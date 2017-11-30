@@ -1,0 +1,16 @@
+.idea/
+/node_modules
+/bower_components
+
+/cordova/node_modules
+/cordova/www
+/cordova/platforms/android
+/cordova/platforms/browser
+/cordova/platforms/ios
+
+.tmp
+.sass-cache
+*.swp
+*.swo
+*.log
+*.DS_Store
