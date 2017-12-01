@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { BcoinComponent } from '../bcoin/bcoin';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'app';
+  message = new BcoinComponent().test();
 }
