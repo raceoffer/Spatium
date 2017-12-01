@@ -1,36 +1,37 @@
 import {OnInit} from '@angular/core';
 
 import bcoin from 'bcoin';
-import * as bcoinLib from 'bcoinlib';
+import * as bcoinLib from './bcoinlib';
 
 // Dunno if it's appropriate here
 bcoin.set('testnet');
 
-const WatchingWallet = bcoinLib.watchingWallet;
-const BlockCypherProvider = bcoinLib.blockCypherProvider;
-
 export class BcoinComponent implements OnInit {
   private walletdb: bcoin.walletdb;
-  private wallet:   WatchingWallet;
-  private provider: BlockCypherProvider;
+  private wallet:   bcoinLib.watchingWallet;
+  private provider: bcoinLib.blockCypherProvider;
 
   privateKey: bcoin.KeyRing;
 
   ngOnInit(): void {
     this.walletdb = new bcoin.walletdb({
       db: 'leveldb',
-      location: 'test'
+      location: 'test' // This should also be changed
     });
 
     this.privateKey = bcoin.keyring.fromSecret('cR9anA5WcxvD8hFzJgxxaBGwV4jt9YeJUdcTUBwoSbEgW2zfoGXc');
     console.log(this.privateKey.getKeyAddress('base58'));
   }
 
+  test(): string {
+    return 'dummy';
+  }
+
   async openWallet(): Promise<void> {
     await this.walletdb.open();
 
     // The wallet is intended to watch over the full public key
-    this.wallet = await new WatchingWallet({
+    this.wallet = await new bcoinLib.watchingWallet({
       watchingKey: bcoin.keyring.fromPublic(this.privateKey.getPublicKey())
     }).load(this.walletdb);
 
@@ -45,7 +46,7 @@ export class BcoinComponent implements OnInit {
     // End: configuring a wallet
 
     // Start: configuring a provider
-    this.provider = new BlockCypherProvider();
+    this.provider = new bcoinLib.blockCypherProvider();
 
     this.provider.on('rawTransaction', async (hex, meta) => {
       await this.wallet.addRawTransaction(hex, meta);
