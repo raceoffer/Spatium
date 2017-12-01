@@ -14,8 +14,7 @@ export class BcoinComponent implements OnInit {
 
   ngOnInit(): void {
     this.walletdb = new bcoin.walletdb({
-      db: 'leveldb',
-      location: 'test' // This should also be changed
+      db: 'memory'
     });
 
     this.privateKey = bcoin.keyring.fromSecret('cR9anA5WcxvD8hFzJgxxaBGwV4jt9YeJUdcTUBwoSbEgW2zfoGXc');
