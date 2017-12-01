@@ -1,15 +1,14 @@
 import {OnInit} from '@angular/core';
 
 import bcoin from 'bcoin';
-import * as bcoinLib from './bcoinlib';
 
 // Dunno if it's appropriate here
 bcoin.set('testnet');
 
 export class BcoinComponent implements OnInit {
   private walletdb: bcoin.walletdb;
-  private wallet:   bcoinLib.watchingWallet;
-  private provider: bcoinLib.blockCypherProvider;
+  private wallet:   any;
+  private provider: any;
 
   privateKey: bcoin.KeyRing;
 
@@ -31,7 +30,7 @@ export class BcoinComponent implements OnInit {
     await this.walletdb.open();
 
     // The wallet is intended to watch over the full public key
-    this.wallet = await new bcoinLib.watchingWallet({
+    this.wallet = await new watchingWallet({
       watchingKey: bcoin.keyring.fromPublic(this.privateKey.getPublicKey())
     }).load(this.walletdb);
 
@@ -46,7 +45,7 @@ export class BcoinComponent implements OnInit {
     // End: configuring a wallet
 
     // Start: configuring a provider
-    this.provider = new bcoinLib.blockCypherProvider();
+    this.provider = new blockCypherProvider();
 
     this.provider.on('rawTransaction', async (hex, meta) => {
       await this.wallet.addRawTransaction(hex, meta);
