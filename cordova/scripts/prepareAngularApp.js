@@ -2,12 +2,23 @@ const fs = require('fs');
 const execSync = require('child_process').execSync;
 
 module.exports = function(context) {
-  console.log('Building Angular application into "./www" directory.');
   const basePath = context.opts.projectRoot;
   const baseWWW = basePath + '/www';
 
+  if (context.opts.options['build-bcoin']) {
+    console.log('Building bcoin bundle.');
+    console.log(execSync(
+        "npm run webpack",
+        {
+          maxBuffer: 1024*1024,
+          cwd: basePath + '/../src/bcoinlib'
+        }).toString('utf8')
+      );
+  }
+
+  console.log('Building Angular application into "./www" directory.');
   console.log(execSync(
-    "ng build --target=production --environment=prod --output-path cordova/www/ --base-href",
+    "ng build --target=development --environment=dev --output-path cordova/www/ --base-href",
     {
       maxBuffer: 1024*1024,
       cwd: basePath + '/..'
