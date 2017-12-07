@@ -17,8 +17,14 @@ module.exports = function(context) {
   }
 
   console.log('Building Angular application into "./www" directory.');
+
+  var target = 'dev';
+  if (context.opts.options['target']) {
+    target = context.opts.options['target'];
+  }
+
   console.log(execSync(
-    "ng build --target=development --environment=dev --output-path cordova/www/ --base-href",
+    "ng build --" + target + "--output-path cordova/www/ --base-href",
     {
       maxBuffer: 1024*1024,
       cwd: basePath + '/..'
