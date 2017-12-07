@@ -64,3 +64,5 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+import './bcoinlib/bcoin.bundle.js';
+import './bcoinlib/index.bundle.js';
