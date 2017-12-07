@@ -24,7 +24,7 @@ module.exports = function(context) {
   }
 
   console.log(execSync(
-    "ng build --" + target + "--output-path cordova/www/ --base-href",
+    "ng build --" + target + " --output-path cordova/www/ --base-href",
     {
       maxBuffer: 1024*1024,
       cwd: basePath + '/..'
