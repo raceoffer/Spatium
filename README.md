@@ -1,8 +1,8 @@
 # Requirements
 
-* npm
-* Angular 5
-* Cordova
+* npm v.3.10
+* Angular v.1.5
+* Cordova v. 7.1
 * Android SDK v.26
 
 # Run the app
