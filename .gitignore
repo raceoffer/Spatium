@@ -14,3 +14,4 @@
 *.swo
 *.log
 *.DS_Store
+*.bundle.js
