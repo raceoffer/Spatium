@@ -13,10 +13,11 @@ export class AppComponent implements OnInit {
   platform = cordova.platformId;
 
   ngOnInit() {
-  	this.message = cordova.platformVersion;
   	document.addEventListener("deviceready", () => {
       console.log('Using Cordova plugins with Angular. Cordova version: ' + cordova.platformVersion)
-    }, false)
+    }, false);
+
+    cordova.plugins.bluetooth.coolMethod();
   }
 
 }
