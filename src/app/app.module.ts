@@ -4,6 +4,7 @@ import {NgModule} from '@angular/core';
 import {
     MatButtonModule,
     MatIconModule,
+    MatInputModule,
     MatMenuModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
@@ -11,20 +12,27 @@ import {
 } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppComponent} from './app.component';
+import {AppRoutingModule} from './app-routing.module';
 import {ToolbarComponent} from './toolbar/toolbar.component';
 import {BluetoothScreen} from './screens/bluetooth/bluetooth.component';
+import {ConnectScreen} from './screens/connect/connect.component';
+import {WalletScreen} from './screens/wallet/wallet.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         ToolbarComponent,
-        BluetoothScreen
+        BluetoothScreen,
+        ConnectScreen,
+        WalletScreen
     ],
     imports: [
+        AppRoutingModule,
         BrowserModule,
         BrowserAnimationsModule,
         MatButtonModule,
         MatIconModule,
+        MatInputModule,
         MatMenuModule,
         MatToolbarModule,
         MatProgressBarModule,
@@ -34,7 +42,9 @@ import {BluetoothScreen} from './screens/bluetooth/bluetooth.component';
     bootstrap: [
         AppComponent,
         ToolbarComponent,
-        BluetoothScreen]
+        BluetoothScreen,
+        ConnectScreen,
+        WalletScreen]
 })
 
 export class AppModule {}
