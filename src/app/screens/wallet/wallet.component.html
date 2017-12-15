@@ -12,7 +12,7 @@
 
                 <mat-form-field class="example-full-width">
                     <input disabled matInput placeholder="BitCoin balance" [value]="bcBalance">
-                    <button mat-icon-button matSuffix>
+                    <button mat-icon-button matSuffix (click)="syncBalance($event)" [value]="isSync">
                         <mat-icon>{{balanceSyncStatus}}</mat-icon>
                     </button>
                 </mat-form-field>

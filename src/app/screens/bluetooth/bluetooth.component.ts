@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import {Component, Inject} from '@angular/core';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 
 @Component({
-  selector: 'bluetooth-screen',
-  templateUrl: './bluetooth.component.html',
-  styleUrls: ['./bluetooth.component.css', '../../app.component.css']
+    selector: 'bluetooth-screen',
+    templateUrl: './bluetooth.component.html',
+    styleUrls: ['./bluetooth.component.css', '../../app.component.css']
 })
 export class BluetoothScreen {
     status = 'disable';
@@ -11,10 +12,12 @@ export class BluetoothScreen {
     valueBluetooth = '0';
     bluetoothIcon = 'bluetooth_disabled';
     spinnerClass = 'invisible bluetooth-spinner'
-  
-    changeBluetoothStatus(element){
+
+    constructor(public dialog: MatDialog) {}
+
+    changeBluetoothStatus(element) {
         console.log(this.myColor);
-        switch(this.valueBluetooth) {
+        switch (this.valueBluetooth) {
             case '0': { //disable
                 this.status = 'enable';
                 this.myColor = "primary";
@@ -24,6 +27,7 @@ export class BluetoothScreen {
                 break;
             }
             case '1': { //enable
+                this.openDialog();
                 this.status = 'enable';
                 this.myColor = "accent";
                 this.valueBluetooth = "2";
@@ -49,4 +53,45 @@ export class BluetoothScreen {
             }
         }
     }
+
+    openDialog(): void {
+        let dialogRef = this.dialog.open(ConnectedDevicesDialog, {
+            width: '250px',
+            data: {}
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            console.log('The dialog was closed');
+        });
+    }
+}
+
+@Component({
+    selector: 'connected-devices-dialog',
+    templateUrl: 'connected-devices-dialog.html',
+})
+export class ConnectedDevicesDialog {
+    devices = [
+        {
+            name: 'Photos',
+            address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
+        },
+        {
+            name: 'Recipes',
+            address: 'nkjhsd,asjd;laskdlakslk',
+        },
+        {
+            name: 'Work',
+            address: 'nkjhsd,asjd',
+        }
+    ];
+
+    constructor(
+        public dialogRef: MatDialogRef<ConnectedDevicesDialog>,
+        @Inject(MAT_DIALOG_DATA) public data: any) {}
+
+    toDo(event): void {
+        console.log(JSON.stringify(event));
+    }
+
 }
