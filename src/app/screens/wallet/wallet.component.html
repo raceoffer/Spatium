@@ -1,34 +1,34 @@
-<div class="main-central">
-    <div class="aligner-central">
+<div xLayout="column" fxLayoutAlign="center center">
+    <div fxLayoutAlign="center center">
         <div>
-            <form class="example-form">
+            <table class="example-form">
+                <mat-form-field class="example-full-width">
+                    <input disabled matInput placeholder="BitCoin address" [value]="bcAddress">
+                    <button mat-icon-button matSuffix  
+                            ngxClipboard [cbContent]="bcAddress">
+                            <mat-icon>insert_link</mat-icon>
+                    </button>
+                </mat-form-field>
 
-                    <mat-form-field class="example-full-width">
-                        <input disabled matInput placeholder="BitCoin address" [value]="bcAddress">
-                        <button mat-icon-button matSuffix>
-                            <mat-icon matSuffix>insert_link</mat-icon>
-                        </button>
-                    </mat-form-field>
+                <mat-form-field class="example-full-width">
+                    <input disabled matInput placeholder="BitCoin balance" [value]="bcBalance">
+                    <button mat-icon-button matSuffix>
+                        <mat-icon>{{balanceSyncStatus}}</mat-icon>
+                    </button>
+                </mat-form-field>
 
-                    <mat-form-field class="example-full-width">
-                        <input disabled matInput placeholder="BitCoin balance" [value]="bcBalance">
-                        <button mat-icon-button matSuffix>
-                            <mat-icon matSuffix>{{balanceSyncStatus}}</mat-icon>
-                        </button>
-                    </mat-form-field>
+                <mat-form-field class="example-full-width">
+                    <input disabled matInput placeholder="Ethereum address" [value]="ethereumAddress">
+                    <button mat-icon-button matSuffix  
+                            ngxClipboard [cbContent]="ethereumAddress">
+                            <mat-icon>insert_link</mat-icon>
+                    </button>
+                </mat-form-field>
 
-                    <mat-form-field class="example-full-width">
-                        <input disabled matInput placeholder="Ethereum address" [value]="ethereumAddress">
-                        <button mat-icon-button matSuffix>
-                            <mat-icon matSuffix>insert_link</mat-icon>
-                        </button>
-                    </mat-form-field>
-
-                    <mat-form-field class="example-full-width">
-                        <input disabled matInput placeholder="Ethereum balance" [value]="ethereumBalance">
-                    </mat-form-field>
-
-            </form>
+                <mat-form-field class="example-full-width">
+                    <input disabled matInput placeholder="Ethereum balance" [value]="ethereumBalance">
+                </mat-form-field>
+            </table>
         </div>
     </div>
 </div>

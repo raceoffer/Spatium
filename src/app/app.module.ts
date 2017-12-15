@@ -10,7 +10,9 @@ import {
     MatProgressSpinnerModule,
     MatToolbarModule
 } from '@angular/material';
+import {FlexLayoutModule} from '@angular/flex-layout';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {ClipboardModule} from 'ngx-clipboard';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
 import {ToolbarComponent} from './toolbar/toolbar.component';
@@ -37,6 +39,8 @@ import {WalletScreen} from './screens/wallet/wallet.component';
         MatToolbarModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
+        ClipboardModule,
+        FlexLayoutModule
     ],
     providers: [],
     bootstrap: [
