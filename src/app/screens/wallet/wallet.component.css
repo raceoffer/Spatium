@@ -8,3 +8,18 @@
 .example-full-width {
     width: 100%;
 }
+
+.backup-button {
+  float: left;
+  z-index: 1;
+}
+
+.backup-spinner {
+  float:left;
+  z-index:0;
+  position: absolute;
+}
+
+.invisible {
+  display: none;
+}

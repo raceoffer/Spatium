@@ -4,7 +4,7 @@
     </div>
 
     <div fxLayoutAlign="center center">
-        <button (click)="changeBluetoothStatus($event)" mat-fab [color]="myColor" [value]="valueBluetooth" class="bluetooth-button">
+        <button (click)="changeBluetoothStatus()" mat-fab [color]="myColor" [value]="valueBluetooth" class="bluetooth-button">
             <mat-icon>{{ bluetoothIcon }}</mat-icon>
         </button>
         <div [class]="spinnerClass">

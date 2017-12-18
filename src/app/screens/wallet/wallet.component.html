@@ -4,7 +4,7 @@
             <table class="example-form">
                 <mat-form-field class="example-full-width">
                     <input disabled matInput placeholder="BitCoin address" [value]="bcAddress">
-                    <button mat-icon-button matSuffix  
+                    <button mat-icon-button matSuffix
                             ngxClipboard [cbContent]="bcAddress">
                             <mat-icon>insert_link</mat-icon>
                     </button>
@@ -12,14 +12,20 @@
 
                 <mat-form-field class="example-full-width">
                     <input disabled matInput placeholder="BitCoin balance" [value]="bcBalance">
-                    <button mat-icon-button matSuffix (click)="syncBalance($event)" [value]="isSync">
-                        <mat-icon>{{balanceSyncStatus}}</mat-icon>
+
+                  <div matSuffix>
+                    <button mat-icon-button class="backup-button" (click)="syncBalance($event)">
+                        <mat-icon>{{balanceBackupStatus}}</mat-icon>
                     </button>
+                    <div class={{spinnerClass}}>
+                      <mat-spinner diameter="30" strokeWidth="2"></mat-spinner>
+                    </div>
+                  </div>
                 </mat-form-field>
 
                 <mat-form-field class="example-full-width">
                     <input disabled matInput placeholder="Ethereum address" [value]="ethereumAddress">
-                    <button mat-icon-button matSuffix  
+                    <button mat-icon-button matSuffix
                             ngxClipboard [cbContent]="ethereumAddress">
                             <mat-icon>insert_link</mat-icon>
                     </button>

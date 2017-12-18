@@ -1,14 +1,14 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {BluetoothScreen} from './screens/bluetooth/bluetooth.component';
-import {ConnectScreen} from './screens/connect/connect.component';
-import {WalletScreen} from './screens/wallet/wallet.component';
+import {BluetoothScreenComponent} from './screens/bluetooth/bluetooth.component';
+import {ConnectScreenComponent} from './screens/connect/connect.component';
+import {WalletScreenComponent} from './screens/wallet/wallet.component';
 
 const appRoutes: Routes = [
     {path: '', redirectTo: 'wallet', pathMatch: 'full'},
-    {path: 'bluetooth', component: BluetoothScreen},
-    {path: 'connect', component: ConnectScreen},
-    {path: 'wallet', component: WalletScreen}
+    {path: 'bluetooth', component: BluetoothScreenComponent},
+    {path: 'connect', component: ConnectScreenComponent},
+    {path: 'wallet', component: WalletScreenComponent}
 ];
 @NgModule({
     imports: [
