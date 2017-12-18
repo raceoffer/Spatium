@@ -17,8 +17,7 @@
   },
   "cordova": {
     "plugins": {
-      "cordova-plugin-whitelist": {},
-      "bluetooth": {}
+      "cordova-plugin-whitelist": {}
     },
     "platforms": [
       "android",

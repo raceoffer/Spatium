@@ -1,6 +1,8 @@
 var exec = require('cordova/exec');
 
-exports.coolMethod = function (arg0, success, error) {
-	console.log("cool method");
-    return "cool bluetooth method";
+var PLUGIN_NAME = 'Bluetooth';
+
+exports.getDeviceInfo = function (success, error) {
+	console.log("get device info");
+    exec(success, error, PLUGIN_NAME, 'getDeviceInfo', []);
 };

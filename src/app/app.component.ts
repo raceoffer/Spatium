@@ -9,15 +9,23 @@ declare var cordova: any;
 })
 export class AppComponent implements OnInit {
   title = 'app';
-  message = 'Loading...';
   platform = cordova.platformId;
+  message = this.platform;
 
   ngOnInit() {
   	document.addEventListener("deviceready", () => {
-      console.log('Using Cordova plugins with Angular. Cordova version: ' + cordova.platformVersion)
+      cordova.plugins.bluetooth.getDeviceInfo(
+        arg => {
+          console.log(arg);
+          this.message = arg;
+        },
+        err => {
+          console.log(err);
+          this.message = err;
+        }
+      );
+      //console.log('Using Cordova plugins with Angular. Cordova version: ' + cordova.platformVersion)
     }, false);
-
-    cordova.plugins.bluetooth.coolMethod();
   }
 
 }
