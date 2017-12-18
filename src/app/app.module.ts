@@ -1,4 +1,5 @@
 import {BrowserModule} from '@angular/platform-browser';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {NgModule} from '@angular/core';
 import {
@@ -20,7 +21,9 @@ import {AppRoutingModule} from './app-routing.module';
 import {ToolbarComponent} from './toolbar/toolbar.component';
 import {BluetoothScreenComponent, ConnectedDevicesDialogComponent} from './screens/bluetooth/bluetooth.component';
 import {ConnectScreenComponent} from './screens/connect/connect.component';
-import {WalletScreenComponent, BackupBalanceDialogComponent} from './screens/wallet/wallet.component';
+import {BackupBalanceDialogComponent, WalletScreenComponent} from './screens/wallet/wallet.component';
+import {SendTransactionDialogComponent} from './dialogs/transaction/send/send.transaction.dialog';
+import {ConfirmTransactionDialogComponent} from './dialogs/transaction/confirm/confirm.transaction.dialog';
 
 @NgModule({
   declarations: [
@@ -30,12 +33,16 @@ import {WalletScreenComponent, BackupBalanceDialogComponent} from './screens/wal
     ConnectedDevicesDialogComponent,
     ConnectScreenComponent,
     WalletScreenComponent,
-    BackupBalanceDialogComponent
+    BackupBalanceDialogComponent,
+    SendTransactionDialogComponent,
+    ConfirmTransactionDialogComponent
   ],
   imports: [
     AppRoutingModule,
     BrowserModule,
     BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
@@ -54,7 +61,9 @@ import {WalletScreenComponent, BackupBalanceDialogComponent} from './screens/wal
     ToolbarComponent],
   entryComponents: [
     ConnectedDevicesDialogComponent,
-    BackupBalanceDialogComponent
+    BackupBalanceDialogComponent,
+    SendTransactionDialogComponent,
+    ConfirmTransactionDialogComponent
   ]
 })
 

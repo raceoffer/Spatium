@@ -1,5 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material';
+import {SendTransactionDialogComponent} from '../../dialogs/transaction/send/send.transaction.dialog';
+import {ConfirmTransactionDialogComponent} from '../../dialogs/transaction/confirm/confirm.transaction.dialog';
 
 
 @Component({
@@ -22,10 +24,10 @@ export class WalletScreenComponent {
   syncBalance(element) {
     //here getting last sync balance
 
-    this.openDialog();
+    this.openBackupDialog();
   }
 
-  openDialog(): void {
+  openBackupDialog(): void {
     let dialogRef = this.dialog.open(BackupBalanceDialogComponent, {
       width: '300px',
       data: {
@@ -44,6 +46,32 @@ export class WalletScreenComponent {
       }
     });
   }
+
+  openSendTransactionDialog(): void {
+    let dialogRef = this.dialog.open(SendTransactionDialogComponent, {
+      width: '300px',
+      data: {}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+      this.openConfirmTransactionDialog(result[1], result[2]);
+    });
+  }
+
+  openConfirmTransactionDialog(address, sum): void {
+    let dialogRef = this.dialog.open(ConfirmTransactionDialogComponent, {
+      width: '300px',
+      data: {
+        address: address,
+        sum: sum}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+
+    });
+  }
 }
 
 @Component({
@@ -55,6 +83,4 @@ export class BackupBalanceDialogComponent {
   constructor(public dialogRef: MatDialogRef<BackupBalanceDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: any) {
   }
-
-
 }
