@@ -1,0 +1,23 @@
+.mat-fab {
+    min-width: 0;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.bluetooth-button {
+    float: left;
+    z-index: 1;
+}
+
+.bluetooth-spinner {
+    float:left; 
+    z-index:0; 
+    position: absolute;
+}
+
+.invisible {
+    display: none;
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 declare var cordova: any;
 
@@ -7,16 +7,6 @@ declare var cordova: any;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  title = 'app';
-  message = 'Loading...';
-  platform = cordova.platformId;
-
-  ngOnInit() {
-  	this.message = cordova.platformVersion;
-  	document.addEventListener("deviceready", () => {
-      console.log('Using Cordova plugins with Angular. Cordova version: ' + cordova.platformVersion)
-    }, false)
-  }
-
+export class AppComponent {
+  title = 'Spatium Wallet app';
 }
