@@ -1,0 +1,18 @@
+.spatium-logo-text{
+
+}
+
+.example-sidenav-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-sidenav {
+  width: 278px;
+}
+
+.nav-logo-text{
+  height: 22px!important;
+}
