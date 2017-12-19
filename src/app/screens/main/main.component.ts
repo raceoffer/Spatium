@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-main',
@@ -8,9 +8,29 @@ import { Component, OnInit } from '@angular/core';
 export class MainComponent implements OnInit {
   title = 'Spatium Wallet app';
   message = 'Loading...';
-  logo_src = ''//'../../res/drawable/logo.svg';
+  navLinks = [{
+      name: 'Кошелек',
+      link: '.',
+    },
+    {
+      name: 'ICO',
+      link: '.',
+    },
+    {
+      name: 'Портфельное инвестирование',
+      link: '.',
+    },
+    {
+      name: 'Верификация',
+      link: '.',
+    },
+    {
+      name: 'Настройки',
+      link: '.',
+    }];
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
   }

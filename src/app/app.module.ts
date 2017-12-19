@@ -1,18 +1,20 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {
-  MatToolbarModule,
   MatButtonModule,
   MatIconModule,
-  MatSidenavModule,
   MatListModule,
   MatMenuModule,
+  MatSidenavModule,
+  MatSlideToggleModule,
+  MatToolbarModule,
 } from '@angular/material';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import {FlexLayoutModule} from '@angular/flex-layout';
 
-import { AppComponent } from './app.component';
-import { MainComponent } from './screens/main/main.component';
+import {AppComponent} from './app.component';
+import {AppRoutingModule} from './app-routing.module';
+import {MainComponent} from './screens/main/main.component';
 
 
 @NgModule({
@@ -21,6 +23,7 @@ import { MainComponent } from './screens/main/main.component';
     MainComponent,
   ],
   imports: [
+    AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,
     MatToolbarModule,
@@ -29,11 +32,13 @@ import { MainComponent } from './screens/main/main.component';
     MatSidenavModule,
     MatListModule,
     MatMenuModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    MatSlideToggleModule
   ],
   providers: [],
   bootstrap: [
     AppComponent
-    ]
+  ]
 })
-export class AppModule { }
+export class AppModule {
+}
