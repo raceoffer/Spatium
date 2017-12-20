@@ -19,7 +19,9 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
-        "styles.css"
+        "styles.css",
+        "assets/themes/android_theme.scss",
+        "assets/themes/styles.scss"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",

@@ -1,12 +1,78 @@
 .android.test {
-	background-color: blue;
+  background-color: blue;
 }
 
 .browser.test {
-	background-color: red;
+  background-color: red;
 }
 
-app-main{
+app-main {
   width: 100%;
   height: 100%;
 }
+
+
+.example-sidenav-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-sidenav {
+  width: 278px;
+}
+
+.spatium-logo-text {
+  height: 80px;
+  padding: 0 44px 0 11px;
+}
+
+
+
+.bottom-absolute {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  height: 60px;
+  width: 100%;
+}
+
+.static {
+  position: static !important;
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 16px;
+  position: relative;
+  height: inherit;
+  width: 100%;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.main-nav-list-custom {
+  height: 60px !important;
+  display: block !important;
+  border-bottom: 1px solid #f1f1f4;
+}
+
+.selected {
+  background-color: rgba(29, 29, 38, 0.03) !important;
+  font-weight: bold;
+}
+
+mat-icon.size-30{
+  width: 33px;
+  height: 33px;
+  line-height: 33px;
+  font-size: 33px;
+  color: #9c9cab;
+  opacity: 0.4;
+}
+

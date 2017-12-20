@@ -10,17 +10,30 @@ import {
   MatSlideToggleModule,
   MatToolbarModule,
 } from '@angular/material';
+import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
 
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import {MainComponent} from './screens/main/main.component';
+import { WalletComponent } from './screens/wallet/wallet.component';
+import { ExchangeComponent } from './screens/exchange/exchange.component';
+import { IcoComponent } from './screens/ico/ico.component';
+import { PortfolioInvestmentComponent } from './screens/portfolio-investment/portfolio-investment.component';
+import { VerificationComponent } from './screens/verification/verification.component';
+import { OptionsComponent } from './screens/options/options.component';
+import { EntryComponent } from './screens/entry/entry.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    MainComponent,
+    WalletComponent,
+    ExchangeComponent,
+    IcoComponent,
+    PortfolioInvestmentComponent,
+    VerificationComponent,
+    OptionsComponent,
+    EntryComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -33,7 +46,7 @@ import {MainComponent} from './screens/main/main.component';
     MatListModule,
     MatMenuModule,
     FlexLayoutModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
   ],
   providers: [],
   bootstrap: [
@@ -41,4 +54,7 @@ import {MainComponent} from './screens/main/main.component';
   ]
 })
 export class AppModule {
+  constructor(overlayContainer: OverlayContainer) {
+    overlayContainer.getContainerElement().classList.add('dark-theme');
+  }
 }
