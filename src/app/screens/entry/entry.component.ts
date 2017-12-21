@@ -6,13 +6,20 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./entry.component.css']
 })
 export class EntryComponent implements OnInit {
-  tagline = 'Secure your funds';
   entry = 'Войти';
-  connect = 'Подключиться';
+  stLogin = 'Логин';
+  login = '';
+  isDisable = false;
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+
+
+  letLogin(): void {
+    this.isDisable = !this.isDisable;
   }
 
 }

@@ -1,9 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: Roboto,Helvetica Neue Light,Helvetica Neue,Helvetica,Arial,Lucida Grande,sans-serif;
-}
 
 @font-face {
   font-family: 'Material Icons';
@@ -27,4 +22,26 @@ html, body {
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
+
+.loading {
+  opacity: 0;
+  transition: opacity .8s ease-in-out;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  place-content: center flex-start;
+  align-items: center;
+  display: none;
+  //z-index: -1;
+}
+
+app-root:empty + .loading {
+  opacity: 1;
+  z-index: 100;
+}
+
 

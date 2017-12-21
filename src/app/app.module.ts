@@ -9,6 +9,7 @@ import {
   MatSidenavModule,
   MatSlideToggleModule,
   MatToolbarModule,
+  MatInputModule,
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -22,6 +23,10 @@ import { PortfolioInvestmentComponent } from './screens/portfolio-investment/por
 import { VerificationComponent } from './screens/verification/verification.component';
 import { OptionsComponent } from './screens/options/options.component';
 import { EntryComponent } from './screens/entry/entry.component';
+import { NavigatorComponent } from './screens/navigator/navigator.component';
+import { StartComponent } from './screens/start/start.component';
+import { ConnectComponent } from './screens/connect/connect.component';
+import { RegistrationComponent } from './screens/registration/registration.component';
 
 
 @NgModule({
@@ -34,6 +39,10 @@ import { EntryComponent } from './screens/entry/entry.component';
     VerificationComponent,
     OptionsComponent,
     EntryComponent,
+    NavigatorComponent,
+    StartComponent,
+    ConnectComponent,
+    RegistrationComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -42,6 +51,7 @@ import { EntryComponent } from './screens/entry/entry.component';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
+    MatInputModule,
     MatSidenavModule,
     MatListModule,
     MatMenuModule,

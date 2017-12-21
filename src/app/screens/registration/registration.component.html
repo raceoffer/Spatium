@@ -1,5 +1,3 @@
-
-
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
@@ -19,12 +17,10 @@
   <div class="width-button-container margin30" fxLayout="column" fxLayoutAlign="start center">
 
     <div class="spatium-textfield entry">
-      <input type="text" placeholder="{{stLogin}}">
+      <input type="text" placeholder="{{stLogin}}" [value]="login">
     </div>
 
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" >{{entry}}</button>
+    <button mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" >{{stButton}}</button>
   </div>
 
 </div>
-<button mat-button>Авторизация</button>
-<button mat-button routerLink="/registration">Регистрация</button>

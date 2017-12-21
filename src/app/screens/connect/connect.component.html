@@ -1,0 +1,21 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-toolbar color="primary" class="shadow">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span>{{stConnect}}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class = "connect-text">
+
+    <span>{{stText}}</span>
+
+  </div>
+
+  <button mat-fab>
+    <mat-icon aria-label="Example icon-button with a heart icon" routerLink="/navigator">arrow_forward</mat-icon>
+  </button>
+
+</div>

@@ -7,9 +7,133 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <style>
+    @font-face {
+      font-family: 'Circe Bold';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Circe-Bold.woff) format('woff');
+    }
+
+    .start-logo-text {
+      height: 23px !important;
+    }
+
+    .start-tagline {
+      color: rgb(155, 160, 160);
+      font-size: 15px;
+      font-family: "Circe Bold";
+    }
+
+    .start-tagline-padding{
+      padding-top: 10px;
+    }
+
+    .start-hello {
+      color: rgb(55, 55, 65);
+      font-size: 17px;
+      padding: 15px 0 0 0;
+      font-family: 'Roboto-Regular', sans-serif;
+    }
+
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: 100;
+      flex-direction: column;
+      box-sizing: border-box;
+      display: flex;
+      place-content: center flex-start;
+      align-items: center;
+    }
+
+    .margin30 {
+      margin-top: 30%;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+
+    .progress {
+      position: fixed;
+      bottom: 45px;
+      display: inline-block;
+      width: 5em;
+      height: 5em;
+      margin: 0 .5em;
+      font-size: 12px;
+      text-indent: 999em;
+      overflow: hidden;
+      animation: spin 1s infinite steps(8);
+    }
+
+    .small.progress {
+      font-size: 6px;
+    }
+
+    .progress:before,
+    .progress:after,
+    .progress > div:before,
+    .progress > div:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 2.25em; /* (container width - part width)/2  */
+      width: .5em;
+      height: 1.5em;
+      border-radius: .2em;
+      background: #eee;
+      box-shadow: 0 3.5em #eee; /* container height - part height */
+      transform-origin: 50% 2.5em; /* container height / 2 */
+    }
+
+    .progress:before {
+      background: #555;
+    }
+
+    .progress:after {
+      transform: rotate(-45deg);
+      background: #777;
+    }
+
+    .progress > div:before {
+      transform: rotate(-90deg);
+      background: #999;
+    }
+
+    .progress > div:after {
+      transform: rotate(-135deg);
+      background: #bbb;
+    }
+  </style>
 </head>
+
 <body>
-  <app-root ></app-root>
-  <script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="cordova.js"></script>
+<div class="loading">
+  <div class="margin30">
+    <img src="./assets/images/drawable/logo.svg" class="start-logo-text">
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+  <div class="margin30">
+    <span class="start-hello">Добро пожаловать!</span>
+  </div>
+  <div class="small progress">
+    <div>Loading…</div>
+  </div>
+</div>
+
+<app-root></app-root>
+
 </body>
 </html>
