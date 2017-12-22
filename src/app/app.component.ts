@@ -8,7 +8,7 @@ declare var cordova: any;
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'app';
+  title = 'Spatium Wallet app';
   platform = cordova.platformId;
   message = this.platform;
 

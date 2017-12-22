@@ -18,6 +18,8 @@ In the root folder of the repo:
 npm install
 cd cordova
 npm install
+cd ../src/bcoinlib
+npm install
 ```
 
 # Run the app

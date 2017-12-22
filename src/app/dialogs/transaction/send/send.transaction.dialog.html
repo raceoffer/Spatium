@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Send transaction</h2>
+
+<mat-form-field class="example-full-width">
+  <input matInput placeholder="BitCoin address" [(ngModel)]="bcAddress" [formControl]="addressFormControl">
+  <mat-error *ngIf="addressFormControl.hasError('required')">
+    Address is <strong>required</strong>
+  </mat-error>
+</mat-form-field>
+
+<mat-form-field class="example-full-width">
+  <input type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01" matInput placeholder="Sum" [formControl]="sumFormControl"
+         [errorStateMatcher]="matcher" [(ngModel)]="bcSum">
+  <mat-error *ngIf="sumFormControl.hasError('required')">
+    Sum is <strong>required</strong>
+  </mat-error>
+</mat-form-field>
+
+<mat-dialog-content>Are you sure?</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="false">No</button>
+  <button mat-button [mat-dialog-close]="[true, bcAddress, bcSum]"
+          *ngIf="!addressFormControl.hasError('required') && !sumFormControl.hasError('required')">Yes</button>
+</mat-dialog-actions>
