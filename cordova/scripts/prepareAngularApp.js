@@ -5,7 +5,7 @@ module.exports = function(context) {
   const basePath = context.opts.projectRoot;
   const baseWWW = basePath + '/www';
 
-  if (context.opts.options['build-bcoin']) {
+  if (context.opts.options && context.opts.options['build-bcoin']) {
     console.log('Building bcoin bundle.');
     console.log(execSync(
         "npm run webpack",
@@ -19,7 +19,7 @@ module.exports = function(context) {
   console.log('Building Angular application into "./www" directory.');
 
   var target = 'dev';
-  if (context.opts.options['target']) {
+  if (context.opts.options && context.opts.options['target']) {
     target = context.opts.options['target'];
   }
 
