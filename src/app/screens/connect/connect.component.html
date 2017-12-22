@@ -8,14 +8,13 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <div class = "connect-text">
+  <mat-nav-list style="width: 100%;">
+    <mat-list-item *ngFor="let device of devices" (click)="toDo(device.address)">
+      <h4 mat-line>{{device.name}}</h4>
+      <p mat-line> {{device.address}} </p>
+      <mat-icon matSuffix>center_focus_weak</mat-icon>
+    </mat-list-item>
+  </mat-nav-list>
 
-    <span>{{stText}}</span>
-
-  </div>
-
-  <button mat-fab>
-    <mat-icon aria-label="Example icon-button with a heart icon" routerLink="/navigator">arrow_forward</mat-icon>
-  </button>
 
 </div>

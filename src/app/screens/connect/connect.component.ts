@@ -8,12 +8,31 @@ import { Component, OnInit } from '@angular/core';
 export class ConnectComponent implements OnInit {
 
   stConnect = 'Подключение';
-  stText = 'Данное устройство успешно подключено. При совершении транзакционных операций вам будут выдаваться предупреждения';
+  busyClass = 'fade-background invisible';
+
+  devices = [
+    {
+      name: 'Photos',
+      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
+    },
+    {
+      name: 'Recipes',
+      address: 'nkjhsd,asjd;laskdlakslk',
+    },
+    {
+      name: 'Work',
+      address: 'nkjhsd,asjd',
+    }
+  ];
 
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+  toDo(event): void {
+    console.log(JSON.stringify(event));
   }
 
 }

@@ -1,0 +1,33 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span>{{Label}}</span>
+    </mat-toolbar-row>
+
+  </mat-toolbar>
+
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
+
+    <div class="width-button spatium-textfield entry" fxLayout="row" fxLayoutAlign="center center">
+      <input type="text" disabled="true" [value]="addressLoc">
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+        <mat-icon matSuffix>content_copy</mat-icon>
+      </button>
+    </div>
+
+    <button mat-fab *ngIf="disabledBT" class="width-button">
+      <mat-icon (click)="changeBtState()">bluetooth_disabled
+      </mat-icon>
+    </button>
+
+    <button mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="!disabledBT" routerLink="/connect">
+      {{connect}}
+    </button>
+  </div>
+
+</div>
+
