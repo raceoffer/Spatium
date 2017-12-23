@@ -16,3 +16,4 @@
 *.DS_Store
 *.bundle.js
 /src/bcoinlib/test/*.key
+package-lock.json
