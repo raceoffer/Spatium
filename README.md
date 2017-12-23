@@ -16,11 +16,20 @@ npm install -g cordova
 In the root folder of the repo:
 ```bash
 npm install
-cd cordova
-npm install
-cd ../src/bcoinlib
+```
+In src/bcoinlib/:
+```bash
 npm install
 ```
+In cordova/
+```bash
+npm install
+cordova plugin add ../cordova-plugin-android
+cordova platform add android ios browser
+```
+
+## Warning!
+Due to the bug in cordova's local plugin system, you should always revert the changes to config.xml that occur after adding platforms
 
 # Run the app
 ```bash
