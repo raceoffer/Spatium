@@ -4,9 +4,6 @@
 
 /cordova/node_modules
 /cordova/www
-/cordova/platforms/android
-/cordova/platforms/browser
-/cordova/platforms/ios
 
 .tmp
 .sass-cache
@@ -17,5 +14,5 @@
 *.bundle.js
 /src/bcoinlib/test/*.key
 package-lock.json
-/cordova/plugins/bluetooth
-/cordova/plugins/cordova-plugin-whitelist
+/cordova/platforms
+/cordova/plugins
