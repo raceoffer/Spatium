@@ -9,8 +9,8 @@
   },
   "bluetooth": {
     "source": {
-      "type": "registry",
-      "id": "bluetooth@1"
+      "type": "local",
+      "path": "D:\\Projects\\Creepto\\wallet\\cordova\\node_modules\\bluetooth"
     },
     "is_top_level": true,
     "variables": {}

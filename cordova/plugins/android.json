@@ -7,10 +7,10 @@
     "files": {}
   },
   "installed_plugins": {
-    "cordova-plugin-whitelist": {
+    "bluetooth": {
       "PACKAGE_NAME": "capital.spatium.wallet"
     },
-    "bluetooth": {
+    "cordova-plugin-whitelist": {
       "PACKAGE_NAME": "capital.spatium.wallet"
     }
   },

@@ -17,3 +17,4 @@
 *.bundle.js
 /src/bcoinlib/test/*.key
 package-lock.json
+/cordova/plugins/bluetooth

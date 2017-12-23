@@ -1,0 +1,15 @@
+{
+  "name": "bluetooth",
+  "version": "0.0.1",
+  "description": "A simple bluetooth plugin",
+  "author": {
+    "name": "Alexander Yushkov"
+  },
+  "cordova": {
+    "id": "bluetooth",
+    "platforms": [
+      "android",
+	  "browser"
+    ]
+  }
+}
