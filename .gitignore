@@ -18,3 +18,4 @@
 /src/bcoinlib/test/*.key
 package-lock.json
 /cordova/plugins/bluetooth
+/cordova/plugins/cordova-plugin-whitelist
