@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
 declare var cordova: any;
-declare var bluetooth: any;
 
 @Component({
   selector: 'app-root',
@@ -16,7 +15,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
   	document.addEventListener("deviceready", () => {
-      bluetooth.getDeviceInfo(info => { console.log(info) });
+      cordova.plugins.bluetooth.getDeviceInfo(info => { console.log(info) });
     }, false);
   }
 

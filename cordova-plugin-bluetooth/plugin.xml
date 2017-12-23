@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="bluetooth" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-bluetooth" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Bluetooth</name>
     <description>Bluetooth simple plugin</description>
     <js-module name="Bluetooth" src="www/Bluetooth.js">
-        <clobbers target="bluetooth" />
+        <clobbers target="cordova.plugins.bluetooth" />
     </js-module>
     <hook type="after_plugin_add" src="hooks/after_plugin_add.js" />
     <platform name="browser">
