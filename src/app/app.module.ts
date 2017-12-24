@@ -12,6 +12,7 @@ import {
   MatProgressSpinnerModule,
   MatToolbarModule,
   MatInputModule,
+  MatDialogModule
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -23,6 +24,7 @@ import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
+import { CreatingResultComponent, BalanceDialogComponent } from './screens/creating-result/creating-result.component';
 
 
 @NgModule({
@@ -33,6 +35,8 @@ import {ClipboardModule} from 'ngx-clipboard/dist';
     StartComponent,
     ConnectComponent,
     WaitingComponent,
+    CreatingResultComponent,
+    BalanceDialogComponent
   ],
   imports: [
     AppRoutingModule,
@@ -49,15 +53,17 @@ import {ClipboardModule} from 'ngx-clipboard/dist';
     MatMenuModule,
     FlexLayoutModule,
     MatSlideToggleModule,
-    ClipboardModule
+    ClipboardModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [
-    AppComponent
+    AppComponent,
+    BalanceDialogComponent
   ]
 })
 export class AppModule {
   constructor(overlayContainer: OverlayContainer) {
-    overlayContainer.getContainerElement().classList.add('dark-theme');
+    //overlayContainer.getContainerElement().classList.add('dark-theme');
   }
 }

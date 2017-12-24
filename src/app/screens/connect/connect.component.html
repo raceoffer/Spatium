@@ -1,20 +1,25 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary" class="shadow">
     <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
       <span>{{stConnect}}</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <mat-nav-list style="width: 100%;">
-    <mat-list-item *ngFor="let device of devices" (click)="toDo(device.address)">
-      <h4 mat-line>{{device.name}}</h4>
-      <p mat-line> {{device.address}} </p>
-      <mat-icon matSuffix>center_focus_weak</mat-icon>
-    </mat-list-item>
-  </mat-nav-list>
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
+
+    <div class="connect-text">
+      <span>Подключение к устройству </span>
+      <p class="list-name" mat-line>{{name}}</p>
+      <p class="list-info" mat-line> {{address}}</p>
+    </div>
+
+    <mat-spinner color="accent" strokeWidth="2"></mat-spinner>
+
+  </div>
+
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Отмена</button>
+</div>
 
 
 </div>

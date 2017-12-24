@@ -10,24 +10,36 @@
 
   </mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledBT">
 
-    <div class="width-button spatium-textfield entry" fxLayout="row" fxLayoutAlign="center center">
-      <input type="text" disabled="true" [value]="addressLoc">
-      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
-        <mat-icon matSuffix>content_copy</mat-icon>
-      </button>
+    <div class="connect-text">
+      <span>Для дальнейшей работы требуется включить Bluetooth</span>
     </div>
 
-    <button mat-fab *ngIf="disabledBT" class="width-button">
+    <button mat-fab  class="width-button">
       <mat-icon (click)="changeBtState()">bluetooth_disabled
       </mat-icon>
     </button>
 
-    <button mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="!disabledBT" routerLink="/connect">
-      {{connect}}
+  </div>
+
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="!disabledBT">
+
+    <mat-nav-list style="width: 100%;">
+      <mat-list-item *ngFor="let device of devices" (click)="toDo(device.name, device.address)">
+        <p class="list-name" mat-line>{{device.name}}</p>
+        <p class="list-info" mat-line> {{device.address}} </p>
+        <mat-icon class="list-icon" matSuffix>center_focus_weak</mat-icon>
+      </mat-list-item>
+    </mat-nav-list>
+
+    <button mat-fab class="overlay-bottom">
+      <mat-icon (click)="sddNewDevice()">add
+      </mat-icon>
     </button>
   </div>
+
+
 
 </div>
 

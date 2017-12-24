@@ -223,5 +223,72 @@ body, buttons, html, input, textarea {
   width: 100%;
 }
 
+.overlay-bottom{
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2;
+}
 
+.connect-text {
+  font-family: 'Roboto-Light';
+  font-size: 14px;
+  color: $charcoal_grey;
+  padding: 16px 8.5px 16px 14px;
+}
+
+.list-name{
+  font-family: 'Roboto-Regular';
+  font-size: 16.3px !important;
+  color: $charcoal_grey;
+}
+
+.list-info{
+  font-family: 'Roboto-Light';
+  font-size: 13.3px !important;
+  color: $charcoal_grey;
+}
+
+.list-icon{
+  color: $charcoal_grey;
+}
+
+.button-imitator{
+  width: 40px;
+  height: 40px;
+}
+
+@-webkit-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-moz-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-ms-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-o-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+.sync {
+  color: $bluish;
+  -webkit-animation: sync 1s infinite linear;
+  -moz-animation: sync 1s infinite linear;
+  -ms-animation: sync 1s infinite linear;
+  -o-animation: sync 1s infinite linear;
+  animation: sync 1s infinite linear;
+}
 

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-connect',
@@ -7,32 +8,29 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConnectComponent implements OnInit {
 
+
   stConnect = 'Подключение';
   busyClass = 'fade-background invisible';
-
-  devices = [
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    }
-  ];
+  name: string;
+  address: string;
 
 
-  constructor() { }
+
+  constructor(private route: ActivatedRoute,
+              private router: Router) { }
 
   ngOnInit() {
+    this.route.queryParams
+      .subscribe(params => {
+        console.log(params); // {order: "popular"}
+
+        this.name = params.name;
+        console.log(this.name); // popular
+        this.address = params.address;
+        console.log(this.address); // popular
+      });
   }
 
-  toDo(event): void {
-    console.log(JSON.stringify(event));
-  }
+
 
 }
