@@ -43,3 +43,15 @@ exports.disconnect = function(success, error) {
 exports.getConnected = function(success, error) {
     exec(success, error, "Bluetooth", "getConnected", []);
 };
+
+exports.startReading = function(success, error) {
+    exec(success, error, "Bluetooth", "startReading", []);
+};
+
+exports.stopReading = function(success, error) {
+    exec(success, error, "Bluetooth", "stopReading", []);
+};
+
+exports.write = function(data, success, error) {
+    exec(success, error, "Bluetooth", "write", [data]);
+};
