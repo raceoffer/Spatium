@@ -1,5 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-backup',
@@ -15,7 +14,7 @@ export class BackupComponent implements OnInit {
   enough = false;
   syncDHIState = false;
 
-  constructor(public dialog: MatDialog) { }
+  constructor() { }
 
   ngOnInit() {
   }

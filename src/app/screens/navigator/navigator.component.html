@@ -3,7 +3,7 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
-  <span class="toolbar-spacer"></span>
+  <span>Кошелек</span>
 </mat-toolbar>
 
 <mat-sidenav-container>
@@ -21,13 +21,6 @@
          (click)="sidenav.toggle()">{{navLink.name}}</a>
     </mat-nav-list>
 
-    <mat-list-item class="bottom-absolute">
-      <div class="content">
-        <span>Ночной режим</span>
-        <span class="spacer"></span>
-        <mat-slide-toggle (click)="changeTheme()"></mat-slide-toggle>
-      </div>
-    </mat-list-item>
   </mat-sidenav>
 
   <router-outlet name="navigator"></router-outlet>

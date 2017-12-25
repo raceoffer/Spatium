@@ -16,7 +16,7 @@ export class NavigatorComponent implements OnInit {
     },
     {
       name: 'Сохранить ключ в DHI',
-      link: ['/navigator', {outlets: {'navigator': ['ico']}}],
+      link: '/backup',
       isSelected: false
     },
     {
