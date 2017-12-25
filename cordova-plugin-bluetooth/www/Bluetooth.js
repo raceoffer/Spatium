@@ -24,6 +24,22 @@ exports.startListening = function(success, error) {
     exec(success, error, "Bluetooth", "startListening", []);
 };
 
+exports.stopListening = function(success, error) {
+    exec(success, error, "Bluetooth", "stopListening", []);
+};
+
+exports.getListening = function(success, error) {
+    exec(success, error, "Bluetooth", "getListening", []);
+};
+
 exports.connect = function(device, success, error) {
     exec(success, error, "Bluetooth", "connect", [device]);
+};
+
+exports.disconnect = function(success, error) {
+    exec(success, error, "Bluetooth", "disconnect", []);
+};
+
+exports.getConnected = function(success, error) {
+    exec(success, error, "Bluetooth", "getConnected", []);
 };

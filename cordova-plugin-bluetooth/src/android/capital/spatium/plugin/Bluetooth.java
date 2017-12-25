@@ -21,6 +21,11 @@ public class Bluetooth extends CordovaPlugin {
   private BluetoothAdapter mBluetoothAdapter;
   private CallbackContext  mEnableCallback = null;
 
+  private BluetoothServerSocket mBluetoothServerSocket = null;
+  private BluetoothSocket       mBluetoothSocket = null;
+
+  private boolean mListening = false;
+
   private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
   private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
   private static final int REQUEST_ENABLE_BT = 3;
@@ -28,6 +33,7 @@ public class Bluetooth extends CordovaPlugin {
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
+
     mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
   }
 
@@ -51,6 +57,12 @@ public class Bluetooth extends CordovaPlugin {
     } else if ("startListening".equals(action)) {
 		  startListening(callbackContext);
       return true;
+    } else if ("stopListening".equals(action)) {
+      stopListening(callbackContext);
+      return true;
+    } else if ("getListening".equals(action)) {
+      getListening(callbackContext);
+      return true;
     } else if ("connect".equals(action)) {
       String device  = null;
       String address = null;
@@ -62,9 +74,15 @@ public class Bluetooth extends CordovaPlugin {
         callbackContext.error("Invalid arguments");
       }
       return true;
+    } else if ("disconnect".equals(action)) {
+      disconnect(callbackContext);
+      return true;
+    } else if ("getConnected".equals(action)) {
+      getConnected(callbackContext);
+      return true;
     }
 
-	return false;
+    return false;
   }
 
   private void getDeviceInfo(CallbackContext callbackContext) {
@@ -120,35 +138,59 @@ public class Bluetooth extends CordovaPlugin {
 
     cordova.getThreadPool().execute(new Runnable() {
       public void run() {
-        BluetoothServerSocket serverSocket = null;
         try {
-          serverSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Spatium wallet", UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
-        } catch (Exception e) {
-          callbackContext.error("Failed to start listening");
-          return;
-        }
-        BluetoothSocket socket = null;
-        while (true) {
-          try {
-            socket = serverSocket.accept();
-          } catch (Exception e) {
-            callbackContext.error("Socket's accept method failed");
-            break;
+          mBluetoothServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Spatium wallet", UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+
+          mListening = true;
+          BluetoothSocket socket = null;
+          while (socket == null && mListening) {
+            try {
+              socket = mBluetoothServerSocket.accept(500);
+            } catch (Exception e) {
+              // Just ignore it
+            }
           }
 
           if (socket != null) {
-            callbackContext.success("Server connected");
-
-            try {
-              serverSocket.close();
-            } catch (Exception e) {
-              callbackContext.error("Failed to stop listening");
+            if(mBluetoothSocket != null) {
+              try {
+                mBluetoothSocket.close();
+              } catch (Exception e) {
+                callbackContext.error("Error closing client socket");
+              }
             }
-            break;
+            mBluetoothSocket = socket;
+            callbackContext.success("Server socket connected");
           }
+        } catch (Exception e) {
+          callbackContext.error("Failed to start listening");
+        } finally {
+          try {
+            mBluetoothServerSocket.close();
+          } catch (Exception e) {
+            callbackContext.error("Error closing socket");
+          }
+          mBluetoothServerSocket = null;
+          mListening = false;
         }
       }
     });
+  }
+
+  private void stopListening(final CallbackContext callbackContext) {
+    if(!mListening) {
+      callbackContext.error("Not listening");
+      return;
+    }
+
+    mListening = false;
+    callbackContext.success("Stopped listening");
+  }
+
+  private void getListening(CallbackContext callbackContext) {
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothServerSocket != null);
+    result.setKeepCallback(true);
+    callbackContext.sendPluginResult(result);
   }
 
   private void connect(String device, String address, final CallbackContext callbackContext) {
@@ -188,9 +230,39 @@ public class Bluetooth extends CordovaPlugin {
           return;
         }
 
-        callbackContext.success("Client connected");
+        if(clientSocket != null) {
+          if(mBluetoothSocket != null) {
+            try {
+              mBluetoothSocket.close();
+            } catch (Exception e) {
+              callbackContext.error("Error closing client socket");
+            }
+          }
+          mBluetoothSocket = clientSocket;
+          callbackContext.success("Client connected");
+        }
       }
     });
+  }
+
+  private void disconnect(final CallbackContext callbackContext) {
+    if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+      callbackContext.error("Bluetooth is not enabled");
+      return;
+    }
+
+    if(mBluetoothSocket == null) {
+      callbackContext.error("Not connected");
+      return;
+    }
+
+    try {
+      mBluetoothSocket.close();
+    } catch (Exception e) {
+      callbackContext.error("Error closing client socket");
+    }
+    mBluetoothSocket = null;
+    callbackContext.success("Disconnected");
   }
 
   private void enable(CallbackContext callbackContext) {
@@ -204,6 +276,12 @@ public class Bluetooth extends CordovaPlugin {
 
     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
     cordova.getActivity().startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+  }
+
+  private void getConnected(CallbackContext callbackContext) {
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothSocket != null);
+    result.setKeepCallback(true);
+    callbackContext.sendPluginResult(result);
   }
 
   @Override
