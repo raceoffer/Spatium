@@ -19,3 +19,11 @@ exports.enable = function(success, error) {
 exports.listPairedDevices = function(success, error) {
     exec(success, error, "Bluetooth", "listPairedDevices", []);
 };
+
+exports.startListening = function(success, error) {
+    exec(success, error, "Bluetooth", "startListening", []);
+};
+
+exports.connect = function(device, success, error) {
+    exec(success, error, "Bluetooth", "connect", [device]);
+};

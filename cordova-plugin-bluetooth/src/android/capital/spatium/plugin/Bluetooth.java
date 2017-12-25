@@ -1,6 +1,7 @@
 package capital.spatium.plugin;
 
 import java.util.Set;
+import java.util.UUID;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.CallbackContext;
@@ -12,6 +13,8 @@ import org.json.JSONException;
 import android.content.Context;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 
 public class Bluetooth extends CordovaPlugin {
@@ -45,10 +48,24 @@ public class Bluetooth extends CordovaPlugin {
     } else if ("listPairedDevices".equals(action)) {
       listPairedDevices(callbackContext);
       return true;
+    } else if ("startListening".equals(action)) {
+		  startListening(callbackContext);
+      return true;
+    } else if ("connect".equals(action)) {
+      String device  = null;
+      String address = null;
+      try {
+        device = args.getJSONObject(0).getString("name");
+        address = args.getJSONObject(0).getString("address");
+        connect(device,address,callbackContext);
+      } catch (Exception e) {
+        callbackContext.error("Invalid arguments");
+      }
+      return true;
     }
 
-		return false;
-	}
+	return false;
+  }
 
   private void getDeviceInfo(CallbackContext callbackContext) {
     callbackContext.success("Dummy android bluetooth info");
@@ -93,6 +110,87 @@ public class Bluetooth extends CordovaPlugin {
     PluginResult result = new PluginResult(PluginResult.Status.OK, data);
     result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
+  }
+
+  private void startListening(final CallbackContext callbackContext) {
+    if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+      callbackContext.error("Bluetooth is not enabled");
+      return;
+    }
+
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        BluetoothServerSocket serverSocket = null;
+        try {
+          serverSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Spatium wallet", UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+        } catch (Exception e) {
+          callbackContext.error("Failed to start listening");
+          return;
+        }
+        BluetoothSocket socket = null;
+        while (true) {
+          try {
+            socket = serverSocket.accept();
+          } catch (Exception e) {
+            callbackContext.error("Socket's accept method failed");
+            break;
+          }
+
+          if (socket != null) {
+            callbackContext.success("Server connected");
+
+            try {
+              serverSocket.close();
+            } catch (Exception e) {
+              callbackContext.error("Failed to stop listening");
+            }
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  private void connect(String device, String address, final CallbackContext callbackContext) {
+    if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+      callbackContext.error("Bluetooth is not enabled");
+      return;
+    }
+
+    BluetoothDevice tmp = null;
+    Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
+    for(BluetoothDevice bondedDevice : devices) {
+      if(bondedDevice.getName().equals(device) && bondedDevice.getAddress().equals(address)) {
+        tmp = bondedDevice;
+      }
+    }
+
+    if(tmp == null) {
+      callbackContext.error("The device is unpaired");
+      return;
+    }
+
+    final BluetoothDevice foundDevice = tmp;
+
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        BluetoothSocket clientSocket = null;
+        try {
+          clientSocket = foundDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+        } catch (Exception e) {
+          callbackContext.error("Failed to conect to bs");
+        }
+
+        try {
+          clientSocket.connect();
+        } catch (Exception e) {
+          callbackContext.error("Socket's connect method failed");
+          return;
+        }
+
+        callbackContext.success("Client connected");
+      }
+    });
   }
 
   private void enable(CallbackContext callbackContext) {
