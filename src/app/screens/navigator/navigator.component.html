@@ -1,0 +1,34 @@
+<mat-toolbar color="primary" [class.dark-theme]="isDarkTheme" class="shadow">
+  <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>{{ title }}</span>
+  <span class="toolbar-spacer"></span>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav class="width-sidenav" mode="over" [fixedInViewport]="true">
+    <mat-list-item>
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="spatium-logo-text">
+        <button mat-icon-button (click)="sidenav.toggle()">
+          <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
+        </button>
+        <img src="./assets/images/drawable/logo.svg" class="logo-text">
+      </div>
+    </mat-list-item>
+    <mat-nav-list *ngFor="let navLink of navLinks">
+      <a mat-list-item [routerLink]="navLink.link" class="main-nav-list-custom" [ngClass]="{'selected' : navLink.isSelected} "
+         (click)="sidenav.toggle()">{{navLink.name}}</a>
+    </mat-nav-list>
+
+    <mat-list-item class="bottom-absolute">
+      <div class="content">
+        <span>Ночной режим</span>
+        <span class="spacer"></span>
+        <mat-slide-toggle (click)="changeTheme()"></mat-slide-toggle>
+      </div>
+    </mat-list-item>
+  </mat-sidenav>
+
+  <router-outlet name="navigator"></router-outlet>
+</mat-sidenav-container>

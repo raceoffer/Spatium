@@ -7,12 +7,194 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css" />
-      
+
+  <style>
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Material_Icons.woff2) format('woff2');
+    }
+
+    @font-face {
+      font-family: 'HelveticaNeueCyr-Light';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/HelveticaNeueCyr-Light.woff) format('woff');
+    }
+
+    @font-face {
+      font-family: 'Circe Regular';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Circe-Regular.woff) format('woff');
+    }
+
+    @font-face {
+      font-family: 'Circe Bold';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Circe-Bold.woff) format('woff');
+    }
+
+    @font-face {
+      font-family: 'Roboto-Regular';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Roboto-Regular.ttf) format('opentype');
+    }
+
+    @font-face {
+      font-family: 'Roboto-Light';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Roboto-Light.ttf) format('opentype');
+    }
+
+    @font-face {
+      font-family: 'Roboto-Medium';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Roboto-Medium.ttf) format('opentype');
+    }
+
+    @font-face {
+      font-family: 'Roboto-Bold';
+      font-style: normal;
+      font-weight: 400;
+      src: url(assets/fonts/Roboto-Bold.ttf) format('opentype');
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Roboto-Regular';
+      color: rgb(55, 55, 65);
+      background-color: rgb(245, 245, 245);
+    }
+
+    .start-logo-text {
+      height: 23px !important;
+    }
+
+    .start-tagline {
+      color: rgb(155, 160, 160);
+      font-size: 15px;
+      font-family: "Circe Bold";
+    }
+
+    .start-tagline-padding{
+      padding-top: 9.5px;
+    }
+
+    .start-hello {
+      color: rgb(55, 55, 65);
+      font-size: 17.5px;
+      padding: 15px 0 0 0;
+      font-family: 'Roboto-Regular';
+    }
+
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: 100;
+      flex-direction: column;
+      box-sizing: border-box;
+      display: flex;
+      place-content: center flex-start;
+      align-items: center;
+    }
+
+    .margin86 {
+      margin-top: 86px;
+    }
+
+    .margin58 {
+      margin-top: 58.5px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(1turn);
+      }
+    }
+
+    .progress {
+      position: fixed;
+      bottom: 45px;
+      display: inline-block;
+      width: 5em;
+      height: 5em;
+      margin: 0 .5em;
+      font-size: 12px;
+      text-indent: 999em;
+      overflow: hidden;
+      animation: spin 1s infinite steps(8);
+    }
+
+    .small.progress {
+      font-size: 6px;
+    }
+
+    .progress:before,
+    .progress:after,
+    .progress > div:before,
+    .progress > div:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 2.25em; /* (container width - part width)/2  */
+      width: .5em;
+      height: 1.5em;
+      border-radius: .2em;
+      background: #eee;
+      box-shadow: 0 3.5em #eee; /* container height - part height */
+      transform-origin: 50% 2.5em; /* container height / 2 */
+    }
+
+    .progress:before {
+      background: #555;
+    }
+
+    .progress:after {
+      transform: rotate(-45deg);
+      background: #777;
+    }
+
+    .progress > div:before {
+      transform: rotate(-90deg);
+      background: #999;
+    }
+
+    .progress > div:after {
+      transform: rotate(-135deg);
+      background: #bbb;
+    }
+  </style>
 </head>
-<body ng-app="app" layout="column" flex>
-    <app-root></app-root>
-  <script type="text/javascript" src="cordova.js"></script>
+
+<body>
+<script type="text/javascript" src="cordova.js"></script>
+<div class="loading">
+  <div class="margin86">
+    <img src="./assets/images/drawable/logo.svg" class="start-logo-text">
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+  <div class="margin58">
+    <span class="start-hello">Добро пожаловать!</span>
+  </div>
+  <div class="small progress">
+    <div>Loading…</div>
+  </div>
+</div>
+
+<app-root></app-root>
+
 </body>
 </html>

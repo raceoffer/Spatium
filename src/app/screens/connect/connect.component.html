@@ -1,7 +1,25 @@
-<div fxLayout="column" fxLayoutAlign="center center">
-    <div fxLayoutAlign="center center">
-        <div class="bluetooth-spinner">
-            <mat-spinner diameter="200" strokeWidth="2" ></mat-spinner>
-        </div>
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-toolbar color="primary" class="shadow">
+    <mat-toolbar-row>
+      <span>{{stConnect}}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
+
+    <div class="connect-text">
+      <span>Подключение к устройству </span>
+      <p class="list-name" mat-line>{{name}}</p>
+      <p class="list-info" mat-line> {{address}}</p>
     </div>
+
+    <mat-spinner color="accent" strokeWidth="2"></mat-spinner>
+
+  </div>
+
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Отмена</button>
+</div>
+
+
 </div>

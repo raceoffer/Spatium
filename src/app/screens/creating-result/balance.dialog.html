@@ -1,0 +1,39 @@
+<div *ngIf="!enough">
+  <h2 mat-dialog-title>Пополните счет</h2>
+  <mat-list role="list">
+    <mat-list-item>
+      <p class="list-info" mat-line>Ethereum address</p>
+      <p class="list-name" mat-line> {{data.ethereumAddress}} </p>
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+        <mat-icon matSuffix>content_copy</mat-icon>
+      </button>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-info" mat-line>Backup comission</p>
+      <p class="list-name" mat-line> {{data.comission}} ethereum </p>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-info" mat-line>Etherium balance</p>
+      <p class="list-name" mat-line> {{data.ethereumBalance}} </p>
+      <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">
+        <mat-icon class="sync" *ngIf="syncState==0">sync</mat-icon>
+        <mat-icon *ngIf="syncState==1">sync</mat-icon>
+        <mat-icon *ngIf="syncState==2">sync_problem</mat-icon>
+      </div>
+
+    </mat-list-item>
+  </mat-list>
+
+  <mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="false">Отмена</button>
+  </mat-dialog-actions>
+</div>
+
+<div *ngIf="enough">
+  <p class="list-info" mat-line>Синхронизация с DHI прошла успешно.</p>
+  <mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="true" routerLink="/waiting">OK</button>
+  </mat-dialog-actions>
+</div>

@@ -1,73 +1,69 @@
 import {BrowserModule} from '@angular/platform-browser';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {NgModule} from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
-  MatDialogModule,
   MatIconModule,
-  MatInputModule,
   MatListModule,
   MatMenuModule,
+  MatSidenavModule,
+  MatSlideToggleModule,
   MatProgressBarModule,
   MatProgressSpinnerModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatInputModule,
+  MatDialogModule
 } from '@angular/material';
+import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ClipboardModule} from 'ngx-clipboard';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import {ToolbarComponent} from './toolbar/toolbar.component';
-import {BluetoothScreenComponent, ConnectedDevicesDialogComponent} from './screens/bluetooth/bluetooth.component';
-import {ConnectScreenComponent} from './screens/connect/connect.component';
-import {BackupBalanceDialogComponent, WalletScreenComponent} from './screens/wallet/wallet.component';
-import {SendTransactionDialogComponent} from './dialogs/transaction/send/send.transaction.dialog';
-import {ConfirmTransactionDialogComponent} from './dialogs/transaction/confirm/confirm.transaction.dialog';
+import { WalletComponent } from './screens/wallet/wallet.component';
+import { NavigatorComponent } from './screens/navigator/navigator.component';
+import { StartComponent } from './screens/start/start.component';
+import { ConnectComponent } from './screens/connect/connect.component';
+import { WaitingComponent } from './screens/waiting/waiting.component';
+import {ClipboardModule} from 'ngx-clipboard/dist';
+import { CreatingResultComponent, BalanceDialogComponent } from './screens/creating-result/creating-result.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    ToolbarComponent,
-    BluetoothScreenComponent,
-    ConnectedDevicesDialogComponent,
-    ConnectScreenComponent,
-    WalletScreenComponent,
-    BackupBalanceDialogComponent,
-    SendTransactionDialogComponent,
-    ConfirmTransactionDialogComponent
+    WalletComponent,
+    NavigatorComponent,
+    StartComponent,
+    ConnectComponent,
+    WaitingComponent,
+    CreatingResultComponent,
+    BalanceDialogComponent
   ],
   imports: [
     AppRoutingModule,
     BrowserModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatIconModule,
-    MatInputModule,
-    MatListModule,
-    MatMenuModule,
+    NoopAnimationsModule,
     MatToolbarModule,
+    MatButtonModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
+    MatIconModule,
+    MatInputModule,
+    MatSidenavModule,
+    MatListModule,
+    MatMenuModule,
+    FlexLayoutModule,
+    MatSlideToggleModule,
     ClipboardModule,
-    FlexLayoutModule
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [
     AppComponent,
-    ToolbarComponent],
-  entryComponents: [
-    ConnectedDevicesDialogComponent,
-    BackupBalanceDialogComponent,
-    SendTransactionDialogComponent,
-    ConfirmTransactionDialogComponent
+    BalanceDialogComponent
   ]
 })
-
 export class AppModule {
+  constructor(overlayContainer: OverlayContainer) {
+    //overlayContainer.getContainerElement().classList.add('dark-theme');
+  }
 }
-
-platformBrowserDynamic().bootstrapModule(AppModule);

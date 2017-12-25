@@ -1,0 +1,22 @@
+<div fxLayout="column" class="main" fxLayoutAlign="start center">
+  <mat-form-field class="full-width">
+    <mat-select placeholder="Select wallet">
+      <mat-select-trigger *ngIf="initiatorWallet">
+        <span class="address" >{{initiatorWallet.address}}</span> ({{initiatorWallet.balance}} BTC)
+      </mat-select-trigger>
+      <mat-option *ngIf="initiatorWallet" [value]="initiatorWallet.address">
+        <span class="address">{{initiatorWallet.address}}</span> ({{initiatorWallet.balance}} BTC)
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <input matInput placeholder="Receiver address" value="dmitry12444bernaev44">
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <input matInput placeholder="Send BTC" value="0.0001">
+  </mat-form-field>
+
+  <button mat-raised-button color="accent" class="width-button">Продолжить</button>
+</div>
