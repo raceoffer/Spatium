@@ -30,6 +30,7 @@ cordova platform add android ios browser
 
 ## Warning!
 Due to the bug in cordova's local plugin system, you should always revert the changes to config.xml that occur after adding platforms
+Issue link: https://issues.apache.org/jira/browse/CB-13503
 
 # Run the app
 ```bash
