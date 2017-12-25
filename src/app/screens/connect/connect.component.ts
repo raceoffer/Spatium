@@ -9,7 +9,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class ConnectComponent implements OnInit {
 
 
-  stConnect = 'Подключение';
+  stConnect = 'Подключение к ';
   busyClass = 'fade-background invisible';
   name: string;
   address: string;
@@ -25,6 +25,7 @@ export class ConnectComponent implements OnInit {
         console.log(params); // {order: "popular"}
 
         this.name = params.name;
+        this.stConnect = this.stConnect + this.name;
         console.log(this.name); // popular
         this.address = params.address;
         console.log(this.address); // popular

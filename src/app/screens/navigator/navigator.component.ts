@@ -10,32 +10,17 @@ export class NavigatorComponent implements OnInit {
   isDarkTheme = false;
   navLinks = [
     {
-      name: 'Кошелек',
-      link: ['/navigator', {outlets: {'navigator': ['wallet']}}],
-      isSelected: true
+      name: 'Подключиться к устройству',
+      link: '/waiting',
+      isSelected: false
     },
     {
-      name: 'ICO',
+      name: 'Сохранить ключ в DHI',
       link: ['/navigator', {outlets: {'navigator': ['ico']}}],
       isSelected: false
     },
     {
-      name: 'Портфельное инвестирование',
-      link: ['/navigator', {outlets: {'navigator': ['portfolio_investment']}}],
-      isSelected: false
-    },
-    {
-      name: 'Верификация',
-      link: ['/navigator', {outlets: {'navigator': ['verification']}}],
-      isSelected: false
-    },
-    {
-      name: 'Настройки',
-      link: ['/navigator', {outlets: {'navigator': ['options']}}],
-      isSelected: false
-    },
-    {
-      name: 'Вход',
+      name: 'Сменить кошелек',
       link: '/start',
       isSelected: false
     }];

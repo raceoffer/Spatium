@@ -24,7 +24,8 @@ import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
-import { CreatingResultComponent, BalanceDialogComponent } from './screens/creating-result/creating-result.component';
+import { CreatingResultComponent } from './screens/creating-result/creating-result.component';
+import { BackupComponent } from './screens/backup/backup.component';
 
 
 @NgModule({
@@ -36,7 +37,7 @@ import { CreatingResultComponent, BalanceDialogComponent } from './screens/creat
     ConnectComponent,
     WaitingComponent,
     CreatingResultComponent,
-    BalanceDialogComponent
+    BackupComponent
   ],
   imports: [
     AppRoutingModule,
@@ -58,8 +59,7 @@ import { CreatingResultComponent, BalanceDialogComponent } from './screens/creat
   ],
   providers: [],
   bootstrap: [
-    AppComponent,
-    BalanceDialogComponent
+    AppComponent
   ]
 })
 export class AppModule {

@@ -1,0 +1,44 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <span>Сохранение в DHI</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <mat-list role="list">
+    <mat-list-item>
+      <p class="list-info" mat-line>Ethereum адрес</p>
+      <p class="list-name" mat-line> {{ethereumAddress}} </p>
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+        <mat-icon matSuffix>content_copy</mat-icon>
+      </button>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-info" mat-line>Стоимость сохранения</p>
+      <p class="list-name" mat-line> {{comission}} ethereum </p>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-name" mat-line *ngIf="!enough"> Не хватает средств </p>
+      <p class="list-info" mat-line>Etherium balance</p>
+      <p class="list-name" mat-line> {{ethereumBalance}} </p>
+      <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">
+        <mat-icon *ngIf="syncState==0">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="syncState==1">sync</mat-icon>
+        <mat-icon *ngIf="syncState==2">sync_problem</mat-icon>
+      </div>
+
+    </mat-list-item>
+  </mat-list>
+
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <mat-spinner color="accent" strokeWidth="2" diameter="56" style = "margin-bottom: 23px !important;" *ngIf="syncDHIState"></mat-spinner>
+    <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="enough && !syncDHIState">Сохранить</button>
+
+    <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="syncDHIState">Отменить</button>
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Пропустить</button>
+  </div>
+
+
+</div>

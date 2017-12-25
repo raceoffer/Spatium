@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
   styleUrls: ['./waiting.component.css']
 })
 export class WaitingComponent implements OnInit {
-  Label = 'Ожидание подключения';
+  Label = 'Подключение устройства';
   connect = 'Подключиться'
   disabledBT = true;
 

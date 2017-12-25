@@ -18,6 +18,10 @@ $dark_grey_21:rgba(44, 46, 49, 0.21);
   display: none!important;
 }
 
+.hide {
+  visibility: hidden;
+}
+
 .shadow{
   box-shadow: 0 3px 5px $dark_grey_21;
 }
