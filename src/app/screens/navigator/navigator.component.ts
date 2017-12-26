@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation  } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-navigator',
   templateUrl: './navigator.component.html',
-  styleUrls: ['./navigator.component.css']
+  styleUrls: ['./navigator.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class NavigatorComponent implements OnInit {
   isDarkTheme = false;

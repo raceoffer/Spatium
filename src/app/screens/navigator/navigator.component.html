@@ -13,7 +13,7 @@
         <button mat-icon-button (click)="sidenav.toggle()">
           <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
         </button>
-        <img src="./assets/images/drawable/logo.svg" class="logo-text">
+        <div class="nav-logo-text"></div>
       </div>
     </mat-list-item>
     <mat-nav-list *ngFor="let navLink of navLinks">
@@ -23,5 +23,8 @@
 
   </mat-sidenav>
 
-  <router-outlet name="navigator"></router-outlet>
+    <router-outlet name="navigator"></router-outlet>
+
+
+
 </mat-sidenav-container>

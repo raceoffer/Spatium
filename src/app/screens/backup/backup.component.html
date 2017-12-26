@@ -5,7 +5,7 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <mat-list role="list">
+  <mat-list role="list" style = "margin-bottom: 23px !important;">
     <mat-list-item>
       <p class="list-info" mat-line>Ethereum адрес</p>
       <p class="list-name" mat-line> {{ethereumAddress}} </p>
@@ -32,7 +32,7 @@
     </mat-list-item>
   </mat-list>
 
-  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
     <mat-spinner color="accent" strokeWidth="2" diameter="56" style = "margin-bottom: 23px !important;" *ngIf="syncDHIState"></mat-spinner>
     <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="enough && !syncDHIState">Сохранить</button>
 
