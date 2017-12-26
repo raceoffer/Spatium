@@ -19,7 +19,7 @@ export class ConnectComponent implements OnInit, AfterViewInit {
         name: this.name,
         address: this.address
       });
-      this.router.navigate(['/send']);
+      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: false }}]);
     } catch (e) {
       console.log('connect', e);
       this.router.navigate(['/waiting']);

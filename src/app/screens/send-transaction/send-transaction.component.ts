@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import WalletData from '../../classes/wallet-data';
 import {WalletService} from '../../services/wallet.service';
-import {FormControl, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
+import {MatSnackBar} from "@angular/material";
 
 declare var bcoin: any;
 declare var CompoundKey: any;
@@ -31,7 +31,8 @@ export class SendTransactionComponent implements OnInit {
 
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
-              private router: Router) {}
+              private router: Router,
+              public snackBar: MatSnackBar) {}
 
   async ngOnInit() {
     this.route.queryParams
@@ -59,11 +60,32 @@ export class SendTransactionComponent implements OnInit {
   stateChange() : void {
     switch (this.state){
       case 0: {
-        this.state = 1;
+        this.state = 1;//ожидание узла
         this.buttonText = 'Отмена';
+
+        break;
+      }
+      case 1: {
+        this.state = 2;//создание транзакции
+        this.buttonText = 'Отмена';
+
+        break;
+      }
+      case 2: {
+        this.state = 3;//отправка в сеть
+        this.buttonText = 'Отмена';
+
         break;
       }
     }
+  }
+
+  sendTransaction(): void {
+    this.snackBar.open('Транзакция была отправлена.', null, {
+      duration: 3000,
+    });
+    this.state=0;
+    this.buttonText = 'Продолжить';
   }
 }
 

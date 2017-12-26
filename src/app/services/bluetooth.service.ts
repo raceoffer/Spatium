@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {EventEmitter, Injectable, Output} from '@angular/core';
 
 declare const cordova: any;
 
@@ -8,9 +8,9 @@ export class BluetoothService {
 
   enabled = false;
 
-  onConnected = null;
-  onDisconnected = null;
-  onMessage = null;
+  onConnected: EventEmitter<any> = new EventEmitter();
+  onDisconnected: EventEmitter<any> = new EventEmitter();
+  onMessage: EventEmitter<any> = new EventEmitter();
 
   constructor() {}
 
@@ -51,11 +51,11 @@ export class BluetoothService {
           console.log('Message', message);
         });
         if (this.onConnected) {
-          this.onConnected();
+          this.onConnected.emit();
         }
       }, () => {
         if (this.onDisconnected) {
-          this.onDisconnected();
+          this.onDisconnected.emit();
         }
       });
     }
@@ -68,13 +68,13 @@ export class BluetoothService {
 
     await this.bt.connect(device, () => {
       if (this.onDisconnected) {
-        this.onDisconnected();
+        this.onDisconnected.emit();
       }
     });
 
     await this.bt.startReading((message) => {
       if (this.onMessage) {
-        this.onMessage(message);
+        this.onMessage.emit(message);
       }
     });
   }

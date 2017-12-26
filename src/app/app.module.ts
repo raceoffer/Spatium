@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {NoopAnimationsModule, BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
   MatIconModule,
@@ -15,6 +15,7 @@ import {
   MatInputModule,
   MatDialogModule,
   MatSelectModule,
+  MatSnackBarModule,
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -47,6 +48,7 @@ import {BluetoothService} from './services/bluetooth.service';
     AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,
+    BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
     MatProgressBarModule,
@@ -61,6 +63,7 @@ import {BluetoothService} from './services/bluetooth.service';
     ClipboardModule,
     MatDialogModule,
     MatSelectModule,
+    MatSnackBarModule
   ],
   providers: [
     WalletService,

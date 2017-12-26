@@ -17,12 +17,15 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   constructor(private bt: BluetoothService, private router: Router) {}
 
   ngOnInit() {
-    this.bt.onConnected = () => {
-      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}, { queryParams: { isSecond: true } }]);
-    };
-    this.bt.onDisconnected = () => {
-      this.router.navigate(['/waiting']);
-    };
+    const routerObj = this.router;
+
+    this.bt.onConnected.subscribe(() => {
+      routerObj.navigate(['/backup']);
+      //routerObj.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: true }}]);
+    });
+    this.bt.onDisconnected.subscribe( () => {
+      routerObj.navigate(['/waiting']);
+    });
   }
 
   async ngAfterViewInit() {
