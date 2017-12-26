@@ -12,7 +12,8 @@ import {
   MatProgressSpinnerModule,
   MatToolbarModule,
   MatInputModule,
-  MatDialogModule
+  MatDialogModule,
+  MatSelectModule,
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -25,6 +26,8 @@ import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
 import { CreatingResultComponent, BalanceDialogComponent } from './screens/creating-result/creating-result.component';
+import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
+import {WalletService} from './services/wallet.service';
 
 
 @NgModule({
@@ -36,7 +39,8 @@ import { CreatingResultComponent, BalanceDialogComponent } from './screens/creat
     ConnectComponent,
     WaitingComponent,
     CreatingResultComponent,
-    BalanceDialogComponent
+    BalanceDialogComponent,
+    SendTransactionComponent
   ],
   imports: [
     AppRoutingModule,
@@ -54,9 +58,12 @@ import { CreatingResultComponent, BalanceDialogComponent } from './screens/creat
     FlexLayoutModule,
     MatSlideToggleModule,
     ClipboardModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSelectModule,
   ],
-  providers: [],
+  providers: [
+    WalletService,
+  ],
   bootstrap: [
     AppComponent,
     BalanceDialogComponent
