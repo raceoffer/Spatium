@@ -6,6 +6,7 @@ import {StartComponent} from './screens/start/start.component';
 import {WaitingComponent} from './screens/waiting/waiting.component';
 import {ConnectComponent} from './screens/connect/connect.component';
 import {BackupComponent} from './screens/backup/backup.component';
+import {SendTransactionComponent} from './screens/send-transaction/send-transaction.component';
 
 
 
@@ -18,6 +19,7 @@ const appRoutes: Routes = [
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
   ]},
+  { path: 'send', component: SendTransactionComponent},
 ];
 @NgModule({
   imports: [

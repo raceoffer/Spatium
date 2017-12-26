@@ -1,7 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-list role="list">
     <mat-list-item>
-      <p class="list-info" mat-line>BitCoin Р°РґСЂРµСЃ</p>
+      <p class="list-info" mat-line>BitCoin адрес</p>
       <p class="list-name" mat-line> {{bitcoinAddress}} </p>
       <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
         <mat-icon matSuffix>content_copy</mat-icon>
@@ -9,7 +9,7 @@
     </mat-list-item>
 
     <mat-list-item>
-      <p class="list-info" mat-line>BitCoin Р±Р°Р»Р°РЅСЃ</p>
+      <p class="list-info" mat-line>BitCoin баланс</p>
       <p class="list-name" mat-line> {{bitcoinBalance}} </p>
       <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">
         <mat-icon *ngIf="syncState==0">sync</mat-icon>
@@ -21,7 +21,7 @@
   </mat-list>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">РџРµСЂРµРІРѕРґ</button>
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Перевод</button>
   </div>
 
 

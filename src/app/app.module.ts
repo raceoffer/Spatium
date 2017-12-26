@@ -12,7 +12,8 @@ import {
   MatProgressSpinnerModule,
   MatToolbarModule,
   MatInputModule,
-  MatDialogModule
+  MatDialogModule,
+  MatSelectModule,
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -25,6 +26,8 @@ import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
+import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
+import {WalletService} from './services/wallet.service';
 
 
 @NgModule({
@@ -35,7 +38,8 @@ import { BackupComponent } from './screens/backup/backup.component';
     StartComponent,
     ConnectComponent,
     WaitingComponent,
-    BackupComponent
+    BackupComponent,
+    SendTransactionComponent
   ],
   imports: [
     AppRoutingModule,
@@ -53,9 +57,12 @@ import { BackupComponent } from './screens/backup/backup.component';
     FlexLayoutModule,
     MatSlideToggleModule,
     ClipboardModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSelectModule,
   ],
-  providers: [],
+  providers: [
+    WalletService,
+  ],
   bootstrap: [
     AppComponent
   ]
