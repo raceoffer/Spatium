@@ -24,7 +24,6 @@ import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
-import { CreatingResultComponent } from './screens/creating-result/creating-result.component';
 import { BackupComponent } from './screens/backup/backup.component';
 
 
@@ -36,7 +35,6 @@ import { BackupComponent } from './screens/backup/backup.component';
     StartComponent,
     ConnectComponent,
     WaitingComponent,
-    CreatingResultComponent,
     BackupComponent
   ],
   imports: [

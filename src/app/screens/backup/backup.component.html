@@ -1,7 +1,10 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <span>Сохранение в DHI</span>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span>Сохранение в ДХИ</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
@@ -33,11 +36,11 @@
   </mat-list>
 
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-    <mat-spinner color="accent" strokeWidth="2" diameter="56" style = "margin-bottom: 23px !important;" *ngIf="syncDHIState"></mat-spinner>
+    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="syncDHIState"></mat-spinner>
     <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="enough && !syncDHIState">Сохранить</button>
 
     <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="syncDHIState">Отменить</button>
-    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Пропустить</button>
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting" *ngIf="!syncDHIState">Пропустить</button>
   </div>
 
 

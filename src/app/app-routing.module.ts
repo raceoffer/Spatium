@@ -5,15 +5,13 @@ import {NavigatorComponent} from './screens/navigator/navigator.component';
 import {StartComponent} from './screens/start/start.component';
 import {WaitingComponent} from './screens/waiting/waiting.component';
 import {ConnectComponent} from './screens/connect/connect.component';
-import {CreatingResultComponent} from './screens/creating-result/creating-result.component';
-import {BackupComponent} from "./screens/backup/backup.component";
+import {BackupComponent} from './screens/backup/backup.component';
 
 
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
-  { path: 'creatingKey', component: CreatingResultComponent},
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'connect', component: ConnectComponent },
