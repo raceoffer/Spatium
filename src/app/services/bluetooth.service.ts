@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-declare var cordova: any;
+declare const cordova: any;
 
 @Injectable()
 export class BluetoothService {
@@ -10,6 +10,7 @@ export class BluetoothService {
 
   onConnected = null;
   onDisconnected = null;
+  onMessage = null;
 
   constructor() {}
 
@@ -40,44 +41,45 @@ export class BluetoothService {
   }
 
   async ensureListening() {
-    try {
+    if (await this.bt.getConnected()) {
       await this.bt.disconnect();
-    } catch (e) {}
+    }
 
-    await this.bt.startListening(async () => {
-      await this.bt.startReading((message) => {
-        console.log('Message', message);
+    if (!await this.bt.getListening()) {
+      await this.bt.startListening(async () => {
+        await this.bt.startReading((message) => {
+          console.log('Message', message);
+        });
+        if (this.onConnected) {
+          this.onConnected();
+        }
+      }, () => {
+        if (this.onDisconnected) {
+          this.onDisconnected();
+        }
       });
-      if (this.onConnected) {
-        this.onConnected();
-      }
-    }, () => {
-      if (this.onDisconnected) {
-        this.onDisconnected();
-      }
-    });
+    }
   }
 
   async connect(device) {
-    try {
+    if (await this.bt.getConnected()) {
       await this.bt.disconnect();
-    } catch (e) {}
+    }
 
     await this.bt.connect(device, () => {
       if (this.onDisconnected) {
         this.onDisconnected();
       }
     });
+
     await this.bt.startReading((message) => {
-      console.log('Message', message);
+      if (this.onMessage) {
+        this.onMessage(message);
+      }
     });
   }
 
   async send(message) {
-    try {
-      this.bt.send(message);
-    } catch (e) {
-      console.log('Send erroe:', e);
-    }
+    this.bt.send(message);
   }
 }
