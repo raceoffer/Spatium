@@ -4,6 +4,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.CallbackContext;
@@ -28,6 +33,9 @@ public class Bluetooth extends CordovaPlugin {
 
   private BluetoothServerSocket mBluetoothServerSocket = null;
   private BluetoothSocket       mBluetoothSocket = null;
+  
+  BufferedReader mBufferedReader = null;
+  PrintWriter mPrintWriter = null;
 
   private boolean mListening = false;
   private boolean mReading = false;
@@ -173,6 +181,8 @@ public class Bluetooth extends CordovaPlugin {
             try {
               BluetoothSocket socket = mBluetoothServerSocket.accept(500);
               if(mBluetoothSocket == null) {
+				mBufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+				mPrintWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
                 mBluetoothSocket = socket;
               } else {
                 socket.close();
@@ -246,6 +256,8 @@ public class Bluetooth extends CordovaPlugin {
 			  clientSocket.connect();
 
 			  if(mBluetoothSocket == null) {
+				mBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+				mPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"), true);
 				mBluetoothSocket = clientSocket;
 				callbackContext.success();
 			  } else {
@@ -298,15 +310,6 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
-    InputStream tmp = null;
-    try {
-      tmp = mBluetoothSocket.getInputStream();
-    } catch (Exception e) {
-      callbackContext.error("Failed to get the input stream");
-      return;
-    }
-
-    final InputStream stream = tmp;
     cordova.getThreadPool().execute(new Runnable() {
       public void run() {
         try {
@@ -316,10 +319,10 @@ public class Bluetooth extends CordovaPlugin {
           mReading = true;
 
           while (mReading) {
-            bytesRead = stream.read(buffer);
+			String string = mBufferedReader.readLine();
 
             if (mDataCallback != null) {
-              PluginResult result = new PluginResult(PluginResult.Status.OK, new String(buffer, 0, bytesRead, "UTF-8"));
+              PluginResult result = new PluginResult(PluginResult.Status.OK, string);
               result.setKeepCallback(true);
               mDataCallback.sendPluginResult(result);
             }
@@ -361,16 +364,8 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
-    OutputStream stream = null;
     try {
-      stream = mBluetoothSocket.getOutputStream();
-    } catch (Exception e) {
-      callbackContext.error("Failed to get the output stream");
-      return;
-    }
-
-    try {
-      stream.write(data.getBytes("UTF-8"));
+	  mPrintWriter.println(data);
     } catch (Exception e) {
       callbackContext.error("Disconnected");
       return;
