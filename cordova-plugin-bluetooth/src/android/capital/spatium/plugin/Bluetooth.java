@@ -22,6 +22,9 @@ import android.content.Intent;
 public class Bluetooth extends CordovaPlugin {
   private BluetoothAdapter mBluetoothAdapter;
   private CallbackContext  mEnableCallback = null;
+  private CallbackContext  mDataCallback = null;
+  private CallbackContext  mConnectedCallback = null;
+  private CallbackContext  mDisconnectedCallback = null;
 
   private BluetoothServerSocket mBluetoothServerSocket = null;
   private BluetoothSocket       mBluetoothSocket = null;
@@ -42,10 +45,7 @@ public class Bluetooth extends CordovaPlugin {
 
 	@Override
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-		if ("getDeviceInfo".equals(action)) {
-			getDeviceInfo(callbackContext);
-			return true;
-		} else if ("getSupported".equals(action)) {
+		 if ("getSupported".equals(action)) {
 		  getSupported(callbackContext);
 		  return true;
     } else if ("getEnabled".equals(action)) {
@@ -62,6 +62,12 @@ public class Bluetooth extends CordovaPlugin {
       return true;
     } else if ("stopListening".equals(action)) {
       stopListening(callbackContext);
+      return true;
+    } else if ("setOnConnected".equals(action)) {
+		  setOnConnected(callbackContext);
+      return true;
+    } else if ("setOnDisconnected".equals(action)) {
+      setOnDisconnected(callbackContext);
       return true;
     } else if ("getListening".equals(action)) {
       getListening(callbackContext);
@@ -83,13 +89,19 @@ public class Bluetooth extends CordovaPlugin {
     } else if ("getConnected".equals(action)) {
       getConnected(callbackContext);
       return true;
+    } else if ("setOnData".equals(action)) {
+      setOnData(callbackContext);
+      return true;
     } else if ("startReading".equals(action)) {
       startReading(callbackContext);
       return true;
     } else if ("stopReading".equals(action)) {
       stopReading(callbackContext);
       return true;
-    } else if ("write".equals(action)) {
+    } else if ("getReading".equals(action)) {
+      getReading(callbackContext);
+      return true;
+     } else if ("write".equals(action)) {
       try {
         String data = args.getString(0);
         write(data, callbackContext);
@@ -100,10 +112,6 @@ public class Bluetooth extends CordovaPlugin {
     }
 
     return false;
-  }
-
-  private void getDeviceInfo(final CallbackContext callbackContext) {
-    callbackContext.success("Dummy android bluetooth info");
   }
 
   private void getSupported(final CallbackContext callbackContext) {
@@ -150,45 +158,45 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
+    if(mBluetoothSocket != null) {
+      callbackContext.error("Cannot listen while already connected");
+      return;
+    }
+
     cordova.getThreadPool().execute(new Runnable() {
       public void run() {
         try {
           mBluetoothServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Spatium wallet", UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
 
           mListening = true;
-          BluetoothSocket socket = null;
-          while (socket == null && mListening) {
+          while (mBluetoothSocket == null && mListening) {
             try {
-              socket = mBluetoothServerSocket.accept(500);
+              BluetoothSocket socket = mBluetoothServerSocket.accept(500);
+              if(mBluetoothSocket == null) {
+                mBluetoothSocket = socket;
+              } else {
+                socket.close();
+              }
             } catch (Exception e) {
               // Just ignore it
             }
           }
 
-          if (socket != null) {
-            if(mBluetoothSocket != null) {
-              try {
-                mBluetoothSocket.close();
-              } catch (Exception e) {
-                callbackContext.error("Error closing client socket");
-              }
-            }
-            mBluetoothSocket = socket;
-            callbackContext.success("Server socket connected");
-          }
+          if(mBluetoothSocket != null && mConnectedCallback != null)
+            mConnectedCallback.success("Server socket connected");
         } catch (Exception e) {
-          callbackContext.error("Failed to start listening");
+          callbackContext.error("Listening failed");
         } finally {
           try {
             mBluetoothServerSocket.close();
-          } catch (Exception e) {
-            callbackContext.error("Error closing socket");
-          }
+          } catch (Exception e) {}
           mBluetoothServerSocket = null;
           mListening = false;
         }
       }
     });
+
+    callbackContext.success();
   }
 
   private void stopListening(final CallbackContext callbackContext) {
@@ -198,11 +206,11 @@ public class Bluetooth extends CordovaPlugin {
     }
 
     mListening = false;
-    callbackContext.success("Stopped listening");
+    callbackContext.success();
   }
 
   private void getListening(final CallbackContext callbackContext) {
-    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothServerSocket != null);
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mListening);
     callbackContext.sendPluginResult(result);
   }
 
@@ -212,58 +220,50 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
-    BluetoothDevice tmp = null;
+    if(mBluetoothSocket != null) {
+      callbackContext.error("Already connected");
+      return;
+    }
+
+    BluetoothDevice foundDevice = null;
     Set<BluetoothDevice> devices = mBluetoothAdapter.getBondedDevices();
     for(BluetoothDevice bondedDevice : devices) {
       if(bondedDevice.getName().equals(device) && bondedDevice.getAddress().equals(address)) {
-        tmp = bondedDevice;
+        foundDevice = bondedDevice;
       }
     }
 
-    if(tmp == null) {
+    if(foundDevice == null) {
       callbackContext.error("The device is unpaired");
       return;
     }
 
-    final BluetoothDevice foundDevice = tmp;
+    try {
+      BluetoothSocket clientSocket = foundDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+      clientSocket.connect();
 
-    cordova.getThreadPool().execute(new Runnable() {
-      public void run() {
-        BluetoothSocket clientSocket = null;
-        try {
-          clientSocket = foundDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
-        } catch (Exception e) {
-          callbackContext.error("Failed to conect to bs");
-        }
-
-        try {
-          clientSocket.connect();
-        } catch (Exception e) {
-          callbackContext.error("Socket's connect method failed");
-          return;
-        }
-
-        if(clientSocket != null) {
-          if(mBluetoothSocket != null) {
-            try {
-              mBluetoothSocket.close();
-            } catch (Exception e) {
-              callbackContext.error("Error closing client socket");
-            }
-          }
-          mBluetoothSocket = clientSocket;
-          callbackContext.success("Client connected");
-        }
+      if(mBluetoothSocket == null) {
+        mBluetoothSocket = clientSocket;
+        callbackContext.success();
+      } else {
+        callbackContext.error("Failed to conect: interrupted");
+        clientSocket.close();
       }
-    });
+    } catch (Exception e) {
+      callbackContext.error("Failed to conect to remote socket");
+      return;
+    }
+  }
+
+  private void setOnConnected(CallbackContext callbackContext) {
+    mConnectedCallback = callbackContext;
+  }
+
+  private void setOnDisconnected(CallbackContext callbackContext) {
+    mDisconnectedCallback = callbackContext;
   }
 
   private void disconnect(final CallbackContext callbackContext) {
-    if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-      callbackContext.error("Bluetooth is not enabled");
-      return;
-    }
-
     if(mBluetoothSocket == null) {
       callbackContext.error("Not connected");
       return;
@@ -275,14 +275,18 @@ public class Bluetooth extends CordovaPlugin {
       callbackContext.error("Error closing client socket");
     }
     mBluetoothSocket = null;
-    callbackContext.success("Disconnected");
+    callbackContext.success();
   }
 
   private void getConnected(CallbackContext callbackContext) {
-    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothSocket != null && mBluetoothSocket.isConnected());
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothSocket != null);
     callbackContext.sendPluginResult(result);
   }
-  
+
+  private void setOnData(CallbackContext callbackContext) {
+    mDataCallback = callbackContext;
+  }
+
   private void startReading(final CallbackContext callbackContext) {
     if(mBluetoothSocket == null) {
       callbackContext.error("Not connected");
@@ -300,26 +304,40 @@ public class Bluetooth extends CordovaPlugin {
     final InputStream stream = tmp;
     cordova.getThreadPool().execute(new Runnable() {
       public void run() {
+        try {
+          byte[] buffer = new byte[2048];
+          int bytesRead = 0;
 
-        byte[] buffer = new byte[2048];
-        int bytesRead = 0;
+          mReading = true;
 
-        mReading = true;
-
-        while (mReading) {
-          try {
+          while (mReading) {
             bytesRead = stream.read(buffer);
-            PluginResult result = new PluginResult(PluginResult.Status.OK, new String(buffer, 0, bytesRead, "UTF-8"));
-            result.setKeepCallback(true);
-            callbackContext.sendPluginResult(result);
-          } catch (Exception e) {
-            // Just ignore it for now
+
+            if (mDataCallback != null) {
+              PluginResult result = new PluginResult(PluginResult.Status.OK, new String(buffer, 0, bytesRead, "UTF-8"));
+              result.setKeepCallback(true);
+              mDataCallback.sendPluginResult(result);
+            }
           }
+        } catch (Exception e) {
+          try {
+            mBluetoothSocket.close();
+          } catch (Exception s) {}
+          mBluetoothSocket = null;
+          if(mDisconnectedCallback != null)
+            mDisconnectedCallback.success();
+        } finally {
+          mReading = false;
         }
       }
     });
 
-    mReading = false;
+    callbackContext.success();
+  }
+
+  private void getReading(final CallbackContext callbackContext) {
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mReading);
+    callbackContext.sendPluginResult(result);
   }
 
   private void stopReading(final CallbackContext callbackContext) {
@@ -329,7 +347,7 @@ public class Bluetooth extends CordovaPlugin {
     }
 
     mReading = false;
-    callbackContext.success("Stopped reading");
+    callbackContext.success();
   }
 
   private void write(String data, final CallbackContext callbackContext) {
@@ -353,7 +371,7 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
-    callbackContext.success("Written");
+    callbackContext.success();
   }
 
   private void enable(final CallbackContext callbackContext) {
