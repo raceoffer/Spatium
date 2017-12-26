@@ -1,6 +1,7 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {BluetoothService} from '../../services/bluetooth.service';
+import {WalletService} from '../../services/wallet.service';
 
 @Component({
   selector: 'app-waiting',
@@ -14,17 +15,21 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   devices = [];
 
-  constructor(private bt: BluetoothService, private router: Router) {}
+  constructor(private bt: BluetoothService,
+              private wallet: WalletService,
+              private router: Router) {}
 
   ngOnInit() {
-    const routerObj = this.router;
-
-    this.bt.onConnected.subscribe(() => {
-      routerObj.navigate(['/backup']);
-      //routerObj.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: true }}]);
+    this.wallet.onFinish = () => {
+      console.log(this.wallet.address);
+      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: false }}]);
+    };
+    this.bt.onConnected.subscribe( () => {
+      this.wallet.setKeyFragment(this.wallet.generateFragment());
+      this.wallet.startSync();
     });
-    this.bt.onDisconnected.subscribe( () => {
-      routerObj.navigate(['/waiting']);
+    this.bt.onDisconnected.subscribe(() => {
+      this.router.navigate(['/waiting']);
     });
   }
 
@@ -48,6 +53,6 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   goWallet(): void{
     this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
-  }
+}
 
 }

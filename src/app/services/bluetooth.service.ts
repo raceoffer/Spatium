@@ -48,7 +48,9 @@ export class BluetoothService {
     if (!await this.bt.getListening()) {
       await this.bt.startListening(async () => {
         await this.bt.startReading((message) => {
-          console.log('Message', message);
+          if (this.onMessage) {
+            this.onMessage.emit(message);
+          }
         });
         if (this.onConnected) {
           this.onConnected.emit();
@@ -80,6 +82,6 @@ export class BluetoothService {
   }
 
   async send(message) {
-    this.bt.send(message);
+    this.bt.write(message);
   }
 }
