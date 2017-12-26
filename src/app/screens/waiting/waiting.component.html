@@ -1,0 +1,45 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span>{{Label}}</span>
+    </mat-toolbar-row>
+
+  </mat-toolbar>
+
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledBT">
+
+    <div class="connect-text">
+      <span>Для дальнейшей работы требуется включить Bluetooth</span>
+    </div>
+
+    <button mat-fab  class="width-button">
+      <mat-icon (click)="changeBtState()">bluetooth_disabled
+      </mat-icon>
+    </button>
+
+  </div>
+
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="!disabledBT">
+
+    <mat-nav-list style="width: 100%;">
+      <mat-list-item *ngFor="let device of devices" (click)="toDo(device.name, device.address)">
+        <p class="list-name" mat-line>{{device.name}}</p>
+        <p class="list-info" mat-line> {{device.address}} </p>
+        <mat-icon class="list-icon" matSuffix>center_focus_weak</mat-icon>
+      </mat-list-item>
+    </mat-nav-list>
+
+    <button mat-fab class="overlay-bottom">
+      <mat-icon (click)="sddNewDevice()">add
+      </mat-icon>
+    </button>
+  </div>
+
+
+
+</div>
+

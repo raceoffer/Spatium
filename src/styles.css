@@ -1,19 +1,39 @@
 /* You can add global styles to this file, and also import other style files */
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
-
-html, body {
-    height: 100%;
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-    font: 500 20px/32px Roboto,"Helvetica Neue",sans-serif;
-}
-
-app-root {
-  display: block;
+.loading {
+  opacity: 0;
+  transition: opacity .8s ease-in-out;
+  position: fixed;
   height: 100%;
+  width: 100%;
+  z-index: 100;
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  place-content: center flex-start;
+  align-items: center;
+  display: none;
+  //z-index: -1;
 }
 
-mat-icon{
-  font-family: 'Material Icons' !important;
+app-root:empty + .loading {
+  opacity: 1;
+  z-index: 100;
 }
+
+

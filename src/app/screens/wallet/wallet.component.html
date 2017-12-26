@@ -1,43 +1,28 @@
-<div xLayout="column" fxLayoutAlign="center center">
-  <div fxLayoutAlign="center center">
-    <div>
-      <table class="example-form">
-        <mat-form-field class="example-full-width">
-          <input disabled matInput placeholder="BitCoin address" [value]="bcAddress">
-          <button mat-icon-button matSuffix
-                  ngxClipboard [cbContent]="bcAddress">
-            <mat-icon>insert_link</mat-icon>
-          </button>
-        </mat-form-field>
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-list role="list">
+    <mat-list-item>
+      <p class="list-info" mat-line>BitCoin адрес</p>
+      <p class="list-name" mat-line> {{bitcoinAddress}} </p>
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+        <mat-icon matSuffix>content_copy</mat-icon>
+      </button>
+    </mat-list-item>
 
-        <mat-form-field class="example-full-width">
-          <input disabled matInput placeholder="BitCoin balance" [value]="bcBalance">
-          <div matSuffix>
-            <button mat-icon-button class="backup-button" (click)="syncBalance($event)">
-              <mat-icon>{{balanceBackupStatus}}</mat-icon>
-            </button>
-            <div class={{spinnerClass}}>
-              <mat-spinner diameter="30" strokeWidth="2"></mat-spinner>
-            </div>
-          </div>
-        </mat-form-field>
+    <mat-list-item>
+      <p class="list-info" mat-line>BitCoin баланс</p>
+      <p class="list-name" mat-line> {{bitcoinBalance}} </p>
+      <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">
+        <mat-icon *ngIf="syncState==0">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="syncState==1">sync</mat-icon>
+        <mat-icon *ngIf="syncState==2">sync_problem</mat-icon>
+      </div>
 
-        <mat-form-field class="example-full-width">
-          <input disabled matInput placeholder="Ethereum address" [value]="ethereumAddress">
-          <button mat-icon-button matSuffix
-                  ngxClipboard [cbContent]="ethereumAddress">
-            <mat-icon>insert_link</mat-icon>
-          </button>
-        </mat-form-field>
+    </mat-list-item>
+  </mat-list>
 
-        <mat-form-field class="example-full-width">
-          <input disabled matInput placeholder="Ethereum balance" [value]="ethereumBalance">
-        </mat-form-field>
-
-        <div fxLayoutAlign="center center">
-          <button mat-raised-button color="primary" (click)="openSendTransactionDialog()">Send transaction</button>
-        </div>
-      </table>
-    </div>
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">Перевод</button>
   </div>
+
+
 </div>

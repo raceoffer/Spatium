@@ -1,12 +1,7 @@
-.mat-fab {
-    min-width: 0;
-    border-radius: 50%;
-    width: 100px;
-    height: 100px;
-    padding: 0;
-    flex-shrink: 0;
+.connect-text{
+  padding: 16px 8px 16px 14px;
+  font-size: 14px;
+  font-family: 'Roboto-Light';
 }
 
-.invisible {
-    display: none;
-}
+

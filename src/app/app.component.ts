@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-declare var cordova: any;
+//declare var cordova: any;
 
 @Component({
   selector: 'app-root',
@@ -10,13 +10,11 @@ declare var cordova: any;
 
 export class AppComponent implements OnInit {
   title = 'Spatium Wallet app';
-  platform = cordova.platformId;
-  message = this.platform;
+  message = 'Loading...';
+
+  constructor() { }
 
   ngOnInit() {
-  	document.addEventListener("deviceready", () => {
-      cordova.plugins.bluetooth.getDeviceInfo(info => { console.log(info) });
-    }, false);
   }
 
 }

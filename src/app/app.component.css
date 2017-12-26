@@ -1,7 +1,6 @@
-.android.test {
-	background-color: blue;
+app-main {
+  width: 100%;
+  height: 100%;
 }
 
-.browser.test {
-	background-color: red;
-}
+

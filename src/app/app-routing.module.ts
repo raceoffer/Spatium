@@ -1,21 +1,30 @@
-import {NgModule} from '@angular/core';
+import { NgModule } from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {BluetoothScreenComponent} from './screens/bluetooth/bluetooth.component';
-import {ConnectScreenComponent} from './screens/connect/connect.component';
-import {WalletScreenComponent} from './screens/wallet/wallet.component';
+import {WalletComponent} from './screens/wallet/wallet.component';
+import {NavigatorComponent} from './screens/navigator/navigator.component';
+import {StartComponent} from './screens/start/start.component';
+import {WaitingComponent} from './screens/waiting/waiting.component';
+import {ConnectComponent} from './screens/connect/connect.component';
+import {BackupComponent} from './screens/backup/backup.component';
+
+
 
 const appRoutes: Routes = [
-    {path: '', redirectTo: 'wallet', pathMatch: 'full'},
-    {path: 'bluetooth', component: BluetoothScreenComponent},
-    {path: 'connect', component: ConnectScreenComponent},
-    {path: 'wallet', component: WalletScreenComponent}
+  { path: '', redirectTo: 'start', pathMatch: 'full' },
+  { path: 'start', component: StartComponent },
+  { path: 'backup', component: BackupComponent},
+  { path: 'waiting', component: WaitingComponent },
+  { path: 'connect', component: ConnectComponent },
+  { path: 'navigator', component: NavigatorComponent, children: [
+    { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
+  ]},
 ];
 @NgModule({
-    imports: [
-        RouterModule.forRoot(appRoutes)
-    ],
-    exports: [
-        RouterModule
-    ]
+  imports: [
+    RouterModule.forRoot(appRoutes)
+  ],
+  exports: [
+    RouterModule
+  ]
 })
 export class AppRoutingModule {}

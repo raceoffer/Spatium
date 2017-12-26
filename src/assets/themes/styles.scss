@@ -1,0 +1,302 @@
+@import '~@angular/material/theming';
+@import "android_theme";
+
+// You can add global styles to this file that will cascade like normal CSS
+$bluish : rgb(34, 119, 186); //#2277ba
+$charcoal_grey : rgb(55, 55, 65); //#373741
+$silver : rgb(226, 227, 227); //#e2e3e3
+$black_20 : rgba(0, 0, 0, 0.2);//
+$white_36 : rgba(255, 255, 255, 0.36);//
+$charcoal_grey_36 : rgba(55, 55, 65, 0.36);//
+$dark : rgb(29, 29, 38);//#1d1d26
+$selected : rgba(29, 29, 38, 0.03);//
+$cool_grey : rgb(155, 160, 160);//#9ba0a0
+$white : rgb(245, 245, 245);//#f5f5f5,
+$dark_grey_21:rgba(44, 46, 49, 0.21);
+
+.mat-drawer-backdrop.mat-drawer-shown {
+   background-color: rgba(0, 0, 0, 0);
+}
+
+.invisible {
+  display: none!important;
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.shadow{
+  box-shadow: 0 3px 5px $dark_grey_21;
+}
+
+.mat-drawer-backdrop mat-drawer-shown{
+  height: 100%;
+}
+
+.mat-drawer-container {
+  height: calc(100% - 56px) !important;
+}
+
+.entry-margin {
+  margin-top: calc(86px - 56px);
+}
+
+.entry {
+  width: calc(100% - 128px)!important;
+}
+
+.entry-start {
+  margin-top: 45%;
+}
+
+.width-button {
+  width: calc(100% - 48px);
+  height: 50px;
+  margin-bottom: 23px !important;
+}
+/*
+@media (max-width: 360px) {
+  .mat-drawer-container {
+    height: calc(100% - 56px) !important;
+  }
+
+  .entry-margin {
+    margin-top: calc(86px - 56px);
+  }
+
+  .entry {
+    width: calc(100% - 128px)!important;
+  }
+
+  .entry-start {
+    margin-top: 45%;
+  }
+
+  .width-button {
+    width: calc(100% - 48px);
+    height: 50px;
+    margin-bottom: 23px !important;
+  }
+}*/
+
+.mat-toolbar, .mat-toolbar h1, .mat-toolbar h2, .mat-toolbar h3, .mat-toolbar h4, .mat-toolbar h5, .mat-toolbar h6 {
+  font-family: 'Roboto-Regular';
+  font-size: 17.5px;
+  margin: 0;
+}
+
+.mat-raised-button.mat-primary.color[disabled],
+.mat-raised-button.mat-accent.color[disabled],
+.mat-raised-button.mat-warn.color[disabled],
+.mat-raised-button.color[disabled][disabled],
+.mat-fab.mat-primary.color[disabled],
+.mat-fab.mat-accent.color[disabled],
+.mat-fab.mat-warn.color[disabled],
+.mat-fab.color[disabled][disabled],
+.mat-mini-fab.mat-primary.color[disabled],
+.mat-mini-fab.mat-accent.color[disabled],
+.mat-mini-fab.mat-warn.color[disabled],
+.mat-mini-fab.color[disabled][disabled] {
+  opacity: 0.5;
+  background-color: $bluish;
+  color: $white!important;
+}
+
+.mat-button, .mat-raised-button, .mat-icon-button, .mat-fab, .mat-mini-fab {
+  font-family: "HelveticaNeueCyr-Light";
+  //letter-spacing: 1px;
+  font-size: 16.5px;
+  font-weight: 500;
+}
+
+.mat-raised-button {
+  border-radius: 4px!important;
+}
+
+mat-icon.color-custom{
+  color: #9c9cab;
+  opacity: 0.4;
+}
+
+mat-icon.color-custom-dark{
+  color: $charcoal_grey;
+}
+
+mat-icon.size-30{
+  width: 33px !important;
+  font-size: 33px !important;
+}
+
+.mat-list, .mat-nav-list, .mat-selection-list {
+  padding-top: 0px !important;
+  display: block;
+}
+
+//toggler
+.mat-slide-toggle-thumb {
+  background-color: $charcoal_grey;
+}
+
+.mat-list .mat-list-item, .mat-nav-list .mat-list-item, .mat-selection-list .mat-list-item {
+  color: $dark;
+}
+
+.mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+  background-color: #cccccc;
+}
+
+.mat-slide-toggle-bar {
+  background-color: rgba(55, 55, 65, 0.36);
+}
+
+.mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
+  background-color: rgba(255, 255, 255, 0.36);
+}
+
+// input
+
+.spatium-textfield > input {
+  height: 32px;
+}
+
+.spatium-textfield > input, .spatium-textfield > textarea {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+  background-color: transparent;
+  color: $charcoal_grey;
+  border: none;
+  border-bottom: 1px solid $charcoal_grey;
+  outline: 0;
+  width: 100%;
+  padding: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: 16.5px;
+  line-height: inherit;
+  background-image: none;
+  text-align: center;
+  font-family: Roboto,Roboto-Regular,sans-serif;
+}
+
+.spatium-textfield > input {
+  animation-duration: 0.0001s;
+  animation-name: mui-textfield-inserted;
+}
+
+
+//dont show placeholder on focus
+input:focus::-webkit-input-placeholder { color:transparent; }
+input:focus:-moz-placeholder { color:transparent; } /* FF 4-18 */
+input:focus::-moz-placeholder { color:transparent; } /* FF 19+ */
+input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
+
+body, buttons, html, input, textarea {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, .004);
+}
+
+// custom
+.margin13 {
+  margin-top: 13%;
+}
+
+.margin93{
+  margin-top: 93px;
+}
+
+.margin97{
+  margin-top: 97.5px;
+}
+
+.bottom32{
+  padding-bottom: 32px;
+}
+
+.logo-text {
+  height: 22px !important;
+}
+
+.tagline {
+  color: $cool_grey;
+  font-size: 15px;
+  padding: 15px 0 0 0;
+  font-family: "Circe Bold";
+}
+
+.width-button-container {
+  width: 100%;
+}
+
+.overlay-bottom{
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2;
+}
+
+.connect-text {
+  font-family: 'Roboto-Light';
+  font-size: 14px;
+  color: $charcoal_grey;
+  padding: 16px 8.5px 16px 14px;
+}
+
+.list-name{
+  font-family: 'Roboto-Regular';
+  font-size: 16.3px !important;
+  color: $charcoal_grey;
+}
+
+.list-info{
+  font-family: 'Roboto-Light';
+  font-size: 13.3px !important;
+  color: $charcoal_grey;
+}
+
+.list-icon{
+  color: $charcoal_grey;
+}
+
+.button-imitator{
+  width: 40px;
+  height: 40px;
+}
+
+@-webkit-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-moz-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-ms-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@-o-keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes sync {
+  from { transform: rotate(359deg); }
+  to { transform: rotate(0deg); }
+}
+
+.sync {
+  color: $bluish;
+  -webkit-animation: sync 1s infinite linear;
+  -moz-animation: sync 1s infinite linear;
+  -ms-animation: sync 1s infinite linear;
+  -o-animation: sync 1s infinite linear;
+  animation: sync 1s infinite linear;
+}
+
