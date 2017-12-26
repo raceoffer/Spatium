@@ -44,7 +44,8 @@ exports.getListening = function() {
 	});
 };
 
-exports.connect = function(device) {
+exports.connect = function(device,onDisconnected) {
+	exec(onDisconnected, null, "Bluetooth", "setOnDisconnected", []);
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "connect", [device]);
 	});

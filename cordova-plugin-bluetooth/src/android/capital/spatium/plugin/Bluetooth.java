@@ -238,21 +238,26 @@ public class Bluetooth extends CordovaPlugin {
       return;
     }
 
-    try {
-      BluetoothSocket clientSocket = foundDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
-      clientSocket.connect();
+	final BluetoothDevice targetDevice = foundDevice;
+	cordova.getThreadPool().execute(new Runnable() {
+		public void run() {
+			try {
+			  BluetoothSocket clientSocket = targetDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+			  clientSocket.connect();
 
-      if(mBluetoothSocket == null) {
-        mBluetoothSocket = clientSocket;
-        callbackContext.success();
-      } else {
-        callbackContext.error("Failed to conect: interrupted");
-        clientSocket.close();
-      }
-    } catch (Exception e) {
-      callbackContext.error("Failed to conect to remote socket");
-      return;
-    }
+			  if(mBluetoothSocket == null) {
+				mBluetoothSocket = clientSocket;
+				callbackContext.success();
+			  } else {
+				callbackContext.error("Failed to conect: interrupted");
+				clientSocket.close();
+			  }
+			} catch (Exception e) {
+			  callbackContext.error("Failed to conect to remote socket");
+			  return;
+			}
+		}
+	});
   }
 
   private void setOnConnected(CallbackContext callbackContext) {
