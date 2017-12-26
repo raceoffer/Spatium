@@ -300,6 +300,22 @@ body, buttons, html, input, textarea {
   animation: sync 1s infinite linear;
 }
 
-.full-width {
+.full-width{
+  width: calc(100% - 48px)!important;
+  max-width: calc(100% - 48px)!important;
+}
+
+table, tbody, tr {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  max-width: 100%;
   width: 100%;
 }
+
+td{
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+}
+
+
+

@@ -1,5 +1,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
@@ -19,7 +20,6 @@ import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import { WalletComponent } from './screens/wallet/wallet.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
@@ -34,7 +34,6 @@ import {BluetoothService} from './services/bluetooth.service';
 @NgModule({
   declarations: [
     AppComponent,
-    WalletComponent,
     NavigatorComponent,
     StartComponent,
     ConnectComponent,
@@ -43,6 +42,8 @@ import {BluetoothService} from './services/bluetooth.service';
     SendTransactionComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,

@@ -18,7 +18,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.bt.onConnected = () => {
-      this.router.navigate(['/send']);
+      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}, { queryParams: { isSecond: true } }]);
     };
     this.bt.onDisconnected = () => {
       this.router.navigate(['/waiting']);
@@ -41,6 +41,10 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   sddNewDevice(): void{
 
+  }
+
+  goWallet(): void{
+    this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
   }
 
 }
