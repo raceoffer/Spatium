@@ -1,67 +1,41 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {BluetoothService} from '../../services/bluetooth.service';
 
 @Component({
   selector: 'app-waiting',
   templateUrl: './waiting.component.html',
   styleUrls: ['./waiting.component.css']
 })
-export class WaitingComponent implements OnInit {
+export class WaitingComponent implements OnInit, AfterViewInit {
   Label = 'Подключение устройства';
-  connect = 'Подключиться'
+  connect = 'Подключиться';
   disabledBT = true;
 
-  devices = [
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    },
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    },
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    }
-  ];
+  devices = [];
 
-  constructor(private router: Router) { }
+  constructor(private bt: BluetoothService, private router: Router) {}
 
   ngOnInit() {
+    this.bt.onConnected = () => {
+      this.router.navigate(['/send']);
+    };
+    this.bt.onDisconnected = () => {
+      this.router.navigate(['/waiting']);
+    };
   }
 
-  changeBtState(): void {
-    this.disabledBT = ! this.disabledBT;
+  async ngAfterViewInit() {
+    await this.changeBtState();
+  }
+
+  async changeBtState() {
+    this.disabledBT = !await this.bt.ensureEnabled();
+    this.devices = await this.bt.getDevices();
+    await this.bt.ensureListening();
   }
 
   toDo(name, address): void {
-    console.log(JSON.stringify(name));
-    console.log(JSON.stringify(address));
     this.router.navigate(['/connect'], { queryParams: { name: name, address: address } });
   }
 

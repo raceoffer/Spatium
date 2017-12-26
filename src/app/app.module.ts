@@ -28,6 +28,7 @@ import {ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import {WalletService} from './services/wallet.service';
+import {BluetoothService} from './services/bluetooth.service';
 
 
 @NgModule({
@@ -62,6 +63,7 @@ import {WalletService} from './services/wallet.service';
   ],
   providers: [
     WalletService,
+    BluetoothService
   ],
   bootstrap: [
     AppComponent
