@@ -13,6 +13,11 @@ $selected : rgba(29, 29, 38, 0.03);//
 $cool_grey : rgb(155, 160, 160);//#9ba0a0
 $white : rgb(245, 245, 245);//#f5f5f5,
 $dark_grey_21:rgba(44, 46, 49, 0.21);
+$green: rgb(24, 154, 57);//#189a39
+
+.green-color{
+  color: $green;
+}
 
 .mat-drawer-backdrop.mat-drawer-shown {
    background-color: rgba(0, 0, 0, 0);
@@ -52,6 +57,12 @@ $dark_grey_21:rgba(44, 46, 49, 0.21);
 
 .width-button {
   width: calc(100% - 48px);
+  height: 50px;
+  margin-bottom: 23px !important;
+}
+
+.width-button-full {
+  width: 100%;
   height: 50px;
   margin-bottom: 23px !important;
 }
@@ -303,6 +314,12 @@ body, buttons, html, input, textarea {
 .full-width{
   width: calc(100% - 48px)!important;
   max-width: calc(100% - 48px)!important;
+  text-align: center;
+}
+
+.full-width_nopadding{
+  width: 100%!important;
+  max-width: 100%!important;
   text-align: center;
 }
 

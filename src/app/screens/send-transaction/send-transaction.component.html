@@ -3,11 +3,8 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start center">
-  <span *ngIf="!isSecond">initiator</span>
-  <span *ngIf="isSecond">Second</span>
-
   <mat-form-field class="full-width" color="accent">
-    <mat-select placeholder="С какого кошелька">
+    <mat-select placeholder="С какого кошелька" [disabled]="disableFields">
       <mat-select-trigger *ngIf="initiatorWallet">
         <span class="address">{{initiatorWallet.address}}</span> ({{initiatorWallet.balance}} BTC)
       </mat-select-trigger>
@@ -33,7 +30,7 @@
   </table>
 
   <mat-form-field class="full-width" color="accent">
-    <input matInput placeholder="Адрес получателя" [value]="addressReceiver">
+    <input matInput placeholder="Адрес получателя" [value]="addressReceiver" [disabled]="disableFields">
   </mat-form-field>
 
   <table class="full-width">
@@ -41,36 +38,54 @@
       <td align="left" width="50%">
         <mat-form-field style="width: 120px;" color="accent">
           <input matInput placeholder="BTC" [value]="sendBtc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                 step="0.01" (change)="changeSum('btc')">
+                 step="0.01" (change)="changeSum('btc')" [disabled]="disableFields">
         </mat-form-field>
       </td>
       <td align="right" width="50%">
         <mat-form-field style="width: 120px;" color="accent">
           <input matInput placeholder="USD" [value]="sendUsd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                 step="0.01" (change)="changeSum('usd')">
+                 step="0.01" (change)="changeSum('usd')" [disabled]="disableFields">
         </mat-form-field>
       </td>
     </tr>
   </table>
-
-
-  <div style="height: 97px; width: 100% " fxLayout="column" fxLayoutAlign="center center">
-    <span *ngIf="state==3" style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;">
-    <mat-icon>bluetooth</mat-icon>
-    Транзакция создана
-  </span>
-    <button *ngIf="state==3" mat-raised-button color="accent" class="width-button" (click)="sendTransaction()">Отправить</button>
-  </div>
+  <button mat-button (click)="stateChange()">next state</button>
 
 
 
-  <div class="full-width" style="height: 20px; " fxLayout="row" fxLayoutAlign="center center">
+
+  <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: absolute; bottom: 30px">
+
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="state==1">Требуется подтверждение вторым узлом</span>
-    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%" *ngIf="state==2"></mat-progress-bar>
-  </div>
+          *ngIf="state==1 && !isSecond">Подтвердите транзакцию на {{connectedDevice}}</span>
+    <span style="font-family: 'Roboto-Medium'; font-size: 15px"
+          *ngIf="state==1 && isSecond">Подтвердите транзакцию, созданную на {{connectedDevice}}</span>
+    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
+                      *ngIf="state==1"></mat-progress-bar>
 
-  <button mat-raised-button color="accent" class="width-button" *ngIf="isSecond && state==1" (click)="stateChange()">Подтвердить
-  </button>
-  <button mat-raised-button color="accent" class="width-button" (click)="stateChange()">{{buttonText}}</button>
+    <span style="font-family: 'Roboto-Medium'; font-size: 15px"
+          *ngIf="state==2">Подписание транзакции</span>
+    <mat-progress-bar mode="determinate" [value]="progressCreateTransaction" color="accent"
+                      style="width: 100%; margin: 5px 0" *ngIf="state==2"></mat-progress-bar>
+
+    <span *ngIf="state==3"
+          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">
+      <mat-icon>bluetooth</mat-icon>
+      Транзакция создана и подписана
+    </span>
+    <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
+                      *ngIf="state==3"></mat-progress-bar>
+
+    <button *ngIf="state==3 && !isSecond" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
+      Отправить
+    </button>
+    <button mat-raised-button color="accent" class="width-button-full color" (click)="stateChange()" *ngIf="state<3"
+            [disabled]="initContinueDisabled">Продолжить
+    </button>
+    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3)" (click)="cancelTransaction()"
+            [disabled]="initCancelDisabled">Отмена
+    </button>
+    <div style="height: 146px;" *ngIf="state==3 && isSecond"></div>
+  </div>
 </div>
+

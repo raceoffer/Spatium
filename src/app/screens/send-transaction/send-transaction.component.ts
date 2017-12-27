@@ -14,6 +14,7 @@ declare const bcoin: any;
 export class SendTransactionComponent implements AfterViewInit {
   initiatorWallet: WalletData;
   load = true;
+  connectedDevice = 'Xperia';
 
   balanceBtc = '100';
   balanceUsd = 7000;
@@ -25,7 +26,12 @@ export class SendTransactionComponent implements AfterViewInit {
   state = 0;
   buttonText = 'Продолжить';
 
-  isSecond = false;
+  isSecond = false; //параметр, индикатор инициатора\верификатора
+
+  progressCreateTransaction = 40;
+  disableFields = false; //блокировка полей транзакции
+  initContinueDisabled = false; //активность кнопки "Продолжить" у инициатора
+  initCancelDisabled = false; //Активность кнопки "Отмена" у инициатора
 
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
@@ -38,6 +44,11 @@ export class SendTransactionComponent implements AfterViewInit {
         console.log(params);
 
         this.isSecond = params.isSecond;
+        if (this.isSecond) {
+          this.state = 1;
+          this.disableFields = true;
+        }
+
         console.log(this.isSecond);
       });
 
@@ -58,21 +69,23 @@ export class SendTransactionComponent implements AfterViewInit {
 
   stateChange(): void {
     switch (this.state){
-      case 0: {
-        this.state = 1; // ожидание узла
-        this.buttonText = 'Отмена';
+      case 0: {//экрвн ожидания
+        this.state = 1; // ожидание подтверждения узла
+        this.disableFields = true;
+        this.initContinueDisabled = true;
 
         break;
       }
       case 1: {
-        this.state = 2; // создание транзакции
-        this.buttonText = 'Отмена';
+        this.state = 2; // подписание транзакции
+        this.initContinueDisabled = true;
+        this.initCancelDisabled = true;
 
         break;
       }
       case 2: {
         this.state = 3; // отправка в сеть
-        this.buttonText = 'Отмена';
+        this.initCancelDisabled = false;
 
         break;
       }
@@ -84,7 +97,16 @@ export class SendTransactionComponent implements AfterViewInit {
       duration: 3000,
     });
     this.state = 0;
-    this.buttonText = 'Продолжить';
+    this.disableFields = false;
+    this.initCancelDisabled = false;
+    this.initContinueDisabled = false;
+  }
+
+  cancelTransaction(): void {
+    this.state = 0;
+    this.disableFields = false;
+    this.initCancelDisabled = false;
+    this.initContinueDisabled = false;
   }
 }
 
