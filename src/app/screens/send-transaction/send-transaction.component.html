@@ -3,10 +3,7 @@
     <mat-progress-bar mode="indeterminate" *ngIf="loading" color="accent" style="width: 100%"></mat-progress-bar>
   </div>
   <mat-form-field class="full-width" color="accent">
-    <mat-select placeholder="С какого кошелька" [disabled]="disableFields">
-      <mat-select-trigger *ngIf="walletAddress">
-        <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
-      </mat-select-trigger>
+    <mat-select placeholder="С какого кошелька" [disabled]="disableFields" [(value)]="selected">
       <mat-option *ngIf="walletAddress" [value]="walletAddress">
         <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
       </mat-option>
@@ -48,10 +45,6 @@
       </td>
     </tr>
   </table>
-  <button mat-button (click)="stateChange()">next state</button>
-
-
-
 
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
 
