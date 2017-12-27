@@ -21,6 +21,9 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.wallet.resetRemote();
+    this.wallet.onStatus.subscribe((status) => {
+      console.log(status);
+    });
     this.wallet.onFinish.subscribe(() => {
       console.log(this.wallet.address);
       this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);

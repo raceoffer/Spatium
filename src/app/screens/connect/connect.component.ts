@@ -29,9 +29,6 @@ export class ConnectComponent implements OnInit, AfterViewInit {
       this.address = params.address;
       console.log(this.address); // popular
     });
-    this.wallet.onStatus.subscribe((status) => {
-      console.log(status);
-    });
   }
 
   async ngAfterViewInit() {
