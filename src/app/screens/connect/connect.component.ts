@@ -9,7 +9,7 @@ import {WalletService} from '../../services/wallet.service';
   styleUrls: ['./connect.component.css']
 })
 export class ConnectComponent implements OnInit {
-  stConnect = 'Подключение к ';
+  stConnect = 'Подключение ко второму устройству';
   busyClass = 'fade-background invisible';
   name: string;
   address: string;

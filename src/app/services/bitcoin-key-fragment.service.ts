@@ -39,12 +39,14 @@ export class BitcoinKeyFragmentService {
       const initiatorDDSData = await initiatorDDS.read();
       if (!initiatorDDSData) {
         console.warn('No data in DDS - reading key from a local file');
-        throw new Error('Нет данных в ДХИ');
+        window.plugins.toast.showLongBottom('Нет данных в ДХИ', 3000, 'Нет данных в ДХИ', console.log('Нет данных в ДХИ'));
+        throw new Error('Ключ не найден в ДХИ');
       }
       bitcoinKeyFragment = bcoin.keyring.fromPrivate(BitcoinKeyFragmentService.decrypt(bcoin.utils.base58.decode(initiatorDDSData), this.aesKey));
       return bitcoinKeyFragment;
     }
     catch (keyError) {
+      window.plugins.toast.showLongBottom('Нет доступа к ДХИ', 3000, 'Нет доступа к ДХИ', console.log('Нет доступа к ДХИ'));
       try {
         bitcoinKeyFragment = bcoin.keyring.fromPrivate(BitcoinKeyFragmentService.decrypt(
           bcoin.utils.base58.decode(await this.readFromFile(this.bitcoinKeyFragmentFilename)), this.aesKey));

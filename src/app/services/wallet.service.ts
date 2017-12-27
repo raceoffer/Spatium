@@ -201,8 +201,10 @@ export class WalletService {
   verifyTransaction = function(obj) {
     this.onVerifyTransaction.emit({
       transaction: Transaction.fromJSON(obj.transaction),
-      entropy: obj.entropy}
-    );
+      entropy: obj.entropy,
+      address: obj.address,
+      value: obj.value
+    });
 
     this.onStatus.emit('Received tx');
   };
@@ -261,7 +263,7 @@ export class WalletService {
     return transaction;
   }
 
-  async startVerify(transaction) {
+  async startVerify(transaction, address, value) {
     const hashes = transaction.getHashes();
     const map = transaction.mapCompoundKeys(this.compoundKey);
 
@@ -272,7 +274,9 @@ export class WalletService {
       type: 'verifyTransaction',
       content: {
         transaction: transaction.toJSON(),
-        entropy: commitments
+        entropy: commitments,
+        address: address,
+        value: value
       }
     }));
   }

@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, Input} from '@angular/core';
 import {WalletService} from '../../services/wallet.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
@@ -12,12 +12,24 @@ declare const window: any;
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements AfterViewInit {
-  addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
+  @Input() addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
   selected = '';
-  sendBtc = 0.1;
-  sendUsd = 7;
+
+  _sendBtc = 0.1;
 
   rateBtcUsd = 15000;
+
+  get sendBtc() {
+    return this._sendBtc;
+  }
+
+  @Input()
+  set sendBtc(btc) {
+    this._sendBtc = btc;
+    this.sendUsd = this.sendBtc * this.rateBtcUsd;
+  }
+
+  sendUsd = this.sendBtc * this.rateBtcUsd;
 
   currentTx = null;
   entropy = null;
@@ -32,7 +44,6 @@ export class SendTransactionComponent implements AfterViewInit {
 
   isSecond = false; // параметр, индикатор инициатора\верификатора
 
-  progressCreateTransaction = 40;
   disableFields = false; // блокировка полей транзакции
   initContinueDisabled = false; // активность кнопки "Продолжить" у инициатора
   initCancelDisabled = false; // Активность кнопки "Отмена" у инициатора
@@ -65,7 +76,7 @@ export class SendTransactionComponent implements AfterViewInit {
     });
 
     this.walletService.onVerifyTransaction.subscribe(async (event) => {
-      await this.startAccepting(event.transaction, event.entropy);
+      await this.startAccepting(event.transaction, event.entropy, event.address, event.value);
     });
 
     this.walletService.onAccepted.subscribe(async () => {
@@ -86,15 +97,6 @@ export class SendTransactionComponent implements AfterViewInit {
     this.balanceBtcUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
     this.balanceUsd = (this.balanceBtcUnconfirmed) * this.rateBtcUsd;
     this.cd.detectChanges();
-  }
-
-  changeSum(type): void {
-    console.log('type' + type);
-    if (type === 'btc') {
-      this.sendUsd = this.sendBtc * this.rateBtcUsd;
-    } else {
-      this.sendBtc = this.sendUsd / this.rateBtcUsd;
-}
   }
 
   stateChange(desiredState): void {
@@ -158,9 +160,15 @@ export class SendTransactionComponent implements AfterViewInit {
   }
 
   // Received signature should ask for confirmation
-  async startAccepting(tx, entropy) {
+  async startAccepting(tx, entropy, address, value) {
     this.currentTx = tx;
     this.entropy = entropy;
+
+    console.log(address, value);
+
+    this.addressReceiver = address;
+    this.sendBtc = bcoin.amount.btc(value);
+    this.sendUsd = this.sendBtc * this.rateBtcUsd;
 
     this.isSecond = true;
     this.stateChange(1);
@@ -180,17 +188,21 @@ export class SendTransactionComponent implements AfterViewInit {
 
   // Pressed start signeture
   async startSigning() {
-    this.currentTx = await this.walletService.createTransaction(this.addressReceiver, 6000000, false);
+    this.currentTx = await this.walletService.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value, false);
     if (this.currentTx) {
       this.isSecond = false;
       this.stateChange(1);
       this.cd.detectChanges();
-      await this.walletService.startVerify(this.currentTx);
+      await this.walletService.startVerify(this.currentTx, this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value);
     }
   }
 
   // Received confirmation
   async accepted() {
+    if (this.state === 0) {
+      return;
+    }
+
     this.stateChange(2);
     this.cd.detectChanges();
   }
@@ -203,6 +215,10 @@ export class SendTransactionComponent implements AfterViewInit {
 
   // Received a ready signature
   async finalaizeSignature(signatures) {
+    if (this.state === 0) {
+      return;
+    }
+
     this.stateChange(3);
     this.cd.detectChanges();
 
