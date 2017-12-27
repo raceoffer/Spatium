@@ -5,11 +5,11 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-form-field class="full-width" color="accent">
     <mat-select placeholder="С какого кошелька" [disabled]="disableFields">
-      <mat-select-trigger *ngIf="initiatorWallet">
-        <span class="address">{{initiatorWallet.address}}</span> ({{initiatorWallet.balance}} BTC)
+      <mat-select-trigger *ngIf="walletAddress">
+        <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
       </mat-select-trigger>
-      <mat-option *ngIf="initiatorWallet" [value]="initiatorWallet.address">
-        <span class="address">{{initiatorWallet.address}}</span> ({{initiatorWallet.balance}} BTC)
+      <mat-option *ngIf="walletAddress" [value]="walletAddress">
+        <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -18,7 +18,7 @@
     <tr>
       <td align="left" width="50%">
         <mat-form-field style="width: 120px;">
-          <input matInput placeholder="BTC" [value]="balanceBtc" disabled>
+          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed" disabled>
         </mat-form-field>
       </td>
       <td align="right" width="50%">
@@ -50,9 +50,6 @@
     </tr>
   </table>
   <button mat-button (click)="stateChange()">next state</button>
-
-
-
 
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: absolute; bottom: 30px">
 

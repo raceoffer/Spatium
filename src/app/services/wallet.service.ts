@@ -27,6 +27,7 @@ export class WalletService {
   prover = null;
   verifier = null;
 
+  onBalance: EventEmitter<any> = new EventEmitter();
   onStatus: EventEmitter<any> = new EventEmitter();
   onFinish: EventEmitter<any> = new EventEmitter();
 
@@ -204,6 +205,7 @@ export class WalletService {
 
     this.watchingWallet.on('balance', (balance) => {
       this.balance = balance;
+      this.onBalance.emit(this.balance);
     });
 
     this.watchingWallet.on('transaction', (transaction) => {

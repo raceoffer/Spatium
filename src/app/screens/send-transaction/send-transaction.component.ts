@@ -12,26 +12,29 @@ declare const bcoin: any;
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements AfterViewInit {
-  initiatorWallet: WalletData;
   load = true;
   connectedDevice = 'Xperia';
 
-  balanceBtc = '100';
-  balanceUsd = 7000;
   addressReceiver = 'ksjasi788399032usdk';
   sendBtc = 0.1;
   sendUsd = 7;
-  course = 70;
+
+  rateBtcUsd = 15000;
+
+  walletAddress = '';
+  balanceBtcConfirmed = 0;
+  balanceBtcUnconfirmed = 0;
+  balanceUsd = 0;
 
   state = 0;
   buttonText = 'Продолжить';
 
-  isSecond = false; //параметр, индикатор инициатора\верификатора
+  isSecond = false; // параметр, индикатор инициатора\верификатора
 
   progressCreateTransaction = 40;
-  disableFields = false; //блокировка полей транзакции
-  initContinueDisabled = false; //активность кнопки "Продолжить" у инициатора
-  initCancelDisabled = false; //Активность кнопки "Отмена" у инициатора
+  disableFields = false; // блокировка полей транзакции
+  initContinueDisabled = false; // активность кнопки "Продолжить" у инициатора
+  initCancelDisabled = false; // Активность кнопки "Отмена" у инициатора
 
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
@@ -52,24 +55,31 @@ export class SendTransactionComponent implements AfterViewInit {
         console.log(this.isSecond);
       });
 
-    this.initiatorWallet = this.walletService.getWallet();
-    this.addressReceiver = this.walletService.getAddress();
-    this.balanceBtc = bcoin.amount.btc(this.walletService.getBalance().confirmed) + '(' + bcoin.amount.btc(this.walletService.getBalance().unconfirmed) + ')';
-    this.load = !this.load;
+    this.walletAddress = this.walletService.getAddress();
+    this.updataBalance(this.walletService.getBalance());
+    this.walletService.onBalance.subscribe((balance) => {
+      this.updataBalance(balance);
+    });
+  }
+
+  updataBalance(balance) {
+    this.balanceBtcConfirmed = bcoin.amount.btc(balance.confirmed);
+    this.balanceBtcUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
+    this.balanceUsd = (this.balanceBtcUnconfirmed) * this.rateBtcUsd;
   }
 
   changeSum(type): void {
     console.log('type' + type);
-    if (type === 'btc'){
-      this.sendUsd = this.sendBtc * this.course;
+    if (type === 'btc') {
+      this.sendUsd = this.sendBtc * this.rateBtcUsd;
     } else {
-      this.sendBtc = this.sendUsd / this.course;
+      this.sendBtc = this.sendUsd / this.rateBtcUsd;
 }
   }
 
   stateChange(): void {
     switch (this.state){
-      case 0: {//экрвн ожидания
+      case 0: { // экрвн ожидания
         this.state = 1; // ожидание подтверждения узла
         this.disableFields = true;
         this.initContinueDisabled = true;
