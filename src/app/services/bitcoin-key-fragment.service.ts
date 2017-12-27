@@ -18,9 +18,9 @@ export class BitcoinKeyFragmentService {
 
   async generateBitcoinKeyFragment(): Promise<string> {
     const initiatorDDSKey = await this.generateDDSKey();  // ensure DDS key saved locally
-    const initiatorKey = CompoundKey.generateKeyring();
-    const bitcoinKeyFragment = bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(initiatorKey.getPrivateKey(), this.aesKey));
-    await this.writeToFile(this.bitcoinKeyFragmentFilename, bitcoinKeyFragment);
+    const bitcoinKeyFragment = CompoundKey.generateKeyring();
+    const encodedBitcoinKeyFragment = bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(bitcoinKeyFragment.getPrivateKey(), this.aesKey));
+    await this.writeToFile(this.bitcoinKeyFragmentFilename, encodedBitcoinKeyFragment);
     return bitcoinKeyFragment;
   }
 
@@ -46,7 +46,8 @@ export class BitcoinKeyFragmentService {
     }
     catch (keyError) {
       try {
-        bitcoinKeyFragment = await this.readFromFile(this.bitcoinKeyFragmentFilename);
+        bitcoinKeyFragment = bcoin.keyring.fromPrivate(BitcoinKeyFragmentService.decrypt(
+          bcoin.utils.base58.decode(await this.readFromFile(this.bitcoinKeyFragmentFilename)), this.aesKey));
         return bitcoinKeyFragment;
       }
       catch (fileError) {
