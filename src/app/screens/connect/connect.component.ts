@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import {Component, OnInit, AfterViewInit, NgZone} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {BluetoothService} from '../../services/bluetooth.service';
 import {WalletService} from '../../services/wallet.service';
@@ -17,7 +17,8 @@ export class ConnectComponent implements OnInit, AfterViewInit {
   constructor(private route: ActivatedRoute,
               private bt: BluetoothService,
               private wallet: WalletService,
-              private router: Router) { }
+              private router: Router,
+              private ngZone: NgZone) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -42,7 +43,10 @@ export class ConnectComponent implements OnInit, AfterViewInit {
       });
     } catch (e) {
       console.log('connect', e);
-      this.router.navigate(['/waiting']);
+
+      this.ngZone.run(() => {
+        this.router.navigate(['/waiting']);
+      });
     }
   }
 }

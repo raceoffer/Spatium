@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, NgZone, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {BluetoothService} from '../../services/bluetooth.service';
 import {WalletService} from '../../services/wallet.service';
@@ -17,20 +17,25 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   constructor(private bt: BluetoothService,
               private wallet: WalletService,
-              private router: Router) {}
+              private router: Router,
+              private ngZone: NgZone ) {}
 
   ngOnInit() {
     this.wallet.resetRemote();
     this.wallet.onFinish.subscribe(() => {
       console.log(this.wallet.address);
-      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+      this.ngZone.run(() => {
+        this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+      });
     });
     this.bt.onConnected.subscribe( () => {
       this.wallet.setKeyFragment(this.wallet.generateFragment());
       this.wallet.startSync();
     });
     this.bt.onDisconnected.subscribe(() => {
-      this.router.navigate(['/waiting']);
+      this.ngZone.run(() => {
+        this.router.navigate(['/waiting']);
+      });
     });
   }
 
@@ -52,9 +57,5 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     await this.bt.openSettings();
     await this.changeBtState();
   }
-
-  goWallet(): void{
-    this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
-}
 
 }

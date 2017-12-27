@@ -20,8 +20,8 @@
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},
-      "cordova-plugin-bluetooth": {},
-      "cordova-custom-config": {}
+      "cordova-custom-config": {},
+      "cordova-plugin-bluetooth": {}
     },
     "platforms": [
       "android",
