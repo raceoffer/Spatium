@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {Router} from '@angular/router';
+import {WalletService} from '../../services/wallet.service';
 
 declare var window: any;
 declare var cordova: any;
@@ -15,7 +16,9 @@ export class StartComponent implements OnInit {
   entry = 'Войти';
   create = 'Создать';
 
-  constructor(private router: Router, private bitcoinKeyFragmentService: BitcoinKeyFragmentService) { }
+  constructor(private router: Router,
+              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
+              private walletService: WalletService) { }
 
   ngOnInit() {
   }
@@ -23,6 +26,7 @@ export class StartComponent implements OnInit {
   async onEntryClicked() {
     try {
       const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.loadBitcoinKeyFragment();
+      this.walletService.setKeyFragment(bitcoinKeyFragment);
       this.router.navigate(['/waiting'])
     }
     catch (e) {
@@ -32,6 +36,7 @@ export class StartComponent implements OnInit {
 
   async onCreateClicked() {
     const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.generateBitcoinKeyFragment();
+    this.walletService.setKeyFragment(bitcoinKeyFragment);
     this.router.navigate(['/backup']);
   }
 }
