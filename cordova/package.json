@@ -12,6 +12,7 @@
   "dependencies": {
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
+    "cordova-custom-config": "^5.0.1",
     "cordova-ios": "^4.5.4",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
     "cordova-plugin-file": "^5.0.0",
@@ -22,6 +23,7 @@
     "plugins": {
       "cordova-plugin-whitelist": {},
       "cordova-plugin-bluetooth": {},
+      "cordova-custom-config": {},
       "cordova-plugin-file": {},
       "cordova-plugin-x-toast": {}
     },

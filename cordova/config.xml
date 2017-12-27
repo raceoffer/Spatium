@@ -42,6 +42,7 @@
         <splash density="port-xhdpi" src="res/screen/android/splash-port-xhdpi.png" />
         <splash density="port-xxhdpi" src="res/screen/android/splash-port-xxhdpi.png" />
         <splash density="port-xxxhdpi" src="res/screen/android/splash-port-xxxhdpi.png" />
+        <preference name="android-manifest/application/activity/@android:windowSoftInputMode" value="adjustPan" />
     </platform>
     <engine name="android" spec="^6.3.0" />
     <engine name="ios" spec="^4.5.4" />
@@ -50,4 +51,5 @@
     <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-x-toast" spec="^2.6.0" />
+    <plugin name="cordova-custom-config" spec="^5.0.1" />
 </widget>

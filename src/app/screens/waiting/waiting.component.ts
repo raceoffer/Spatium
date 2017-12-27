@@ -23,7 +23,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     this.wallet.resetRemote();
     this.wallet.onFinish.subscribe(() => {
       console.log(this.wallet.address);
-      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: false }}]);
+      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
     });
     this.bt.onConnected.subscribe( () => {
       this.wallet.setKeyFragment(this.wallet.generateFragment());
