@@ -1,11 +1,10 @@
-import {AfterViewInit, Component} from '@angular/core';
-import WalletData from '../../classes/wallet-data';
+import {AfterViewInit, ChangeDetectorRef, Component} from '@angular/core';
 import {WalletService} from '../../services/wallet.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
-import {BluetoothService} from '../../services/bluetooth.service';
 
 declare const bcoin: any;
+declare const window: any;
 
 @Component({
   selector: 'app-send-transaction',
@@ -21,6 +20,7 @@ export class SendTransactionComponent implements AfterViewInit {
   rateBtcUsd = 15000;
 
   currentTx = null;
+  entropy = null;
 
   walletAddress = '';
   balanceBtcConfirmed = 0;
@@ -40,7 +40,7 @@ export class SendTransactionComponent implements AfterViewInit {
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
               private router: Router,
-              private bt: BluetoothService,
+              private cd: ChangeDetectorRef,
               public snackBar: MatSnackBar) {}
 
   ngAfterViewInit() {
@@ -72,6 +72,10 @@ export class SendTransactionComponent implements AfterViewInit {
       await this.accepted();
     });
 
+    this.walletService.onRejected.subscribe(async () => {
+      await this.rejected();
+    });
+
     this.walletService.onSigned.subscribe(async (signatures) => {
       await this.finalaizeSignature(signatures);
     });
@@ -81,6 +85,7 @@ export class SendTransactionComponent implements AfterViewInit {
     this.balanceBtcConfirmed = bcoin.amount.btc(balance.confirmed);
     this.balanceBtcUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
     this.balanceUsd = (this.balanceBtcUnconfirmed) * this.rateBtcUsd;
+    this.cd.detectChanges();
   }
 
   changeSum(type): void {
@@ -92,24 +97,37 @@ export class SendTransactionComponent implements AfterViewInit {
 }
   }
 
-  stateChange(): void {
-    switch (this.state) {
-      case 0: { // экрвн ожидания
-        this.state = 1; // ожидание подтверждения узла
-        this.disableFields = true;
-        this.initContinueDisabled = true;
+  stateChange(desiredState): void {
+    switch (desiredState) {
+      case 0: {
+        this.isSecond = false;
+        this.state = 0;
+        this.disableFields = false;
+        this.initContinueDisabled = false;
+        this.initCancelDisabled = true;
 
         break;
       }
       case 1: {
-        this.state = 2; // подписание транзакции
+        this.state = 1;
+        this.disableFields = true;
+        this.initContinueDisabled = false;
+        this.initCancelDisabled = false;
+
+        break;
+      }
+      case 2: {
+        this.state = 2;
+        this.disableFields = true;
         this.initContinueDisabled = true;
         this.initCancelDisabled = true;
 
         break;
       }
-      case 2: {
-        this.state = 3; // отправка в сеть
+      case 3: {
+        this.state = 3;
+        this.disableFields = true;
+        this.initContinueDisabled = false;
         this.initCancelDisabled = false;
 
         break;
@@ -118,75 +136,82 @@ export class SendTransactionComponent implements AfterViewInit {
   }
 
   async sendTransaction() {
-    this.state = 0;
-    this.disableFields = false;
-    this.initCancelDisabled = false;
-    this.initContinueDisabled = false;
+    this.stateChange(0);
+    this.cd.detectChanges();
 
     try {
       await this.walletService.verifySignature(this.currentTx);
       await this.walletService.pushTransaction(this.currentTx);
 
-      this.snackBar.open('Транзакция была отправлена.', null, {
-        duration: 3000,
-      });
+      window.plugins.toast.showLongBottom('Транзакция была отправлена.', 3000, 'Транзакция была отправлена.',
+        console.log('Транзакция была отправлена.'));
     } catch (e) {
-      this.snackBar.open('He удалось отправить транзакцию.', null, {
-        duration: 3000,
-      });
+      window.plugins.toast.showLongBottom('He удалось отправить транзакцию.', 3000, 'He удалось отправить транзакцию.',
+        console.log('He удалось отправить транзакцию.'));
     }
   }
 
-  cancelTransaction(): void {
-    this.state = 0;
-    this.disableFields = false;
-    this.initCancelDisabled = false;
-    this.initContinueDisabled = false;
+  async cancelTransaction() {
+    this.stateChange(0);
+    this.cd.detectChanges();
+    await this.walletService.reject();
   }
 
   // Received signature should ask for confirmation
   async startAccepting(tx, entropy) {
     this.currentTx = tx;
-    this.isSecond = true;
-    this.state = 2;
-    this.initContinueDisabled = true;
-    this.initCancelDisabled = true;
-    console.log(tx.toJSON(), entropy);
+    this.entropy = entropy;
 
-    await this.walletService.accept(tx, entropy);
+    this.isSecond = true;
+    this.stateChange(1);
+    this.cd.detectChanges();
+  }
+
+  async accept() {
+    this.stateChange(2);
+    this.cd.detectChanges();
+    await this.walletService.accept(this.currentTx, this.entropy);
+  }
+
+  async skip() {
+    this.stateChange(0);
+    this.cd.detectChanges();
   }
 
   // Pressed start signeture
   async startSigning() {
-    this.currentTx = await this.walletService.createTransaction(this.addressReceiver, 60000000, false);
+    this.currentTx = await this.walletService.createTransaction(this.addressReceiver, 6000000, false);
     if (this.currentTx) {
-      await this.walletService.startVerify(this.currentTx);
-
-      this.state = 1;
       this.isSecond = false;
-      this.disableFields = true;
-      this.initContinueDisabled = true;
+      this.stateChange(1);
+      this.cd.detectChanges();
+      await this.walletService.startVerify(this.currentTx);
     }
   }
 
   // Received confirmation
   async accepted() {
-    // Dunno
+    this.stateChange(2);
+    this.cd.detectChanges();
+  }
+
+  // Received rejection
+  async rejected() {
+    this.stateChange(0);
+    this.cd.detectChanges();
   }
 
   // Received a ready signature
   async finalaizeSignature(signatures) {
-    this.state = 3;
-    this.initCancelDisabled = false;
+    this.stateChange(3);
+    this.cd.detectChanges();
 
     this.currentTx.injectSignatures(signatures);
 
     const ok = await this.walletService.verifySignature(this.currentTx);
 
     if (!ok && !this.isSecond) {
-      this.snackBar.open('Транзакция некорректна', null, {
-        duration: 3000,
-      });
+      window.plugins.toast.showLongBottom('Транзакция некорректна', 3000, 'Транзакция некорректна', console.log('Транзакция некорректна'));
     }
   }
 }

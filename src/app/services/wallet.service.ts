@@ -37,6 +37,7 @@ export class WalletService {
   onSigned: EventEmitter<any> = new EventEmitter();
   onVerifyTransaction: EventEmitter<any> = new EventEmitter();
   onAccepted: EventEmitter<any> = new EventEmitter();
+  onRejected: EventEmitter<any> = new EventEmitter();
 
   constructor(private bt: BluetoothService) {
     bcoin.set('testnet');
@@ -205,6 +206,17 @@ export class WalletService {
 
     this.onStatus.emit('Received tx');
   };
+
+  transactionReject = function() {
+    this.onRejected.emit();
+  };
+
+  async reject() {
+    await this.bt.send(JSON.stringify({
+      type: 'transactionReject',
+      content: null
+    }));
+  }
 
   entropyCommitment = async function(entropyCommitment) {
     const entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropyCommitment);

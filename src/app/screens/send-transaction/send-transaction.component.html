@@ -49,20 +49,14 @@
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
 
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="state==1 && !isSecond">Подтвердите транзакцию на {{connectedDevice}}</span>
-    <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="state==1 && isSecond">Подтвердите транзакцию, созданную на {{connectedDevice}}</span>
-    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="state==1" (click)="startAccepting()"></mat-progress-bar>
-
+          *ngIf="state==1">Ожидается подтверждение</span>
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
           *ngIf="state==2">Подписание транзакции</span>
-    <mat-progress-bar mode="determinate" [value]="progressCreateTransaction" color="accent"
-                      style="width: 100%; margin: 5px 0" *ngIf="state==2"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
+                      *ngIf="state==1 || state==2"></mat-progress-bar>
 
     <span *ngIf="state==3"
           style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">
-      <mat-icon>bluetooth</mat-icon>
       Транзакция создана и подписана
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
@@ -71,13 +65,21 @@
     <button *ngIf="state==3 && !isSecond" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       Отправить
     </button>
-    <button mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" *ngIf="state<3"
+    <button mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" *ngIf="state==0"
+            [disabled]="initContinueDisabled">Перевести
+    </button>
+    <button mat-raised-button color="accent" class="width-button-full color" (click)="accept()" *ngIf="state==1 && isSecond"
+            [disabled]="initContinueDisabled">Подтвердить
+    </button>
+    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="state==2"
             [disabled]="initContinueDisabled">Продолжить
     </button>
-    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3)" (click)="cancelTransaction()"
+    <button mat-raised-button color="accent" class="width-button-full color" (click)="skip()" *ngIf="state==3 && isSecond"
+            [disabled]="initContinueDisabled">Продолжить
+    </button>
+    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3 && state>0)" (click)="cancelTransaction()"
             [disabled]="initCancelDisabled">Отмена
     </button>
-    <div style="height: 146px;" *ngIf="state==3 && isSecond"></div>
   </div>
 </div>
 
