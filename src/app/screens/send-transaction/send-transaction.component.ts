@@ -14,6 +14,7 @@ declare const bcoin: any;
 })
 export class SendTransactionComponent implements AfterViewInit {
   addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
+  selected = '';
   sendBtc = 0.1;
   sendUsd = 7;
 
@@ -57,6 +58,7 @@ export class SendTransactionComponent implements AfterViewInit {
       });
 
     this.walletAddress = this.walletService.getAddress();
+    this.selected = this.walletAddress;
     this.updataBalance(this.walletService.getBalance());
     this.walletService.onBalance.subscribe((balance) => {
       this.updataBalance(balance);

@@ -6,9 +6,9 @@
   </div>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-raised-button color="accent" class="width-button"
+    <button mat-raised-button color="accent" class="width-button color"
             [disabled]="inProgress" (click)="onEntryClicked()">{{entry}}</button>
-    <button mat-raised-button color="accent" class="width-button"
+    <button mat-raised-button color="accent" class="width-button color"
             [disabled]="inProgress" (click)="onCreateClicked()">{{create}}</button>
 
     <div class="progress small buttons-progress" *ngIf="inProgress"></div>
