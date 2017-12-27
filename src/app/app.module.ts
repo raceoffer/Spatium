@@ -30,6 +30,7 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import {WalletService} from './services/wallet.service';
 import {BluetoothService} from './services/bluetooth.service';
+import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
 
 
 @NgModule({
@@ -67,7 +68,8 @@ import {BluetoothService} from './services/bluetooth.service';
   ],
   providers: [
     WalletService,
-    BluetoothService
+    BitcoinKeyFragmentService,
+    BluetoothService,
   ],
   bootstrap: [
     AppComponent
