@@ -13,6 +13,7 @@ declare const bcoin: any;
 })
 export class SendTransactionComponent implements AfterViewInit {
 
+  selected = '';
   loading: boolean = true;
   connectedDevice = 'Xperia';
 
@@ -57,6 +58,7 @@ export class SendTransactionComponent implements AfterViewInit {
       });
 
     this.walletAddress = this.walletService.getAddress();
+    this.selected = this.walletAddress;
     this.updataBalance(this.walletService.getBalance());
     this.walletService.onBalance.subscribe((balance) => {
       this.updataBalance(balance);
