@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, NgZone, OnInit} from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {Router} from '@angular/router';
 import {BluetoothService} from '../../services/bluetooth.service';
 import {WalletService} from '../../services/wallet.service';
 
@@ -12,13 +12,15 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   Label = 'Подключение устройства';
   connect = 'Подключиться';
   disabledBT = true;
+  overlayClass = 'overlay invisible';
 
   devices = [];
 
   constructor(private bt: BluetoothService,
               private wallet: WalletService,
               private router: Router,
-              private ngZone: NgZone ) {}
+              private ngZone: NgZone) {
+  }
 
   ngOnInit() {
     this.wallet.resetRemote();
@@ -33,6 +35,9 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     });
     this.bt.onConnected.subscribe( async () => {
       await this.wallet.startSync();
+      this.ngZone.run(() => {
+        this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
+    });
     });
     this.bt.onDisconnected.subscribe(() => {
       this.ngZone.run(() => {
@@ -51,8 +56,22 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     await this.bt.ensureListening();
   }
 
-  toDo(name, address): void {
-    this.router.navigate(['/connect'], { queryParams: { name: name, address: address } });
+  async toDo(name, address) {
+    console.log('connect'+name+address);
+    this.overlayClass = 'overlay';
+    try {
+      await this.bt.connect({
+        name: name,
+        address: address
+      });
+    } catch (e) {
+      console.log('connect', e);
+      this.overlayClass = 'overlay invisible';
+
+      this.ngZone.run(() => {
+        this.router.navigate(['/waiting']);
+      });
+  }
   }
 
   async sddNewDevice() {

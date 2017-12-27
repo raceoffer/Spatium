@@ -8,7 +8,7 @@ import {WalletService} from '../../services/wallet.service';
   templateUrl: './connect.component.html',
   styleUrls: ['./connect.component.css']
 })
-export class ConnectComponent implements OnInit, AfterViewInit {
+export class ConnectComponent implements OnInit {
   stConnect = 'Подключение к ';
   busyClass = 'fade-background invisible';
   name: string;
@@ -30,20 +30,5 @@ export class ConnectComponent implements OnInit, AfterViewInit {
       this.address = params.address;
       console.log(this.address); // popular
     });
-  }
-
-  async ngAfterViewInit() {
-    try {
-      await this.bt.connect({
-        name: this.name,
-        address: this.address
-      });
-    } catch (e) {
-      console.log('connect', e);
-
-      this.ngZone.run(() => {
-        this.router.navigate(['/waiting']);
-      });
-    }
   }
 }
