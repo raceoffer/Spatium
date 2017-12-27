@@ -70,7 +70,7 @@ export class BluetoothService {
   }
 
   async send(message) {
-    cordova.plugins.bluetooth.write(message);
+    await cordova.plugins.bluetooth.write(message);
   }
 
   async openSettings() {

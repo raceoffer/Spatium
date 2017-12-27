@@ -31,8 +31,8 @@ export class WaitingComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       });
     });
-    this.bt.onConnected.subscribe( () => {
-      this.wallet.startSync();
+    this.bt.onConnected.subscribe( async () => {
+      await this.wallet.startSync();
     });
     this.bt.onDisconnected.subscribe(() => {
       this.ngZone.run(() => {

@@ -48,10 +48,6 @@
       </td>
     </tr>
   </table>
-  <button mat-button (click)="stateChange()">next state</button>
-
-
-
 
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
 
@@ -60,7 +56,7 @@
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
           *ngIf="state==1 && isSecond">Подтвердите транзакцию, созданную на {{connectedDevice}}</span>
     <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="state==1"></mat-progress-bar>
+                      *ngIf="state==1" (click)="startAccepting()"></mat-progress-bar>
 
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
           *ngIf="state==2">Подписание транзакции</span>
@@ -78,7 +74,7 @@
     <button *ngIf="state==3 && !isSecond" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       Отправить
     </button>
-    <button mat-raised-button color="accent" class="width-button-full color" (click)="stateChange()" *ngIf="state<3"
+    <button mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" *ngIf="state<3"
             [disabled]="initContinueDisabled">Продолжить
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3)" (click)="cancelTransaction()"

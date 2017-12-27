@@ -7,6 +7,8 @@ declare const bcoin: any;
 declare const CompoundKey: any;
 declare const WatchingWallet: any;
 declare const BlockCypherProvider: any;
+declare const Transaction: any;
+declare const Utils: any;
 
 @Injectable()
 export class WalletService {
@@ -26,10 +28,15 @@ export class WalletService {
 
   prover = null;
   verifier = null;
+  signers = null;
 
   onBalance: EventEmitter<any> = new EventEmitter();
   onStatus: EventEmitter<any> = new EventEmitter();
   onFinish: EventEmitter<any> = new EventEmitter();
+
+  onSigned: EventEmitter<any> = new EventEmitter();
+  onVerifyTransaction: EventEmitter<any> = new EventEmitter();
+  onAccepted: EventEmitter<any> = new EventEmitter();
 
   constructor(private bt: BluetoothService) {
     bcoin.set('testnet');
@@ -100,11 +107,11 @@ export class WalletService {
     return this.compoundKey.startInitialCommitment();
   }
 
-  startSync() {
+  async startSync() {
     const prover = this.getProver();
 
     const initialCommitment = prover.getInitialCommitment();
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'initialCommitment',
       content: initialCommitment
     }));
@@ -115,7 +122,7 @@ export class WalletService {
   }
 
   initialCommitment = async function(remoteInitialCommitment) {
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       if (this.prover) {
         resolve();
         return;
@@ -129,7 +136,7 @@ export class WalletService {
     });
 
     const initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'initialDecommitment',
       content: initialDecommitment
     }));
@@ -137,9 +144,9 @@ export class WalletService {
     this.onStatus.emit('Sending initialDecommitment');
   };
 
-  initialDecommitment = function(remoteInitialDecommitment) {
+  initialDecommitment = async function(remoteInitialDecommitment) {
     this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'verifierCommitment',
       content: this.verifier.getCommitment()
     }));
@@ -147,9 +154,9 @@ export class WalletService {
     this.onStatus.emit('Sending verifierCommitment');
   };
 
-  verifierCommitment = function(remoteVerifierCommitment) {
+  verifierCommitment = async function(remoteVerifierCommitment) {
     const proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'proverCommitment',
       content: proverCommitment
     }));
@@ -157,9 +164,9 @@ export class WalletService {
     this.onStatus.emit('Sending proverCommitment');
   };
 
-  proverCommitment = function(remoteProverCommitment) {
+  proverCommitment = async function(remoteProverCommitment) {
     const verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'verifierDecommitment',
       content: verifierDecommitment
     }));
@@ -167,9 +174,9 @@ export class WalletService {
     this.onStatus.emit('Sending verifierDecommitment');
   };
 
-  verifierDecommitment = function(remoteVerifierDecommitment) {
+  verifierDecommitment = async function(remoteVerifierDecommitment) {
     const proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
-    this.bt.send(JSON.stringify({
+    await this.bt.send(JSON.stringify({
       type: 'proverDecommitment',
       content: proverDecommitment
     }));
@@ -190,15 +197,116 @@ export class WalletService {
     });
   };
 
+  verifyTransaction = function(obj) {
+    this.onVerifyTransaction.emit({
+      transaction: Transaction.fromJSON(obj.transaction),
+      entropy: obj.entropy}
+    );
+
+    this.onStatus.emit('Received tx');
+  };
+
+  entropyCommitment = async function(entropyCommitment) {
+    const entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropyCommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'entropyDecommitment',
+      content: entropyDecommitment
+    }));
+
+    this.onStatus.emit('Sending entropyDecommitment');
+  };
+
+  entropyDecommitment = async function(entropyDecommitment) {
+    Transaction.processEntropyDecommitments(this.signers, entropyDecommitment);
+    const ciphertext = Transaction.computeCiphertexts(this.signers);
+    await this.bt.send(JSON.stringify({
+      type: 'ciphertext',
+      content: ciphertext
+    }));
+
+    this.onAccepted.emit();
+    this.onStatus.emit('Sending chipertext');
+  };
+
+  ciphertext = async function(ciphertext) {
+    const signatures = Transaction.extractSignatures(this.signers, ciphertext).map(Utils.encodeSignature);
+    this.onSigned.emit(signatures);
+
+    this.onStatus.emit('signatures ready');
+  };
+
+  async createTransaction(address, value, substractFee) {
+    const transaction = new Transaction({
+      address: address,
+      value: value
+    });
+
+    /// Fill inputs and calculate script hashes
+    await transaction.prepare(this.watchingWallet, {
+      subtractFee: substractFee
+    });
+
+    return transaction;
+  }
+
+  async startVerify(transaction) {
+    const hashes = transaction.getHashes();
+    const map = transaction.mapCompoundKeys(this.compoundKey);
+
+    this.signers = Transaction.startSign(hashes, map);
+    const commitments = Transaction.createEntropyCommitments(this.signers);
+
+    await this.bt.send(JSON.stringify({
+      type: 'verifyTransaction',
+      content: {
+        transaction: transaction.toJSON(),
+        entropy: commitments
+      }
+    }));
+  }
+
+  async accept(transaction, entropy) {
+    const hashes = transaction.getHashes();
+    const map = transaction.mapCompoundKeys(this.compoundKey);
+
+    this.signers = Transaction.startSign(hashes, map);
+    const commitments = Transaction.createEntropyCommitments(this.signers);
+
+    await this.bt.send(JSON.stringify({
+      type: 'entropyCommitment',
+      content: commitments
+    }));
+
+    this.onStatus.emit('Sending entropyCommitment');
+
+    console.log(this.signers, entropy);
+    const entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropy);
+    await this.bt.send(JSON.stringify({
+      type: 'entropyDecommitment',
+      content: entropyDecommitment
+    }));
+
+    this.onStatus.emit('Sending entropyDecommitment');
+  }
+
+  async verifySignature(transaction) {
+    const tx = transaction.toTX();
+
+   return tx.verify(await this.watchingWallet.wallet.getCoinView(tx));
+  }
+
+  async pushTransaction(transaction) {
+    const tx = transaction.toTX();
+    await this.provider.pushTransaction(tx.toRaw().toString('hex'));
+  }
+
   async finishSync(data) {
     this.compoundKey.finishInitialSync(data);
-
     this.address = this.compoundKey.getCompoundKeyAddress('base58');
 
     try {
       await this.walletDB.open();
     } catch (e) {}
-
     this.watchingWallet = await new WatchingWallet({
       watchingKey: this.compoundKey.compoundPublicKeyring
     }).load(this.walletDB);
@@ -223,14 +331,10 @@ export class WalletService {
 
     // Initiate update routine
 
-    try {
-      await this.provider.pullTransactions(this.watchingWallet.getAddress('base58'));
-    } catch (e) {}
+    this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
     clearInterval(this.routineTimer);
-    this.routineTimer = setInterval(async () => {
-      try {
-        await this.provider.pullTransactions(this.watchingWallet.wallet.getAddress('base58'));
-      } catch (e) {}
+    this.routineTimer = setInterval(() => {
+      this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
     }, 20000);
 
     // End: configuring a provider

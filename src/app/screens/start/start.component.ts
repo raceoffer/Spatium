@@ -29,9 +29,8 @@ export class StartComponent implements OnInit {
       this.entry = 'Идет вход';
       const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.loadBitcoinKeyFragment();
       this.walletService.setKeyFragment(bitcoinKeyFragment);
-      this.router.navigate(['/waiting'])
-    }
-    catch (e) {
+      this.router.navigate(['/waiting']);
+    } catch (e) {
       window.plugins.toast.showLongBottom(e.message, 3000, 'bottom', console.log(e.message));
     }
     finally {

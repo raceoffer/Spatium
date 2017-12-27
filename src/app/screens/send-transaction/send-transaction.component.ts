@@ -3,6 +3,7 @@ import WalletData from '../../classes/wallet-data';
 import {WalletService} from '../../services/wallet.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material';
+import {BluetoothService} from '../../services/bluetooth.service';
 
 declare const bcoin: any;
 
@@ -12,15 +13,13 @@ declare const bcoin: any;
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements AfterViewInit {
-
-  loading: boolean = true;
-  connectedDevice = 'Xperia';
-
-  addressReceiver = 'ksjasi788399032usdk';
+  addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
   sendBtc = 0.1;
   sendUsd = 7;
 
   rateBtcUsd = 15000;
+
+  currentTx = null;
 
   walletAddress = '';
   balanceBtcConfirmed = 0;
@@ -40,6 +39,7 @@ export class SendTransactionComponent implements AfterViewInit {
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
               private router: Router,
+              private bt: BluetoothService,
               public snackBar: MatSnackBar) {}
 
   ngAfterViewInit() {
@@ -62,7 +62,17 @@ export class SendTransactionComponent implements AfterViewInit {
       this.updataBalance(balance);
     });
 
-   this.loading = !this.loading;
+    this.walletService.onVerifyTransaction.subscribe(async (event) => {
+      await this.startAccepting(event.transaction, event.entropy);
+    });
+
+    this.walletService.onAccepted.subscribe(async () => {
+      await this.accepted();
+    });
+
+    this.walletService.onSigned.subscribe(async (signatures) => {
+      await this.finalaizeSignature(signatures);
+    });
   }
 
   updataBalance(balance) {
@@ -81,8 +91,8 @@ export class SendTransactionComponent implements AfterViewInit {
   }
 
   stateChange(): void {
-    switch (this.state){
-      case 0: {//экрвн ожидания
+    switch (this.state) {
+      case 0: { // экрвн ожидания
         this.state = 1; // ожидание подтверждения узла
         this.disableFields = true;
         this.initContinueDisabled = true;
@@ -105,14 +115,24 @@ export class SendTransactionComponent implements AfterViewInit {
     }
   }
 
-  sendTransaction(): void {
-    this.snackBar.open('Транзакция была отправлена.', null, {
-      duration: 3000,
-    });
+  async sendTransaction() {
     this.state = 0;
     this.disableFields = false;
     this.initCancelDisabled = false;
     this.initContinueDisabled = false;
+
+    try {
+      await this.walletService.verifySignature(this.currentTx);
+      await this.walletService.pushTransaction(this.currentTx);
+
+      this.snackBar.open('Транзакция была отправлена.', null, {
+        duration: 3000,
+      });
+    } catch (e) {
+      this.snackBar.open('He удалось отправить транзакцию.', null, {
+        duration: 3000,
+      });
+    }
   }
 
   cancelTransaction(): void {
@@ -120,6 +140,52 @@ export class SendTransactionComponent implements AfterViewInit {
     this.disableFields = false;
     this.initCancelDisabled = false;
     this.initContinueDisabled = false;
+  }
+
+  // Received signature should ask for confirmation
+  async startAccepting(tx, entropy) {
+    this.currentTx = tx;
+    this.isSecond = true;
+    this.state = 2;
+    this.initContinueDisabled = true;
+    this.initCancelDisabled = true;
+    console.log(tx.toJSON(), entropy);
+
+    await this.walletService.accept(tx, entropy);
+  }
+
+  // Pressed start signeture
+  async startSigning() {
+    this.currentTx = await this.walletService.createTransaction(this.addressReceiver, 60000000, false);
+    if (this.currentTx) {
+      await this.walletService.startVerify(this.currentTx);
+
+      this.state = 1;
+      this.isSecond = false;
+      this.disableFields = true;
+      this.initContinueDisabled = true;
+    }
+  }
+
+  // Received confirmation
+  async accepted() {
+    // Dunno
+  }
+
+  // Received a ready signature
+  async finalaizeSignature(signatures) {
+    this.state = 3;
+    this.initCancelDisabled = false;
+
+    this.currentTx.injectSignatures(signatures);
+
+    const ok = await this.walletService.verifySignature(this.currentTx);
+
+    if (!ok && !this.isSecond) {
+      this.snackBar.open('Транзакция некорректна', null, {
+        duration: 3000,
+      });
+    }
   }
 }
 
