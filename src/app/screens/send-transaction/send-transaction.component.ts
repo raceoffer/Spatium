@@ -12,7 +12,8 @@ declare const bcoin: any;
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements AfterViewInit {
-  load = true;
+
+  loading: boolean = true;
   connectedDevice = 'Xperia';
 
   addressReceiver = 'ksjasi788399032usdk';
@@ -60,6 +61,8 @@ export class SendTransactionComponent implements AfterViewInit {
     this.walletService.onBalance.subscribe((balance) => {
       this.updataBalance(balance);
     });
+
+   this.loading = !this.loading;
   }
 
   updataBalance(balance) {
@@ -79,7 +82,7 @@ export class SendTransactionComponent implements AfterViewInit {
 
   stateChange(): void {
     switch (this.state){
-      case 0: { // экрвн ожидания
+      case 0: {//экрвн ожидания
         this.state = 1; // ожидание подтверждения узла
         this.disableFields = true;
         this.initContinueDisabled = true;
