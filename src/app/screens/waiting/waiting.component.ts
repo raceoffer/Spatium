@@ -47,8 +47,9 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/connect'], { queryParams: { name: name, address: address } });
   }
 
-  sddNewDevice(): void{
-
+  async sddNewDevice() {
+    await this.bt.openSettings();
+    await this.changeBtState();
   }
 
   goWallet(): void{

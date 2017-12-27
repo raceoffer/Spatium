@@ -87,3 +87,9 @@ exports.write = function(data) {
 		exec(success, error, "Bluetooth", "write", [data]);
 	});
 };
+
+exports.openSettings = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "openSettings", []);
+  });
+};

@@ -84,4 +84,8 @@ export class BluetoothService {
   async send(message) {
     this.bt.write(message);
   }
+
+  async openSettings() {
+    return await this.bt.openSettings();
+  }
 }

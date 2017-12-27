@@ -23,25 +23,26 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.provider.Settings;
 
 public class Bluetooth extends CordovaPlugin {
   private BluetoothAdapter mBluetoothAdapter;
   private CallbackContext  mEnableCallback = null;
+  private CallbackContext  mSettingsCallback = null;
   private CallbackContext  mDataCallback = null;
   private CallbackContext  mConnectedCallback = null;
   private CallbackContext  mDisconnectedCallback = null;
 
   private BluetoothServerSocket mBluetoothServerSocket = null;
   private BluetoothSocket       mBluetoothSocket = null;
-  
+
   BufferedReader mBufferedReader = null;
   PrintWriter mPrintWriter = null;
 
   private boolean mListening = false;
   private boolean mReading = false;
 
-  private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-  private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+  private static final int REQUEST_BT_SETTINGS = 2;
   private static final int REQUEST_ENABLE_BT = 3;
 
   @Override
@@ -79,6 +80,9 @@ public class Bluetooth extends CordovaPlugin {
       return true;
     } else if ("getListening".equals(action)) {
       getListening(callbackContext);
+      return true;
+    } else if ("openSettings".equals(action)) {
+      openSettings(callbackContext);
       return true;
     } else if ("connect".equals(action)) {
       String device  = null;
@@ -181,8 +185,8 @@ public class Bluetooth extends CordovaPlugin {
             try {
               BluetoothSocket socket = mBluetoothServerSocket.accept(500);
               if(mBluetoothSocket == null) {
-				mBufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-				mPrintWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
+                mBufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+                mPrintWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
                 mBluetoothSocket = socket;
               } else {
                 socket.close();
@@ -249,27 +253,27 @@ public class Bluetooth extends CordovaPlugin {
     }
 
 	final BluetoothDevice targetDevice = foundDevice;
-	cordova.getThreadPool().execute(new Runnable() {
-		public void run() {
-			try {
-			  BluetoothSocket clientSocket = targetDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
-			  clientSocket.connect();
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        try {
+          BluetoothSocket clientSocket = targetDevice.createRfcommSocketToServiceRecord(UUID.fromString("995f40e0-ce68-4d24-8f68-f49d2b9d661f"));
+          clientSocket.connect();
 
-			  if(mBluetoothSocket == null) {
-				mBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
-				mPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"), true);
-				mBluetoothSocket = clientSocket;
-				callbackContext.success();
-			  } else {
-				callbackContext.error("Failed to conect: interrupted");
-				clientSocket.close();
-			  }
-			} catch (Exception e) {
-			  callbackContext.error("Failed to conect to remote socket");
-			  return;
-			}
-		}
-	});
+          if(mBluetoothSocket == null) {
+            mBufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+            mPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"), true);
+            mBluetoothSocket = clientSocket;
+            callbackContext.success();
+          } else {
+            callbackContext.error("Failed to conect: interrupted");
+            clientSocket.close();
+          }
+        } catch (Exception e) {
+          callbackContext.error("Failed to conect to remote socket");
+          return;
+        }
+      }
+    });
   }
 
   private void setOnConnected(CallbackContext callbackContext) {
@@ -319,7 +323,7 @@ public class Bluetooth extends CordovaPlugin {
           mReading = true;
 
           while (mReading) {
-			String string = mBufferedReader.readLine();
+			      String string = mBufferedReader.readLine();
 
             if (mDataCallback != null) {
               PluginResult result = new PluginResult(PluginResult.Status.OK, string);
@@ -387,15 +391,29 @@ public class Bluetooth extends CordovaPlugin {
     cordova.getActivity().startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
   }
 
+  private void openSettings(final CallbackContext callbackContext) {
+    if(mBluetoothAdapter == null) {
+      callbackContext.error("Bluetooth is not supported");
+      return;
+    }
+
+    mSettingsCallback = callbackContext;
+    cordova.setActivityResultCallback(this);
+
+    Intent intentOpenBluetoothSettings = new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+    cordova.getActivity().startActivityForResult(intentOpenBluetoothSettings, REQUEST_BT_SETTINGS);
+  }
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if( requestCode == REQUEST_ENABLE_BT ) {
-      if(mBluetoothAdapter.isEnabled()) {
+    if (requestCode == REQUEST_ENABLE_BT) {
+      if (mBluetoothAdapter.isEnabled()) {
         mEnableCallback.success();
       } else {
         mEnableCallback.error("rejected");
       }
+    } else if (requestCode == REQUEST_BT_SETTINGS) {
+      mSettingsCallback.success();
     }
   }
 }
