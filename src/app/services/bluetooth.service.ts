@@ -4,8 +4,6 @@ declare const cordova: any;
 
 @Injectable()
 export class BluetoothService {
-  bt = cordova.plugins.bluetooth;
-
   enabled = false;
 
   onConnected: EventEmitter<any> = new EventEmitter();
@@ -17,9 +15,9 @@ export class BluetoothService {
   async ensureEnabled() {
     let enabled = false;
     try {
-      enabled = await this.bt.getEnabled();
+      enabled = await cordova.plugins.bluetooth.getEnabled();
       if (!enabled) {
-        await this.bt.enable();
+        await cordova.plugins.bluetooth.enable();
       }
       this.enabled = true;
     } catch (e) {
@@ -33,7 +31,7 @@ export class BluetoothService {
     let devices = [];
     if (this.enabled) {
       try {
-        devices = await this.bt.listPairedDevices();
+        devices = await cordova.plugins.bluetooth.listPairedDevices();
       } catch (e) {}
     }
 
@@ -41,13 +39,13 @@ export class BluetoothService {
   }
 
   async ensureListening() {
-    if (await this.bt.getConnected()) {
-      await this.bt.disconnect();
+    if (await cordova.plugins.bluetooth.getConnected()) {
+      await cordova.plugins.bluetooth.disconnect();
     }
 
-    if (!await this.bt.getListening()) {
-      await this.bt.startListening(async () => {
-        await this.bt.startReading((message) => {
+    if (!await cordova.plugins.bluetooth.getListening()) {
+      await cordova.plugins.bluetooth.startListening(async () => {
+        await cordova.plugins.bluetooth.startReading((message) => {
           if (this.onMessage) {
             this.onMessage.emit(message);
           }
@@ -64,17 +62,17 @@ export class BluetoothService {
   }
 
   async connect(device) {
-    if (await this.bt.getConnected()) {
-      await this.bt.disconnect();
+    if (await cordova.plugins.bluetooth.getConnected()) {
+      await cordova.plugins.bluetooth.disconnect();
     }
 
-    await this.bt.connect(device, () => {
+    await cordova.plugins.bluetooth.connect(device, () => {
       if (this.onDisconnected) {
         this.onDisconnected.emit();
       }
     });
 
-    await this.bt.startReading((message) => {
+    await cordova.plugins.bluetooth.startReading((message) => {
       if (this.onMessage) {
         this.onMessage.emit(message);
       }
@@ -82,10 +80,10 @@ export class BluetoothService {
   }
 
   async send(message) {
-    this.bt.write(message);
+    cordova.plugins.bluetooth.write(message);
   }
 
   async openSettings() {
-    return await this.bt.openSettings();
+    return await cordova.plugins.bluetooth.openSettings();
   }
 }
