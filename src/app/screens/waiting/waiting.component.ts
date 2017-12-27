@@ -12,6 +12,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   Label = 'Подключение устройства';
   connect = 'Подключиться';
   disabledBT = true;
+  overlayClass = 'overlay invisible';
 
   devices = [];
 
@@ -57,6 +58,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   async toDo(name, address) {
     console.log('connect'+name+address);
+    this.overlayClass = 'overlay';
     try {
       await this.bt.connect({
         name: name,
@@ -64,6 +66,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       });
     } catch (e) {
       console.log('connect', e);
+      this.overlayClass = 'overlay invisible';
 
       this.ngZone.run(() => {
         this.router.navigate(['/waiting']);
