@@ -20,10 +20,11 @@ export class WaitingComponent implements OnInit, AfterViewInit {
               private router: Router) {}
 
   ngOnInit() {
-    this.wallet.onFinish = () => {
+    this.wallet.resetRemote();
+    this.wallet.onFinish.subscribe(() => {
       console.log(this.wallet.address);
       this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: false }}]);
-    };
+    });
     this.bt.onConnected.subscribe( () => {
       this.wallet.setKeyFragment(this.wallet.generateFragment());
       this.wallet.startSync();

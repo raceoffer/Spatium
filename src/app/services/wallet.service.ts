@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 
 import WalletData from '../classes/wallet-data';
 import {BluetoothService} from './bluetooth.service';
@@ -6,14 +6,17 @@ import {BluetoothService} from './bluetooth.service';
 declare const bcoin: any;
 declare const CompoundKey: any;
 declare const WatchingWallet: any;
+declare const BlockCypherProvider: any;
 
 @Injectable()
 export class WalletService {
   DDS: any = null;
   compoundKey: any = null;
   walletDB: any = null;
-
   watchingWallet: any = null;
+  provider: any = null;
+
+  routineTimer: any = null;
 
   localReady = false;
   remoteReady = false;
@@ -24,13 +27,19 @@ export class WalletService {
   prover = null;
   verifier = null;
 
-  onStatus = null;
-  onFinish = null;
+  onStatus: EventEmitter<any> = new EventEmitter();
+  onFinish: EventEmitter<any> = new EventEmitter();
 
   constructor(private bt: BluetoothService) {
+    bcoin.set('testnet');
+
     this.bt.onMessage.subscribe((message) => {
       const obj = JSON.parse(message);
       this[obj.type](obj.content);
+    });
+
+    this.walletDB = new bcoin.walletdb({
+      db: 'memory'
     });
   }
 
@@ -68,6 +77,24 @@ export class WalletService {
     this.localReady = true;
   }
 
+  resetRemote() {
+    this.remoteReady = false;
+    this.prover = null;
+    this.verifier = null;
+
+    this.watchingWallet = null;
+    this.provider = null;
+
+    clearInterval(this.routineTimer);
+    this.routineTimer = null;
+  }
+
+  resetFull() {
+    this.resetRemote();
+    this.localReady = false;
+    this.compoundKey = null;
+  }
+
   getProver() {
     return this.compoundKey.startInitialCommitment();
   }
@@ -81,9 +108,7 @@ export class WalletService {
       content: initialCommitment
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending initialCommitment');
-    }
+    this.onStatus.emit('Sending initialCommitment');
 
     this.prover = prover;
   }
@@ -108,9 +133,7 @@ export class WalletService {
       content: initialDecommitment
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending initialDecommitment');
-    }
+    this.onStatus.emit('Sending initialDecommitment');
   };
 
   initialDecommitment = function(remoteInitialDecommitment) {
@@ -120,9 +143,7 @@ export class WalletService {
       content: this.verifier.getCommitment()
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending verifierCommitment');
-    }
+    this.onStatus.emit('Sending verifierCommitment');
   };
 
   verifierCommitment = function(remoteVerifierCommitment) {
@@ -132,9 +153,7 @@ export class WalletService {
       content: proverCommitment
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending proverCommitment');
-    }
+    this.onStatus.emit('Sending proverCommitment');
   };
 
   proverCommitment = function(remoteProverCommitment) {
@@ -144,9 +163,7 @@ export class WalletService {
       content: verifierDecommitment
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending verifierDecommitment');
-    }
+    this.onStatus.emit('Sending verifierDecommitment');
   };
 
   verifierDecommitment = function(remoteVerifierDecommitment) {
@@ -156,25 +173,19 @@ export class WalletService {
       content: proverDecommitment
     }));
 
-    if (this.onStatus) {
-      this.onStatus('Sending proverDecommitment');
-    }
+    this.onStatus.emit('Sending proverDecommitment');
   };
 
   proverDecommitment = function(remoteProverDecommitment) {
     const verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
 
-    if (this.onStatus) {
-      this.onStatus('Fin');
-    }
+    this.onStatus.emit('Fin');
 
     this.prover = null;
     this.verifier = null;
 
     this.finishSync(verifiedData).then(() => {
-      if (this.onFinish) {
-        this.onFinish();
-      }
+      this.onFinish.emit();
     });
   };
 
@@ -183,12 +194,9 @@ export class WalletService {
 
     this.address = this.compoundKey.getCompoundKeyAddress('base58');
 
-    this.walletDB = new bcoin.walletdb({
-      db: 'memory',
-      location: 'test'
-    });
-
-    await this.walletDB.open();
+    try {
+      await this.walletDB.open();
+    } catch (e) {}
 
     this.watchingWallet = await new WatchingWallet({
       watchingKey: this.compoundKey.compoundPublicKeyring
@@ -196,10 +204,36 @@ export class WalletService {
 
     this.watchingWallet.on('balance', (balance) => {
       this.balance = balance;
-      // console.log('Balance:', bcoin.amount.btc(balance.confirmed), '(', bcoin.amount.btc(balance.unconfirmed), ')');
+    });
+
+    this.watchingWallet.on('transaction', (transaction) => {
+      console.log(transaction);
     });
 
     this.balance = await this.watchingWallet.getBalance();
+
+    // Start: configuring a provider
+    this.provider = new BlockCypherProvider();
+
+    this.provider.on('rawTransaction', async (hex, meta) => {
+      await this.watchingWallet.addRawTransaction(hex, meta);
+    });
+
+    // Initiate update routine
+
+    try {
+      await this.provider.pullTransactions(this.watchingWallet.getAddress('base58'));
+    } catch (e) {}
+    clearInterval(this.routineTimer);
+    this.routineTimer = setInterval(async () => {
+      try {
+        await this.provider.pullTransactions(this.watchingWallet.wallet.getAddress('base58'));
+      } catch (e) {}
+    }, 20000);
+
+    // End: configuring a provider
+
+    console.log('Sync done');
 
     this.remoteReady = true;
   }
