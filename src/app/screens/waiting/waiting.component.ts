@@ -32,7 +32,6 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       });
     });
     this.bt.onConnected.subscribe( () => {
-      this.wallet.setKeyFragment(this.wallet.generateFragment());
       this.wallet.startSync();
     });
     this.bt.onDisconnected.subscribe(() => {
