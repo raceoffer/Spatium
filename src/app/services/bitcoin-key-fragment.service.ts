@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {reject} from 'q';
 
 declare var window;
 declare var cordova;
@@ -7,8 +6,6 @@ declare var Web3;
 declare var DDS;
 declare var bcoin;
 declare var CompoundKey;
-
-export class MissingKeyError extends Error {}
 
 
 @Injectable()

@@ -1,72 +1,59 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {BluetoothService} from '../../services/bluetooth.service';
+import {WalletService} from '../../services/wallet.service';
 
 @Component({
   selector: 'app-waiting',
   templateUrl: './waiting.component.html',
   styleUrls: ['./waiting.component.css']
 })
-export class WaitingComponent implements OnInit {
+export class WaitingComponent implements OnInit, AfterViewInit {
   Label = 'Подключение устройства';
-  connect = 'Подключиться'
+  connect = 'Подключиться';
   disabledBT = true;
 
-  devices = [
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    },
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    },
-    {
-      name: 'Photos',
-      address: 'nkjhsd,asjd;laskdlakslkdfgsdgdsgdrg',
-    },
-    {
-      name: 'Recipes',
-      address: 'nkjhsd,asjd;laskdlakslk',
-    },
-    {
-      name: 'Work',
-      address: 'nkjhsd,asjd',
-    }
-  ];
+  devices = [];
 
-  constructor(private router: Router) { }
+  constructor(private bt: BluetoothService,
+              private wallet: WalletService,
+              private router: Router) {}
 
   ngOnInit() {
+    this.wallet.onFinish = () => {
+      console.log(this.wallet.address);
+      this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}, queryParams: { isSecond: false }}]);
+    };
+    this.bt.onConnected.subscribe( () => {
+      this.wallet.setKeyFragment(this.wallet.generateFragment());
+      this.wallet.startSync();
+    });
+    this.bt.onDisconnected.subscribe(() => {
+      this.router.navigate(['/waiting']);
+    });
   }
 
-  changeBtState(): void {
-    this.disabledBT = ! this.disabledBT;
+  async ngAfterViewInit() {
+    await this.changeBtState();
+  }
+
+  async changeBtState() {
+    this.disabledBT = !await this.bt.ensureEnabled();
+    this.devices = await this.bt.getDevices();
+    await this.bt.ensureListening();
   }
 
   toDo(name, address): void {
-    console.log(JSON.stringify(name));
-    console.log(JSON.stringify(address));
     this.router.navigate(['/connect'], { queryParams: { name: name, address: address } });
   }
 
-  sddNewDevice(): void{
-
+  async sddNewDevice() {
+    await this.bt.openSettings();
+    await this.changeBtState();
   }
+
+  goWallet(): void{
+    this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+}
 
 }

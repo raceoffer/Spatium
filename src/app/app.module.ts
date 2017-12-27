@@ -1,6 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NoopAnimationsModule, BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
   MatIconModule,
@@ -14,12 +15,12 @@ import {
   MatInputModule,
   MatDialogModule,
   MatSelectModule,
+  MatSnackBarModule,
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {AppComponent} from './app.component';
 import {AppRoutingModule} from './app-routing.module';
-import { WalletComponent } from './screens/wallet/wallet.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
@@ -28,13 +29,13 @@ import {ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import {WalletService} from './services/wallet.service';
+import {BluetoothService} from './services/bluetooth.service';
 import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    WalletComponent,
     NavigatorComponent,
     StartComponent,
     ConnectComponent,
@@ -43,9 +44,12 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
     SendTransactionComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,
+    BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
     MatProgressBarModule,
@@ -60,10 +64,12 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
     ClipboardModule,
     MatDialogModule,
     MatSelectModule,
+    MatSnackBarModule
   ],
   providers: [
     WalletService,
     BitcoinKeyFragmentService,
+    BluetoothService,
   ],
   bootstrap: [
     AppComponent

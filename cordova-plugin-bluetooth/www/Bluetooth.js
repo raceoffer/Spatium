@@ -44,7 +44,8 @@ exports.getListening = function() {
 	});
 };
 
-exports.connect = function(device) {
+exports.connect = function(device,onDisconnected) {
+	exec(onDisconnected, null, "Bluetooth", "setOnDisconnected", []);
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "connect", [device]);
 	});
@@ -85,4 +86,10 @@ exports.write = function(data) {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "write", [data]);
 	});
+};
+
+exports.openSettings = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "openSettings", []);
+  });
 };

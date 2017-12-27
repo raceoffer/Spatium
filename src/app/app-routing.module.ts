@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {WalletComponent} from './screens/wallet/wallet.component';
 import {NavigatorComponent} from './screens/navigator/navigator.component';
 import {StartComponent} from './screens/start/start.component';
 import {WaitingComponent} from './screens/waiting/waiting.component';
@@ -17,9 +16,8 @@ const appRoutes: Routes = [
   { path: 'waiting', component: WaitingComponent },
   { path: 'connect', component: ConnectComponent },
   { path: 'navigator', component: NavigatorComponent, children: [
-    { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
-  ]},
-  { path: 'send', component: SendTransactionComponent},
+    { path: 'wallet', component: SendTransactionComponent, outlet: 'navigator' },
+  ]}
 ];
 @NgModule({
   imports: [

@@ -1,123 +1,207 @@
 import { Injectable } from '@angular/core';
 
-import {Signature} from '../cryptocurrency/signature';
 import WalletData from '../classes/wallet-data';
-import {Wallet} from '../cryptocurrency/wallet';
+import {BluetoothService} from './bluetooth.service';
 
-declare var bcoin: any;
-declare var CompoundKey: any;
-declare var WatchingWallet: any;
+declare const bcoin: any;
+declare const CompoundKey: any;
+declare const WatchingWallet: any;
 
 @Injectable()
 export class WalletService {
-  connected = false;
-  initiatorDDS: any;
-  initiatorCompoundKey: any;
-  verifierDDS: any;
-  verifierCompoundKey: any;
+  DDS: any = null;
+  compoundKey: any = null;
+  walletDB: any = null;
 
-  constructor() {
-    // this.emulateConnection();
+  watchingWallet: any = null;
+
+  localReady = false;
+  remoteReady = false;
+
+  address = null;
+  balance = null;
+
+  prover = null;
+  verifier = null;
+
+  onStatus = null;
+  onFinish = null;
+
+  constructor(private bt: BluetoothService) {
+    this.bt.onMessage.subscribe((message) => {
+      const obj = JSON.parse(message);
+      this[obj.type](obj.content);
+    });
   }
 
-  async getAddress(): Promise<string> {
-    return await this.initiatorCompoundKey.getCompoundKeyAddress('base58');
+  generateFragment() {
+    return CompoundKey.generateKeyring();
   }
 
-  async getBalance(): Promise<any> {
-    return await this.initiatorDDS.getBalance();
+  getAddress() {
+    if (this.remoteReady) {
+      return this.address;
+    } else {
+      return null;
+    }
   }
 
-  async getWallet(): Promise<WalletData> {
+  getBalance() {
+    if (this.remoteReady) {
+      return this.balance;
+    } else {
+      return null;
+    }
+  }
+
+  getWallet() {
     const wallet = new WalletData();
-    wallet.address = await this.getAddress();
-    wallet.balance = await this.getBalance();
+    wallet.address = this.getAddress();
+    wallet.balance = this.getBalance();
     return wallet;
   }
 
-  async emulateConnection() {
-    if (this.connected) return;
-
-    const initiatorDDS = await Signature.getDDS();
-    console.log("Initiator", initiatorDDS.address, Signature.web3.utils.fromWei(
-      await initiatorDDS.getBalance(),"ether"),"eth");
-    this.initiatorDDS = initiatorDDS;
-
-    const verifierDDS = await Signature.getDDS();
-    console.log("Verifier", verifierDDS.address, Signature.web3.utils.fromWei(
-      await verifierDDS.getBalance(),"ether"),"eth");
-    this.verifierDDS = verifierDDS;
-
-    const initiatorKey = await Signature.getKeyring(initiatorDDS);
-    const verifierKey = await Signature.getKeyring(verifierDDS);
-
-    const initiator = new CompoundKey({
-      localPrivateKeyring: initiatorKey
+  setKeyFragment(fragment) {
+    this.compoundKey = new CompoundKey({
+      localPrivateKeyring: fragment
     });
-    this.initiatorCompoundKey = initiator;
-
-    const verifier = new CompoundKey({
-      localPrivateKeyring: verifierKey
-    });
-    this.verifierCompoundKey = verifier;
-
-    //!--- Secret sharing with Pedersen commitment scheme and original proof of paillier encryption
-
-    const initiatorProver = initiator.startInitialCommitment();
-    const verifierProver = verifier.startInitialCommitment();
-
-    // Step 1: creating commitments
-    const initiatorCommitment = JSON.stringify(initiatorProver.getInitialCommitment());
-    const verifierCommitment = JSON.stringify(verifierProver.getInitialCommitment());
-
-    // Step 3: exchanging decommitments (a party sends its decommitment only after it has received other party's commitment)
-    const initiatorDecommitment = JSON.stringify(initiatorProver.processInitialCommitment(JSON.parse(verifierCommitment)));
-    const verifierDecommitment = JSON.stringify(verifierProver.processInitialCommitment(JSON.parse(initiatorCommitment)));
-
-    // Step 4: decommiting
-    const verifierVerifier = verifierProver.processInitialDecommitment(JSON.parse(initiatorDecommitment));
-    const initiatorVerifier = initiatorProver.processInitialDecommitment(JSON.parse(verifierDecommitment));
-
-    // Further steps: interactive proofs of knowledge
-    const verifierVerifierCommitment = JSON.stringify(verifierVerifier.getCommitment());
-    const initiatorProverCommitment = JSON.stringify(initiatorProver.processCommitment(JSON.parse(verifierVerifierCommitment)));
-    const verifierVerifierDecommitment = JSON.stringify(verifierVerifier.processCommitment(JSON.parse(initiatorProverCommitment)));
-    const initiatorProverDecommitment = JSON.stringify(initiatorProver.processDecommitment(JSON.parse(verifierVerifierDecommitment)));
-    const verifierVerifiedData = verifierVerifier.processDecommitment(JSON.parse(initiatorProverDecommitment));
-    verifier.finishInitialSync(verifierVerifiedData);
-
-    const initiatorVerifierCommitment = JSON.stringify(initiatorVerifier.getCommitment());
-    const verifierProverCommitment = JSON.stringify(verifierProver.processCommitment(JSON.parse(initiatorVerifierCommitment)));
-    const initiatorVerifierDecommitment = JSON.stringify(initiatorVerifier.processCommitment(JSON.parse(verifierProverCommitment)));
-    const verifierProverDecommitment = JSON.stringify(verifierProver.processDecommitment(JSON.parse(initiatorVerifierDecommitment)));
-    const initiatorVerifiedData = initiatorVerifier.processDecommitment(JSON.parse(verifierProverDecommitment));
-    initiator.finishInitialSync(initiatorVerifiedData);
-
-    //!--- End sharing
-
-    console.log(initiator.getCompoundKeyAddress('base58'));
-
-    // Start: configuring a wallet
-
-    await Wallet.walletdb.open();
-
-    // The wallet is intended to watch over the full public key
-    const wallet = await new WatchingWallet({
-      watchingKey: initiator.compoundPublicKeyring
-    }).load(Wallet.walletdb);
-
-    wallet.on('balance', (balance) => {
-      console.log('Balance:', bcoin.amount.btc(balance.confirmed), '(', bcoin.amount.btc(balance.unconfirmed), ')');
-    });
-
-    // End: configuring a wallet
-
-    // Displaying an initial (loaded from db) balance
-    const balance = await wallet.getBalance();
-    console.log('Balance:', bcoin.amount.btc(balance.confirmed), '(', bcoin.amount.btc(balance.unconfirmed), ')');
-
-    // this.router.navigate(['/', 'wallet']);
-    this.connected = true;
+    this.localReady = true;
   }
 
+  getProver() {
+    return this.compoundKey.startInitialCommitment();
+  }
+
+  startSync() {
+    const prover = this.getProver();
+
+    const initialCommitment = prover.getInitialCommitment();
+    this.bt.send(JSON.stringify({
+      type: 'initialCommitment',
+      content: initialCommitment
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending initialCommitment');
+    }
+
+    this.prover = prover;
+  }
+
+  initialCommitment = async function(remoteInitialCommitment) {
+    await new Promise((resolve, reject) => {
+      if (this.prover) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.prover) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 10);
+    });
+
+    const initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+    this.bt.send(JSON.stringify({
+      type: 'initialDecommitment',
+      content: initialDecommitment
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending initialDecommitment');
+    }
+  };
+
+  initialDecommitment = function(remoteInitialDecommitment) {
+    this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+    this.bt.send(JSON.stringify({
+      type: 'verifierCommitment',
+      content: this.verifier.getCommitment()
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending verifierCommitment');
+    }
+  };
+
+  verifierCommitment = function(remoteVerifierCommitment) {
+    const proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+    this.bt.send(JSON.stringify({
+      type: 'proverCommitment',
+      content: proverCommitment
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending proverCommitment');
+    }
+  };
+
+  proverCommitment = function(remoteProverCommitment) {
+    const verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
+    this.bt.send(JSON.stringify({
+      type: 'verifierDecommitment',
+      content: verifierDecommitment
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending verifierDecommitment');
+    }
+  };
+
+  verifierDecommitment = function(remoteVerifierDecommitment) {
+    const proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+    this.bt.send(JSON.stringify({
+      type: 'proverDecommitment',
+      content: proverDecommitment
+    }));
+
+    if (this.onStatus) {
+      this.onStatus('Sending proverDecommitment');
+    }
+  };
+
+  proverDecommitment = function(remoteProverDecommitment) {
+    const verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
+
+    if (this.onStatus) {
+      this.onStatus('Fin');
+    }
+
+    this.prover = null;
+    this.verifier = null;
+
+    this.finishSync(verifiedData).then(() => {
+      if (this.onFinish) {
+        this.onFinish();
+      }
+    });
+  };
+
+  async finishSync(data) {
+    this.compoundKey.finishInitialSync(data);
+
+    this.address = this.compoundKey.getCompoundKeyAddress('base58');
+
+    this.walletDB = new bcoin.walletdb({
+      db: 'memory',
+      location: 'test'
+    });
+
+    await this.walletDB.open();
+
+    this.watchingWallet = await new WatchingWallet({
+      watchingKey: this.compoundKey.compoundPublicKeyring
+    }).load(this.walletDB);
+
+    this.watchingWallet.on('balance', (balance) => {
+      this.balance = balance;
+      // console.log('Balance:', bcoin.amount.btc(balance.confirmed), '(', bcoin.amount.btc(balance.unconfirmed), ')');
+    });
+
+    this.balance = await this.watchingWallet.getBalance();
+
+    this.remoteReady = true;
+  }
 }
+
