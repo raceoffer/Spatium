@@ -11,7 +11,7 @@
   <mat-list role="list" style = "margin-bottom: 23px !important;">
     <mat-list-item>
       <p class="list-info" mat-line>Ethereum адрес</p>
-      <p class="list-name" mat-line> {{ethereumAddress}} </p>
+      <p class="list-name small" mat-line>{{ethereumAddress}}</p>
       <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
         <mat-icon matSuffix>content_copy</mat-icon>
       </button>
@@ -26,21 +26,30 @@
       <p class="list-name" mat-line *ngIf="!enough"> Не хватает средств </p>
       <p class="list-info" mat-line>Etherium balance</p>
       <p class="list-name" mat-line> {{ethereumBalance}} </p>
-      <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">
-        <mat-icon *ngIf="syncState==0">sync</mat-icon>
-        <mat-icon class="sync" *ngIf="syncState==1">sync</mat-icon>
-        <mat-icon *ngIf="syncState==2">sync_problem</mat-icon>
+      <!--<div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">-->
+      <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="updateBalance()">
+        <mat-icon *ngIf="syncState==syncStateType.Ready">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="syncState==syncStateType.Syncing">sync</mat-icon>
+        <mat-icon *ngIf="syncState==syncStateType.Error">sync_problem</mat-icon>
       </div>
 
     </mat-list-item>
   </mat-list>
 
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="syncDHIState"></mat-spinner>
-    <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="enough && !syncDHIState">Сохранить</button>
+    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="saveTransactionState"></mat-spinner>
+    <button mat-raised-button color="accent" class="width-button"
+            (click)="saveBitcoinKeyFragmentInEthereumCell()"
+            *ngIf="enough && !saveTransactionState">Сохранить</button>
 
-    <button mat-raised-button color="accent" class="width-button" (click)="syncDHI()" *ngIf="syncDHIState">Отменить</button>
-    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting" *ngIf="!syncDHIState">Пропустить</button>
+    <button mat-raised-button color="accent" class="width-button"
+            (click)="saveBitcoinKeyFragmentInEthereumCell()"
+            *ngIf="saveTransactionState">Отменить</button>
+
+    <button mat-raised-button color="accent"
+            class="width-button"
+            routerLink="/waiting"
+            *ngIf="!saveTransactionState">Пропустить</button>
   </div>
 
 

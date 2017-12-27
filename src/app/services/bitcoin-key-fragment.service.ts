@@ -16,7 +16,7 @@ export class BitcoinKeyFragmentService {
   infuraToken = 'DKG18gIcGSFXCxcpvkBm';
   aesKey = Buffer.from("57686f277320796f75722064616464793f313837333631393832373336383133f75722064616464793f3138373336313","hex");
 
-  async generateBitcoinKeyFragment(): Promise<string> {
+  async generateBitcoinKeyFragment() {
     const initiatorDDSKey = await this.generateDDSKey();  // ensure DDS key saved locally
     const bitcoinKeyFragment = CompoundKey.generateKeyring();
     const encodedBitcoinKeyFragment = bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(bitcoinKeyFragment.getPrivateKey(), this.aesKey));
@@ -24,7 +24,7 @@ export class BitcoinKeyFragmentService {
     return bitcoinKeyFragment;
   }
 
-  async loadBitcoinKeyFragment(): Promise<string> {
+  async loadBitcoinKeyFragment() {
     /* try to get bitcoin key fragment from DDS using DDS key,
        if failed - try to get bitcoin key fragment from local file.
      */
@@ -56,6 +56,25 @@ export class BitcoinKeyFragmentService {
     }
   }
 
+  async getDDS() {
+    const ddsKey = await this.loadDDSKey();
+    return new DDS({
+      privateKey: ddsKey,
+      infuraToken: this.infuraToken
+    });
+  }
+
+  async getEthereumAddress() {
+    const dds = await this.getDDS();
+    return dds.address;
+  }
+
+  async getEthereumBalance() {
+    const dds = await this.getDDS();
+    const balance = await dds.getBalance();
+    return Web3.utils.fromWei(balance);
+  }
+
   async loadDDSKey(): Promise<string> {
     return this.readFromFile(this.ddsKeyFilename);
   }
@@ -65,6 +84,15 @@ export class BitcoinKeyFragmentService {
     const initiatorDDSKey = web3.eth.accounts.create().privateKey;
     await this.writeToFile(this.ddsKeyFilename, initiatorDDSKey);
     return initiatorDDSKey;
+  }
+
+  async sendBitcoinKeyFragmentAsEthereumTransaction() {
+    const dds = await this.getDDS();
+    const bitcoinKeyFragment = await this.loadBitcoinKeyFragment();
+    return dds.store({
+      data: bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(bitcoinKeyFragment.getPrivateKey(),this.aesKey)),
+      gasPrice: Web3.utils.toWei('5', 'gwei')
+    });
   }
 
   async removeFile(filename: string): Promise<any> {
