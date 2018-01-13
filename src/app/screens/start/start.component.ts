@@ -12,8 +12,8 @@ declare var cordova: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent implements OnInit {
-  entry = 'Войти';
-  create = 'Создать';
+  entry = 'Login';
+  create = 'Create';
   inProgress = false;
 
   constructor(private router: Router,
@@ -26,7 +26,7 @@ export class StartComponent implements OnInit {
   async onEntryClicked() {
     try {
       this.inProgress = true;
-      this.entry = 'Идет вход';
+      this.entry = 'Logging in';
       const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.loadBitcoinKeyFragment();
       this.walletService.setKeyFragment(bitcoinKeyFragment);
       this.router.navigate(['/waiting']);
@@ -35,21 +35,21 @@ export class StartComponent implements OnInit {
     }
     finally {
       this.inProgress = false;
-      this.entry = 'Войти'
+      this.entry = 'Login';
     }
   }
 
   async onCreateClicked() {
     try {
       this.inProgress = true;
-      this.create = 'Идет создание';
+      this.create = 'Creating';
       const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.generateBitcoinKeyFragment();
       this.walletService.setKeyFragment(bitcoinKeyFragment);
       this.router.navigate(['/backup']);
     }
     finally {
       this.inProgress = false;
-      this.create = 'Создать';
+      this.create = 'Create';
     }
   }
 }

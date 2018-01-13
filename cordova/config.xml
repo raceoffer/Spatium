@@ -49,7 +49,7 @@
     <engine name="browser" spec="^5.0.2" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
-    <plugin name="cordova-custom-config" spec="^5.0.1" />
+    <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-x-toast" spec="^2.6.0" />
 </widget>

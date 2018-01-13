@@ -8,20 +8,21 @@ import {ActivatedRoute, Router} from "@angular/router";
   encapsulation: ViewEncapsulation.None
 })
 export class NavigatorComponent implements OnInit {
+  title = 'Wallet';
   isDarkTheme = false;
   navLinks = [
     {
-      name: 'Подключиться к устройству',
+      name: 'Pair devices',
       link: '/waiting',
       isSelected: false
     },
     {
-      name: 'Сохранить ключ в DHI',
+      name: 'Save key to the Decentralized Storage',
       link: '/backup',
       isSelected: false
     },
     {
-      name: 'Сменить кошелек',
+      name: 'Change wallet',
       link: '/start',
       isSelected: false
     }];

@@ -3,7 +3,7 @@
     <mat-progress-bar mode="indeterminate" *ngIf="loading" color="accent" style="width: 100%"></mat-progress-bar>
   </div>
   <mat-form-field class="full-width" color="accent">
-    <mat-select placeholder="С какого кошелька" [disabled]="disableFields" [(value)]="selected">
+    <mat-select [placeholder]="currentWalletPh" [disabled]="disableFields" [(value)]="selected">
       <mat-option *ngIf="walletAddress" [value]="walletAddress">
         <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
       </mat-option>
@@ -26,7 +26,7 @@
   </table>
 
   <mat-form-field class="full-width" color="accent">
-    <input matInput placeholder="Адрес получателя" [(ngModel)]="addressReceiver" [disabled]="disableFields">
+    <input matInput [placeholder]="receiverPh" [(ngModel)]="addressReceiver" [disabled]="disableFields">
   </mat-form-field>
 
   <table class="full-width">
@@ -49,15 +49,14 @@
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
 
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="state==1">Ожидается подтверждение</span>
+          *ngIf="state==1">{{stAwaitConfirm}}</span>
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="state==2">Подписание транзакции</span>
+          *ngIf="state==2">{{stSigning}}</span>
     <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="state==1 || state==2"></mat-progress-bar>
 
     <span *ngIf="state==3"
-          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">
-      Транзакция создана и подписана
+          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{stSigningResult}}
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="state==3"></mat-progress-bar>
@@ -66,19 +65,19 @@
       Отправить
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" *ngIf="state==0"
-            [disabled]="initContinueDisabled">Перевести
+            [disabled]="initContinueDisabled">{{stTransfer}}
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" (click)="accept()" *ngIf="state==1 && isSecond"
-            [disabled]="initContinueDisabled">Подтвердить
+            [disabled]="initContinueDisabled">{{stConfirm}}
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" *ngIf="state==2"
-            [disabled]="initContinueDisabled">Продолжить
+            [disabled]="initContinueDisabled">{{stContinue}}
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" (click)="skip()" *ngIf="state==3 && isSecond"
-            [disabled]="initContinueDisabled">Продолжить
+            [disabled]="initContinueDisabled">{{stContinue}}
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3 && state>0)" (click)="cancelTransaction()"
-            [disabled]="initCancelDisabled">Отмена
+            [disabled]="initCancelDisabled">{{stCancel}}
     </button>
   </div>
 </div>

@@ -15,6 +15,10 @@ export class BitcoinKeyFragmentService {
   bitcoinKeyFragmentFilename = 'enc_initiator.key';
   infuraToken = 'DKG18gIcGSFXCxcpvkBm';
   aesKey = Buffer.from("57686f277320796f75722064616464793f313837333631393832373336383133f75722064616464793f3138373336313","hex");
+  ddsNoData = 'No data in Decentralized Storage';
+  ddsKeyNotFound = 'Bitcoin key is not found in the Decentralized Storage';
+  ddsNotAvailable = 'Decentralized Storage is not available';
+  localKeyNotFound = 'Bitcoin key is not found on the device';
 
   async generateBitcoinKeyFragment() {
     const initiatorDDSKey = await this.generateDDSKey();  // ensure DDS key saved locally
@@ -39,21 +43,21 @@ export class BitcoinKeyFragmentService {
       const initiatorDDSData = await initiatorDDS.read();
       if (!initiatorDDSData) {
         console.warn('No data in DDS - reading key from a local file');
-        window.plugins.toast.showLongBottom('Нет данных в ДХИ', 3000, 'Нет данных в ДХИ', console.log('Нет данных в ДХИ'));
-        throw new Error('Ключ не найден в ДХИ');
+        window.plugins.toast.showLongBottom(this.ddsNoData, 3000, this.ddsNoData, console.log(this.ddsNoData));
+        throw new Error(this.ddsKeyNotFound);
       }
       bitcoinKeyFragment = bcoin.keyring.fromPrivate(BitcoinKeyFragmentService.decrypt(bcoin.utils.base58.decode(initiatorDDSData), this.aesKey));
       return bitcoinKeyFragment;
     }
     catch (keyError) {
-      window.plugins.toast.showLongBottom('Нет доступа к ДХИ', 3000, 'Нет доступа к ДХИ', console.log('Нет доступа к ДХИ'));
+      window.plugins.toast.showLongBottom(this.ddsNotAvailable, 3000, this.ddsKeyFilename, console.log(this.ddsNotAvailable));
       try {
         bitcoinKeyFragment = bcoin.keyring.fromPrivate(BitcoinKeyFragmentService.decrypt(
           bcoin.utils.base58.decode(await this.readFromFile(this.bitcoinKeyFragmentFilename)), this.aesKey));
         return bitcoinKeyFragment;
       }
       catch (fileError) {
-        throw new Error('Частичный ключ Bitcoin не найден');
+        throw new Error(this.localKeyNotFound);
       }
     }
   }
