@@ -12,19 +12,52 @@ export class NavigatorComponent implements OnInit {
   isDarkTheme = false;
   navLinks = [
     {
-      name: 'Pair devices',
-      link: '/waiting',
-      isSelected: false
+      name: 'Wallet',
+      link: '/wallet',
+      isSelected: false,
+      isActive: true
     },
     {
-      name: 'Save key to the Decentralized Storage',
+      name: 'Exchange',
+      link: '',
+      isSelected: false,
+      isActive: false
+    },
+    {
+      name: 'ICO',
+      link: '',
+      isSelected: false,
+      isActive: false
+    },
+    {
+      name: 'Portfolio Investment',
+      link: '',
+      isSelected: false,
+      isActive: false
+    },
+    {
+      name: 'Verification',
+      link: '',
+      isSelected: false,
+      isActive: false
+    },
+    {
+      name: 'Backup to Decentralized Storage',
       link: '/backup',
-      isSelected: false
+      isSelected: false,
+      isActive: true
     },
     {
-      name: 'Change wallet',
+      name: 'Settings',
+      link: '',
+      isSelected: false,
+      isActive: false
+    },
+    {
+      name: 'Exit',
       link: '/start',
-      isSelected: false
+      isSelected: false,
+      isActive: true
     }];
 
   changeTheme(): void {
