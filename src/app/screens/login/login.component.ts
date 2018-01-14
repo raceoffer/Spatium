@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
 
-declare var window;
+declare const window: any;
+declare const Utils: any;
 
 @Component({
   selector: 'app-login',
@@ -9,25 +11,25 @@ declare var window;
 })
 
 export class LoginComponent implements OnInit {
-
   entry = 'Log in';
   stLogin = 'Username';
   login = '';
-  isDisable = false;
 
-  constructor() { }
+  constructor(private router: Router,
+              private ngZone: NgZone) { }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  async letLogin() {
+    if (!await this.isEthernetAvailable()) {
+      window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+      return;
+    }
+
+    this.router.navigate([['/initiator-auth', { login: this.login }]]);
   }
 
-
-  letLogin(): void {
-    this.isDisable = !this.isDisable;
-    this.isEthernetAvailable();
-  }
-
-  isEthernetAvailable(): void {
-    window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
-    this.isDisable = !this.isDisable;
+  async isEthernetAvailable() {
+    return await Utils.testNetwork();
   }
 }

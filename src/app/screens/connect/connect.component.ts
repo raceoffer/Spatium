@@ -35,7 +35,7 @@ export class ConnectComponent implements OnInit {
     });
 
     this.wallet.onStatus.subscribe((status) => this.ngZone.run(() => {
-      this.progress = Math.max(Math.min(Math.round(status * 100 / 7), 100), 0);
+      this.progress = Math.max(Math.min(Math.round(status * 100 / 8), 100), 0);
     }));
   }
 }
