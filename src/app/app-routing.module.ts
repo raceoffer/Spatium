@@ -10,10 +10,12 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import {PincodeComponent} from "./screens/pincode/pincode.component";
 import {LoginComponent} from "./screens/login/login.component";
+import {AuthComponent} from "./screens/auth/auth.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
+  { path: 'auth', component: AuthComponent },
   { path: 'initiator-auth', component: InitiatorAuthComponent },
   { path: 'verifier-auth', component: VerifierAuthComponent  },
   { path: 'pincode', component: PincodeComponent },

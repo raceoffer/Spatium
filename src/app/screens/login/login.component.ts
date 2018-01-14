@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {Router} from "@angular/router";
 
 declare var window;
 
@@ -12,14 +13,22 @@ export class LoginComponent implements OnInit {
 
   entry = 'Log in';
   stLogin = 'Username';
-  login = '';
+  _userNameValue = '';
   isDisable = false;
 
-  constructor() { }
+  get userNameValue() {
+    return this._userNameValue;
+  }
+
+  @Input()
+  set userNameValue(value) {
+    this._userNameValue = value;
+  }
+
+  constructor(private readonly router: Router) { }
 
   ngOnInit() {
   }
-
 
   letLogin(): void {
     this.isDisable = !this.isDisable;
@@ -27,7 +36,15 @@ export class LoginComponent implements OnInit {
   }
 
   isEthernetAvailable(): void {
-    window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
-    this.isDisable = !this.isDisable;
+    console.log(this._userNameValue);
+    var isOnline = true;
+
+    if (isOnline) {
+      this.router.navigate(['/auth'], { queryParams: { username: this._userNameValue } });
+
+    } else {
+      window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+      this.isDisable = !this.isDisable;
+    }
   }
 }

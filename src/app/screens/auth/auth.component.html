@@ -14,15 +14,22 @@
   <div class="start-tagline-padding">
     <span class="start-tagline">Secure your funds</span>
   </div>
-
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
-
-    <div class="spatium-textfield entry bottom32">
-      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userNameValue">
-    </div>
-
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" >{{entry}}</button>
+  <div class="margin-top-18">
+    <mat-icon class="color-custom-dark">lock_outline</mat-icon>
   </div>
+  <div class="margin-top-18 light">
+    {{username}}
+  </div>
+
+
+  <div class="margin-top-18">
+    <button mat-fab>
+      <mat-icon (click)="sddNewFactor()">add
+      </mat-icon>
+    </button>
+  </div>
+
+  <button mat-raised-button color="accent" class="width-button color overlay-bottom-center" [disabled]="loginDisable" (click)="letLogin()" >{{login}}</button>
 
 </div>
 
