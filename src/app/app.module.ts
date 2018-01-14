@@ -16,6 +16,7 @@ import {
   MatDialogModule,
   MatSelectModule,
   MatSnackBarModule,
+  MatFormFieldModule
 } from '@angular/material';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {FlexLayoutModule} from '@angular/flex-layout';
@@ -28,6 +29,7 @@ import { WaitingComponent } from './screens/waiting/waiting.component';
 import {ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
+import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
 import {WalletService} from './services/wallet.service';
 import {BluetoothService} from './services/bluetooth.service';
 import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
@@ -41,7 +43,8 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
     ConnectComponent,
     WaitingComponent,
     BackupComponent,
-    SendTransactionComponent
+    SendTransactionComponent,
+    VerifyTransactionComponent
   ],
   imports: [
     FormsModule,
@@ -64,7 +67,8 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
     ClipboardModule,
     MatDialogModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatFormFieldModule
   ],
   providers: [
     WalletService,

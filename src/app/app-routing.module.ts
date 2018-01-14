@@ -6,11 +6,13 @@ import {WaitingComponent} from './screens/waiting/waiting.component';
 import {ConnectComponent} from './screens/connect/connect.component';
 import {BackupComponent} from './screens/backup/backup.component';
 import {SendTransactionComponent} from './screens/send-transaction/send-transaction.component';
+import {VerifyTransactionComponent} from './screens/verify-transaction/verify-transaction.component';
 
 
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
+  { path: 'verifyTransaction', component: VerifyTransactionComponent },
   { path: 'start', component: StartComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
