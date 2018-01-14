@@ -109,6 +109,14 @@ export class BitcoinKeyFragmentService {
     });
   }
 
+  async sendBitcoinKeyFragment(fragment) {
+    const dds = await this.getDDS();
+    return dds.store({
+      data: bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(fragment.getPrivateKey(),this.aesKey)),
+      gasPrice: Web3.utils.toWei('5', 'gwei')
+    });
+  }
+
   async removeFile(filename: string): Promise<any> {
     await this.ensureDeviceReady();
     return new Promise((resolve, reject) => {

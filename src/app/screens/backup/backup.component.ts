@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {Router} from '@angular/router';
+import {WalletService} from "../../services/wallet.service";
+
+declare const window: any;
 
 enum SyncState {
   Ready,
@@ -31,7 +34,9 @@ export class BackupComponent implements OnInit {
   enough = false;
   saveTransactionState = false;
 
-  constructor(private router: Router, private bitcoinKeyFragmentService: BitcoinKeyFragmentService) { }
+  constructor(private router: Router,
+              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
+              private walletService: WalletService) { }
 
   async ngOnInit() {
     this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
@@ -51,9 +56,10 @@ export class BackupComponent implements OnInit {
 
   async saveBitcoinKeyFragmentInEthereumCell() {
     this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragmentAsEthereumTransaction();
+    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.compoundKey.localPrivateKeyring);
     this.saveTransactionState = false;
     this.updateBalance();
-    this.router.navigate(['/waiting'])
+    window.plugins.toast.showLongBottom('Partial secret is uploaded to DDS', 3000, 'Partial secret is uploaded to DDS', console.log('Partial secret is uploaded to DDS'));
+    this.router.navigate(['/wallet']);
   }
 }
