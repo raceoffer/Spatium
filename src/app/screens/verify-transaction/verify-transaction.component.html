@@ -1,0 +1,43 @@
+<div fxLayout="column" fxLayoutAlign="start center" style="width:100%">
+  <mat-toolbar color="primary" class="shadow">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="verify-transaction-text">
+    <span>This device is linked to {{name}}. All transactions will be confirmed by you.</span>
+  </div>
+
+  <div class="transaction-container" *ngIf="showTransaction">
+    
+    <mat-form-field class="full-width" color="accent">
+      <input matInput placeholder="Recipient address" [(ngModel)]="address" disabled>
+    </mat-form-field>
+
+    <table class="full-width">
+      <tr>
+        <td align="left" width="50%">
+          <mat-form-field style="width: 120px;" color="accent">
+            <input matInput placeholder="BTC" [(ngModel)]="btc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01" disabled>
+          </mat-form-field>
+        </td>
+        <td align="right" width="50%">
+          <mat-form-field style="width: 120px;" color="accent">
+            <input matInput placeholder="USD" [(ngModel)]="usd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01" disabled>
+          </mat-form-field>
+        </td>
+      </tr>
+    </table>
+
+    <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
+      <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
+      <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+    </div>
+
+  </div>
+</div>

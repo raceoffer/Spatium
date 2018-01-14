@@ -1,0 +1,21 @@
+.verify-transaction-text {
+  padding: 16px 24px 16px 24px;
+  font-size: 14px;
+  font-family: 'Roboto-Light';
+}
+
+.transaction-container {
+  width: 100%;
+}
+
+.mat-form-field-infix {
+  width: 100%!important;
+}
+
+.full-width{
+  padding-left: 24px;
+}
+
+table .full-width td {
+  width: 100px;
+}
