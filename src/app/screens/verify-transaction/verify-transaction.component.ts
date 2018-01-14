@@ -11,9 +11,9 @@ declare const bcoin: any;
   templateUrl: './verify-transaction.component.html',
   styleUrls: ['./verify-transaction.component.css']
 })
-export class VerifyTransactionComponent implements AfterViewInit {
+export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   name;
-  showTransaction: boolean = true;
+  showTransaction = false;
   tx;
   entropy;
   address;
@@ -21,21 +21,46 @@ export class VerifyTransactionComponent implements AfterViewInit {
   rateBtcUsd = 15000;
   usd;
 
+  enableBTmessage = 'Turn on Bluetooth to proceed';
+  Label = 'Device paring';
+  disabledBT = true;
+
+  synching = false;
+  ready = false;
+
   constructor(private route: ActivatedRoute,
               private bt: BluetoothService,
               private wallet: WalletService,
               private router: Router,
               private ngZone: NgZone) { }
 
-  ngAfterViewInit() {
+  ngOnInit() {
+    this.wallet.resetRemote();
+    this.wallet.onFinish.subscribe(async () => await this.ngZone.run(async () => {
+      console.log(this.wallet.address);
+      this.ready = true;
+      this.synching = false;
+    }));
+    this.bt.onConnected.subscribe( async () => await this.ngZone.run(async () => {
+      await this.wallet.startSync();
+      this.synching = true;
+      this.ready = false;
+    }));
+    this.bt.onDisconnected.subscribe(async () => await this.ngZone.run(async () => {
+      this.synching = false;
+      this.ready = false;
+    }));
+  }
+
+  async ngAfterViewInit() {
     this.route.queryParams.subscribe(params => {
       console.log(params); // {order: "popular"}
 
       this.name = params.name;
       console.log(this.name); // popular
-    });  
+    });
 
-    this.wallet.onVerifyTransaction.subscribe(async (event) => {
+    this.wallet.onVerifyTransaction.subscribe(async (event) => await this.ngZone.run(async () => {
       this.tx = event.transaction;
       this.entropy = event.entropy;
       this.address = event.address;
@@ -47,17 +72,14 @@ export class VerifyTransactionComponent implements AfterViewInit {
       console.log(this.address);
       console.log(this.btc);
       console.log(this.usd);
-    });
+    }));
 
     this.wallet.resetRemote();
     this.wallet.onStatus.subscribe((status) => {
       console.log(status);
     });
-    this.bt.onDisconnected.subscribe(() => {
-      this.ngZone.run(() => {
-        this.router.navigate(['/waiting']);
-      });
-    });
+
+    await this.changeBtState();
   }
 
   confirm() {
@@ -72,4 +94,13 @@ export class VerifyTransactionComponent implements AfterViewInit {
     this.wallet.reject();
   }
 
+  async changeBtState() {
+    this.disabledBT = !await this.bt.ensureEnabled();
+    await this.bt.ensureListening();
+  }
+
+  async sddNewDevice() {
+    await this.bt.openSettings();
+    await this.changeBtState();
+  }
 }

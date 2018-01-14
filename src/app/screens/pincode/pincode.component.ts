@@ -50,7 +50,7 @@ export class PincodeComponent implements AfterViewInit {
     if (this.next && this.next === 'waiting') {
       const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.pincode.toString());
       this.walletService.setKeyFragment(keyFragment);
-      this.router.navigate(['/waiting']);
+      this.router.navigate(['/verifyTransaction']);
     }
   }
 
