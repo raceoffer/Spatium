@@ -3,8 +3,8 @@ import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.ser
 import {Router} from '@angular/router';
 import {WalletService} from '../../services/wallet.service';
 
-declare var window: any;
-declare var cordova: any;
+declare const window: any;
+declare const cordova: any;
 
 @Component({
   selector: 'app-start',
@@ -12,44 +12,16 @@ declare var cordova: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent implements OnInit {
-  entry = 'Войти';
-  create = 'Создать';
-  inProgress = false;
-
-  constructor(private router: Router,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService) { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
   }
 
-  async onEntryClicked() {
-    try {
-      this.inProgress = true;
-      this.entry = 'Идет вход';
-      const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.loadBitcoinKeyFragment();
-      this.walletService.setKeyFragment(bitcoinKeyFragment);
-      this.router.navigate(['/waiting']);
-    } catch (e) {
-      window.plugins.toast.showLongBottom(e.message, 3000, 'bottom', console.log(e.message));
-    }
-    finally {
-      this.inProgress = false;
-      this.entry = 'Войти'
-    }
+  async onOpenClicked() {
+    this.router.navigate(['/initiator-auth']);
   }
 
-  async onCreateClicked() {
-    try {
-      this.inProgress = true;
-      this.create = 'Идет создание';
-      const bitcoinKeyFragment = await this.bitcoinKeyFragmentService.generateBitcoinKeyFragment();
-      this.walletService.setKeyFragment(bitcoinKeyFragment);
-      this.router.navigate(['/backup']);
-    }
-    finally {
-      this.inProgress = false;
-      this.create = 'Создать';
-    }
+  async onConnectClicked() {
+    this.router.navigate(['/verifier-auth']);
   }
 }

@@ -1,0 +1,18 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <div class="margin86 start-logo-text" >
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <mat-form-field class="full-width" color="accent">
+      <input matInput type="number" pattern="[0-9]*" placeholder="Pin code" [(ngModel)]="pinCode" (submit)="onSubmitClicked()">
+      <button mat-button *ngIf="pinCode" matSuffix mat-icon-button aria-label="Clear" (click)="pinCode=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <button mat-raised-button color="accent" class="width-button color" (click)="onSubmitClicked()">Submit</button>
+  </div>
+</div>
+

@@ -17,20 +17,23 @@ import {
   MatSelectModule,
   MatSnackBarModule,
 } from '@angular/material';
-import {OverlayContainer} from '@angular/cdk/overlay';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {AppComponent} from './app.component';
-import {AppRoutingModule} from './app-routing.module';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
+import { InitiatorAuthComponent } from './screens/initiator-auth/initiator-auth.component';
+import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
-import {ClipboardModule} from 'ngx-clipboard/dist';
+import { ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
-import {WalletService} from './services/wallet.service';
-import {BluetoothService} from './services/bluetooth.service';
-import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
+import { WalletService } from './services/wallet.service';
+import { BluetoothService } from './services/bluetooth.service';
+import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
+import { PincodeComponent } from './screens/pincode/pincode.component';
 
 
 @NgModule({
@@ -38,10 +41,13 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
     AppComponent,
     NavigatorComponent,
     StartComponent,
+    InitiatorAuthComponent,
+    VerifierAuthComponent,
     ConnectComponent,
     WaitingComponent,
     BackupComponent,
-    SendTransactionComponent
+    SendTransactionComponent,
+    PincodeComponent
   ],
   imports: [
     FormsModule,
@@ -77,6 +83,6 @@ import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service
 })
 export class AppModule {
   constructor(overlayContainer: OverlayContainer) {
-    //overlayContainer.getContainerElement().classList.add('dark-theme');
+    // overlayContainer.getContainerElement().classList.add('dark-theme');
   }
 }
