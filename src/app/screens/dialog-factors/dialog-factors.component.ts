@@ -1,4 +1,4 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, NgZone} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
 import {Router} from "@angular/router";
 
@@ -30,12 +30,17 @@ export class DialogFactorsComponent {
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
     private router: Router,
+    private ngZone: NgZone,
     @Inject(MAT_DIALOG_DATA) public data: any) { }
 
 
   goTo(factor): void {
     this.dialogRef.close();
-    this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
+
+    this.ngZone.run(() => {
+      this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
+    });
+
   }
 
 }

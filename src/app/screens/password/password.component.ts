@@ -1,5 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, NgZone, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
+import {AuthService} from "../../services/auth.service";
 
 declare var window;
 
@@ -24,13 +25,22 @@ export class PasswordComponent implements OnInit {
     this._passwordValue = value;
   }
 
-  constructor(private readonly router: Router) { }
+  constructor(private readonly router: Router,
+              private ngZone: NgZone,
+              private authSevice: AuthService) { }
 
   ngOnInit() {
   }
 
   goNext(): void {
-    this.router.navigate(['/auth'], { queryParams: { username: this._passwordValue } });
+    this.authSevice.addFactor({
+      name: 'Password',
+      icon: 'keyboard',
+      value: this._passwordValue.toString(),
+    });
+    this.ngZone.run(() => {
+      this.router.navigate(['/auth']);
+    });
   }
 
 }

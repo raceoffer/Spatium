@@ -2,6 +2,7 @@ import {Component, Input, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {WalletService} from '../../services/wallet.service';
+import {AuthService} from "../../services/auth.service";
 
 @Component({
   selector: 'app-pincode',
@@ -17,6 +18,7 @@ export class PincodeComponent implements AfterViewInit {
   constructor(private route: ActivatedRoute,
               private router: Router,
               private ngZone: NgZone,
+              private authSevice: AuthService,
               private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
               private walletService: WalletService) {
     this.route.params.subscribe(params => {
@@ -55,6 +57,16 @@ export class PincodeComponent implements AfterViewInit {
       const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.pincode.toString());
       this.walletService.setKeyFragment(keyFragment);
       this.router.navigate(['/verifyTransaction']);
+    } else {
+      this.authSevice.addFactor({
+        name: 'PIN',
+        icon: 'dialpad',
+        value: this.pincode.toString(),
+      });
+
+      this.ngZone.run(() => {
+        this.router.navigate(['/auth']);
+      });
     }
   }
 

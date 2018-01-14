@@ -31,11 +31,17 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      this.username = params.username;
+      if (params['username']) {
+        this.username = params.username;
+        this.authSevice.login = this.username;
+      }
     });
   }
 
   ngAfterViewInit() {
+    if (!this.username) {
+      this.username = this.authSevice.login;
+    }
     this.factors = this.authSevice.factors;
     this.cd.detectChanges();
   }
@@ -45,19 +51,6 @@ export class AuthComponent implements OnInit, AfterViewInit {
       width: '250px',
       data: { }
     });
-
-    dialogRef.afterClosed().subscribe(result => this.ngZone.run(() => {
-      console.log('The dialog was closed');
-      // zzzzzzzz
-      this.authSevice.addFactor({
-        name: 'Password',
-        icon: 'keyboard',
-        value: 'dlkfsjlkfsd',
-      });
-      ///
-      this.factors = this.authSevice.factors;
-      this.cd.detectChanges();
-    }));
   }
 
   removeFactor(factor): void {
