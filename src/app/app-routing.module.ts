@@ -9,6 +9,7 @@ import { ConnectComponent } from './screens/connect/connect.component';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import {PincodeComponent} from "./screens/pincode/pincode.component";
+import {LoginComponent} from "./screens/login/login.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -16,6 +17,7 @@ const appRoutes: Routes = [
   { path: 'initiator-auth', component: InitiatorAuthComponent },
   { path: 'verifier-auth', component: VerifierAuthComponent  },
   { path: 'pincode', component: PincodeComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'connect', component: ConnectComponent },
