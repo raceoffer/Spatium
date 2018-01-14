@@ -12,8 +12,8 @@
       <p class="list-info" mat-line> {{address}}</p>
     </div>
 
-    <mat-spinner color="accent" strokeWidth="2"></mat-spinner>
-
+    <mat-progress-spinner mode="determinate" color="accent" [value]="progress"></mat-progress-spinner>
+    <mat-progress-bar mode="determinate" value="progress"></mat-progress-bar>
   </div>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">

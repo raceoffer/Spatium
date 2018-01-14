@@ -1,7 +1,7 @@
-import {Component, OnInit, AfterViewInit, NgZone} from '@angular/core';
+import { Component, OnInit, NgZone} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {BluetoothService} from '../../services/bluetooth.service';
-import {WalletService} from '../../services/wallet.service';
+import { BluetoothService } from '../../services/bluetooth.service';
+import { WalletService } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-connect',
@@ -13,6 +13,8 @@ export class ConnectComponent implements OnInit {
   busyClass = 'fade-background invisible';
   name: string;
   address: string;
+
+  progress = 0;
 
   constructor(private route: ActivatedRoute,
               private bt: BluetoothService,
@@ -30,5 +32,9 @@ export class ConnectComponent implements OnInit {
       this.address = params.address;
       console.log(this.address); // popular
     });
+
+    this.wallet.onStatus.subscribe((status) => this.ngZone.run(() => {
+      this.progress = Math.max(Math.min(Math.round(status * 100 / 7), 100), 0);
+    }));
   }
 }
