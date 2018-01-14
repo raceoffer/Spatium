@@ -3,7 +3,6 @@ import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.ser
 import {Router} from '@angular/router';
 
 declare const window: any;
-declare const CompoundKey: any;
 
 @Component({
   selector: 'app-initiator-auth',
@@ -19,7 +18,7 @@ export class VerifierAuthComponent implements OnInit {
   ngOnInit() {}
 
   async onSubmitClicked() {
-    const keyFragment = CompoundKey.fromSeed(this.pinCode.toString());
+    const keyFragment = await this.bitcoinKeyFragmentService.keyFromSeed(this.pinCode.toString());
     window.plugins.toast.showLongBottom(
       keyFragment.getPrivateKey('base58'),
       3000,

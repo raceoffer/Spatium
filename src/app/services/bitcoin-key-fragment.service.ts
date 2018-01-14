@@ -24,6 +24,10 @@ export class BitcoinKeyFragmentService {
     return bitcoinKeyFragment;
   }
 
+  async keyFromSeed(seed) {
+    return CompoundKey.fromSeed(seed);
+  }
+
   async loadBitcoinKeyFragment() {
     /* try to get bitcoin key fragment from DDS using DDS key,
        if failed - try to get bitcoin key fragment from local file.
