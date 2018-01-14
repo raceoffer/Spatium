@@ -13,6 +13,20 @@ declare const window: any;
 })
 export class SendTransactionComponent implements AfterViewInit {
   @Input() addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
+
+  currentWalletPh = 'Wallet';
+  receiverPh = 'Recipient';
+
+  stAwaitConfirm = 'Confirm on the second device';
+  stSigning = 'Signing transaction';
+  stSigningResult = 'Transaction is signed';
+
+  stContinue = 'Continue';
+  stCancel = 'Cancel';
+  stConfirm = 'Confirm';
+  stTransfer = 'Transfer';
+
+
   selected = '';
 
   _sendBtc = 0.1;

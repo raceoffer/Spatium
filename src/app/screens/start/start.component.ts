@@ -12,13 +12,17 @@ declare const cordova: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent implements OnInit {
+  stOpen = 'Open wallet';
+  stConnect = 'Connect';
+  inProgress = false;
+
   constructor(private router: Router) { }
 
   ngOnInit() {
   }
 
   async onOpenClicked() {
-    this.router.navigate(['/initiator-auth']);
+    this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {

@@ -7,9 +7,9 @@
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
     <button mat-raised-button color="accent" class="width-button color"
-            [disabled]="inProgress" (click)="onOpenClicked()">Open wallet</button>
+            [disabled]="inProgress" (click)="onOpenClicked()">{{stOpen}}</button>
     <button mat-raised-button color="accent" class="width-button color"
-            [disabled]="inProgress" (click)="onConnectClicked()">Connect</button>
+            [disabled]="inProgress" (click)="onConnectClicked()">{{stConnect}}</button>
 
     <div class="progress small buttons-progress" *ngIf="inProgress"></div>
   </div>

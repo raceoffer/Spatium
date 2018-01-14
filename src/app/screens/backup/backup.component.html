@@ -4,13 +4,13 @@
       <button mat-icon-button routerLink="/start">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <span>Сохранение в ДХИ</span>
+      <span>{{backupLabel}}</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
   <mat-list role="list" style = "margin-bottom: 23px !important;">
     <mat-list-item>
-      <p class="list-info" mat-line>Ethereum адрес</p>
+      <p class="list-info" mat-line>{{ethAddressLabel}}</p>
       <p class="list-name small" mat-line>{{ethereumAddress}}</p>
       <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
         <mat-icon matSuffix>content_copy</mat-icon>
@@ -18,13 +18,13 @@
     </mat-list-item>
 
     <mat-list-item>
-      <p class="list-info" mat-line>Стоимость сохранения</p>
+      <p class="list-info" mat-line>{{backupCostLabel}}</p>
       <p class="list-name" mat-line> {{comission}} ethereum </p>
     </mat-list-item>
 
     <mat-list-item>
-      <p class="list-name" mat-line *ngIf="!enough"> Не хватает средств </p>
-      <p class="list-info" mat-line>Etherium balance</p>
+      <p class="list-name" mat-line *ngIf="!enough"> {{notEnoughLabel}} </p>
+      <p class="list-info" mat-line>{{ethBalanceLabel}}</p>
       <p class="list-name" mat-line> {{ethereumBalance}} </p>
       <!--<div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">-->
       <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="updateBalance()">
@@ -40,16 +40,16 @@
     <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="saveTransactionState"></mat-spinner>
     <button mat-raised-button color="accent" class="width-button"
             (click)="saveBitcoinKeyFragmentInEthereumCell()"
-            *ngIf="enough && !saveTransactionState">Сохранить</button>
+            *ngIf="enough && !saveTransactionState">{{SaveLabel}}</button>
 
     <button mat-raised-button color="accent" class="width-button"
             (click)="saveBitcoinKeyFragmentInEthereumCell()"
-            *ngIf="saveTransactionState">Отменить</button>
+            *ngIf="saveTransactionState">{{CancelLabel}}</button>
 
     <button mat-raised-button color="accent"
             class="width-button"
             routerLink="/waiting"
-            *ngIf="!saveTransactionState">Пропустить</button>
+            *ngIf="!saveTransactionState">{{SkipLabel}}</button>
   </div>
 
 

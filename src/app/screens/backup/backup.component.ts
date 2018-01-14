@@ -14,6 +14,14 @@ enum SyncState {
   styleUrls: ['./backup.component.css']
 })
 export class BackupComponent implements OnInit {
+  backupLabel = 'Saving to Decentralized Storage';
+  ethAddressLabel = 'Ethereum address';
+  backupCostLabel = 'Cost';
+  notEnoughLabel = 'Not enough Ethereum';
+  ethBalanceLabel = 'Ethereum balance';
+  SaveLabel = 'Save';
+  CancelLabel = 'Cancel';
+  SkipLabel = 'Skip';
 
   ethereumAddress = '';
   ethereumBalance = '';

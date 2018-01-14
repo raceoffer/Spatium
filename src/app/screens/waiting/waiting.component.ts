@@ -9,8 +9,8 @@ import {WalletService} from '../../services/wallet.service';
   styleUrls: ['./waiting.component.css']
 })
 export class WaitingComponent implements OnInit, AfterViewInit {
-  Label = 'Подключение устройства';
-  connect = 'Подключиться';
+  enableBTmessage = 'Turn on Bluetooth to proceed';
+  Label = 'Device paring';
   disabledBT = true;
   overlayClass = 'overlay invisible';
 
