@@ -30,8 +30,11 @@ export class LoginComponent implements OnInit {
   }
 
   async letLogin() {
-      this.router.navigate(['/waiting']);
-
+    if (await this.isEthernetAvailable()) {
+      this.router.navigate(['/auth'], { queryParams: { username: this._userNameValue } });
+    } else {
+      window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+    }
   }
 
   async isEthernetAvailable() {

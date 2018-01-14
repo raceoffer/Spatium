@@ -2,28 +2,22 @@ import {Injectable} from '@angular/core';
 
 @Injectable()
 export class AuthService {
-  enabled = false;
-
   login: string;
-  factors: Factors[];
+  factors: any;
 
-
-  constructor() {}
-
-
-}
-
-enum FactorType {PIN, Password}
-
-export class Factors {
-  type: FactorType;
-  value: string;
-  icon: string;
-
-  constructor( type: FactorType, value: string, icon: string ) {
-    this.type = type;
-    this.value = value;
-    this.icon = icon;
+  constructor() {
+    this.factors = [];
   }
 
+  addFactor(factor) {
+    this.factors.push(factor);
+  }
+
+  rmFactor(factor) {
+    this.factors.splice(this.factors.indexOf(factor), 1);
+  }
+
+  clearFactors() {
+    this.factors = [];
+  }
 }
