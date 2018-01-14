@@ -36,6 +36,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.wallet.resetRemote();
+    this.bt.disconnect();
     this.wallet.onFinish.subscribe(async () => await this.ngZone.run(async () => {
       console.log(this.wallet.address);
       this.ready = true;
@@ -47,12 +48,17 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.ready = false;
     }));
     this.bt.onDisconnected.subscribe(async () => await this.ngZone.run(async () => {
+      this.wallet.resetRemote();
       this.synching = false;
       this.ready = false;
     }));
   }
 
   async ngAfterViewInit() {
+    this.synching = false;
+    this.ready = false;
+    this.showTransaction = false;
+
     this.route.queryParams.subscribe(params => {
       console.log(params); // {order: "popular"}
 

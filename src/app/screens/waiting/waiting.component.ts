@@ -24,6 +24,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.wallet.resetRemote();
+    this.bt.disconnect();
     this.wallet.onFinish.subscribe(() => {
       console.log(this.wallet.address);
       this.ngZone.run(() => {
@@ -37,6 +38,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       });
     });
     this.bt.onDisconnected.subscribe(() => {
+      this.wallet.resetRemote();
       this.ngZone.run(() => {
         this.router.navigate(['/waiting']);
       });
@@ -54,7 +56,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   }
 
   async toDo(name, address) {
-    console.log('connect'+name+address);
+    console.log('connect' + name + address);
     this.overlayClass = 'overlay';
     try {
       await this.bt.connect({

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {MAT_DIALOG_DATA, MatDialog} from "@angular/material";
 import {DialogFactorsComponent} from "../dialog-factors/dialog-factors.component";
+import {BitcoinKeyFragmentService} from "../../services/bitcoin-key-fragment.service";
+import {WalletService} from "../../services/wallet.service";
 
 @Component({
   selector: 'app-auth',
@@ -12,10 +14,12 @@ export class AuthComponent implements OnInit {
 
   username = '';
   login = 'Log in'
-  loginDisable = true;
+  loginDisable = false;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
+              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
+              private walletService: WalletService,
               public dialog: MatDialog) { }
 
   ngOnInit() {
@@ -35,6 +39,11 @@ export class AuthComponent implements OnInit {
     });
   }
 
+  async letLogin() {
+    const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.username);
+    this.walletService.setKeyFragment(keyFragment);
+    this.router.navigate(['/waiting']);
+  }
 }
 
 
