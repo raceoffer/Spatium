@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
 declare const window: any;
@@ -13,20 +13,28 @@ declare const Utils: any;
 export class LoginComponent implements OnInit {
   entry = 'Log in';
   stLogin = 'Username';
-  login = '';
+  _userNameValue = '';
 
-  constructor(private router: Router,
-              private ngZone: NgZone) { }
+  get userNameValue() {
+    return this._userNameValue;
+  }
 
-  ngOnInit() {}
+  @Input()
+  set userNameValue(value) {
+    this._userNameValue = value;
+  }
+
+  constructor(private readonly router: Router) { }
+
+  ngOnInit() {
+  }
 
   async letLogin() {
-    if (!await this.isEthernetAvailable()) {
+    if (await this.isEthernetAvailable()) {
+      this.router.navigate(['/auth'], { queryParams: { username: this._userNameValue } });
+    } else {
       window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
-      return;
     }
-
-    this.router.navigate([['/initiator-auth', { login: this.login }]]);
   }
 
   async isEthernetAvailable() {

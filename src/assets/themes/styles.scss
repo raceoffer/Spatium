@@ -7,6 +7,7 @@ $charcoal_grey : rgb(55, 55, 65); //#373741
 $silver : rgb(226, 227, 227); //#e2e3e3
 $black_20 : rgba(0, 0, 0, 0.2);//
 $white_36 : rgba(255, 255, 255, 0.36);//
+$white_two : rgb(238, 238,	238);//eeeeee;
 $charcoal_grey_36 : rgba(55, 55, 65, 0.36);//
 $dark : rgb(29, 29, 38);//#1d1d26
 $selected : rgba(29, 29, 38, 0.03);//
@@ -249,6 +250,14 @@ body, buttons, html, input, textarea {
   padding-bottom: 32px;
 }
 
+.margin-top-18{
+  margin-top: 18px;
+}
+
+.light {
+  font-family: "Roboto-Light";
+}
+
 .logo-text {
   height: 22px !important;
 }
@@ -268,6 +277,12 @@ body, buttons, html, input, textarea {
   position: fixed !important;
   bottom: 20px;
   right: 20px;
+  z-index: 2;
+}
+
+.overlay-bottom-center{
+  position: fixed !important;
+  bottom: 20px;
   z-index: 2;
 }
 
@@ -374,7 +389,7 @@ td{
   cursor: pointer; /* Add a pointer on hover */
 }
 
-input[type="password"]
+input[type="password-pin"]
 {
   -webkit-text-security: disc!important;
   font:small-caption!important;
@@ -383,6 +398,8 @@ input[type="password"]
   letter-spacing: 0.5em!important;
   cursor: none;
 }
+
+
 
 .keyboard-button{
   width: 100px;
@@ -398,5 +415,57 @@ input[type="password"]
 .mat-icon-button.keyboard-size {
   width: 70px!important;
   height: 70px!important;
+}
+
+.mat-dialog-container {
+  border-radius: 12.5px!important;
+  padding: 0px!important;
+}
+
+.mat-dialog-content {
+  display: block;
+  margin: 0 !important;
+  padding: 10px 0px !important;
+
+  max-height: 65vh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.mat-dialog-actions:last-child {
+  margin-bottom: 0px !important;
+}
+
+.dialog-label{
+  width: 100%;
+  height: 40px;
+  background-color: $white_two;
+}
+
+.dialog-container {
+  padding: 10px 10px 10px 8px;
+}
+
+.factor-icon {
+  width: 33px;
+  height: 33px;
+  border-radius: 50px;
+  background-color: $bluish;
+  color: #FFFFFF;
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.factor-icon-padding {
+  padding-top: 4.5px;
+  padding-left: 4.5px;
+}
+
+.factor-text {
+  display: flex!important;
+  align-items: center!important;
+  font-size: 14px!important;
 }
 

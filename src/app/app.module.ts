@@ -35,6 +35,9 @@ import { BluetoothService } from './services/bluetooth.service';
 import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
 import { PincodeComponent } from './screens/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
+import { AuthComponent } from './screens/auth/auth.component';
+import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
+import { PasswordComponent } from './screens/password/password.component';
 
 
 @NgModule({
@@ -49,7 +52,10 @@ import { LoginComponent } from './screens/login/login.component';
     BackupComponent,
     SendTransactionComponent,
     PincodeComponent,
-    LoginComponent
+    LoginComponent,
+    AuthComponent,
+    DialogFactorsComponent,
+    PasswordComponent
   ],
   imports: [
     FormsModule,
@@ -80,7 +86,8 @@ import { LoginComponent } from './screens/login/login.component';
     BluetoothService,
   ],
   bootstrap: [
-    AppComponent
+    AppComponent,
+    DialogFactorsComponent
   ]
 })
 export class AppModule {
