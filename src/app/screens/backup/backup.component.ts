@@ -43,10 +43,8 @@ export class BackupComponent implements OnInit {
       this.syncState = SyncState.Syncing;
       this.ethereumBalance = await this.bitcoinKeyFragmentService.getEthereumBalance();
       this.enough = parseFloat(this.ethereumBalance) >= parseFloat(this.comission);
-      this.enough = true;
       this.syncState = SyncState.Ready;
-    }
-    catch (e) {
+    } catch (e) {
       this.syncState = SyncState.Error;
     }
   }
