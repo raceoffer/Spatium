@@ -1,6 +1,6 @@
 
 
-<div fxLayout="column" fxLayoutAlign="start center">
+<div fxLayout="column" fxLayoutAlign="start center" style="max-height: 100%;">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <button mat-icon-button routerLink="/start">
@@ -21,27 +21,28 @@
     {{username}}
   </div>
 
-  <mat-list>
-    <mat-list-item style="height: 54.5px!important; border-bottom: 1px solid #e0e0e0;" *ngFor="let factor of factors;"
-                   (click)="goTo(factor)">
-      <h4 mat-line class="factor-text">
-        <div class="factor-icon">
-          <mat-icon matPrefix class="factor-icon-padding">{{factor.icon}}</mat-icon>
-        </div>
-        {{factor.name}}
-      </h4>
-    </mat-list-item>
-  </mat-list>
+  <div style="width:100%; overflow: scroll; ">
+    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center"  *ngFor="let factor of factors;"
+         (click)="goTo(factor)">
+      <div style="margin-left: 50px;">
+        <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+          <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
+        </button>
+      </div>
+      <div>
+        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{factor.icon}}</mat-icon>
+      </div>
+    </div>
+  </div>
 
-
-  <div class="margin-top-18">
+  <div class="margin-top-18" style="padding-bottom: 10px">
     <button mat-fab>
       <mat-icon (click)="sddNewFactor()">add
       </mat-icon>
     </button>
   </div>
 
-  <button mat-raised-button color="accent" class="width-button color overlay-bottom-center" [disabled]="loginDisable" (click)="letLogin()" >{{login}}</button>
+  <button mat-raised-button color="accent" class="width-button color bottom-center" [disabled]="loginDisable" (click)="letLogin()" >{{login}}</button>
 
 </div>
 

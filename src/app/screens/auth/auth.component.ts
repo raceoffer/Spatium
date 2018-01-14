@@ -14,6 +14,22 @@ export class AuthComponent implements OnInit {
   login = 'Log in'
   loginDisable = true;
 
+  //из службы
+  factors = [
+    {
+      name: 'PIN',
+      icon: 'dialpad',
+      value: 'kjsadhkasjd',
+    },
+    {
+      name: 'Password',
+      icon: 'keyboard',
+      value: 'dlkfsjlkfsd',
+    },
+
+
+  ];
+
   constructor(private route: ActivatedRoute,
               private router: Router,
               public dialog: MatDialog) { }
@@ -34,6 +50,10 @@ export class AuthComponent implements OnInit {
       console.log('The dialog was closed');
 
     });
+  }
+
+  removeFactor(factor): void {
+
   }
 
 }
