@@ -14,6 +14,8 @@ export class ConnectComponent implements OnInit {
   name: string;
   address: string;
 
+  progressPrecent = 0;
+
   constructor(private route: ActivatedRoute,
               private bt: BluetoothService,
               private wallet: WalletService,
@@ -21,6 +23,10 @@ export class ConnectComponent implements OnInit {
               private ngZone: NgZone) { }
 
   ngOnInit() {
+    this.wallet.onStatus.subscribe((status) => {
+      this.progressPrecent = Math.max(Math.min(Math.round(status * 100 / 7), 100), 0);
+      console.log(this.progressPrecent);
+    });
     this.route.queryParams.subscribe(params => {
       console.log(params); // {order: "popular"}
 
