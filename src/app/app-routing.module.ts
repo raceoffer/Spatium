@@ -8,12 +8,14 @@ import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
+import {PincodeComponent} from "./screens/pincode/pincode.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
   { path: 'initiator-auth', component: InitiatorAuthComponent },
   { path: 'verifier-auth', component: VerifierAuthComponent  },
+  { path: 'pincode', component: PincodeComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'connect', component: ConnectComponent },

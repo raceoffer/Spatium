@@ -33,6 +33,7 @@ import { SendTransactionComponent } from './screens/send-transaction/send-transa
 import { WalletService } from './services/wallet.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
+import { PincodeComponent } from './screens/pincode/pincode.component';
 
 
 @NgModule({
@@ -45,7 +46,8 @@ import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.servi
     ConnectComponent,
     WaitingComponent,
     BackupComponent,
-    SendTransactionComponent
+    SendTransactionComponent,
+    PincodeComponent
   ],
   imports: [
     FormsModule,

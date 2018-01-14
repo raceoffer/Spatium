@@ -51,6 +51,16 @@ $green: rgb(24, 154, 57);//#189a39
   width: calc(100% - 128px)!important;
 }
 
+.keyboard-row {
+  width: calc(100% - 48px)!important;
+}
+
+.keyboard-ok {
+  font-size: 34.5px!important;
+  height:34.5px!important;
+  width: 34.5px!important;
+}
+
 .entry-start {
   margin-top: 45%;
 }
@@ -192,6 +202,14 @@ mat-icon.size-30{
   font-family: Roboto,Roboto-Regular,sans-serif;
 }
 
+.noborder > input {
+  border: none!important;
+  border-bottom: none!important;
+  border-left: none!important;
+  border-right: none!important;
+  border-top: none!important;
+}
+
 .spatium-textfield > input {
   animation-duration: 0.0001s;
   animation-name: mui-textfield-inserted;
@@ -213,6 +231,10 @@ body, buttons, html, input, textarea {
 // custom
 .margin13 {
   margin-top: 13%;
+}
+
+.margin35 {
+  margin-top: 35px;
 }
 
 .margin93{
@@ -352,4 +374,29 @@ td{
   cursor: pointer; /* Add a pointer on hover */
 }
 
+input[type="password"]
+{
+  -webkit-text-security: disc!important;
+  font:small-caption!important;
+  font-size:16px!important;
+  -webkit-text-stroke-width: .3em!important;
+  letter-spacing: 0.5em!important;
+  cursor: none;
+}
+
+.keyboard-button{
+  width: 100px;
+  height: 80px;
+}
+
+.keyboard-size{
+  font-size: 34.5px;
+  font-family: 'Roboto-Light';
+  color: $charcoal_grey;
+}
+
+.mat-icon-button.keyboard-size {
+  width: 70px!important;
+  height: 70px!important;
+}
 

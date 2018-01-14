@@ -1,0 +1,91 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="entry-margin start-logo-text" >
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+
+  <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%; padding-top: 24.5px;">
+    <div class="spatium-textfield entry noborder">
+      <input type="password" [(ngModel)]="Pincode" disabled>
+    </div>
+    <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspaceClicked()">
+      <mat-icon matSuffix>backspace</mat-icon>
+    </button>
+  </div>
+
+  <div class="keyboard-row margin35" fxLayout="row" fxLayoutAlign="center stretch">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(1)">
+        1
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(2)">
+        2
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(3)">
+        3
+      </button>
+    </div>
+  </div>
+  <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(4)">
+        4
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(5)">
+        5
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(6)">
+        6
+      </button>
+    </div>
+  </div>
+  <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(7)">
+        7
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(8)">
+        8
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(9)">
+        9
+      </button>
+    </div>
+  </div>
+  <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(0)">
+        0
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
+      <button mat-icon-button class="keyboard-size" (click)="onSubmitClicked()">
+        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">check</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

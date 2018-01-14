@@ -21,4 +21,8 @@ export class InitiatorAuthComponent implements OnInit {
   async onEntryClicked() {}
 
   async onCreateClicked() {}
+
+  async onGoPinClicked() {
+    this.router.navigate(['/pincode']);
+  }
 }
