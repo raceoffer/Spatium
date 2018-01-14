@@ -27,11 +27,12 @@ export class AuthComponent implements OnInit {
   sddNewFactor(): void {
     let dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { name: 'qweqqweq', animal: 'dsfsfsdf' }
+      data: { }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
+
     });
   }
 

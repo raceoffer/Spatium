@@ -22,6 +22,6 @@ export class StartComponent implements OnInit {
   }
 
   async onConnectClicked() {
-    this.router.navigate(['/pincode', { next: 'waiting' }]);
+    this.router.navigate(['/pincode', { next: 'waiting', back: 'start' }]);
   }
 }
