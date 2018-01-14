@@ -389,7 +389,7 @@ td{
   cursor: pointer; /* Add a pointer on hover */
 }
 
-input[type="password"]
+input[type="password-pin"]
 {
   -webkit-text-security: disc!important;
   font:small-caption!important;
@@ -398,6 +398,8 @@ input[type="password"]
   letter-spacing: 0.5em!important;
   cursor: none;
 }
+
+
 
 .keyboard-button{
   width: 100px;

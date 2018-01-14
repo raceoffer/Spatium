@@ -37,6 +37,7 @@ import { PincodeComponent } from './screens/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
+import { PasswordComponent } from './screens/password/password.component';
 
 
 @NgModule({
@@ -53,7 +54,8 @@ import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.
     PincodeComponent,
     LoginComponent,
     AuthComponent,
-    DialogFactorsComponent
+    DialogFactorsComponent,
+    PasswordComponent
   ],
   imports: [
     FormsModule,

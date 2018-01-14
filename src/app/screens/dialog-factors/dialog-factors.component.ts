@@ -15,7 +15,7 @@ export class DialogFactorsComponent {
     },
     {
       name: 'Password',
-      icon: 'lock_outline',
+      icon: 'keyboard',
     }
   ];
 
