@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {Router} from '@angular/router';
-import {WalletService} from '../../services/wallet.service';
 
 declare const window: any;
 declare const cordova: any;
@@ -12,11 +10,9 @@ declare const cordova: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent implements OnInit {
-  stOpen = 'Open wallet';
-  stConnect = 'Connect';
-  inProgress = false;
-
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router
+  ) { }
 
   ngOnInit() {
   }
@@ -26,6 +22,6 @@ export class StartComponent implements OnInit {
   }
 
   async onConnectClicked() {
-    this.router.navigate(['/verifier-auth']);
+    this.router.navigate(['/pincode', { next: 'waiting' }]);
   }
 }

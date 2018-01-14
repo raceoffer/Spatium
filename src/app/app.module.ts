@@ -48,7 +48,7 @@ import { LoginComponent } from './screens/login/login.component';
     WaitingComponent,
     BackupComponent,
     SendTransactionComponent,
-    PincodeComponent
+    PincodeComponent,
     LoginComponent
   ],
   imports: [
