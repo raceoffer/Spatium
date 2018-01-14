@@ -16,6 +16,22 @@ export class AuthComponent implements OnInit {
   login = 'Log in'
   loginDisable = false;
 
+  //из службы
+  factors = [
+    {
+      name: 'PIN',
+      icon: 'dialpad',
+      value: 'kjsadhkasjd',
+    },
+    {
+      name: 'Password',
+      icon: 'keyboard',
+      value: 'dlkfsjlkfsd',
+    },
+
+
+  ];
+
   constructor(private route: ActivatedRoute,
               private router: Router,
               private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
@@ -31,19 +47,24 @@ export class AuthComponent implements OnInit {
   sddNewFactor(): void {
     let dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { name: 'qweqqweq', animal: 'dsfsfsdf' }
+      data: { }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
+
     });
   }
 
+  removeFactor(factor): void {
+  }
   async letLogin() {
     const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.username);
     this.walletService.setKeyFragment(keyFragment);
     this.router.navigate(['/waiting']);
   }
+}
+
 }
 
 
