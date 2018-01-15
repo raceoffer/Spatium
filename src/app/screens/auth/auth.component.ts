@@ -1,10 +1,10 @@
 import {Component, OnInit, AfterViewInit, NgZone, ChangeDetectorRef} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {MAT_DIALOG_DATA, MatDialog} from "@angular/material";
-import {DialogFactorsComponent} from "../dialog-factors/dialog-factors.component";
-import {BitcoinKeyFragmentService} from "../../services/bitcoin-key-fragment.service";
-import {WalletService} from "../../services/wallet.service";
-import {AuthService} from "../../services/auth.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {MAT_DIALOG_DATA, MatDialog} from '@angular/material';
+import {DialogFactorsComponent} from '../dialog-factors/dialog-factors.component';
+import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
+import {WalletService} from '../../services/wallet.service';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -14,10 +14,9 @@ import {AuthService} from "../../services/auth.service";
 export class AuthComponent implements OnInit, AfterViewInit {
 
   username = '';
-  login = 'Log in'
+  login = 'Log in';
   loginDisable = false;
 
-  //из службы
   factors = [];
 
   constructor(private route: ActivatedRoute,
@@ -34,6 +33,8 @@ export class AuthComponent implements OnInit, AfterViewInit {
       if (params['username']) {
         this.username = params.username;
         this.authSevice.login = this.username;
+        this.authSevice.clearFactors();
+        this.cd.detectChanges();
       }
     });
   }
@@ -47,7 +48,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   sddNewFactor(): void {
-    let dialogRef = this.dialog.open(DialogFactorsComponent, {
+    this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { }
     });
@@ -60,7 +61,14 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   async letLogin() {
-    const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.username);
+    let data = this.username;
+    for (const factor of this.factors) {
+      data += factor.value;
+    }
+
+    console.log(data);
+
+    const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(data);
     this.walletService.setKeyFragment(keyFragment);
     this.router.navigate(['/waiting']);
   }
