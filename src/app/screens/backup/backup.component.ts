@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {Router} from '@angular/router';
-import {WalletService} from "../../services/wallet.service";
+import {WalletService} from '../../services/wallet.service';
 
 declare const window: any;
 
@@ -39,6 +39,8 @@ export class BackupComponent implements OnInit {
               private walletService: WalletService) { }
 
   async ngOnInit() {
+    await this.bitcoinKeyFragmentService.ensureReady();
+
     this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
     this.updateBalance();
   }
@@ -59,7 +61,11 @@ export class BackupComponent implements OnInit {
     await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.compoundKey.localPrivateKeyring);
     this.saveTransactionState = false;
     this.updateBalance();
-    window.plugins.toast.showLongBottom('Partial secret is uploaded to DDS', 3000, 'Partial secret is uploaded to DDS', console.log('Partial secret is uploaded to DDS'));
+    window.plugins.toast.showLongBottom(
+      'Partial secret is uploaded to DDS',
+      3000, 'Partial secret is uploaded to DDS',
+      console.log('Partial secret is uploaded to DDS')
+    );
     this.router.navigate(['/wallet']);
   }
 }
