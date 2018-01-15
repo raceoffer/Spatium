@@ -51,6 +51,8 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.wallet.resetRemote();
       this.synching = false;
       this.ready = false;
+
+      await this.changeBtState();
     }));
   }
 
@@ -103,10 +105,5 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   async changeBtState() {
     this.disabledBT = !await this.bt.ensureEnabled();
     await this.bt.ensureListening();
-  }
-
-  async sddNewDevice() {
-    await this.bt.openSettings();
-    await this.changeBtState();
   }
 }
