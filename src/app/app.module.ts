@@ -41,6 +41,7 @@ import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
 import { PasswordComponent } from './screens/password/password.component';
+import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 
 
 @NgModule({
@@ -59,7 +60,8 @@ import { PasswordComponent } from './screens/password/password.component';
     LoginComponent,
     AuthComponent,
     DialogFactorsComponent,
-    PasswordComponent
+    PasswordComponent,
+    GraphicKeyComponent
   ],
   imports: [
     FormsModule,

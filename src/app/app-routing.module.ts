@@ -13,6 +13,7 @@ import {PincodeComponent} from "./screens/pincode/pincode.component";
 import {LoginComponent} from "./screens/login/login.component";
 import {AuthComponent} from "./screens/auth/auth.component";
 import {PasswordComponent} from "./screens/password/password.component";
+import {GraphicKeyComponent} from "./screens/graphic-key/graphic-key.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -23,6 +24,7 @@ const appRoutes: Routes = [
   { path: 'verifier-auth', component: VerifierAuthComponent  },
   { path: 'pincode', component: PincodeComponent },
   { path: 'password', component: PasswordComponent },
+  { path: 'graphic-key', component: GraphicKeyComponent },
   { path: 'login', component: LoginComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
