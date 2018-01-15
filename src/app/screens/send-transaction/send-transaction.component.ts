@@ -159,11 +159,19 @@ export class SendTransactionComponent implements AfterViewInit {
       await this.walletService.verifySignature(this.currentTx);
       await this.walletService.pushTransaction(this.currentTx);
 
-      window.plugins.toast.showLongBottom('Транзакция была отправлена.', 3000, 'Транзакция была отправлена.',
-        console.log('Транзакция была отправлена.'));
+      window.plugins.toast.showLongBottom(
+        'The transaction was successfully sent',
+        3000,
+        'The transaction was successfully sent',
+        console.log('The transaction was successfully sent')
+      );
     } catch (e) {
-      window.plugins.toast.showLongBottom('He удалось отправить транзакцию.', 3000, 'He удалось отправить транзакцию.',
-        console.log('He удалось отправить транзакцию.'));
+      window.plugins.toast.showLongBottom(
+        'Error sending transaction',
+        3000,
+        'Error sending transaction',
+        console.log('Error sending transaction')
+      );
     }
   }
 
@@ -241,7 +249,7 @@ export class SendTransactionComponent implements AfterViewInit {
     const ok = await this.walletService.verifySignature(this.currentTx);
 
     if (!ok && !this.isSecond) {
-      window.plugins.toast.showLongBottom('Транзакция некорректна', 3000, 'Транзакция некорректна', console.log('Транзакция некорректна'));
+      window.plugins.toast.showLongBottom('Malformed transaction', 3000, 'Malformed transaction', console.log('Malformed transaction'));
     }
   }
 }

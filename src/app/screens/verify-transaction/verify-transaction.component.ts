@@ -76,7 +76,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.usd = this.btc * this.rateBtcUsd;
       this.showTransaction = true;
 
-      console.log("Transaction:");
+      console.log('Transaction:');
       console.log(this.address);
       console.log(this.btc);
       console.log(this.usd);
@@ -91,13 +91,13 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   }
 
   confirm() {
-    console.log("Transaction confirmed");
+    console.log('Transaction confirmed');
     this.showTransaction = false;
     this.wallet.accept(this.tx, this.entropy);
   }
 
   decline() {
-    console.log("Transaction declined");
+    console.log('Transaction declined');
     this.showTransaction = false;
     this.wallet.reject();
   }
