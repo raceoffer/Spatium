@@ -7,7 +7,8 @@
     <author email="dev@cordova.apache.org" href="http://cordova.io">
         Apache Cordova Team
     </author>
-    <hook src="scripts/prepareAngularApp.js" type="before_prepare" />
+    <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
+    <hook src="hooks/replaceAndroidMainActivity.js" type="after_plugin_install" />
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -52,4 +53,8 @@
     <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-x-toast" spec="^2.6.0" />
+    <plugin name="cordova-fabric-plugin" spec="^1.1.10">
+        <variable name="FABRIC_API_KEY" value="752fc70596e44939199e6f2f35f9275dc6bae22c" />
+        <variable name="FABRIC_API_SECRET" value="e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267" />
+    </plugin>
 </widget>
