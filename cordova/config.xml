@@ -1,12 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="capital.spatium.wallet" version="1.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Wallet</name>
-    <description>
-        A sample Apache Cordova application that responds to the deviceready event.
-    </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
-    </author>
+    <name>Spatium</name>
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/replaceAndroidMainActivity.js" type="after_plugin_install" />
     <content src="index.html" />
