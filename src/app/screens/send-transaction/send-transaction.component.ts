@@ -54,7 +54,7 @@ export class SendTransactionComponent implements AfterViewInit {
   balanceUsd = 0;
 
   state = 0;
-  buttonText = 'Продолжить';
+  buttonText = 'Continue';
 
   isSecond = false; // параметр, индикатор инициатора\верификатора
 
@@ -65,8 +65,7 @@ export class SendTransactionComponent implements AfterViewInit {
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
               private router: Router,
-              private cd: ChangeDetectorRef,
-              public snackBar: MatSnackBar) {}
+              private cd: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
     this.route.queryParams
