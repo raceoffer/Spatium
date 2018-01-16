@@ -29,7 +29,7 @@ export class DialogFactorsComponent {
       name: 'Graphic key',
       icon: '',
       icon_asset: 'graphic-key',
-      link: '/password',
+      link: '/graphic-key',
       next: 'auth',
       back: 'auth'
     }

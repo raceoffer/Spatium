@@ -23,7 +23,10 @@
         "assets/themes/android_theme.scss",
         "assets/themes/styles.scss"
       ],
-      "scripts": [],
+      "scripts": [
+        "assets/js/patternLock.js",
+        "../node_modules/hammerjs/hammer.js"
+      ],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",
