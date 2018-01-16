@@ -29,6 +29,14 @@ export class WalletService {
   watchingWallet: any = null;
   provider: any = null;
 
+  readyStart = false;
+  readyInitialCommitment = false;
+  readyInitialDecommitment = false;
+  readyVerifierCommitment = false;
+  readyProverCommitment = false;
+  readyVerifierDecommitment = false;
+  readyProverDecommitment = false;
+
   routineTimer: any = null;
 
   localReady = false;
@@ -122,9 +130,19 @@ export class WalletService {
   async startSync() {
     this.onStatus.emit(Status.Start);
 
+    this.readyStart = false;
+    this.readyInitialCommitment = false;
+    this.readyInitialDecommitment = false;
+    this.readyVerifierCommitment = false;
+    this.readyProverCommitment = false;
+    this.readyVerifierDecommitment = false;
+    this.readyProverDecommitment = false;
+
     const prover = this.getProver();
 
     const initialCommitment = prover.getInitialCommitment();
+
+    console.log('Sending initialCommitment');
     await this.bt.send(JSON.stringify({
       type: 'initialCommitment',
       content: initialCommitment
@@ -133,78 +151,199 @@ export class WalletService {
     this.onStatus.emit(Status.InitialCommitment);
 
     this.prover = prover;
+
+    this.readyStart = true;
   }
 
   initialCommitment = async function(remoteInitialCommitment) {
+    if (this.readyInitialCommitment) {
+      return;
+    }
+
+    console.log('Received remoteInitialCommitment');
     await new Promise((resolve) => {
-      if (this.prover) {
+      if (this.readyStart) {
         resolve();
         return;
       }
       const timer = setInterval(() => {
-        if (this.prover) {
+        if (this.readyStart) {
           clearInterval(timer);
           resolve();
         }
-      }, 10);
+      }, 100);
     });
 
     const initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+
+    console.log('Sending initialDecommitment');
     await this.bt.send(JSON.stringify({
       type: 'initialDecommitment',
       content: initialDecommitment
     }));
 
     this.onStatus.emit(Status.InitialDecommitment);
+
+    this.readyInitialCommitment = true;
   };
 
   initialDecommitment = async function(remoteInitialDecommitment) {
+    if (this.readyInitialDecommitment) {
+      return;
+    }
+
+    console.log('Received remoteInitialDecommitment');
+    await new Promise((resolve) => {
+      if (this.readyInitialCommitment) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.readyInitialCommitment) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
     this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+
+    console.log('Sending verifierCommitment');
     await this.bt.send(JSON.stringify({
       type: 'verifierCommitment',
       content: this.verifier.getCommitment()
     }));
 
     this.onStatus.emit(Status.VerifierCommitment);
+
+    this.readyInitialDecommitment = true;
   };
 
   verifierCommitment = async function(remoteVerifierCommitment) {
+    if (this.readyVerifierCommitment) {
+      return;
+    }
+
+    console.log('Received remoteVerifierCommitment');
+    await new Promise((resolve) => {
+      if (this.readyInitialDecommitment) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.readyInitialDecommitment) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
     const proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+
+    console.log('Sending proverCommitment');
     await this.bt.send(JSON.stringify({
       type: 'proverCommitment',
       content: proverCommitment
     }));
 
     this.onStatus.emit(Status.ProverCommitment);
+
+    this.readyVerifierCommitment = true;
   };
 
   proverCommitment = async function(remoteProverCommitment) {
+    if (this.readyProverCommitment) {
+      return;
+    }
+
+    console.log('Received remoteProverCommitment');
+    await new Promise((resolve) => {
+      if (this.readyVerifierCommitment) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.readyVerifierCommitment) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
     const verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
+
+    console.log('Sending verifierDecommitment');
     await this.bt.send(JSON.stringify({
       type: 'verifierDecommitment',
       content: verifierDecommitment
     }));
 
     this.onStatus.emit(Status.VerifierDecommitment);
+
+    this.readyProverCommitment = true;
   };
 
   verifierDecommitment = async function(remoteVerifierDecommitment) {
+    if (this.readyVerifierDecommitment) {
+      return;
+    }
+
+    console.log('Received remoteVerifierDecommitment');
+    await new Promise((resolve) => {
+      if (this.readyProverCommitment) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.readyProverCommitment) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
     const proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+
+    console.log('Sending proverDecommitment');
     await this.bt.send(JSON.stringify({
       type: 'proverDecommitment',
       content: proverDecommitment
     }));
 
     this.onStatus.emit(Status.ProverDecommitment);
+
+    this.readyVerifierDecommitment = true;
   };
 
-  proverDecommitment = function(remoteProverDecommitment) {
+  proverDecommitment = async function(remoteProverDecommitment) {
+    if (this.readyProverDecommitment) {
+      return;
+    }
+
+    console.log('Received remoteProverDecommitment');
+    await new Promise((resolve) => {
+      if (this.readyProverCommitment) {
+        resolve();
+        return;
+      }
+      const timer = setInterval(() => {
+        if (this.readyProverCommitment) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 100);
+    });
+
     const verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
+
+    console.log('Done sync');
 
     this.onStatus.emit(Status.Finish);
 
     this.prover = null;
     this.verifier = null;
+
+    this.readyProverDecommitment = true;
 
     this.finishSync(verifiedData).then(() => {
       this.onFinish.emit();
