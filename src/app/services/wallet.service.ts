@@ -6,7 +6,7 @@ import {BluetoothService} from './bluetooth.service';
 declare const bcoin: any;
 declare const CompoundKey: any;
 declare const WatchingWallet: any;
-declare const BlockCypherProvider: any;
+declare const BlockchainInfoProvider: any;
 declare const Transaction: any;
 declare const Utils: any;
 
@@ -49,6 +49,8 @@ export class WalletService {
   verifier = null;
   signers = null;
 
+  network = 'testnet'; // 'mainnet'; | 'testnet';
+
   onBalance: EventEmitter<any> = new EventEmitter();
   onStatus: EventEmitter<Status> = new EventEmitter<Status>();
   onFinish: EventEmitter<any> = new EventEmitter();
@@ -59,7 +61,7 @@ export class WalletService {
   onRejected: EventEmitter<any> = new EventEmitter();
 
   constructor(private bt: BluetoothService) {
-    bcoin.set('testnet');
+    bcoin.set(this.network);
 
     this.bt.onMessage.subscribe((message) => {
       const obj = JSON.parse(message);
@@ -482,19 +484,24 @@ export class WalletService {
     this.balance = await this.watchingWallet.getBalance();
 
     // Start: configuring a provider
-    this.provider = new BlockCypherProvider();
+    this.provider = new BlockchainInfoProvider({
+      network: this.network
+    });
 
-    this.provider.on('rawTransaction', async (hex, meta) => {
+    this.provider.on('transaction', async (hash, meta) => {
+      let hex = await this.watchingWallet.getRawTransaction(hash);
+      if (!hex) {
+        hex = await this.provider.pullRawTransaction(hash);
+      }
       await this.watchingWallet.addRawTransaction(hex, meta);
     });
 
     // Initiate update routine
-
-    this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
+    await this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
     clearInterval(this.routineTimer);
-    this.routineTimer = setInterval(() => {
-      this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
-    }, 20000);
+    setInterval(async () => {
+      await this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
+    }, 10000);
 
     // End: configuring a provider
 
