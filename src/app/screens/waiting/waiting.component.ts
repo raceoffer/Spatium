@@ -31,12 +31,6 @@ export class WaitingComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       });
     });
-    this.bt.onConnected.subscribe( async () => {
-      await this.wallet.startSync();
-      this.ngZone.run(() => {
-        this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
-      });
-    });
     this.bt.onDisconnected.subscribe(() => {
       this.wallet.resetRemote();
       this.ngZone.run(() => {
@@ -62,6 +56,10 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       await this.bt.connect({
         name: name,
         address: address
+      });
+      await this.wallet.startSync();
+      this.ngZone.run(() => {
+        this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
       });
     } catch (e) {
       console.log('connect', e);
