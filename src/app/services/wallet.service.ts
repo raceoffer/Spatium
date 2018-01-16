@@ -49,7 +49,7 @@ export class WalletService {
   verifier = null;
   signers = null;
 
-  network = 'main'; // 'main'; | 'testnet';
+  network = 'testnet'; // 'main'; | 'testnet';
 
   onBalance: EventEmitter<any> = new EventEmitter();
   onStatus: EventEmitter<Status> = new EventEmitter<Status>();
