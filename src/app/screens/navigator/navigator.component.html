@@ -3,7 +3,6 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
-  <span>Кошелек</span>
 </mat-toolbar>
 
 <mat-sidenav-container>
@@ -17,14 +16,15 @@
       </div>
     </mat-list-item>
     <mat-nav-list *ngFor="let navLink of navLinks">
-      <a mat-list-item [routerLink]="navLink.link" class="main-nav-list-custom" [ngClass]="{'selected' : navLink.isSelected} "
-         (click)="sidenav.toggle()">{{navLink.name}}</a>
+      <a mat-list-item [routerLink]="navLink.link" [class.disabled]="!navLink.isActive" class="main-nav-list-custom" 
+        (click)="!navLink.isActive || sidenav.toggle()"
+        [ngClass]="{'selected' : navLink.isSelected, 'disabled' : !navLink.isActive}">
+        {{navLink.name}}
+      </a>
     </mat-nav-list>
 
   </mat-sidenav>
 
     <router-outlet name="navigator"></router-outlet>
-
-
 
 </mat-sidenav-container>

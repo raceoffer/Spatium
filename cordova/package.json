@@ -12,7 +12,8 @@
   "dependencies": {
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
-    "cordova-custom-config": "^5.0.1",
+    "cordova-custom-config": "^5.0.2",
+    "cordova-fabric-plugin": "^1.1.10",
     "cordova-ios": "^4.5.4",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
     "cordova-plugin-file": "^5.0.0",
@@ -22,15 +23,19 @@
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},
-      "cordova-plugin-bluetooth": {},
       "cordova-custom-config": {},
       "cordova-plugin-file": {},
-      "cordova-plugin-x-toast": {}
+      "cordova-plugin-x-toast": {},
+      "cordova-fabric-plugin": {
+        "FABRIC_API_KEY": "752fc70596e44939199e6f2f35f9275dc6bae22c",
+        "FABRIC_API_SECRET": "e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267"
+      },
+      "cordova-plugin-bluetooth": {}
     },
     "platforms": [
-      "android",
       "ios",
-      "browser"
+      "browser",
+      "android"
     ]
   },
   "devDependencies": {

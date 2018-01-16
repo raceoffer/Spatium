@@ -13,6 +13,20 @@ declare const window: any;
 })
 export class SendTransactionComponent implements AfterViewInit {
   @Input() addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
+
+  currentWalletPh = 'Wallet';
+  receiverPh = 'Recipient';
+
+  stAwaitConfirm = 'Confirm on the second device';
+  stSigning = 'Signing transaction';
+  stSigningResult = 'Transaction is signed';
+
+  stContinue = 'Continue';
+  stCancel = 'Cancel';
+  stConfirm = 'Confirm';
+  stTransfer = 'Transfer';
+
+
   selected = '';
 
   _sendBtc = 0.1;
@@ -40,7 +54,7 @@ export class SendTransactionComponent implements AfterViewInit {
   balanceUsd = 0;
 
   state = 0;
-  buttonText = 'Продолжить';
+  buttonText = 'Continue';
 
   isSecond = false; // параметр, индикатор инициатора\верификатора
 
@@ -51,8 +65,7 @@ export class SendTransactionComponent implements AfterViewInit {
   constructor(private walletService: WalletService,
               private route: ActivatedRoute,
               private router: Router,
-              private cd: ChangeDetectorRef,
-              public snackBar: MatSnackBar) {}
+              private cd: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
     this.route.queryParams
@@ -145,11 +158,19 @@ export class SendTransactionComponent implements AfterViewInit {
       await this.walletService.verifySignature(this.currentTx);
       await this.walletService.pushTransaction(this.currentTx);
 
-      window.plugins.toast.showLongBottom('Транзакция была отправлена.', 3000, 'Транзакция была отправлена.',
-        console.log('Транзакция была отправлена.'));
+      window.plugins.toast.showLongBottom(
+        'The transaction was successfully sent',
+        3000,
+        'The transaction was successfully sent',
+        console.log('The transaction was successfully sent')
+      );
     } catch (e) {
-      window.plugins.toast.showLongBottom('He удалось отправить транзакцию.', 3000, 'He удалось отправить транзакцию.',
-        console.log('He удалось отправить транзакцию.'));
+      window.plugins.toast.showLongBottom(
+        'Error sending transaction',
+        3000,
+        'Error sending transaction',
+        console.log('Error sending transaction')
+      );
     }
   }
 
@@ -227,7 +248,7 @@ export class SendTransactionComponent implements AfterViewInit {
     const ok = await this.walletService.verifySignature(this.currentTx);
 
     if (!ok && !this.isSecond) {
-      window.plugins.toast.showLongBottom('Транзакция некорректна', 3000, 'Транзакция некорректна', console.log('Транзакция некорректна'));
+      window.plugins.toast.showLongBottom('Malformed transaction', 3000, 'Malformed transaction', console.log('Malformed transaction'));
     }
   }
 }

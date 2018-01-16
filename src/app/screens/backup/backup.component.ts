@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
 import {Router} from '@angular/router';
+import {WalletService} from '../../services/wallet.service';
+
+declare const window: any;
 
 enum SyncState {
   Ready,
@@ -14,6 +17,14 @@ enum SyncState {
   styleUrls: ['./backup.component.css']
 })
 export class BackupComponent implements OnInit {
+  backupLabel = 'Saving to Decentralized Storage';
+  ethAddressLabel = 'Ethereum address';
+  backupCostLabel = 'Cost';
+  notEnoughLabel = 'Not enough Ethereum';
+  ethBalanceLabel = 'Ethereum balance';
+  SaveLabel = 'Save';
+  CancelLabel = 'Cancel';
+  SkipLabel = 'Skip';
 
   ethereumAddress = '';
   ethereumBalance = '';
@@ -23,9 +34,13 @@ export class BackupComponent implements OnInit {
   enough = false;
   saveTransactionState = false;
 
-  constructor(private router: Router, private bitcoinKeyFragmentService: BitcoinKeyFragmentService) { }
+  constructor(private router: Router,
+              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
+              private walletService: WalletService) { }
 
   async ngOnInit() {
+    await this.bitcoinKeyFragmentService.ensureReady();
+
     this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
     this.updateBalance();
   }
@@ -35,19 +50,22 @@ export class BackupComponent implements OnInit {
       this.syncState = SyncState.Syncing;
       this.ethereumBalance = await this.bitcoinKeyFragmentService.getEthereumBalance();
       this.enough = parseFloat(this.ethereumBalance) >= parseFloat(this.comission);
-      this.enough = true;
       this.syncState = SyncState.Ready;
-    }
-    catch (e) {
+    } catch (e) {
       this.syncState = SyncState.Error;
     }
   }
 
   async saveBitcoinKeyFragmentInEthereumCell() {
     this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragmentAsEthereumTransaction();
+    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.compoundKey.localPrivateKeyring);
     this.saveTransactionState = false;
     this.updateBalance();
-    this.router.navigate(['/waiting'])
+    window.plugins.toast.showLongBottom(
+      'Partial secret is uploaded to DDS',
+      3000, 'Partial secret is uploaded to DDS',
+      console.log('Partial secret is uploaded to DDS')
+    );
+    this.router.navigate(['/wallet']);
   }
 }

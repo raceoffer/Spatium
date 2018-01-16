@@ -69,6 +69,13 @@ export class BluetoothService {
     });
   }
 
+  async disconnect() {
+    if (await cordova.plugins.bluetooth.getConnected()) {
+      await cordova.plugins.bluetooth.disconnect();
+    }
+  }
+
+
   async send(message) {
     await cordova.plugins.bluetooth.write(message);
   }

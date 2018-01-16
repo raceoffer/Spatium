@@ -1,0 +1,48 @@
+
+
+<div fxLayout="column" fxLayoutAlign="start center" style="max-height: 100%;">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="entry-margin start-logo-text" >
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+  <div class="margin-top-18">
+    <mat-icon class="color-custom-dark">lock_outline</mat-icon>
+  </div>
+  <div class="margin-top-18 light">
+    {{ username }}
+  </div>
+
+  <div style="width:100%; overflow: scroll; ">
+    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center"  *ngFor="let factor of factors;"
+         (click)="goTo(factor)">
+      <div style="margin-left: 50px;">
+        <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+          <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
+        </button>
+      </div>
+      <div>
+        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
+      </div>
+    </div>
+  </div>
+
+  <div class="margin-top-18" style="padding-bottom: 10px">
+    <button mat-fab>
+      <mat-icon (click)="sddNewFactor()">add
+      </mat-icon>
+    </button>
+  </div>
+
+  <button mat-raised-button color="accent" class="width-button color bottom-center" [disabled]="loginDisable" (click)="letLogin()" >{{ login }}</button>
+
+</div>
+

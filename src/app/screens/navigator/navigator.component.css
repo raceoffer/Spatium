@@ -42,4 +42,8 @@
   font-weight: bold;
 }
 
-
+.disabled {
+  pointer-events: none;
+  color: #9ba0a0 !important;
+  cursor: default;
+}
