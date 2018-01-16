@@ -1,7 +1,7 @@
 import {AfterContentInit, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
-import * as PatternLock from '../../../assets/js/patternLock.js';
+import * as PatternLock from 'PatternLock';
 import * as $ from 'jquery';
 
 @Component({
@@ -39,8 +39,7 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
 
     let qqq =  new PatternLock(this.el.nativeElement,{
       matrix:[3,3],
-      radius:10,
-      margin:35,
+      inner_radius:10,
       mapper: function(idx){
         console.log((idx%9) + 1);
       }
