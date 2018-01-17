@@ -148,7 +148,7 @@
                             iObj.addDirectionClass({i: ip, j: jp});
 
                             //mark a point added
-                            iObj.markPoint($($(li[nextPattId - 1]).children[0]), nextPattId);
+                            iObj.markPoint( $(li[nextPattId - 1]), nextPattId);
 
                             //add line between the points
                             iObj.addLine({i: ip,j: jp});

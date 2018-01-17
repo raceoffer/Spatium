@@ -39,9 +39,6 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
   ngAfterContentInit(){
     const self = this;
     let lock =  new PatternLock(this.el.nativeElement,{
-      mapper: function(idx){
-        return (idx%9) + 1;
-      },
       onDraw:function(pattern){
         console.log(pattern)
         self.graph_key = pattern;
