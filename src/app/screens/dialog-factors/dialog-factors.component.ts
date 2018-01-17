@@ -24,6 +24,13 @@ export class DialogFactorsComponent {
       link: '/password',
       next: 'auth',
       back: 'auth'
+    },
+    {
+      name: 'File',
+      icon: 'insert_drive_file',
+      link: '/file-upload',
+      next: 'auth',
+      back: 'auth'
     }
   ];
 

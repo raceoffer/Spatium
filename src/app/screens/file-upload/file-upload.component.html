@@ -1,0 +1,29 @@
+
+
+<div fxLayout="column" fxLayoutAlign="start center" style="max-height: 100%;">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/{{back}}">
+        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="entry-margin start-logo-text" >
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+  <div mat-fab class="overlay-bottom-center" fxLayout="column" fxLayoutAlign="start center">
+    <button mat-icon-button class="file-upload-size" (click)="onUploadFileClick()">
+      <mat-icon class="color-cool_grey file-upload" size="50px">insert_drive_file</mat-icon>
+    </button>
+    <div style="padding-top: 5px;" >
+      {{uploadFile}}
+    </div>
+  </div>
+
+
+</div>
+

@@ -60,6 +60,14 @@ $green: rgb(24, 154, 57);//#189a39
   font-size: 34.5px!important;
   height:34.5px!important;
   width: 34.5px!important;
+  line-height: 34.5px!important;
+}
+
+.file-upload {
+  font-size: 50px !important;
+  height: 50px !important;
+  width: 50px !important;
+  line-height: 50px !important;
 }
 
 .entry-start {
@@ -143,6 +151,10 @@ mat-icon.color-custom{
 
 mat-icon.color-custom-dark{
   color: $charcoal_grey;
+}
+
+mat-icon.color-cool_grey{
+  color: $cool_grey;
 }
 
 mat-icon.size-30{
@@ -282,7 +294,7 @@ body, buttons, html, input, textarea {
 
 .overlay-bottom-center{
   position: fixed !important;
-  bottom: 20px;
+  bottom: 45px;
   z-index: 2;
 }
 
@@ -414,12 +426,19 @@ input[type="password-pin"]
 .keyboard-size{
   font-size: 34.5px;
   font-family: 'Roboto-Light';
-  color: $charcoal_grey;
+  color: $charcoal_grey!important;
 }
 
 .mat-icon-button.keyboard-size {
   width: 70px!important;
   height: 70px!important;
+  line-height: 34.5px!important;
+}
+
+.mat-icon-button.file-upload-size {
+  width: 70px !important;
+  height: 70px !important;
+  line-height: 50px!important;
 }
 
 .mat-dialog-container {
@@ -473,9 +492,6 @@ input[type="password-pin"]
   height:50px!important;
   width: 50px!important;
 }
-
-
-
 
 .mat-icon factor-icon-big{
   background-repeat: no-repeat;
