@@ -31,6 +31,14 @@ export class DialogFactorsComponent {
       link: '/file-upload',
       next: 'auth',
       back: 'auth'
+    },
+    {
+      name: 'Graphic key',
+      icon: '',
+      icon_asset: 'graphic-key',
+      link: '/graphic-key',
+      next: 'auth',
+      back: 'auth'
     }
   ];
 

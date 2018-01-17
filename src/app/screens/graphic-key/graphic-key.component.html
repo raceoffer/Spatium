@@ -15,14 +15,10 @@
     <span class="start-tagline">Secure your funds</span>
   </div>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
 
-    <div class="spatium-textfield entry bottom32">
-      <input type="password" placeholder="{{stPassword}}" [(ngModel)]="passwordValue">
-    </div>
+  <div class="margin80" #patternContainer id='patternContainer'></div>
 
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="goNext()" >{{stContinue}}</button>
-  </div>
+
 
 </div>
 

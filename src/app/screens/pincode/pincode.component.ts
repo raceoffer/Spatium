@@ -57,7 +57,7 @@ export class PincodeComponent implements AfterViewInit {
       const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.pincode.toString());
       this.walletService.setKeyFragment(keyFragment);
       this.router.navigate(['/verifyTransaction']);
-    } else {
+    } else if (this.next && this.next === 'auth') {
       this.authSevice.addFactor({
         name: 'PIN',
         icon: 'dialpad',

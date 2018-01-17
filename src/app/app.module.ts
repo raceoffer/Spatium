@@ -42,6 +42,7 @@ import { AuthComponent } from './screens/auth/auth.component';
 import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
 import { PasswordComponent } from './screens/password/password.component';
 import { FileUploadComponent } from './screens/file-upload/file-upload.component';
+import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 
 
 @NgModule({
@@ -61,7 +62,8 @@ import { FileUploadComponent } from './screens/file-upload/file-upload.component
     AuthComponent,
     DialogFactorsComponent,
     PasswordComponent,
-    FileUploadComponent
+    FileUploadComponent,
+    GraphicKeyComponent
   ],
   imports: [
     FormsModule,
