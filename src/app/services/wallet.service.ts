@@ -1,4 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
+import { UUID } from 'angular2-uuid';
 
 import WalletData from '../classes/wallet-data';
 import {BluetoothService} from './bluetooth.service';
@@ -61,6 +62,11 @@ export class WalletService {
   onAccepted: EventEmitter<any> = new EventEmitter();
   onRejected: EventEmitter<any> = new EventEmitter();
 
+  private static log(message, data) {
+    window.fabric.Crashlytics.addLog(message + JSON.stringify(data));
+    console.log(message, JSON.stringify(data));
+  }
+
   constructor(private bt: BluetoothService) {
     bcoin.set(this.network);
 
@@ -80,10 +86,10 @@ export class WalletService {
       key = CompoundKey.generateKeyring();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to generate key fragment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to generate key fragment');
     } finally {
       return key;
-  }
+    }
   }
 
   getAddress() {
@@ -111,14 +117,14 @@ export class WalletService {
 
   setKeyFragment(fragment) {
     try {
-    this.compoundKey = new CompoundKey({
-      localPrivateKeyring: fragment
-    });
-    this.localReady = true;
+      this.compoundKey = new CompoundKey({
+        localPrivateKeyring: fragment
+      });
+      this.localReady = true;
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to create compound key");
-  }
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to create compound key');
+    }
   }
 
   resetRemote() {
@@ -141,11 +147,11 @@ export class WalletService {
 
   getProver() {
     try {
-    return this.compoundKey.startInitialCommitment();
+      return this.compoundKey.startInitialCommitment();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to start initial commitment");
-  }
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to start initial commitment');
+    }
   }
 
   async startSync() {
@@ -161,15 +167,15 @@ export class WalletService {
 
     const prover = this.getProver();
 
-    let initialCommitment;
+    let initialCommitment = null;
     try {
       initialCommitment = prover.getInitialCommitment();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get initial commitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get initial commitment');
     }
 
-    console.log('Sending initialCommitment');
+    WalletService.log('Sending initialCommitment:', initialCommitment);
     await this.bt.send(JSON.stringify({
       type: 'initialCommitment',
       content: initialCommitment
@@ -187,7 +193,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteInitialCommitment');
+    WalletService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     await new Promise((resolve) => {
       if (this.readyStart) {
         resolve();
@@ -201,15 +207,15 @@ export class WalletService {
       }, 100);
     });
 
-    let initialDecommitment;
+    let initialDecommitment = null;
     try {
       initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process initial commitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process initial commitment');
     }
 
-    console.log('Sending initialDecommitment');
+    WalletService.log('Sending initialDecommitment', initialDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'initialDecommitment',
       content: initialDecommitment
@@ -225,7 +231,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteInitialDecommitment');
+    WalletService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     await new Promise((resolve) => {
       if (this.readyInitialCommitment) {
         resolve();
@@ -240,16 +246,18 @@ export class WalletService {
     });
 
     try {
-    this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+      this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process initial decommitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process initial decommitment');
     }
 
-    console.log('Sending verifierCommitment');
+    const verifierCommitment = this.verifier.getCommitment();
+
+    WalletService.log('Sending verifierCommitment', verifierCommitment);
     await this.bt.send(JSON.stringify({
       type: 'verifierCommitment',
-      content: this.verifier.getCommitment()
+      content: verifierCommitment
     }));
 
     this.onStatus.emit(Status.VerifierCommitment);
@@ -262,7 +270,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteVerifierCommitment');
+    WalletService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     await new Promise((resolve) => {
       if (this.readyInitialDecommitment) {
         resolve();
@@ -276,15 +284,15 @@ export class WalletService {
       }, 100);
     });
 
-    let proverCommitment;
+    let proverCommitment = null;
     try {
-    proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process verifier commitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process verifier commitment');
     }
 
-    console.log('Sending proverCommitment');
+    WalletService.log('Sending proverCommitment', proverCommitment);
     await this.bt.send(JSON.stringify({
       type: 'proverCommitment',
       content: proverCommitment
@@ -300,7 +308,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteProverCommitment');
+    WalletService.log('Received remoteProverCommitment', remoteProverCommitment);
     await new Promise((resolve) => {
       if (this.readyVerifierCommitment) {
         resolve();
@@ -314,15 +322,15 @@ export class WalletService {
       }, 100);
     });
 
-    let verifierDecommitment;
+    let verifierDecommitment = null;
     try {
-    verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
+      verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process prover commitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process prover commitment');
     }
 
-    console.log('Sending verifierDecommitment');
+    WalletService.log('Sending verifierDecommitment', verifierDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'verifierDecommitment',
       content: verifierDecommitment
@@ -338,7 +346,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteVerifierDecommitment');
+    WalletService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     await new Promise((resolve) => {
       if (this.readyProverCommitment) {
         resolve();
@@ -352,15 +360,15 @@ export class WalletService {
       }, 100);
     });
 
-    let proverDecommitment;
+    let proverDecommitment = null;
     try {
       proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process verifier decommitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process verifier decommitment');
     }
 
-    console.log('Sending proverDecommitment');
+    WalletService.log('Sending proverDecommitment', proverDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'proverDecommitment',
       content: proverDecommitment
@@ -376,7 +384,7 @@ export class WalletService {
       return;
     }
 
-    console.log('Received remoteProverDecommitment');
+    WalletService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     await new Promise((resolve) => {
       if (this.readyProverCommitment) {
         resolve();
@@ -390,20 +398,28 @@ export class WalletService {
       }, 100);
     });
 
-    let verifiedData;
+    let verifiedData = null;
     try {
       verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process prover decommitment");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process prover decommitment');
     }
+
+    this.readyStart = false;
+    this.readyInitialCommitment = false;
+    this.readyInitialDecommitment = false;
+    this.readyVerifierCommitment = false;
+    this.readyProverCommitment = false;
+    this.readyVerifierDecommitment = false;
+    this.readyProverDecommitment = false;
+
+    this.prover = null;
+    this.verifier = null;
 
     console.log('Done sync');
 
     this.onStatus.emit(Status.Finish);
-
-    this.prover = null;
-    this.verifier = null;
 
     this.readyProverDecommitment = true;
 
@@ -435,13 +451,13 @@ export class WalletService {
   }
 
   entropyCommitment = async function(entropyCommitment) {
-    let entropyDecommitment;
-
+    let entropyDecommitment = null;
     try {
       entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropyCommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process entropy commitment");
+      window.fabric.Crashlytics.addLog(JSON.stringify(entropyCommitment));
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process entropy commitment');
     }
 
     await this.bt.send(JSON.stringify({
@@ -452,18 +468,19 @@ export class WalletService {
 
   entropyDecommitment = async function(entropyDecommitment) {
     try {
-    Transaction.processEntropyDecommitments(this.signers, entropyDecommitment);
+      Transaction.processEntropyDecommitments(this.signers, entropyDecommitment);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process entropy decommitment");
+      window.fabric.Crashlytics.addLog(JSON.stringify(entropyDecommitment));
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process entropy decommitment');
     }
 
-    let ciphertext; 
+    let ciphertext = null;
     try {
       ciphertext = Transaction.computeCiphertexts(this.signers);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to compute ciphertext");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to compute ciphertext');
     }
 
     await this.bt.send(JSON.stringify({
@@ -475,12 +492,13 @@ export class WalletService {
   };
 
   ciphertext = async function(ciphertext) {
-    let signatures;
+    let signatures = null;
     try {
       signatures = Transaction.extractSignatures(this.signers, ciphertext).map(Utils.encodeSignature);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to extract signatures");
+      window.fabric.Crashlytics.addLog(JSON.stringify(ciphertext));
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to extract signatures');
     }
 
     this.onSigned.emit(signatures);
@@ -494,41 +512,42 @@ export class WalletService {
 
     /// Fill inputs and calculate script hashes
     try {
-    await transaction.prepare(this.watchingWallet, {
-      subtractFee: substractFee
-    });
+      await transaction.prepare(this.watchingWallet, {
+        subtractFee: substractFee
+      });
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to prepare transaction");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to prepare transaction');
     }
 
     return transaction;
   }
 
   async startVerify(transaction, address, value) {
-    let hashes;
+    let hashes = null;
     try {
       hashes = transaction.getHashes();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get transaction hashes");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get transaction hashes');
     }
 
-    let map;
+    let map = null;
     try {
       map = transaction.mapCompoundKeys(this.compoundKey);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get transaction map compound key");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get transaction map compound key');
     }
 
     this.signers = Transaction.startSign(hashes, map);
-    let commitments;
+
+    let commitments = null;
     try {
       commitments = Transaction.createEntropyCommitments(this.signers);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to create entropy commitments");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to create entropy commitments');
     }
 
     await this.bt.send(JSON.stringify({
@@ -548,7 +567,7 @@ export class WalletService {
       hashes = transaction.getHashes();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get transaction hashes");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get transaction hashes');
     }
 
     let map;
@@ -556,7 +575,7 @@ export class WalletService {
       map = transaction.mapCompoundKeys(this.compoundKey);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get transaction map compound key");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get transaction map compound key');
     }
 
     this.signers = Transaction.startSign(hashes, map);
@@ -565,7 +584,7 @@ export class WalletService {
       commitments = Transaction.createEntropyCommitments(this.signers);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to create entropy commitments");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to create entropy commitments');
     }
 
     await this.bt.send(JSON.stringify({
@@ -575,12 +594,13 @@ export class WalletService {
 
     console.log(this.signers, entropy);
 
-    let entropyDecommitment;
+    let entropyDecommitment = null;
     try {
-    const entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropy);
+      entropyDecommitment = Transaction.processEntropyCommitments(this.signers, entropy);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to process entropy commitments");
+      window.fabric.Crashlytics.addLog(JSON.stringify(entropy));
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process entropy commitments');
     }
 
     await this.bt.send(JSON.stringify({
@@ -592,12 +612,12 @@ export class WalletService {
   async verifySignature(transaction) {
     const tx = transaction.toTX();
 
-    let verify; 
+    let verify;
     try {
       verify = tx.verify(await this.watchingWallet.wallet.getCoinView(tx));
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to verify signature");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to verify signature');
   }
     return verify;
   }
@@ -605,42 +625,42 @@ export class WalletService {
   async pushTransaction(transaction) {
     const tx = transaction.toTX();
     try {
-    await this.provider.pushTransaction(tx.toRaw().toString('hex'));
+      await this.provider.pushTransaction(tx.toRaw().toString('hex'));
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to push transaction");
-  }
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to push transaction');
+    }
   }
 
   async finishSync(data) {
     try {
-    this.compoundKey.finishInitialSync(data);
+      this.compoundKey.finishInitialSync(data);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed synchronization finish");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed synchronization finish');
     }
 
     try {
-    this.address = this.compoundKey.getCompoundKeyAddress('base58');
+      this.address = this.compoundKey.getCompoundKeyAddress('base58');
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get compound key address");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get compound key address');
     }
 
     try {
       await this.walletDB.open();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed open database");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed open database');
     }
 
     try {
-    this.watchingWallet = await new WatchingWallet({
-      watchingKey: this.compoundKey.compoundPublicKeyring
-    }).load(this.walletDB);
+      this.watchingWallet = await new WatchingWallet({
+        watchingKey: this.compoundKey.compoundPublicKeyring
+      }).load(this.walletDB);
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to create watching wallet");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to create watching wallet');
     }
 
     this.watchingWallet.on('balance', (balance) => {
@@ -653,10 +673,10 @@ export class WalletService {
     });
 
     try {
-    this.balance = await this.watchingWallet.getBalance();
+      this.balance = await this.watchingWallet.getBalance();
     } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to get the balance");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get the balance');
     }
 
     // Start: configuring a provider
@@ -680,9 +700,9 @@ export class WalletService {
       this.routineTimer = setInterval(() => {
         this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(e => {});
       }, 20000);
-    } catch(e) {
+    } catch (e) {
       window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to pull transactions into provider");
+      window.fabric.Crashlytics.sendNonFatalCrash('Failed to pull transactions into provider');
     }
 
     // End: configuring a provider
