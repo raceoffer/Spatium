@@ -16,3 +16,4 @@
 package-lock.json
 /cordova/platforms
 /cordova/plugins
+dist
