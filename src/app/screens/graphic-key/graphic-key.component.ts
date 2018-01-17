@@ -17,6 +17,7 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
 
   next: string = null;
   back: string = null;
+  graph_key: string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -36,25 +37,29 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit(){
-
-    let qqq =  new PatternLock(this.el.nativeElement,{
-      matrix:[3,3],
-      inner_radius:10,
+    const self = this;
+    let lock =  new PatternLock(this.el.nativeElement,{
       mapper: function(idx){
-        console.log((idx%9) + 1);
+        return (idx%9) + 1;
+      },
+      onDraw:function(pattern){
+        console.log(pattern)
+        self.graph_key = pattern;
+        self.goNext();
       }
     });
 
-    console.log(qqq)
+    console.log(lock)
 
   }
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
       this.authSevice.addFactor({
-        name: 'Password',
-        icon: 'keyboard',
-        value: '',
+        name: 'GraphicKey',
+        icon: '',
+        icon_asset: 'graphic-key-big',
+        value: this.graph_key.toString(),
       });
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);

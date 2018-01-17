@@ -39,9 +39,11 @@
             matrix = option.matrix,
             margin = option.margin,
             radius = option.radius,
+			inner_radius = option.inner_radius,
+          inner_margin = option.inner_margin,
             html = ['<ul class="patt-wrap" style="padding:' + margin + 'px">'];
         for (var i = 0, ln = matrix[0] * matrix[1]; i < ln; i++) {
-            html.push('<li class="patt-circ" style="margin:' + margin + 'px; width : ' + (radius * 2) + 'px; height : ' + (radius * 2) + 'px; -webkit-border-radius: ' + radius + 'px; -moz-border-radius: ' + radius + 'px; border-radius: ' + radius + 'px; "><div class="patt-dots"></div></li>');
+            html.push('<li class="patt-circ" style="margin:' + margin + 'px; width : ' + (radius * 2) + 'px; height : ' + (radius * 2) + 'px; -webkit-border-radius: ' + radius + 'px; -moz-border-radius: ' + radius + 'px; border-radius: ' + radius + 'px; "><div class="patt-inner-circ" style="margin:' + inner_margin + 'px; width : ' + (inner_radius * 2) + 'px; height : ' + (inner_radius * 2) + 'px; -webkit-border-radius:' + inner_radius + 'px; -moz-border-radius:' + inner_radius + 'px; border-radius:' + inner_radius + 'px; "><div class="patt-dots"></div></div></li>');
         }
         html.push('</ul>');
         holder.html(html.join('')).css({
@@ -50,7 +52,7 @@
         });
 
         //select pattern circle
-        iObj.pattCircle = iObj.holder.find('.patt-circ');
+        iObj.pattCircle = iObj.holder.find('.patt-inner-circ');
 
     }
 
@@ -112,7 +114,7 @@
             if (patternAry.length > 0) {
                 var laMove = getLengthAngle(iObj.lineX1, posObj.x, iObj.lineY1, posObj.y);
                 iObj.line.css({
-                    'width': (laMove.length + 10) + 'px',
+                    'width': (laMove.length + 2) + 'px',
                     'transform': 'rotate(' + laMove.angle + 'deg)'
                 });
             }
@@ -146,7 +148,7 @@
                             iObj.addDirectionClass({i: ip, j: jp});
 
                             //mark a point added
-                            iObj.markPoint($(li[nextPattId - 1]), nextPattId);
+                            iObj.markPoint($($(li[nextPattId - 1]).children[0]), nextPattId);
 
                             //add line between the points
                             iObj.addLine({i: ip,j: jp});
@@ -248,7 +250,7 @@
                 //to fix line
                 var lA = getLengthAngle(_this.lineX1, newX, _this.lineY1, newY);
                 _this.line.css({
-                    'width': (lA.length + 10) + 'px',
+                    'width': (lA.length +2) + 'px',
                     'transform': 'rotate(' + lA.angle + 'deg)'
                 });
 
@@ -257,7 +259,7 @@
 
 
             //to create new line
-            var line = $('<div class="patt-lines" style="top:' + (newY - 5) + 'px; left:' + (newX - 5) + 'px"></div>');
+            var line = $('<div class="patt-lines" style="top:' + (newY - 1) + 'px; left:' + (newX - 1) + 'px"></div>');
             _this.line = line;
             _this.lineX1 = newX;
             _this.lineY1 = newY;
@@ -432,8 +434,10 @@
 
     PatternLock.defaults = {
         matrix: [3, 3],
-        margin: 20,
-        radius: 25,
+        margin: 22,
+        radius: 30,
+		    inner_radius: 9,
+        inner_margin: 20,
         patternVisible: true,
         lineOnMove: true,
         delimiter: "", // a delimiter between the pattern

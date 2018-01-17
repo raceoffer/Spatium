@@ -246,6 +246,10 @@ body, buttons, html, input, textarea {
   margin-top: 97.5px;
 }
 
+.margin80 {
+  margin-top: 80px;
+}
+
 .bottom32{
   padding-bottom: 32px;
 }
@@ -502,6 +506,16 @@ input[type="password-pin"]
   margin-top: 7px;
 }
 
+.graphic-key-big {
+  background: $bluish;
+  mask: url(../../assets/images/drawable/graphic_key.svg) center;
+  -webkit-mask: url(../../assets/images/drawable/graphic_key.svg) center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-size: contain;
+  height: 50px !important;
+  width: 50px !important;
+}
 
 //graphic-key
 .patt-wrap li{
@@ -512,10 +526,9 @@ input[type="password-pin"]
 
 .patt-holder ul{
   list-style: none;
-  margin:0;
   padding: 0;
-  margin-top: 0!important;
-  margin-bottom: 10px!important;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
 
 .patt-holder{background:none!important;
@@ -532,9 +545,6 @@ input[type="password-pin"]
   box-sizing: border-box;
   -moz-box-sizing: border-box;
 }
-.patt-circ.hovered{
-  border:1px solid $bluish!important;
-}
 
 .patt-error .patt-circ.hovered{
   border:3px solid #BA1B26;
@@ -542,26 +552,32 @@ input[type="password-pin"]
 
 .patt-hidden .patt-circ.hovered{border:0;}
 
-.patt-dots{
-  background: $bluish!important;
-  width: 10px;height: 10px;
-  border-radius:5px;
-  position:absolute;
-  top:50%;
-  left:50%;
-  margin-top:-5px;
-  margin-left:-5px;
-}
-.patt-lines{
-  border-radius:5px;
-  height:10px;
-  background:$bluish!important;
-  position:absolute;
-  transform-origin:5px 5px;
-  -ms-transform-origin:5px 5px; /* IE 9 */
-  -webkit-transform-origin:5px 5px;
-}
-
 .patt-hidden .patt-lines{
   display:none;
+}
+
+.patt-inner-circ.hovered{
+  border:1px solid $bluish;
+}
+
+.patt-dots{
+  background: $bluish;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -6px;
+  margin-left: -6px;
+}
+
+.patt-lines{
+  border-radius:1px;
+  height:2px;
+  background:$bluish;
+  position:absolute;
+  transform-origin:1px 1px;
+  -ms-transform-origin:1px 1px; /* IE 9 */
+  -webkit-transform-origin:1px 1px;
 }
