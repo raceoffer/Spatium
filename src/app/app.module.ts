@@ -33,6 +33,7 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
+import { LoggerService } from './services/logger.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { AuthService } from './services/auth.service';
 import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
@@ -89,6 +90,7 @@ import { PasswordComponent } from './screens/password/password.component';
     WalletService,
     BitcoinKeyFragmentService,
     BluetoothService,
+    LoggerService,
     AuthService
   ],
   bootstrap: [

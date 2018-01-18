@@ -53,14 +53,15 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     console.log('connect' + name + address);
     this.overlayClass = 'overlay';
     try {
-      await this.bt.connect({
+      if (await this.bt.connect({
         name: name,
         address: address
-      });
-      await this.wallet.startSync();
-      this.ngZone.run(() => {
-        this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
-      });
+      })) {
+        await this.wallet.startSync();
+        this.ngZone.run(() => {
+          this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
+        });
+      }
     } catch (e) {
       console.log('connect', e);
       this.overlayClass = 'overlay invisible';

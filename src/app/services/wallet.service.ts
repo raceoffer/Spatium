@@ -8,7 +8,8 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
-import {BluetoothService} from './bluetooth.service';
+import { BluetoothService } from './bluetooth.service';
+import { LoggerService } from './logger.service';
 
 declare const bcoin: any;
 declare const CompoundKey: any;
@@ -94,10 +95,10 @@ class SyncSession {
     try {
       initialCommitment = this.prover.getInitialCommitment();
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to get initialCommitment', e);
+      LoggerService.nonFatalCrash('Failed to get initialCommitment', e);
     }
 
-    WalletService.log('Sending initialCommitment:', initialCommitment);
+    LoggerService.log('Sending initialCommitment:', initialCommitment);
     await this.bt.send(JSON.stringify({
       type: 'initialCommitment',
       content: initialCommitment
@@ -110,15 +111,15 @@ class SyncSession {
     }
 
     this.status.next(Status.InitialCommitment);
-    WalletService.log('Received remoteInitialCommitment', remoteInitialCommitment);
+    LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     let initialDecommitment = null;
     try {
       initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteInitialCommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteInitialCommitment', e);
     }
 
-    WalletService.log('Sending initialDecommitment', initialDecommitment);
+    LoggerService.log('Sending initialDecommitment', initialDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'initialDecommitment',
       content: initialDecommitment
@@ -131,16 +132,16 @@ class SyncSession {
     }
 
     this.status.next(Status.InitialDecommitment);
-    WalletService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
+    LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     try {
       this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteInitialDecommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteInitialDecommitment', e);
     }
 
     const verifierCommitment = this.verifier.getCommitment();
 
-    WalletService.log('Sending verifierCommitment', verifierCommitment);
+    LoggerService.log('Sending verifierCommitment', verifierCommitment);
     await this.bt.send(JSON.stringify({
       type: 'verifierCommitment',
       content: verifierCommitment
@@ -153,15 +154,15 @@ class SyncSession {
     }
 
     this.status.next(Status.VerifierCommitment);
-    WalletService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
+    LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     let proverCommitment = null;
     try {
       proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteVerifierCommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteVerifierCommitment', e);
     }
 
-    WalletService.log('Sending proverCommitment', proverCommitment);
+    LoggerService.log('Sending proverCommitment', proverCommitment);
     await this.bt.send(JSON.stringify({
       type: 'proverCommitment',
       content: proverCommitment
@@ -174,15 +175,15 @@ class SyncSession {
     }
 
     this.status.next(Status.ProverCommitment);
-    WalletService.log('Received remoteProverCommitment', remoteProverCommitment);
+    LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
     let verifierDecommitment = null;
     try {
       verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteProverCommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteProverCommitment', e);
     }
 
-    WalletService.log('Sending verifierDecommitment', verifierDecommitment);
+    LoggerService.log('Sending verifierDecommitment', verifierDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'verifierDecommitment',
       content: verifierDecommitment
@@ -195,15 +196,15 @@ class SyncSession {
     }
 
     this.status.next(Status.VerifierDecommitment);
-    WalletService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
+    LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     let proverDecommitment = null;
     try {
       proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteVerifierDecommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteVerifierDecommitment', e);
     }
 
-    WalletService.log('Sending proverDecommitment', proverDecommitment);
+    LoggerService.log('Sending proverDecommitment', proverDecommitment);
     await this.bt.send(JSON.stringify({
       type: 'proverDecommitment',
       content: proverDecommitment
@@ -216,12 +217,12 @@ class SyncSession {
     }
 
     this.status.next(Status.ProverDecommitment);
-    WalletService.log('Received remoteProverDecommitment', remoteProverDecommitment);
+    LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     let verifiedData = null;
     try {
       verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
     } catch (e) {
-      WalletService.nonFatalCrash('Failed to process remoteProverDecommitment', e);
+      LoggerService.nonFatalCrash('Failed to process remoteProverDecommitment', e);
     }
 
     this.status.next(Status.Finish);
@@ -268,16 +269,6 @@ export class WalletService {
   onVerifyTransaction: EventEmitter<any> = new EventEmitter();
   onAccepted: EventEmitter<any> = new EventEmitter();
   onRejected: EventEmitter<any> = new EventEmitter();
-
-  public static log(message, data) {
-    window.fabric.Crashlytics.addLog(message + ': ' + JSON.stringify(data));
-    console.log(message, JSON.stringify(data));
-  }
-
-  public static nonFatalCrash(message, exception) {
-    window.fabric.Crashlytics.sendNonFatalCrash(message + ': ' + exception);
-    console.log(message, exception);
-  }
 
   constructor(private bt: BluetoothService) {
     bcoin.set(this.network);
