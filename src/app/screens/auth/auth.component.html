@@ -30,8 +30,8 @@
         </button>
       </div>
       <div>
-        <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon">{{factor.icon}}</mat-icon>
-        <div class="{{factor.icon_asset}}" *ngIf="factor.icon_asset">
+        <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{factor.icon}}</mat-icon>
+        <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
         </div>
       </div>
     </div>

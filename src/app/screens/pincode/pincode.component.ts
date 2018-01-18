@@ -58,11 +58,7 @@ export class PincodeComponent implements AfterViewInit {
       this.walletService.setKeyFragment(keyFragment);
       this.router.navigate(['/verifyTransaction']);
     } else if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor({
-        name: 'PIN',
-        icon: 'dialpad',
-        value: this.pincode.toString(),
-      });
+      this.authSevice.addFactor(AuthService.FactorType.PIN, this.pincode.toString());
 
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);

@@ -52,12 +52,8 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor({
-        name: 'GraphicKey',
-        icon: '',
-        icon_asset: 'graphic-key-big',
-        value: this.graph_key.toString(),
-      });
+
+      this.authSevice.addFactor( AuthService.FactorType.GRAPHIC_KEY, this.graph_key.toString());
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });

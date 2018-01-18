@@ -39,11 +39,7 @@ export class FileUploadComponent implements OnInit {
   }
 
   goNext(): void {
-    this.authSevice.addFactor({
-      name: 'File',
-      icon: 'insert_drive_file',
-      value: this._fileHash.toString(),
-    });
+    this.authSevice.addFactor( AuthService.FactorType.FILE, this._fileHash.toString());
     this.ngZone.run(() => {
       this.router.navigate(['/auth']);
     });

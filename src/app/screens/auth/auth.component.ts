@@ -44,6 +44,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
       this.username = this.authSevice.login;
     }
     this.factors = this.authSevice.factors;
+    console.log(this.factors);
     this.cd.detectChanges();
   }
 

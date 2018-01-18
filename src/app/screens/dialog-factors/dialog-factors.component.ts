@@ -1,6 +1,7 @@
 import {Component, Inject, NgZone} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
 import {Router} from "@angular/router";
+import {AuthService} from "../../services/auth.service";
 
 
 @Component({
@@ -10,43 +11,18 @@ import {Router} from "@angular/router";
 })
 export class DialogFactorsComponent {
 
-  factors = [
-    {
-      name: 'PIN',
-      icon: 'dialpad',
-      link: '/pincode',
-      next: 'auth',
-      back: 'auth'
-    },
-    {
-      name: 'Password',
-      icon: 'keyboard',
-      link: '/password',
-      next: 'auth',
-      back: 'auth'
-    },
-    {
-      name: 'File',
-      icon: 'insert_drive_file',
-      link: '/file-upload',
-      next: 'auth',
-      back: 'auth'
-    },
-    {
-      name: 'Graphic key',
-      icon: '',
-      icon_asset: 'graphic-key',
-      link: '/graphic-key',
-      next: 'auth',
-      back: 'auth'
-    }
-  ];
+  factors: any;
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
+    private authSevice: AuthService,
     private router: Router,
     private ngZone: NgZone,
-    @Inject(MAT_DIALOG_DATA) public data: any) { }
+    @Inject(MAT_DIALOG_DATA) public data: any) {
+
+    console.log(this.authSevice.getAllAvailableFactors());
+    this.factors = this.authSevice.getAllAvailableFactors();
+  }
 
 
   goTo(factor): void {
