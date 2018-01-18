@@ -1,7 +1,13 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { UUID } from 'angular2-uuid';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import WalletData from '../classes/wallet-data';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/takeUntil';
+
 import {BluetoothService} from './bluetooth.service';
 
 declare const bcoin: any;
@@ -12,8 +18,9 @@ declare const Transaction: any;
 declare const Utils: any;
 declare const window: any;
 
-enum Status {
-  Start = 0,
+export enum Status {
+  None = 0,
+  Start,
   InitialCommitment,
   InitialDecommitment,
   VerifierCommitment,
@@ -23,21 +30,219 @@ enum Status {
   Finish
 }
 
+class SyncSession {
+  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
+
+  private initialCommitmentObserver:    Observable<any>;
+  private initialDecommitmentObserver:  Observable<any>;
+  private verifierCommitmentObserver:   Observable<any>;
+  private proverCommitmentObserver:     Observable<any>;
+  private verifierDecommitmentObserver: Observable<any>;
+  private proverDecommitmentObserver:   Observable<any>;
+
+  private canceled: EventEmitter<any> = new EventEmitter();
+
+  private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
+
+  public finished: EventEmitter<any> = new EventEmitter();
+
+  private verifier: any = null;
+
+  constructor(
+    private prover: any,
+    private messageSubject: ReplaySubject<any>,
+    private bt: BluetoothService
+  ) {
+    this.initialCommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'initialCommitment')
+        .map(object => object.content);
+
+    this.initialDecommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'initialDecommitment')
+        .map(object => object.content);
+
+    this.verifierCommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'verifierCommitment')
+        .map(object => object.content);
+
+    this.proverCommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'proverCommitment')
+        .map(object => object.content);
+
+    this.verifierDecommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'verifierDecommitment')
+        .map(object => object.content);
+
+    this.proverDecommitmentObserver =
+      this.messageSubject
+        .filter(object => object.type === 'proverDecommitment')
+        .map(object => object.content);
+  }
+
+  public cancel() {
+    this.cancelObserver.next(true);
+  }
+
+  public async sync() {
+    this.status.next(Status.Start);
+    let initialCommitment = null;
+    try {
+      initialCommitment = this.prover.getInitialCommitment();
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to get initialCommitment', e);
+    }
+
+    WalletService.log('Sending initialCommitment:', initialCommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'initialCommitment',
+      content: initialCommitment
+    }));
+
+    const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteInitialCommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.InitialCommitment);
+    WalletService.log('Received remoteInitialCommitment', remoteInitialCommitment);
+    let initialDecommitment = null;
+    try {
+      initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteInitialCommitment', e);
+    }
+
+    WalletService.log('Sending initialDecommitment', initialDecommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'initialDecommitment',
+      content: initialDecommitment
+    }));
+
+    const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteInitialDecommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.InitialDecommitment);
+    WalletService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
+    try {
+      this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteInitialDecommitment', e);
+    }
+
+    const verifierCommitment = this.verifier.getCommitment();
+
+    WalletService.log('Sending verifierCommitment', verifierCommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'verifierCommitment',
+      content: verifierCommitment
+    }));
+
+    const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteVerifierCommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.VerifierCommitment);
+    WalletService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
+    let proverCommitment = null;
+    try {
+      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteVerifierCommitment', e);
+    }
+
+    WalletService.log('Sending proverCommitment', proverCommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'proverCommitment',
+      content: proverCommitment
+    }));
+
+    const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteProverCommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.ProverCommitment);
+    WalletService.log('Received remoteProverCommitment', remoteProverCommitment);
+    let verifierDecommitment = null;
+    try {
+      verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteProverCommitment', e);
+    }
+
+    WalletService.log('Sending verifierDecommitment', verifierDecommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'verifierDecommitment',
+      content: verifierDecommitment
+    }));
+
+    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteVerifierDecommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.VerifierDecommitment);
+    WalletService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
+    let proverDecommitment = null;
+    try {
+      proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteVerifierDecommitment', e);
+    }
+
+    WalletService.log('Sending proverDecommitment', proverDecommitment);
+    await this.bt.send(JSON.stringify({
+      type: 'proverDecommitment',
+      content: proverDecommitment
+    }));
+
+    const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteProverDecommitment) {
+      this.canceled.emit();
+      throw new Error('Cancelled');
+    }
+
+    this.status.next(Status.ProverDecommitment);
+    WalletService.log('Received remoteProverDecommitment', remoteProverDecommitment);
+    let verifiedData = null;
+    try {
+      verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
+    } catch (e) {
+      WalletService.nonFatalCrash('Failed to process remoteProverDecommitment', e);
+    }
+
+    this.status.next(Status.Finish);
+    this.finished.emit(verifiedData);
+
+    return verifiedData;
+  }
+}
+
+class SignSession {
+  constructor() {
+
+  }
+}
+
 @Injectable()
 export class WalletService {
-  DDS: any = null;
   compoundKey: any = null;
   walletDB: any = null;
   watchingWallet: any = null;
   provider: any = null;
-
-  readyStart = false;
-  readyInitialCommitment = false;
-  readyInitialDecommitment = false;
-  readyVerifierCommitment = false;
-  readyProverCommitment = false;
-  readyVerifierDecommitment = false;
-  readyProverDecommitment = false;
 
   routineTimer: any = null;
 
@@ -47,8 +252,10 @@ export class WalletService {
   address = null;
   balance = null;
 
-  prover = null;
-  verifier = null;
+  messageSubject: ReplaySubject<any> = new ReplaySubject<any>(2);
+
+  syncSession: SyncSession = null;
+
   signers = null;
 
   network = 'testnet'; // 'main'; | 'testnet';
@@ -62,17 +269,21 @@ export class WalletService {
   onAccepted: EventEmitter<any> = new EventEmitter();
   onRejected: EventEmitter<any> = new EventEmitter();
 
-  private static log(message, data) {
-    window.fabric.Crashlytics.addLog(message + JSON.stringify(data));
+  public static log(message, data) {
+    window.fabric.Crashlytics.addLog(message + ': ' + JSON.stringify(data));
     console.log(message, JSON.stringify(data));
+  }
+
+  public static nonFatalCrash(message, exception) {
+    window.fabric.Crashlytics.sendNonFatalCrash(message + ': ' + exception);
+    console.log(message, exception);
   }
 
   constructor(private bt: BluetoothService) {
     bcoin.set(this.network);
 
     this.bt.onMessage.subscribe((message) => {
-      const obj = JSON.parse(message);
-      this[obj.type](obj.content);
+      this.messageSubject.next(JSON.parse(message));
     });
 
     this.walletDB = new bcoin.walletdb({
@@ -80,19 +291,7 @@ export class WalletService {
     });
   }
 
-  generateFragment() {
-    let key = null;
-    try {
-      key = CompoundKey.generateKeyring();
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to generate key fragment');
-    } finally {
-      return key;
-    }
-  }
-
-  getAddress() {
+  public getAddress() {
     if (this.remoteReady) {
       return this.address;
     } else {
@@ -100,7 +299,7 @@ export class WalletService {
     }
   }
 
-  getBalance() {
+  public getBalance() {
     if (this.remoteReady) {
       return this.balance;
     } else {
@@ -108,14 +307,7 @@ export class WalletService {
     }
   }
 
-  getWallet() {
-    const wallet = new WalletData();
-    wallet.address = this.getAddress();
-    wallet.balance = this.getBalance();
-    return wallet;
-  }
-
-  setKeyFragment(fragment) {
+  public setKeyFragment(fragment) {
     try {
       this.compoundKey = new CompoundKey({
         localPrivateKeyring: fragment
@@ -127,10 +319,8 @@ export class WalletService {
     }
   }
 
-  resetRemote() {
+  public resetRemote() {
     this.remoteReady = false;
-    this.prover = null;
-    this.verifier = null;
 
     this.watchingWallet = null;
     this.provider = null;
@@ -139,294 +329,34 @@ export class WalletService {
     this.routineTimer = null;
   }
 
-  resetFull() {
+  public resetFull() {
     this.resetRemote();
     this.localReady = false;
     this.compoundKey = null;
   }
 
-  getProver() {
-    try {
-      return this.compoundKey.startInitialCommitment();
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to start initial commitment');
+  public startSync() {
+    if (this.syncSession && this.syncSession.status.getValue() !== Status.Finish) {
+      throw new Error('Sync in progress');
     }
+
+    let prover = null;
+    try {
+      prover = this.compoundKey.startInitialCommitment();
+    } catch (e) {
+      window.fabric.Crashlytics.addLog('Failed to start initial commitment', e);
+    }
+
+    this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
+    this.syncSession.status.subscribe(state => this.onStatus.emit(state));
+    this.syncSession.sync().then(data => this.finishSync(data));
   }
 
-  async startSync() {
-    this.onStatus.emit(Status.Start);
-
-    this.readyStart = false;
-    this.readyInitialCommitment = false;
-    this.readyInitialDecommitment = false;
-    this.readyVerifierCommitment = false;
-    this.readyProverCommitment = false;
-    this.readyVerifierDecommitment = false;
-    this.readyProverDecommitment = false;
-
-    const prover = this.getProver();
-
-    let initialCommitment = null;
-    try {
-      initialCommitment = prover.getInitialCommitment();
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to get initial commitment');
+  public cancelSync() {
+    if (this.syncSession) {
+      this.syncSession.cancel();
     }
-
-    WalletService.log('Sending initialCommitment:', initialCommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'initialCommitment',
-      content: initialCommitment
-    }));
-
-    this.onStatus.emit(Status.InitialCommitment);
-
-    this.prover = prover;
-
-    this.readyStart = true;
   }
-
-  initialCommitment = async function(remoteInitialCommitment) {
-    if (this.readyInitialCommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteInitialCommitment', remoteInitialCommitment);
-    await new Promise((resolve) => {
-      if (this.readyStart) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyStart) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    let initialDecommitment = null;
-    try {
-      initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process initial commitment');
-    }
-
-    WalletService.log('Sending initialDecommitment', initialDecommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'initialDecommitment',
-      content: initialDecommitment
-    }));
-
-    this.onStatus.emit(Status.InitialDecommitment);
-
-    this.readyInitialCommitment = true;
-  };
-
-  initialDecommitment = async function(remoteInitialDecommitment) {
-    if (this.readyInitialDecommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
-    await new Promise((resolve) => {
-      if (this.readyInitialCommitment) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyInitialCommitment) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    try {
-      this.verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process initial decommitment');
-    }
-
-    const verifierCommitment = this.verifier.getCommitment();
-
-    WalletService.log('Sending verifierCommitment', verifierCommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'verifierCommitment',
-      content: verifierCommitment
-    }));
-
-    this.onStatus.emit(Status.VerifierCommitment);
-
-    this.readyInitialDecommitment = true;
-  };
-
-  verifierCommitment = async function(remoteVerifierCommitment) {
-    if (this.readyVerifierCommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
-    await new Promise((resolve) => {
-      if (this.readyInitialDecommitment) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyInitialDecommitment) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    let proverCommitment = null;
-    try {
-      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process verifier commitment');
-    }
-
-    WalletService.log('Sending proverCommitment', proverCommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'proverCommitment',
-      content: proverCommitment
-    }));
-
-    this.onStatus.emit(Status.ProverCommitment);
-
-    this.readyVerifierCommitment = true;
-  };
-
-  proverCommitment = async function(remoteProverCommitment) {
-    if (this.readyProverCommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteProverCommitment', remoteProverCommitment);
-    await new Promise((resolve) => {
-      if (this.readyVerifierCommitment) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyVerifierCommitment) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    let verifierDecommitment = null;
-    try {
-      verifierDecommitment = this.verifier.processCommitment(remoteProverCommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process prover commitment');
-    }
-
-    WalletService.log('Sending verifierDecommitment', verifierDecommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'verifierDecommitment',
-      content: verifierDecommitment
-    }));
-
-    this.onStatus.emit(Status.VerifierDecommitment);
-
-    this.readyProverCommitment = true;
-  };
-
-  verifierDecommitment = async function(remoteVerifierDecommitment) {
-    if (this.readyVerifierDecommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
-    await new Promise((resolve) => {
-      if (this.readyProverCommitment) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyProverCommitment) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    let proverDecommitment = null;
-    try {
-      proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process verifier decommitment');
-    }
-
-    WalletService.log('Sending proverDecommitment', proverDecommitment);
-    await this.bt.send(JSON.stringify({
-      type: 'proverDecommitment',
-      content: proverDecommitment
-    }));
-
-    this.onStatus.emit(Status.ProverDecommitment);
-
-    this.readyVerifierDecommitment = true;
-  };
-
-  proverDecommitment = async function(remoteProverDecommitment) {
-    if (this.readyProverDecommitment) {
-      return;
-    }
-
-    WalletService.log('Received remoteProverDecommitment', remoteProverDecommitment);
-    await new Promise((resolve) => {
-      if (this.readyProverCommitment) {
-        resolve();
-        return;
-      }
-      const timer = setInterval(() => {
-        if (this.readyProverCommitment) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 100);
-    });
-
-    let verifiedData = null;
-    try {
-      verifiedData = this.verifier.processDecommitment(remoteProverDecommitment);
-    } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash('Failed to process prover decommitment');
-    }
-
-    this.readyStart = false;
-    this.readyInitialCommitment = false;
-    this.readyInitialDecommitment = false;
-    this.readyVerifierCommitment = false;
-    this.readyProverCommitment = false;
-    this.readyVerifierDecommitment = false;
-    this.readyProverDecommitment = false;
-
-    this.prover = null;
-    this.verifier = null;
-
-    console.log('Done sync');
-
-    this.onStatus.emit(Status.Finish);
-
-    this.readyProverDecommitment = true;
-
-    this.finishSync(verifiedData).then(() => {
-      this.onFinish.emit();
-    });
-  };
 
   verifyTransaction = function(obj) {
     this.onVerifyTransaction.emit({
@@ -708,6 +638,8 @@ export class WalletService {
     // End: configuring a provider
 
     console.log('Sync done');
+
+    this.onFinish.emit();
 
     this.remoteReady = true;
   }

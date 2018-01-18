@@ -1,7 +1,6 @@
 import { Component, OnInit, NgZone} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BluetoothService } from '../../services/bluetooth.service';
-import { WalletService } from '../../services/wallet.service';
+import { ActivatedRoute } from '@angular/router';
+import { WalletService, Status } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-connect',
@@ -18,9 +17,7 @@ export class ConnectComponent implements OnInit {
   progress = 0;
 
   constructor(private route: ActivatedRoute,
-              private bt: BluetoothService,
               private wallet: WalletService,
-              private router: Router,
               private ngZone: NgZone) { }
 
   ngOnInit() {
@@ -35,7 +32,11 @@ export class ConnectComponent implements OnInit {
     });
 
     this.wallet.onStatus.subscribe((status) => this.ngZone.run(() => {
-      this.progress = Math.max(Math.min(Math.round(status * 100 / 8), 100), 0);
+      this.progress = Math.max(Math.min(Math.round(status * 100 / Object.keys(Status).length / 2), 100), 0);
     }));
+  }
+
+  cancelSync() {
+    this.wallet.cancelSync();
   }
 }
