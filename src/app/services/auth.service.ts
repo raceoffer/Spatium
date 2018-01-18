@@ -89,8 +89,8 @@ export namespace AuthService {
     PASSWORD = '/password',
     FILE = '/file-upload',
     GRAPHIC_KEY = '/graphic-key',
-    QR = '',
-    NFC = ''
+    QR = '/qr-code',
+    NFC = '/nfc'
   }
 
   export class AvailableFactor {

@@ -43,6 +43,8 @@ import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.
 import { PasswordComponent } from './screens/password/password.component';
 import { FileUploadComponent } from './screens/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
+import { QrCodeComponent } from './screens/qr-code/qr-code.component';
+import { NfcComponent } from './screens/nfc/nfc.component';
 
 
 @NgModule({
@@ -63,7 +65,9 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
     DialogFactorsComponent,
     PasswordComponent,
     FileUploadComponent,
-    GraphicKeyComponent
+    GraphicKeyComponent,
+    QrCodeComponent,
+    NfcComponent
   ],
   imports: [
     FormsModule,

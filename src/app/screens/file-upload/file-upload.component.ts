@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {AfterViewInit, Component, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 
@@ -7,14 +7,14 @@ import {AuthService} from "../../services/auth.service";
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
-export class FileUploadComponent implements OnInit {
+export class FileUploadComponent implements AfterViewInit {
 
   uploadFile = 'Choose a file';
 
   next: string = null;
   back: string = null;
 
-  _fileHash:string = null;
+  _file:string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -30,16 +30,17 @@ export class FileUploadComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this._file = '';
   }
 
   onUploadFileClick() :void{
-    this._fileHash = 'lkasjdksajdlaskdj';
+    this._file = 'lkasjdksajdlaskdj';
     this.goNext();
   }
 
   goNext(): void {
-    this.authSevice.addFactor( AuthService.FactorType.FILE, this._fileHash.toString());
+    this.authSevice.addFactor( AuthService.FactorType.FILE, this._file.toString());
     this.ngZone.run(() => {
       this.router.navigate(['/auth']);
     });

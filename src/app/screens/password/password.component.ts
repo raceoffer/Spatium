@@ -1,4 +1,4 @@
-import {Component, Input, NgZone, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 
@@ -9,7 +9,7 @@ declare var window;
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })
-export class PasswordComponent implements OnInit {
+export class PasswordComponent implements AfterViewInit {
 
   stContinue = 'Continue';
   stPassword = 'Password';
@@ -42,7 +42,8 @@ export class PasswordComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this._passwordValue = '';
   }
 
   goNext(): void {
