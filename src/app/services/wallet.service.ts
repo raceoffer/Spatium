@@ -371,30 +371,40 @@ export class WalletService {
 
   public startSync() {
     if (this.syncSession && this.syncSession.status.getValue() !== Status.Finished) {
-      throw new Error('Sync in progress');
+      LoggerService.log('Sync in progress', {});
+      return;
     }
 
     let prover = null;
     try {
       prover = this.compoundKey.startInitialCommitment();
     } catch (e) {
-      window.fabric.Crashlytics.addLog('Failed to start initial commitment', e);
+      LoggerService.nonFatalCrash('Failed to start initial commitment', e);
     }
 
     this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
     this.syncSession.status.subscribe(state => this.onStatus.emit(state));
     this.syncSession.canceled.subscribe(() => {
       console.log('received cancel event');
+      // pop the queue
+      this.messageSubject.next({});
+      this.messageSubject.next({});
       this.syncSession = null;
       this.onCancelled.emit();
     });
     this.syncSession.failed.subscribe(() => {
       console.log('received failed event');
+      // pop the queue
+      this.messageSubject.next({});
+      this.messageSubject.next({});
       this.syncSession = null;
       this.onFailed.emit();
     });
     this.syncSession.finished.subscribe(async (data) => {
       console.log('received finished event');
+      // pop the queue
+      this.messageSubject.next({});
+      this.messageSubject.next({});
       this.syncSession = null;
       await this.finishSync(data);
     });

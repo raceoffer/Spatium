@@ -34,14 +34,26 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
               private router: Router,
               private ngZone: NgZone) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.wallet.resetRemote();
-    this.bt.disconnect();
+    await this.bt.disconnect();
     this.wallet.onFinish.subscribe(async () => await this.ngZone.run(async () => {
       console.log(this.wallet.address);
       this.ready = true;
       this.synching = false;
     }));
+    this.wallet.onCancelled.subscribe(async () => {
+      this.wallet.resetRemote();
+      await this.bt.disconnect();
+      this.synching = false;
+      this.ready = false;
+    });
+    this.wallet.onFailed.subscribe(async () => {
+      this.wallet.resetRemote();
+      await this.bt.disconnect();
+      this.synching = false;
+      this.ready = false;
+    });
     this.bt.onConnected.subscribe( async () => await this.ngZone.run(async () => {
       await this.wallet.startSync();
       this.synching = true;
