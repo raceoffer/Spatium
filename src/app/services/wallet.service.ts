@@ -93,170 +93,183 @@ class SyncSession {
       this.messageSubject
         .filter(object => object.type === 'proverDecommitment')
         .map(object => object.content);
+
+    this.messageSubject
+        .filter(object => object.type === 'cancel')
+        .subscribe(() => this.cancelObserver.next(true));
   }
 
-  public cancel() {
+  public async cancel() {
     this.cancelObserver.next(true);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'cancel',
+      content: {}
+    }))) {
+      LoggerService.nonFatalCrash('Failed to send cancel', null);
+    }
   }
 
   public async sync() {
-    try {
-      this.status.next(Status.Started);
-      let initialCommitment = null;
-      try {
-        initialCommitment = this.prover.getInitialCommitment();
-      } catch (e) {
-        throw new Failure('Failed to get initialCommitment', e);
-      }
-
-      LoggerService.log('Sending initialCommitment:', initialCommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'initialCommitment',
-        content: initialCommitment
-      }))) {
-        throw new Failure('Failed to send initialCommitment', null);
-      }
-
-      const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteInitialCommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.InitialCommitment);
-      LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
-      let initialDecommitment = null;
-      try {
-        initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteInitialCommitment', e);
-      }
-
-      LoggerService.log('Sending initialDecommitment', initialDecommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'initialDecommitment',
-        content: initialDecommitment
-      }))) {
-        throw new Failure('Failed to send initialDecommitment', null);
-      }
-
-      const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteInitialDecommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.InitialDecommitment);
-      LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
-      let verifier = null;
-      try {
-        verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteInitialDecommitment', e);
-      }
-
-      const verifierCommitment = verifier.getCommitment();
-
-      LoggerService.log('Sending verifierCommitment', verifierCommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'verifierCommitment',
-        content: verifierCommitment
-      }))) {
-        throw new Failure('Failed to send verifierCommitment', null);
-      }
-
-      const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteVerifierCommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.VerifierCommitment);
-      LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
-      let proverCommitment = null;
-      try {
-        proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteVerifierCommitment', e);
-      }
-
-      LoggerService.log('Sending proverCommitment', proverCommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'proverCommitment',
-        content: proverCommitment
-      }))) {
-        throw new Failure('Failed to send proverCommitment', null);
-      }
-
-      const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteProverCommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.ProverCommitment);
-      LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
-      let verifierDecommitment = null;
-      try {
-        verifierDecommitment = verifier.processCommitment(remoteProverCommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteProverCommitment', e);
-      }
-
-      LoggerService.log('Sending verifierDecommitment', verifierDecommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'verifierDecommitment',
-        content: verifierDecommitment
-      }))) {
-        throw new Failure('Failed to send verifierDecommitment', null);
-      }
-
-      const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteVerifierDecommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.VerifierDecommitment);
-      LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
-      let proverDecommitment = null;
-      try {
-        proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteVerifierDecommitment', e);
-      }
-
-      LoggerService.log('Sending proverDecommitment', proverDecommitment);
-      if (!await this.bt.send(JSON.stringify({
-        type: 'proverDecommitment',
-        content: proverDecommitment
-      }))) {
-        throw new Failure('Failed to send proverDecommitment', null);
-      }
-
-      const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-      if (!remoteProverDecommitment) {
-        throw new Cancelled();
-      }
-
-      this.status.next(Status.ProverDecommitment);
-      LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
-      let verifiedData = null;
-      try {
-        verifiedData = verifier.processDecommitment(remoteProverDecommitment);
-      } catch (e) {
-        throw new Failure('Failed to process remoteProverDecommitment', e);
-      }
-
-      this.finished.emit(verifiedData);
-
-      return verifiedData;
-    } catch (e) {
-      if (e instanceof Failure) {
-        LoggerService.nonFatalCrash(e.message, e.inner);
-        this.failed.emit();
-      } else if (e instanceof Cancelled) {
-        LoggerService.log('Cancelled', {});
-        this.canceled.emit();
-      }
-    } finally {
+    const handleFailure = (message, exception) => {
+      LoggerService.nonFatalCrash(message, exception);
       this.status.next(Status.Finished);
+      this.failed.emit();
+      throw new Failure(message, exception);
+    };
+
+    const handleCancel = () => {
+      LoggerService.log('Cancelled', {});
+      this.status.next(Status.Finished);
+      this.canceled.emit();
+      throw new Cancelled();
+    };
+
+    this.status.next(Status.Started);
+    let initialCommitment = null;
+    try {
+      initialCommitment = this.prover.getInitialCommitment();
+    } catch (e) {
+      return handleFailure('Failed to get initialCommitment', e);
     }
+
+    LoggerService.log('Sending initialCommitment:', initialCommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'initialCommitment',
+      content: initialCommitment
+    }))) {
+      return handleFailure('Failed to send initialCommitment', null);
+    }
+
+    const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteInitialCommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.InitialCommitment);
+    LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
+    let initialDecommitment = null;
+    try {
+      initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteInitialCommitment', e);
+    }
+
+    LoggerService.log('Sending initialDecommitment', initialDecommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'initialDecommitment',
+      content: initialDecommitment
+    }))) {
+      return handleFailure('Failed to send initialDecommitment', null);
+    }
+
+    const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteInitialDecommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.InitialDecommitment);
+    LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
+    let verifier = null;
+    try {
+      verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteInitialDecommitment', e);
+    }
+
+    const verifierCommitment = verifier.getCommitment();
+
+    LoggerService.log('Sending verifierCommitment', verifierCommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'verifierCommitment',
+      content: verifierCommitment
+    }))) {
+      return handleFailure('Failed to send verifierCommitment', null);
+    }
+
+    const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteVerifierCommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.VerifierCommitment);
+    LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
+    let proverCommitment = null;
+    try {
+      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteVerifierCommitment', e);
+    }
+
+    LoggerService.log('Sending proverCommitment', proverCommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'proverCommitment',
+      content: proverCommitment
+    }))) {
+      return handleFailure('Failed to send proverCommitment', null);
+    }
+
+    const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteProverCommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.ProverCommitment);
+    LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
+    let verifierDecommitment = null;
+    try {
+      verifierDecommitment = verifier.processCommitment(remoteProverCommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteProverCommitment', e);
+    }
+
+    LoggerService.log('Sending verifierDecommitment', verifierDecommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'verifierDecommitment',
+      content: verifierDecommitment
+    }))) {
+      return handleFailure('Failed to send verifierDecommitment', null);
+    }
+
+    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteVerifierDecommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.VerifierDecommitment);
+    LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
+    let proverDecommitment = null;
+    try {
+      proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteVerifierDecommitment', e);
+    }
+
+    LoggerService.log('Sending proverDecommitment', proverDecommitment);
+    if (!await this.bt.send(JSON.stringify({
+      type: 'proverDecommitment',
+      content: proverDecommitment
+    }))) {
+      return handleFailure('Failed to send proverDecommitment', null);
+    }
+
+    const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    if (!remoteProverDecommitment) {
+      return handleCancel();
+    }
+
+    this.status.next(Status.ProverDecommitment);
+    LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
+    let verifiedData = null;
+    try {
+      verifiedData = verifier.processDecommitment(remoteProverDecommitment);
+    } catch (e) {
+      return handleFailure('Failed to process remoteProverDecommitment', e);
+    }
+
+    this.status.next(Status.Finished);
+    this.finished.emit(verifiedData);
+
+    return verifiedData;
   }
 }
 
@@ -371,17 +384,22 @@ export class WalletService {
     this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
     this.syncSession.status.subscribe(state => this.onStatus.emit(state));
     this.syncSession.canceled.subscribe(() => {
+      console.log('received cancel event');
       this.syncSession = null;
       this.onCancelled.emit();
     });
     this.syncSession.failed.subscribe(() => {
+      console.log('received failed event');
       this.syncSession = null;
       this.onFailed.emit();
     });
-    this.syncSession.finished.subscribe(() => {
+    this.syncSession.finished.subscribe(async (data) => {
+      console.log('received finished event');
       this.syncSession = null;
+      await this.finishSync(data);
     });
-    this.syncSession.sync().then(data => this.finishSync(data));
+    // We'll handle it via events instead
+    this.syncSession.sync().catch(() => {});
   }
 
   public cancelSync() {
