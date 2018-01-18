@@ -44,6 +44,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       });
     });
     this.bt.onDisconnected.subscribe(() => {
+      this.wallet.cancelSync();
       this.wallet.resetRemote();
       this.ngZone.run(() => {
         this.router.navigate(['/waiting']);

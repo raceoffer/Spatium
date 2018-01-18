@@ -14,8 +14,6 @@ declare const bcoin: any;
 export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   name;
   showTransaction = false;
-  tx;
-  entropy;
   address;
   btc;
   rateBtcUsd = 15000;
@@ -81,8 +79,6 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     });
 
     this.wallet.onVerifyTransaction.subscribe(async (event) => await this.ngZone.run(async () => {
-      this.tx = event.transaction;
-      this.entropy = event.entropy;
       this.address = event.address;
       this.btc = bcoin.amount.btc(event.value);
       this.usd = this.btc * this.rateBtcUsd;
@@ -102,16 +98,16 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     await this.changeBtState();
   }
 
-  confirm() {
+  async confirm() {
     console.log('Transaction confirmed');
     this.showTransaction = false;
-    this.wallet.accept(this.tx, this.entropy);
+    await this.wallet.acceptTransaction();
   }
 
-  decline() {
+  async decline() {
     console.log('Transaction declined');
     this.showTransaction = false;
-    this.wallet.reject();
+    await this.wallet.rejectTransaction();
   }
 
   async changeBtState() {
