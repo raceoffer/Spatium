@@ -1,6 +1,6 @@
-import {Component, Inject, NgZone} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {Router} from "@angular/router";
+import { Component, Inject, NgZone } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -9,7 +9,6 @@ import {Router} from "@angular/router";
   styleUrls: ['./dialog-factors.component.css']
 })
 export class DialogFactorsComponent {
-
   factors = [
     {
       name: 'PIN',
@@ -37,10 +36,9 @@ export class DialogFactorsComponent {
   goTo(factor): void {
     this.dialogRef.close();
 
-    this.ngZone.run(() => {
-      this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
+    this.ngZone.run(async () => {
+      await this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
     });
-
   }
 
 }

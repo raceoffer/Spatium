@@ -1,5 +1,3 @@
-
-
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
@@ -18,10 +16,10 @@
   <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
 
     <div class="spatium-textfield entry bottom32">
-      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userNameValue">
+      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName">
     </div>
 
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="_userNameValue.length < 1" (click)="letLogin()" >{{entry}}</button>
+    <button mat-raised-button color="accent" class="width-button color" [disabled]="userName.length < 1" (click)="letLogin()" >{{entry}}</button>
   </div>
 
 </div>

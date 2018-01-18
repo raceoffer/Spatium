@@ -1,7 +1,4 @@
 <div fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
-  <div style="height: 5px;">
-    <mat-progress-bar mode="indeterminate" *ngIf="loading" color="accent" style="width: 100%"></mat-progress-bar>
-  </div>
   <mat-form-field class="full-width" color="accent">
     <mat-select [placeholder]="currentWalletPh" [disabled]="disableFields" [(value)]="selected">
       <mat-option *ngIf="walletAddress" [value]="walletAddress">
@@ -61,22 +58,16 @@
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="state==3"></mat-progress-bar>
 
-    <button *ngIf="state==3 && !isSecond" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
+    <button *ngIf="state==3" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       Отправить
     </button>
     <button mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" *ngIf="state==0"
             [disabled]="initContinueDisabled">{{stTransfer}}
     </button>
-    <button mat-raised-button color="accent" class="width-button-full color" (click)="accept()" *ngIf="state==1 && isSecond"
-            [disabled]="initContinueDisabled">{{stConfirm}}
-    </button>
     <button mat-raised-button color="accent" class="width-button-full color" *ngIf="state==2"
             [disabled]="initContinueDisabled">{{stContinue}}
     </button>
-    <button mat-raised-button color="accent" class="width-button-full color" (click)="skip()" *ngIf="state==3 && isSecond"
-            [disabled]="initContinueDisabled">{{stContinue}}
-    </button>
-    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(!isSecond && state>0) || (isSecond && state <3 && state>0)" (click)="cancelTransaction()"
+    <button mat-raised-button color="accent" class="width-button-full color" *ngIf="(state>0)" (click)="cancelTransaction()"
             [disabled]="initCancelDisabled">{{stCancel}}
     </button>
   </div>

@@ -24,8 +24,6 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
-import { InitiatorAuthComponent } from './screens/initiator-auth/initiator-auth.component';
-import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ClipboardModule} from 'ngx-clipboard/dist';
@@ -49,8 +47,6 @@ import { PasswordComponent } from './screens/password/password.component';
     AppComponent,
     NavigatorComponent,
     StartComponent,
-    InitiatorAuthComponent,
-    VerifierAuthComponent,
     ConnectComponent,
     WaitingComponent,
     BackupComponent,

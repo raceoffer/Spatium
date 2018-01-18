@@ -453,36 +453,33 @@ class SignSession {
 
 @Injectable()
 export class WalletService {
-  compoundKey: any = null;
-  walletDB: any = null;
-  watchingWallet: any = null;
-  provider: any = null;
+  private compoundKey: any = null;
+  private walletDB: any = null;
+  private watchingWallet: any = null;
+  private provider: any = null;
 
-  routineTimer: any = null;
+  private routineTimer: any = null;
 
-  localReady = false;
-  remoteReady = false;
+  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
 
-  address = null;
-  balance = null;
+  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(2);
 
-  messageSubject: ReplaySubject<any> = new ReplaySubject<any>(2);
+  private syncSession: SyncSession = null;
+  private signSession: SignSession = null;
 
-  syncSession: SyncSession = null;
-  signSession: SignSession = null;
+  private network = 'testnet'; // 'main'; | 'testnet';
 
-  network = 'testnet'; // 'main'; | 'testnet';
+  public onBalance: EventEmitter<any> = new EventEmitter<any>();
+  public onStatus: EventEmitter<Status> = new EventEmitter<Status>();
+  public onFinish: EventEmitter<any> = new EventEmitter<any>();
+  public onCancelled: EventEmitter<any> = new EventEmitter<any>();
+  public onFailed: EventEmitter<any> = new EventEmitter<any>();
 
-  onBalance: EventEmitter<any> = new EventEmitter();
-  onStatus: EventEmitter<Status> = new EventEmitter<Status>();
-  onFinish: EventEmitter<any> = new EventEmitter();
-  onCancelled: EventEmitter<any> = new EventEmitter();
-  onFailed: EventEmitter<any> = new EventEmitter();
-
-  onVerifyTransaction: EventEmitter<any> = new EventEmitter();
-  onSigned: EventEmitter<any> = new EventEmitter();
-  onAccepted: EventEmitter<any> = new EventEmitter();
-  onRejected: EventEmitter<any> = new EventEmitter();
+  public onVerifyTransaction: EventEmitter<any> = new EventEmitter<any>();
+  public onSigned: EventEmitter<any> = new EventEmitter<any>();
+  public onAccepted: EventEmitter<any> = new EventEmitter<any>();
+  public onRejected: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(private bt: BluetoothService) {
     bcoin.set(this.network);
@@ -507,20 +504,8 @@ export class WalletService {
     });
   }
 
-  public getAddress() {
-    if (this.remoteReady) {
-      return this.address;
-    } else {
-      return null;
-    }
-  }
-
-  public getBalance() {
-    if (this.remoteReady) {
-      return this.balance;
-    } else {
-      return null;
-    }
+  public get keyFragment() {
+    return this.compoundKey.localPrivateKeyring;
   }
 
   public setKeyFragment(fragment) {
@@ -528,26 +513,9 @@ export class WalletService {
       this.compoundKey = new CompoundKey({
         localPrivateKeyring: fragment
       });
-      this.localReady = true;
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create compound key', e);
     }
-  }
-
-  public resetRemote() {
-    this.remoteReady = false;
-
-    this.watchingWallet = null;
-    this.provider = null;
-
-    clearInterval(this.routineTimer);
-    this.routineTimer = null;
-  }
-
-  public resetFull() {
-    this.resetRemote();
-    this.localReady = false;
-    this.compoundKey = null;
   }
 
   public startSync() {
@@ -593,25 +561,25 @@ export class WalletService {
     this.syncSession.sync().catch(() => {});
   }
 
-  public cancelSync() {
+  public async cancelSync() {
     if (this.syncSession) {
-      this.syncSession.cancel();
+      await this.syncSession.cancel();
     }
   }
 
-  async rejectTransaction() {
+  public async rejectTransaction() {
     if (this.signSession) {
       await this.signSession.cancel();
     }
   }
 
-  async acceptTransaction() {
+  public async acceptTransaction() {
     if (this.signSession) {
       await this.signSession.submitChiphertexts();
     }
   }
 
-  async createTransaction(address, value, substractFee) {
+  public async createTransaction(address, value, substractFee) {
     const transaction = new Transaction({
       address: address,
       value: value
@@ -629,7 +597,7 @@ export class WalletService {
     return transaction;
   }
 
-  async requestTransactionVerify(transaction, address, value) {
+  public async requestTransactionVerify(transaction, address, value) {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
       content: {
@@ -674,7 +642,7 @@ export class WalletService {
     this.signSession.sync().catch(() => {});
   }
 
-  async startTransactionVerify(transaction, address, value) {
+  public async startTransactionVerify(transaction, address, value) {
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
@@ -707,7 +675,7 @@ export class WalletService {
     this.signSession.sync().catch(() => {});
   }
 
-  async verifySignature() {
+  public async verifySignature() {
     if (this.signSession) {
       const tx = this.signSession.transaction.toTx();
 
@@ -723,7 +691,7 @@ export class WalletService {
     return false;
   }
 
-  async pushTransaction() {
+  public async pushTransaction() {
     if (this.signSession) {
       const tx = this.signSession.transaction.toTx();
       try {
@@ -734,7 +702,7 @@ export class WalletService {
     }
   }
 
-  async finishSync(data) {
+  private async finishSync(data) {
     try {
       this.compoundKey.finishInitialSync(data);
     } catch (e) {
@@ -742,7 +710,7 @@ export class WalletService {
     }
 
     try {
-      this.address = this.compoundKey.getCompoundKeyAddress('base58');
+      this.address.next(this.compoundKey.getCompoundKeyAddress('base58'));
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
@@ -762,8 +730,7 @@ export class WalletService {
     }
 
     this.watchingWallet.on('balance', (balance) => {
-      this.balance = balance;
-      this.onBalance.emit(this.balance);
+      this.balance.next(balance);
     });
 
     this.watchingWallet.on('transaction', (transaction) => {
@@ -771,7 +738,7 @@ export class WalletService {
     });
 
     try {
-      this.balance = await this.watchingWallet.getBalance();
+      this.balance.next(await this.watchingWallet.getBalance());
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get the balance', e);
     }
@@ -806,8 +773,6 @@ export class WalletService {
     console.log('Sync done');
 
     this.onFinish.emit();
-
-    this.remoteReady = true;
   }
 }
 

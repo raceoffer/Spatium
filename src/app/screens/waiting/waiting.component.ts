@@ -23,31 +23,27 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   }
 
   async ngOnInit() {
-    this.wallet.resetRemote();
     await this.bt.disconnect();
     this.wallet.onFinish.subscribe(() => {
-      console.log(this.wallet.address);
-      this.ngZone.run(() => {
-        this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+      console.log(this.wallet.address.getValue());
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       });
     });
     this.wallet.onCancelled.subscribe(() => {
-      this.wallet.resetRemote();
-      this.ngZone.run(() => {
-        this.router.navigate(['/waiting']);
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/waiting']);
       });
     });
     this.wallet.onFailed.subscribe(() => {
-      this.wallet.resetRemote();
-      this.ngZone.run(() => {
-        this.router.navigate(['/waiting']);
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/waiting']);
       });
     });
-    this.bt.onDisconnected.subscribe(() => {
-      this.wallet.cancelSync();
-      this.wallet.resetRemote();
-      this.ngZone.run(() => {
-        this.router.navigate(['/waiting']);
+    this.bt.onDisconnected.subscribe(async () => {
+      await this.wallet.cancelSync();
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/waiting']);
       });
     });
   }
@@ -62,7 +58,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     await this.bt.ensureListening();
   }
 
-  async toDo(name, address) {
+  async connectTo(name, address) {
     console.log('connect' + name + address);
     this.overlayClass = 'overlay';
     if (await this.bt.connect({

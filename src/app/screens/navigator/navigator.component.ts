@@ -61,11 +61,7 @@ export class NavigatorComponent implements OnInit {
     }];
 
   changeTheme(): void {
-    if (this.isDarkTheme) {
-      this.isDarkTheme = false;
-    } else {
-      this.isDarkTheme = true;
-    }
+    this.isDarkTheme = !this.isDarkTheme;
   }
 
   constructor(private readonly router: Router,

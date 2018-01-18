@@ -1,7 +1,5 @@
-import {AfterViewInit, ChangeDetectorRef, Component, Input} from '@angular/core';
-import {WalletService} from '../../services/wallet.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material';
+import { AfterViewInit, ChangeDetectorRef, Component, Input} from '@angular/core';
+import { WalletService } from '../../services/wallet.service';
 
 declare const bcoin: any;
 declare const window: any;
@@ -52,35 +50,18 @@ export class SendTransactionComponent implements AfterViewInit {
   state = 0;
   buttonText = 'Continue';
 
-  isSecond = false; // параметр, индикатор инициатора\верификатора
-
   disableFields = false; // блокировка полей транзакции
   initContinueDisabled = false; // активность кнопки "Продолжить" у инициатора
   initCancelDisabled = false; // Активность кнопки "Отмена" у инициатора
 
   constructor(private walletService: WalletService,
-              private route: ActivatedRoute,
-              private router: Router,
               private cd: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
-    this.route.queryParams
-      .subscribe(params => {
-        console.log(params);
-
-        this.isSecond = params.isSecond;
-        if (this.isSecond) {
-          this.state = 1;
-          this.disableFields = true;
-        }
-
-        console.log(this.isSecond);
-      });
-
-    this.walletAddress = this.walletService.getAddress();
+    this.walletAddress = this.walletService.address.getValue();
     this.selected = this.walletAddress;
-    this.updataBalance(this.walletService.getBalance());
-    this.walletService.onBalance.subscribe((balance) => {
+    this.updataBalance(this.walletService.balance.getValue());
+    this.walletService.balance.subscribe((balance) => {
       this.updataBalance(balance);
     });
 
@@ -107,7 +88,6 @@ export class SendTransactionComponent implements AfterViewInit {
   stateChange(desiredState): void {
     switch (desiredState) {
       case 0: {
-        this.isSecond = false;
         this.state = 0;
         this.disableFields = false;
         this.initContinueDisabled = false;
@@ -147,8 +127,8 @@ export class SendTransactionComponent implements AfterViewInit {
     this.cd.detectChanges();
 
     try {
-      // await this.walletService.verifySignature(this.currentTx);
-      // await this.walletService.pushTransaction(this.currentTx);
+      await this.walletService.verifySignature();
+      await this.walletService.pushTransaction();
 
       window.plugins.toast.showLongBottom(
         'The transaction was successfully sent',
@@ -181,7 +161,6 @@ export class SendTransactionComponent implements AfterViewInit {
   async startSigning() {
     const tx = await this.walletService.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value, false);
     if (tx) {
-      this.isSecond = false;
       this.stateChange(1);
       this.cd.detectChanges();
       await this.walletService.requestTransactionVerify(tx, this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value);
