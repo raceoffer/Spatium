@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, NgZone} from '@angular/core';
+import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 
@@ -7,6 +7,7 @@ import {AuthService} from "../../services/auth.service";
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
+
 export class FileUploadComponent implements AfterViewInit {
 
   uploadFile = 'Choose a file';
@@ -34,9 +35,24 @@ export class FileUploadComponent implements AfterViewInit {
     this._file = '';
   }
 
-  onUploadFileClick() :void{
-    this._file = 'lkasjdksajdlaskdj';
-    this.goNext();
+  onUploadFileClick(event) {
+    event.preventDefault();
+
+    var file = event.srcElement.files[0];
+    this.readFile(file);
+  }
+
+  readFile (file) {
+    let chunk = file.slice(0, 32);
+    let reader = new FileReader();
+    const self = this;
+
+    reader.onloadend = function () {
+      self._file = reader.result.toString();
+      self.goNext();
+    }
+
+    reader.readAsBinaryString(chunk);
   }
 
   goNext(): void {

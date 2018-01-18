@@ -15,8 +15,10 @@
     <span class="start-tagline">Secure your funds</span>
   </div>
 
+  <input type='file' id='fileInput' (change)="onUploadFileClick($event)">
+
   <div mat-fab class="overlay-bottom-center" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-icon-button class="file-upload-size" (click)="onUploadFileClick()">
+    <button mat-icon-button class="file-upload-size" >
       <mat-icon class="color-cool_grey file-upload" size="50px">insert_drive_file</mat-icon>
     </button>
     <div style="padding-top: 5px;" >
