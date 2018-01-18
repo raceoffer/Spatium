@@ -47,11 +47,7 @@ export class PasswordComponent implements OnInit {
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor({
-        name: 'Password',
-        icon: 'keyboard',
-        value: this._passwordValue.toString(),
-      });
+      this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this._passwordValue.toString());
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });
