@@ -1,7 +1,8 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
+
+import { LoggerService } from './logger.service';
 
 declare const cordova: any;
-declare const window: any;
 
 @Injectable()
 export class BluetoothService {
@@ -22,6 +23,7 @@ export class BluetoothService {
       }
       this.enabled = true;
     } catch (e) {
+      LoggerService.nonFatalCrash('Failed to enable Bluetooth', e);
       this.enabled = false;
     }
 
@@ -34,8 +36,7 @@ export class BluetoothService {
       try {
         devices = await cordova.plugins.bluetooth.listPairedDevices();
       } catch (e) {
-        window.fabric.Crashlytics.addLog(e);
-        window.fabric.Crashlytics.sendNonFatalCrash("Failed to get the list of paired devices");
+        LoggerService.nonFatalCrash('Failed to get the list of paired devices', e);
       }
     }
 
@@ -57,9 +58,11 @@ export class BluetoothService {
         });
       }
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to ensure that bluetooth devices are listening");
+      LoggerService.nonFatalCrash('Failed to ensure that bluetooth devices are listening', e);
+      return false;
     }
+
+    return true;
   }
 
   async connect(device) {
@@ -70,8 +73,8 @@ export class BluetoothService {
         this.onDisconnected.emit();
       });
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to connect to the bluetooth device");
+      LoggerService.nonFatalCrash('Failed to connect to the bluetooth device', e);
+      return false;
     }
 
     try {
@@ -79,9 +82,11 @@ export class BluetoothService {
         this.onMessage.emit(message);
       });
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to read from the bluetooth device");
+      LoggerService.nonFatalCrash('Failed to read from the bluetooth device', e);
+      return false;
     }
+
+    return true;
   }
 
   async disconnect() {
@@ -90,26 +95,30 @@ export class BluetoothService {
         await cordova.plugins.bluetooth.disconnect();
       }
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to disconnect bluetooth devices");
+      LoggerService.nonFatalCrash('Failed to disconnect bluetooth devices', e);
+      return false;
     }
+
+    return true;
   }
 
   async send(message) {
     try {
       await cordova.plugins.bluetooth.write(message);
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to send message to a bluetooth device");
+      LoggerService.nonFatalCrash('Failed to send message to a bluetooth device', e);
+      return false;
     }
+
+    return true;
   }
 
   async openSettings() {
     try {
       return await cordova.plugins.bluetooth.openSettings();
     } catch (e) {
-      window.fabric.Crashlytics.addLog(e);
-      window.fabric.Crashlytics.sendNonFatalCrash("Failed to open bluetooth settings");
+      LoggerService.nonFatalCrash('Failed to open bluetooth settings', e);
+      return false;
     }
   }
 }

@@ -1,8 +1,0 @@
-<h2 mat-dialog-title>Connections</h2>
-<mat-nav-list>
-    <mat-list-item *ngFor="let device of devices" (click)="toDo(device.address)">
-        <h4 mat-line>{{device.name}}</h4>
-        <p mat-line> {{device.address}} </p>
-        <mat-icon matSuffix>center_focus_weak</mat-icon>
-    </mat-list-item>
-</mat-nav-list>

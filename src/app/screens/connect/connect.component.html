@@ -6,18 +6,11 @@
   </mat-toolbar>
 
   <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
-
-    <div class="connect-text">
-      <p class="list-name" mat-line>{{name}}</p>
-      <p class="list-info" mat-line> {{address}}</p>
-    </div>
-
     <mat-progress-spinner mode="determinate" color="accent" [value]="progress"></mat-progress-spinner>
-    <mat-progress-bar mode="determinate" value="progress"></mat-progress-bar>
   </div>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-raised-button color="accent" class="width-button" routerLink="/waiting">{{cancelLabel}}</button>
+    <button mat-raised-button color="accent" class="width-button" (click)="cancelSync()">{{cancelLabel}}</button>
 </div>
 
 

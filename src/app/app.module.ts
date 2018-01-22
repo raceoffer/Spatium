@@ -24,8 +24,6 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
-import { InitiatorAuthComponent } from './screens/initiator-auth/initiator-auth.component';
-import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ClipboardModule} from 'ngx-clipboard/dist';
@@ -33,6 +31,7 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
+import { LoggerService } from './services/logger.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { AuthService } from './services/auth.service';
 import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
@@ -50,8 +49,6 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
     AppComponent,
     NavigatorComponent,
     StartComponent,
-    InitiatorAuthComponent,
-    VerifierAuthComponent,
     ConnectComponent,
     WaitingComponent,
     BackupComponent,
@@ -93,6 +90,7 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
     WalletService,
     BitcoinKeyFragmentService,
     BluetoothService,
+    LoggerService,
     AuthService
   ],
   bootstrap: [

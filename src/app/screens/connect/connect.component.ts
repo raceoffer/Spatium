@@ -1,7 +1,5 @@
-import { Component, OnInit, NgZone} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BluetoothService } from '../../services/bluetooth.service';
-import { WalletService } from '../../services/wallet.service';
+import { Component, OnInit, NgZone } from '@angular/core';
+import { WalletService, Status } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-connect',
@@ -12,30 +10,21 @@ export class ConnectComponent implements OnInit {
   stConnect = 'Connecting to the device';
   cancelLabel = 'Cancel';
   busyClass = 'fade-background invisible';
-  name: string;
-  address: string;
 
   progress = 0;
 
-  constructor(private route: ActivatedRoute,
-              private bt: BluetoothService,
-              private wallet: WalletService,
-              private router: Router,
-              private ngZone: NgZone) { }
+  constructor(
+    private wallet: WalletService,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      console.log(params); // {order: "popular"}
-
-      this.name = params.name;
-      this.stConnect = this.stConnect + this.name;
-      console.log(this.name); // popular
-      this.address = params.address;
-      console.log(this.address); // popular
-    });
-
-    this.wallet.onStatus.subscribe((status) => this.ngZone.run(() => {
-      this.progress = Math.max(Math.min(Math.round(status * 100 / 8), 100), 0);
+    this.wallet.onStatus.subscribe(status => this.ngZone.run(() => {
+      this.progress = Math.max(Math.min(Math.round(status * 100 / (Status.Finished - Status.None + 1)), 100), 0);
     }));
+  }
+
+  async cancelSync() {
+    await this.wallet.cancelSync();
   }
 }

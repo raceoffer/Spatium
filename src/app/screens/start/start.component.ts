@@ -1,27 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
-
-declare const window: any;
-declare const cordova: any;
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-start',
   templateUrl: './start.component.html',
   styleUrls: ['./start.component.css']
 })
-export class StartComponent implements OnInit {
-  constructor(
-    private router: Router
-  ) { }
-
-  ngOnInit() {
-  }
+export class StartComponent {
+  constructor(private router: Router) { }
 
   async onOpenClicked() {
-    this.router.navigate(['/login']);
+    await this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {
-    this.router.navigate(['/pincode', { next: 'waiting', back: 'start' }]);
+    await this.router.navigate(['/pincode', { next: 'waiting', back: 'start' }]);
   }
 }

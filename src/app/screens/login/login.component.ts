@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 declare const window: any;
 declare const Utils: any;
@@ -10,34 +10,22 @@ declare const Utils: any;
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   entry = 'Log in';
   stLogin = 'Username';
-  _userNameValue = '';
+  userName = '';
 
-  get userNameValue() {
-    return this._userNameValue;
-  }
-
-  @Input()
-  set userNameValue(value) {
-    this._userNameValue = value;
+  static async isEthernetAvailable() {
+    return await Utils.testNetwork();
   }
 
   constructor(private readonly router: Router) { }
 
-  ngOnInit() {
-  }
-
   async letLogin() {
-    if (await this.isEthernetAvailable()) {
-      this.router.navigate(['/auth'], { queryParams: { username: this._userNameValue } });
+    if (await LoginComponent.isEthernetAvailable()) {
+      await this.router.navigate(['/auth'], { queryParams: { username: this.userName } });
     } else {
       window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
     }
-  }
-
-  async isEthernetAvailable() {
-    return await Utils.testNetwork();
   }
 }

@@ -42,7 +42,7 @@ export class BackupComponent implements OnInit {
     await this.bitcoinKeyFragmentService.ensureReady();
 
     this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
-    this.updateBalance();
+    await this.updateBalance();
   }
 
   async updateBalance() {
@@ -58,14 +58,14 @@ export class BackupComponent implements OnInit {
 
   async saveBitcoinKeyFragmentInEthereumCell() {
     this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.compoundKey.localPrivateKeyring);
+    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.keyFragment);
     this.saveTransactionState = false;
-    this.updateBalance();
+    await this.updateBalance();
     window.plugins.toast.showLongBottom(
       'Partial secret is uploaded to DDS',
       3000, 'Partial secret is uploaded to DDS',
       console.log('Partial secret is uploaded to DDS')
     );
-    this.router.navigate(['/wallet']);
+    await this.router.navigate(['/wallet']);
   }
 }

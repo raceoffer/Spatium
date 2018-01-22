@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
 
-declare var cordova: any;
+declare const cordova: any;
 
 @Component({
   selector: 'app-root',

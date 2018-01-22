@@ -1,6 +1,6 @@
 import {Component, Inject, NgZone} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
-import {Router} from "@angular/router";
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { Router } from '@angular/router';
 import {AuthService} from "../../services/auth.service";
 
 
@@ -10,7 +10,6 @@ import {AuthService} from "../../services/auth.service";
   styleUrls: ['./dialog-factors.component.css']
 })
 export class DialogFactorsComponent {
-
   factors: any;
 
   constructor(
@@ -28,10 +27,9 @@ export class DialogFactorsComponent {
   goTo(factor): void {
     this.dialogRef.close();
 
-    this.ngZone.run(() => {
-      this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
+    this.ngZone.run(async () => {
+      await this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
     });
-
   }
 
 }

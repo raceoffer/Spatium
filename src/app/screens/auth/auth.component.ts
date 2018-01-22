@@ -1,10 +1,10 @@
-import {Component, OnInit, AfterViewInit, NgZone, ChangeDetectorRef} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MAT_DIALOG_DATA, MatDialog} from '@angular/material';
-import {DialogFactorsComponent} from '../dialog-factors/dialog-factors.component';
-import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
-import {WalletService} from '../../services/wallet.service';
-import {AuthService} from '../../services/auth.service';
+import { Component, OnInit, AfterViewInit, NgZone, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
+import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
+import { BitcoinKeyFragmentService } from '../../services/bitcoin-key-fragment.service';
+import { WalletService } from '../../services/wallet.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -12,7 +12,6 @@ import {AuthService} from '../../services/auth.service';
   styleUrls: ['./auth.component.css']
 })
 export class AuthComponent implements OnInit, AfterViewInit {
-
   username = '';
   login = 'Log in';
   loginDisable = false;
@@ -25,8 +24,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
               private walletService: WalletService,
               public dialog: MatDialog,
               private authSevice: AuthService,
-              private cd: ChangeDetectorRef,
-              private ngZone: NgZone) { }
+              private cd: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -71,7 +69,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
     const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(data);
     this.walletService.setKeyFragment(keyFragment);
-    this.router.navigate(['/waiting']);
+    await this.router.navigate(['/waiting']);
   }
 }
 

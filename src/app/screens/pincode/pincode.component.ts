@@ -35,15 +35,6 @@ export class PincodeComponent implements AfterViewInit {
     this.pincode = '';
   }
 
-  get Pincode() {
-    return this.pincode;
-  }
-
-  @Input()
-  set Pincode(newPin) {
-    this.pincode = newPin;
-  }
-
   onAddClicked(symbol) {
     this.pincode = this.pincode + symbol;
   }
@@ -56,12 +47,12 @@ export class PincodeComponent implements AfterViewInit {
     if (this.next && this.next === 'waiting') {
       const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.pincode.toString());
       this.walletService.setKeyFragment(keyFragment);
-      this.router.navigate(['/verifyTransaction']);
+      await this.router.navigate(['/verifyTransaction']);
     } else if (this.next && this.next === 'auth') {
       this.authSevice.addFactor(AuthService.FactorType.PIN, this.pincode.toString());
 
-      this.ngZone.run(() => {
-        this.router.navigate(['/auth']);
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/auth']);
       });
     }
   }
