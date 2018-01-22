@@ -1,8 +1,7 @@
-import {AfterContentInit, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 import * as PatternLock from 'PatternLock';
-import * as $ from 'jquery';
 
 @Component({
   selector: 'app-graphic-key',
@@ -11,13 +10,13 @@ import * as $ from 'jquery';
 })
 //let pl:PatternLock = new PatternLock();
 
-export class GraphicKeyComponent implements OnInit, AfterContentInit {
+export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
 
   @ViewChild('patternContainer') el: ElementRef;
 
   next: string = null;
   back: string = null;
-  graph_key: string = null;
+  _graphKey: string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -33,7 +32,8 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
     });
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this._graphKey = '';
   }
 
   ngAfterContentInit(){
@@ -41,7 +41,7 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
     let lock =  new PatternLock(this.el.nativeElement,{
       onDraw:function(pattern){
         console.log(pattern)
-        self.graph_key = pattern;
+        self._graphKey = pattern;
         self.goNext();
       }
     });
@@ -53,7 +53,7 @@ export class GraphicKeyComponent implements OnInit, AfterContentInit {
   goNext(): void {
     if (this.next && this.next === 'auth') {
 
-      this.authSevice.addFactor( AuthService.FactorType.GRAPHIC_KEY, this.graph_key.toString());
+      this.authSevice.addFactor( AuthService.FactorType.GRAPHIC_KEY, this._graphKey.toString());
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });
