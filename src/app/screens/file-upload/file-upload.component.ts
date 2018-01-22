@@ -48,11 +48,14 @@ export class FileUploadComponent implements AfterViewInit {
     const self = this;
 
     reader.onloadend = function () {
-      self._file = reader.result.toString();
+      const arrayBufferToHex = require('array-buffer-to-hex');
+      const string = arrayBufferToHex( reader.result);
+      self._file = string;
+
       self.goNext();
     }
 
-    reader.readAsBinaryString(chunk);
+    reader.readAsArrayBuffer(chunk);
   }
 
   goNext(): void {
