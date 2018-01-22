@@ -12,7 +12,7 @@ export class PasswordComponent implements AfterViewInit {
   stContinue = 'Continue';
   stPassword = 'Password';
   _passwordValue = '';
-  isDisable = false;
+  isDisable = true;
 
   next: string = null;
   back: string = null;
@@ -38,6 +38,13 @@ export class PasswordComponent implements AfterViewInit {
   @Input()
   set Password(newPassword) {
     this._passwordValue = newPassword;
+    if (this._passwordValue.length > 1){
+      this.isDisable = false;
+      console.log(this.isDisable);
+    } else {
+      this.isDisable = true;
+      console.log(this.isDisable);
+    }
   }
 
   ngAfterViewInit() {
@@ -45,11 +52,13 @@ export class PasswordComponent implements AfterViewInit {
   }
 
   goNext(): void {
-    if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this._passwordValue.toString());
-    this.ngZone.run(async () => {
-      await this.router.navigate(['/auth']);
-      });
+    if(this._passwordValue != '') {
+      if (this.next && this.next === 'auth') {
+        this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this._passwordValue.toString());
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/auth']);
+        });
+      }
     }
   }
 
