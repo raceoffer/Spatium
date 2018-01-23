@@ -44,6 +44,14 @@ export class AuthService {
         this.factors.push(new AuthService.Factor(AuthService.FactorType.GRAPHIC_KEY, AuthService.FactorIcon.GRAPHIC_KEY, AuthService.FactorIconAsset.GRAPHIC_KEY, value));
         break;
       }
+      case AuthService.FactorType.QR: {
+        this.factors.push(new AuthService.Factor(AuthService.FactorType.QR, AuthService.FactorIcon.QR, AuthService.FactorIconAsset.QR, value));
+        break;
+      }
+      case AuthService.FactorType.NFC: {
+        this.factors.push(new AuthService.Factor(AuthService.FactorType.NFC, AuthService.FactorIcon.NFC, AuthService.FactorIconAsset.NFC, value));
+        break;
+      }
     }
   }
 

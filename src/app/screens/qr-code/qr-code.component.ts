@@ -1,8 +1,7 @@
-import {AfterViewInit, Component, NgZone,} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, NgZone, ViewChild,} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
-import {BitcoinKeyFragmentService} from "../../services/bitcoin-key-fragment.service";
-import {WalletService} from "../../services/wallet.service";
+
 
 @Component({
   selector: 'app-qr-code',
@@ -11,18 +10,24 @@ import {WalletService} from "../../services/wallet.service";
 })
 export class QrCodeComponent implements AfterViewInit {
 
-  //https://github.com/chen6516/cordova-zxing-portrait
   _qrcode = '';
 
   next: string = null;
   back: string = null;
 
+  camStarted = false;
+  selectedDevice = undefined;
+  qrResult = "";
+  availableDevices = [];
+  text = 'Place the QR-code into the square';
+  videoClass = 'small-video hidden';
+
+  @ViewChild('videoContainer') el: ElementRef;
+
   constructor(private route: ActivatedRoute,
               private router: Router,
               private ngZone: NgZone,
-              private authSevice: AuthService,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService) {
+              private authSevice: AuthService) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -33,8 +38,51 @@ export class QrCodeComponent implements AfterViewInit {
     });
   }
 
+  ngAfterContentInit() {
+    let el = document.querySelector('video');
+    el.setAttribute('poster', '#');
+  }
+
   ngAfterViewInit() {
     this._qrcode = '';
+  }
+
+  displayCameras(cams: any[]){
+    this.availableDevices = cams;
+
+    if(cams && cams.length > 0) {
+      this.selectedDevice = cams[1];
+      this.camStarted = true;
+      this.videoClass = 'small-video';
+    }
+  }
+
+  async letWait(){
+    this.pause(2000);
+  }
+
+  async handleQrCodeResult(event){
+    this._qrcode = event.toString();
+
+    this.camStarted = false;
+
+     if (this.next && this.next === 'auth') {
+      this.authSevice.addFactor(AuthService.FactorType.QR, this._qrcode.toString());
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/auth']);
+      });
+    }
+  }
+
+  pause(numberMillis) {
+    var now = new Date();
+    var exitTime = now.getTime() + numberMillis;
+    while (true) {
+      now = new Date();
+      if (now.getTime() > exitTime)
+        return;
+    }
   }
 
 }

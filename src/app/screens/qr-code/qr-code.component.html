@@ -13,5 +13,23 @@
     <span class="start-tagline">Secure your funds</span>
   </div>
 
+  <div style="height: 34px;">
+  </div>
+  <div style="position: relative;">
+    <ngx-zxing
+      [start]="camStarted"
+      [device]="selectedDevice"
+      (onCamsFound)="displayCameras($event)"
+      (onScan)="handleQrCodeResult($event)"
+      [cssClass]="small-video"
+      class="small-video-container"
+      #videoContainer
+    ></ngx-zxing>
+
+  </div>
+
+
+
+  <span class="overlay-bottom-center">{{text}}</span>
 
 </div>
