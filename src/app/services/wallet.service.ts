@@ -18,6 +18,7 @@ declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
 declare const Transaction: any;
 declare const Utils: any;
+declare const KeyChain: any;
 
 export enum Status {
   None = 0,
@@ -470,6 +471,9 @@ export class WalletService {
 
   private network = 'testnet'; // 'main'; | 'testnet';
 
+  public seed: any = null;
+  public verifierSecret: any = null;
+
   public onBalance: EventEmitter<any> = new EventEmitter<any>();
   public onStatus: EventEmitter<Status> = new EventEmitter<Status>();
   public onFinish: EventEmitter<any> = new EventEmitter<any>();
@@ -504,24 +508,29 @@ export class WalletService {
     });
   }
 
-  public get keyFragment() {
-    return this.compoundKey.localPrivateKeyring;
-  }
-
-  public setKeyFragment(fragment) {
-    try {
-      this.compoundKey = new CompoundKey({
-        localPrivateKeyring: fragment
-      });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to create compound key', e);
-    }
-  }
-
   public startSync() {
     if (this.syncSession && this.syncSession.status.getValue() !== Status.Finished) {
       LoggerService.log('Sync in progress', {});
       return;
+    }
+
+    if (this.seed) {
+      try {
+        const keyChain = KeyChain.fromSeed(this.seed);
+        this.compoundKey = new CompoundKey({
+          localPrivateKeyring: bcoin.keyring.fromPrivate(keyChain.getAccountSecret(0, 0))
+        });
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to create compound key', e);
+      }
+    } else {
+      try {
+        this.compoundKey = new CompoundKey({
+          localPrivateKeyring: bcoin.keyring.fromPrivate(this.verifierSecret)
+        });
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to create compound key', e);
+      }
     }
 
     let prover = null;
@@ -721,9 +730,14 @@ export class WalletService {
       LoggerService.nonFatalCrash('Failed open database', e);
     }
 
+    const watchingKey = this.compoundKey.compoundPublicKeyring;
+
     try {
       this.watchingWallet = await new WatchingWallet({
-        watchingKey: this.compoundKey.compoundPublicKeyring
+        accounts: [{
+          name: watchingKey.getCompoundKeyAddress('base58'),
+          key: watchingKey.compoundPublicKeyring
+        }]
       }).load(this.walletDB);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);

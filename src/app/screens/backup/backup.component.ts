@@ -58,7 +58,7 @@ export class BackupComponent implements OnInit {
 
   async saveBitcoinKeyFragmentInEthereumCell() {
     this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.keyFragment);
+    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.seed);
     this.saveTransactionState = false;
     await this.updateBalance();
     window.plugins.toast.showLongBottom(

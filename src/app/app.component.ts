@@ -21,6 +21,6 @@ export class AppComponent implements OnInit {
   }
 
   onDeviceready(ev) {
-    this.bitcoinKeyService.ready = true;
+    // this.bitcoinKeyService.ready = true;
   }
 }

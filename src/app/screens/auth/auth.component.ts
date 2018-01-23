@@ -1,48 +1,37 @@
-import { Component, OnInit, AfterViewInit, NgZone, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { BitcoinKeyFragmentService } from '../../services/bitcoin-key-fragment.service';
 import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
+
+declare const window: any;
+declare const Utils: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent implements OnInit, AfterViewInit {
+export class AuthComponent implements AfterViewInit {
   username = '';
   login = 'Log in';
   loginDisable = false;
 
   factors = [];
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService,
-              public dialog: MatDialog,
-              private authSevice: AuthService,
-              private cd: ChangeDetectorRef) { }
-
-  ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      if (params['username']) {
-        this.username = params.username;
-        this.authSevice.login = this.username;
-        this.authSevice.clearFactors();
-        this.cd.detectChanges();
-      }
-    });
-  }
+  constructor(
+    private router: Router,
+    private walletService: WalletService,
+    public dialog: MatDialog,
+    private authSevice: AuthService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   ngAfterViewInit() {
-    if (!this.username) {
-      this.username = this.authSevice.login;
-    }
+    this.username = this.authSevice.login;
     this.factors = this.authSevice.factors;
-    console.log(this.factors);
     this.cd.detectChanges();
   }
 
@@ -67,9 +56,35 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
     console.log(data);
 
-    const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(data);
-    this.walletService.setKeyFragment(keyFragment);
-    await this.router.navigate(['/waiting']);
+    const aesKey = await Utils.deriveAesKey(Buffer.from(data, 'utf-8'));
+
+    try {
+      if (this.authSevice.encryptedSeed) {
+        const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
+        this.walletService.seed = Utils.decrypt(ciphertext, aesKey);
+      } else {
+        this.walletService.seed = Utils.randomBytes(64);
+        this.authSevice.encryptedSeed = Utils.encrypt(this.walletService.seed, aesKey).toString('hex');
+
+        await new Promise((resolve, reject) => {
+          window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+            fs.root.getFile(Buffer.from(this.username, 'utf-8').toString('base64') + '.store', {create: true}, fileEntry => {
+              fileEntry.createWriter(fileWriter => {
+                const tdata = new Blob([this.authSevice.encryptedSeed], {type: 'text/plain'});
+                fileWriter.write(tdata);
+                resolve();
+              });
+            });
+          });
+        });
+      }
+
+      console.log(this.walletService.seed.toString('hex'));
+
+      await this.router.navigate(['/waiting']);
+    } catch (e) {
+      console.log('Auth failed');
+    }
   }
 }
 
