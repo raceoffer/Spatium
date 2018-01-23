@@ -20,7 +20,7 @@ export class QrCodeComponent implements AfterViewInit {
   qrResult = "";
   availableDevices = [];
   text = 'Place the QR-code into the square';
-  videoClass = 'small-video hidden';
+  spinnerClass = '';
 
   @ViewChild('videoContainer') el: ElementRef;
 
@@ -41,6 +41,8 @@ export class QrCodeComponent implements AfterViewInit {
   ngAfterContentInit() {
     let el = document.querySelector('video');
     el.setAttribute('poster', '#');
+    this.spinnerClass = 'small-video-container';
+
   }
 
   ngAfterViewInit() {
@@ -53,7 +55,7 @@ export class QrCodeComponent implements AfterViewInit {
     if(cams && cams.length > 0) {
       this.selectedDevice = cams[1];
       this.camStarted = true;
-      this.videoClass = 'small-video';
+      this.spinnerClass = "invisible";
     }
   }
 
