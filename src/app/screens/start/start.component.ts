@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-
-declare const window: any;
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-start',
@@ -10,7 +10,12 @@ declare const window: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent {
-  constructor(private router: Router, private readonly authService: AuthService) { }
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
+  ) { }
 
   async onOpenClicked() {
     await this.router.navigate(['/login']);
@@ -18,22 +23,10 @@ export class StartComponent {
 
   async onConnectClicked() {
     try {
-      this.authService.encryptedSecret = await new Promise<string>((resolve, reject) => {
-        window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
-          fs.root.getFile('verifierSecret.store', {create: false}, fileEntry => {
-            fileEntry.file(file => {
-              const reader = new FileReader();
-              reader.onloadend = (e: any) => {
-                const initiatorDDSKey = e.target.result;
-                resolve(initiatorDDSKey);
-              };
-              reader.readAsText(file);
-            });
-          }, reject);
-        });
-      });
+      this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
     } catch (e) {
-      this.authService.encryptedSecret = null;
+      this.authService.encryptedSeed = null;
+      this.notification.show('No stored seed found');
     }
 
     await this.router.navigate(['/pincode', { next: 'waiting', back: 'start' }]);

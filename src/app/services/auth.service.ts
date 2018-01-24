@@ -8,7 +8,6 @@ export class AuthService {
   available: AuthService.AvailableFactor[] = [];
 
   encryptedSeed: string = null;
-  encryptedSecret: string = null;
 
   constructor() {
     this.available.push(new AuthService.AvailableFactor(AuthService.FactorType.PIN, 'PIN', AuthService.FactorIcon.PIN,

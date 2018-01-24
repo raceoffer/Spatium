@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
-declare const window: any;
 declare const Utils: any;
-declare const Buffer: any;
 
 @Component({
   selector: 'app-login',
@@ -23,7 +23,9 @@ export class LoginComponent {
 
   constructor(
     private readonly router: Router,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
   ) { }
 
   async letLogin() {
@@ -32,27 +34,15 @@ export class LoginComponent {
       this.authService.clearFactors();
 
       try {
-        this.authService.encryptedSeed = await new Promise<string>((resolve, reject) => {
-          window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
-            fs.root.getFile(Buffer.from(this.userName, 'utf-8').toString('base64') + '.store', {create: false}, fileEntry => {
-              fileEntry.file(file => {
-                const reader = new FileReader();
-                reader.onloadend = (e: any) => {
-                  const initiatorDDSKey = e.target.result;
-                  resolve(initiatorDDSKey);
-                };
-                reader.readAsText(file);
-              });
-            }, reject);
-          });
-        });
+        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
       } catch (e) {
         this.authService.encryptedSeed = null;
+        this.notification.show('No stored seed found');
       }
 
       await this.router.navigate(['/auth']);
     } else {
-      window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+      this.notification.show('No connection');
     }
   }
 }

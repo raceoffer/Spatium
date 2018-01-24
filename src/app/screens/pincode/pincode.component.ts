@@ -2,6 +2,8 @@ import { Component, Input, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const Utils: any;
 declare const Buffer: any;
@@ -18,11 +20,15 @@ export class PincodeComponent implements AfterViewInit {
   next: string = null;
   back: string = null;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private ngZone: NgZone,
-              private authSevice: AuthService,
-              private walletService: WalletService) {
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly authSevice: AuthService,
+    private readonly walletService: WalletService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -59,29 +65,21 @@ export class PincodeComponent implements AfterViewInit {
       const aesKey = await Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
 
       try {
-        if (this.authSevice.encryptedSecret) {
-          const ciphertext = Buffer.from(this.authSevice.encryptedSecret, 'hex');
-          this.walletService.verifierSecret = Utils.decrypt(ciphertext, aesKey);
+        if (this.authSevice.encryptedSeed) {
+          const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
+          this.walletService.seed = Utils.decrypt(ciphertext, aesKey);
         } else {
-          this.walletService.verifierSecret = Utils.randomBytes(32);
-          this.authSevice.encryptedSecret = Utils.encrypt(this.walletService.verifierSecret, aesKey).toString('hex');
+          this.walletService.seed = Utils.randomBytes(64);
+          this.authSevice.encryptedSeed = Utils.encrypt(this.walletService.seed, aesKey).toString('hex');
 
-          await new Promise((resolve, reject) => {
-            window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
-              fs.root.getFile('verifierSecret.store', { create: true }, fileEntry => {
-                fileEntry.createWriter(fileWriter => {
-                  const tdata = new Blob([this.authSevice.encryptedSecret], {type: 'text/plain'});
-                  fileWriter.write(tdata);
-                  resolve();
-                });
-              });
-            });
-          });
+          await this.fs.writeFile(this.fs.safeFileName('seed'), this.authSevice.encryptedSeed);
         }
+
+        console.log(this.walletService.seed.toString('hex'));
 
         await this.router.navigate(['/verifyTransaction']);
       } catch (e) {
-        console.log('Pincode auth failed');
+        this.notification.show('Authorization error');
       }
     } else if (this.next && this.next === 'auth') {
       this.authSevice.addFactor(AuthService.FactorType.PIN, this._pincode.toString());

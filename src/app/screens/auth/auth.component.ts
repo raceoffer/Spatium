@@ -4,10 +4,10 @@ import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
-declare const window: any;
 declare const Utils: any;
-declare const Buffer: any;
 
 @Component({
   selector: 'app-auth',
@@ -22,11 +22,13 @@ export class AuthComponent implements AfterViewInit {
   factors = [];
 
   constructor(
-    private router: Router,
-    private walletService: WalletService,
-    public dialog: MatDialog,
-    private authSevice: AuthService,
-    private cd: ChangeDetectorRef
+    public  dialog: MatDialog,
+    private readonly router: Router,
+    private readonly walletService: WalletService,
+    private readonly authSevice: AuthService,
+    private readonly cd: ChangeDetectorRef,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
   ) { }
 
   ngAfterViewInit() {
@@ -66,24 +68,14 @@ export class AuthComponent implements AfterViewInit {
         this.walletService.seed = Utils.randomBytes(64);
         this.authSevice.encryptedSeed = Utils.encrypt(this.walletService.seed, aesKey).toString('hex');
 
-        await new Promise((resolve, reject) => {
-          window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
-            fs.root.getFile(Buffer.from(this.username, 'utf-8').toString('base64') + '.store', {create: true}, fileEntry => {
-              fileEntry.createWriter(fileWriter => {
-                const tdata = new Blob([this.authSevice.encryptedSeed], {type: 'text/plain'});
-                fileWriter.write(tdata);
-                resolve();
-              });
-            });
-          });
-        });
+        await this.fs.writeFile(this.fs.safeFileName(this.username), this.authSevice.encryptedSeed);
       }
 
       console.log(this.walletService.seed.toString('hex'));
 
       await this.router.navigate(['/waiting']);
     } catch (e) {
-      console.log('Auth failed');
+      this.notification.show('Authorization error');
     }
   }
 }
