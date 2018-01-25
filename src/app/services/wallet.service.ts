@@ -18,6 +18,7 @@ declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
 declare const Transaction: any;
 declare const Utils: any;
+declare const KeyChain: any;
 
 export enum Status {
   None = 0,
@@ -470,6 +471,8 @@ export class WalletService {
 
   private network = 'testnet'; // 'main'; | 'testnet';
 
+  public seed: any = null;
+
   public onBalance: EventEmitter<any> = new EventEmitter<any>();
   public onStatus: EventEmitter<Status> = new EventEmitter<Status>();
   public onFinish: EventEmitter<any> = new EventEmitter<any>();
@@ -504,23 +507,19 @@ export class WalletService {
     });
   }
 
-  public get keyFragment() {
-    return this.compoundKey.localPrivateKeyring;
-  }
-
-  public setKeyFragment(fragment) {
-    try {
-      this.compoundKey = new CompoundKey({
-        localPrivateKeyring: fragment
-      });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to create compound key', e);
-    }
-  }
-
   public startSync() {
     if (this.syncSession && this.syncSession.status.getValue() !== Status.Finished) {
       LoggerService.log('Sync in progress', {});
+      return;
+    }
+
+    try {
+      const keyChain = KeyChain.fromSeed(this.seed);
+      this.compoundKey = new CompoundKey({
+        localPrivateKeyring: bcoin.keyring.fromPrivate(keyChain.getAccountSecret(0, 0))
+      });
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to create compound key', e);
       return;
     }
 
@@ -529,6 +528,7 @@ export class WalletService {
       prover = this.compoundKey.startInitialCommitment();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start initial commitment', e);
+      return;
     }
 
     this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
@@ -676,24 +676,24 @@ export class WalletService {
   }
 
   public async verifySignature() {
-    if (this.signSession) {
-      const tx = this.signSession.transaction.toTx();
+    let verify = false;
 
-      let verify;
+    if (this.signSession) {
+      const tx = this.signSession.transaction.toTX();
+
       try {
         verify = tx.verify(await this.watchingWallet.wallet.getCoinView(tx));
       } catch (e) {
         LoggerService.nonFatalCrash('Failed to verify signature', e);
       }
-      return verify;
     }
 
-    return false;
+    return verify;
   }
 
   public async pushTransaction() {
     if (this.signSession) {
-      const tx = this.signSession.transaction.toTx();
+      const tx = this.signSession.transaction.toTX();
       try {
         await this.provider.pushTransaction(tx.toRaw().toString('hex'));
       } catch (e) {
@@ -723,7 +723,10 @@ export class WalletService {
 
     try {
       this.watchingWallet = await new WatchingWallet({
-        watchingKey: this.compoundKey.compoundPublicKeyring
+        accounts: [{
+          name: this.compoundKey.getCompoundKeyAddress('base58'),
+          key: this.compoundKey.compoundPublicKeyring
+        }]
       }).load(this.walletDB);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);

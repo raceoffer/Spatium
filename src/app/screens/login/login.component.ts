@@ -1,7 +1,9 @@
 import {Component, Input} from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
-declare const window: any;
 declare const Utils: any;
 
 @Component({
@@ -40,14 +42,29 @@ export class LoginComponent {
     return await Utils.testNetwork();
   }
 
-  constructor(private readonly router: Router) { }
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
+  ) { }
 
   async letLogin() {
     if(this._userName != '') {
       if (await LoginComponent.isEthernetAvailable()) {
-        await this.router.navigate(['/auth'], {queryParams: {username: this._userName}});
+      this.authService.login = this._userName;
+      this.authService.clearFactors();
+
+      try {
+        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this._userName));
+      } catch (e) {
+        this.authService.encryptedSeed = null;
+        this.notification.show('No stored seed found');
+      }
+
+      await this.router.navigate(['/auth']);
       } else {
-        window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+      this.notification.show('No connection');
       }
     }
   }

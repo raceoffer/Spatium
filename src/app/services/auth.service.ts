@@ -7,6 +7,8 @@ export class AuthService {
   factors: AuthService.Factor[] = [];
   available: AuthService.AvailableFactor[] = [];
 
+  encryptedSeed: string = null;
+
   constructor() {
     this.available.push(new AuthService.AvailableFactor(AuthService.FactorType.PIN, 'PIN', AuthService.FactorIcon.PIN,
       AuthService.FactorIconAsset.PIN, AuthService.FactorLink.PIN, 'auth', 'auth'));

@@ -5,7 +5,7 @@ declare const cordova;
 declare const Web3;
 declare const DDS;
 declare const bcoin;
-declare const CompoundKey;
+declare const CompoundKey: any;
 
 @Injectable()
 export class BitcoinKeyFragmentService {
@@ -22,14 +22,6 @@ export class BitcoinKeyFragmentService {
   localKeyNotFound = 'Bitcoin key is not found on the device';
 
   dds: any = null;
-
-  private static decrypt (ciphertext, secret) {
-    return bcoin.crypto.aes.decipher(ciphertext, secret.slice(0, 32), secret.slice(32, 48));
-  }
-
-  private static encrypt (buffer, secret) {
-    return bcoin.crypto.aes.encipher(buffer, secret.slice(0, 32), secret.slice(32, 48));
-  }
 
   async ensureReady() {
     if (!this.dds) {
@@ -67,14 +59,6 @@ export class BitcoinKeyFragmentService {
     }
   }
 
-  async keyFromSeed(seed) {
-    return CompoundKey.fromSeed(seed);
-  }
-
-  async keyringFromSeed(seed) {
-    return CompoundKey.keyringFromSeed(seed);
-  }
-
   async getEthereumAddress() {
     return this.dds.address;
   }
@@ -98,10 +82,10 @@ export class BitcoinKeyFragmentService {
   }
 
   async sendBitcoinKeyFragment(fragment) {
-    return this.dds.store({
-      data: bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(fragment.getPrivateKey(), this.aesKey)),
-      gasPrice: Web3.utils.toWei('5', 'gwei')
-    });
+    // return this.dds.store({
+    //   data: bcoin.utils.base58.encode(BitcoinKeyFragmentService.encrypt(fragment.getPrivateKey(), this.aesKey)),
+    //   gasPrice: Web3.utils.toWei('5', 'gwei')
+    // });
   }
 
   async removeFile(filename: string): Promise<any> {
