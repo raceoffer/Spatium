@@ -24,6 +24,26 @@ exports.listPairedDevices = function() {
 	});
 };
 
+exports.discoverDevices = function(onDiscovered) {
+	exec(onDiscovered, null, "Bluetooth", "setOnDiscovered", []);
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "discoverDevices", []);
+  });
+};
+
+exports.cancelDiscovery = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "cancelDiscovery", []);
+  });
+};
+
+exports.enableDiscovery = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "enableDiscovery", []);
+  });
+};
+
+
 exports.startListening = function(onConnected,onDisconnected) {
 	exec(onConnected, null, "Bluetooth", "setOnConnected", []);
 	exec(onDisconnected, null, "Bluetooth", "setOnDisconnected", []);
