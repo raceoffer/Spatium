@@ -10,6 +10,7 @@ export class BluetoothService {
 
   onConnected: EventEmitter<any> = new EventEmitter();
   onDisconnected: EventEmitter<any> = new EventEmitter();
+  onDiscoveredDevice: EventEmitter<any> = new EventEmitter();
   onMessage: EventEmitter<any> = new EventEmitter();
 
   constructor() {}
@@ -111,6 +112,20 @@ export class BluetoothService {
     }
 
     return true;
+  }
+
+  async startDiscovery() {
+    return await cordova.plugins.bluetooth.discoverDevices((device) => {
+      this.onDiscoveredDevice.emit(device);
+    });
+  }
+
+  async cancelDiscovery() {
+    return await cordova.plugins.bluetooth.cancelDiscovery();
+  }
+
+  async enableDiscovery() {
+    return await cordova.plugins.bluetooth.enableDiscovery();
   }
 
   async openSettings() {

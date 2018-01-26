@@ -16,36 +16,32 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   devices = [];
 
-  constructor(private bt: BluetoothService,
-              private wallet: WalletService,
-              private router: Router,
-              private ngZone: NgZone) {
-  }
+  constructor(
+    private bt: BluetoothService,
+    private wallet: WalletService,
+    private router: Router,
+    private ngZone: NgZone
+  ) { }
 
   async ngOnInit() {
     await this.bt.disconnect();
-    this.wallet.onFinish.subscribe(() => {
+    this.wallet.onFinish.subscribe(() =>  this.ngZone.run(async () => {
       console.log(this.wallet.address.getValue());
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
-      });
-    });
-    this.wallet.onCancelled.subscribe(() => {
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/waiting']);
-      });
-    });
-    this.wallet.onFailed.subscribe(() => {
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/waiting']);
-      });
-    });
-    this.bt.onDisconnected.subscribe(async () => {
+      await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+    }));
+    this.wallet.onCancelled.subscribe(() => this.ngZone.run(async () => {
+      await this.router.navigate(['/waiting']);
+    }));
+    this.wallet.onFailed.subscribe(() => this.ngZone.run(async () => {
+      await this.router.navigate(['/waiting']);
+    }));
+    this.bt.onDisconnected.subscribe(async () => this.ngZone.run(async () => {
       await this.wallet.cancelSync();
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/waiting']);
-      });
-    });
+      await this.router.navigate(['/waiting']);
+    }));
+    this.bt.onDiscoveredDevice.subscribe((device) => this.ngZone.run(async () => {
+      this.devices.push(device);
+    }));
   }
 
   async ngAfterViewInit() {
@@ -54,8 +50,8 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   async changeBtState() {
     this.disabledBT = !await this.bt.ensureEnabled();
-    this.devices = await this.bt.getDevices();
-    await this.bt.ensureListening();
+    this.devices = [];
+    await this.bt.startDiscovery();
   }
 
   async connectTo(name, address) {
