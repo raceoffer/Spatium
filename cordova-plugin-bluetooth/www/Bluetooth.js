@@ -1,10 +1,20 @@
-var exec = require('cordova/exec');
+const exec = require('cordova/exec');
+
+exports.getState = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getState", []);
+  });
+};
+
+exports.setOnState = function(onState) {
+  exec(onState, null, "Bluetooth", "setOnState", []);
+};
 
 exports.getSupported = function(){
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "getSupported", []);
 	});
-}
+};
 
 exports.getEnabled = function() {
 	return new Promise(function(success,error) {
@@ -96,7 +106,7 @@ exports.stopReading = function() {
 	});
 };
 
-exports.getReading = function(onData) {
+exports.getReading = function() {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "getReading", []);
 	});

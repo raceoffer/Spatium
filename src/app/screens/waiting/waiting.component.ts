@@ -42,6 +42,9 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     this.bt.onDiscoveredDevice.subscribe((device) => this.ngZone.run(async () => {
       this.devices.push(device);
     }));
+    this.bt.onDiscoveryFinished.subscribe((device) => this.ngZone.run(async () => {
+      console.log('Finished discovery');
+    }));
   }
 
   async ngAfterViewInit() {

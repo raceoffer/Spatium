@@ -1,19 +1,43 @@
 import { EventEmitter, Injectable } from '@angular/core';
 
 import { LoggerService } from './logger.service';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const cordova: any;
+
+enum State {
+  OFF         = 0x0000000a,
+  TURNING_ON  = 0x0000000b,
+  ON          = 0x0000000c,
+  TURNING_OFF = 0x0000000d
+}
 
 @Injectable()
 export class BluetoothService {
   enabled = false;
 
+  state: BehaviorSubject<State> = new BehaviorSubject<State>(State.OFF);
+
   onConnected: EventEmitter<any> = new EventEmitter();
   onDisconnected: EventEmitter<any> = new EventEmitter();
   onDiscoveredDevice: EventEmitter<any> = new EventEmitter();
+  onDiscoveryFinished: EventEmitter<any> = new EventEmitter();
   onMessage: EventEmitter<any> = new EventEmitter();
 
-  constructor() {}
+  constructor() {
+    this.state.subscribe((state) => {
+      console.log('00', state);
+    });
+    cordova.plugins.bluetooth.setOnState((state) => {
+      console.log('11', state);
+      this.state.next(state);
+    });
+    cordova.plugins.bluetooth.getState().then((state) => {
+      console.log('22', state);
+      this.state.next(state);
+    });
+    console.log('33', this.state.getValue());
+  }
 
   async ensureEnabled() {
     let enabled = false;
@@ -115,9 +139,14 @@ export class BluetoothService {
   }
 
   async startDiscovery() {
-    return await cordova.plugins.bluetooth.discoverDevices((device) => {
-      this.onDiscoveredDevice.emit(device);
-    });
+    return await cordova.plugins.bluetooth.discoverDevices(
+      (device) => {
+        this.onDiscoveredDevice.emit(device);
+      },
+      () => {
+        this.onDiscoveryFinished.emit();
+      }
+    );
   }
 
   async cancelDiscovery() {

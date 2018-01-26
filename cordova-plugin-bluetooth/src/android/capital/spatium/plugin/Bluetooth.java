@@ -27,6 +27,10 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.bluetooth.BluetoothAdapter.ACTION_DISCOVERY_FINISHED;
+import static android.bluetooth.BluetoothAdapter.ACTION_DISCOVERY_STARTED;
+import static android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED;
+import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
 
 public class Bluetooth extends CordovaPlugin {
   private BluetoothAdapter mBluetoothAdapter;
@@ -37,7 +41,10 @@ public class Bluetooth extends CordovaPlugin {
   private CallbackContext  mDisconnectedCallback = null;
   private CallbackContext  mDiscoveredCallback = null;
 
+  private CallbackContext  mStateCallback = null;
+
   private CallbackContext  mPermissionCallback = null;
+  private CallbackContext  mFinishedCallback = null;
   private CallbackContext  mDiscoveryCallback = null;
 
   private BluetoothServerSocket mBluetoothServerSocket = null;
@@ -54,7 +61,8 @@ public class Bluetooth extends CordovaPlugin {
   private static final int REQUEST_PERMISSION_BT = 4;
   private static final int REQUEST_DISCOVERY_BT = 5;
 
-  private BroadcastReceiver mReceiver = null;
+  private BroadcastReceiver mDiscoveryReceiver = null;
+  private BroadcastReceiver mStateReceiver = null;
 
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -70,6 +78,9 @@ public class Bluetooth extends CordovaPlugin {
       return true;
     } else if ("getEnabled".equals(action)) {
       getEnabled(callbackContext);
+      return true;
+    } else if ("getState".equals(action)) {
+      getState(callbackContext);
       return true;
     } else if ("enable".equals(action)) {
       enable(callbackContext);
@@ -97,6 +108,12 @@ public class Bluetooth extends CordovaPlugin {
       return true;
     } else if ("setOnDisconnected".equals(action)) {
       setOnDisconnected(callbackContext);
+      return true;
+    } else if ("setOnState".equals(action)) {
+      setOnState(callbackContext);
+      return true;
+    } else if ("setOnDiscoveryFinished".equals(action)) {
+      setOnDiscoveryFinished(callbackContext);
       return true;
     } else if ("getListening".equals(action)) {
       getListening(callbackContext);
@@ -147,6 +164,41 @@ public class Bluetooth extends CordovaPlugin {
     }
 
     return false;
+  }
+
+  private void getState(final CallbackContext callbackContext) {
+    if(mBluetoothAdapter == null) {
+      callbackContext.error("Bluetooth is not supported");
+      return;
+    }
+
+    PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothAdapter.getState());
+    callbackContext.sendPluginResult(result);
+  }
+
+  private void setOnState(CallbackContext callbackContext) {
+    mStateCallback = callbackContext;
+    if(mStateReceiver == null) {
+      mStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          String action = intent.getAction();
+          if (ACTION_STATE_CHANGED.equals(action)) {
+            int state = intent.getIntExtra(EXTRA_STATE, -1);
+            if(mStateCallback != null) {
+              PluginResult result = new PluginResult(PluginResult.Status.OK, state);
+              result.setKeepCallback(true);
+              mStateCallback.sendPluginResult(result);
+            }
+          }
+        }
+      };
+      webView.getContext().registerReceiver(mStateReceiver, new IntentFilter(ACTION_STATE_CHANGED));
+    }
+  }
+
+  private void setOnDiscoveryFinished(final CallbackContext callbackContext) {
+    mFinishedCallback = callbackContext;
   }
 
   private void cancelDiscovery(final CallbackContext callbackContext) {
@@ -218,8 +270,8 @@ public class Bluetooth extends CordovaPlugin {
     }
 
     try {
-      if(mReceiver == null) {
-        mReceiver = new BroadcastReceiver() {
+      if(mDiscoveryReceiver == null) {
+        mDiscoveryReceiver = new BroadcastReceiver() {
           @Override
           public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -238,10 +290,20 @@ public class Bluetooth extends CordovaPlugin {
                   // Okay then
                 }
               }
+            } else if (ACTION_DISCOVERY_STARTED.equals(action)) {
+              // Ignore for now
+            } else if (ACTION_DISCOVERY_FINISHED.equals(action)) {
+              if(mFinishedCallback != null) {
+                mFinishedCallback.success();
+              }
             }
           }
         };
-        webView.getContext().registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(ACTION_DISCOVERY_STARTED);
+        filter.addAction(ACTION_DISCOVERY_FINISHED);
+        webView.getContext().registerReceiver(mDiscoveryReceiver, filter);
       }
 
       if(!cordova.hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
@@ -258,10 +320,10 @@ public class Bluetooth extends CordovaPlugin {
 
   @Override
   public void onDestroy() {
-    if (this.mReceiver != null) {
+    if (this.mDiscoveryReceiver != null) {
       try {
-        webView.getContext().unregisterReceiver(this.mReceiver);
-        this.mReceiver = null;
+        webView.getContext().unregisterReceiver(this.mDiscoveryReceiver);
+        this.mDiscoveryReceiver = null;
       } catch (Exception e) {
         // well okay
       }
