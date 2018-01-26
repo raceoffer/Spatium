@@ -19,8 +19,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   usd;
 
   enableBTmessage = 'Turn on Bluetooth to proceed';
-  Label = 'Device paring';
-  disabledBT = true;
+  enabledBT = this.bt.enabled;
 
   synching = false;
   ready = false;
@@ -47,6 +46,12 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.synching = false;
       this.ready = false;
     });
+    this.bt.enabled.filter(enabled => !enabled).subscribe(() => this.ngZone.run(async () => {
+      await this.wallet.cancelSync();
+    }));
+    this.bt.enabled.filter(enabled => enabled).subscribe(() => this.ngZone.run(async () => {
+      await this.bt.ensureListening();
+    }));
     this.bt.onConnected.subscribe(() => this.ngZone.run(async () => {
       await this.wallet.startSync();
       this.synching = true;
@@ -55,8 +60,6 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     this.bt.onDisconnected.subscribe(() => this.ngZone.run(async () => {
       this.synching = false;
       this.ready = false;
-
-      await this.changeBtState();
     }));
   }
 
@@ -81,7 +84,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       console.log(this.usd);
     }));
 
-    await this.changeBtState();
+    await this.bt.requestEnable();
   }
 
   async confirm() {
@@ -97,7 +100,6 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   }
 
   async changeBtState() {
-    this.disabledBT = !await this.bt.ensureEnabled();
-    await this.bt.ensureListening();
+    await this.bt.requestEnable();
   }
 }

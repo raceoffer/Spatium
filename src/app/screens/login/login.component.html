@@ -14,12 +14,11 @@
   </div>
 
   <form class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" (submit)="letLogin()">
-
     <div class="spatium-textfield entry bottom32">
-      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="UserName" name="UserName">
+      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName">
     </div>
 
-    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" >{{entry}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="userName.length < 1" (click)="letLogin()">{{entry}}</button>
   </form>
 
 </div>

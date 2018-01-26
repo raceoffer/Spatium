@@ -12,52 +12,53 @@ enum State {
   TURNING_OFF = 0x0000000d
 }
 
+export class Device {
+  constructor(public name: string, public address: string) { }
+
+  static fromJSON(json): Device {
+    return new Device(json.name, json.address);
+  }
+
+  toJSON(): any {
+    return { name: this.name, address: this.address };
+  }
+}
+
 @Injectable()
 export class BluetoothService {
-  enabled = false;
-
   state: BehaviorSubject<State> = new BehaviorSubject<State>(State.OFF);
+  enabled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  devices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
 
   onConnected: EventEmitter<any> = new EventEmitter();
   onDisconnected: EventEmitter<any> = new EventEmitter();
-  onDiscoveredDevice: EventEmitter<any> = new EventEmitter();
   onDiscoveryFinished: EventEmitter<any> = new EventEmitter();
   onMessage: EventEmitter<any> = new EventEmitter();
 
   constructor() {
-    this.state.subscribe((state) => {
-      console.log('00', state);
-    });
+    this.state.subscribe(state => this.enabled.next(state === State.ON));
     cordova.plugins.bluetooth.setOnState((state) => {
-      console.log('11', state);
       this.state.next(state);
     });
     cordova.plugins.bluetooth.getState().then((state) => {
-      console.log('22', state);
       this.state.next(state);
     });
-    console.log('33', this.state.getValue());
   }
 
-  async ensureEnabled() {
-    let enabled = false;
+  async requestEnable() {
     try {
-      enabled = await cordova.plugins.bluetooth.getEnabled();
-      if (!enabled) {
+      if (!this.enabled.getValue()) {
         await cordova.plugins.bluetooth.enable();
       }
-      this.enabled = true;
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to enable Bluetooth', e);
-      this.enabled = false;
     }
-
-    return this.enabled;
   }
 
   async getDevices() {
     let devices = [];
-    if (this.enabled) {
+    if (this.enabled.getValue()) {
       try {
         devices = await cordova.plugins.bluetooth.listPairedDevices();
       } catch (e) {
@@ -90,11 +91,11 @@ export class BluetoothService {
     return true;
   }
 
-  async connect(device) {
+  async connect(device: Device) {
     await this.disconnect();
 
     try {
-      await cordova.plugins.bluetooth.connect(device, () => {
+      await cordova.plugins.bluetooth.connect(device.toJSON(), () => {
         this.onDisconnected.emit();
       });
     } catch (e) {
@@ -139,11 +140,11 @@ export class BluetoothService {
   }
 
   async startDiscovery() {
+    this.devices.next([]);
     return await cordova.plugins.bluetooth.discoverDevices(
       (device) => {
-        this.onDiscoveredDevice.emit(device);
-      },
-      () => {
+        this.devices.next(this.devices.getValue().concat([Device.fromJSON(device)]));
+      }, () => {
         this.onDiscoveryFinished.emit();
       }
     );
