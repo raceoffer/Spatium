@@ -56,8 +56,6 @@ export class AuthComponent implements AfterViewInit {
       data += factor.value;
     }
 
-    console.log(data);
-
     const aesKey = await Utils.deriveAesKey(Buffer.from(data, 'utf-8'));
 
     try {
@@ -70,8 +68,6 @@ export class AuthComponent implements AfterViewInit {
 
         await this.fs.writeFile(this.fs.safeFileName(this.username), this.authSevice.encryptedSeed);
       }
-
-      console.log(this.walletService.seed.toString('hex'));
 
       await this.router.navigate(['/waiting']);
     } catch (e) {

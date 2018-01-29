@@ -7,7 +7,7 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledBT">
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!discoverable.getValue()">
 
     <div class="connect-text">
       <span>{{enableBTmessage}}</span>
@@ -20,7 +20,7 @@
 
   </div>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="!disabledBT">
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="discoverable.getValue()">
 
     <div class="verify-transaction-text" *ngIf="ready">
       <span>This device is linked. All transactions will be confirmed by you.</span>

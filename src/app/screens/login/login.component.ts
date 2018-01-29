@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import { AfterViewInit, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
@@ -12,34 +12,18 @@ declare const Utils: any;
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   entry = 'Log in';
   stLogin = 'Username';
-  _userName = '';
+  userName = '';
   isDisable = true;
-
-  ngAfterViewInit() {
-    this._userName = '';
-  }
-
-  get UserName() {
-    return this._userName;
-  }
-
-  @Input()
-  set UserName(newUserName) {
-    this._userName = newUserName;
-    if (this._userName.length > 1){
-      this.isDisable = false;
-      console.log(this.isDisable);
-    } else {
-      this.isDisable = true;
-      console.log(this.isDisable);
-    }
-  }
 
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
+  }
+
+  ngAfterViewInit() {
+    this.userName = '';
   }
 
   constructor(
@@ -50,21 +34,21 @@ export class LoginComponent {
   ) { }
 
   async letLogin() {
-    if(this._userName != '') {
+    if (this.userName !== '') {
       if (await LoginComponent.isEthernetAvailable()) {
-      this.authService.login = this._userName;
-      this.authService.clearFactors();
+        this.authService.login = this.userName;
+        this.authService.clearFactors();
 
-      try {
-        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this._userName));
-      } catch (e) {
-        this.authService.encryptedSeed = null;
-        this.notification.show('No stored seed found');
-      }
+        try {
+          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
+        } catch (e) {
+          this.authService.encryptedSeed = null;
+          this.notification.show('No stored seed found');
+        }
 
-      await this.router.navigate(['/auth']);
+        await this.router.navigate(['/auth']);
       } else {
-      this.notification.show('No connection');
+        this.notification.show('No connection');
       }
     }
   }
