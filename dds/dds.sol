@@ -1,21 +1,18 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 contract DDS {
-    mapping (string => string) private dataStorage;
+    mapping (string => bytes) private dataStorage;
     
-    function DDS() public {}
-    
-    function exists(string id) public constant returns(bool exists) {
-        exists = bytes(dataStorage[id]).length == 0;
+    function exists(string id) public constant returns(bool) {
+        return dataStorage[id].length != 0;
     }
     
-    function store(string id, string data) public {
-        if(!exists(id)) {
-            dataStorage[id] = data;
-        }
+    function store(string id, bytes data) public {
+        require(!exists(id));
+        dataStorage[id] = data;
     }
     
-    function read(string id) public constant returns(string data) {
+    function read(string id) public constant returns(bytes data) {
         data = dataStorage[id];
     }
 }
