@@ -1,6 +1,5 @@
 <div [class]="overlayClass"></div>
 <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;">
-
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <button mat-icon-button routerLink="/start">
@@ -11,7 +10,7 @@
 
   </mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!enabledBT.getValue()">
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!enabled.getValue()">
     <div class="connect-text">
       <span>{{enableBTmessage}}</span>
     </div>
@@ -22,16 +21,15 @@
     </button>
   </div>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabledBT.getValue()">
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled.getValue()">
     <mat-nav-list style="width: 100%;">
-      <mat-list-item *ngFor="let device of devices" (click)="connectTo(device.name, device.address)">
+      <mat-list-item *ngFor="let device of devices.getValue()" (click)="connectTo(device.name, device.address)">
         <p class="list-name" mat-line>{{device.name}}</p>
         <p class="list-info" mat-line> {{device.address}} </p>
         <mat-icon class="list-icon" matSuffix>center_focus_weak</mat-icon>
       </mat-list-item>
     </mat-nav-list>
   </div>
-
 </div>
 
 

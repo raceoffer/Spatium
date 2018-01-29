@@ -18,8 +18,9 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   rateBtcUsd = 15000;
   usd;
 
-  enableBTmessage = 'Turn on Bluetooth to proceed';
-  enabledBT = this.bt.enabled;
+  enableBTmessage = 'Allow device discovery to proceed';
+  enabled = this.bt.enabled;
+  discoverable = this.bt.discoverable;
 
   synching = false;
   ready = false;
@@ -46,18 +47,20 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.synching = false;
       this.ready = false;
     });
-    this.bt.enabled.filter(enabled => !enabled).subscribe(() => this.ngZone.run(async () => {
+    this.bt.disabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.wallet.cancelSync();
     }));
-    this.bt.enabled.filter(enabled => enabled).subscribe(() => this.ngZone.run(async () => {
+    this.bt.discoverableStartedEvent.subscribe(() => this.ngZone.run(async () => {
       await this.bt.ensureListening();
     }));
-    this.bt.onConnected.subscribe(() => this.ngZone.run(async () => {
+    this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
+      console.log('Connected to', this.bt.connectedDevice.getValue());
       await this.wallet.startSync();
       this.synching = true;
       this.ready = false;
     }));
-    this.bt.onDisconnected.subscribe(() => this.ngZone.run(async () => {
+    this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+      await this.wallet.cancelSync();
       this.synching = false;
       this.ready = false;
     }));
@@ -84,7 +87,11 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       console.log(this.usd);
     }));
 
-    await this.bt.requestEnable();
+    if (!this.bt.discoverable.getValue()) {
+      await this.bt.enableDiscovery();
+    } else {
+      await this.bt.ensureListening();
+    }
   }
 
   async confirm() {
@@ -100,6 +107,6 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   }
 
   async changeBtState() {
-    await this.bt.requestEnable();
+    await this.bt.enableDiscovery();
   }
 }

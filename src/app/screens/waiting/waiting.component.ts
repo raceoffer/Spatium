@@ -11,10 +11,11 @@ import {WalletService} from '../../services/wallet.service';
 export class WaitingComponent implements OnInit, AfterViewInit {
   enableBTmessage = 'Turn on Bluetooth to proceed';
   Label = 'Connect to device';
-  enabledBT = this.bt.enabled;
   overlayClass = 'overlay invisible';
 
-  devices = [];
+  enabled = this.bt.enabled;
+  discovering = this.bt.discovering;
+  devices = this.bt.discoveredDevices;
 
   constructor(
     private bt: BluetoothService,
@@ -35,21 +36,30 @@ export class WaitingComponent implements OnInit, AfterViewInit {
     this.wallet.onFailed.subscribe(() => this.ngZone.run(async () => {
       await this.router.navigate(['/waiting']);
     }));
-    this.bt.enabled.filter(enabled => !enabled).subscribe(() => this.ngZone.run(async () => {
-      await this.wallet.cancelSync();
+    this.bt.disabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.router.navigate(['/waiting']);
+      await this.wallet.cancelSync();
     }));
-    this.bt.enabled.filter(enabled => enabled).subscribe(() => this.ngZone.run(async () => {
+    this.bt.enabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.bt.startDiscovery();
     }));
-    this.bt.onDiscoveryFinished.subscribe((device) => this.ngZone.run(async () => {
-      console.log('Finished discovery');
+    this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
+      console.log('Connected to', this.bt.connectedDevice.getValue());
+      await this.wallet.startSync();
+      this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
     }));
-    this.bt.devices.subscribe(devices => this.ngZone.run(() => this.devices = devices));
+    this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+      await this.router.navigate(['/waiting']);
+      await this.wallet.cancelSync();
+    }));
   }
 
   async ngAfterViewInit() {
-    await this.bt.requestEnable();
+    if (!this.bt.enabled.getValue()) {
+      await this.bt.requestEnable();
+    } else {
+      await this.bt.startDiscovery();
+    }
   }
 
   async changeBtState() {
@@ -59,12 +69,7 @@ export class WaitingComponent implements OnInit, AfterViewInit {
   async connectTo(name, address) {
     console.log('connect' + name + address);
     this.overlayClass = 'overlay';
-    if (await this.bt.connect(new Device(name, address))) {
-      await this.wallet.startSync();
-      this.ngZone.run(() => {
-        this.router.navigate(['/connect'], {queryParams: {name: '', address: ''}});
-      });
-    } else {
+    if (!await this.bt.connect(new Device(name, address))) {
       this.overlayClass = 'overlay invisible';
       this.ngZone.run(() => {
         this.router.navigate(['/waiting']);
