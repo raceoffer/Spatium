@@ -1,32 +1,66 @@
-var exec = require('cordova/exec');
+const exec = require('cordova/exec');
 
 exports.getSupported = function(){
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "getSupported", []);
-	});
-}
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getSupported", []);
+  });
+};
 
-exports.getEnabled = function() {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "getEnabled", []);
-	});
+exports.getState = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getState", []);
+  });
+};
+
+exports.getListening = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getListening", []);
+  });
+};
+
+exports.getConnected = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getConnected", []);
+  });
+};
+
+exports.getReading = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getReading", []);
+  });
 };
 
 exports.enable = function() {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "enable", []);
-	});
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "enable", []);
+  });
 };
 
 exports.listPairedDevices = function() {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "listPairedDevices", []);
-	});
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "listPairedDevices", []);
+  });
 };
 
-exports.startListening = function(onConnected,onDisconnected) {
-	exec(onConnected, null, "Bluetooth", "setOnConnected", []);
-	exec(onDisconnected, null, "Bluetooth", "setOnDisconnected", []);
+exports.startDiscovery = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "startDiscovery", []);
+  });
+};
+
+exports.cancelDiscovery = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "cancelDiscovery", []);
+  });
+};
+
+exports.enableDiscovery = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "enableDiscovery", []);
+  });
+};
+
+exports.startListening = function() {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "startListening", []);
 	});
@@ -38,14 +72,7 @@ exports.stopListening = function() {
 	});
 };
 
-exports.getListening = function() {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "getListening", []);
-	});
-};
-
-exports.connect = function(device,onDisconnected) {
-	exec(onDisconnected, null, "Bluetooth", "setOnDisconnected", []);
+exports.connect = function(device) {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "connect", [device]);
 	});
@@ -57,14 +84,7 @@ exports.disconnect = function() {
 	});
 };
 
-exports.getConnected = function() {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "getConnected", []);
-	});
-};
-
-exports.startReading = function(onData) {
-	exec(onData, null, "Bluetooth", "setOnData", []);
+exports.startReading = function() {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "startReading", []);
 	});
@@ -76,20 +96,33 @@ exports.stopReading = function() {
 	});
 };
 
-exports.getReading = function(onData) {
-	return new Promise(function(success,error) {
-		exec(success, error, "Bluetooth", "getReading", []);
-	});
-};
-
 exports.write = function(data) {
 	return new Promise(function(success,error) {
 		exec(success, error, "Bluetooth", "write", [data]);
 	});
 };
 
-exports.openSettings = function() {
-  return new Promise(function(success,error) {
-    exec(success, error, "Bluetooth", "openSettings", []);
-  });
+exports.setConnectedCallback = function(callback) {
+  exec(callback, () => callback(null), "Bluetooth", "setConnectedCallback", []);
 };
+
+exports.setDiscoverableCallback = function(callback) {
+  exec(callback, null, "Bluetooth", "setDiscoverableCallback", []);
+};
+
+exports.setDiscoveredCallback = function(callback) {
+  exec(callback, null, "Bluetooth", "setDiscoveredCallback", []);
+};
+
+exports.setDiscoveryCallback = function(callback) {
+  exec(callback, null, "Bluetooth", "setDiscoveryCallback", []);
+};
+
+exports.setMessageCallback = function(callback) {
+  exec(callback, null, "Bluetooth", "setMessageCallback", []);
+};
+
+exports.setStateCallback = function(callback) {
+  exec(callback, null, "Bluetooth", "setStateCallback", []);
+};
+

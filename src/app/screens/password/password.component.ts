@@ -1,17 +1,18 @@
-import { Component, NgZone } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
+import {ActivatedRoute, Router} from "@angular/router";
+import {AuthService} from "../../services/auth.service";
 
 @Component({
   selector: 'app-password',
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })
-export class PasswordComponent {
+export class PasswordComponent implements AfterViewInit {
+
   stContinue = 'Continue';
   stPassword = 'Password';
-  password = '';
-  isDisable = false;
+  _passwordValue = '';
+  isDisable = true;
 
   next: string = null;
   back: string = null;
@@ -30,12 +31,34 @@ export class PasswordComponent {
     });
   }
 
+  get Password() {
+    return this._passwordValue;
+  }
+
+  @Input()
+  set Password(newPassword) {
+    this._passwordValue = newPassword;
+    if (this._passwordValue.length > 1){
+      this.isDisable = false;
+      console.log(this.isDisable);
+    } else {
+      this.isDisable = true;
+      console.log(this.isDisable);
+    }
+  }
+
+  ngAfterViewInit() {
+    this._passwordValue = '';
+  }
+
   goNext(): void {
-    if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this.password.toString());
-    this.ngZone.run(async () => {
-      await this.router.navigate(['/auth']);
-      });
+    if(this._passwordValue != '') {
+      if (this.next && this.next === 'auth') {
+        this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this._passwordValue.toString());
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/auth']);
+        });
+      }
     }
   }
 

@@ -13,6 +13,7 @@
 *.DS_Store
 *.bundle.js
 /src/bcoinlib/test/*.key
+/src/bcoinlib/test/*.seed
 package-lock.json
 /cordova/platforms
 /cordova/plugins

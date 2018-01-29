@@ -7,6 +7,8 @@ export class AuthService {
   factors: AuthService.Factor[] = [];
   available: AuthService.AvailableFactor[] = [];
 
+  encryptedSeed: string = null;
+
   constructor() {
     this.available.push(new AuthService.AvailableFactor(AuthService.FactorType.PIN, 'PIN', AuthService.FactorIcon.PIN,
       AuthService.FactorIconAsset.PIN, AuthService.FactorLink.PIN, 'auth', 'auth'));
@@ -42,6 +44,14 @@ export class AuthService {
       }
       case AuthService.FactorType.GRAPHIC_KEY: {
         this.factors.push(new AuthService.Factor(AuthService.FactorType.GRAPHIC_KEY, AuthService.FactorIcon.GRAPHIC_KEY, AuthService.FactorIconAsset.GRAPHIC_KEY, value));
+        break;
+      }
+      case AuthService.FactorType.QR: {
+        this.factors.push(new AuthService.Factor(AuthService.FactorType.QR, AuthService.FactorIcon.QR, AuthService.FactorIconAsset.QR, value));
+        break;
+      }
+      case AuthService.FactorType.NFC: {
+        this.factors.push(new AuthService.Factor(AuthService.FactorType.NFC, AuthService.FactorIcon.NFC, AuthService.FactorIconAsset.NFC, value));
         break;
       }
     }
@@ -89,8 +99,8 @@ export namespace AuthService {
     PASSWORD = '/password',
     FILE = '/file-upload',
     GRAPHIC_KEY = '/graphic-key',
-    QR = '',
-    NFC = ''
+    QR = '/qr-code',
+    NFC = '/nfc'
   }
 
   export class AvailableFactor {

@@ -1,8 +1,13 @@
-import {Component, Input, AfterViewInit, NgZone } from '@angular/core';
+import { Component, Input, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
-import {WalletService} from '../../services/wallet.service';
-import {AuthService} from "../../services/auth.service";
+import { WalletService } from '../../services/wallet.service';
+import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
+
+declare const Utils: any;
+declare const Buffer: any;
+declare const window: any;
 
 @Component({
   selector: 'app-pincode',
@@ -10,17 +15,20 @@ import {AuthService} from "../../services/auth.service";
   styleUrls: ['./pincode.component.css']
 })
 export class PincodeComponent implements AfterViewInit {
-  pincode = '';
+  _pincode = '';
 
   next: string = null;
   back: string = null;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private ngZone: NgZone,
-              private authSevice: AuthService,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService) {
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly authSevice: AuthService,
+    private readonly walletService: WalletService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -32,24 +40,49 @@ export class PincodeComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.pincode = '';
+    this._pincode = '';
+  }
+
+  get Pincode() {
+    return this._pincode;
+  }
+
+  @Input()
+  set Pincode(newPin) {
+    this._pincode = newPin;
   }
 
   onAddClicked(symbol) {
-    this.pincode = this.pincode + symbol;
+    this._pincode = this._pincode + symbol;
   }
 
   onBackspaceClicked() {
-    this.pincode = this.pincode.substr(0, this.pincode.length - 1);
+    this._pincode = this._pincode.substr(0, this._pincode.length - 1);
   }
 
   async onSubmitClicked() {
     if (this.next && this.next === 'waiting') {
-      const keyFragment = await this.bitcoinKeyFragmentService.keyringFromSeed(this.pincode.toString());
-      this.walletService.setKeyFragment(keyFragment);
-      await this.router.navigate(['/verifyTransaction']);
+      const aesKey = await Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
+
+      try {
+        if (this.authSevice.encryptedSeed) {
+          const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
+          this.walletService.seed = Utils.decrypt(ciphertext, aesKey);
+        } else {
+          this.walletService.seed = Utils.randomBytes(64);
+          this.authSevice.encryptedSeed = Utils.encrypt(this.walletService.seed, aesKey).toString('hex');
+
+          await this.fs.writeFile(this.fs.safeFileName('seed'), this.authSevice.encryptedSeed);
+        }
+
+        console.log(this.walletService.seed.toString('hex'));
+
+        await this.router.navigate(['/verifyTransaction']);
+      } catch (e) {
+        this.notification.show('Authorization error');
+      }
     } else if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.PIN, this.pincode.toString());
+      this.authSevice.addFactor(AuthService.FactorType.PIN, this._pincode.toString());
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

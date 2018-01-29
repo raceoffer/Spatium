@@ -34,6 +34,8 @@ import { WalletService } from './services/wallet.service';
 import { LoggerService } from './services/logger.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { AuthService } from './services/auth.service';
+import { FileService } from './services/file.service';
+import { NotificationService } from './services/notification.service';
 import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
 import { PincodeComponent } from './screens/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
@@ -42,6 +44,10 @@ import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.
 import { PasswordComponent } from './screens/password/password.component';
 import { FileUploadComponent } from './screens/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
+import { QrCodeComponent } from './screens/qr-code/qr-code.component';
+import { NfcComponent } from './screens/nfc/nfc.component';
+import { NgxZxingModule } from 'ngx-zxing';
+
 
 
 @NgModule({
@@ -60,7 +66,9 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
     DialogFactorsComponent,
     PasswordComponent,
     FileUploadComponent,
-    GraphicKeyComponent
+    GraphicKeyComponent,
+    QrCodeComponent,
+    NfcComponent
   ],
   imports: [
     FormsModule,
@@ -84,14 +92,17 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
     MatDialogModule,
     MatSelectModule,
     MatSnackBarModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    NgxZxingModule.forRoot()
   ],
   providers: [
     WalletService,
     BitcoinKeyFragmentService,
     BluetoothService,
     LoggerService,
-    AuthService
+    AuthService,
+    FileService,
+    NotificationService
   ],
   bootstrap: [
     AppComponent,

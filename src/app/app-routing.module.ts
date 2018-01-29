@@ -13,6 +13,8 @@ import {AuthComponent} from './screens/auth/auth.component';
 import {PasswordComponent} from './screens/password/password.component';
 import {FileUploadComponent} from "./screens/file-upload/file-upload.component";
 import {GraphicKeyComponent} from "./screens/graphic-key/graphic-key.component";
+import {QrCodeComponent} from "./screens/qr-code/qr-code.component";
+import {NfcComponent} from "./screens/nfc/nfc.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -23,6 +25,8 @@ const appRoutes: Routes = [
   { path: 'password', component: PasswordComponent },
   { path: 'file-upload', component: FileUploadComponent },
   { path: 'graphic-key', component: GraphicKeyComponent },
+  { path: 'qr-code', component: QrCodeComponent },
+  { path: 'nfc', component: NfcComponent },
   { path: 'login', component: LoginComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },

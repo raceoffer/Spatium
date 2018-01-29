@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 
@@ -7,14 +7,15 @@ import {AuthService} from "../../services/auth.service";
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
-export class FileUploadComponent implements OnInit {
+
+export class FileUploadComponent implements AfterViewInit {
 
   uploadFile = 'Choose a file';
 
   next: string = null;
   back: string = null;
 
-  _fileHash:string = null;
+  _file:string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -30,16 +31,35 @@ export class FileUploadComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+    this._file = '';
   }
 
-  onUploadFileClick() :void{
-    this._fileHash = 'lkasjdksajdlaskdj';
-    this.goNext();
+  onUploadFileClick(event) {
+    event.preventDefault();
+
+    var file = event.srcElement.files[0];
+    this.readFile(file);
+  }
+
+  readFile (file) {
+    let chunk = file.slice(0, 32);
+    let reader = new FileReader();
+    const self = this;
+
+    reader.onloadend = function () {
+      const arrayBufferToHex = require('array-buffer-to-hex');
+      const string = arrayBufferToHex( reader.result);
+      self._file = string;
+
+      self.goNext();
+    }
+
+    reader.readAsArrayBuffer(chunk);
   }
 
   goNext(): void {
-    this.authSevice.addFactor( AuthService.FactorType.FILE, this._fileHash.toString());
+    this.authSevice.addFactor( AuthService.FactorType.FILE, this._file.toString());
     this.ngZone.run(() => {
       this.router.navigate(['/auth']);
     });

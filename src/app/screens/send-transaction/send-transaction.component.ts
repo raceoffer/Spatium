@@ -137,6 +137,7 @@ export class SendTransactionComponent implements AfterViewInit {
         console.log('The transaction was successfully sent')
       );
     } catch (e) {
+      console.log(e);
       window.plugins.toast.showLongBottom(
         'Error sending transaction',
         3000,

@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
-declare const window: any;
 declare const Utils: any;
 
 @Component({
@@ -10,22 +12,44 @@ declare const Utils: any;
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   entry = 'Log in';
   stLogin = 'Username';
   userName = '';
+  isDisable = true;
 
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
   }
 
-  constructor(private readonly router: Router) { }
+  ngAfterViewInit() {
+    this.userName = '';
+  }
+
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService
+  ) { }
 
   async letLogin() {
-    if (await LoginComponent.isEthernetAvailable()) {
-      await this.router.navigate(['/auth'], { queryParams: { username: this.userName } });
-    } else {
-      window.plugins.toast.showLongBottom('No connection', 3000, 'No connection', console.log('No connection'));
+    if (this.userName !== '') {
+      if (await LoginComponent.isEthernetAvailable()) {
+        this.authService.login = this.userName;
+        this.authService.clearFactors();
+
+        try {
+          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
+        } catch (e) {
+          this.authService.encryptedSeed = null;
+          this.notification.show('No stored seed found');
+        }
+
+        await this.router.navigate(['/auth']);
+      } else {
+        this.notification.show('No connection');
+      }
     }
   }
 }
