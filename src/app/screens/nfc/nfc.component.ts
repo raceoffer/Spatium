@@ -1,9 +1,12 @@
-import {AfterViewInit, Component, NgZone} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, NgZone, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
+import {FileService} from "../../services/file.service";
+import {NotificationService} from "../../services/notification.service";
 
 declare const nfc: any;
 declare const navigator: any;
+declare const Utils: any;
 
 @Component({
   selector: 'app-nfc',
@@ -11,19 +14,29 @@ declare const navigator: any;
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
-export class NfcComponent implements AfterViewInit {
+export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
 
   _nfc = '';
-  next='';
-  back='';
+  entry = 'Sign in';
+  buttonState = 0; //sign in = 0, sign up = 1
+  next: string = null;
+  back: string = null;
   text = 'Touch an NFC tag';
   isActive = false;
   isCreatedListener = false;
+  isCheckingInProcess = true;
+
+  isDisable = false;
+  isRepeatable = false;
+  canScanAgain = false;
+  classNfcContainer ='';
 
   constructor(private route: ActivatedRoute,
     private router: Router,
     private ngZone: NgZone,
-    private authService: AuthService) {
+    private authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService,) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -33,6 +46,17 @@ export class NfcComponent implements AfterViewInit {
       }
     });
 
+  }
+
+  ngOnInit(){
+    this.canScanAgain = false;
+    this.classNfcContainer = '';
+  }
+
+  ngAfterContentInit() {
+    if (this.next == null && this.back == null){
+      this.isRepeatable = true;
+    }
   }
 
   ngAfterViewInit() {
@@ -126,8 +150,55 @@ export class NfcComponent implements AfterViewInit {
       });
     } else {
       //if at login-parent
-      this.authService.nfc = this._nfc.toString();
-      this.authService.clearFactors();
+      this.canScanAgain = true;
+      this.classNfcContainer = 'invisible'
+      this.isCheckingInProcess = true;
+      this.checkingLogin();
     }
+  }
+
+  async checkingLogin(){
+    //logic for buttonState 0 and 1;
+    await this.delay(2000);
+    this.entry = 'Sign Up';
+    this.isCheckingInProcess = false;
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  scanAgain(){
+    this.canScanAgain = false;
+    this.isActive = true;
+    this.classNfcContainer = '';
+    this.isCheckingInProcess = true;
+  }
+
+  static async isEthernetAvailable() {
+    return await Utils.testNetwork();
+  }
+
+  async letLogin() {
+    //logic for buttonState 0 and 1;
+    this.isDisable = true;
+    if(this._nfc != '') {
+      if (await NfcComponent.isEthernetAvailable()) {
+        this.authService.nfc = this._nfc;
+        this.authService.clearFactors();
+
+        try {
+          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this._nfc));
+        } catch (e) {
+          this.authService.encryptedSeed = null;
+          this.notification.show('No stored seed found');
+        }
+
+        await this.router.navigate(['/auth']);
+      } else {
+        this.notification.show('No connection');
+      }
+    }
+    this.isDisable = false;
   }
 }
