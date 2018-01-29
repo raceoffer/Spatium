@@ -1,23 +1,27 @@
-import {AfterViewInit, Component, ElementRef, NgZone, ViewChild,} from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild,} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 
 
 @Component({
   selector: 'app-qr-code',
+  host: {'class':'child'},
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements AfterViewInit {
+export class QrCodeComponent implements OnInit, AfterViewInit, AfterContentInit {
 
   _qrcode = '';
+  isRepeatable = false;
+  canScanAgain = false;
+  classVideoContainer ='';
+  classVideo = '';
 
   next: string = null;
   back: string = null;
 
   camStarted = false;
   selectedDevice = undefined;
-  qrResult = "";
   availableDevices = [];
   text = 'Place the QR-code into the square';
   spinnerClass = '';
@@ -27,7 +31,7 @@ export class QrCodeComponent implements AfterViewInit {
   constructor(private route: ActivatedRoute,
               private router: Router,
               private ngZone: NgZone,
-              private authSevice: AuthService) {
+              private authService: AuthService) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -36,13 +40,22 @@ export class QrCodeComponent implements AfterViewInit {
         this.back = params['back'];
       }
     });
+    this.classVideo = 'small-video';
+    this.spinnerClass = 'small-video-container';
+  }
+
+  ngOnInit(){
+    this.canScanAgain = false;
+    this.classVideoContainer = '';
   }
 
   ngAfterContentInit() {
     let el = document.querySelector('video');
     el.setAttribute('poster', '#');
-    this.spinnerClass = 'small-video-container';
 
+    if (this.next == null && this.back == null){
+      this.isRepeatable = true;
+    }
   }
 
   ngAfterViewInit() {
@@ -53,14 +66,10 @@ export class QrCodeComponent implements AfterViewInit {
     this.availableDevices = cams;
 
     if(cams && cams.length > 0) {
+      this.spinnerClass = "invisible";
       this.selectedDevice = cams[1];
       this.camStarted = true;
-      this.spinnerClass = "invisible";
     }
-  }
-
-  async letWait(){
-    this.pause(2000);
   }
 
   async handleQrCodeResult(event){
@@ -69,12 +78,18 @@ export class QrCodeComponent implements AfterViewInit {
     this.camStarted = false;
 
      if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.QR, this._qrcode.toString());
+      this.authService.addFactor(AuthService.FactorType.QR, this._qrcode.toString());
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);
       });
-    }
+    } else {
+       //if at login-parent
+       this.authService.qr = this._qrcode.toString();
+       this.authService.clearFactors();
+       this.canScanAgain = true;
+       this.classVideoContainer = 'invisible'
+     }
   }
 
   pause(numberMillis) {
@@ -85,6 +100,13 @@ export class QrCodeComponent implements AfterViewInit {
       if (now.getTime() > exitTime)
         return;
     }
+  }
+
+  scanAgain(){
+    console.log('qr '+this.authService.qr);
+    this.canScanAgain = false;
+    this.classVideoContainer = '';
+    this.camStarted = true;
   }
 
 }

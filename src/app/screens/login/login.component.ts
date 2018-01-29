@@ -8,6 +8,7 @@ declare const Utils: any;
 
 @Component({
   selector: 'app-login',
+  host: {'class':'child'},
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

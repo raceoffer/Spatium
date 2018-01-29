@@ -1,36 +1,23 @@
-<div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/{{back}}">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
+<div fxLayout="column" fxLayoutAlign="start center" [class]="classVideoContainer">
 
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
-
-  <div style="height: 34px;">
-  </div>
-  <div [class]="spinnerClass" fxLayout="column" fxLayoutAlign="center center"><mat-spinner color="accent"></mat-spinner></div>
-  <div style="position: relative;">
+  <div [class]="spinnerClass" fxLayout="column" fxLayoutAlign="center center" ><mat-spinner color="accent"></mat-spinner></div>
+  <div style="position: relative;" >
     <ngx-zxing
       [start]="camStarted"
       [device]="selectedDevice"
       (onCamsFound)="displayCameras($event)"
       (onScan)="handleQrCodeResult($event)"
-      [cssClass]="small-video"
+      [cssClass]="classVideo"
       class="small-video-container"
       #videoContainer
     ></ngx-zxing>
-
   </div>
-
-
 
   <span class="overlay-bottom-center">{{text}}</span>
 
 </div>
+
+<div fxLayout="column" fxLayoutAlign="center center" style="height:300px;" *ngIf="isRepeatable && canScanAgain">
+  <button mat-button color="accent" (click)="scanAgain()">Scan again</button>
+</div>
+

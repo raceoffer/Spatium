@@ -5,6 +5,7 @@ import * as PatternLock from 'PatternLock';
 
 @Component({
   selector: 'app-graphic-key',
+  host: {'class':'child'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })
@@ -41,9 +42,9 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
     let lock =  new PatternLock(this.el.nativeElement,{
       onDraw:function(pattern){
         console.log(pattern)
-        self._graphKey = pattern;
-        self.goNext();
-      }
+        this._graphKey = pattern;
+        this.goNext();
+      }.bind(this)
     });
 
     console.log(lock)

@@ -4,6 +4,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule, BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
+  MatButtonToggleModule,
   MatIconModule,
   MatListModule,
   MatMenuModule,
@@ -47,6 +48,8 @@ import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component
 import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
 import { NgxZxingModule } from 'ngx-zxing';
+import { FactorParentComponent } from './screens/factor/factor-parent.component';
+import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 
 
 
@@ -68,7 +71,9 @@ import { NgxZxingModule } from 'ngx-zxing';
     FileUploadComponent,
     GraphicKeyComponent,
     QrCodeComponent,
-    NfcComponent
+    NfcComponent,
+    FactorParentComponent,
+    LoginParentComponent
   ],
   imports: [
     FormsModule,
@@ -79,6 +84,7 @@ import { NgxZxingModule } from 'ngx-zxing';
     BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatIconModule,
