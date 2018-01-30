@@ -2,6 +2,7 @@ import {AfterViewInit, Component, NgZone, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {BluetoothService, Device} from '../../services/bluetooth.service';
 import {WalletService} from '../../services/wallet.service';
+import {combineLatest} from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-waiting',
@@ -15,7 +16,8 @@ export class WaitingComponent implements OnInit, AfterViewInit {
 
   enabled = this.bt.enabled;
   discovering = this.bt.discovering;
-  devices = this.bt.discoveredDevices;
+
+  devices = [];
 
   constructor(
     private bt: BluetoothService,
@@ -40,9 +42,6 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       await this.router.navigate(['/waiting']);
       await this.wallet.cancelSync();
     }));
-    this.bt.enabledEvent.subscribe(() => this.ngZone.run(async () => {
-      await this.bt.startDiscovery();
-    }));
     this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
       console.log('Connected to', this.bt.connectedDevice.getValue());
       await this.wallet.startSync();
@@ -52,13 +51,29 @@ export class WaitingComponent implements OnInit, AfterViewInit {
       await this.router.navigate(['/waiting']);
       await this.wallet.cancelSync();
     }));
+    combineLatest(this.bt.discoveredDevices, this.bt.pairedDevices, (discovered, paired) => {
+      const devices = paired.map(device => {
+        const json = device.toJSON();
+        json.paired = true;
+        return json;
+      });
+      discovered.forEach(device => {
+        for (let i = 0; i < devices.length; ++i) {
+          if (devices[i].name === device.name && devices[i].address === device.address) {
+            return;
+          }
+        }
+        const json = device.toJSON();
+        json.paired = false;
+        devices.push(json);
+      });
+      return devices;
+    }).subscribe(devices => this.devices = devices);
   }
 
   async ngAfterViewInit() {
     if (!this.bt.enabled.getValue()) {
       await this.bt.requestEnable();
-    } else {
-      await this.bt.startDiscovery();
     }
   }
 
@@ -75,5 +90,9 @@ export class WaitingComponent implements OnInit, AfterViewInit {
         this.router.navigate(['/waiting']);
       });
     }
+  }
+
+  async startDiscovery() {
+    this.bt.startDiscovery();
   }
 }
