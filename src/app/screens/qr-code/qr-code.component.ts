@@ -31,7 +31,7 @@ export class QrCodeComponent implements OnInit, AfterContentInit {
   camStarted = false;
   selectedDevice = undefined;
   availableDevices = [];
-  text = 'Place the QR-code into the square';
+  text = 'Scan a QR-code';
   spinnerClass = '';
 
   @ViewChild('videoContainer') el: ElementRef;

@@ -1,8 +1,21 @@
-<div fxLayout="column" fxLayoutAlign="start center" [class]="classNfcContainer">
+<div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledNFC">
+
+  <div class="connect-text">
+    <span>{{enableNFCmessage}}</span>
+  </div>
+
+  <button mat-fab  class="width-button">
+    <mat-icon (click)="changeNFCState()">nfc
+    </mat-icon>
+  </button>
+
+</div>
+
+<div fxLayout="column" fxLayoutAlign="start center" [class]="classNfcContainer" *ngIf="!disabledNFC">
   <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
     <mat-icon style="width: 200px;
     height: 200px;
-    font-size: 200px;" class="pulse">wifi</mat-icon>
+    font-size: 200px;" class="pulse">nfc</mat-icon>
   </div>
 
   <span class="overlay-bottom-center">{{text}}</span>

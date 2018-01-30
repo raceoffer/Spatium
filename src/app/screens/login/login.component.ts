@@ -37,7 +37,7 @@ export class LoginComponent implements AfterViewInit, OnInit{
   @Input()
   set UserName(newUserName) {
     this._userName = newUserName;
-    if (this._userName.length > 1){
+    if (this._userName.length > 0){
       this.isDisable = false;
       console.log(this.isDisable);
       if (this.timer){

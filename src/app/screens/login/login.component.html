@@ -6,8 +6,8 @@
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="UserName" name="UserName">
     </div>
 
-    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess && _userName.length > 1">{{entry}}</button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="isCheckingInProcess && _userName.length > 1"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess && _userName.length > 0">{{entry}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="isCheckingInProcess && _userName.length > 0"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
   </form>
 
   <router-outlet name="login"></router-outlet>

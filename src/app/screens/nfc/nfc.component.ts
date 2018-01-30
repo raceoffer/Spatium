@@ -14,7 +14,7 @@ declare const Utils: any;
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
-export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
+export class NfcComponent implements AfterViewInit, OnInit {
 
   _nfc = '';
   entry = 'Sign in';
@@ -22,10 +22,12 @@ export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
   next: string = null;
   back: string = null;
   text = 'Touch an NFC tag';
+  enableNFCmessage = 'Turn on NFC to proceed';
   isActive = false;
   isCreatedListener = false;
   isCheckingInProcess = true;
 
+  disabledNFC = true;
   isDisable = false;
   isRepeatable = false;
   canScanAgain = false;
@@ -49,25 +51,21 @@ export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
   }
 
   ngOnInit(){
-    this.canScanAgain = false;
-    this.classNfcContainer = '';
-  }
-
-  ngAfterContentInit() {
     if (this.next == null && this.back == null){
       this.isRepeatable = true;
     }
+
+    this.canScanAgain = false;
+    this.classNfcContainer = '';
   }
 
   ngAfterViewInit() {
     this._nfc = '';
     this.isActive = true;
 
-    nfc.enabled(function () {
-      console.log("on");
-    }, function () {
-      nfc.showSettings();
-    });
+    this.checkState();
+
+    document.addEventListener("resume", this.checkState.bind(this), false);
 
     if (!this.isCreatedListener) {
       nfc.addNdefListener(
@@ -96,6 +94,33 @@ export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
       );
       this.isCreatedListener = true;
     }
+
+    this.timeout();
+  }
+
+  timeout() {
+    setTimeout(() => {
+      this.checkState();
+      this.timeout();
+    }, 100);
+  }
+
+  checkState(){
+      nfc.enabled(function () {
+        this.ngZone.run(async () => {
+          this.disabledNFC = false;
+          console.log(this.disabledNFC);
+        })
+      }.bind(this), function () {
+        this.ngZone.run(async () => {
+          this.disabledNFC = true;
+          console.log(this.disabledNFC);
+        })
+      }.bind(this))
+  }
+
+  changeNFCState(){
+    nfc.showSettings();
   }
 
   failure(reason) {
@@ -109,7 +134,7 @@ export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
 
       this._nfc = nfcEvent.tag.id;
 
-      //navigator.vibrate(100);
+      navigator.vibrate(100);
 
       this.onSuccess();
     } else {
@@ -133,7 +158,7 @@ export class NfcComponent implements AfterViewInit, AfterContentInit, OnInit {
 
       this._nfc = tag.id;
 
-      //navigator.vibrate(100);
+      navigator.vibrate(100);
 
       this.onSuccess();
     }

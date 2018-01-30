@@ -84,7 +84,7 @@ export namespace AuthService {
     FILE = 'insert_drive_file',
     GRAPHIC_KEY = '',
     QR = '',
-    NFC = 'wifi'
+    NFC = 'nfc'
   }
 
   export enum FactorIconAsset {
