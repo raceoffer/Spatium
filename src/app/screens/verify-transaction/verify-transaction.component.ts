@@ -54,6 +54,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
       console.log('Disconnected');
       await this.wallet.cancelSync();
+      await this.bt.ensureListening();
     }));
   }
 
