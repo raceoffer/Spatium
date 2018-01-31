@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
+import {AuthService, FactorType} from "../../services/auth.service";
 
 @Component({
   selector: 'app-file-upload',
@@ -59,7 +59,7 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   goNext(): void {
-    this.authSevice.addFactor( AuthService.FactorType.FILE, this._file.toString());
+    this.authSevice.addFactor( FactorType.FILE, this._file.toString());
     this.ngZone.run(() => {
       this.router.navigate(['/auth']);
     });
