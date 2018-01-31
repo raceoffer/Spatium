@@ -65,9 +65,11 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       this.name = params.name;
     });
 
-    this.wallet.onVerifyTransaction.subscribe((event) => this.ngZone.run(async () => {
-      this.address = event.address;
-      this.btc = bcoin.amount.btc(event.value);
+    this.wallet.onVerifyTransaction.subscribe((transaction) => this.ngZone.run(async () => {
+      const output = transaction.totalOutputs()[0];
+
+      this.address = output.address;
+      this.btc = bcoin.amount.btc(output.value);
       this.usd = this.btc * this.rateBtcUsd;
       this.showTransaction = true;
 

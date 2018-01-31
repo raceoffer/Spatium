@@ -469,7 +469,7 @@ export class WalletService {
 
   private routineTimer: any = null;
 
-  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(2);
+  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
   private syncSession: SyncSession = null;
   private signSession: SignSession = null;
@@ -513,9 +513,7 @@ export class WalletService {
       .map(object => object.content)
       .subscribe(async content => {
         return await this.startTransactionVerify(
-          Transaction.fromJSON(content.transaction),
-          content.address,
-          content.value
+          Transaction.fromJSON(content)
         );
       });
 
@@ -563,7 +561,6 @@ export class WalletService {
       console.log('received cancel event');
       // pop the queue
       this.messageSubject.next({});
-      this.messageSubject.next({});
       this.status.next(Status.Cancelled);
       this.syncSession = null;
     });
@@ -571,14 +568,12 @@ export class WalletService {
       console.log('received failed event');
       // pop the queue
       this.messageSubject.next({});
-      this.messageSubject.next({});
       this.status.next(Status.Failed);
       this.syncSession = null;
     });
     this.syncSession.finished.subscribe(async (data) => {
       console.log('received finished event');
       // pop the queue
-      this.messageSubject.next({});
       this.messageSubject.next({});
       this.syncSession = null;
       await this.finishSync(data);
@@ -623,14 +618,10 @@ export class WalletService {
     return transaction;
   }
 
-  public async requestTransactionVerify(transaction, address, value) {
+  public async requestTransactionVerify(transaction) {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
-      content: {
-        transaction: transaction.toJSON(),
-        address: address,
-        value: value
-      }
+      content:  transaction.toJSON()
     }));
 
     this.signSession = new SignSession(
@@ -646,20 +637,17 @@ export class WalletService {
     this.signSession.canceled.subscribe(async () => {
       console.log('canceled');
       this.messageSubject.next({});
-      this.messageSubject.next({});
       this.signSession = null;
       this.onRejected.emit();
     });
     this.signSession.failed.subscribe(async () => {
       console.log('failed');
       this.messageSubject.next({});
-      this.messageSubject.next({});
       this.signSession = null;
       this.onRejected.emit();
     });
     this.signSession.signed.subscribe(async () => {
       console.log('signed');
-      this.messageSubject.next({});
       this.messageSubject.next({});
       this.onAccepted.emit();
       this.onSigned.emit();
@@ -668,7 +656,7 @@ export class WalletService {
     this.signSession.sync().catch(() => {});
   }
 
-  public async startTransactionVerify(transaction, address, value) {
+  public async startTransactionVerify(transaction) {
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
@@ -677,20 +665,14 @@ export class WalletService {
     );
 
     this.signSession.ready.subscribe(async () => {
-      this.onVerifyTransaction.emit({
-        transaction: transaction,
-        address: address,
-        value: value
-      });
+      this.onVerifyTransaction.emit(transaction);
     });
     this.signSession.canceled.subscribe(async () => {
-      this.messageSubject.next({});
       this.messageSubject.next({});
       this.signSession = null;
       this.onRejected.emit();
     });
     this.signSession.failed.subscribe(async () => {
-      this.messageSubject.next({});
       this.messageSubject.next({});
       this.signSession = null;
       this.onRejected.emit();

@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, Input} from '@angular/core';
 import { WalletService } from '../../services/wallet.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const bcoin: any;
 declare const window: any;
@@ -55,7 +56,8 @@ export class SendTransactionComponent implements AfterViewInit {
   initCancelDisabled = false; // Активность кнопки "Отмена" у инициатора
 
   constructor(private walletService: WalletService,
-              private cd: ChangeDetectorRef) {}
+              private cd: ChangeDetectorRef,
+              private notification: NotificationService) {}
 
   ngAfterViewInit() {
     this.walletAddress = this.walletService.address.getValue();
@@ -130,20 +132,10 @@ export class SendTransactionComponent implements AfterViewInit {
       await this.walletService.verifySignature();
       await this.walletService.pushTransaction();
 
-      window.plugins.toast.showLongBottom(
-        'The transaction was successfully sent',
-        3000,
-        'The transaction was successfully sent',
-        console.log('The transaction was successfully sent')
-      );
+      this.notification.show('The transaction was successfully sent');
     } catch (e) {
       console.log(e);
-      window.plugins.toast.showLongBottom(
-        'Error sending transaction',
-        3000,
-        'Error sending transaction',
-        console.log('Error sending transaction')
-      );
+      this.notification.show('Error sending transaction');
     }
   }
 
@@ -164,7 +156,7 @@ export class SendTransactionComponent implements AfterViewInit {
     if (tx) {
       this.stateChange(1);
       this.cd.detectChanges();
-      await this.walletService.requestTransactionVerify(tx, this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value);
+      await this.walletService.requestTransactionVerify(tx);
     }
   }
 
