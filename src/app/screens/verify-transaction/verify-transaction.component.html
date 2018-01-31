@@ -1,4 +1,5 @@
-<div fxLayout="column" fxLayoutAlign="start center" style="width:100%">
+<app-connect *ngIf="synchronizing.getValue()"></app-connect>
+<div *ngIf="!synchronizing.getValue()" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
   <mat-toolbar color="primary" class="shadow">
     <mat-toolbar-row>
       <button mat-icon-button routerLink="/start">
@@ -14,7 +15,7 @@
     </div>
 
     <button mat-fab  class="width-button">
-      <mat-icon (click)="changeBtState()">bluetooth_disabled
+      <mat-icon (click)="enableBluetooth()">bluetooth_disabled
       </mat-icon>
     </button>
 
@@ -22,15 +23,11 @@
 
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="discoverable.getValue()">
 
-    <div class="verify-transaction-text" *ngIf="ready">
+    <div class="verify-transaction-text" *ngIf="ready.getValue()">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="verify-transaction-text" *ngIf="synching">
-      <span>Synchronization in progress.</span>
-    </div>
-
-    <div class="verify-transaction-text" *ngIf="!synching && ! ready">
+    <div class="verify-transaction-text" *ngIf="!synchronizing.getValue() && !ready.getValue()">
       <span>Awaiting connection from the main device.</span>
     </div>
 

@@ -365,19 +365,6 @@ body, buttons, html, input, textarea {
   height: 40px !important;
 }
 
-.button-imitator-large-sync {
-  font-size: 40px;
-  width: 40px !important;
-  height: 40px !important;
-
-  color: $bluish;
-  -webkit-animation: sync 1s infinite linear;
-  -moz-animation: sync 1s infinite linear;
-  -ms-animation: sync 1s infinite linear;
-  -o-animation: sync 1s infinite linear;
-  animation: sync 1s infinite linear;
-}
-
 @-webkit-keyframes sync {
   from { transform: rotate(359deg); }
   to { transform: rotate(0deg); }

@@ -74,7 +74,7 @@ export class BluetoothService {
   public discoverableStartedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => discoverable).mapTo(null);
   public discoverableFinishedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => !discoverable).mapTo(null);
 
-  public onMessage: Subject<string> = new Subject<string>();
+  public message: Subject<string> = new Subject<string>();
 
   private deviceRelatedChange = combineLatest(
     this.enabled.filter(enabled => enabled),
@@ -111,7 +111,7 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setMessageCallback((message) => this.ngZone.run(() => {
-      this.onMessage.next(message);
+      this.message.next(message);
     }));
 
     cordova.plugins.bluetooth.setStateCallback((state) => this.ngZone.run(() => {
