@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnInit } from '@angular/core';
+import {AfterViewInit, Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
@@ -14,7 +14,7 @@ declare const Utils: any;
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
-export class NfcComponent implements AfterViewInit, OnInit {
+export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
   _nfc = '';
   entry = 'Sign in';
@@ -32,6 +32,8 @@ export class NfcComponent implements AfterViewInit, OnInit {
   isRepeatable = false;
   canScanAgain = false;
   classNfcContainer = '';
+
+  timer: any;
 
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
@@ -104,8 +106,12 @@ export class NfcComponent implements AfterViewInit, OnInit {
     this.timeout();
   }
 
+  ngOnDestroy() {
+    clearTimeout(this.timer);
+  }
+
   timeout() {
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.checkState();
       this.timeout();
     }, 100);
@@ -115,12 +121,10 @@ export class NfcComponent implements AfterViewInit, OnInit {
       nfc.enabled(function () {
         this.ngZone.run(async () => {
           this.disabledNFC = false;
-          console.log(this.disabledNFC);
         });
       }.bind(this), function () {
         this.ngZone.run(async () => {
           this.disabledNFC = true;
-          console.log(this.disabledNFC);
         });
       }.bind(this));
   }

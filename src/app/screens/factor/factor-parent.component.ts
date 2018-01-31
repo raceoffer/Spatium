@@ -1,5 +1,5 @@
 import {Component, NgZone, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-factor',
@@ -12,9 +12,7 @@ export class FactorParentComponent implements OnInit {
   back: string = null;
 
 
-  constructor(private readonly router: Router,
-              private route: ActivatedRoute,
-              private ngZone: NgZone) {
+  constructor(private route: ActivatedRoute) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];

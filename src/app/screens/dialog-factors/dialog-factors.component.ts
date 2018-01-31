@@ -1,8 +1,7 @@
 import {Component, Inject, NgZone} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Router } from '@angular/router';
-import {AuthService} from "../../services/auth.service";
-
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-dialog-factors',

@@ -14,17 +14,17 @@ export class LoginParentComponent implements OnInit {
   ngOnInit() {
   }
 
-  toggleContent(type){
+  toggleContent(type) {
     this.currentType = type;
-    switch (type){
-      case 0:{
-
+    switch (type) {
+      case 0: {
+        break;
       }
-      case 1:{
-
+      case 1: {
+        break;
       }
-      case 2:{
-
+      case 2: {
+        break;
       }
     }
   }

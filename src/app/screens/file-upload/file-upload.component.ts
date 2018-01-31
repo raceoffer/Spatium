@@ -1,10 +1,10 @@
 import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService, FactorType} from "../../services/auth.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthService, FactorType} from '../../services/auth.service';
 
 @Component({
   selector: 'app-file-upload',
-  host: {'class':'child'},
+  host: {'class': 'child'},
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
@@ -16,7 +16,7 @@ export class FileUploadComponent implements AfterViewInit {
   next: string = null;
   back: string = null;
 
-  _file:string = null;
+  _file: string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -39,13 +39,13 @@ export class FileUploadComponent implements AfterViewInit {
   onUploadFileClick(event) {
     event.preventDefault();
 
-    var file = event.srcElement.files[0];
+    const file = event.srcElement.files[0];
     this.readFile(file);
   }
 
   readFile (file) {
-    let chunk = file.slice(0, 32);
-    let reader = new FileReader();
+    const chunk = file.slice(0, 32);
+    const reader = new FileReader();
     const self = this;
 
     reader.onloadend = function () {
@@ -54,7 +54,7 @@ export class FileUploadComponent implements AfterViewInit {
       self._file = string;
 
       self.goNext();
-    }
+    };
 
     reader.readAsArrayBuffer(chunk);
   }

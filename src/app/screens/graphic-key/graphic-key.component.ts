@@ -1,15 +1,14 @@
 import {AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService, FactorType} from "../../services/auth.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthService, FactorType} from '../../services/auth.service';
 import * as PatternLock from 'PatternLock';
 
 @Component({
   selector: 'app-graphic-key',
-  host: {'class':'child'},
+  host: {'class': 'child'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })
-//let pl:PatternLock = new PatternLock();
 
 export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
 
@@ -37,18 +36,16 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
     this._graphKey = '';
   }
 
-  ngAfterContentInit(){
-    const self = this;
-    let lock =  new PatternLock(this.el.nativeElement,{
-      onDraw:function(pattern){
-        console.log(pattern)
+  ngAfterContentInit() {
+    const lock =  new PatternLock(this.el.nativeElement, {
+      onDraw: function(pattern){
+        console.log(pattern);
         this._graphKey = pattern;
         this.goNext();
       }.bind(this)
     });
 
-    console.log(lock)
-
+    console.log(lock);
   }
 
   goNext(): void {
