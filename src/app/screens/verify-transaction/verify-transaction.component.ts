@@ -6,7 +6,7 @@ import { WalletService } from '../../services/wallet.service';
 declare const bcoin: any;
 
 @Component({
-  selector: 'app-connect',
+  selector: 'app-verify-transaction',
   templateUrl: './verify-transaction.component.html',
   styleUrls: ['./verify-transaction.component.css']
 })
@@ -18,12 +18,12 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   rateBtcUsd = 15000;
   usd;
 
-  enableBTmessage = 'Allow device discovery to proceed';
+  enableBTmessage = 'Enable Bluetooth to proceed';
   enabled = this.bt.enabled;
   discoverable = this.bt.discoverable;
 
-  synching = false;
-  ready = false;
+  synchronizing = this.wallet.synchronizing;
+  ready = this.wallet.ready;
 
   constructor(private route: ActivatedRoute,
               private bt: BluetoothService,
@@ -32,43 +32,32 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
 
   async ngOnInit() {
     await this.bt.disconnect();
-    this.wallet.onFinish.subscribe(() => this.ngZone.run(async () => {
+    this.wallet.readyEvent.subscribe(() => this.ngZone.run(async () => {
       console.log(this.wallet.address.getValue());
-      this.ready = true;
-      this.synching = false;
     }));
-    this.wallet.onCancelled.subscribe(async () => {
+    this.wallet.cancelledEvent.subscribe(async () => {
       await this.bt.disconnect();
-      this.synching = false;
-      this.ready = false;
     });
-    this.wallet.onFailed.subscribe(async () => {
+    this.wallet.failedEvent.subscribe(async () => {
       await this.bt.disconnect();
-      this.synching = false;
-      this.ready = false;
     });
+    this.bt.enabledEvent.subscribe(() => this.ngZone.run(async () => {
+      await this.bt.ensureListening();
+    }));
     this.bt.disabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.wallet.cancelSync();
-    }));
-    this.bt.discoverableStartedEvent.subscribe(() => this.ngZone.run(async () => {
-      await this.bt.ensureListening();
     }));
     this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
       console.log('Connected to', this.bt.connectedDevice.getValue());
       await this.wallet.startSync();
-      this.synching = true;
-      this.ready = false;
     }));
     this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+      console.log('Disconnected');
       await this.wallet.cancelSync();
-      this.synching = false;
-      this.ready = false;
     }));
   }
 
   async ngAfterViewInit() {
-    this.synching = false;
-    this.ready = false;
     this.showTransaction = false;
 
     this.route.queryParams.subscribe(params => {
@@ -87,8 +76,8 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       console.log(this.usd);
     }));
 
-    if (!this.bt.discoverable.getValue()) {
-      await this.bt.enableDiscovery();
+    if (!this.bt.enabled.getValue()) {
+      await this.bt.requestEnable();
     } else {
       await this.bt.ensureListening();
     }
@@ -106,7 +95,11 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     await this.wallet.rejectTransaction();
   }
 
-  async changeBtState() {
+  async enableBluetooth() {
+    await this.bt.requestEnable();
+  }
+
+  async enableDiscoverable() {
     await this.bt.enableDiscovery();
   }
 }

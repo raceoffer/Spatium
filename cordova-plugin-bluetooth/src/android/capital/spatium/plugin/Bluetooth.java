@@ -98,6 +98,9 @@ public class Bluetooth extends CordovaPlugin {
     } else if ("getState".equals(action)) {
       getState(callbackContext);
       return true;
+    } else if ("getDiscoverable".equals(action)) {
+      getDiscoverable(callbackContext);
+      return true;
     } else if ("getListening".equals(action)) {
       getListening(callbackContext);
       return true;
@@ -193,6 +196,16 @@ public class Bluetooth extends CordovaPlugin {
     PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothAdapter.getState());
     callbackContext.sendPluginResult(result);
   }
+
+  private void getDiscoverable(final CallbackContext callbackContext) {
+      if(mBluetoothAdapter == null) {
+        callbackContext.error("Bluetooth is not supported");
+        return;
+      }
+
+      PluginResult result = new PluginResult(PluginResult.Status.OK, mBluetoothAdapter.getScanMode() == SCAN_MODE_CONNECTABLE_DISCOVERABLE);
+      callbackContext.sendPluginResult(result);
+    }
 
   private void setStateCallback(CallbackContext callbackContext) {
     mStateCallback = callbackContext;

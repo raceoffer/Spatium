@@ -20,7 +20,7 @@ declare const Transaction: any;
 declare const Utils: any;
 declare const KeyChain: any;
 
-export enum Status {
+export enum SynchronizationStatus {
   None = 0,
   Started,
   InitialCommitment,
@@ -43,8 +43,16 @@ export enum TransactionStatus {
   Failed
 }
 
+export enum Status {
+  None = 0,
+  Cancelled,
+  Failed,
+  Synchronizing,
+  Ready
+}
+
 class SyncSession {
-  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
+  public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
 
   private initialCommitmentObserver:    Observable<any>;
   private initialDecommitmentObserver:  Observable<any>;
@@ -112,19 +120,19 @@ class SyncSession {
   public async sync() {
     const handleFailure = (message, exception) => {
       LoggerService.nonFatalCrash(message, exception);
-      this.status.next(Status.Finished);
+      this.status.next(SynchronizationStatus.Finished);
       this.failed.emit();
       throw new Error(message);
     };
 
     const handleCancel = () => {
       LoggerService.log('Cancelled', {});
-      this.status.next(Status.Finished);
+      this.status.next(SynchronizationStatus.Finished);
       this.canceled.emit();
       throw new Error('Cancelled');
     };
 
-    this.status.next(Status.Started);
+    this.status.next(SynchronizationStatus.Started);
     let initialCommitment = null;
     try {
       initialCommitment = this.prover.getInitialCommitment();
@@ -145,7 +153,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.InitialCommitment);
+    this.status.next(SynchronizationStatus.InitialCommitment);
     LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     let initialDecommitment = null;
     try {
@@ -167,7 +175,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.InitialDecommitment);
+    this.status.next(SynchronizationStatus.InitialDecommitment);
     LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     let verifier = null;
     try {
@@ -191,7 +199,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.VerifierCommitment);
+    this.status.next(SynchronizationStatus.VerifierCommitment);
     LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     let proverCommitment = null;
     try {
@@ -213,7 +221,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.ProverCommitment);
+    this.status.next(SynchronizationStatus.ProverCommitment);
     LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
     let verifierDecommitment = null;
     try {
@@ -235,7 +243,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.VerifierDecommitment);
+    this.status.next(SynchronizationStatus.VerifierDecommitment);
     LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     let proverDecommitment = null;
     try {
@@ -257,7 +265,7 @@ class SyncSession {
       return handleCancel();
     }
 
-    this.status.next(Status.ProverDecommitment);
+    this.status.next(SynchronizationStatus.ProverDecommitment);
     LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     let verifiedData = null;
     try {
@@ -266,7 +274,7 @@ class SyncSession {
       return handleFailure('Failed to process remoteProverDecommitment', e);
     }
 
-    this.status.next(Status.Finished);
+    this.status.next(SynchronizationStatus.Finished);
     this.finished.emit(verifiedData);
 
     return verifiedData;
@@ -461,9 +469,6 @@ export class WalletService {
 
   private routineTimer: any = null;
 
-  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
-
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(2);
 
   private syncSession: SyncSession = null;
@@ -473,11 +478,21 @@ export class WalletService {
 
   public seed: any = null;
 
-  public onBalance: EventEmitter<any> = new EventEmitter<any>();
-  public onStatus: EventEmitter<Status> = new EventEmitter<Status>();
-  public onFinish: EventEmitter<any> = new EventEmitter<any>();
-  public onCancelled: EventEmitter<any> = new EventEmitter<any>();
-  public onFailed: EventEmitter<any> = new EventEmitter<any>();
+  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+
+  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
+  public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+
+  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
+
+  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
+  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
+  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
+  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
 
   public onVerifyTransaction: EventEmitter<any> = new EventEmitter<any>();
   public onSigned: EventEmitter<any> = new EventEmitter<any>();
@@ -487,9 +502,11 @@ export class WalletService {
   constructor(private bt: BluetoothService) {
     bcoin.set(this.network);
 
-    this.bt.onMessage.subscribe((message) => {
+    this.bt.message.subscribe((message) => {
       this.messageSubject.next(JSON.parse(message));
     });
+
+    this.bt.disconnectedEvent.subscribe(() => this.status.next(Status.None));
 
     this.messageSubject
       .filter(object => object.type === 'verifyTransaction')
@@ -502,13 +519,17 @@ export class WalletService {
         );
       });
 
+    this.status.subscribe(status => this.synchronizing.next(status === Status.Synchronizing));
+    this.status.subscribe(status => this.ready.next(status === Status.Ready));
+    this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
+
     this.walletDB = new bcoin.walletdb({
       db: 'memory'
     });
   }
 
   public startSync() {
-    if (this.syncSession && this.syncSession.status.getValue() !== Status.Finished) {
+    if (this.synchronizing.getValue()) {
       LoggerService.log('Sync in progress', {});
       return;
     }
@@ -531,23 +552,28 @@ export class WalletService {
       return;
     }
 
+    this.status.next(Status.Synchronizing);
     this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
-    this.syncSession.status.subscribe(state => this.onStatus.emit(state));
+    this.syncSession.status.subscribe(state => {
+      this.syncProgress.next(
+        Math.max(Math.min(Math.round(state * 100 / (SynchronizationStatus.Finished - SynchronizationStatus.None + 1)), 100), 0)
+      );
+    });
     this.syncSession.canceled.subscribe(() => {
       console.log('received cancel event');
       // pop the queue
       this.messageSubject.next({});
       this.messageSubject.next({});
+      this.status.next(Status.Cancelled);
       this.syncSession = null;
-      this.onCancelled.emit();
     });
     this.syncSession.failed.subscribe(() => {
       console.log('received failed event');
       // pop the queue
       this.messageSubject.next({});
       this.messageSubject.next({});
+      this.status.next(Status.Failed);
       this.syncSession = null;
-      this.onFailed.emit();
     });
     this.syncSession.finished.subscribe(async (data) => {
       console.log('received finished event');
@@ -658,14 +684,12 @@ export class WalletService {
       });
     });
     this.signSession.canceled.subscribe(async () => {
-      console.log('canceled');
       this.messageSubject.next({});
       this.messageSubject.next({});
       this.signSession = null;
       this.onRejected.emit();
     });
     this.signSession.failed.subscribe(async () => {
-      console.log('failed');
       this.messageSubject.next({});
       this.messageSubject.next({});
       this.signSession = null;
@@ -773,9 +797,7 @@ export class WalletService {
 
     // End: configuring a provider
 
-    console.log('Sync done');
-
-    this.onFinish.emit();
+    this.status.next(Status.Ready);
   }
 }
 

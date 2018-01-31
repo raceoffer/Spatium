@@ -4,6 +4,7 @@ import { LoggerService } from './logger.service';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 import 'rxjs/add/operator/mapTo';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -40,6 +41,7 @@ export class BluetoothService {
   public discoverable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   public connectedDevice: BehaviorSubject<Device> = new BehaviorSubject<Device>(null);
+  public pairedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
   public discoveredDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
 
   public enabledChanged: Observable<boolean> = this.enabled.skip(1).distinctUntilChanged();
@@ -47,8 +49,18 @@ export class BluetoothService {
   public discoveringChanged: Observable<boolean> = this.discovering.skip(1).distinctUntilChanged();
   public discoverableChanged: Observable<boolean> = this.discoverable.skip(1).distinctUntilChanged();
 
-  public connectedDeviceChanged: Observable<Device> = this.connectedDevice.skip(1).distinctUntilChanged();
-  public discoveredDevicesChanged: Observable<Array<Device>> = this.discoveredDevices.skip(1).distinctUntilChanged();
+  public connectedDeviceChanged: Observable<Device> = this.connectedDevice.skip(1)
+    .distinctUntilChanged((x, y) => x.name === y.name && x.address === y.address);
+
+  public discoveredDevicesChanged: Observable<Array<Device>> = this.discoveredDevices.skip(1)
+    .distinctUntilChanged((x, y) =>
+      x.length === y.length &&
+      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
+
+  public pairedDevicesChanged: Observable<Array<Device>> = this.pairedDevices.skip(1)
+    .distinctUntilChanged((x, y) =>
+      x.length === y.length &&
+      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
 
   public enabledEvent: Observable<any> = this.enabledChanged.filter(enabled => enabled).mapTo(null);
   public disabledEvent: Observable<any> = this.enabledChanged.filter(enabled => !enabled).mapTo(null);
@@ -62,19 +74,28 @@ export class BluetoothService {
   public discoverableStartedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => discoverable).mapTo(null);
   public discoverableFinishedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => !discoverable).mapTo(null);
 
-  public onMessage: Subject<string> = new Subject<string>();
+  public message: Subject<string> = new Subject<string>();
+
+  private deviceRelatedChange = combineLatest(
+    this.enabled.filter(enabled => enabled),
+    this.connected,
+    this.discovering
+  );
 
   constructor(private ngZone: NgZone) {
     this.state.subscribe(state => this.enabled.next(state === State.ON));
     this.connectedDevice.subscribe(device => this.connected.next(device !== null));
 
+    this.deviceRelatedChange.subscribe(() => this.ngZone.run(async () => {
+      const devices = await cordova.plugins.bluetooth.listPairedDevices();
+      this.pairedDevices.next(devices.map((device => Device.fromJSON(device))));
+    }));
+
+    this.discoveryStartedEvent.subscribe(() => this.discoveredDevices.next([]));
+
     cordova.plugins.bluetooth.setConnectedCallback((device) => this.ngZone.run(async () => {
       this.connectedDevice.next(device ? Device.fromJSON(device) : null);
       await cordova.plugins.bluetooth.startReading();
-    }));
-
-    cordova.plugins.bluetooth.setDiscoverableCallback((discoverable) => this.ngZone.run(() => {
-      this.discoverable.next(discoverable);
     }));
 
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
@@ -86,7 +107,15 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setMessageCallback((message) => this.ngZone.run(() => {
-      this.onMessage.next(message);
+      this.message.next(message);
+    }));
+
+    cordova.plugins.bluetooth.setDiscoverableCallback((discoverable) => this.ngZone.run(() => {
+      this.discoverable.next(discoverable);
+    }));
+
+    cordova.plugins.bluetooth.getDiscoverable().then((discoverable) => this.ngZone.run(() => {
+      this.discoverable.next(discoverable);
     }));
 
     cordova.plugins.bluetooth.setStateCallback((state) => this.ngZone.run(() => {
@@ -161,7 +190,7 @@ export class BluetoothService {
   }
 
   async startDiscovery() {
-    this.discoveredDevices.next([]);
+    await this.cancelDiscovery();
     await cordova.plugins.bluetooth.startDiscovery();
   }
 

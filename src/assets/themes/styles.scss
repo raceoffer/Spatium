@@ -359,6 +359,12 @@ body, buttons, html, input, textarea {
   height: 40px;
 }
 
+.button-imitator-large{
+  font-size: 40px;
+  width: 40px !important;
+  height: 40px !important;
+}
+
 @-webkit-keyframes sync {
   from { transform: rotate(359deg); }
   to { transform: rotate(0deg); }
