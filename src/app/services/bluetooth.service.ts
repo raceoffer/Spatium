@@ -98,10 +98,6 @@ export class BluetoothService {
       await cordova.plugins.bluetooth.startReading();
     }));
 
-    cordova.plugins.bluetooth.setDiscoverableCallback((discoverable) => this.ngZone.run(() => {
-      this.discoverable.next(discoverable);
-    }));
-
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
       this.discoveredDevices.next(this.discoveredDevices.getValue().concat([Device.fromJSON(device)]));
     }));
@@ -112,6 +108,14 @@ export class BluetoothService {
 
     cordova.plugins.bluetooth.setMessageCallback((message) => this.ngZone.run(() => {
       this.message.next(message);
+    }));
+
+    cordova.plugins.bluetooth.setDiscoverableCallback((discoverable) => this.ngZone.run(() => {
+      this.discoverable.next(discoverable);
+    }));
+
+    cordova.plugins.bluetooth.getDiscoverable().then((discoverable) => this.ngZone.run(() => {
+      this.discoverable.next(discoverable);
     }));
 
     cordova.plugins.bluetooth.setStateCallback((state) => this.ngZone.run(() => {
