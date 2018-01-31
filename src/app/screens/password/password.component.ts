@@ -1,9 +1,10 @@
 import { AfterViewInit, Component, Input, NgZone } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthService, FactorType} from '../../services/auth.service';
 
 @Component({
   selector: 'app-password',
+  host: {'class': 'child'},
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })

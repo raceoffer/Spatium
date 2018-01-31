@@ -11,6 +11,7 @@ declare const window: any;
 
 @Component({
   selector: 'app-pincode',
+  host: {'class':'child'},
   templateUrl: './pincode.component.html',
   styleUrls: ['./pincode.component.css']
 })

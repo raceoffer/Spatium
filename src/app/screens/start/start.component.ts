@@ -29,6 +29,6 @@ export class StartComponent {
       this.notification.show('No stored seed found');
     }
 
-    await this.router.navigate(['/pincode', { next: 'waiting', back: 'start' }]);
+    await this.router.navigate(['/factor', { back: 'start' }, {outlets: {'factor': ['pincode', {next: 'waiting'}]}}]);
   }
 }

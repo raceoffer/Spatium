@@ -7,6 +7,7 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-graphic-key',
+  host: {'class': 'child'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })
@@ -37,18 +38,16 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
     this._graphKey = '';
   }
 
-  ngAfterContentInit(){
-    const self = this;
-    let lock =  new PatternLock(this.el.nativeElement,{
-      onDraw:function(pattern){
-        console.log(pattern)
-        self._graphKey = pattern;
-        self.goNext();
-      }
+  ngAfterContentInit() {
+    const lock =  new PatternLock(this.el.nativeElement, {
+      onDraw: function(pattern){
+        console.log(pattern);
+        this._graphKey = pattern;
+        this.goNext();
+      }.bind(this)
     });
 
-    console.log(lock)
-
+    console.log(lock);
   }
 
   goNext(): void {
