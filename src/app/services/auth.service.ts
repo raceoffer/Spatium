@@ -26,7 +26,7 @@ export class AuthService {
       FactorIconAsset.NFC, FactorLink.NFC, 'auth', 'auth'));
   }
 
-  getAllAvailableFactors(){
+  getAllAvailableFactors() {
     return this.available;
   }
 
@@ -113,7 +113,7 @@ export class AuthService {
     next: string;
     back: string;
 
-    constructor(type, name, icon, icon_asset, link, next, back){
+    constructor(type, name, icon, icon_asset, link, next, back) {
       this.type = type;
       this.name = name;
       this.icon = icon;
@@ -125,7 +125,7 @@ export class AuthService {
   }
 
   export class Factor {
-    type: FactorType;û
+    type: FactorType;
     icon: string;
     icon_asset: string;
     value: string;

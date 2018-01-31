@@ -1,7 +1,7 @@
 <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledNFC">
 
   <div class="connect-text">
-    <span>{{enableNFCmessage}}</span>
+    <span>{{ enableNFCmessage }}</span>
   </div>
 
   <button mat-fab  class="width-button">
@@ -18,12 +18,12 @@
     font-size: 200px;" class="pulse">nfc</mat-icon>
   </div>
 
-  <span class="overlay-bottom-center">{{text}}</span>
+  <span class="overlay-bottom-center">{{ text }}</span>
 
 </div>
 
 <div fxLayout="column" fxLayoutAlign="center center" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
   <button mat-button color="accent" style="margin-bottom: 20px" (click)="scanAgain()">Scan again</button>
-  <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess">{{entry}}</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess">{{ entry }}</button>
   <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="isCheckingInProcess"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
 </div>

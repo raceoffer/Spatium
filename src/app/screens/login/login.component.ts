@@ -1,4 +1,4 @@
-import {Component, Input, AfterViewInit, OnInit} from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
@@ -8,39 +8,43 @@ declare const Utils: any;
 
 @Component({
   selector: 'app-login',
-  host: {'class':'child'},
+  host: {'class': 'child'},
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 
-export class LoginComponent implements AfterViewInit, OnInit{
+export class LoginComponent implements AfterViewInit, OnInit {
+  private _userName = '';
+
   entry = 'Sign in';
-  buttonState = 0; //sign in = 0, sign up = 1
+  buttonState = 0;
   stLogin = 'Username';
-  userName = '';
   isDisable = true;
   isCheckingInProcess = false;
   timer;
 
-  ngOnInit(){
-    this.isCheckingInProcess = false;
+  static async isEthernetAvailable() {
+    return await Utils.testNetwork();
   }
 
-  ngAfterViewInit() {
-    this._userName = '';
+  ngOnInit() {
+    this.isCheckingInProcess = false;
   }
 
   ngAfterViewInit() {
     this.userName = '';
   }
 
-  @Input()
-  set UserName(newUserName) {
+  get userName() {
+    return this._userName;
+  }
+
+  set userName(newUserName) {
     this._userName = newUserName;
-    if (this._userName.length > 0){
+    if (this._userName.length > 0) {
       this.isDisable = false;
       console.log(this.isDisable);
-      if (this.timer){
+      if (this.timer) {
         clearTimeout(this.timer);
       }
       this.timer = this.timeout();
@@ -56,10 +60,6 @@ export class LoginComponent implements AfterViewInit, OnInit{
     }, 1000);
   }
 
-  static async isEthernetAvailable() {
-    return await Utils.testNetwork();
-  }
-
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
@@ -67,8 +67,7 @@ export class LoginComponent implements AfterViewInit, OnInit{
     private readonly notification: NotificationService
   ) { }
 
-  async checkingLogin(){
-    //logic for buttonState 0 and 1;
+  async checkingLogin() {
     this.isCheckingInProcess = true;
     await this.delay(5000);
     this.entry = 'Sign Up';
@@ -80,8 +79,7 @@ export class LoginComponent implements AfterViewInit, OnInit{
   }
 
   async letLogin() {
-    //logic for buttonState 0 and 1;
-    if(this._userName != '') {
+    if (this.userName !== '') {
       if (await LoginComponent.isEthernetAvailable()) {
         this.authService.login = this.userName;
         this.authService.clearFactors();
