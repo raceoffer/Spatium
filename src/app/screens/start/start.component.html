@@ -7,11 +7,11 @@
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
     <button mat-raised-button color="accent" class="width-button color"
-            [disabled]="inProgress" (click)="onOpenClicked()">Open Wallet</button>
+            (click)="onOpenClicked()">Open Wallet</button>
     <button mat-raised-button color="accent" class="width-button color"
-            [disabled]="inProgress" (click)="onConnectClicked()">Link Device</button>
+            (click)="onConnectClicked()">Link Device</button>
 
-    <div class="progress small buttons-progress" *ngIf="inProgress"></div>
+    <div class="progress small buttons-progress"></div>
   </div>
 
 </div>
