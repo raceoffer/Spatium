@@ -506,6 +506,8 @@ export class WalletService {
       this.messageSubject.next(JSON.parse(message));
     });
 
+    this.bt.disconnectedEvent.subscribe(() => this.status.next(Status.None));
+
     this.messageSubject
       .filter(object => object.type === 'verifyTransaction')
       .map(object => object.content)

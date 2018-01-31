@@ -18,7 +18,7 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   rateBtcUsd = 15000;
   usd;
 
-  enableBTmessage = 'Allow device discovery to proceed';
+  enableBTmessage = 'Enable Bluetooth to proceed';
   enabled = this.bt.enabled;
   discoverable = this.bt.discoverable;
 
@@ -41,17 +41,18 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     this.wallet.failedEvent.subscribe(async () => {
       await this.bt.disconnect();
     });
+    this.bt.enabledEvent.subscribe(() => this.ngZone.run(async () => {
+      await this.bt.ensureListening();
+    }));
     this.bt.disabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.wallet.cancelSync();
-    }));
-    this.bt.discoverableStartedEvent.subscribe(() => this.ngZone.run(async () => {
-      await this.bt.ensureListening();
     }));
     this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
       console.log('Connected to', this.bt.connectedDevice.getValue());
       await this.wallet.startSync();
     }));
     this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+      console.log('Disconnected');
       await this.wallet.cancelSync();
     }));
   }
@@ -75,8 +76,8 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
       console.log(this.usd);
     }));
 
-    if (!this.bt.discoverable.getValue()) {
-      await this.bt.enableDiscovery();
+    if (!this.bt.enabled.getValue()) {
+      await this.bt.requestEnable();
     } else {
       await this.bt.ensureListening();
     }
@@ -95,6 +96,10 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
   }
 
   async enableBluetooth() {
+    await this.bt.requestEnable();
+  }
+
+  async enableDiscoverable() {
     await this.bt.enableDiscovery();
   }
 }
