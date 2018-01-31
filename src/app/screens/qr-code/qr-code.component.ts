@@ -1,10 +1,11 @@
-import {AfterContentInit, Component, ElementRef, NgZone, OnInit, ViewChild,} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
 import {FileService} from "../../services/file.service";
 import {NotificationService} from "../../services/notification.service";
 
 declare const Utils: any;
+declare const cordova: any;
 
 @Component({
   selector: 'app-qr-code',
@@ -12,13 +13,13 @@ declare const Utils: any;
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements OnInit, AfterContentInit {
+export class QrCodeComponent implements OnInit {
 
   entry = 'Sign in';
   buttonState = 0; //sign in = 0, sign up = 1
-  isDisable = false;
+  isDisable = false;//button state
 
-  _qrcode = '';
+  _qrcode: string = null;
   isRepeatable = false;
   canScanAgain = false;
   isCheckingInProcess = true;
@@ -33,8 +34,7 @@ export class QrCodeComponent implements OnInit, AfterContentInit {
   availableDevices = [];
   text = 'Scan a QR-code';
   spinnerClass = '';
-
-  @ViewChild('videoContainer') el: ElementRef;
+  permissionCam = false;
 
   constructor(private route: ActivatedRoute,
               private router: Router,
@@ -61,12 +61,46 @@ export class QrCodeComponent implements OnInit, AfterContentInit {
     this.classVideoContainer = '';
     this._qrcode = '';
     this.classVideo = 'small-video';
-    this.spinnerClass = 'small-video-container';
+    this.spinnerClass = 'spinner-video-container';
+
+    var permissions = cordova.plugins.permissions;
+    permissions.hasPermission(permissions.CAMERA, function( status ){
+      if ( status.hasPermission ) {
+        this.ngZone.run(async () => {
+          this.permissionCam = true;
+        })
+      }
+      else {
+        this.ngZone.run(async () => {
+          this.permissionCam = false;
+        })
+
+        var permissions = cordova.plugins.permissions;
+        permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error);
+      }
+    }.bind(this));
   }
 
-  ngAfterContentInit() {
+  addVideoContainer(){
     let el = document.querySelector('video');
     el.setAttribute('poster', '#');
+  }
+
+  error() {
+    console.warn('Camera permission is not turned on');
+  }
+
+  success( status ) {
+    if( !status.hasPermission ) {
+      console.warn('Camera permission is not turned on');
+      this.ngZone.run(async () => {
+        this.permissionCam = false;
+      })
+    } else {
+      this.ngZone.run(async () => {
+        this.permissionCam = true;
+      })
+    }
   }
 
   displayCameras(cams: any[]){
@@ -144,5 +178,5 @@ export class QrCodeComponent implements OnInit, AfterContentInit {
     }
     this.isDisable = false;
   }
-
 }
+

@@ -15,6 +15,7 @@
     "cordova-custom-config": "^5.0.2",
     "cordova-fabric-plugin": "^1.1.10",
     "cordova-ios": "^4.5.4",
+    "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-vibration": "^3.0.1",
@@ -36,7 +37,8 @@
       "phonegap-nfc": {
         "NFC_USAGE_DESCRIPTION": "Read NFC Tags"
       },
-      "cordova-plugin-vibration": {}
+      "cordova-plugin-vibration": {},
+      "cordova-plugin-android-permissions": {}
     },
     "platforms": [
       "ios",

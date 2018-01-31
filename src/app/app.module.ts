@@ -50,6 +50,7 @@ import { NfcComponent } from './screens/nfc/nfc.component';
 import { NgxZxingModule } from 'ngx-zxing';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
+import { NgInitDirective } from './ng-init.directive';
 
 
 
@@ -73,7 +74,8 @@ import { LoginParentComponent } from './screens/login-parent/login-parent.compon
     QrCodeComponent,
     NfcComponent,
     FactorParentComponent,
-    LoginParentComponent
+    LoginParentComponent,
+    NgInitDirective
   ],
   imports: [
     FormsModule,

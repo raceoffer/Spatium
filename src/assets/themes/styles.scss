@@ -27,6 +27,16 @@ $green: rgb(24, 154, 57);//#189a39
   height: 300px;
 }
 
+.spinner-video-container {
+  position: fixed;
+  z-index: 3;
+  background-color: $white;
+  width: 300px;
+  overflow: hidden;
+  display: block;
+  height: 300px;
+}
+
 .small-video {
   width: 300px;
   margin-top: -50px;

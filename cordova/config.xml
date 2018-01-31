@@ -55,4 +55,5 @@
         <variable name="NFC_USAGE_DESCRIPTION" value="Read NFC Tags" />
     </plugin>
     <plugin name="cordova-plugin-vibration" spec="^3.0.1" />
+    <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
 </widget>
