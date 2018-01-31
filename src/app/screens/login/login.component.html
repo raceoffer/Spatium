@@ -1,25 +1,16 @@
 <div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
 
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
+  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center" (submit)="letLogin()">
 
-  <form class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" (submit)="letLogin()">
     <div class="spatium-textfield entry bottom32">
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName">
     </div>
 
-    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="userName.length < 1" (click)="letLogin()">{{entry}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess && _userName.length > 0">{{entry}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="isCheckingInProcess && _userName.length > 0"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
   </form>
+
+  <router-outlet name="login"></router-outlet>
 
 </div>
 

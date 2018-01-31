@@ -51,4 +51,9 @@
         <variable name="FABRIC_API_SECRET" value="e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267" />
     </plugin>
     <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
+    <plugin name="phonegap-nfc" spec="^0.7.1">
+        <variable name="NFC_USAGE_DESCRIPTION" value="Read NFC Tags" />
+    </plugin>
+    <plugin name="cordova-plugin-vibration" spec="^3.0.1" />
+    <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
 </widget>

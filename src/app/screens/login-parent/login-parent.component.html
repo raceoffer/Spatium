@@ -1,0 +1,37 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="entry-margin start-logo-text" >
+  </div>
+  <div class="start-tagline-padding">
+    <span class="start-tagline">Secure your funds</span>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 100%;" class="start-tagline-padding">
+    <button mat-icon-button class="fab" (click)="toggleContent(0)">
+      <mat-icon class="size-40" color="accent" *ngIf="currentType == 0">text_fields</mat-icon>
+      <mat-icon class="size-40" *ngIf="currentType != 0">text_fields</mat-icon>
+    </button>
+    <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(1)">
+      <div class="qr-code-blue" *ngIf="currentType == 1"></div>
+      <div class="qr-code-black" *ngIf="currentType != 1"></div>
+    </button>
+    <button mat-icon-button class="fab" (click)="toggleContent(2)">
+      <mat-icon class="size-40" color="accent" *ngIf="currentType == 2">nfc</mat-icon>
+      <mat-icon class="size-40" *ngIf="currentType != 2">nfc</mat-icon>
+    </button>
+  </div>
+
+  <app-login *ngIf="currentType == 0"></app-login>
+  <app-qr-code *ngIf="currentType == 1"></app-qr-code>
+  <app-nfc *ngIf="currentType == 2"></app-nfc>
+
+</div>
+
+

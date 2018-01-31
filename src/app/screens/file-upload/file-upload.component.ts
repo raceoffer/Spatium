@@ -4,6 +4,7 @@ import {AuthService, FactorType} from "../../services/auth.service";
 
 @Component({
   selector: 'app-file-upload',
+  host: {'class':'child'},
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })

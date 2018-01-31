@@ -4,6 +4,8 @@ import {Injectable} from '@angular/core';
 @Injectable()
 export class AuthService {
   login: string;
+  qr: string;
+  nfc: string;
   factors: Factor[] = [];
   available: AvailableFactor[] = [];
 
@@ -81,7 +83,7 @@ export class AuthService {
     FILE = 'insert_drive_file',
     GRAPHIC_KEY = '',
     QR = '',
-    NFC = 'wifi'
+    NFC = 'nfc'
   }
 
   export enum FactorIconAsset {
@@ -94,12 +96,12 @@ export class AuthService {
   }
 
   export enum FactorLink {
-    PIN = '/pincode',
-    PASSWORD = '/password',
-    FILE = '/file-upload',
-    GRAPHIC_KEY = '/graphic-key',
-    QR = '/qr-code',
-    NFC = '/nfc'
+    PIN = 'pincode',
+    PASSWORD = 'password',
+    FILE = 'file-upload',
+    GRAPHIC_KEY = 'graphic-key',
+    QR = 'qr-code',
+    NFC = 'nfc'
   }
 
   export class AvailableFactor {
@@ -123,7 +125,7 @@ export class AuthService {
   }
 
   export class Factor {
-    type: FactorType;Ñ‹
+    type: FactorType;û
     icon: string;
     icon_asset: string;
     value: string;

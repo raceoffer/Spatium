@@ -28,7 +28,7 @@ export class DialogFactorsComponent {
     this.dialogRef.close();
 
     this.ngZone.run(async () => {
-      await this.router.navigate([factor.link, { next: factor.next, back: factor.back }]);
+      await this.router.navigate(['/factor', { back: factor.back }, {outlets: {'factor': [factor.link, {next: factor.next}]}}]);
     });
   }
 

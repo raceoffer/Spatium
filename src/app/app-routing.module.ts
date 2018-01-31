@@ -14,23 +14,27 @@ import { FileUploadComponent } from './screens/file-upload/file-upload.component
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
+import {FactorParentComponent} from "./screens/factor/factor-parent.component";
+import {LoginParentComponent} from "./screens/login-parent/login-parent.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'verifyTransaction', component: VerifyTransactionComponent },
   { path: 'start', component: StartComponent },
   { path: 'auth', component: AuthComponent },
-  { path: 'pincode', component: PincodeComponent },
-  { path: 'password', component: PasswordComponent },
-  { path: 'file-upload', component: FileUploadComponent },
-  { path: 'graphic-key', component: GraphicKeyComponent },
-  { path: 'qr-code', component: QrCodeComponent },
-  { path: 'nfc', component: NfcComponent },
-  { path: 'login', component: LoginComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
+  { path: 'login', component: LoginParentComponent},
+  { path: 'factor', component: FactorParentComponent, children: [
+    { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
+    { path: 'password', component: PasswordComponent, outlet: 'factor' },
+    { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
+    { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
+    { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
+    { path: 'nfc', component: NfcComponent, outlet: 'factor' }
+  ]},
   { path: 'navigator', component: NavigatorComponent, children: [
-    { path: 'wallet', component: SendTransactionComponent, outlet: 'navigator' },
+    { path: 'wallet', component: SendTransactionComponent, outlet: 'navigator' }
   ]}
 ];
 
