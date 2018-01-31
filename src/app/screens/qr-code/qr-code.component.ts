@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, NgZone, ViewChild,} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
+import {AuthService, FactorType} from "../../services/auth.service";
 
 
 @Component({
@@ -69,7 +69,7 @@ export class QrCodeComponent implements AfterViewInit {
     this.camStarted = false;
 
      if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.QR, this._qrcode.toString());
+      this.authSevice.addFactor(FactorType.QR, this._qrcode.toString());
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

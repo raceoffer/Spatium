@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
+import {AuthService, FactorType} from "../../services/auth.service";
 
 @Component({
   selector: 'app-password',
@@ -54,7 +54,7 @@ export class PasswordComponent implements AfterViewInit {
   goNext(): void {
     if(this._passwordValue != '') {
       if (this.next && this.next === 'auth') {
-        this.authSevice.addFactor(AuthService.FactorType.PASSWORD, this._passwordValue.toString());
+        this.authSevice.addFactor(FactorType.PASSWORD, this._passwordValue.toString());
         this.ngZone.run(async () => {
           await this.router.navigate(['/auth']);
         });

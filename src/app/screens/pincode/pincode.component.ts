@@ -1,7 +1,7 @@
 import { Component, Input, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WalletService } from '../../services/wallet.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -82,7 +82,7 @@ export class PincodeComponent implements AfterViewInit {
         this.notification.show('Authorization error');
       }
     } else if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(AuthService.FactorType.PIN, this._pincode.toString());
+      this.authSevice.addFactor(FactorType.PIN, this._pincode.toString());
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

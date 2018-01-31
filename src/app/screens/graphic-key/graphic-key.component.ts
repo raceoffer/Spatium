@@ -1,6 +1,6 @@
 import {AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
+import {AuthService, FactorType} from "../../services/auth.service";
 import * as PatternLock from 'PatternLock';
 
 @Component({
@@ -53,7 +53,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   goNext(): void {
     if (this.next && this.next === 'auth') {
 
-      this.authSevice.addFactor( AuthService.FactorType.GRAPHIC_KEY, this._graphKey.toString());
+      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, this._graphKey.toString());
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });
