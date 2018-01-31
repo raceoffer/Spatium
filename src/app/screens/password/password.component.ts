@@ -1,6 +1,6 @@
-import {AfterViewInit, Component, Input, NgZone} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService, FactorType} from "../../services/auth.service";
+import { AfterViewInit, Component, Input, NgZone } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
 
 @Component({
   selector: 'app-password',
@@ -8,7 +8,6 @@ import {AuthService, FactorType} from "../../services/auth.service";
   styleUrls: ['./password.component.css']
 })
 export class PasswordComponent implements AfterViewInit {
-
   stContinue = 'Continue';
   stPassword = 'Password';
   _passwordValue = '';
@@ -38,7 +37,7 @@ export class PasswordComponent implements AfterViewInit {
   @Input()
   set Password(newPassword) {
     this._passwordValue = newPassword;
-    if (this._passwordValue.length > 1){
+    if (this._passwordValue.length > 1) {
       this.isDisable = false;
       console.log(this.isDisable);
     } else {
@@ -52,9 +51,9 @@ export class PasswordComponent implements AfterViewInit {
   }
 
   goNext(): void {
-    if(this._passwordValue != '') {
+    if (this._passwordValue !== '') {
       if (this.next && this.next === 'auth') {
-        this.authSevice.addFactor(FactorType.PASSWORD, this._passwordValue.toString());
+        this.authSevice.addFactor(FactorType.PASSWORD, Buffer.from(this._passwordValue, 'utf-8'));
         this.ngZone.run(async () => {
           await this.router.navigate(['/auth']);
         });

@@ -126,7 +126,7 @@ export class AuthService {
     type: FactorType;ы
     icon: string;
     icon_asset: string;
-    value: string;
+    value: any;
 
     constructor(type, icon, asset, value) {
       this.type = type;

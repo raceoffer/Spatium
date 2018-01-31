@@ -82,7 +82,7 @@ export class PincodeComponent implements AfterViewInit {
         this.notification.show('Authorization error');
       }
     } else if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(FactorType.PIN, this._pincode.toString());
+      this.authSevice.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

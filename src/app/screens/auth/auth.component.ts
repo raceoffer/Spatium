@@ -51,12 +51,18 @@ export class AuthComponent implements AfterViewInit {
   }
 
   async letLogin() {
-    let data = this.username;
-    for (const factor of this.factors) {
-      data += factor.value;
-    }
+    const factors = this.factors.map((factor) => {
+      const prefix = Buffer.alloc(4);
+      prefix.readInt8(factor.type);
 
-    const aesKey = await Utils.deriveAesKey(Buffer.from(data, 'utf-8'));
+      return Utils.sha256(Buffer.concat([prefix, factor.value]));
+    });
+
+    console.log(factors);
+
+    const aesKey = await Utils.deriveAesKey(Buffer.concat(factors));
+
+    console.log(aesKey);
 
     try {
       if (this.authSevice.encryptedSeed) {

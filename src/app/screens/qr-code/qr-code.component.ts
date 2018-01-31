@@ -1,6 +1,6 @@
-import {AfterViewInit, Component, ElementRef, NgZone, ViewChild,} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService, FactorType} from "../../services/auth.service";
+import { AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
 
 
 @Component({
@@ -8,8 +8,7 @@ import {AuthService, FactorType} from "../../services/auth.service";
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements AfterViewInit {
-
+export class QrCodeComponent implements AfterViewInit, AfterContentInit {
   _qrcode = '';
 
   next: string = null;
@@ -17,7 +16,7 @@ export class QrCodeComponent implements AfterViewInit {
 
   camStarted = false;
   selectedDevice = undefined;
-  qrResult = "";
+  qrResult = '';
   availableDevices = [];
   text = 'Place the QR-code into the square';
   spinnerClass = '';
@@ -39,7 +38,7 @@ export class QrCodeComponent implements AfterViewInit {
   }
 
   ngAfterContentInit() {
-    let el = document.querySelector('video');
+    const el = document.querySelector('video');
     el.setAttribute('poster', '#');
     this.spinnerClass = 'small-video-container';
 
@@ -49,27 +48,27 @@ export class QrCodeComponent implements AfterViewInit {
     this._qrcode = '';
   }
 
-  displayCameras(cams: any[]){
+  displayCameras(cams: any[]) {
     this.availableDevices = cams;
 
-    if(cams && cams.length > 0) {
+    if (cams && cams.length > 0) {
       this.selectedDevice = cams[1];
       this.camStarted = true;
-      this.spinnerClass = "invisible";
+      this.spinnerClass = 'invisible';
     }
   }
 
-  async letWait(){
+  async letWait() {
     this.pause(2000);
   }
 
-  async handleQrCodeResult(event){
+  async handleQrCodeResult(event) {
     this._qrcode = event.toString();
 
     this.camStarted = false;
 
      if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(FactorType.QR, this._qrcode.toString());
+      this.authSevice.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);
@@ -78,12 +77,13 @@ export class QrCodeComponent implements AfterViewInit {
   }
 
   pause(numberMillis) {
-    var now = new Date();
-    var exitTime = now.getTime() + numberMillis;
+    let now = new Date();
+    const exitTime = now.getTime() + numberMillis;
     while (true) {
       now = new Date();
-      if (now.getTime() > exitTime)
+      if (now.getTime() > exitTime) {
         return;
+      }
     }
   }
 

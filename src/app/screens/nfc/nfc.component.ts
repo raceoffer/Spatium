@@ -1,8 +1,8 @@
-import {AfterViewInit, Component, NgZone, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
-import {BitcoinKeyFragmentService} from "../../services/bitcoin-key-fragment.service";
-import {WalletService} from "../../services/wallet.service";
+import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { BitcoinKeyFragmentService } from '../../services/bitcoin-key-fragment.service';
+import { WalletService } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-nfc',
@@ -10,7 +10,6 @@ import {WalletService} from "../../services/wallet.service";
   styleUrls: ['./nfc.component.css']
 })
 export class NfcComponent implements AfterViewInit {
-
   _nfc = '';
 
   next: string = null;
