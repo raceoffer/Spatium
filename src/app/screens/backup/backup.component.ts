@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
+import {AuthService} from "../../services/auth.service";
 
 declare const Utils: any;
 
@@ -45,16 +46,16 @@ export class BackupComponent implements OnInit {
   private account: DDSAccount = null;
 
   constructor(
-    private router: Router,
-    private dds: DDSService,
-    private notification: NotificationService
+    private readonly router: Router,
+    private readonly dds: DDSService,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService
   ) { }
 
   async ngOnInit() {
-    // should be configured from the outside
-    this.id = 'some id';
-    this.secret = Utils.randomBytes(32);
-    this.data = Utils.randomBytes(352);
+    this.id = Utils.sha256(this.authService.login).toString('hex');
+    this.secret = this.authService.ethereumSecret;
+    this.data = this.authService.encryptedTreeData;
 
     this.account = await this.dds.accountFromSecret(this.secret);
     this.address = this.account.address;
@@ -75,11 +76,20 @@ export class BackupComponent implements OnInit {
   }
 
   async save() {
-    this.saving = true;
-    await this.account.store(this.id, this.data, this.gasPrice);
-    await this.updateBalance();
-    this.saving = false;
-    this.notification.show('Partial secret is uploaded to DDS');
-    await this.router.navigate(['/wallet']);
+    try {
+      this.saving = true;
+      await this.account.store(this.id, this.data, this.gasPrice);
+      await this.updateBalance();
+      this.notification.show('Partial secret is uploaded to DDS');
+      await this.router.navigate(['/wallet']);
+    } catch (ignored) {
+      this.notification.show('Failed to upload secret');
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async skip() {
+    // do nothing yet
   }
 }

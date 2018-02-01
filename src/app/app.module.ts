@@ -51,8 +51,7 @@ import { NgxZxingModule } from 'ngx-zxing';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './ng-init.directive';
-
-
+import { KeyChainService } from './services/keychain.service';
 
 @NgModule({
   declarations: [
@@ -110,13 +109,15 @@ import { NgInitDirective } from './ng-init.directive';
     AuthService,
     FileService,
     NotificationService,
-    DDSService
+    DDSService,
+    KeyChainService
   ],
   bootstrap: [
     AppComponent,
     DialogFactorsComponent
   ]
 })
+
 export class AppModule {
   constructor(overlayContainer: OverlayContainer) {
     // overlayContainer.getContainerElement().classList.add('dark-theme');

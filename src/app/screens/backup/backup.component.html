@@ -41,9 +41,8 @@
             *ngIf="!saving"
             [disabled]="!enough">{{ saveLabel }}</button>
 
-    <button mat-raised-button color="accent"
-            class="width-button"
-            routerLink="/waiting"
+    <button mat-raised-button color="accent" class="width-button"
+            (click)="skip()"
             *ngIf="!saving">{{ skipLabel }}</button>
   </div>
 
