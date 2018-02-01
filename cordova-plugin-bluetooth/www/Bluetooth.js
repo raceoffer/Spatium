@@ -12,6 +12,12 @@ exports.getState = function() {
   });
 };
 
+exports.getDiscoverable = function() {
+  return new Promise(function(success,error) {
+    exec(success, error, "Bluetooth", "getDiscoverable", []);
+  });
+};
+
 exports.getListening = function() {
   return new Promise(function(success,error) {
     exec(success, error, "Bluetooth", "getListening", []);

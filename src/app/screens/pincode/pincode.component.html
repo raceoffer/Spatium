@@ -1,20 +1,6 @@
 <div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/{{back}}">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
 
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
-
-
-  <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%; padding-top: 24.5px;">
+  <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%;">
     <div class="spatium-textfield entry noborder">
       <input type="password-pin" [(ngModel)]="Pincode" disabled>
     </div>

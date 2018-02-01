@@ -33,6 +33,7 @@ export class BackupComponent implements OnInit {
   syncState: SyncState = SyncState.Syncing;
   enough = false;
   saveTransactionState = false;
+  addressLoc;
 
   constructor(private router: Router,
               private bitcoinKeyFragmentService: BitcoinKeyFragmentService,

@@ -1,17 +1,29 @@
-<div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/{{back}}">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
+<div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledNFC">
 
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
+  <div class="connect-text">
+    <span>{{ enableNFCmessage }}</span>
   </div>
 
+  <button mat-fab  class="width-button">
+    <mat-icon (click)="changeNFCState()">nfc
+    </mat-icon>
+  </button>
 
+</div>
+
+<div fxLayout="column" fxLayoutAlign="start center" [class]="classNfcContainer" *ngIf="!disabledNFC">
+  <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
+    <mat-icon style="width: 200px;
+    height: 200px;
+    font-size: 200px;" class="pulse">nfc</mat-icon>
+  </div>
+
+  <span class="overlay-bottom-center">{{ text }}</span>
+
+</div>
+
+<div fxLayout="column" fxLayoutAlign="center center" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
+  <button mat-button color="accent" style="margin-bottom: 20px" (click)="scanAgain()">Scan again</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" [disabled]="isDisable" (click)="letLogin()" *ngIf="!isCheckingInProcess">{{ entry }}</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="isCheckingInProcess"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
 </div>

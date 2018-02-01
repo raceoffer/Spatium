@@ -1,19 +1,5 @@
 
-
 <div fxLayout="column" fxLayoutAlign="start center" style="max-height: 100%;">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/{{back}}">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
-
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
 
   <div mat-fab class="overlay-bottom-center" fxLayout="column" fxLayoutAlign="start center">
     <button mat-icon-button class="file-upload-size" >
@@ -21,10 +7,9 @@
       <input type='file' id='fileInput' style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" (change)="onUploadFileClick($event)">
     </button>
     <div style="padding-top: 5px;" >
-      {{uploadFile}}
+      {{ uploadFile }}
     </div>
   </div>
-
 
 </div>
 
