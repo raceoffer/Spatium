@@ -4,52 +4,46 @@
       <button mat-icon-button routerLink="/start">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <span>{{backupLabel}}</span>
+      <span>{{ backupLabel }}</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
   <mat-list role="list" style = "margin-bottom: 23px !important;">
     <mat-list-item>
-      <p class="list-info" mat-line>{{ethAddressLabel}}</p>
-      <p class="list-name small" mat-line>{{ethereumAddress}}</p>
-      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+      <p class="list-info" mat-line>{{ ethAddressLabel }}</p>
+      <p class="list-name small" mat-line>{{ address }}</p>
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="address">
         <mat-icon matSuffix>content_copy</mat-icon>
       </button>
     </mat-list-item>
 
     <mat-list-item>
-      <p class="list-info" mat-line>{{backupCostLabel}}</p>
-      <p class="list-name" mat-line> {{comission}} ethereum </p>
-    </mat-list-item>
+      <p class="list-info" mat-line>{{ ethBalanceLabel }}</p>
+      <p class="list-name" mat-line>{{ balance }} ETH</p>
 
-    <mat-list-item>
-      <p class="list-name" mat-line *ngIf="!enough"> {{notEnoughLabel}} </p>
-      <p class="list-info" mat-line>{{ethBalanceLabel}}</p>
-      <p class="list-name" mat-line> {{ethereumBalance}} </p>
-      <!--<div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="changeSyncState()">-->
       <div matSuffix class="button-imitator" fxLayout="row" fxLayoutAlign="center center" (click)="updateBalance()">
         <mat-icon *ngIf="syncState==syncStateType.Ready">sync</mat-icon>
         <mat-icon class="sync" *ngIf="syncState==syncStateType.Syncing">sync</mat-icon>
         <mat-icon *ngIf="syncState==syncStateType.Error">sync_problem</mat-icon>
       </div>
+    </mat-list-item>
 
+    <mat-list-item>
+      <p class="list-info" mat-line>{{ backupCostLabel }}</p>
+      <p class="list-name" mat-line>{{ comission }} ETH</p>
     </mat-list-item>
   </mat-list>
 
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="saveTransactionState"></mat-spinner>
+    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="saving"></mat-spinner>
     <button mat-raised-button color="accent" class="width-button"
-            (click)="saveBitcoinKeyFragmentInEthereumCell()"
-            *ngIf="enough && !saveTransactionState">{{SaveLabel}}</button>
+            (click)="save()"
+            *ngIf="!saving"
+            [disabled]="!enough">{{ saveLabel }}</button>
 
     <button mat-raised-button color="accent" class="width-button"
-            (click)="saveBitcoinKeyFragmentInEthereumCell()"
-            *ngIf="saveTransactionState">{{CancelLabel}}</button>
-
-    <button mat-raised-button color="accent"
-            class="width-button"
-            routerLink="/waiting"
-            *ngIf="!saveTransactionState">{{SkipLabel}}</button>
+            (click)="skip()"
+            *ngIf="!saving">{{ skipLabel }}</button>
   </div>
 
 
