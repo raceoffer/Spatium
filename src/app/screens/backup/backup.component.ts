@@ -1,9 +1,11 @@
-import {Component, OnInit} from '@angular/core';
-import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
-import {Router} from '@angular/router';
-import {WalletService} from '../../services/wallet.service';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { WalletService } from '../../services/wallet.service';
+import { DDSAccount, DDSService } from '../../services/dds.service';
+import {NotificationService} from "../../services/notification.service";
 
-declare const window: any;
+declare const Utils: any;
+declare const KeyChain: any;
 
 enum SyncState {
   Ready,
@@ -35,21 +37,28 @@ export class BackupComponent implements OnInit {
   saveTransactionState = false;
   addressLoc;
 
-  constructor(private router: Router,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService) { }
+  public id: string = null;
+  public secret: any = null;
+  public data: any = null;
+
+  private account: DDSAccount = null;
+
+  constructor(
+    private router: Router,
+    private dds: DDSService,
+    private notification: NotificationService
+  ) { }
 
   async ngOnInit() {
-    await this.bitcoinKeyFragmentService.ensureReady();
+    this.account = await this.dds.accountFromSecret(this.secret);
 
-    this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
     await this.updateBalance();
   }
 
   async updateBalance() {
     try {
       this.syncState = SyncState.Syncing;
-      this.ethereumBalance = await this.bitcoinKeyFragmentService.getEthereumBalance();
+      this.ethereumBalance = this.dds.fromWei(await this.account.getBalance(), 'ether');
       this.enough = parseFloat(this.ethereumBalance) >= parseFloat(this.comission);
       this.syncState = SyncState.Ready;
     } catch (e) {
@@ -57,16 +66,12 @@ export class BackupComponent implements OnInit {
     }
   }
 
-  async saveBitcoinKeyFragmentInEthereumCell() {
+  async save() {
     this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.seed);
+    await this.account.store(this.id, this.data, this.dds.toWei('5', 'gwei'));
     this.saveTransactionState = false;
     await this.updateBalance();
-    window.plugins.toast.showLongBottom(
-      'Partial secret is uploaded to DDS',
-      3000, 'Partial secret is uploaded to DDS',
-      console.log('Partial secret is uploaded to DDS')
-    );
+    this.notification.show('Partial secret is uploaded to DDS');
     await this.router.navigate(['/wallet']);
   }
 }
