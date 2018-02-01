@@ -51,7 +51,7 @@ export class DDSService {
   }
 
   public async estimateGas(id: string, data: any) {
-    return this.dds.estimateStoreGas(id, data);
+    return this.dds.estimateStoreGas({ id, data });
   }
 
   public fromWei(wei: any, coin: string) {

@@ -19,20 +19,23 @@ enum SyncState {
 export class BackupComponent implements OnInit {
   backupLabel = 'Saving to Decentralized Storage';
   ethAddressLabel = 'Ethereum address';
-  backupCostLabel = 'Cost';
+  backupCostLabel = 'Estimated commission';
   notEnoughLabel = 'Not enough Ethereum';
   ethBalanceLabel = 'Ethereum balance';
-  SaveLabel = 'Save';
-  CancelLabel = 'Cancel';
-  SkipLabel = 'Skip';
 
-  ethereumAddress = '';
-  ethereumBalance = '';
-  comission = '0.01';
-  syncStateType = SyncState;
-  syncState: SyncState = SyncState.Syncing;
+  saveLabel = 'Save';
+  skipLabel = 'Skip';
+
+  address = '';
+  balance = 0.0;
+  comission = 0.0;
   enough = false;
-  saveTransactionState = false;
+
+  syncStateType = SyncState;
+  syncState: SyncState = SyncState.Ready;
+
+  saving = false;
+
   addressLoc;
 
   public id: string = null;
@@ -56,7 +59,8 @@ export class BackupComponent implements OnInit {
     this.data = Utils.randomBytes(352);
 
     this.account = await this.dds.accountFromSecret(this.secret);
-    this.comission = this.dds.fromWei(this.gasPrice * await this.dds.estimateGas(this.id, this.data), 'ether');
+    this.address = this.account.address;
+    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.dds.estimateGas(this.id, this.data)).toString(), 'ether'));
 
     await this.updateBalance();
   }
@@ -64,8 +68,8 @@ export class BackupComponent implements OnInit {
   async updateBalance() {
     try {
       this.syncState = SyncState.Syncing;
-      this.ethereumBalance = this.dds.fromWei(await this.account.getBalance(), 'ether');
-      this.enough = parseFloat(this.ethereumBalance) >= parseFloat(this.comission);
+      this.balance = parseFloat(this.dds.fromWei((await this.account.getBalance()).toString(), 'ether'));
+      this.enough = this.balance >= this.comission;
       this.syncState = SyncState.Ready;
     } catch (e) {
       this.syncState = SyncState.Error;
@@ -73,10 +77,10 @@ export class BackupComponent implements OnInit {
   }
 
   async save() {
-    this.saveTransactionState = true;
+    this.saving = true;
     await this.account.store(this.id, this.data, this.gasPrice);
-    this.saveTransactionState = false;
     await this.updateBalance();
+    this.saving = false;
     this.notification.show('Partial secret is uploaded to DDS');
     await this.router.navigate(['/wallet']);
   }
