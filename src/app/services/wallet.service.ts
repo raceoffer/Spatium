@@ -321,7 +321,14 @@ class SignSession {
 
     this.messageSubject
       .filter(object => object.type === 'cancelTransaction')
-      .subscribe(() => this.cancelObserver.next(true));
+      .subscribe(() => {
+        this.cancelObserver.next(true);
+        if (this.status.getValue() === TransactionStatus.Ready) {
+          LoggerService.log('Cancelled after sync', {});
+          this.status.next(TransactionStatus.Cancelled);
+          this.canceled.emit();
+        }
+      });
   }
 
   public get transaction() {
