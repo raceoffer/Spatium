@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
 import { DDSAccount, DDSService } from '../../services/dds.service';
-import {NotificationService} from "../../services/notification.service";
+import { NotificationService } from '../../services/notification.service';
 
 declare const Utils: any;
-declare const KeyChain: any;
 
 enum SyncState {
   Ready,
@@ -41,6 +39,8 @@ export class BackupComponent implements OnInit {
   public secret: any = null;
   public data: any = null;
 
+  public gasPrice: number = this.dds.toWei('5', 'gwei');
+
   private account: DDSAccount = null;
 
   constructor(
@@ -50,7 +50,13 @@ export class BackupComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
+    // should be configured from the outside
+    this.id = 'some id';
+    this.secret = Utils.randomBytes(32);
+    this.data = Utils.randomBytes(352);
+
     this.account = await this.dds.accountFromSecret(this.secret);
+    this.comission = this.dds.fromWei(this.gasPrice * await this.dds.estimateGas(this.id, this.data), 'ether');
 
     await this.updateBalance();
   }
@@ -68,7 +74,7 @@ export class BackupComponent implements OnInit {
 
   async save() {
     this.saveTransactionState = true;
-    await this.account.store(this.id, this.data, this.dds.toWei('5', 'gwei'));
+    await this.account.store(this.id, this.data, this.gasPrice);
     this.saveTransactionState = false;
     await this.updateBalance();
     this.notification.show('Partial secret is uploaded to DDS');
