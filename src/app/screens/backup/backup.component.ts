@@ -53,7 +53,7 @@ export class BackupComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.id = Utils.sha256(this.authService.login).toString('hex');
+    this.id = Utils.sha256(Buffer.from(this.authService.login, 'utf-8')).toString('hex');
     this.secret = this.authService.ethereumSecret;
     this.data = this.authService.encryptedTreeData;
 
