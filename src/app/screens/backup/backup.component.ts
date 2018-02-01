@@ -36,8 +36,6 @@ export class BackupComponent implements OnInit {
 
   saving = false;
 
-  addressLoc;
-
   public id: string = null;
   public secret: any = null;
   public data: any = null;

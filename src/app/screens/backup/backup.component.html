@@ -12,14 +12,9 @@
     <mat-list-item>
       <p class="list-info" mat-line>{{ ethAddressLabel }}</p>
       <p class="list-name small" mat-line>{{ address }}</p>
-      <button mat-icon-button matSuffix ngxClipboard [cbContent]="addressLoc">
+      <button mat-icon-button matSuffix ngxClipboard [cbContent]="address">
         <mat-icon matSuffix>content_copy</mat-icon>
       </button>
-    </mat-list-item>
-
-    <mat-list-item>
-      <p class="list-info" mat-line>{{ backupCostLabel }}</p>
-      <p class="list-name" mat-line>{{ comission }} ETH</p>
     </mat-list-item>
 
     <mat-list-item>
@@ -31,7 +26,11 @@
         <mat-icon class="sync" *ngIf="syncState==syncStateType.Syncing">sync</mat-icon>
         <mat-icon *ngIf="syncState==syncStateType.Error">sync_problem</mat-icon>
       </div>
+    </mat-list-item>
 
+    <mat-list-item>
+      <p class="list-info" mat-line>{{ backupCostLabel }}</p>
+      <p class="list-name" mat-line>{{ comission }} ETH</p>
     </mat-list-item>
   </mat-list>
 
