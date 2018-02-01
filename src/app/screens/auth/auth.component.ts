@@ -52,6 +52,32 @@ export class AuthComponent implements AfterViewInit {
     this.cd.detectChanges();
   }
 
+  matchPredefinedRoute(forest, route) {
+    let currentFactor = 0;
+    let currentData = forest;
+    let result = null;
+    while (!result) {
+      const requestedFactor = currentFactor < route.length ? route[currentFactor++] : null;
+      if (!requestedFactor) {
+        break;
+      }
+
+      const matchResult = Utils.matchPassphrase(currentData, requestedFactor);
+      if (typeof matchResult.seed !== 'undefined') {
+        result = matchResult.seed;
+        break;
+      }
+
+      if (matchResult.subtexts.length < 1) {
+        break;
+      }
+
+      currentData = matchResult.subtexts;
+    }
+
+    return result;
+  }
+
   async letLogin() {
     const factors = this.factors.map((factor) => {
       const prefix = Buffer.alloc(4);
@@ -60,25 +86,16 @@ export class AuthComponent implements AfterViewInit {
       return Utils.sha256(Buffer.concat([prefix, factor.value]));
     });
 
-    const aesKey = await Utils.deriveAesKey(Buffer.concat(factors));
-
-    try {
-      if (this.authSevice.encryptedSeed) {
-        const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
-        this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
-        this.walletService.secret = this.keyChain.getBitcoinSecret(0);
-      } else {
-        this.keyChain.seed = Utils.randomBytes(64);
-        this.walletService.secret = this.keyChain.getBitcoinSecret(0);
-        this.authSevice.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
-
-        await this.fs.writeFile(this.fs.safeFileName(this.username), this.authSevice.encryptedSeed);
-      }
-
-      await this.router.navigate(['/waiting']);
-    } catch (e) {
+    const seed = this.matchPredefinedRoute(this.authSevice.remoteEncryptedTrees, factors);
+    if (!seed) {
       this.notification.show('Authorization error');
+      return;
     }
+
+    this.keyChain.seed = seed;
+    this.walletService.secret = this.keyChain.getBitcoinSecret(0);
+
+    await this.router.navigate(['/waiting']);
   }
 }
 

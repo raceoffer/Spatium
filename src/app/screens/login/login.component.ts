@@ -97,10 +97,10 @@ export class LoginComponent implements AfterViewInit {
       this.authService.clearFactors();
 
       try {
-        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
+        this.authService.remoteEncryptedTrees = await this.dds.read(Utils.sha256(Buffer.from(this.userName, 'utf-8')).toString('hex'));
       } catch (e) {
-        this.authService.encryptedSeed = null;
-        this.notification.show('No stored seed found');
+        this.authService.remoteEncryptedTrees = [];
+        this.notification.show('No backup found');
       }
 
       await this.router.navigate(['/auth']);

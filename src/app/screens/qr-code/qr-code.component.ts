@@ -14,7 +14,6 @@ declare const cordova: any;
   styleUrls: ['./qr-code.component.css']
 })
 export class QrCodeComponent implements OnInit {
-
   entry = 'Sign in';
   buttonState = 0; // sign in = 0, sign up = 1
   isDisable = false; // button state
@@ -36,12 +35,14 @@ export class QrCodeComponent implements OnInit {
   spinnerClass = '';
   permissionCam = false;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router,
-              private ngZone: NgZone,
-              private readonly fs: FileService,
-              private readonly notification: NotificationService,
-              private authService: AuthService) {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private ngZone: NgZone,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService,
+    private authService: AuthService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];

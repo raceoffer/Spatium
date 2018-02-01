@@ -14,23 +14,23 @@
   </div>
 
   <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 100%;" class="start-tagline-padding">
-    <button mat-icon-button class="fab" (click)="toggleContent(0)">
-      <mat-icon class="size-40" color="accent" *ngIf="currentType == 0">text_fields</mat-icon>
-      <mat-icon class="size-40" *ngIf="currentType != 0">text_fields</mat-icon>
+    <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
+      <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
+      <mat-icon class="size-40" *ngIf="content !== contentType.Login">text_fields</mat-icon>
     </button>
-    <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(1)">
-      <div class="qr-code-blue" *ngIf="currentType == 1"></div>
-      <div class="qr-code-black" *ngIf="currentType != 1"></div>
+    <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
+      <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
+      <div class="qr-code-black" *ngIf="content !== contentType.QR"></div>
     </button>
-    <button mat-icon-button class="fab" (click)="toggleContent(2)">
-      <mat-icon class="size-40" color="accent" *ngIf="currentType == 2">nfc</mat-icon>
-      <mat-icon class="size-40" *ngIf="currentType != 2">nfc</mat-icon>
+    <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)">
+      <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
+      <mat-icon class="size-40" *ngIf="content !== contentType.NFC">nfc</mat-icon>
     </button>
   </div>
 
-  <app-login *ngIf="currentType == 0"></app-login>
-  <app-qr-code *ngIf="currentType == 1"></app-qr-code>
-  <app-nfc *ngIf="currentType == 2"></app-nfc>
+  <app-login *ngIf="content === contentType.Login"></app-login>
+  <app-qr-code *ngIf="content === contentType.QR"></app-qr-code>
+  <app-nfc *ngIf="content === contentType.NFC"></app-nfc>
 
 </div>
 

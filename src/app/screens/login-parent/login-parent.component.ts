@@ -1,29 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
+enum Content {
+  Login,
+  QR,
+  NFC
+}
 
 @Component({
   selector: 'app-login-parent',
   templateUrl: './login-parent.component.html',
   styleUrls: ['./login-parent.component.css']
 })
-export class LoginParentComponent implements OnInit {
-
-  currentType = 0;
+export class LoginParentComponent {
+  contentType = Content;
+  content = Content.Login;
 
   constructor() { }
 
-  ngOnInit() {
-  }
-
-  toggleContent(type) {
-    this.currentType = type;
-    switch (type) {
-      case 0: {
+  toggleContent(content) {
+    this.content = content;
+    switch (this.content) {
+      case Content.Login: {
         break;
       }
-      case 1: {
+      case Content.QR: {
         break;
       }
-      case 2: {
+      case Content.NFC: {
         break;
       }
     }

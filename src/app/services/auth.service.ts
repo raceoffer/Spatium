@@ -12,6 +12,7 @@ export class AuthService {
 
   ethereumSecret: any = null;
   encryptedTreeData: any = null;
+  remoteEncryptedTrees: Array<any> = [];
 
   constructor() {
     this.available.push(new AvailableFactor(FactorType.PIN, 'PIN', FactorIcon.PIN,
