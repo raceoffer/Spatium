@@ -1,27 +1,28 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <button mat-icon-button routerLink="/start">
+          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+        </button>
+      </mat-toolbar-row>
+    </mat-toolbar>
 
+    <div class="entry-margin start-logo-text" >
+    </div>
+    <div class="start-tagline-padding">
+      <span class="start-tagline">Secure your funds</span>
+    </div>
 
-<div fxLayout="column" fxLayoutAlign="start center" style="max-height: 100%;">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
-
-  <div class="entry-margin start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
-  <div class="margin-top-18">
-    <mat-icon class="color-custom-dark">lock_outline</mat-icon>
-  </div>
-  <div class="margin-top-18 light">
-    {{ username }}
+    <div class="margin-top-18">
+      <mat-icon class="color-custom-dark">lock_outline</mat-icon>
+    </div>
+    <div class="margin-top-18 light">
+      {{ username }}
+    </div>
   </div>
 
-  <div style="width:100%; overflow: scroll; ">
+  <div class="content text-center" style="overflow: scroll;max-height: 100%;">
     <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center"  *ngFor="let factor of factors;"
          (click)="goTo(factor)">
       <div style="margin-left: 50px;">
@@ -37,14 +38,16 @@
     </div>
   </div>
 
-  <div class="margin-top-18" style="padding-bottom: 10px">
-    <button mat-fab>
-      <mat-icon (click)="sddNewFactor()">add
-      </mat-icon>
-    </button>
-  </div>
+  <div class="footer text-center" style="bottom: 0px;">
+    <div style="padding-bottom: 10px">
+      <button mat-fab (click)="sddNewFactor()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
 
-  <button mat-raised-button color="accent" class="width-button color bottom-center" [disabled]="loginDisable" (click)="letLogin()" >{{ login }}</button>
+    <button mat-raised-button color="accent" class="width-button color" [disabled]="loginDisable" (click)="letLogin()" >{{ login }}</button>
+
+  </div>
 
 </div>
 

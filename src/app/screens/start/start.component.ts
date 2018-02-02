@@ -31,4 +31,8 @@ export class StartComponent {
 
     await this.router.navigate(['/factor', { back: 'start' }, {outlets: {'factor': ['pincode', {next: 'waiting'}]}}]);
   }
+
+  async onNextClicked() {
+    await this.router.navigate(['/registration', { login: 'kasuhddskajdaskdaskldj' }]);
+  }
 }

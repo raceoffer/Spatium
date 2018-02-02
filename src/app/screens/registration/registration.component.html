@@ -1,0 +1,61 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <button mat-icon-button routerLink="/start">
+          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+        </button>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div style="height: 30px;"></div>
+    <div class="start-logo-text" >
+    </div>
+    <div class="start-tagline-padding">
+      <span class="start-tagline">Secure your funds</span>
+    </div>
+  </div>
+
+  <form class="width-button-container content text-center box" style="margin-top: 45px; margin-bottom: 0px">
+
+    <div class="header text-center">
+      <div class="entry" style="padding-bottom: 20px">
+        <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
+          {{ username }}
+        </div>
+        <div matSuffix style="position: absolute; right:24px; display: inline-block; margin-top: -7.5px;" (click)="generateNewLogin()">
+          <mat-icon class="button-imitator-30" *ngIf="!generateInProgress">sync</mat-icon>
+          <mat-icon class="button-imitator-30 sync" *ngIf="generateInProgress">sync</mat-icon>
+        </div>
+      </div>
+
+      <div class="spatium-textfield entry bottom32">
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="Password" name="Password">
+      </div>
+    </div>
+
+    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;">
+      <div class="reg-warning" *ngIf="!advancedMode" >
+         <span>{{stWarning}}</span>
+      </div>
+    </div>
+
+    <div class="footer text-center" style="bottom: 0px;">
+      <div class="margin-top-18" style="padding-bottom: 10px;" *ngIf="advancedMode">
+        <button color="accent" mat-fab (click)="sddNewFactor()" type="button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
+        <button mat-icon-button type="button" style="float: right;" (click)="openAdvanced()">
+          <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
+        </button>
+      </div>
+      <button type="submit" mat-raised-button color="accent" [disabled]="isDisable" class="width-button color" >{{stRegistration}}</button>
+
+    </div>
+
+  </form>
+</div>
+
+

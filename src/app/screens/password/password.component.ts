@@ -38,7 +38,7 @@ export class PasswordComponent implements AfterViewInit {
   @Input()
   set Password(newPassword) {
     this._passwordValue = newPassword;
-    if (this._passwordValue.length > 1) {
+    if (this._passwordValue.length > 0) {
       this.isDisable = false;
       console.log(this.isDisable);
     } else {

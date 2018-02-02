@@ -6,23 +6,24 @@ export class AuthService {
   qr: string;
   nfc: string;
   factors: Factor[] = [];
+  reg_factors: Factor[] = [];
   available: AvailableFactor[] = [];
 
   encryptedSeed: string = null;
 
   constructor() {
     this.available.push(new AvailableFactor(FactorType.PIN, 'PIN', FactorIcon.PIN,
-      FactorIconAsset.PIN, FactorLink.PIN, 'auth', 'auth'));
+      FactorIconAsset.PIN, FactorLink.PIN));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, 'Password', FactorIcon.PASSWORD,
-      FactorIconAsset.PASSWORD, FactorLink.PASSWORD, 'auth', 'auth'));
+      FactorIconAsset.PASSWORD, FactorLink.PASSWORD));
     this.available.push(new AvailableFactor(FactorType.FILE, 'File', FactorIcon.FILE,
-      FactorIconAsset.FILE, FactorLink.FILE, 'auth', 'auth'));
+      FactorIconAsset.FILE, FactorLink.FILE));
     this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, 'Graphic key', FactorIcon.GRAPHIC_KEY,
-      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, 'auth', 'auth'));
+      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY));
     this.available.push(new AvailableFactor(FactorType.QR, 'QR', FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, 'auth', 'auth'));
+      FactorIconAsset.QR, FactorLink.QR));
     this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
-      FactorIconAsset.NFC, FactorLink.NFC, 'auth', 'auth'));
+      FactorIconAsset.NFC, FactorLink.NFC));
   }
 
   getAllAvailableFactors() {
@@ -109,17 +110,13 @@ export class AuthService {
     icon: string;
     icon_asset: string;
     link: string;
-    next: string;
-    back: string;
 
-    constructor(type, name, icon, icon_asset, link, next, back) {
+    constructor(type, name, icon, icon_asset, link) {
       this.type = type;
       this.name = name;
       this.icon = icon;
       this.icon_asset = icon_asset;
       this.link = link;
-      this.next = next;
-      this.back = back;
     }
   }
 

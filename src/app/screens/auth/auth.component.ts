@@ -40,7 +40,7 @@ export class AuthComponent implements AfterViewInit {
   sddNewFactor(): void {
     this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { }
+      data: { back: 'auth', next: 'auth' }
     });
   }
 
