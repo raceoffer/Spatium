@@ -1,15 +1,19 @@
-import {Component, Input, NgZone, OnInit} from '@angular/core';
+import {
+  Component, Input, NgZone, OnInit, ElementRef,
+  ViewChild, AfterViewInit
+} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
 import {MatDialog} from '@angular/material';
 import {DialogFactorsComponent} from '../dialog-factors/dialog-factors.component';
+import * as $ from 'jquery';
 
 @Component({
   selector: 'app-registration',
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']
 })
-export class RegistrationComponent implements OnInit {
+export class RegistrationComponent implements OnInit, AfterViewInit {
 
   stPassword = 'Password';
   isDisable = true;
@@ -19,6 +23,8 @@ export class RegistrationComponent implements OnInit {
   _passwordValue = '';
   generateInProgress = false;
   advancedMode = false;
+
+  @ViewChild('factorContainer') factorContainer: ElementRef;
 
   constructor(public  dialog: MatDialog,
               private readonly router: Router,
@@ -31,6 +37,7 @@ export class RegistrationComponent implements OnInit {
         this.username = params['login'];
       }
     });
+    this.advancedMode = false;
   }
 
   get Password() {
@@ -48,6 +55,41 @@ export class RegistrationComponent implements OnInit {
   }
 
   ngOnInit() {
+    $('#factor-container').scroll(function () {
+      if ($(this).scrollTop() > 0) {
+        $('#top-scroller').fadeIn();
+      } else {
+        $('#top-scroller').fadeOut();
+      }
+
+      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
+        $('#bottom-scroller').fadeIn();
+      } else {
+        $('#bottom-scroller').fadeOut();
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    if (this.factorContainer != null) {
+      this.checkOverflow(this.factorContainer);
+    }
+  }
+
+  checkOverflow (element) {
+    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
+      $('#bottom-scroller').fadeIn();
+    } else {
+      $('#bottom-scroller').fadeOut();
+    }
+  }
+
+  goTop() {
+    $('#factor-container').animate({scrollTop: 0}, 500, 'swing');
+  }
+
+  goBottom() {
+    $('#factor-container').animate({scrollTop: $('#factor-container').height()}, 500, 'swing');
   }
 
   async generateNewLogin() {
@@ -92,7 +134,7 @@ export class RegistrationComponent implements OnInit {
   }
 
   openAdvanced() {
-    this.advancedMode = !this.advancedMode;
+    this.advancedMode = true;
   }
 
 }

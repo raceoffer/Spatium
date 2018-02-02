@@ -32,15 +32,31 @@
       <div class="spatium-textfield entry bottom32">
         <input type="password" placeholder="{{stPassword}}" [(ngModel)]="Password" name="Password">
       </div>
+
+      <div class="top-arrow-scroll" id="top-scroller">
+        <button mat-icon-button (click)="goTop()">
+          <mat-icon>keyboard_arrow_up</mat-icon>
+        </button>
+      </div>
     </div>
 
-    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;">
-      <div class="reg-warning" *ngIf="!advancedMode" >
+    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;" *ngIf="!advancedMode">
+      <div class="reg-warning">
          <span>{{stWarning}}</span>
       </div>
     </div>
 
+    <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
+
+    </div>
+
     <div class="footer text-center" style="bottom: 0px;">
+      <div class="bottom-arrow-scroll" id="bottom-scroller">
+        <button mat-icon-button (click)="goBottom()">
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+      </div>
+
       <div class="margin-top-18" style="padding-bottom: 10px;" *ngIf="advancedMode">
         <button color="accent" mat-fab (click)="sddNewFactor()" type="button">
           <mat-icon>add</mat-icon>
