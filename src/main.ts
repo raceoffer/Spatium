@@ -9,9 +9,11 @@ const cordovaScript = document.createElement('script');
 cordovaScript.setAttribute('src', 'cordova.js');
 document.body.appendChild(cordovaScript);
 
+document.addEventListener('deviceready', () => {
+  platformBrowserDynamic().bootstrapModule(AppModule)
+    .catch(err => console.log(err));
+}, false);
+
 if (environment.production) {
   enableProdMode();
 }
-
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.log(err));

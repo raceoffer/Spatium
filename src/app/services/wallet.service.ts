@@ -534,6 +534,33 @@ export class WalletService {
     });
   }
 
+  public async reset() {
+    this.status.next(Status.None);
+
+    if (this.secret) {
+      this.secret.fill(0);
+      this.secret = null;
+    }
+
+    this.compoundKey = null;
+    this.walletDB = null;
+    this.watchingWallet = null;
+    this.provider = null;
+
+    if (this.syncSession) {
+      await this.syncSession.cancel();
+      this.syncSession = null;
+    }
+
+    if (this.signSession) {
+      await this.signSession.cancel();
+      this.signSession = null;
+    }
+
+    this.address.next('');
+    this.balance.next({ confirmed: 0, unconfirmed: 0 });
+  }
+
   public startSync() {
     if (this.synchronizing.getValue()) {
       LoggerService.log('Sync in progress', {});

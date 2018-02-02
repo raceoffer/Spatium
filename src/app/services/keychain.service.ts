@@ -18,7 +18,15 @@ export class KeyChainService {
 
   set seed(seed) {
     this._seed = seed;
-    this.keyChain = KeyChain.fromSeed(this.seed);
+    this.keyChain = this._seed ? KeyChain.fromSeed(this.seed) : null;
+  }
+
+  reset() {
+    if (this._seed) {
+      this._seed.fill(0);
+      this._seed = null;
+      this.keyChain = null;
+    }
   }
 
   getCoinSecret(coin: Coin, account: number) {

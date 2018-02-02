@@ -1,7 +1,6 @@
 import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 
 declare const Utils: any;

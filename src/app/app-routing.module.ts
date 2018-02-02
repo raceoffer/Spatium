@@ -7,15 +7,14 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
 import { PincodeComponent } from './screens/pincode/pincode.component';
-import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { PasswordComponent } from './screens/password/password.component';
 import { FileUploadComponent } from './screens/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
-import {FactorParentComponent} from "./screens/factor/factor-parent.component";
-import {LoginParentComponent} from "./screens/login-parent/login-parent.component";
+import { FactorParentComponent } from './screens/factor/factor-parent.component';
+import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
