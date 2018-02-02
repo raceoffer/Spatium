@@ -1,20 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
-
-declare const Utils: any;
-declare const Buffer: any;
-
-enum State {
-  Empty,
-  Exists,
-  New,
-  Updating,
-  Error
-}
+import { Component, AfterViewInit, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -25,15 +9,13 @@ enum State {
 export class LoginComponent implements AfterViewInit {
   private _userName = '';
 
-  stSignUp = 'Sign up';
-  stLogIn = 'Log in';
   stLogin = 'Username';
-  stNoNetwork = 'Network is unavailable';
 
   timer;
 
-  stateType = State;
-  buttonState = State.Empty;
+  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
 
   get userName() {
     return this._userName;
@@ -42,72 +24,24 @@ export class LoginComponent implements AfterViewInit {
   set userName(newUserName) {
     this._userName = newUserName;
     if (this._userName.length > 0) {
-      this.buttonState = State.Updating;
+      this.buisyEvent.emit();
       if (this.timer) {
         clearTimeout(this.timer);
       }
       this.timer = setTimeout(() => {
-        this.checkLogin();
+        this.inputEvent.emit(this._userName);
       }, 1000);
     } else {
-      this.buttonState = State.Empty;
+      this.clearEvent.emit();
       if (this.timer) {
         clearTimeout(this.timer);
       }
     }
   }
 
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly fs: FileService,
-    private readonly notification: NotificationService,
-    private readonly dds: DDSService
-  ) { }
+  constructor() { }
 
   ngAfterViewInit() {
     this.userName = '';
-  }
-
-  async checkLogin() {
-    if (!await Utils.testNetwork()) {
-      console.log('no network');
-      this.buttonState = State.Error;
-      return;
-    }
-    try {
-      const userName = this.userName;
-      const exists = await this.dds.exists(Utils.sha256(Buffer.from(userName, 'utf-8')).toString('hex'));
-      if (userName !== this.userName) {
-        return;
-      }
-      if (exists) {
-        this.buttonState = State.Exists;
-      } else {
-        this.buttonState = State.New;
-      }
-    } catch (ignored) {
-      this.buttonState = State.Error;
-    }
-  }
-
-  async letLogin() {
-    if (this.buttonState === State.Exists) {
-      this.authService.login = this.userName;
-      this.authService.clearFactors();
-
-      try {
-        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
-      } catch (e) {
-        this.authService.encryptedSeed = null;
-        this.notification.show('No stored seed found');
-      }
-
-      await this.router.navigate(['/auth']);
-    } else if (this.buttonState === State.New) {
-      // not yet
-    } else {
-      // do nothing
-    }
   }
 }

@@ -72,7 +72,7 @@ export class PincodeComponent implements AfterViewInit {
         }
 
         await this.router.navigate(['/verifyTransaction']);
-      } catch (e) {
+      } catch (ignored) {
         this.notification.show('Authorization error');
       }
     } else if (this.next && this.next === 'auth') {

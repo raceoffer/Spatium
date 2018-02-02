@@ -1,7 +1,6 @@
-import {AfterViewInit, Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 
 declare const nfc: any;
@@ -34,6 +33,10 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
   timer: any;
 
+  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
   }
@@ -43,7 +46,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
-    private readonly fs: FileService,
     private readonly notification: NotificationService
   ) {
     this.route.params.subscribe(params => {
@@ -186,49 +188,14 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
       // if at login-parent
       this.canScanAgain = true;
       this.classNfcContainer = 'invisible';
-      this.isCheckingInProcess = true;
-      this.checkingLogin();
+      this.inputEvent.emit(this._nfc);
     }
-  }
-
-  async checkingLogin() {
-    // logic for buttonState 0 and 1;
-    await this.delay(2000);
-    this.entry = 'Sign Up';
-    this.isCheckingInProcess = false;
-  }
-
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   scanAgain() {
     this.canScanAgain = false;
     this.isActive = true;
     this.classNfcContainer = '';
-    this.isCheckingInProcess = true;
-  }
-
-  async letLogin() {
-    // logic for buttonState 0 and 1;
-    this.isDisable = true;
-    if (this._nfc !== '') {
-      if (await NfcComponent.isEthernetAvailable()) {
-        this.authService.nfc = this._nfc;
-        this.authService.clearFactors();
-
-        try {
-          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this._nfc));
-        } catch (e) {
-          this.authService.encryptedSeed = null;
-          this.notification.show('No stored seed found');
-        }
-
-        await this.router.navigate(['/auth']);
-      } else {
-        this.notification.show('No connection');
-      }
-    }
-    this.isDisable = false;
+    this.clearEvent.emit();
   }
 }
