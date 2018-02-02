@@ -149,7 +149,7 @@ export class AuthService {
 
     public toBuffer() {
       const prefix = Buffer.alloc(4);
-      prefix.readInt8(this.type);
+      prefix.writeUInt32BE(this.type, 0);
 
       return Utils.sha256(Buffer.concat([prefix, this.value]));
     }
