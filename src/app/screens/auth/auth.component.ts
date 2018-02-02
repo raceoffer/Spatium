@@ -28,7 +28,6 @@ export class AuthComponent implements AfterViewInit {
     private readonly walletService: WalletService,
     private readonly authSevice: AuthService,
     private readonly cd: ChangeDetectorRef,
-    private readonly fs: FileService,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
   ) { }
@@ -52,7 +51,7 @@ export class AuthComponent implements AfterViewInit {
     this.cd.detectChanges();
   }
 
-  matchPredefinedRoute(forest, route) {
+  private matchPredefinedRoute(forest, route) {
     let currentFactor = 0;
     let currentData = forest;
     let result = null;
@@ -79,12 +78,7 @@ export class AuthComponent implements AfterViewInit {
   }
 
   async letLogin() {
-    const factors = this.factors.map((factor) => {
-      const prefix = Buffer.alloc(4);
-      prefix.readInt8(factor.type);
-
-      return Utils.sha256(Buffer.concat([prefix, factor.value]));
-    });
+    const factors = this.factors.map(factor => factor.toBuffer());
 
     const seed = this.matchPredefinedRoute(this.authSevice.remoteEncryptedTrees, factors);
     if (!seed) {

@@ -1,5 +1,8 @@
 import {Injectable} from '@angular/core';
 
+declare const Utils: any;
+declare const Buffer: any;
+
 @Injectable()
 export class AuthService {
   login: string;
@@ -13,6 +16,10 @@ export class AuthService {
   ethereumSecret: any = null;
   encryptedTreeData: any = null;
   remoteEncryptedTrees: Array<any> = [];
+
+  static toId(name: string): string {
+    return Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
+  }
 
   constructor() {
     this.available.push(new AvailableFactor(FactorType.PIN, 'PIN', FactorIcon.PIN,
@@ -138,6 +145,13 @@ export class AuthService {
       this.icon = icon;
       this.icon_asset = asset;
       this.value = value;
+    }
+
+    public toBuffer() {
+      const prefix = Buffer.alloc(4);
+      prefix.readInt8(this.type);
+
+      return Utils.sha256(Buffer.concat([prefix, this.value]));
     }
   }
 

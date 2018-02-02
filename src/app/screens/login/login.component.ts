@@ -60,7 +60,6 @@ export class LoginComponent implements AfterViewInit {
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
-    private readonly fs: FileService,
     private readonly notification: NotificationService,
     private readonly dds: DDSService
   ) { }
@@ -77,8 +76,8 @@ export class LoginComponent implements AfterViewInit {
     }
     try {
       const userName = this.userName;
-      const exists = await this.dds.exists(Utils.sha256(Buffer.from(userName, 'utf-8')).toString('hex'));
-      if (userName !== this.userName) {
+      const exists = await this.dds.exists(AuthService.toId(userName));
+      if (userName !== this.userName) { // in case of updates to userName during lookup
         return;
       }
       if (exists) {
@@ -97,7 +96,7 @@ export class LoginComponent implements AfterViewInit {
       this.authService.clearFactors();
 
       try {
-        this.authService.remoteEncryptedTrees = await this.dds.read(Utils.sha256(Buffer.from(this.userName, 'utf-8')).toString('hex'));
+        this.authService.remoteEncryptedTrees = await this.dds.read(AuthService.toId(this.userName));
       } catch (e) {
         this.authService.remoteEncryptedTrees = [];
         this.notification.show('No backup found');
