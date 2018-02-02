@@ -28,10 +28,24 @@
     </button>
   </div>
 
-  <app-login *ngIf="content === contentType.Login"></app-login>
-  <app-qr-code *ngIf="content === contentType.QR"></app-qr-code>
-  <app-nfc *ngIf="content === contentType.NFC"></app-nfc>
+  <app-login *ngIf="content === contentType.Login"
+             (buisyEvent)="setBusy()"
+             (clearEvent)="setEmpty()"
+             (inputEvent)="setInput($event)"
+  ></app-login>
+  <app-qr-code *ngIf="content === contentType.QR"
+               (clearEvent)="setEmpty()"
+               (inputEvent)="setInput($event)"
+  ></app-qr-code>
+  <app-nfc *ngIf="content === contentType.NFC"
+           (clearEvent)="setEmpty()"
+           (inputEvent)="setInput($event)"
+  ></app-nfc>
 
+  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.Exists">{{stLogIn}}</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Error">{{stError}}</button>
 </div>
 
 

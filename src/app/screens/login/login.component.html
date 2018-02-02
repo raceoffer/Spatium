@@ -1,18 +1,12 @@
 <div fxLayout="column" fxLayoutAlign="start center">
 
-  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center" (submit)="letLogin()">
+  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
 
     <div class="spatium-textfield entry bottom32">
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName">
     </div>
-
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.Exists">{{stLogIn}}</button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Error">{{stNoNetwork}}</button>
   </form>
 
   <router-outlet name="login"></router-outlet>
-
 </div>
 

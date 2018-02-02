@@ -1,8 +1,8 @@
-import {Component, NgZone, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService, FactorType} from '../../services/auth.service';
-import {FileService} from '../../services/file.service';
-import {NotificationService} from '../../services/notification.service';
+import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const Utils: any;
 declare const cordova: any;
@@ -15,13 +15,10 @@ declare const cordova: any;
 })
 export class QrCodeComponent implements OnInit {
   entry = 'Sign in';
-  buttonState = 0; // sign in = 0, sign up = 1
-  isDisable = false; // button state
 
   _qrcode: string = null;
   isRepeatable = false;
   canScanAgain = false;
-  isCheckingInProcess = true;
   classVideoContainer = '';
   classVideo = '';
 
@@ -35,13 +32,16 @@ export class QrCodeComponent implements OnInit {
   spinnerClass = '';
   permissionCam = false;
 
+  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private ngZone: NgZone,
-    private readonly fs: FileService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
     private readonly notification: NotificationService,
-    private authService: AuthService
+    private readonly authService: AuthService
   ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
@@ -55,10 +55,6 @@ export class QrCodeComponent implements OnInit {
     if (this.next == null && this.back == null) {
       this.isRepeatable = true;
     }
-  }
-
-  static async isEthernetAvailable() {
-    return await Utils.testNetwork();
   }
 
   ngOnInit() {
@@ -79,7 +75,7 @@ export class QrCodeComponent implements OnInit {
           this.permissionCam = false;
         });
 
-        permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error);
+        permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
       }
     }.bind(this));
   }
@@ -90,12 +86,12 @@ export class QrCodeComponent implements OnInit {
   }
 
   error() {
-    console.warn('Camera permission is not turned on');
+    this.notification.show('Camera permission is not turned on');
   }
 
   success( status ) {
     if ( !status.hasPermission ) {
-      console.warn('Camera permission is not turned on');
+      this.notification.show('Camera permission is not turned on');
       this.ngZone.run(async () => {
         this.permissionCam = false;
       });
@@ -131,20 +127,8 @@ export class QrCodeComponent implements OnInit {
        // if at login-parent
        this.canScanAgain = true;
        this.classVideoContainer = 'invisible';
-       this.isCheckingInProcess = true;
-       this.checkingLogin();
+       this.inputEvent.emit(this._qrcode);
     }
-  }
-
-  async checkingLogin() {
-    // logic for buttonState 0 and 1;
-    await this.delay(2000);
-    this.entry = 'Sign Up';
-    this.isCheckingInProcess = false;
-    }
-
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   scanAgain() {
@@ -152,30 +136,7 @@ export class QrCodeComponent implements OnInit {
     this.canScanAgain = false;
     this.classVideoContainer = '';
     this.camStarted = true;
-    this.isCheckingInProcess = true;
-  }
-
-  async letLogin() {
-    // logic for buttonState 0 and 1;
-    this.isDisable = true;
-    if (this._qrcode) {
-      if (await QrCodeComponent.isEthernetAvailable()) {
-        this.authService.qr = this._qrcode;
-        this.authService.clearFactors();
-
-        try {
-          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this._qrcode));
-        } catch (e) {
-          this.authService.encryptedSeed = null;
-          this.notification.show('No stored seed found');
-        }
-
-        await this.router.navigate(['/auth']);
-      } else {
-        this.notification.show('No connection');
-      }
-    }
-    this.isDisable = false;
+    this.clearEvent.emit();
   }
 }
 
