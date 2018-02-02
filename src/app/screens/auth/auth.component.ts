@@ -6,6 +6,7 @@ import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
+import {KeyChainService} from "../../services/keychain.service";
 
 declare const Utils: any;
 
@@ -28,7 +29,8 @@ export class AuthComponent implements AfterViewInit {
     private readonly authSevice: AuthService,
     private readonly cd: ChangeDetectorRef,
     private readonly fs: FileService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly keyChain: KeyChainService
   ) { }
 
   ngAfterViewInit() {
@@ -63,10 +65,12 @@ export class AuthComponent implements AfterViewInit {
     try {
       if (this.authSevice.encryptedSeed) {
         const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
-        this.walletService.seed = Utils.decrypt(ciphertext, aesKey);
+        this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
+        this.walletService.secret = this.keyChain.getBitcoinSecret(0);
       } else {
-        this.walletService.seed = Utils.randomBytes(64);
-        this.authSevice.encryptedSeed = Utils.encrypt(this.walletService.seed, aesKey).toString('hex');
+        this.keyChain.seed = Utils.randomBytes(64);
+        this.walletService.secret = this.keyChain.getBitcoinSecret(0);
+        this.authSevice.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
 
         await this.fs.writeFile(this.fs.safeFileName(this.username), this.authSevice.encryptedSeed);
       }

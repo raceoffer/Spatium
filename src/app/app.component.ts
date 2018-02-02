@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {BitcoinKeyFragmentService} from './services/bitcoin-key-fragment.service';
 
 declare const cordova: any;
 
@@ -15,12 +14,10 @@ export class AppComponent implements OnInit {
   title = 'Spatium Wallet app';
   message = 'Loading...';
 
-  constructor(private bitcoinKeyService: BitcoinKeyFragmentService) { }
+  constructor() { }
 
   ngOnInit() {
   }
 
-  onDeviceready(ev) {
-    // this.bitcoinKeyService.ready = true;
-  }
+  onDeviceready(ev) {}
 }

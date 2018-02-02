@@ -1,9 +1,14 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Input} from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { WalletService } from '../../services/wallet.service';
 import { NotificationService } from '../../services/notification.service';
 
 declare const bcoin: any;
-declare const window: any;
+
+enum Phase {
+  Creation,
+  Confirmation,
+  Sending
+}
 
 @Component({
   selector: 'app-send-transaction',
@@ -11,19 +16,20 @@ declare const window: any;
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements AfterViewInit {
-  @Input() addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
+  public phaseType = Phase; // for template
+
+  addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
 
   currentWalletPh = 'Wallet';
   receiverPh = 'Recipient';
 
   stAwaitConfirm = 'Confirm on the second device';
-  stSigning = 'Signing transaction';
   stSigningResult = 'Transaction is signed';
 
   stContinue = 'Continue';
   stCancel = 'Cancel';
-  stConfirm = 'Confirm';
   stTransfer = 'Transfer';
+  stSend = 'Send';
 
   selected = '';
 
@@ -35,7 +41,6 @@ export class SendTransactionComponent implements AfterViewInit {
     return this._sendBtc;
   }
 
-  @Input()
   set sendBtc(btc) {
     this._sendBtc = btc;
     this.sendUsd = this.sendBtc * this.rateBtcUsd;
@@ -48,27 +53,20 @@ export class SendTransactionComponent implements AfterViewInit {
   balanceBtcUnconfirmed = 0;
   balanceUsd = 0;
 
-  state = 0;
-  buttonText = 'Continue';
+  phase = Phase.Creation;
 
-  disableFields = false; // блокировка полей транзакции
-  initContinueDisabled = false; // активность кнопки "Продолжить" у инициатора
-  initCancelDisabled = false; // Активность кнопки "Отмена" у инициатора
-
-  constructor(private walletService: WalletService,
-              private cd: ChangeDetectorRef,
-              private notification: NotificationService) {}
+  constructor(
+    private walletService: WalletService,
+    private notification: NotificationService
+  ) {}
 
   ngAfterViewInit() {
     this.walletAddress = this.walletService.address.getValue();
     this.selected = this.walletAddress;
     this.updataBalance(this.walletService.balance.getValue());
+
     this.walletService.balance.subscribe((balance) => {
       this.updataBalance(balance);
-    });
-
-    this.walletService.onAccepted.subscribe(async () => {
-      await this.accepted();
     });
 
     this.walletService.onRejected.subscribe(async () => {
@@ -84,49 +82,25 @@ export class SendTransactionComponent implements AfterViewInit {
     this.balanceBtcConfirmed = bcoin.amount.btc(balance.confirmed);
     this.balanceBtcUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
     this.balanceUsd = (this.balanceBtcUnconfirmed) * this.rateBtcUsd;
-    this.cd.detectChanges();
   }
 
-  stateChange(desiredState): void {
-    switch (desiredState) {
-      case 0: {
-        this.state = 0;
-        this.disableFields = false;
-        this.initContinueDisabled = false;
-        this.initCancelDisabled = true;
-
-        break;
-      }
-      case 1: {
-        this.state = 1;
-        this.disableFields = true;
-        this.initContinueDisabled = false;
-        this.initCancelDisabled = false;
-
-        break;
-      }
-      case 2: {
-        this.state = 2;
-        this.disableFields = true;
-        this.initContinueDisabled = true;
-        this.initCancelDisabled = true;
-
-        break;
-      }
-      case 3: {
-        this.state = 3;
-        this.disableFields = true;
-        this.initContinueDisabled = false;
-        this.initCancelDisabled = false;
-
-        break;
-      }
+  // Pressed start signature
+  async startSigning() {
+    const tx = await this.walletService.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value, false);
+    if (tx) {
+      this.phase = Phase.Confirmation;
+      await this.walletService.requestTransactionVerify(tx);
     }
   }
 
+  async cancelTransaction() {
+    this.phase = Phase.Creation;
+
+    await this.walletService.rejectTransaction();
+  }
+
   async sendTransaction() {
-    this.stateChange(0);
-    this.cd.detectChanges();
+    this.phase = Phase.Creation;
 
     try {
       await this.walletService.verifySignature();
@@ -139,51 +113,18 @@ export class SendTransactionComponent implements AfterViewInit {
     }
   }
 
-  async cancelTransaction() {
-    this.stateChange(0);
-    this.cd.detectChanges();
-    await this.walletService.rejectTransaction();
-  }
-
-  async skip() {
-    this.stateChange(0);
-    this.cd.detectChanges();
-  }
-
-  // Pressed start signeture
-  async startSigning() {
-    const tx = await this.walletService.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value, false);
-    if (tx) {
-      this.stateChange(1);
-      this.cd.detectChanges();
-      await this.walletService.requestTransactionVerify(tx);
-    }
-  }
-
-  // Received confirmation
-  async accepted() {
-    if (this.state === 0) {
-      return;
-    }
-
-    this.stateChange(2);
-    this.cd.detectChanges();
+  async skipSending() {
+    this.phase = Phase.Creation;
   }
 
   // Received rejection
   async rejected() {
-    this.stateChange(0);
-    this.cd.detectChanges();
+    this.phase = Phase.Creation;
   }
 
   // Received a ready signature
   async finalaized() {
-    if (this.state === 0) {
-      return;
-    }
-
-    this.stateChange(3);
-    this.cd.detectChanges();
+    this.phase = Phase.Sending;
   }
 }
 

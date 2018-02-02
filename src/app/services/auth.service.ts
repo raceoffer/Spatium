@@ -11,6 +11,9 @@ export class AuthService {
 
   encryptedSeed: string = null;
 
+  ethereumSecret: any = null;
+  encryptedTreeData: any = null;
+
   constructor() {
     this.available.push(new AvailableFactor(FactorType.PIN, 'PIN', FactorIcon.PIN,
       FactorIconAsset.PIN, FactorLink.PIN));

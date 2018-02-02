@@ -37,7 +37,7 @@ import { BluetoothService } from './services/bluetooth.service';
 import { AuthService } from './services/auth.service';
 import { FileService } from './services/file.service';
 import { NotificationService } from './services/notification.service';
-import { BitcoinKeyFragmentService } from './services/bitcoin-key-fragment.service';
+import { DDSService } from './services/dds.service';
 import { PincodeComponent } from './screens/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
@@ -52,8 +52,7 @@ import { FactorParentComponent } from './screens/factor/factor-parent.component'
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
-
-
+import { KeyChainService } from './services/keychain.service';
 
 @NgModule({
   declarations: [
@@ -107,18 +106,20 @@ import { RegistrationComponent } from './screens/registration/registration.compo
   ],
   providers: [
     WalletService,
-    BitcoinKeyFragmentService,
     BluetoothService,
     LoggerService,
     AuthService,
     FileService,
-    NotificationService
+    NotificationService,
+    DDSService,
+    KeyChainService
   ],
   bootstrap: [
     AppComponent,
     DialogFactorsComponent
   ]
 })
+
 export class AppModule {
   constructor(overlayContainer: OverlayContainer) {
     // overlayContainer.getContainerElement().classList.add('dark-theme');

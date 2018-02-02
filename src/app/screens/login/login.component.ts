@@ -1,10 +1,20 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
+import { DDSService } from '../../services/dds.service';
 
 declare const Utils: any;
+declare const Buffer: any;
+
+enum State {
+  Empty,
+  Exists,
+  New,
+  Updating,
+  Error
+}
 
 @Component({
   selector: 'app-login',
@@ -12,28 +22,18 @@ declare const Utils: any;
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-
-export class LoginComponent implements AfterViewInit, OnInit {
+export class LoginComponent implements AfterViewInit {
   private _userName = '';
 
-  entry = 'Sign in';
-  buttonState = 0;
+  stSignUp = 'Sign up';
+  stLogIn = 'Log in';
   stLogin = 'Username';
-  isDisable = true;
-  isCheckingInProcess = false;
+  stNoNetwork = 'Network is unavailable';
+
   timer;
 
-  static async isEthernetAvailable() {
-    return await Utils.testNetwork();
-  }
-
-  ngOnInit() {
-    this.isCheckingInProcess = false;
-  }
-
-  ngAfterViewInit() {
-    this.userName = '';
-  }
+  stateType = State;
+  buttonState = State.Empty;
 
   get userName() {
     return this._userName;
@@ -42,59 +42,72 @@ export class LoginComponent implements AfterViewInit, OnInit {
   set userName(newUserName) {
     this._userName = newUserName;
     if (this._userName.length > 0) {
-      this.isDisable = false;
-      console.log(this.isDisable);
+      this.buttonState = State.Updating;
       if (this.timer) {
         clearTimeout(this.timer);
       }
-      this.timer = this.timeout();
+      this.timer = setTimeout(() => {
+        this.checkLogin();
+      }, 1000);
     } else {
-      this.isDisable = true;
-      console.log(this.isDisable);
+      this.buttonState = State.Empty;
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
     }
-  }
-
-  timeout() {
-    this.timer = setTimeout(() => {
-      this.checkingLogin();
-    }, 1000);
   }
 
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly fs: FileService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly dds: DDSService
   ) { }
 
-  async checkingLogin() {
-    this.isCheckingInProcess = true;
-    await this.delay(5000);
-    this.entry = 'Sign Up';
-    this.isCheckingInProcess = false;
+  ngAfterViewInit() {
+    this.userName = '';
   }
 
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  async checkLogin() {
+    if (!await Utils.testNetwork()) {
+      console.log('no network');
+      this.buttonState = State.Error;
+      return;
+    }
+    try {
+      const userName = this.userName;
+      const exists = await this.dds.exists(Utils.sha256(Buffer.from(userName, 'utf-8')).toString('hex'));
+      if (userName !== this.userName) {
+        return;
+      }
+      if (exists) {
+        this.buttonState = State.Exists;
+      } else {
+        this.buttonState = State.New;
+      }
+    } catch (ignored) {
+      this.buttonState = State.Error;
+    }
   }
 
   async letLogin() {
-    if (this.userName !== '') {
-      if (await LoginComponent.isEthernetAvailable()) {
-        this.authService.login = this.userName;
-        this.authService.clearFactors();
+    if (this.buttonState === State.Exists) {
+      this.authService.login = this.userName;
+      this.authService.clearFactors();
 
-        try {
-          this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
-        } catch (e) {
-          this.authService.encryptedSeed = null;
-          this.notification.show('No stored seed found');
-        }
-
-        await this.router.navigate(['/auth']);
-      } else {
-        this.notification.show('No connection');
+      try {
+        this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName(this.userName));
+      } catch (e) {
+        this.authService.encryptedSeed = null;
+        this.notification.show('No stored seed found');
       }
+
+      await this.router.navigate(['/auth']);
+    } else if (this.buttonState === State.New) {
+      // not yet
+    } else {
+      // do nothing
     }
   }
 }

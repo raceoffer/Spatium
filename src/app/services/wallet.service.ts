@@ -18,7 +18,6 @@ declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
 declare const Transaction: any;
 declare const Utils: any;
-declare const KeyChain: any;
 
 export enum SynchronizationStatus {
   None = 0,
@@ -321,7 +320,14 @@ class SignSession {
 
     this.messageSubject
       .filter(object => object.type === 'cancelTransaction')
-      .subscribe(() => this.cancelObserver.next(true));
+      .subscribe(() => {
+        this.cancelObserver.next(true);
+        if (this.status.getValue() === TransactionStatus.Ready) {
+          LoggerService.log('Cancelled after sync', {});
+          this.status.next(TransactionStatus.Cancelled);
+          this.canceled.emit();
+        }
+      });
   }
 
   public get transaction() {
@@ -476,7 +482,7 @@ export class WalletService {
 
   private network = 'testnet'; // 'main'; | 'testnet';
 
-  public seed: any = null;
+  public secret: any = null;
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
@@ -499,7 +505,9 @@ export class WalletService {
   public onAccepted: EventEmitter<any> = new EventEmitter<any>();
   public onRejected: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private bt: BluetoothService) {
+  constructor(
+    private bt: BluetoothService
+  ) {
     bcoin.set(this.network);
 
     this.bt.message.subscribe((message) => {
@@ -533,9 +541,8 @@ export class WalletService {
     }
 
     try {
-      const keyChain = KeyChain.fromSeed(this.seed);
       this.compoundKey = new CompoundKey({
-        localPrivateKeyring: bcoin.keyring.fromPrivate(keyChain.getAccountSecret(0, 0))
+        localPrivateKeyring: CompoundKey.keyringFromSecret(this.secret)
       });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create compound key', e);

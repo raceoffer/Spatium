@@ -1,9 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {BitcoinKeyFragmentService} from '../../services/bitcoin-key-fragment.service';
-import {Router} from '@angular/router';
-import {WalletService} from '../../services/wallet.service';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { DDSAccount, DDSService } from '../../services/dds.service';
+import { NotificationService } from '../../services/notification.service';
+import {AuthService} from "../../services/auth.service";
 
-declare const window: any;
+declare const Utils: any;
 
 enum SyncState {
   Ready,
@@ -19,54 +20,76 @@ enum SyncState {
 export class BackupComponent implements OnInit {
   backupLabel = 'Saving to Decentralized Storage';
   ethAddressLabel = 'Ethereum address';
-  backupCostLabel = 'Cost';
+  backupCostLabel = 'Estimated commission';
   notEnoughLabel = 'Not enough Ethereum';
   ethBalanceLabel = 'Ethereum balance';
-  SaveLabel = 'Save';
-  CancelLabel = 'Cancel';
-  SkipLabel = 'Skip';
 
-  ethereumAddress = '';
-  ethereumBalance = '';
-  comission = '0.01';
-  syncStateType = SyncState;
-  syncState: SyncState = SyncState.Syncing;
+  saveLabel = 'Save';
+  skipLabel = 'Skip';
+
+  address = '';
+  balance = 0.0;
+  comission = 0.0;
   enough = false;
-  saveTransactionState = false;
-  addressLoc;
 
-  constructor(private router: Router,
-              private bitcoinKeyFragmentService: BitcoinKeyFragmentService,
-              private walletService: WalletService) { }
+  syncStateType = SyncState;
+  syncState: SyncState = SyncState.Ready;
+
+  saving = false;
+
+  public id: string = null;
+  public secret: any = null;
+  public data: any = null;
+
+  public gasPrice: number = this.dds.toWei('5', 'gwei');
+
+  private account: DDSAccount = null;
+
+  constructor(
+    private readonly router: Router,
+    private readonly dds: DDSService,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService
+  ) { }
 
   async ngOnInit() {
-    await this.bitcoinKeyFragmentService.ensureReady();
+    this.id = Utils.sha256(Buffer.from(this.authService.login, 'utf-8')).toString('hex');
+    this.secret = this.authService.ethereumSecret;
+    this.data = this.authService.encryptedTreeData;
 
-    this.ethereumAddress = await this.bitcoinKeyFragmentService.getEthereumAddress();
+    this.account = await this.dds.accountFromSecret(this.secret);
+    this.address = this.account.address;
+    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.dds.estimateGas(this.id, this.data)).toString(), 'ether'));
+
     await this.updateBalance();
   }
 
   async updateBalance() {
     try {
       this.syncState = SyncState.Syncing;
-      this.ethereumBalance = await this.bitcoinKeyFragmentService.getEthereumBalance();
-      this.enough = parseFloat(this.ethereumBalance) >= parseFloat(this.comission);
+      this.balance = parseFloat(this.dds.fromWei((await this.account.getBalance()).toString(), 'ether'));
+      this.enough = this.balance >= this.comission;
       this.syncState = SyncState.Ready;
     } catch (e) {
       this.syncState = SyncState.Error;
     }
   }
 
-  async saveBitcoinKeyFragmentInEthereumCell() {
-    this.saveTransactionState = true;
-    await this.bitcoinKeyFragmentService.sendBitcoinKeyFragment(this.walletService.seed);
-    this.saveTransactionState = false;
-    await this.updateBalance();
-    window.plugins.toast.showLongBottom(
-      'Partial secret is uploaded to DDS',
-      3000, 'Partial secret is uploaded to DDS',
-      console.log('Partial secret is uploaded to DDS')
-    );
-    await this.router.navigate(['/wallet']);
+  async save() {
+    try {
+      this.saving = true;
+      await this.account.store(this.id, this.data, this.gasPrice);
+      await this.updateBalance();
+      this.notification.show('Partial secret is uploaded to DDS');
+      await this.router.navigate(['/wallet']);
+    } catch (ignored) {
+      this.notification.show('Failed to upload secret');
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async skip() {
+    // do nothing yet
   }
 }

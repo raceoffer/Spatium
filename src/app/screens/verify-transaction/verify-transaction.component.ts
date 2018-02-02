@@ -41,6 +41,10 @@ export class VerifyTransactionComponent implements AfterViewInit, OnInit {
     this.wallet.failedEvent.subscribe(async () => {
       await this.bt.disconnect();
     });
+    this.wallet.onRejected.subscribe(async () => {
+      console.log('Transaction cancelled');
+      this.showTransaction = false;
+    });
     this.bt.enabledEvent.subscribe(() => this.ngZone.run(async () => {
       await this.bt.ensureListening();
     }));
