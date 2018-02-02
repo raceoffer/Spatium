@@ -34,7 +34,7 @@ export class LoginParentComponent {
 
   stSignUp = 'Sign up';
   stLogIn = 'Log in';
-  stError = '';
+  stError = 'Retry';
 
   input = '';
 
@@ -65,8 +65,7 @@ export class LoginParentComponent {
 
   async checkInput(input: string) {
     if (!await Utils.testNetwork()) {
-      console.log('no network');
-      this.stError = 'Network is unavailable';
+      this.notification.show('No network connection');
       this.buttonState = State.Error;
       return;
     }

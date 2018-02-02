@@ -45,7 +45,7 @@
   <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.Exists">{{stLogIn}}</button>
   <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
   <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
-  <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Error">{{stError}}</button>
+  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)" *ngIf="buttonState === stateType.Error">{{stError}}</button>
 </div>
 
 
