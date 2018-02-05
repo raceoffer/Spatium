@@ -10,6 +10,8 @@ import {AuthService} from '../../services/auth.service';
 })
 export class DialogFactorsComponent {
   factors: any;
+  next: string = null;
+  back: string = null;
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
@@ -20,6 +22,8 @@ export class DialogFactorsComponent {
 
     console.log(this.authSevice.getAllAvailableFactors());
     this.factors = this.authSevice.getAllAvailableFactors();
+    this.back = data.back;
+    this.next = data.next;
   }
 
 
@@ -27,7 +31,7 @@ export class DialogFactorsComponent {
     this.dialogRef.close();
 
     this.ngZone.run(async () => {
-      await this.router.navigate(['/factor', { back: factor.back }, {outlets: {'factor': [factor.link, {next: factor.next}]}}]);
+      await this.router.navigate(['/factor', { back: this.back }, {outlets: {'factor': [factor.link, {next: this.next}]}}]);
     });
   }
 

@@ -15,6 +15,7 @@ import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
+import { RegistrationComponent } from './screens/registration/registration.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -24,6 +25,7 @@ const appRoutes: Routes = [
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'login', component: LoginParentComponent},
+  { path: 'registration', component: RegistrationComponent},
   { path: 'factor', component: FactorParentComponent, children: [
     { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
     { path: 'password', component: PasswordComponent, outlet: 'factor' },
