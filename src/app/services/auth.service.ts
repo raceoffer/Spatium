@@ -2,10 +2,12 @@ import {Injectable} from '@angular/core';
 
 declare const Utils: any;
 declare const Buffer: any;
+declare const nfc: any;
 
 @Injectable()
 export class AuthService {
   login: string;
+  password: string;
   qr: string;
   nfc: string;
   factors: Factor[] = [];
@@ -23,50 +25,54 @@ export class AuthService {
 
   constructor() {
     this.available.push(new AvailableFactor(FactorType.PIN, 'PIN', FactorIcon.PIN,
-      FactorIconAsset.PIN, FactorLink.PIN, 'auth', 'auth'));
+      FactorIconAsset.PIN, FactorLink.PIN));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, 'Password', FactorIcon.PASSWORD,
-      FactorIconAsset.PASSWORD, FactorLink.PASSWORD, 'auth', 'auth'));
+      FactorIconAsset.PASSWORD, FactorLink.PASSWORD));
     this.available.push(new AvailableFactor(FactorType.FILE, 'File', FactorIcon.FILE,
-      FactorIconAsset.FILE, FactorLink.FILE, 'auth', 'auth'));
+      FactorIconAsset.FILE, FactorLink.FILE));
     this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, 'Graphic key', FactorIcon.GRAPHIC_KEY,
-      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, 'auth', 'auth'));
+      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY));
     this.available.push(new AvailableFactor(FactorType.QR, 'QR', FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, 'auth', 'auth'));
+      FactorIconAsset.QR, FactorLink.QR));
+
+    nfc.enabled(function () {
+      console.log('success');
     this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
-      FactorIconAsset.NFC, FactorLink.NFC, 'auth', 'auth'));
+      FactorIconAsset.NFC, FactorLink.NFC));
+    }.bind(this), function () {
+      console.log('failure');
+    });
   }
 
   getAllAvailableFactors() {
     return this.available;
   }
 
-  addFactor(type, value) {
+  newFactor(type, value) {
     switch (type) {
       case FactorType.PIN: {
-        this.factors.push(new Factor(FactorType.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value));
-        break;
+        return new Factor(FactorType.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value);
       }
       case FactorType.PASSWORD: {
-        this.factors.push(new Factor(FactorType.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value));
-        break;
+        return new Factor(FactorType.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value);
       }
       case FactorType.FILE: {
-        this.factors.push(new Factor(FactorType.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value));
-        break;
+        return new Factor(FactorType.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value);
       }
       case FactorType.GRAPHIC_KEY: {
-        this.factors.push(new Factor(FactorType.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value));
-        break;
+        return new Factor(FactorType.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value);
       }
       case FactorType.QR: {
-        this.factors.push(new Factor(FactorType.QR, FactorIcon.QR, FactorIconAsset.QR, value));
-        break;
+        return new Factor(FactorType.QR, FactorIcon.QR, FactorIconAsset.QR, value);
       }
       case FactorType.NFC: {
-        this.factors.push(new Factor(FactorType.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value));
-        break;
+        return new Factor(FactorType.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
       }
     }
+  }
+
+  addFactor(type, value) {
+    this.factors.push(this.newFactor(type, value));
   }
 
   rmFactor(factor) {
@@ -120,17 +126,13 @@ export class AuthService {
     icon: string;
     icon_asset: string;
     link: string;
-    next: string;
-    back: string;
 
-    constructor(type, name, icon, icon_asset, link, next, back) {
+    constructor(type, name, icon, icon_asset, link) {
       this.type = type;
       this.name = name;
       this.icon = icon;
       this.icon_asset = icon_asset;
       this.link = link;
-      this.next = next;
-      this.back = back;
     }
   }
 

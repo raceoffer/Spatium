@@ -1,12 +1,16 @@
-import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component, AfterViewInit, ChangeDetectorRef, OnInit, Inject, NgZone, ElementRef,
+  ViewChild
+} from '@angular/core';
+import { DOCUMENT } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
-import {KeyChainService} from "../../services/keychain.service";
+import {KeyChainService} from '../../services/keychain.service';
+import * as $ from 'jquery';
 
 declare const Utils: any;
 
@@ -15,15 +19,19 @@ declare const Utils: any;
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent implements AfterViewInit {
+export class AuthComponent implements OnInit, AfterViewInit {
   username = '';
   login = 'Log in';
   loginDisable = false;
 
   factors = [];
 
+  @ViewChild('factorContainer') factorContainer: ElementRef;
+
   constructor(
     public  dialog: MatDialog,
+    @Inject(DOCUMENT) private document: Document,
+    private ngZone: NgZone,
     private readonly router: Router,
     private readonly walletService: WalletService,
     private readonly authSevice: AuthService,
@@ -32,16 +40,50 @@ export class AuthComponent implements AfterViewInit {
     private readonly keyChain: KeyChainService
   ) { }
 
+  ngOnInit() {
+    $('#factor-container').scroll(function () {
+      if ($(this).scrollTop() > 0) {
+        $('#top-scroller').fadeIn();
+      } else {
+        $('#top-scroller').fadeOut();
+      }
+
+      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
+        $('#bottom-scroller').fadeIn();
+      } else {
+          $('#bottom-scroller').fadeOut();
+        }
+    });
+  }
+
+  goTop() {
+    $('#factor-container').animate({scrollTop: 0}, 500, 'swing');
+  }
+
+  goBottom() {
+    $('#factor-container').animate({scrollTop: $('#factor-container').height()}, 500, 'swing');
+  }
+
   ngAfterViewInit() {
     this.username = this.authSevice.login;
     this.factors = this.authSevice.factors;
     this.cd.detectChanges();
+    this.checkOverflow(this.factorContainer);
+    this.goBottom();
+  }
+
+  checkOverflow (element) {
+    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
+      $('#bottom-scroller').fadeIn();
+    } else {
+      $('#bottom-scroller').fadeOut();
+    }
   }
 
   sddNewFactor(): void {
     this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { }
+      data: { back: 'auth', next: 'auth' }
     });
   }
 

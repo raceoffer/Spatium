@@ -13,12 +13,11 @@ declare const Buffer: any;
 })
 
 export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
-
   @ViewChild('patternContainer') el: ElementRef;
 
   next: string = null;
   back: string = null;
-  _graphKey: string = null;
+  graphKey: string = null;
 
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
@@ -35,14 +34,14 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   ngAfterViewInit() {
-    this._graphKey = '';
+    this.graphKey = '';
   }
 
   ngAfterContentInit() {
     const lock =  new PatternLock(this.el.nativeElement, {
       onDraw: function(pattern){
         console.log(pattern);
-        this._graphKey = pattern;
+        this.graphKey = pattern;
         this.goNext();
       }.bind(this)
     });
@@ -52,10 +51,14 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
-
-      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this._graphKey, 'utf-8'));
+      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
+      });
+    } else if (this.next && this.next === 'registration') {
+      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+      this.ngZone.run(() => {
+        this.router.navigate(['/registration']);
       });
     }
   }

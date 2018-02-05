@@ -51,6 +51,7 @@ import { NgxZxingModule } from 'ngx-zxing';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './ng-init.directive';
+import { RegistrationComponent } from './screens/registration/registration.component';
 import { KeyChainService } from './services/keychain.service';
 
 @NgModule({
@@ -74,7 +75,8 @@ import { KeyChainService } from './services/keychain.service';
     NfcComponent,
     FactorParentComponent,
     LoginParentComponent,
-    NgInitDirective
+    NgInitDirective,
+    RegistrationComponent
   ],
   imports: [
     FormsModule,
