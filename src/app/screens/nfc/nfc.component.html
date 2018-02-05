@@ -23,5 +23,16 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="center center" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
-  <button mat-button color="accent" style="margin-bottom: 20px" (click)="scanAgain()">Scan again</button>
+  <div class="container-220" fxLayout="column" fxLayoutAlign="center center">
+    <div class="glass">
+      <mat-icon style="width: 200px; height: 200px; font-size: 200px;">nfc</mat-icon>
+    </div>
+
+    <button mat-fab color="primary" class="bt-size-30" style="margin-bottom: 20px; position: absolute; z-index: 3;" (click)="scanAgain()">
+      <mat-icon class="size-30">sync</mat-icon>
+    </button>
+
+  </div>
+
 </div>
+

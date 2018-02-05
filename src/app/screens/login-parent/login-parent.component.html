@@ -16,15 +16,15 @@
   <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 100%;" class="start-tagline-padding">
     <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
       <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
-      <mat-icon class="size-40" *ngIf="content !== contentType.Login">text_fields</mat-icon>
+      <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
     </button>
     <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
       <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
-      <div class="qr-code-black" *ngIf="content !== contentType.QR"></div>
+      <div class="qr-code-black optical-4" *ngIf="content !== contentType.QR"></div>
     </button>
     <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)">
       <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
-      <mat-icon class="size-40" *ngIf="content !== contentType.NFC">nfc</mat-icon>
+      <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.NFC">nfc</mat-icon>
     </button>
   </div>
 
