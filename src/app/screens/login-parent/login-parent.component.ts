@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -20,12 +20,14 @@ enum Content {
   NFC
 }
 
+declare const nfc: any;
+
 @Component({
   selector: 'app-login-parent',
   templateUrl: './login-parent.component.html',
   styleUrls: ['./login-parent.component.css']
 })
-export class LoginParentComponent {
+export class LoginParentComponent  implements OnInit {
   contentType = Content;
   content = Content.Login;
 
@@ -38,12 +40,26 @@ export class LoginParentComponent {
 
   input = '';
 
+  isNfcAvailable = true;
+
   constructor(
     private readonly router: Router,
+    private readonly ngZone: NgZone,
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
     private readonly dds: DDSService
   ) { }
+
+  ngOnInit() {
+    nfc.enabled(function () {
+      console.log('success');
+    }, function () {
+      console.log('failure');
+      this.ngZone.run(async () => {
+        this.isNfcAvailable = false;
+      });
+    }.bind(this));
+  }
 
   toggleContent(content) {
     this.buttonState = State.Empty;

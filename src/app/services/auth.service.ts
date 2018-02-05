@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 
 declare const Utils: any;
 declare const Buffer: any;
+declare const nfc: any;
 
 @Injectable()
 export class AuthService {
@@ -32,8 +33,14 @@ export class AuthService {
       FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, 'auth', 'auth'));
     this.available.push(new AvailableFactor(FactorType.QR, 'QR', FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR, 'auth', 'auth'));
-    this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
-      FactorIconAsset.NFC, FactorLink.NFC, 'auth', 'auth'));
+
+    nfc.enabled(function () {
+      console.log('success');
+      this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC, 'auth', 'auth'));
+    }.bind(this), function () {
+      console.log('failure');
+    });
   }
 
   getAllAvailableFactors() {

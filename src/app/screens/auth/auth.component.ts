@@ -4,9 +4,8 @@ import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
-import {KeyChainService} from "../../services/keychain.service";
+import {KeyChainService} from '../../services/keychain.service';
 
 declare const Utils: any;
 

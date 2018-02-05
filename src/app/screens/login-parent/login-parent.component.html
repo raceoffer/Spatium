@@ -22,7 +22,7 @@
       <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
       <div class="qr-code-black" *ngIf="content !== contentType.QR"></div>
     </button>
-    <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)">
+    <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)" *ngIf="isNfcAvailable">
       <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
       <mat-icon class="size-40" *ngIf="content !== contentType.NFC">nfc</mat-icon>
     </button>
@@ -37,7 +37,7 @@
                (clearEvent)="setEmpty()"
                (inputEvent)="setInput($event)"
   ></app-qr-code>
-  <app-nfc *ngIf="content === contentType.NFC"
+  <app-nfc *ngIf="content === contentType.NFC && isNfcAvailable"
            (clearEvent)="setEmpty()"
            (inputEvent)="setInput($event)"
   ></app-nfc>
