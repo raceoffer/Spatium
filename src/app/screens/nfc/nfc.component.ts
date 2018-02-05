@@ -9,7 +9,7 @@ declare const Utils: any;
 
 @Component({
   selector: 'app-nfc',
-  host: {'class': 'child'},
+  host: {'class': 'child box'},
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
