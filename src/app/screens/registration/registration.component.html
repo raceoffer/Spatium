@@ -24,13 +24,14 @@
           {{ username }}
         </div>
         <div matSuffix style="position: absolute; right:24px; display: inline-block; margin-top: -7.5px;" (click)="generateNewLogin()">
-          <mat-icon class="button-imitator-30" *ngIf="!generateInProgress">sync</mat-icon>
-          <mat-icon class="button-imitator-30 sync" *ngIf="generateInProgress">sync</mat-icon>
+          <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
+          <mat-icon class="button-imitator-30 sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
+          <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
         </div>
       </div>
 
       <div class="spatium-textfield entry bottom32">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="Password" name="Password">
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password">
       </div>
 
       <div class="top-arrow-scroll" id="top-scroller">
@@ -42,7 +43,7 @@
 
     <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;" *ngIf="!advancedMode">
       <div class="reg-warning">
-         <span>{{stWarning}}</span>
+         <span>{{ stWarning }}</span>
       </div>
     </div>
 
@@ -67,7 +68,7 @@
           <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
         </button>
       </div>
-      <button type="submit" mat-raised-button color="accent" [disabled]="isDisable" class="width-button color" >{{stRegistration}}</button>
+      <button type="submit" mat-raised-button color="accent" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
 
     </div>
 

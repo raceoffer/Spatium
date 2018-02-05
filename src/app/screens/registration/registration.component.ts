@@ -2,11 +2,22 @@ import {
   Component, Input, NgZone, OnInit, ElementRef,
   ViewChild, AfterViewInit
 } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService} from '../../services/auth.service';
-import {MatDialog} from '@angular/material';
-import {DialogFactorsComponent} from '../dialog-factors/dialog-factors.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { MatDialog } from '@angular/material';
+import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
+import { NotificationService } from '../../services/notification.service';
+import { DDSService } from '../../services/dds.service';
 import * as $ from 'jquery';
+
+declare const Utils: any;
+
+enum State {
+  Ready,
+  Updating,
+  Exists,
+  Error
+}
 
 @Component({
   selector: 'app-registration',
@@ -14,44 +25,26 @@ import * as $ from 'jquery';
   styleUrls: ['./registration.component.css']
 })
 export class RegistrationComponent implements OnInit, AfterViewInit {
-
   stPassword = 'Password';
-  isDisable = true;
   stRegistration = 'Sign up';
   username: string = null;
   stWarning = 'Your funds safety depends on the strongness of the authentication factors. Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
-  _passwordValue = '';
-  generateInProgress = false;
+  password = '';
   advancedMode = false;
+
+  stateType = State;
+  usernameState = State.Ready;
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
   constructor(public  dialog: MatDialog,
               private readonly router: Router,
-              private route: ActivatedRoute,
-              private ngZone: NgZone,
-              private authSevice: AuthService) {
-
-    this.route.params.subscribe(params => {
-      if (params['login']) {
-        this.username = params['login'];
-      }
-    });
+              private readonly route: ActivatedRoute,
+              private readonly ngZone: NgZone,
+              private readonly authSevice: AuthService,
+              private readonly notification: NotificationService,
+              private readonly dds: DDSService) {
     this.advancedMode = false;
-  }
-
-  get Password() {
-    return this._passwordValue;
-  }
-
-  @Input()
-  set Password (newPassword) {
-    this._passwordValue = newPassword;
-    if (this._passwordValue.length > 0 && !this.generateInProgress && this.username.length > 0) {
-      this.isDisable = false;
-    } else {
-      this.isDisable = true;
-    }
   }
 
   ngOnInit() {
@@ -71,6 +64,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.username = this.authSevice.login;
     if (this.factorContainer != null) {
       this.checkOverflow(this.factorContainer);
     }
@@ -93,22 +87,24 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   async generateNewLogin() {
-    if (!this.generateInProgress) {
-      this.generateInProgress = true;
-      for (let i = 0; i < 3; i++) {
-        this.username = this.makeNew();
-        await this.checkingLoginInDDS();
-      }
-      this.generateInProgress = false;
-
-      if (this._passwordValue.length > 0 && !this.generateInProgress && this.username.length > 0) {
-        this.isDisable = false;
-      }
+    if (!await Utils.testNetwork()) {
+      this.notification.show('No network connection');
+      this.usernameState = State.Error;
+      return;
     }
-  }
-
-  async checkingLoginInDDS() {
-    await this.delay(3000);
+    this.usernameState = State.Updating;
+    try {
+      do {
+        this.username = this.makeNew();
+        const exists = await this.dds.exists(AuthService.toId(this.username));
+        if (!exists) {
+          this.usernameState = State.Ready;
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+      this.usernameState = State.Error;
+    }
   }
 
   makeNew() {
@@ -122,10 +118,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     return text;
   }
 
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   sddNewFactor() {
     this.dialog.open(DialogFactorsComponent, {
       width: '250px',
@@ -136,5 +128,4 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   openAdvanced() {
     this.advancedMode = true;
   }
-
 }

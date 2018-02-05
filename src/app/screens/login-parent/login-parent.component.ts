@@ -99,7 +99,10 @@ export class LoginParentComponent {
 
       await this.router.navigate(['/auth']);
     } else if (this.buttonState === State.New) {
-      // not yet
+      this.authService.login = this.input;
+      this.authService.clearFactors();
+
+      await this.router.navigate(['/registration']);
     } else {
       // do nothing
     }
