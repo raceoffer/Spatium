@@ -16,6 +16,7 @@ import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
 import {FactorParentComponent} from "./screens/factor/factor-parent.component";
 import {LoginParentComponent} from "./screens/login-parent/login-parent.component";
+import { WalletComponent } from "./screens/wallet/wallet.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -34,7 +35,8 @@ const appRoutes: Routes = [
     { path: 'nfc', component: NfcComponent, outlet: 'factor' }
   ]},
   { path: 'navigator', component: NavigatorComponent, children: [
-    { path: 'wallet', component: SendTransactionComponent, outlet: 'navigator' }
+    { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
+    { path: 'send-transaction', component: SendTransactionComponent, outlet: 'navigator' }
   ]}
 ];
 

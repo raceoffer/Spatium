@@ -17,7 +17,8 @@ import {
   MatDialogModule,
   MatSelectModule,
   MatSnackBarModule,
-  MatFormFieldModule
+  MatFormFieldModule,
+  MatGridListModule
 } from '@angular/material';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -52,6 +53,7 @@ import { FactorParentComponent } from './screens/factor/factor-parent.component'
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './ng-init.directive';
 import { KeyChainService } from './services/keychain.service';
+import { WalletComponent } from './screens/wallet/wallet.component';
 
 @NgModule({
   declarations: [
@@ -74,7 +76,8 @@ import { KeyChainService } from './services/keychain.service';
     NfcComponent,
     FactorParentComponent,
     LoginParentComponent,
-    NgInitDirective
+    NgInitDirective,
+    WalletComponent
   ],
   imports: [
     FormsModule,
@@ -100,6 +103,7 @@ import { KeyChainService } from './services/keychain.service';
     MatSelectModule,
     MatSnackBarModule,
     MatFormFieldModule,
+    MatGridListModule,
     NgxZxingModule.forRoot()
   ],
   providers: [

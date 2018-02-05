@@ -14,7 +14,7 @@ export class NavigatorComponent implements OnInit {
     {
       name: 'Wallet',
       link: '/wallet',
-      isSelected: false,
+      isSelected: true,
       isActive: true
     },
     {
