@@ -15,12 +15,14 @@ export class FileUploadComponent implements AfterViewInit {
   next: string = null;
   back: string = null;
 
-  _file: any = null;
+  file: any = null;
 
-  constructor(private readonly router: Router,
-              private route: ActivatedRoute,
-              private ngZone: NgZone,
-              private authSevice: AuthService) {
+  constructor(
+    private readonly router: Router,
+    private route: ActivatedRoute,
+    private ngZone: NgZone,
+    private authSevice: AuthService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -32,7 +34,7 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this._file = '';
+    this.file = '';
   }
 
   onUploadFileClick(event) {
@@ -47,7 +49,7 @@ export class FileUploadComponent implements AfterViewInit {
 
     reader.onloadend = function () {
       const arrayBufferToBuffer = require('arraybuffer-to-buffer');
-      self._file = arrayBufferToBuffer(reader.result);
+      self.file = arrayBufferToBuffer(reader.result);
 
       self.goNext();
     };
@@ -56,9 +58,16 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   goNext(): void {
-    this.authSevice.addFactor( FactorType.FILE, this._file);
-    this.ngZone.run(() => {
-      this.router.navigate(['/auth']);
-    });
+    if (this.next && this.next === 'auth') {
+      this.authSevice.addFactor( FactorType.FILE, this.file);
+      this.ngZone.run(() => {
+        this.router.navigate(['/auth']);
+      });
+    } else if (this.next && this.next === 'registration') {
+      this.authSevice.addFactor( FactorType.FILE, this.file);
+      this.ngZone.run(() => {
+        this.router.navigate(['/registration']);
+      });
+    }
   }
 }

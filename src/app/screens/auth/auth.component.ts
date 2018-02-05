@@ -69,6 +69,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
     this.factors = this.authSevice.factors;
     this.cd.detectChanges();
     this.checkOverflow(this.factorContainer);
+    this.goBottom();
   }
 
   checkOverflow (element) {

@@ -81,6 +81,12 @@ export class PincodeComponent implements AfterViewInit {
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);
       });
+    } else if (this.next && this.next === 'registration') {
+      this.authSevice.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/registration']);
+      });
     }
   }
 

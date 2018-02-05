@@ -1,9 +1,9 @@
 import {
-  Component, Input, NgZone, OnInit, ElementRef,
-  ViewChild, AfterViewInit
+  Component, NgZone, OnInit, ElementRef,
+  ViewChild, AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import {AuthService, FactorType} from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { NotificationService } from '../../services/notification.service';
@@ -28,24 +28,29 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   stPassword = 'Password';
   stRegistration = 'Sign up';
   username: string = null;
-  stWarning = 'Your funds safety depends on the strongness of the authentication factors. Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
+  stWarning =
+    'Your funds safety depends on the strongness of the authentication factors. ' +
+    'Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
   password = '';
   advancedMode = false;
+
+  factors = [];
 
   stateType = State;
   usernameState = State.Ready;
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
-  constructor(public  dialog: MatDialog,
-              private readonly router: Router,
-              private readonly route: ActivatedRoute,
-              private readonly ngZone: NgZone,
-              private readonly authSevice: AuthService,
-              private readonly notification: NotificationService,
-              private readonly dds: DDSService) {
-    this.advancedMode = false;
-  }
+  constructor(
+    public  dialog: MatDialog,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly ngZone: NgZone,
+    private readonly cd: ChangeDetectorRef,
+    private readonly authSevice: AuthService,
+    private readonly notification: NotificationService,
+    private readonly dds: DDSService
+  ) { }
 
   ngOnInit() {
     $('#factor-container').scroll(function () {
@@ -65,9 +70,12 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.username = this.authSevice.login;
-    if (this.factorContainer != null) {
-      this.checkOverflow(this.factorContainer);
-    }
+    this.password = this.authSevice.password;
+    this.factors = this.authSevice.factors;
+    this.advancedMode = this.factors.length > 0;
+    this.cd.detectChanges();
+    this.checkOverflow(this.factorContainer);
+    this.goBottom();
   }
 
   checkOverflow (element) {
@@ -119,13 +127,37 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   sddNewFactor() {
+    this.authSevice.password = this.password;
     this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { back: 'registration', next: 'registration' }
     });
   }
 
+  removeFactor(factor): void {
+    this.authSevice.rmFactor(factor);
+    this.factors = this.authSevice.factors;
+    this.cd.detectChanges();
+  }
+
   openAdvanced() {
     this.advancedMode = true;
+  }
+
+  submit() {
+    const factors = this.factors.map(factor => factor.toBuffer()).reverse();
+    factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+    const tree = factors.reduce((rest, factor) => {
+      const node = {
+        factor: factor
+      };
+      if (rest) {
+        node['children'] = [ rest ];
+      }
+      return node;
+    }, null);
+    const seed = Utils.randomBytes(64);
+    const encrypted = Utils.packTree(tree, node => node.factor, seed);
+    console.log(seed.toString('hex'), encrypted.toString('hex'));
   }
 }

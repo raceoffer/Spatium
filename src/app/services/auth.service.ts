@@ -7,10 +7,10 @@ declare const nfc: any;
 @Injectable()
 export class AuthService {
   login: string;
+  password: string;
   qr: string;
   nfc: string;
   factors: Factor[] = [];
-  reg_factors: Factor[] = [];
   available: AvailableFactor[] = [];
 
   encryptedSeed: string = null;
@@ -48,33 +48,31 @@ export class AuthService {
     return this.available;
   }
 
-  addFactor(type, value) {
+  newFactor(type, value) {
     switch (type) {
       case FactorType.PIN: {
-        this.factors.push(new Factor(FactorType.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value));
-        break;
+        return new Factor(FactorType.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value);
       }
       case FactorType.PASSWORD: {
-        this.factors.push(new Factor(FactorType.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value));
-        break;
+        return new Factor(FactorType.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value);
       }
       case FactorType.FILE: {
-        this.factors.push(new Factor(FactorType.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value));
-        break;
+        return new Factor(FactorType.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value);
       }
       case FactorType.GRAPHIC_KEY: {
-        this.factors.push(new Factor(FactorType.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value));
-        break;
+        return new Factor(FactorType.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value);
       }
       case FactorType.QR: {
-        this.factors.push(new Factor(FactorType.QR, FactorIcon.QR, FactorIconAsset.QR, value));
-        break;
+        return new Factor(FactorType.QR, FactorIcon.QR, FactorIconAsset.QR, value);
       }
       case FactorType.NFC: {
-        this.factors.push(new Factor(FactorType.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value));
-        break;
+        return new Factor(FactorType.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
       }
     }
+  }
+
+  addFactor(type, value) {
+    this.factors.push(this.newFactor(type, value));
   }
 
   rmFactor(factor) {

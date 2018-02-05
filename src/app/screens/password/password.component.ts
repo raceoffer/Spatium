@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthService, FactorType} from '../../services/auth.service';
 
@@ -11,16 +11,18 @@ import {AuthService, FactorType} from '../../services/auth.service';
 export class PasswordComponent implements AfterViewInit {
   stContinue = 'Continue';
   stPassword = 'Password';
-  _passwordValue = '';
-  isDisable = true;
+
+  password = '';
 
   next: string = null;
   back: string = null;
 
-  constructor(private readonly router: Router,
-              private route: ActivatedRoute,
-              private ngZone: NgZone,
-              private authSevice: AuthService) {
+  constructor(
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly ngZone: NgZone,
+    private readonly authSevice: AuthService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -31,32 +33,23 @@ export class PasswordComponent implements AfterViewInit {
     });
   }
 
-  get Password() {
-    return this._passwordValue;
-  }
-
-  @Input()
-  set Password(newPassword) {
-    this._passwordValue = newPassword;
-    if (this._passwordValue.length > 0) {
-      this.isDisable = false;
-      console.log(this.isDisable);
-    } else {
-      this.isDisable = true;
-      console.log(this.isDisable);
-    }
-  }
-
   ngAfterViewInit() {
-    this._passwordValue = '';
+    this.password = '';
   }
 
   goNext(): void {
-    if (this._passwordValue !== '') {
+    if (this.password !== '') {
       if (this.next && this.next === 'auth') {
-        this.authSevice.addFactor(FactorType.PASSWORD, Buffer.from(this._passwordValue, 'utf-8'));
+        this.authSevice.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+
         this.ngZone.run(async () => {
           await this.router.navigate(['/auth']);
+        });
+      } else if (this.next && this.next === 'registration') {
+        this.authSevice.addFactor(FactorType.PIN, Buffer.from(this.password, 'utf-8'));
+
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/registration']);
         });
       }
     }

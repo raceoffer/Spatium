@@ -2,7 +2,7 @@
   <div class="header text-center">
     <mat-toolbar color="primary">
       <mat-toolbar-row>
-        <button mat-icon-button routerLink="/start">
+        <button mat-icon-button routerLink="/login">
           <mat-icon class="color-custom-dark">arrow_back</mat-icon>
         </button>
       </mat-toolbar-row>
@@ -48,7 +48,18 @@
     </div>
 
     <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
-
+      <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;">
+        <div style="margin-left: 50px;">
+          <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+            <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
+          </button>
+        </div>
+        <div>
+          <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{factor.icon}}</mat-icon>
+          <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="footer text-center" style="bottom: 0px;">
@@ -68,7 +79,7 @@
           <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
         </button>
       </div>
-      <button type="submit" mat-raised-button color="accent" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
+      <button type="submit" mat-raised-button color="accent" (click)="submit()" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
 
     </div>
 

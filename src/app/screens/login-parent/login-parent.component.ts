@@ -116,6 +116,7 @@ export class LoginParentComponent  implements OnInit {
       await this.router.navigate(['/auth']);
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
+      this.authService.password = '';
       this.authService.clearFactors();
 
       await this.router.navigate(['/registration']);
