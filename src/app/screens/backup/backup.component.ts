@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
-import {AuthService} from "../../services/auth.service";
+import {AuthService} from '../../services/auth.service';
 
 declare const Utils: any;
 
@@ -25,7 +25,6 @@ export class BackupComponent implements OnInit {
   ethBalanceLabel = 'Ethereum balance';
 
   saveLabel = 'Save';
-  skipLabel = 'Skip';
 
   address = '';
   balance = 0.0;
@@ -93,5 +92,10 @@ export class BackupComponent implements OnInit {
 
   async skip() {
     await this.router.navigate(['/reg-success']);
+  }
+
+  async cancelClick() {
+    // cancelled must be here
+    await this.router.navigate(['/start']);
   }
 }

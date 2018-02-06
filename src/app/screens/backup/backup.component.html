@@ -1,7 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
+      <button mat-icon-button (click)="cancelClick()">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{ backupLabel }}</span>
@@ -31,20 +31,18 @@
 
     <mat-list-item>
       <p class="list-info" mat-line>{{ backupCostLabel }}</p>
-      <p class="list-name" mat-line>{{ comission }} ETH</p>
+      <p class="list-name" mat-line>{{ comission }}</p>
     </mat-list-item>
   </mat-list>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-    <mat-spinner color="accent" strokeWidth="2" diameter="50" style = "margin-bottom: 23px !important;" *ngIf="saving"></mat-spinner>
-    <button mat-raised-button color="accent" class="width-button"
+  <div class="full-width" fxLayout="column" fxLayoutAlign="start center">
+    <span *ngIf="!enough">{{notEnoughLabel}}</span>
+    <div style="height: 15px;" *ngIf="!saving"></div>
+    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0" *ngIf="saving"></mat-progress-bar>
+    <button mat-raised-button color="accent" class="width-button-full"
             (click)="save()"
-            *ngIf="!saving"
-            [disabled]="!enough">{{ saveLabel }}</button>
-
-    <button mat-raised-button color="accent" class="width-button"
-            (click)="skip()"
-            *ngIf="!saving">{{ skipLabel }}</button>
+            *ngIf="enough"
+            [disabled]="saving">{{ saveLabel }}</button>
   </div>
 
 
