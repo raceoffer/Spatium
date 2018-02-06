@@ -59,7 +59,7 @@ export class BackupComponent implements OnInit {
 
     this.account = await this.dds.accountFromSecret(this.secret);
     this.address = this.account.address;
-    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.dds.estimateGas(this.id, this.data)).toString(), 'ether'));
+    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
 
     await this.updateBalance();
   }
@@ -92,6 +92,6 @@ export class BackupComponent implements OnInit {
   }
 
   async skip() {
-    await this.router.navigate(['/reg-success']);
+    await this.router.navigate(['/waiting']);
   }
 }

@@ -22,6 +22,14 @@ export class DDSAccount {
       gasPrice: gasPrice
     });
   }
+
+  public async estimateGas(id: string, data: any) {
+    return this.dds.estimateStoreGas({
+      id: id,
+      data: data,
+      account: this.account
+    });
+  }
 }
 
 @Injectable()
@@ -48,10 +56,6 @@ export class DDSService {
     }
 
     return data;
-  }
-
-  public async estimateGas(id: string, data: any) {
-    return this.dds.estimateStoreGas({ id, data });
   }
 
   public fromWei(wei: any, coin: string) {
