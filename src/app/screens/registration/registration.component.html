@@ -22,11 +22,11 @@
         <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
           {{ username }}
         </div>
-        <div matSuffix style="position: absolute; right:24px; display: inline-block; margin-top: -7.5px;" (click)="generateNewLogin()">
+        <button matSuffix mat-icon-button style="position: absolute; right:24px; display: inline-block; margin-top: -7.5px;" (click)="generateNewLogin()">
           <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
           <mat-icon class="button-imitator-30 sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
           <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
-        </div>
+        </button>
       </div>
 
       <div class="spatium-textfield entry bottom32">

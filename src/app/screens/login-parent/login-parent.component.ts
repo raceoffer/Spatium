@@ -35,7 +35,7 @@ export class LoginParentComponent  implements OnInit {
   buttonState = State.Empty;
 
   stSignUp = 'Sign up';
-  stLogIn = 'Log in';
+  stLogIn = 'Sign in';
   stError = 'Retry';
 
   input = '';

@@ -21,7 +21,7 @@ declare const Utils: any;
 })
 export class AuthComponent implements OnInit, AfterViewInit {
   username = '';
-  login = 'Log in';
+  login = 'Sign in';
   loginDisable = false;
 
   factors = [];

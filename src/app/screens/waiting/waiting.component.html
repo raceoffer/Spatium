@@ -31,10 +31,10 @@
       </mat-list-item>
     </mat-nav-list>
     <div style="width: 100%" fxLayout="row" fxLayoutAlign="center center" >
-      <div matSuffix (click)="startDiscovery()">
+      <button mat-icon-button (click)="startDiscovery()">
         <mat-icon class="button-imitator-large" *ngIf="!discovering.getValue()">sync</mat-icon>
         <mat-icon class="button-imitator-large sync" *ngIf="discovering.getValue()">sync</mat-icon>
-      </div>
+      </button>
     </div>
   </div>
 </div>
