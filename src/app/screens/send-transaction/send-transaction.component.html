@@ -56,7 +56,7 @@
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="phase === phaseType.Sending"></mat-progress-bar>
 
-    <button *ngIf="phase === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()">
+    <button *ngIf="phase === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="balanceBtcUnconfirmed < sendBtc">
       {{stTransfer}}
     </button>
     <button *ngIf="phase === phaseType.Confirmation" mat-raised-button color="accent" class="width-button-full color" (click)="cancelTransaction()">
