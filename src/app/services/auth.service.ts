@@ -36,12 +36,16 @@ export class AuthService {
       FactorIconAsset.QR, FactorLink.QR));
 
     nfc.enabled(function () {
-      console.log('success');
-    this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
-      FactorIconAsset.NFC, FactorLink.NFC));
-    }.bind(this), function () {
-      console.log('failure');
-    });
+      this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC));
+      }.bind(this), function (e) {
+      if (e !== 'NO_NFC') {
+        this.ngZone.run(async () => {
+          this.available.push(new AvailableFactor(FactorType.NFC, 'NFC', FactorIcon.NFC,
+            FactorIconAsset.NFC, FactorLink.NFC));
+        });
+      }
+    }.bind(this));
   }
 
   getAllAvailableFactors() {
