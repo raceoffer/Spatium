@@ -10,50 +10,42 @@ import {ActivatedRoute, Router} from '@angular/router';
 export class NavigatorComponent implements OnInit {
   title = 'Wallet';
   isDarkTheme = false;
-  navLinks = [
-    {
+  navLinks = [{
       name: 'Wallet',
       link: '/wallet',
       isSelected: true,
       isActive: true
-    },
-    {
+    }, {
       name: 'Exchange',
       link: '',
       isSelected: false,
       isActive: false
-    },
-    {
+    }, {
       name: 'ICO',
       link: '',
       isSelected: false,
       isActive: false
-    },
-    {
+    }, {
       name: 'Portfolio Investment',
       link: '',
       isSelected: false,
       isActive: false
-    },
-    {
+    }, {
       name: 'Verification',
       link: '',
       isSelected: false,
       isActive: false
-    },
-    {
+    }, {
       name: 'Backup to Decentralized Storage',
       link: '/backup',
       isSelected: false,
       isActive: true
-    },
-    {
+    }, {
       name: 'Settings',
       link: '',
       isSelected: false,
       isActive: false
-    },
-    {
+    }, {
       name: 'Exit',
       link: '/start',
       isSelected: false,
