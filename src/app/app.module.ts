@@ -56,6 +56,7 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { KeyChainService } from './services/keychain.service';
 import { WalletComponent } from './screens/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
+import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 
 @NgModule({
   declarations: [
@@ -81,7 +82,8 @@ import { RegistrationSuccessComponent } from './screens/registration-success/reg
     RegistrationComponent,
     NgInitDirective,
     WalletComponent,
-    RegistrationSuccessComponent
+    RegistrationSuccessComponent,
+    FingerPrintComponent
   ],
   imports: [
     FormsModule,
