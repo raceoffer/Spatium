@@ -82,7 +82,7 @@ export class BackupComponent implements OnInit {
       await this.updateBalance();
       this.notification.show('Partial secret is uploaded to DDS');
 
-      await this.router.navigate(['/waiting']);
+      await this.router.navigate(['/reg-success']);
     } catch (e) {
       this.notification.show('Failed to upload secret');
       console.log(e);
@@ -92,6 +92,6 @@ export class BackupComponent implements OnInit {
   }
 
   async skip() {
-    await this.router.navigate(['/waiting']);
+    await this.router.navigate(['/reg-success']);
   }
 }

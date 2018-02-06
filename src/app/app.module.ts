@@ -55,6 +55,7 @@ import { NgInitDirective } from './ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { KeyChainService } from './services/keychain.service';
 import { WalletComponent } from './screens/wallet/wallet.component';
+import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 
 @NgModule({
   declarations: [
@@ -79,7 +80,8 @@ import { WalletComponent } from './screens/wallet/wallet.component';
     LoginParentComponent,
     RegistrationComponent,
     NgInitDirective,
-    WalletComponent
+    WalletComponent,
+    RegistrationSuccessComponent
   ],
   imports: [
     FormsModule,

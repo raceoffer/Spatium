@@ -17,6 +17,7 @@ import { FactorParentComponent } from './screens/factor/factor-parent.component'
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { WalletComponent } from "./screens/wallet/wallet.component";
+import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -27,6 +28,7 @@ const appRoutes: Routes = [
   { path: 'waiting', component: WaitingComponent },
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
+  { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'factor', component: FactorParentComponent, children: [
     { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
     { path: 'password', component: PasswordComponent, outlet: 'factor' },

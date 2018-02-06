@@ -1,0 +1,27 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <button mat-icon-button routerLink="/login">
+          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+        </button>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div class="entry-margin start-logo-text" >
+    </div>
+    <div class="start-tagline-padding">
+      <span class="start-tagline">Secure your funds</span>
+    </div>
+  </div>
+
+  <div class="content text-center" style="overflow: scroll;max-height: 100%;" fxLayout="column" fxLayoutAlign="center center">
+    <div style="font-size: 18px;line-height: 48px;padding-bottom: 48px;">
+      <span>{{stSuccess0}}</span>
+      <span>{{stSuccess1}}</span>
+    </div>
+    <button mat-raised-button color="accent" (click)="goWaiting()" class="width-button color" >{{stOpenWallet}}</button>
+  </div>
+
+</div>
+
