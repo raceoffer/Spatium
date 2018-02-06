@@ -8,6 +8,8 @@ import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
+import { KeyChainService } from '../../services/keychain.service';
+import { WalletService } from '../../services/wallet.service';
 import * as $ from 'jquery';
 
 declare const Utils: any;
@@ -46,6 +48,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly ngZone: NgZone,
+    private readonly wallet: WalletService,
+    private readonly keychain: KeyChainService,
     private readonly cd: ChangeDetectorRef,
     private readonly authSevice: AuthService,
     private readonly notification: NotificationService,
@@ -158,6 +162,12 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     }, null);
     const seed = Utils.randomBytes(64);
     const encrypted = Utils.packTree(tree, node => node.factor, seed);
-    console.log(seed.toString('hex'), encrypted.toString('hex'));
+
+    this.keychain.seed = seed;
+    this.wallet.secret = this.keychain.getBitcoinSecret(0);
+    this.authSevice.encryptedTreeData = encrypted;
+    this.authSevice.ethereumSecret = this.keychain.getEthereumSecret(0);
+
+    this.router.navigate(['/backup']);
   }
 }
