@@ -51,13 +51,12 @@ export class LoginParentComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    nfc.enabled(function () {
-      console.log('success');
-    }, function () {
-      console.log('failure');
-      this.ngZone.run(async () => {
-        this.isNfcAvailable = false;
-      });
+    nfc.enabled(function () {}, function (e) {
+      if (e === 'NO_NFC') {
+        this.ngZone.run(async () => {
+          this.isNfcAvailable = false;
+        });
+      }
     }.bind(this));
   }
 
