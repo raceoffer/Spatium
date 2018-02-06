@@ -148,7 +148,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.advancedMode = true;
   }
 
-  submit() {
+  async submit() {
     const factors = this.factors.map(factor => factor.toBuffer()).reverse();
     factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
     const tree = factors.reduce((rest, factor) => {
@@ -168,6 +168,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.authSevice.encryptedTreeData = encrypted;
     this.authSevice.ethereumSecret = this.keychain.getEthereumSecret(0);
 
-    this.router.navigate(['/backup']);
+    await this.router.navigate(['/backup']);
   }
 }
