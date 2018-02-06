@@ -20,14 +20,14 @@
     </div>
   </div>
 
-  <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="!disabledNFC && isRepeatable">
+  <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="!disabledNFC && isRepeatable && !canScanAgain">
     <span >{{ text }}</span>
   </div>
-  <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !isRepeatable">
+  <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !isRepeatable && !canScanAgain">
     <span >{{ text }}</span>
   </div>
 
-  <div style="height:250px;" fxLayoutAlign="center center" class="content" *ngIf="isRepeatable && canScanAgain">
+  <div style="height:250px;" fxLayoutAlign="center center" class="content" *ngIf="!disabledNFC && isRepeatable && canScanAgain">
     <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
       <div class="glass">
         <mat-icon style="width: 200px; height: 200px; font-size: 200px;">nfc</mat-icon>
