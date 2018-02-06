@@ -528,10 +528,6 @@ export class WalletService {
     this.status.subscribe(status => this.synchronizing.next(status === Status.Synchronizing));
     this.status.subscribe(status => this.ready.next(status === Status.Ready));
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
-
-    this.walletDB = new bcoin.walletdb({
-      db: 'memory'
-    });
   }
 
   public async reset() {
@@ -743,6 +739,10 @@ export class WalletService {
   }
 
   private async finishSync(data) {
+    this.walletDB = new bcoin.walletdb({
+      db: 'memory'
+    });
+
     try {
       this.compoundKey.finishInitialSync(data);
     } catch (e) {
