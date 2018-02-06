@@ -81,15 +81,17 @@ export class BackupComponent implements OnInit {
       await this.account.store(this.id, this.data, this.gasPrice);
       await this.updateBalance();
       this.notification.show('Partial secret is uploaded to DDS');
-      await this.router.navigate(['/wallet']);
-    } catch (ignored) {
+
+      await this.router.navigate(['/waiting']);
+    } catch (e) {
       this.notification.show('Failed to upload secret');
+      console.log(e);
     } finally {
       this.saving = false;
     }
   }
 
   async skip() {
-    // do nothing yet
+    await this.router.navigate(['/waiting']);
   }
 }
