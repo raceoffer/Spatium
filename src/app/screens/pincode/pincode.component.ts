@@ -1,6 +1,5 @@
-import { Component, Input, AfterViewInit, NgZone } from '@angular/core';
+import { Component, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
@@ -27,7 +26,6 @@ export class PincodeComponent implements AfterViewInit {
     private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly authSevice: AuthService,
-    private readonly walletService: WalletService,
     private readonly fs: FileService,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
@@ -62,10 +60,8 @@ export class PincodeComponent implements AfterViewInit {
         if (this.authSevice.encryptedSeed) {
           const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
           this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
-          this.walletService.secret = this.keyChain.getBitcoinSecret(0);
         } else {
           this.keyChain.seed = Utils.randomBytes(64);
-          this.walletService.secret = this.keyChain.getBitcoinSecret(0);
           this.authSevice.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
 
           await this.fs.writeFile(this.fs.safeFileName('seed'), this.authSevice.encryptedSeed);

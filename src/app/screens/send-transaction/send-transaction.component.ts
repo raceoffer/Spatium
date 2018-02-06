@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { OnInit, Component, OnDestroy } from '@angular/core';
 import { WalletService } from '../../services/wallet.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -15,7 +15,7 @@ enum Phase {
   templateUrl: './send-transaction.component.html',
   styleUrls: ['./send-transaction.component.css']
 })
-export class SendTransactionComponent implements AfterViewInit {
+export class SendTransactionComponent implements OnInit, OnDestroy {
   public phaseType = Phase; // for template
 
   addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
@@ -55,27 +55,37 @@ export class SendTransactionComponent implements AfterViewInit {
 
   phase = Phase.Creation;
 
+  subscriptions = [];
+
   constructor(
     private walletService: WalletService,
     private notification: NotificationService
   ) {}
 
-  ngAfterViewInit() {
+  ngOnInit() {
+    this.subscriptions.push(
+      this.walletService.balance.subscribe((balance) => {
+        this.updataBalance(balance);
+      }));
+
+    this.subscriptions.push(
+      this.walletService.rejectedEvent.subscribe(async () => {
+        await this.rejected();
+      }));
+
+    this.subscriptions.push(
+      this.walletService.signedEvent.subscribe(async () => {
+        await this.finalaized();
+      }));
+
     this.walletAddress = this.walletService.address.getValue();
     this.selected = this.walletAddress;
     this.updataBalance(this.walletService.balance.getValue());
+  }
 
-    this.walletService.balance.subscribe((balance) => {
-      this.updataBalance(balance);
-    });
-
-    this.walletService.onRejected.subscribe(async () => {
-      await this.rejected();
-    });
-
-    this.walletService.onSigned.subscribe(async () => {
-      await this.finalaized();
-    });
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   updataBalance(balance) {

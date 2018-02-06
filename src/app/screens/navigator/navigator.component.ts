@@ -1,18 +1,18 @@
-import { Component, OnInit, ViewEncapsulation  } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { WalletService } from '../../services/wallet.service';
+import { BluetoothService } from '../../services/bluetooth.service';
 
 @Component({
   selector: 'app-navigator',
   templateUrl: './navigator.component.html',
-  styleUrls: ['./navigator.component.css'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./navigator.component.css']
 })
-export class NavigatorComponent implements OnInit {
+export class NavigatorComponent implements OnInit, OnDestroy {
   title = 'Wallet';
-  isDarkTheme = false;
   navLinks = [{
       name: 'Wallet',
-      link: '/wallet',
+      link: ['/navigator', { outlets: { navigator: ['wallet'] } }],
       isSelected: true,
       isActive: true
     }, {
@@ -36,11 +36,6 @@ export class NavigatorComponent implements OnInit {
       isSelected: false,
       isActive: false
     }, {
-      name: 'Backup to Decentralized Storage',
-      link: '/backup',
-      isSelected: false,
-      isActive: true
-    }, {
       name: 'Settings',
       link: '',
       isSelected: false,
@@ -52,15 +47,30 @@ export class NavigatorComponent implements OnInit {
       isActive: true
     }];
 
-  changeTheme(): void {
-    this.isDarkTheme = !this.isDarkTheme;
+  private subscriptions = [];
+
+  constructor(
+    private readonly router: Router,
+    private readonly wallet: WalletService,
+    private readonly bt: BluetoothService,
+    private readonly ngZone: NgZone
+  ) { }
+
+  async ngOnInit() {
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+        await this.router.navigate(['/waiting']);
+      })));
+    console.log('Entered navigation');
   }
 
-  constructor(private readonly router: Router,
-              private readonly route: ActivatedRoute) { }
+  async ngOnDestroy() {
+    console.log('Left navigation');
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
 
-  ngOnInit() {
-    this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}], { relativeTo: this.route.parent });
+    await this.wallet.reset();
+
+    await this.bt.disconnect();
   }
-
 }

@@ -29,11 +29,8 @@ export class AuthComponent implements OnInit, AfterViewInit {
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
   constructor(
-    public  dialog: MatDialog,
-    @Inject(DOCUMENT) private document: Document,
-    private ngZone: NgZone,
+    public dialog: MatDialog,
     private readonly router: Router,
-    private readonly walletService: WalletService,
     private readonly authSevice: AuthService,
     private readonly cd: ChangeDetectorRef,
     private readonly notification: NotificationService,
@@ -129,7 +126,6 @@ export class AuthComponent implements OnInit, AfterViewInit {
     }
 
     this.keyChain.seed = seed;
-    this.walletService.secret = this.keyChain.getBitcoinSecret(0);
 
     await this.router.navigate(['/waiting']);
   }

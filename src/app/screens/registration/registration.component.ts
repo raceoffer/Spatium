@@ -1,15 +1,14 @@
 import {
-  Component, NgZone, OnInit, ElementRef,
+  Component, OnInit, ElementRef,
   ViewChild, AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import {AuthService, FactorType} from '../../services/auth.service';
+import { Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
-import { WalletService } from '../../services/wallet.service';
 import * as $ from 'jquery';
 
 declare const Utils: any;
@@ -46,9 +45,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   constructor(
     public  dialog: MatDialog,
     private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly ngZone: NgZone,
-    private readonly wallet: WalletService,
     private readonly keychain: KeyChainService,
     private readonly cd: ChangeDetectorRef,
     private readonly authSevice: AuthService,
@@ -103,7 +99,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   goBottom() {
-    $('#factor-container').animate({scrollTop: $('#factor-container').height()}, 500, 'swing');
+    const container = $('#factor-container');
+    container.animate({scrollTop: container.height()}, 500, 'swing');
   }
 
   async generateNewLogin() {
@@ -173,7 +170,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     const encrypted = Utils.packTree(tree, node => node.factor, seed);
 
     this.keychain.seed = seed;
-    this.wallet.secret = this.keychain.getBitcoinSecret(0);
     this.authSevice.encryptedTreeData = encrypted;
     this.authSevice.ethereumSecret = this.keychain.getEthereumSecret(0);
 

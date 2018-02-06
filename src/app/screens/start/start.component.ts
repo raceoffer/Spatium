@@ -41,6 +41,6 @@ export class StartComponent implements OnInit {
       this.notification.show('No stored seed found');
     }
 
-    await this.router.navigate(['/factor', { back: 'start' }, {outlets: {'factor': ['pincode', {next: 'waiting'}]}}]);
+    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
   }
 }

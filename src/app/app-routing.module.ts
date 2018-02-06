@@ -16,7 +16,7 @@ import { NfcComponent } from './screens/nfc/nfc.component';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
-import { WalletComponent } from "./screens/wallet/wallet.component";
+import { WalletComponent } from './screens/wallet/wallet.component';
 import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
 
 const appRoutes: Routes = [

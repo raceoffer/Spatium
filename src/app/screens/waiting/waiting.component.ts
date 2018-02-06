@@ -25,41 +25,41 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private bt: BluetoothService,
     private wallet: WalletService,
-    private router: Router,
-    private ngZone: NgZone
+    private router: Router
   ) { }
 
   async ngOnInit() {
     await this.bt.disconnect();
+
     this.subscriptions.push(
-      this.wallet.readyEvent.subscribe(() =>  this.ngZone.run(async () => {
+      this.wallet.readyEvent.subscribe(async () =>  {
         console.log(this.wallet.address.getValue());
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
-    })));
+      }));
 
     this.subscriptions.push(
       this.wallet.cancelledEvent.subscribe(async () => {
         await this.bt.disconnect();
-    }));
+      }));
 
     this.subscriptions.push(
       this.wallet.failedEvent.subscribe(async () => {
         await this.bt.disconnect();
-    }));
+      }));
 
     this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(() => this.ngZone.run(async () => {
+      this.bt.connectedEvent.subscribe(async () => {
         console.log('Connected to', this.bt.connectedDevice.getValue());
         await this.wallet.startSync();
         this.overlayClass = 'overlay invisible';
-    })));
+      }));
 
     this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+      this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
         await this.wallet.cancelSync();
         this.overlayClass = 'overlay invisible';
-    })));
+      }));
 
     this.subscriptions.push(
       combineLatest(this.bt.discoveredDevices, this.bt.pairedDevices, (discovered, paired) => {

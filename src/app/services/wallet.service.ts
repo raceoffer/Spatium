@@ -10,6 +10,8 @@ import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
 import { LoggerService } from './logger.service';
+import { KeyChainService } from './keychain.service';
+import {Subject} from "rxjs/Subject";
 
 declare const bcoin: any;
 
@@ -482,8 +484,6 @@ export class WalletService {
 
   private network = 'testnet'; // 'main'; | 'testnet';
 
-  public secret: any = null;
-
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
 
@@ -500,13 +500,14 @@ export class WalletService {
   public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
   public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
 
-  public onVerifyTransaction: EventEmitter<any> = new EventEmitter<any>();
-  public onSigned: EventEmitter<any> = new EventEmitter<any>();
-  public onAccepted: EventEmitter<any> = new EventEmitter<any>();
-  public onRejected: EventEmitter<any> = new EventEmitter<any>();
+  public verifyEvent: Subject<any> = new Subject<any>();
+  public signedEvent: Subject<any> = new Subject<any>();
+  public acceptedEvent: Subject<any> = new Subject<any>();
+  public rejectedEvent: Subject<any> = new Subject<any>();
 
   constructor(
-    private bt: BluetoothService
+    private readonly bt: BluetoothService,
+    private readonly keychain: KeyChainService
   ) {
     bcoin.set(this.network);
 
@@ -532,11 +533,6 @@ export class WalletService {
 
   public async reset() {
     this.status.next(Status.None);
-
-    if (this.secret) {
-      this.secret.fill(0);
-      this.secret = null;
-    }
 
     if (this.routineTimer) {
       clearInterval(this.routineTimer);
@@ -569,7 +565,7 @@ export class WalletService {
 
     try {
       this.compoundKey = new CompoundKey({
-        localPrivateKeyring: CompoundKey.keyringFromSecret(this.secret)
+        localPrivateKeyring: CompoundKey.keyringFromSecret(this.keychain.getBitcoinSecret(1))
       });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create compound key', e);
@@ -672,19 +668,19 @@ export class WalletService {
       console.log('canceled');
       this.messageSubject.next({});
       this.signSession = null;
-      this.onRejected.emit();
+      this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(async () => {
       console.log('failed');
       this.messageSubject.next({});
       this.signSession = null;
-      this.onRejected.emit();
+      this.rejectedEvent.next();
     });
     this.signSession.signed.subscribe(async () => {
       console.log('signed');
       this.messageSubject.next({});
-      this.onAccepted.emit();
-      this.onSigned.emit();
+      this.acceptedEvent.next();
+      this.signedEvent.next();
     });
 
     this.signSession.sync().catch(() => {});
@@ -699,17 +695,17 @@ export class WalletService {
     );
 
     this.signSession.ready.subscribe(async () => {
-      this.onVerifyTransaction.emit(transaction);
+      this.verifyEvent.next(transaction);
     });
     this.signSession.canceled.subscribe(async () => {
       this.messageSubject.next({});
       this.signSession = null;
-      this.onRejected.emit();
+      this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(async () => {
       this.messageSubject.next({});
       this.signSession = null;
-      this.onRejected.emit();
+      this.rejectedEvent.next();
     });
 
     this.signSession.sync().catch(() => {});
