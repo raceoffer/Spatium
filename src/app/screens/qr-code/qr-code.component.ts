@@ -8,7 +8,7 @@ declare const cordova: any;
 
 @Component({
   selector: 'app-qr-code',
-  host: {'class': 'child'},
+  host: {'class': 'child box'},
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
@@ -18,7 +18,7 @@ export class QrCodeComponent implements OnInit {
   _qrcode: string = null;
   isRepeatable = false;
   canScanAgain = false;
-  classVideoContainer = '';
+  classVideoContainer = 'content';
   classVideo = '';
 
   next: string = null;
@@ -58,7 +58,7 @@ export class QrCodeComponent implements OnInit {
 
   ngOnInit() {
     this.canScanAgain = false;
-    this.classVideoContainer = '';
+    this.classVideoContainer = 'content';
     this._qrcode = '';
     this.classVideo = 'small-video';
     this.spinnerClass = 'spinner-video-container';
@@ -139,7 +139,7 @@ export class QrCodeComponent implements OnInit {
   scanAgain() {
     console.log('qr ' + this.authService.qr);
     this.canScanAgain = false;
-    this.classVideoContainer = '';
+    this.classVideoContainer = 'content';
     this.camStarted = true;
     this.clearEvent.emit();
   }

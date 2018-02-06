@@ -1,27 +1,44 @@
-<div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="disabledNFC">
+<div fxLayout="column" fxLayoutAlign="center center"  class="content">
+  <div class="width-button-container margin97"  *ngIf="disabledNFC">
 
-  <div class="connect-text">
-    <span>{{ enableNFCmessage }}</span>
+    <div class="connect-text">
+      <span>{{ enableNFCmessage }}</span>
+    </div>
+
+    <button mat-fab  class="width-button">
+      <mat-icon (click)="changeNFCState()">nfc
+      </mat-icon>
+    </button>
+
   </div>
 
-  <button mat-fab  class="width-button">
-    <mat-icon (click)="changeNFCState()">nfc
-    </mat-icon>
-  </button>
-
-</div>
-
-<div fxLayout="column" fxLayoutAlign="start center" [class]="classNfcContainer" *ngIf="!disabledNFC">
-  <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
-    <mat-icon style="width: 200px;
+  <div [class]="classNfcContainer" *ngIf="!disabledNFC">
+    <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
+      <mat-icon style="width: 200px;
     height: 200px;
     font-size: 200px;" class="pulse">nfc</mat-icon>
+    </div>
   </div>
 
-  <span class="overlay-bottom-center">{{ text }}</span>
+  <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="!disabledNFC && isRepeatable && !canScanAgain">
+    <span >{{ text }}</span>
+  </div>
+  <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !isRepeatable && !canScanAgain">
+    <span >{{ text }}</span>
+  </div>
 
+  <div style="height:250px;" fxLayoutAlign="center center" class="content" *ngIf="!disabledNFC && isRepeatable && canScanAgain">
+    <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
+      <div class="glass">
+        <mat-icon style="width: 200px; height: 200px; font-size: 200px;">nfc</mat-icon>
+      </div>
+
+      <button mat-fab color="primary" class="bt-size-30" style="margin-bottom: 20px; position: absolute; z-index: 3;" (click)="scanAgain()">
+        <mat-icon class="size-30">sync</mat-icon>
+      </button>
+    </div>
+  </div>
 </div>
 
-<div fxLayout="column" fxLayoutAlign="center center" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
-  <button mat-button color="accent" style="margin-bottom: 20px" (click)="scanAgain()">Scan again</button>
-</div>
+
+

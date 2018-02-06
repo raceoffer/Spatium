@@ -1,52 +1,57 @@
-<div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <button mat-icon-button routerLink="/start">
+          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+        </button>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div class="entry-margin start-logo-text" >
+    </div>
+    <div class="start-tagline-padding">
+      <span class="start-tagline">Secure your funds</span>
+    </div>
+
+    <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 100%;" class="start-tagline-padding">
+      <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
+        <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
+        <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
       </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
-
-  <div style="height: 30px;"></div>
-  <div class="start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
-
-  <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 100%;" class="start-tagline-padding">
-    <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
-      <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
-      <mat-icon class="size-40" *ngIf="content !== contentType.Login">text_fields</mat-icon>
-    </button>
-    <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
-      <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
-      <div class="qr-code-black" *ngIf="content !== contentType.QR"></div>
-    </button>
-    <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)" *ngIf="isNfcAvailable">
-      <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
-      <mat-icon class="size-40" *ngIf="content !== contentType.NFC">nfc</mat-icon>
-    </button>
+      <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
+        <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
+        <div class="qr-code-black optical-4" *ngIf="content !== contentType.QR"></div>
+      </button>
+      <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)" *ngIf="isNfcAvailable">
+        <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
+        <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.NFC">nfc</mat-icon>
+      </button>
+    </div>
   </div>
 
-  <app-login *ngIf="content === contentType.Login"
-             (buisyEvent)="setBusy()"
-             (clearEvent)="setEmpty()"
-             (inputEvent)="setInput($event)"
-  ></app-login>
-  <app-qr-code *ngIf="content === contentType.QR"
+    <app-login class="content-flex text-center" *ngIf="content === contentType.Login"
+               (buisyEvent)="setBusy()"
                (clearEvent)="setEmpty()"
                (inputEvent)="setInput($event)"
-  ></app-qr-code>
-  <app-nfc *ngIf="content === contentType.NFC && isNfcAvailable"
-           (clearEvent)="setEmpty()"
-           (inputEvent)="setInput($event)"
-  ></app-nfc>
+    ></app-login>
+    <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
+                 (clearEvent)="setEmpty()"
+                 (inputEvent)="setInput($event)"
+    ></app-qr-code>
+    <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
+             (clearEvent)="setEmpty()"
+             (inputEvent)="setInput($event)"
+    ></app-nfc>
 
-  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.Exists">{{stLogIn}}</button>
-  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
-  <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
-  <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)" *ngIf="buttonState === stateType.Error">{{stError}}</button>
+
+  <div class="footer text-center">
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" [disabled]="buttonState === stateType.Empty" *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{stLogIn}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)" *ngIf="buttonState === stateType.Error">{{stError}}</button>
+  </div>
+
 </div>
 
 
