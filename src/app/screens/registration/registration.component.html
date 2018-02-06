@@ -8,14 +8,14 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <div class="start-logo-text" >
+    <div class="entry-margin start-logo-text" >
     </div>
     <div class="start-tagline-padding">
       <span class="start-tagline">Secure your funds</span>
     </div>
   </div>
 
-  <form class="width-button-container content text-center box" style="margin-top: 45px; margin-bottom: 0px">
+  <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
 
     <div class="header text-center">
       <div class="entry" style="padding-bottom: 20px">
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
+    <div class="text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;">
         <div style="margin-left: 50px;">
           <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">

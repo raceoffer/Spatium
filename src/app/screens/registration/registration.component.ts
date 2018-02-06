@@ -53,7 +53,17 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit() {
+    this.username = this.authSevice.login;
+    this.password = this.authSevice.password;
+    this.factors = this.authSevice.factors;
+    this.advancedMode = this.factors.length > 0;
+
+    if (this.advancedMode) {
+      this.factorContainer.nativeElement.classList.add('content');
+    }
+
     $('#factor-container').scroll(function () {
+
       if ($(this).scrollTop() > 0) {
         $('#top-scroller').fadeIn();
       } else {
@@ -69,13 +79,11 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.username = this.authSevice.login;
-    this.password = this.authSevice.password;
-    this.factors = this.authSevice.factors;
-    this.advancedMode = this.factors.length > 0;
-    this.cd.detectChanges();
+
     this.checkOverflow(this.factorContainer);
     this.goBottom();
+
+    this.cd.detectChanges();
   }
 
   checkOverflow (element) {
@@ -142,6 +150,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
 
   openAdvanced() {
     this.advancedMode = true;
+    this.factorContainer.nativeElement.classList.add('content');
   }
 
   submit() {
