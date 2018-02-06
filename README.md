@@ -5,7 +5,7 @@
 * Cordova v. 7.1
 * Android SDK v.26
 
-# Instalation
+# Installation
 ```bash
 npm install -g webpack
 npm install -g angular@1.5
@@ -24,7 +24,7 @@ npm install
 In cordova/
 ```bash
 npm install
-cordova plugin add ../cordova-plugin-android
+cordova plugin add ../cordova-plugin-bluetooth
 cordova platform add android ios browser
 ```
 
