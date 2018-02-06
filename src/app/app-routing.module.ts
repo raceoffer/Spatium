@@ -18,6 +18,7 @@ import { LoginParentComponent } from './screens/login-parent/login-parent.compon
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { WalletComponent } from './screens/wallet/wallet.component';
 import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
+import {FingerPrintComponent} from "./screens/finger-print/finger-print.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -29,6 +30,7 @@ const appRoutes: Routes = [
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
+  { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factor', component: FactorParentComponent, children: [
     { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
     { path: 'password', component: PasswordComponent, outlet: 'factor' },
