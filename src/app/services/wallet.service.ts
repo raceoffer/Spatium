@@ -538,6 +538,10 @@ export class WalletService {
       this.secret = null;
     }
 
+    if (this.routineTimer) {
+      clearInterval(this.routineTimer);
+    }
+
     this.compoundKey = null;
     this.walletDB = null;
     this.watchingWallet = null;
