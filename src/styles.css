@@ -29,37 +29,37 @@ app-root {
 }
 
 .ethereum {
-  background: url("./~/assets/images/drawable/currency/ethereum.svg");
+  background: url(assets/images/drawable/currency/ethereum.svg);
 }
 
 .ripple {
-  background: url("./~/assets/images/drawable/currency/ripple.svg");
+  background: url(assets/images/drawable/currency/ripple.svg);
 }
 
 .bitcoin-cash {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .cardano {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .neo {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .litecoin {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .stellar {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .eos {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .nem {
-  background: url("./~/assets/images/drawable/currency/litecoin.svg");
+  background: url(assets/images/drawable/currency/litecoin.svg);
 }

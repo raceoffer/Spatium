@@ -77,7 +77,7 @@ import { WalletComponent } from './screens/wallet/wallet.component';
     NfcComponent,
     FactorParentComponent,
     LoginParentComponent,
-    RegistrationComponent
+    RegistrationComponent,
     NgInitDirective,
     WalletComponent
   ],
