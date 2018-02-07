@@ -74,7 +74,6 @@ export class BackupComponent implements OnInit, OnDestroy {
   async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    this.saving = false;
     console.log('Exited backup');
   }
 
@@ -98,9 +97,6 @@ export class BackupComponent implements OnInit, OnDestroy {
         .subscribe(async (success) => {
           this.saving = false;
           if (success) {
-            await this.updateBalance();
-            this.notification.show('Partial secret is uploaded to DDS');
-
             await this.router.navigate(['/reg-success']);
           } else {
             this.notification.show('Failed to upload a secret');
