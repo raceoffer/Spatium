@@ -117,7 +117,7 @@ export class QrCodeComponent implements OnInit {
     this.camStarted = false;
 
     if (this.next && this.next === 'auth') {
-      this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+      this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

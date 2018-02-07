@@ -21,7 +21,7 @@ export class PasswordComponent implements AfterViewInit {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly ngZone: NgZone,
-    private readonly authSevice: AuthService
+    private readonly authService: AuthService
   ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
@@ -40,13 +40,13 @@ export class PasswordComponent implements AfterViewInit {
   goNext(): void {
     if (this.password !== '') {
       if (this.next && this.next === 'auth') {
-        this.authSevice.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+        this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
 
         this.ngZone.run(async () => {
           await this.router.navigate(['/auth']);
         });
       } else if (this.next && this.next === 'registration') {
-        this.authSevice.addFactor(FactorType.PIN, Buffer.from(this.password, 'utf-8'));
+        this.authService.addFactor(FactorType.PIN, Buffer.from(this.password, 'utf-8'));
 
         this.ngZone.run(async () => {
           await this.router.navigate(['/registration']);

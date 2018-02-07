@@ -25,7 +25,7 @@ export class PincodeComponent implements AfterViewInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly ngZone: NgZone,
-    private readonly authSevice: AuthService,
+    private readonly authService: AuthService,
     private readonly fs: FileService,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
@@ -57,14 +57,14 @@ export class PincodeComponent implements AfterViewInit {
       const aesKey = await Utils.deriveAesKey(Buffer.from(this.pincode, 'utf-8'));
 
       try {
-        if (this.authSevice.encryptedSeed) {
-          const ciphertext = Buffer.from(this.authSevice.encryptedSeed, 'hex');
+        if (this.authService.encryptedSeed) {
+          const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
           this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
         } else {
           this.keyChain.seed = Utils.randomBytes(64);
-          this.authSevice.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
+          this.authService.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
 
-          await this.fs.writeFile(this.fs.safeFileName('seed'), this.authSevice.encryptedSeed);
+          await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
         }
 
         await this.router.navigate(['/verifyTransaction']);
@@ -72,13 +72,13 @@ export class PincodeComponent implements AfterViewInit {
         this.notification.show('Authorization error');
       }
     } else if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+      this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);
       });
     } else if (this.next && this.next === 'registration') {
-      this.authSevice.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+      this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/registration']);

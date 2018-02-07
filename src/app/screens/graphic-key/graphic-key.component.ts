@@ -22,7 +22,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   constructor(private readonly router: Router,
               private route: ActivatedRoute,
               private ngZone: NgZone,
-              private authSevice: AuthService) {
+              private authService: AuthService) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -51,12 +51,12 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+      this.authService.addAuthFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });
     } else if (this.next && this.next === 'registration') {
-      this.authSevice.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+      this.authService.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
       this.ngZone.run(() => {
         this.router.navigate(['/registration']);
       });

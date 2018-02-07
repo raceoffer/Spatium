@@ -14,9 +14,6 @@
       <span class="start-tagline">Secure your funds</span>
     </div>
 
-    <div class="margin-top-18">
-      <mat-icon class="color-custom-dark">lock_outline</mat-icon>
-    </div>
     <div class="margin-top-18 light">
       {{ username }}
     </div>
@@ -29,7 +26,7 @@
   </div>
 
   <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
-    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center"  *ngFor="let factor of factors;">
+    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
       <div style="margin-left: 50px;">
         <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
           <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
@@ -50,13 +47,13 @@
       </button>
     </div>
 
-    <div style="padding-bottom: 10px">
+    <div style="padding-bottom: 23px">
       <button mat-fab (click)="sddNewFactor()">
         <mat-icon>add</mat-icon>
       </button>
     </div>
 
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="loginDisable" (click)="letLogin()" >{{ login }}</button>
+    <button mat-raised-button color="accent" class="width-button color" [disabled]="loginDisable" (click)="letLogin()">{{ login }}</button>
 
   </div>
 

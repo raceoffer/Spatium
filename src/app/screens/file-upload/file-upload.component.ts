@@ -21,7 +21,7 @@ export class FileUploadComponent implements AfterViewInit {
     private readonly router: Router,
     private route: ActivatedRoute,
     private ngZone: NgZone,
-    private authSevice: AuthService
+    private authService: AuthService
   ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
@@ -59,12 +59,12 @@ export class FileUploadComponent implements AfterViewInit {
 
   goNext(): void {
     if (this.next && this.next === 'auth') {
-      this.authSevice.addFactor( FactorType.FILE, this.file);
+      this.authService.addAuthFactor( FactorType.FILE, this.file);
       this.ngZone.run(() => {
         this.router.navigate(['/auth']);
       });
     } else if (this.next && this.next === 'registration') {
-      this.authSevice.addFactor( FactorType.FILE, this.file);
+      this.authService.addFactor( FactorType.FILE, this.file);
       this.ngZone.run(() => {
         this.router.navigate(['/registration']);
       });
