@@ -1,0 +1,33 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span>{{ title | async }}</span>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav class="width-sidenav" mode="over" [fixedInViewport]="true">
+    <mat-list-item>
+      <div fxLayout="row" fxLayoutAlign="space-between center" class="spatium-logo-text">
+        <button mat-icon-button (click)="sidenav.toggle()">
+          <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
+        </button>
+
+        <div class="nav-logo-text"></div>
+      </div>
+    </mat-list-item>
+
+    <mat-nav-list *ngFor="let navLink of navLinks">
+      <a mat-list-item *ngIf="(navLink.allowedModes.indexOf(mode) !== -1)"
+         [routerLink]="navLink.link ? navLink.link : ['/navigator_verifier', { outlets: { navigator_verifier: [navLink.subroute] } }]"
+         class="main-nav-list-custom"
+         [ngClass]="{ 'selected' : navLink.subroute === (currentSubroute | async) }"
+         (click)="sidenav.toggle()">
+        {{ navLink.name }}
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <router-outlet name="navigator_verifier" (activate)='onActivate($event)'></router-outlet>
+</mat-sidenav-container>

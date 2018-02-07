@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
-import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
@@ -17,7 +16,6 @@ export class StartComponent implements OnInit {
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly fs: FileService,
-    private readonly notification: NotificationService,
     private readonly wallet: WalletService,
     private readonly keychain: KeyChainService,
     private readonly bt: BluetoothService
@@ -38,9 +36,12 @@ export class StartComponent implements OnInit {
       this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
     } catch (e) {
       this.authService.encryptedSeed = null;
-      this.notification.show('No stored seed found');
     }
 
-    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+    if (this.authService.encryptedSeed) {
+      await this.router.navigate(['/navigator_verifier', { outlets: { navigator_verifier: ['sign_in'] } }]);
+    } else {
+      await this.router.navigate(['/navigator_verifier', { outlets: { navigator_verifier: ['create'] } }]);
+    }
   }
 }
