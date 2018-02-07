@@ -1,7 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button routerLink="/registration">
+      <button mat-icon-button [routerLink]="saving ? '/start' : '/registration'">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{ backupLabel }}</span>
