@@ -93,7 +93,7 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       Observable.fromPromise(this.account.store(this.id, this.data, this.gasPrice))
         .mapTo(true)
-        .catch(ignored => Observable.of(false))
+        .catch(ignored => { console.log(ignored); return Observable.of(false); })
         .subscribe(async (success) => {
           this.saving = false;
           if (success) {
