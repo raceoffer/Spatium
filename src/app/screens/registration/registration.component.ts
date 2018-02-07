@@ -154,7 +154,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.factorContainer.nativeElement.classList.add('content');
   }
 
-  async submit() {
+  async signUp() {
     const factors = this.factors.map(factor => factor.toBuffer()).reverse();
     factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
     const tree = factors.reduce((rest, factor) => {
@@ -166,11 +166,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
       }
       return node;
     }, null);
-    const seed = Utils.randomBytes(64);
-    const encrypted = Utils.packTree(tree, node => node.factor, seed);
 
-    this.keychain.seed = seed;
-    this.authSevice.encryptedTreeData = encrypted;
+    this.authSevice.clearFactors();
+    this.authSevice.password = '';
+    this.factors = [];
+    this.password = '';
+
+    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
     this.authSevice.ethereumSecret = this.keychain.getEthereumSecret(0);
 
     await this.router.navigate(['/backup']);

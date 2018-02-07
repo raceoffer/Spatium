@@ -1,8 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
-import {AuthService} from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromPromise';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/of';
 
 declare const Utils: any;
 
@@ -17,32 +22,33 @@ enum SyncState {
   templateUrl: './backup.component.html',
   styleUrls: ['./backup.component.css']
 })
-export class BackupComponent implements OnInit {
-  backupLabel = 'Saving to Decentralized Storage';
-  ethAddressLabel = 'Ethereum address';
-  backupCostLabel = 'Estimated commission';
-  notEnoughLabel = 'Not enough Ethereum';
-  ethBalanceLabel = 'Ethereum balance';
+export class BackupComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
+  private account: DDSAccount = null;
 
-  saveLabel = 'Save';
+  public backupLabel = 'Saving to Decentralized Storage';
+  public ethAddressLabel = 'Ethereum address';
+  public backupCostLabel = 'Estimated fee, ETH';
+  public notEnoughLabel = 'Not enough Ethereum';
+  public ethBalanceLabel = 'Balance, ETH';
 
-  address = '';
-  balance = 0.0;
-  comission = 0.0;
-  enough = false;
+  public saveLabel = 'Save';
 
-  syncStateType = SyncState;
-  syncState: SyncState = SyncState.Ready;
+  public address = '';
+  public balance = 0.0;
+  public comission = 0.0;
+  public enough = false;
 
-  saving = false;
+  public syncStateType = SyncState;
+  public syncState: SyncState = SyncState.Ready;
+
+  public saving = false;
 
   public id: string = null;
   public secret: any = null;
   public data: any = null;
 
   public gasPrice: number = this.dds.toWei('5', 'gwei');
-
-  private account: DDSAccount = null;
 
   constructor(
     private readonly router: Router,
@@ -61,6 +67,15 @@ export class BackupComponent implements OnInit {
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
 
     await this.updateBalance();
+
+    console.log('Entered backup');
+  }
+
+  async ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+    this.saving = false;
+    console.log('Exited backup');
   }
 
   async updateBalance() {
@@ -74,28 +89,22 @@ export class BackupComponent implements OnInit {
     }
   }
 
-  async save() {
-    try {
-      this.saving = true;
-      await this.account.store(this.id, this.data, this.gasPrice);
-      await this.updateBalance();
-      this.notification.show('Partial secret is uploaded to DDS');
+  save() {
+    this.saving = true;
+    this.subscriptions.push(
+      Observable.fromPromise(this.account.store(this.id, this.data, this.gasPrice))
+        .mapTo(true)
+        .catch(ignored => Observable.of(false))
+        .subscribe(async (success) => {
+          this.saving = false;
+          if (success) {
+            await this.updateBalance();
+            this.notification.show('Partial secret is uploaded to DDS');
 
-      await this.router.navigate(['/reg-success']);
-    } catch (e) {
-      this.notification.show('Failed to upload secret');
-      console.log(e);
-    } finally {
-      this.saving = false;
-    }
-  }
-
-  async skip() {
-    await this.router.navigate(['/waiting']);
-  }
-
-  async cancelClick() {
-    // cancelled must be here
-    await this.router.navigate(['/start']);
+            await this.router.navigate(['/reg-success']);
+          } else {
+            this.notification.show('Failed to upload a secret');
+          }
+        }));
   }
 }

@@ -1,7 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button (click)="cancelClick()">
+      <button mat-icon-button routerLink="/registration">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{ backupLabel }}</span>
@@ -19,7 +19,7 @@
 
     <mat-list-item>
       <p class="list-info" mat-line>{{ ethBalanceLabel }}</p>
-      <p class="list-name" mat-line>{{ balance }} ETH</p>
+      <p class="list-name" mat-line>{{ balance }}</p>
 
       <button matSuffix mat-icon-button (click)="updateBalance()">
         <mat-icon *ngIf="syncState==syncStateType.Ready">sync</mat-icon>
@@ -36,7 +36,7 @@
   </mat-list>
 
   <div class="full-width" fxLayout="column" fxLayoutAlign="start center">
-    <span *ngIf="!enough">{{notEnoughLabel}}</span>
+    <span *ngIf="!enough">{{ notEnoughLabel }}</span>
     <div style="height: 15px;" *ngIf="!saving"></div>
     <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0" *ngIf="saving"></mat-progress-bar>
     <button mat-raised-button color="accent" class="width-button-full"

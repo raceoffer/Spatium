@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
+import { KeyChainService } from '../../services/keychain.service';
 
 declare const Utils: any;
 
@@ -47,6 +48,7 @@ export class LoginParentComponent  implements OnInit {
     private readonly ngZone: NgZone,
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
+    private readonly keychain: KeyChainService,
     private readonly dds: DDSService
   ) { }
 
@@ -117,6 +119,7 @@ export class LoginParentComponent  implements OnInit {
       this.authService.login = this.input;
       this.authService.password = '';
       this.authService.clearFactors();
+      this.keychain.seed = Utils.randomBytes(64);
 
       await this.router.navigate(['/registration']);
     } else {

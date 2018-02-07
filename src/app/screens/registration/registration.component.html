@@ -8,20 +8,20 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <div class="entry-margin start-logo-text" >
-    </div>
+    <div class="entry-margin start-logo-text" ></div>
+
     <div class="start-tagline-padding">
       <span class="start-tagline">Secure your funds</span>
     </div>
   </div>
 
   <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
-
     <div class="header text-center">
       <div class="entry" style="padding-bottom: 20px">
         <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
           {{ username }}
         </div>
+
         <button matSuffix mat-icon-button style="position: absolute; right:24px; display: inline-block; margin-top: -7.5px;" (click)="generateNewLogin()">
           <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
           <mat-icon class="button-imitator-30 sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
@@ -53,6 +53,7 @@
             <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
           </button>
         </div>
+
         <div>
           <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
           <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
@@ -73,15 +74,15 @@
           <mat-icon>add</mat-icon>
         </button>
       </div>
+
       <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
         <button mat-icon-button type="button" style="float: right;" (click)="openAdvanced()">
           <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
         </button>
       </div>
-      <button type="submit" mat-raised-button color="accent" (click)="submit()" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
 
+      <button type="submit" mat-raised-button color="accent" (click)="signUp()" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
     </div>
-
   </form>
 </div>
 
