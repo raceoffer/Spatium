@@ -51,12 +51,13 @@ import { NfcComponent } from './screens/nfc/nfc.component';
 import { NgxZxingModule } from 'ngx-zxing';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
-import { NgInitDirective } from './ng-init.directive';
+import { NgInitDirective } from './directives/ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { KeyChainService } from './services/keychain.service';
 import { WalletComponent } from './screens/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
+import { AutofocusDirective } from './directives/autofocus.directive';
 
 @NgModule({
   declarations: [
@@ -83,7 +84,8 @@ import { FingerPrintComponent } from './screens/finger-print/finger-print.compon
     NgInitDirective,
     WalletComponent,
     RegistrationSuccessComponent,
-    FingerPrintComponent
+    FingerPrintComponent,
+    AutofocusDirective
   ],
   imports: [
     FormsModule,

@@ -13,7 +13,7 @@ export class NgInitDirective {
   ngOnInit() {
   }
 
-  ngAfterContentInit(){
+  ngAfterContentInit() {
     if (this.ngInit) {
       this.ngInit();
     }
