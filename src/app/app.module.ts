@@ -58,6 +58,12 @@ import { WalletComponent } from './screens/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
+import { CreateComponent } from './screens/create/create.component';
+import { SignInComponent } from './screens/sign-in/sign-in.component';
+import { ImportComponent } from './screens/import/import.component';
+import { ExportComponent } from './screens/export/export.component';
+import { DeleteComponent } from './screens/delete/delete.component';
 
 @NgModule({
   declarations: [
@@ -85,7 +91,13 @@ import { AutofocusDirective } from './directives/autofocus.directive';
     WalletComponent,
     RegistrationSuccessComponent,
     FingerPrintComponent,
-    AutofocusDirective
+    AutofocusDirective,
+    NavigatorVerifierComponent,
+    CreateComponent,
+    SignInComponent,
+    ImportComponent,
+    ExportComponent,
+    DeleteComponent
   ],
   imports: [
     FormsModule,

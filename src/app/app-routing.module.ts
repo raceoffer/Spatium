@@ -19,6 +19,12 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { WalletComponent } from './screens/wallet/wallet.component';
 import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
 import {FingerPrintComponent} from "./screens/finger-print/finger-print.component";
+import {NavigatorVerifierComponent} from "./screens/navigator-verifier/navigator-verifier.component";
+import {CreateComponent} from "./screens/create/create.component";
+import {SignInComponent} from "./screens/sign-in/sign-in.component";
+import {ImportComponent} from "./screens/import/import.component";
+import {ExportComponent} from "./screens/export/export.component";
+import {DeleteComponent} from "./screens/delete/delete.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -42,6 +48,13 @@ const appRoutes: Routes = [
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'send-transaction', component: SendTransactionComponent, outlet: 'navigator' }
+  ]},
+  { path: 'navigator_verifier', component: NavigatorVerifierComponent, children: [
+    { path: 'create',  component: CreateComponent, outlet: 'navigator_verifier' },
+    { path: 'sign_in', component: SignInComponent, outlet: 'navigator_verifier' },
+    { path: 'import',  component: ImportComponent, outlet: 'navigator_verifier' },
+    { path: 'export',  component: ExportComponent, outlet: 'navigator_verifier' },
+    { path: 'delete',  component: DeleteComponent, outlet: 'navigator_verifier' }
   ]}
 ];
 
