@@ -2,8 +2,6 @@
   <button mat-icon-button (click)="sidenav.toggle()">
     <mat-icon>menu</mat-icon>
   </button>
-
-  <span>{{ title | async }}</span>
 </mat-toolbar>
 
 <mat-sidenav-container>
@@ -19,15 +17,14 @@
     </mat-list-item>
 
     <mat-nav-list *ngFor="let navLink of navLinks">
-      <a mat-list-item *ngIf="(navLink.allowedModes.indexOf(mode) !== -1)"
-         [routerLink]="navLink.link ? navLink.link : ['/navigator_verifier', { outlets: { navigator_verifier: [navLink.subroute] } }]"
+      <a mat-list-item *ngIf="navLink.name"
+         [routerLink]="navLink.link"
          class="main-nav-list-custom"
-         [ngClass]="{ 'selected' : navLink.subroute === (currentSubroute | async) }"
          (click)="sidenav.toggle()">
         {{ navLink.name }}
       </a>
     </mat-nav-list>
   </mat-sidenav>
 
-  <router-outlet name="navigator_verifier" (activate)='onActivate($event)'></router-outlet>
+  <app-verify-transaction></app-verify-transaction>
 </mat-sidenav-container>

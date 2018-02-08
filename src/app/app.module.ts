@@ -30,8 +30,8 @@ import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
-import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
-import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
+import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
+import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
 import { LoggerService } from './services/logger.service';
 import { BluetoothService } from './services/bluetooth.service';
@@ -54,16 +54,14 @@ import { LoginParentComponent } from './screens/login-parent/login-parent.compon
 import { NgInitDirective } from './directives/ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { KeyChainService } from './services/keychain.service';
-import { WalletComponent } from './screens/wallet/wallet.component';
+import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
-import { CreateComponent } from './screens/create/create.component';
-import { SignInComponent } from './screens/sign-in/sign-in.component';
-import { ImportComponent } from './screens/import/import.component';
-import { ExportComponent } from './screens/export/export.component';
-import { DeleteComponent } from './screens/delete/delete.component';
+import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
+import { SecretExportComponent } from './screens/secret-export/secret-export.component';
+import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
 
 @NgModule({
   declarations: [
@@ -93,11 +91,9 @@ import { DeleteComponent } from './screens/delete/delete.component';
     FingerPrintComponent,
     AutofocusDirective,
     NavigatorVerifierComponent,
-    CreateComponent,
-    SignInComponent,
-    ImportComponent,
-    ExportComponent,
-    DeleteComponent
+    VerifyWaitingComponent,
+    SecretExportComponent,
+    SecretDeleteComponent
   ],
   imports: [
     FormsModule,

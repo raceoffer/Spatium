@@ -1,6 +1,7 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
-import { BluetoothService } from '../../services/bluetooth.service';
-import { WalletService } from '../../services/wallet.service';
+import {Component, OnInit, AfterViewInit, OnDestroy, NgZone} from '@angular/core';
+import { BluetoothService } from '../../../services/bluetooth.service';
+import { WalletService } from '../../../services/wallet.service';
+import {Router} from '@angular/router';
 
 declare const bcoin: any;
 
@@ -22,11 +23,12 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
   enabled = this.bt.enabled;
   discoverable = this.bt.discoverable;
   synchronizing = this.wallet.synchronizing;
-  ready = this.wallet.ready;
 
   subscriptions = [];
 
   constructor(
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
     private readonly bt: BluetoothService,
     private readonly wallet: WalletService
   ) { }
@@ -35,45 +37,12 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
     await this.bt.disconnect();
 
     this.subscriptions.push(
-      this.wallet.readyEvent.subscribe(async () => {
-        console.log(this.wallet.address.getValue());
-      }));
-
-    this.subscriptions.push(
-      this.wallet.cancelledEvent.subscribe(async () => {
-        await this.bt.disconnect();
-      }));
-
-    this.subscriptions.push(
-      this.wallet.failedEvent.subscribe(async () => {
-        await this.bt.disconnect();
-      }));
-
-    this.subscriptions.push(
       this.wallet.rejectedEvent.subscribe(async () => {
         this.showTransaction = false;
       }));
 
     this.subscriptions.push(
       this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
-      }));
-
-    this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.reset();
-      }));
-
-    this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(async () => {
-        console.log('Connected to', this.bt.connectedDevice.getValue());
-        await this.wallet.startSync();
-      }));
-
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected');
-        await this.wallet.reset();
         await this.bt.ensureListening();
       }));
 
@@ -123,11 +92,4 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
     await this.wallet.rejectTransaction();
   }
 
-  async enableBluetooth() {
-    await this.bt.requestEnable();
-  }
-
-  async enableDiscoverable() {
-    await this.bt.enableDiscovery();
-  }
 }

@@ -1,6 +1,6 @@
 import { OnInit, Component, OnDestroy } from '@angular/core';
-import { WalletService } from '../../services/wallet.service';
-import { NotificationService } from '../../services/notification.service';
+import { WalletService } from '../../../services/wallet.service';
+import { NotificationService } from '../../../services/notification.service';
 
 declare const bcoin: any;
 

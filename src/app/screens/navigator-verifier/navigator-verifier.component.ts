@@ -1,16 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { CreateComponent } from '../create/create.component';
-import { SignInComponent } from '../sign-in/sign-in.component';
-import { ImportComponent } from '../import/import.component';
-import { ExportComponent } from '../export/export.component';
-import { DeleteComponent } from '../delete/delete.component';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-enum Mode {
-  Create,
-  SignIn
-}
+import {Router} from '@angular/router';
+import {WalletService} from '../../services/wallet.service';
+import {BluetoothService} from '../../services/bluetooth.service';
 
 @Component({
   selector: 'app-navigator-verifier',
@@ -19,58 +11,35 @@ enum Mode {
 })
 export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   public navLinks = [{
-    name: 'Create',
-    link: null,
-    subroute: 'create',
-    allowedModes: [Mode.Create]
+    name: 'Export secret',
+    link: '/secret-export'
   }, {
-    name: 'Sign in',
-    link: null,
-    subroute: 'sign_in',
-    allowedModes: [Mode.SignIn]
+    name: 'Change PIN',
+    link: ['/factor', { back: 'navigator-verifier' }, { outlets: { 'factor': ['pincode', { next: 'navigator-verifier' }] } }]
   }, {
-    name: 'Import',
-    link: null,
-    subroute: 'import',
-    allowedModes: [Mode.Create]
-  }, {
-    name: 'Export',
-    link: null,
-    subroute: 'export',
-    allowedModes: [Mode.SignIn]
-  }, {
-    name: 'Delete',
-    link: null,
-    subroute: 'delete',
-    allowedModes: [Mode.SignIn]
+    name: 'Delete secret',
+    link: '/secret-delete'
   }, {
     name: 'Exit',
-    link: '/start',
-    subroute: null,
-    allowedModes: [Mode.SignIn, Mode.Create]
+    link: '/start'
   }];
-
-  public mode = Mode.Create;
-  public currentSubroute = new BehaviorSubject<string>(null);
-  public title = this.currentSubroute.map(subroute =>
-    this.navLinks.reduce((prev, curr) => {
-      console.log(curr.subroute, prev, subroute);
-      if (curr.subroute === subroute) {
-        return curr;
-      } else {
-        return prev;
-      }
-    }, null).name
-  );
 
   private subscriptions = [];
 
   constructor(
-    private readonly auth: AuthService
+    private readonly auth: AuthService,
+    private readonly router: Router,
+    private readonly wallet: WalletService,
+    private readonly bt: BluetoothService,
+    private readonly ngZone: NgZone
   ) { }
 
   ngOnInit() {
-    this.mode = this.auth.encryptedSeed ? Mode.SignIn : Mode.Create;
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(() => this.ngZone.run(async () => {
+        await this.router.navigate(['/waiting']);
+      })));
+    console.log('Entered navigation');
   }
 
   ngOnDestroy() {
@@ -79,16 +48,6 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   }
 
   onActivate(event) {
-    if (event instanceof CreateComponent) {
-      this.currentSubroute.next('create');
-    } else if (event instanceof SignInComponent) {
-      this.currentSubroute.next('sign_in');
-    } if (event instanceof ImportComponent) {
-      this.currentSubroute.next('import');
-    } if (event instanceof ExportComponent) {
-      this.currentSubroute.next('export');
-    } if (event instanceof DeleteComponent) {
-      this.currentSubroute.next('delete');
-    }
+
   }
 }

@@ -67,7 +67,7 @@ export class PincodeComponent implements AfterViewInit {
           await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
         }
 
-        await this.router.navigate(['/verifyTransaction']);
+        await this.router.navigate(['/verifyWaiting']);
       } catch (ignored) {
         this.notification.show('Authorization error');
       }
@@ -82,6 +82,11 @@ export class PincodeComponent implements AfterViewInit {
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/registration']);
+      });
+    } else if (this.next && this.next === 'navigator-verifier') {
+      this.ngZone.run(async () => {
+        // pincode change
+        await this.router.navigate(['/navigator-verifier']);
       });
     }
   }
