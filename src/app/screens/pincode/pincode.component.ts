@@ -67,7 +67,7 @@ export class PincodeComponent implements AfterViewInit {
           await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
         }
 
-        await this.router.navigate(['/verifyWaiting']);
+        await this.router.navigate(['/verify-waiting']);
       } catch (ignored) {
         this.notification.show('Authorization error');
       }

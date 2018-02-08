@@ -34,16 +34,47 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
   ) { }
 
   async ngOnInit() {
-    await this.bt.disconnect();
-
     this.subscriptions.push(
       this.wallet.rejectedEvent.subscribe(async () => {
         this.showTransaction = false;
       }));
 
     this.subscriptions.push(
-      this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
+      this.wallet.cancelledEvent.subscribe(async () => {
+        await this.bt.disconnect();
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/verify-waiting']);
+        });
+      }));
+
+    this.subscriptions.push(
+      this.wallet.failedEvent.subscribe(async () => {
+        await this.bt.disconnect();
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/verify-waiting']);
+        });
+      }));
+
+    this.subscriptions.push(
+      this.bt.disabledEvent.subscribe(async () => {
+        await this.wallet.reset();
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/verify-waiting']);
+        });
+      }));
+
+    this.subscriptions.push(
+      this.bt.connectedEvent.subscribe(async () => {
+        console.log('Connected to', this.bt.connectedDevice.getValue());
+        await this.wallet.startSync();
+      }));
+
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(async () => {
+        await this.wallet.reset();
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/verify-waiting']);
+        });
       }));
 
     this.subscriptions.push(
@@ -68,19 +99,9 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
     console.log('Left verify');
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-
-    await this.wallet.reset();
-
-    await this.bt.disconnect();
   }
 
-  async ngAfterViewInit() {
-    if (!this.bt.enabled.getValue()) {
-      await this.bt.requestEnable();
-    } else {
-      await this.bt.ensureListening();
-    }
-  }
+  async ngAfterViewInit() { }
 
   async confirm() {
     this.showTransaction = false;

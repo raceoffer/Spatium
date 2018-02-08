@@ -29,7 +29,7 @@ const appRoutes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'backup', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
-  { path: 'verifyWaiting', component: VerifyWaitingComponent },
+  { path: 'verify-waiting', component: VerifyWaitingComponent },
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},

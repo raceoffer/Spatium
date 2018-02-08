@@ -1,21 +1,8 @@
 <div *ngIf="!synchronizing.getValue()" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!enabled.getValue()">
-
-    <div class="connect-text">
-      <span>{{enableBTmessage}}</span>
-    </div>
-
-    <button mat-fab  class="width-button">
-      <mat-icon (click)="enableBluetooth()">bluetooth_disabled
-      </mat-icon>
-    </button>
-
-  </div>
-
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled.getValue()">
 
-    <div class="verify-transaction-text">
+    <div class="verify-transaction-text" *ngIf="!showTransaction">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 

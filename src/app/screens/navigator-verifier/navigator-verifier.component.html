@@ -18,9 +18,8 @@
 
     <mat-nav-list *ngFor="let navLink of navLinks">
       <a mat-list-item *ngIf="navLink.name"
-         [routerLink]="navLink.link"
          class="main-nav-list-custom"
-         (click)="sidenav.toggle()">
+         (click)="onLinkClick(navLink)">
         {{ navLink.name }}
       </a>
     </mat-nav-list>

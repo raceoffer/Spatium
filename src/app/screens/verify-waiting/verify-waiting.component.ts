@@ -77,17 +77,13 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
       }));
 
 
-    console.log('Entered verify');
+    console.log('Entered waiting verify');
   }
 
   async ngOnDestroy() {
     console.log('Left verify');
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-
-    await this.wallet.reset();
-
-    await this.bt.disconnect();
   }
 
   async ngAfterViewInit() {
