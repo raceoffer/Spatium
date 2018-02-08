@@ -8,8 +8,8 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <div class="entry-margin start-logo-text" >
-    </div>
+    <div class="entry-margin start-logo-text" ></div>
+
     <div class="start-tagline-padding">
       <span class="start-tagline">Secure your funds</span>
     </div>
@@ -32,10 +32,10 @@
           <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
         </button>
       </div>
+
       <div>
         <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{factor.icon}}</mat-icon>
-        <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
-        </div>
+        <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''"></div>
       </div>
     </div>
   </div>
@@ -47,15 +47,13 @@
       </button>
     </div>
 
-    <div style="padding-bottom: 23px">
+    <div *ngIf="!ready" style="padding-bottom: 23px">
       <button mat-fab (click)="sddNewFactor()">
         <mat-icon>add</mat-icon>
       </button>
     </div>
 
-    <button mat-raised-button color="accent" class="width-button color" [disabled]="loginDisable" (click)="letLogin()">{{ login }}</button>
-
+    <button mat-raised-button color="accent" class="width-button color" *ngIf="ready" (click)="letLogin()">{{ login }}</button>
   </div>
-
 </div>
 

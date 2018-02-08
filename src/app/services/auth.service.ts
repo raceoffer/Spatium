@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {NotificationService} from './notification.service';
+import { Injectable } from '@angular/core';
+import { NotificationService } from './notification.service';
 
 declare const Utils: any;
 declare const Buffer: any;
@@ -11,14 +11,18 @@ export class AuthService {
   password: string;
   qr: string;
   nfc: string;
+
   factors: Factor[] = [];
   available: AvailableFactor[] = [];
+
+  decryptedSeed: any = null;
 
   encryptedSeed: string = null;
 
   ethereumSecret: any = null;
   encryptedTreeData: any = null;
-  remoteEncryptedTrees: Array<any> = [];
+
+  remoteEncryptedTrees: Array<Array<any>> = [];
 
   stFactorError = 'Incorrect factor ';
 
@@ -76,15 +80,35 @@ export class AuthService {
     }
   }
 
+  tryDecryptWith(factor) {
+    const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
+
+    const matchResult = Utils.matchPassphrase(currentData, factor.toBuffer());
+
+    if (typeof matchResult.seed !== 'undefined') {
+      this.decryptedSeed = matchResult.seed;
+      return true;
+    }
+
+    if (matchResult.subtexts.length < 1) {
+      return false;
+    }
+
+    this.remoteEncryptedTrees.push(matchResult.subtexts);
+
+    return true;
+  }
+
   addFactor(type, value) {
     this.factors.push(this.newFactor(type, value));
   }
 
   addAuthFactor(type, value) {
-    let newFactor = this.newFactor(type, value);
-    let random_boolean = Math.random() >= 0.5;
+    const newFactor = this.newFactor(type, value);
 
-    if (random_boolean) {
+    const success = this.tryDecryptWith(newFactor);
+
+    if (success) {
       this.factors.push(newFactor);
     } else {
       this.notification.show(this.stFactorError + newFactor.name);
@@ -96,11 +120,27 @@ export class AuthService {
   }
 
   rmAuthFactor(factor) {
-    this.factors = this.factors.slice(0, this.factors.indexOf(factor));
+    const index = this.factors.indexOf(factor);
+
+    this.factors = this.factors.slice(0, index);
+    this.remoteEncryptedTrees = this.remoteEncryptedTrees.slice(0, index + 1);
+    if (this.decryptedSeed) {
+      this.decryptedSeed.fill(0);
+      this.decryptedSeed = null;
+    }
   }
 
   clearFactors() {
     this.factors = [];
+  }
+
+  reset() {
+    if (this.decryptedSeed) {
+      this.decryptedSeed.fill(0);
+      this.decryptedSeed = null;
+    }
+
+    this.remoteEncryptedTrees = [];
   }
 }
 

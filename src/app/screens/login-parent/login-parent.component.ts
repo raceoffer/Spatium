@@ -108,9 +108,9 @@ export class LoginParentComponent  implements OnInit {
       this.authService.clearFactors();
 
       try {
-        this.authService.remoteEncryptedTrees = await this.dds.read(AuthService.toId(this.input));
-      } catch (e) {
         this.authService.remoteEncryptedTrees = [];
+        this.authService.remoteEncryptedTrees.push(await this.dds.read(AuthService.toId(this.input)));
+      } catch (e) {
         this.notification.show('No backup found');
       }
 

@@ -30,11 +30,10 @@ declare const Utils: any;
 export class AuthComponent implements OnInit, AfterViewInit {
   username = '';
   login = 'Sign in';
-  loginDisable = false;
 
   factors = [];
 
-  findSecret = false;
+  ready = false;
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
@@ -45,9 +44,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
-  ) {
-    this.changeDetectorRef = changeDetectorRef;
-  }
+  ) { }
 
   ngOnInit() {
     $('#factor-container').scroll(function () {
@@ -76,6 +73,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.username = this.authSevice.login;
     this.factors = this.authSevice.factors;
+    this.ready = this.authSevice.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
     this.checkOverflow(this.factorContainer);
     this.goBottom();
@@ -99,45 +97,18 @@ export class AuthComponent implements OnInit, AfterViewInit {
   removeFactor(factor): void {
     this.authSevice.rmAuthFactor(factor);
     this.factors = this.authSevice.factors;
+    this.ready = this.authSevice.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
   }
 
-  private matchPredefinedRoute(forest, route) {
-    let currentFactor = 0;
-    let currentData = forest;
-    let result = null;
-    while (!result) {
-      const requestedFactor = currentFactor < route.length ? route[currentFactor++] : null;
-      if (!requestedFactor) {
-        break;
-      }
-
-      const matchResult = Utils.matchPassphrase(currentData, requestedFactor);
-      if (typeof matchResult.seed !== 'undefined') {
-        result = matchResult.seed;
-        break;
-      }
-
-      if (matchResult.subtexts.length < 1) {
-        break;
-      }
-
-      currentData = matchResult.subtexts;
-    }
-
-    return result;
-  }
-
   async letLogin() {
-    const factors = this.factors.map(factor => factor.toBuffer());
-
-    const seed = this.matchPredefinedRoute(this.authSevice.remoteEncryptedTrees, factors);
-    if (!seed) {
+    if (!this.authSevice.decryptedSeed) {
       this.notification.show('Authorization error');
       return;
     }
 
-    this.keyChain.seed = seed;
+    this.keyChain.seed = this.authSevice.decryptedSeed;
+    this.authSevice.reset();
 
     await this.router.navigate(['/waiting']);
   }
