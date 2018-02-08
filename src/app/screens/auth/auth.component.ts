@@ -1,21 +1,29 @@
 import {
-  Component, AfterViewInit, ChangeDetectorRef, OnInit, Inject, NgZone, ElementRef,
-  ViewChild
+  Component, AfterViewInit, ChangeDetectorRef, OnInit, ElementRef,
+  ViewChild, trigger, transition, style, animate, sequence
 } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { WalletService } from '../../services/wallet.service';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import {KeyChainService} from '../../services/keychain.service';
 import * as $ from 'jquery';
+import {Router} from '@angular/router';
 
 declare const Utils: any;
 
 @Component({
   selector: 'app-auth',
+  animations: [
+    trigger('anim', [
+      transition('* => void', [
+        style({ height: '*', opacity: '1', transform: 'translateX(0)'} ),
+        sequence([
+          animate('.5s ease', style({ height: '*', opacity: '.2', transform: 'translateX(60px)' })),
+          animate('.1s ease', style({ height: '*', opacity: 0, transform: 'translateX(60px)' }))
+        ])
+      ]),
+    ])],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
@@ -26,16 +34,20 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
   factors = [];
 
+  findSecret = false;
+
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
   constructor(
     public dialog: MatDialog,
     private readonly router: Router,
     private readonly authSevice: AuthService,
-    private readonly cd: ChangeDetectorRef,
+    private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
-  ) { }
+  ) {
+    this.changeDetectorRef = changeDetectorRef;
+  }
 
   ngOnInit() {
     $('#factor-container').scroll(function () {
@@ -64,7 +76,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.username = this.authSevice.login;
     this.factors = this.authSevice.factors;
-    this.cd.detectChanges();
+    this.changeDetectorRef.detectChanges();
     this.checkOverflow(this.factorContainer);
     this.goBottom();
   }
@@ -85,9 +97,9 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   removeFactor(factor): void {
-    this.authSevice.rmFactor(factor);
+    this.authSevice.rmAuthFactor(factor);
     this.factors = this.authSevice.factors;
-    this.cd.detectChanges();
+    this.changeDetectorRef.detectChanges();
   }
 
   private matchPredefinedRoute(forest, route) {

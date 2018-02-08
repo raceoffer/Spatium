@@ -179,7 +179,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     this.isActive = false;
 
     if (this.next && this.next === 'auth') {
-      this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+      this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/auth']);

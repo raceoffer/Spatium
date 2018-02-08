@@ -1,6 +1,6 @@
 import {
   Component, OnInit, ElementRef,
-  ViewChild, AfterViewInit, ChangeDetectorRef
+  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
@@ -22,6 +22,16 @@ enum State {
 
 @Component({
   selector: 'app-registration',
+  animations: [
+    trigger('anim', [
+      transition('* => void', [
+        style({ height: '*', opacity: '1', transform: 'translateX(0)'} ),
+        sequence([
+          animate('.5s ease', style({ height: '*', opacity: '.2', transform: 'translateX(60px)' })),
+          animate('.1s ease', style({ height: '*', opacity: 0, transform: 'translateX(60px)' }))
+        ])
+      ]),
+    ])],
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']
 })
@@ -46,11 +56,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     public  dialog: MatDialog,
     private readonly router: Router,
     private readonly keychain: KeyChainService,
-    private readonly cd: ChangeDetectorRef,
+    private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly authSevice: AuthService,
     private readonly notification: NotificationService,
     private readonly dds: DDSService
-  ) { }
+  ) {
+    this.changeDetectorRef = changeDetectorRef;
+  }
 
   ngOnInit() {
     this.username = this.authSevice.login;
@@ -83,7 +95,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.checkOverflow(this.factorContainer);
     this.goBottom();
 
-    this.cd.detectChanges();
+    this.changeDetectorRef.detectChanges();
   }
 
   checkOverflow (element) {
@@ -146,7 +158,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   removeFactor(factor): void {
     this.authSevice.rmFactor(factor);
     this.factors = this.authSevice.factors;
-    this.cd.detectChanges();
+    this.changeDetectorRef.detectChanges();
   }
 
   openAdvanced() {
