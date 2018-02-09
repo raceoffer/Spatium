@@ -124,7 +124,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.usernameState = State.Updating;
     try {
       do {
-        this.username = this.makeNew();
+        this.username = this.authSevice.makeNewLogin(10);
         const exists = await this.dds.exists(AuthService.toId(this.username));
         if (!exists) {
           this.usernameState = State.Ready;
@@ -134,17 +134,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     } catch (ignored) {
       this.usernameState = State.Error;
     }
-  }
-
-  makeNew() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < 20; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    return text;
   }
 
   sddNewFactor() {

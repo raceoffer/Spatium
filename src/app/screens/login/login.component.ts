@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Output, EventEmitter } from '@angular/core';
+import {Component, AfterViewInit, Output, EventEmitter, Input} from '@angular/core';
 
 declare const Utils: any;
 declare const nfc: any;
@@ -14,6 +14,8 @@ export class LoginComponent implements AfterViewInit {
   private _userName = '';
 
   stLogin = 'Username';
+
+  @Input() genericLogin: string;
 
   timer;
 
@@ -46,7 +48,12 @@ export class LoginComponent implements AfterViewInit {
   constructor() { }
 
   ngAfterViewInit() {
-    this.userName = '';
+    if (this.genericLogin !== null) {
+      this.userName = this.genericLogin;
+      this.genericLogin == null;
+    } else {
+      this.userName = '';
+    }
   }
 
   // pust' tut polezhit

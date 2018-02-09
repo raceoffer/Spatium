@@ -40,6 +40,7 @@ export class LoginParentComponent  implements OnInit {
   stError = 'Retry';
 
   notRecognized = 'hide';
+  qrGenerate = null;
 
   input = '';
 
@@ -68,6 +69,11 @@ export class LoginParentComponent  implements OnInit {
     this.buttonState = State.Empty;
     this.content = content;
     this.notRecognized = 'hide';
+    if (this.qrGenerate && content === this.contentType.Login) {
+      console.log(this.qrGenerate);
+    } else {
+      this.qrGenerate = null;
+    }
   }
 
   async setBusy() {
@@ -102,6 +108,7 @@ export class LoginParentComponent  implements OnInit {
         if (this.content === this.contentType.NFC) {
           this.notRecognized = '';
           this.buttonState = State.Empty;
+          this.qrGenerate = this.authService.makeNewLogin(10);
         } else {
           this.buttonState = State.New;
         }
