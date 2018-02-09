@@ -58,6 +58,7 @@ import { WalletComponent } from './screens/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { CurrencyComponent } from './screens/currency/currency.component';
 
 @NgModule({
   declarations: [
@@ -85,7 +86,8 @@ import { AutofocusDirective } from './directives/autofocus.directive';
     WalletComponent,
     RegistrationSuccessComponent,
     FingerPrintComponent,
-    AutofocusDirective
+    AutofocusDirective,
+    CurrencyComponent
   ],
   imports: [
     FormsModule,

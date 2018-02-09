@@ -63,3 +63,27 @@ app-root {
 .nem {
   background: url(assets/images/drawable/currency/litecoin.svg);
 }
+
+.currency-component .mat-select-trigger {
+  height: 100%;
+}
+
+.currency-component .mat-select-value-text {
+  padding: 6px 20px 8px 20px;
+  font-size: 20px;
+  color: #373741;
+  font-family: 'Roboto-Light';
+  display: block;
+}
+
+.currency-component .mat-select-arrow {
+  background: url(assets/images/drawable/select_arrow.svg);
+  background-repeat: no-repeat;
+  border-top: 0px;
+  background-size: contain;
+  border-left: 0px;
+  border-right: 0px;
+  margin: 0 22px 0 22px; 
+  width: 19px;
+  height: 9px;
+}

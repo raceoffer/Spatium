@@ -1,0 +1,40 @@
+.mat-form-field-infix {
+  width: 100%!important;
+}
+
+table td {
+  width: 50%;
+}
+
+.field {
+	width: calc(100% - 14px);
+	height: 40px;
+	background-color: #e2e3e3;
+	border-radius: 2px;
+  margin-top: 18px;
+  text-align: left;
+}
+
+.field span {
+    padding: 6px 20px 8px 20px;
+    font-size: 20px;
+    color: #373741;
+    font-family: 'Roboto-Light';
+    display: block;
+}
+
+.field.right {
+	position: relative;
+	left: 14px;
+}
+
+.label, .mat-select-value-text {
+  position: absolute;
+  color: #373741;
+  font-family: 'Roboto-Light';
+  font-size: 13px;
+}
+
+mat-select {
+  height: 100%;
+}
