@@ -42,7 +42,7 @@ const appRoutes: Routes = [
   ]},
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' }
-  ]}
+  ]},
   { path: 'wallet/:currency', component: CurrencyComponent},
   { path: 'send-transaction', component: SendTransactionComponent}
 ];
