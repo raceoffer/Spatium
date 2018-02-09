@@ -38,3 +38,32 @@ table td {
 mat-select {
   height: 100%;
 }
+
+.qrcode {
+  margin: 32px 0 32px 0;
+}
+
+.transaction-list {
+  text-align: left;
+  margin-bottom: 110px;
+}
+
+.transaction-value {
+  font-family: 'Roboto-Light';
+}
+
+.transaction-address {
+  font-family: 'Roboto-Light';
+  margin: 5px 0 2px 0 !important;
+}
+
+.transaction-status {
+  font-family: 'Roboto-Light';
+}
+
+.send-button-background {
+  position: fixed;
+  bottom: 0;
+  padding: 10px 0 30px 0;
+  background-color: #f5f5f5;
+}

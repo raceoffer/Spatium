@@ -20,6 +20,7 @@ import {
   MatFormFieldModule,
   MatGridListModule
 } from '@angular/material';
+import { QRCodeModule } from 'angular2-qrcode';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { AppComponent } from './app.component';
@@ -59,6 +60,7 @@ import { RegistrationSuccessComponent } from './screens/registration-success/reg
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { CurrencyComponent } from './screens/currency/currency.component';
+
 
 @NgModule({
   declarations: [
@@ -114,6 +116,7 @@ import { CurrencyComponent } from './screens/currency/currency.component';
     MatSnackBarModule,
     MatFormFieldModule,
     MatGridListModule,
+    QRCodeModule,
     NgxZxingModule.forRoot()
   ],
   providers: [

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-currency',
@@ -8,24 +7,60 @@ import { WalletService } from '../../services/wallet.service';
   styleUrls: ['./currency.component.css']
 })
 export class CurrencyComponent implements OnInit {
-  currencyTitle = this.route.paramMap.map(params => params.get('currency'));
+
+  transactions: any = [
+    {
+      type: 'Input',
+      value: 0.00340815,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Confirmed'
+    }, {
+      type: 'Output',
+      value: 0.22571509,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Confirmed'
+    }, {
+      type: 'Input',
+      value: 0.00340815,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Confirmed'
+    }, {
+      type: 'Output',
+      value: 0.22571509,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Unconfirmed'
+    }, {
+      type: 'Input',
+      value: 0.00340815,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Unconfirmed'
+    }, {
+      type: 'Output',
+      value: 0.22571509,
+      address: '12KGmVfy1pRGGhWGWZoq19LaZxEyGd9fZ9',
+      status: 'Unconfirmed'
+    }
+  ];
+  
+  currencyTitle: string = '';
+  currencySymbol: string = 'BTC';
+  usdTitle: string = 'USD';
+
+  currencyValue = 1.001;
+  usdValue = '2.002';
+
   selectedAddress: string;
 
-  cryptoCurrency = 1.001;
-  usd = '2.002$';
-
-  sendLabel = 'Send';
+  addressLabel: string = "Address";
+  sendLabel: string = "Send";
 
   constructor(
-    private readonly route: ActivatedRoute,
-    private readonly wallet: WalletService
-  ) {
-    this.wallet.history.subscribe(history => {
-      console.log(JSON.stringify(history));
-    });
+    private route: ActivatedRoute,
+    private router: Router
+  ) { }
+
+  ngOnInit() {
+    this.currencyTitle = this.route.paramMap.source.value.currency;
   }
 
-  async ngOnInit() {}
-
-  async send() {}
 }
