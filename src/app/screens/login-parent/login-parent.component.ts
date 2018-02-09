@@ -108,7 +108,14 @@ export class LoginParentComponent  implements OnInit {
         if (this.content === this.contentType.NFC) {
           this.notRecognized = '';
           this.buttonState = State.Empty;
-          this.qrGenerate = this.authService.makeNewLogin(10);
+          do {
+            this.qrGenerate = this.authService.makeNewLogin(10);
+            const exists = await this.dds.exists(AuthService.toId(this.qrGenerate));
+            if (!exists) {
+              break;
+            }
+          } while (true);
+
         } else {
           this.buttonState = State.New;
         }
