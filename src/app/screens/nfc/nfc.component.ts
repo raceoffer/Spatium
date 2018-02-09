@@ -101,6 +101,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         },
         this.failure
       );
+
       this.isCreatedListener = true;
   }
 
@@ -148,6 +149,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
       navigator.vibrate(100);
 
       this.onSuccess();
+
     } else {
       console.log('inactive');
     }
@@ -167,11 +169,24 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         tag.canMakeReadOnly = tag.isLockable;
       }
 
-      this._nfc = tag.id;
+      if (!this.isRepeatable) {
+        this._nfc = tag.id;
 
-      navigator.vibrate(100);
+        navigator.vibrate(100);
 
-      this.onSuccess();
+        this.onSuccess();
+      } else {
+        const payload = Buffer.from(tag.ndefMessage[0].payload);
+        const login = Utils.tryUnpackLogin(payload);
+
+        console.log(login);
+
+        this._nfc = login;
+
+        navigator.vibrate(100);
+
+        this.onSuccess();
+      }
     }
   }
 

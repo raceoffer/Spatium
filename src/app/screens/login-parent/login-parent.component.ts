@@ -39,6 +39,8 @@ export class LoginParentComponent  implements OnInit {
   stLogIn = 'Sign in';
   stError = 'Retry';
 
+  notRecognized = 'hide';
+
   input = '';
 
   isNfcAvailable = true;
@@ -65,6 +67,7 @@ export class LoginParentComponent  implements OnInit {
   toggleContent(content) {
     this.buttonState = State.Empty;
     this.content = content;
+    this.notRecognized = 'hide';
   }
 
   async setBusy() {
@@ -73,6 +76,7 @@ export class LoginParentComponent  implements OnInit {
 
   async setEmpty() {
     this.buttonState = State.Empty;
+    this.notRecognized = 'hide';
   }
 
   async setInput(input: string) {
@@ -95,7 +99,12 @@ export class LoginParentComponent  implements OnInit {
       if (exists) {
         this.buttonState = State.Exists;
       } else {
-        this.buttonState = State.New;
+        if (this.content === this.contentType.NFC) {
+          this.notRecognized = '';
+          this.buttonState = State.Empty;
+        } else {
+          this.buttonState = State.New;
+        }
       }
     } catch (ignored) {
       this.buttonState = State.Error;

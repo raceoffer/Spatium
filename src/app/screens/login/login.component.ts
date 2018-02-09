@@ -1,5 +1,9 @@
 import { Component, AfterViewInit, Output, EventEmitter } from '@angular/core';
 
+declare const Utils: any;
+declare const nfc: any;
+declare const ndef: any;
+
 @Component({
   selector: 'app-login',
   host: {'class': 'child'},
@@ -43,5 +47,21 @@ export class LoginComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.userName = '';
+  }
+
+  // pust' tut polezhit
+  writeTag() {
+    const content = Utils.packLogin(this.userName);
+    const payload = Array.from(content);
+    const mimeType = 'text/pg';
+
+    const record = ndef.mimeMediaRecord(mimeType, payload);
+
+    nfc.write([record], function () {
+      console.log('success write');
+    }, function (e) {
+      console.log('error write ' + JSON.stringify(e));
+    });
+
   }
 }

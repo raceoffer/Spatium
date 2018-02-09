@@ -44,7 +44,7 @@
              (inputEvent)="setInput($event)"
     ></app-nfc>
 
-
+  <span style="margin: 5px 0px;" [class]="notRecognized" (clearEvent)="setEmpty()">Not recognized login</span>
   <div class="footer text-center">
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" [disabled]="buttonState === stateType.Empty" *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{stLogIn}}</button>
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
