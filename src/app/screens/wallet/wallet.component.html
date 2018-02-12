@@ -4,11 +4,11 @@
     [colspan]="tile.cols"
     [rowspan]="tile.rows">
 
-    <div class="grid-item" (click)='onTileClicked()'>
-      <div class="block">
+    <div class="grid-item" (click)='onTileClicked(tile.link)'>
+      <button mat-button class="block" [disabled]="tile.link == undefined">
         <div class="logo {{tile.logo}}">
         </div>
-      </div>
+      </button>
       <span class="title">{{tile.title}}</span>
     </div>
   </mat-grid-tile>
