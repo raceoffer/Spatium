@@ -1,57 +1,63 @@
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center"> 
-  <mat-toolbar class='mat-elevation-8' color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/navigator">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <span>{{ currencyTitle }}</span>
-    </mat-toolbar-row>
-  </mat-toolbar>
+  <div class="top-panel" fxLayout="column" fxLayoutAlign="center center">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <button mat-icon-button routerLink="/navigator">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ currencyTitle | async }}</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
 
-  <div class="full-width field" style="margin-bottom: 13px;">
-    <mat-select [(value)]="selectedAddress">
-      <mat-option value="option1">
-        Address
-      </mat-option>
-      <mat-option value="option2">
-        Address2
-      </mat-option>
-      <mat-option value="option3">
-        Address3
-      </mat-option>
-    </mat-select>
-  </div> 
+    <div class="full-width field" style="margin-bottom: 13px;">
+      <mat-select [(value)]="selectedAddress">
+        <mat-option value="option1">
+          Address
+        </mat-option>
+        <mat-option value="option2">
+          Address2
+        </mat-option>
+        <mat-option value="option3">
+          Address3
+        </mat-option>
+      </mat-select>
+    </div> 
 
-  <table class="full-width">
-    <tr>
-      <td>
-        <span class="label" style="margin-left: 5px;">{{ currencySymbol }}</span>
-        <div class="field">
-          <span>
-            {{ currencyValue }}
-          </span>
-        </div>
-      </td>
-      <td>
-        <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
-        <div class="field right">
-          <span>
-            {{ usdValue }}
-          </span>
-        </div>
-      </td>
-    </tr>
-  </table>
+    <table class="full-width">
+      <tr>
+        <td>
+          <span class="label" style="margin-left: 5px;">{{ currencySymbol }}</span>
+          <div class="field">
+            <span>
+              {{ currencyValue }}
+            </span>
+          </div>
+        </td>
+        <td>
+          <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
+          <div class="field right">
+            <span>
+              {{ usdValue }}
+            </span>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
 
   <div class="qrcode">
-    <qr-code [value]="selectedAddress" [size]="150"></qr-code>
+    <qr-code [value]="selectedAddress" [size]="150" [background]="'#f5f5f5'"></qr-code>
   </div>
 
   <mat-list class="full-width transaction-list">
-    <mat-list-item *ngFor="let transaction of transactions">
-      <h3 matLine class="transaction-value"> <b>{{ transaction.type }} {{ transaction.value }} {{ currencySymbol }} </b></h3>
-      <p matLine class="transaction-address"> {{ transaction.address }} </p>
-      <p matLine class="transaction-status"> {{ transaction.status }} </p>
+    <mat-list-item class="list-item" *ngFor="let transaction of transactions" [class.unconfirmed]="!transaction.confirmed">
+      <span matLine class="transaction-amount" 
+        [class.input]="transaction.type=='Input'" 
+        [class.output]="transaction.type=='Output'">
+        {{ transaction.amount }} {{ currencySymbol }}
+      </span>
+      <span matLine class="transaction-time"> {{ transaction.time }} </span>
+      <span matLine class="transaction-address"> {{ transaction.address }} </span>
       <mat-divider></mat-divider>
     </mat-list-item>
   </mat-list>
