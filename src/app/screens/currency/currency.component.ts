@@ -60,6 +60,8 @@ export class CurrencyComponent implements OnInit {
     this.wallet.history.subscribe(history => {
       console.log(JSON.stringify(history));
     });
+
+    //this.transactions = this.wallet.listTransactionHistory();
   }
 
   ngOnInit() {}

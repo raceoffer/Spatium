@@ -1,5 +1,6 @@
-<div class="currency-component" fxLayout="column" fxLayoutAlign="start center"> 
-  <div class="top-panel" fxLayout="column" fxLayoutAlign="center center">
+<div class="currency-component box" fxLayout="column" fxLayoutAlign="start center"> 
+
+  <div class="header top-panel text-center">
     <mat-toolbar color="primary">
       <mat-toolbar-row>
         <button mat-icon-button routerLink="/navigator">
@@ -23,7 +24,7 @@
       </mat-select>
     </div> 
 
-    <table class="full-width">
+    <table class="full-width text-center">
       <tr>
         <td>
           <span class="label" style="margin-left: 5px;">{{ currencySymbol }}</span>
@@ -45,29 +46,37 @@
     </table>
   </div>
 
-  <div class="qrcode">
-    <qr-code [value]="selectedAddress" [size]="150" [background]="'#f5f5f5'"></qr-code>
+  <div class="content text-center" style="overflow: scroll;max-height: 100%;">
+    <div class="qrcode">
+      <qr-code [value]="'bitcoin: ' + selectedAddress" [size]="150" [background]="'#f5f5f5'"></qr-code>
+    </div>
+
+    <mat-list class="full-width text-center transaction-list">
+      <mat-list-item class="list-item" *ngFor="let transaction of transactions" [class.unconfirmed]="!transaction.confirmed">
+        <span matLine class="transaction-amount" 
+          [class.input]="transaction.type=='Input'" 
+          [class.output]="transaction.type=='Output'">
+          {{ transaction.amount }} {{ currencySymbol }}
+        </span>
+        <span matLine class="transaction-time"> {{ transaction.time }} </span>
+        <span matLine class="transaction-address"> {{ transaction.address }} </span>
+        <mat-divider></mat-divider>
+      </mat-list-item>
+    </mat-list>
   </div>
 
-  <mat-list class="full-width transaction-list">
-    <mat-list-item class="list-item" *ngFor="let transaction of transactions" [class.unconfirmed]="!transaction.confirmed">
-      <span matLine class="transaction-amount" 
-        [class.input]="transaction.type=='Input'" 
-        [class.output]="transaction.type=='Output'">
-        {{ transaction.amount }} {{ currencySymbol }}
-      </span>
-      <span matLine class="transaction-time"> {{ transaction.time }} </span>
-      <span matLine class="transaction-address"> {{ transaction.address }} </span>
-      <mat-divider></mat-divider>
-    </mat-list-item>
-  </mat-list>
-
-
-  <div class="full-width send-button-background" fxLayout="column" fxLayoutAlign="center center">
+  <!-- <div class="footer full-width" fxLayout="column" fxLayoutAlign="center center">
     <button mat-raised-button color="accent" class="width-button-full color" (click)="send()">
       {{ sendLabel }}
     </button>
-  </div>
+  </div> -->
 
+  <div class="footer text-center send-button-background">
+
+    <button mat-raised-button color="accent" class="width-button-full color full-width" (click)="send()">
+      {{ sendLabel }}
+    </button>
+
+  </div>
 </div>
 
