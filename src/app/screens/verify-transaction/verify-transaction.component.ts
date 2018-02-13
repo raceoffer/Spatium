@@ -1,6 +1,8 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
+import { Coin } from '../../services/keychain.service';
+import { BitcoinWallet } from '../../services/wallet/bitcoin/bitcoinwallet';
 
 declare const bcoin: any;
 
@@ -26,7 +28,7 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
 
   subscriptions = [];
 
-  public currencyWallet = this.wallet.currencyWallet;
+  public currencyWallet = this.wallet.currencyWallets.get(Coin.BTC) as BitcoinWallet;
 
   constructor(
     private readonly bt: BluetoothService,

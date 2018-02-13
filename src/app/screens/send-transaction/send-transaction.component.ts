@@ -1,6 +1,8 @@
 import { OnInit, Component, OnDestroy } from '@angular/core';
 import { WalletService } from '../../services/wallet.service';
 import { NotificationService } from '../../services/notification.service';
+import { Coin } from '../../services/keychain.service';
+import { BitcoinWallet } from '../../services/wallet/bitcoin/bitcoinwallet';
 
 declare const bcoin: any;
 
@@ -37,7 +39,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   rateBtcUsd = 15000;
 
-  public currencyWallet = this.walletService.currencyWallet;
+  public currencyWallet = this.walletService.currencyWallets.get(Coin.BTC) as BitcoinWallet;
 
   get sendBtc() {
     return this._sendBtc;

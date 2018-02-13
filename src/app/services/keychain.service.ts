@@ -4,7 +4,8 @@ declare const KeyChain: any;
 
 export enum Coin {
   BTC = 0,
-  ETH = 60
+  ETH = 60,
+  BCH = 145
 }
 
 @Injectable()

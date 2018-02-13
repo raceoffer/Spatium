@@ -155,7 +155,10 @@ export class CurrencyWallet {
   public async requestTransactionVerify(transaction) {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
-      content:  transaction.toJSON()
+      content: {
+        tx: transaction.toJSON(),
+        coin: this.currency
+      }
     }));
 
     this.signSession = new SignSession(
