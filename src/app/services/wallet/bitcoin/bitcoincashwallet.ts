@@ -50,7 +50,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
       });
 
     try {
-      this.address.next(publicKey.toAddress.toString());
+      this.address.next(publicKey.toAddress().toString());
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
