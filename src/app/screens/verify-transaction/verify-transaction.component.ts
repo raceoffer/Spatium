@@ -26,6 +26,8 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
 
   subscriptions = [];
 
+  public currencyWallet = this.wallet.currencyWallet;
+
   constructor(
     private readonly bt: BluetoothService,
     private readonly wallet: WalletService
@@ -36,7 +38,7 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
 
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () => {
-        console.log(this.wallet.address.getValue());
+        console.log(this.currencyWallet.address.getValue());
       }));
 
     this.subscriptions.push(
@@ -50,7 +52,7 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
       }));
 
     this.subscriptions.push(
-      this.wallet.rejectedEvent.subscribe(async () => {
+      this.currencyWallet.rejectedEvent.subscribe(async () => {
         this.showTransaction = false;
       }));
 
@@ -78,7 +80,7 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
       }));
 
     this.subscriptions.push(
-      this.wallet.verifyEvent.subscribe((transaction) => {
+      this.currencyWallet.verifyEvent.subscribe((transaction) => {
         const output = transaction.totalOutputs()[0];
 
         this.address = output.address;
@@ -115,12 +117,12 @@ export class VerifyTransactionComponent implements OnInit, AfterViewInit, OnDest
 
   async confirm() {
     this.showTransaction = false;
-    await this.wallet.acceptTransaction();
+    await this.currencyWallet.acceptTransaction();
   }
 
   async decline() {
     this.showTransaction = false;
-    await this.wallet.rejectTransaction();
+    await this.currencyWallet.rejectTransaction();
   }
 
   async enableBluetooth() {

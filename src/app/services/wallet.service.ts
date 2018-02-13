@@ -10,8 +10,9 @@ import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
 import { LoggerService } from './logger.service';
-import { KeyChainService } from './keychain.service';
-import {Subject} from "rxjs/Subject";
+import { Coin, KeyChainService } from './keychain.service';
+import { Subject } from 'rxjs/Subject';
+import { combineLatest } from "rxjs/observable/combineLatest";
 
 declare const bcoin: any;
 
@@ -19,6 +20,7 @@ declare const CompoundKey: any;
 declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
 declare const Transaction: any;
+declare const BitcoinTransaction: any;
 declare const Utils: any;
 
 export enum SynchronizationStatus {
@@ -298,6 +300,7 @@ class SignSession {
   private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
 
   private signers: any = null;
+  private mapping: any = null;
 
   constructor(
     private tx: any,
@@ -363,13 +366,15 @@ class SignSession {
   public async sync() {
     this.status.next(TransactionStatus.Started);
 
-    const hashes = this.tx.getHashes();
-    const map = this.tx.mapCompoundKeys(this.compoundKey);
-    this.signers = Transaction.startSign(hashes, map);
+    this.mapping = this.tx.mapInputs(this.compoundKey);
+
+    const hashes = this.tx.getHashes(this.mapping);
+
+    this.signers = this.tx.startSign(hashes, this.mapping);
 
     let entropyCommitments = null;
     try {
-      entropyCommitments = Transaction.createEntropyCommitments(this.signers);
+      entropyCommitments = this.tx.createEntropyCommitments(this.signers);
     } catch (e) {
       return this.handleFailure('Failed to get entropyCommitments', e);
     }
@@ -391,7 +396,7 @@ class SignSession {
     LoggerService.log('Received remoteEntropyCommitments', remoteEntropyCommitments);
     let entropyDecommitments = null;
     try {
-      entropyDecommitments = Transaction.processEntropyCommitments(this.signers, remoteEntropyCommitments);
+      entropyDecommitments = this.tx.processEntropyCommitments(this.signers, remoteEntropyCommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
@@ -412,7 +417,7 @@ class SignSession {
     this.status.next(TransactionStatus.EntropyDecommitments);
     LoggerService.log('Received remoteEntropyDecommitments', remoteEntropyDecommitments);
     try {
-      Transaction.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
+      this.tx.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyDecommitments', e);
     }
@@ -429,7 +434,7 @@ class SignSession {
 
     let chiphertexts = null;
     try {
-      chiphertexts = Transaction.computeCiphertexts(this.signers);
+      chiphertexts = this.tx.computeCiphertexts(this.signers);
     } catch (e) {
       return this.handleFailure('Failed to compute chiphertexts', e);
     }
@@ -455,43 +460,31 @@ class SignSession {
     }
 
     LoggerService.log('Received remoteChiphertexts', remoteChiphertexts);
-    let signatures = null;
+    let rawSignatures = null;
     try {
-      signatures = Transaction.extractSignatures(this.signers, remoteChiphertexts).map(Utils.encodeSignature);
+      rawSignatures = this.tx.extractSignatures(this.signers, remoteChiphertexts);
     } catch (e) {
       return this.handleFailure('Failed to process remoteChiphertexts', e);
     }
 
-    this.tx.injectSignatures(signatures);
+    const signatures = this.tx.normalizeSignatures(this.mapping, rawSignatures);
+
+    this.tx.applySignatures(signatures);
+
     this.status.next(TransactionStatus.Signed);
     this.signed.emit();
   }
 }
 
-@Injectable()
-export class WalletService {
-  private compoundKey: any = null;
-  private walletDB: any = null;
-  private watchingWallet: any = null;
-  private provider: any = null;
+export class CurrencyWallet {
+  protected compoundKey: any = null;
 
-  private routineTimer: any = null;
-
-  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
-
-  private syncSession: SyncSession = null;
-  private signSession: SignSession = null;
-
-  private network = 'testnet'; // 'main'; | 'testnet';
-
-  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+  protected syncSession: SyncSession = null;
+  protected signSession: SignSession = null;
 
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
-  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  public synchronizing: Observable<boolean> = this.status.map(status => status === Status.Synchronizing);
+  public ready: Observable<boolean> = this.status.map(status => status === Status.Ready);
 
   public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
 
@@ -505,72 +498,33 @@ export class WalletService {
   public acceptedEvent: Subject<any> = new Subject<any>();
   public rejectedEvent: Subject<any> = new Subject<any>();
 
+  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+
+  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+
   constructor(
-    private readonly bt: BluetoothService,
-    private readonly keychain: KeyChainService
+    protected network: string,
+    private keychain: KeyChainService,
+    private currency: Coin,
+    private account: number,
+    private messageSubject: any,
+    private bt: BluetoothService
   ) {
-    bcoin.set(this.network);
-
-    this.bt.message.subscribe((message) => {
-      this.messageSubject.next(JSON.parse(message));
-    });
-
     this.bt.disconnectedEvent.subscribe(() => this.status.next(Status.None));
 
-    this.messageSubject
-      .filter(object => object.type === 'verifyTransaction')
-      .map(object => object.content)
-      .subscribe(async content => {
-        return await this.startTransactionVerify(
-          Transaction.fromJSON(content)
-        );
-      });
-
-    this.status.subscribe(status => this.synchronizing.next(status === Status.Synchronizing));
-    this.status.subscribe(status => this.ready.next(status === Status.Ready));
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
   }
 
-  public async reset() {
-    this.status.next(Status.None);
-
-    if (this.routineTimer) {
-      clearInterval(this.routineTimer);
-    }
-
-    this.compoundKey = null;
-    this.walletDB = null;
-    this.watchingWallet = null;
-    this.provider = null;
-
-    if (this.syncSession) {
-      await this.syncSession.cancel();
-      this.syncSession = null;
-    }
-
-    if (this.signSession) {
-      await this.signSession.cancel();
-      this.signSession = null;
-    }
-
-    this.address.next('');
-    this.balance.next({ confirmed: 0, unconfirmed: 0 });
-  }
-
-  public startSync() {
-    if (this.synchronizing.getValue()) {
+  public sync() {
+    if (this.status.getValue() === Status.Synchronizing) {
       LoggerService.log('Sync in progress', {});
       return;
     }
 
-    try {
-      this.compoundKey = new CompoundKey({
-        localPrivateKeyring: CompoundKey.keyringFromSecret(this.keychain.getBitcoinSecret(1))
-      });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to create compound key', e);
-      return;
-    }
+    this.compoundKey = new CompoundKey({
+      localPrivateKeyring: CompoundKey.keyringFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
+    });
 
     let prover = null;
     try {
@@ -612,6 +566,25 @@ export class WalletService {
     this.syncSession.sync().catch(() => {});
   }
 
+  public async reset() {
+    this.status.next(Status.None);
+
+    this.compoundKey = null;
+
+    if (this.syncSession) {
+      await this.syncSession.cancel();
+      this.syncSession = null;
+    }
+
+    if (this.signSession) {
+      await this.signSession.cancel();
+      this.signSession = null;
+    }
+
+    this.address.next('');
+    this.balance.next({ confirmed: 0, unconfirmed: 0 });
+  }
+
   public async cancelSync() {
     if (this.syncSession) {
       await this.syncSession.cancel();
@@ -630,22 +603,12 @@ export class WalletService {
     }
   }
 
-  public async createTransaction(address, value, substractFee) {
-    const transaction = new Transaction({
-      address: address,
-      value: value
-    });
-
-    /// Fill inputs and calculate script hashes
+  public async finishSync(data) {
     try {
-      await transaction.prepare(this.watchingWallet, {
-        subtractFee: substractFee
-      });
+      this.compoundKey.finishInitialSync(data);
     } catch (e) {
-      LoggerService.nonFatalCrash('Failed to prepare transaction', e);
+      LoggerService.nonFatalCrash('Failed synchronization finish', e);
     }
-
-    return transaction;
   }
 
   public async requestTransactionVerify(transaction) {
@@ -715,39 +678,47 @@ export class WalletService {
     let verify = false;
 
     if (this.signSession) {
-      const tx = this.signSession.transaction.toTX();
-
-      try {
-        verify = tx.verify(await this.watchingWallet.wallet.getCoinView(tx));
-      } catch (e) {
-        LoggerService.nonFatalCrash('Failed to verify signature', e);
-      }
+      verify = this.signSession.transaction.verify();
     }
 
     return verify;
   }
+}
 
-  public async pushTransaction() {
-    if (this.signSession) {
-      const tx = this.signSession.transaction.toTX();
-      try {
-        await this.provider.pushTransaction(tx.toRaw().toString('hex'));
-      } catch (e) {
-        LoggerService.nonFatalCrash('Failed to push transaction', e);
-      }
-    }
+export class BitcoinWallet extends CurrencyWallet {
+  private walletDB: any = null;
+  private watchingWallet: any = null;
+  private provider: any = null;
+  private routineTimer: any = null;
+
+  constructor(
+    network: string,
+    keychain: KeyChainService,
+    account: number,
+    messageSubject: any,
+    bt: BluetoothService
+  ) {
+    super(network, keychain, Coin.BTC, account, messageSubject, bt);
   }
 
-  private async finishSync(data) {
+  public async reset() {
+    await super.reset();
+
+    if (this.routineTimer) {
+      clearInterval(this.routineTimer);
+    }
+
+    this.walletDB = null;
+    this.watchingWallet = null;
+    this.provider = null;
+  }
+
+  public async finishSync(data) {
+    await super.finishSync(data);
+
     this.walletDB = new bcoin.walletdb({
       db: 'memory'
     });
-
-    try {
-      this.compoundKey.finishInitialSync(data);
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed synchronization finish', e);
-    }
 
     try {
       this.address.next(this.compoundKey.getCompoundKeyAddress('base58'));
@@ -814,6 +785,119 @@ export class WalletService {
     // End: configuring a provider
 
     this.status.next(Status.Ready);
+  }
+
+  public async createTransaction(address, value) {
+    const transaction = BitcoinTransaction.fromOptions({
+      network: this.network
+    });
+
+    /// Fill inputs and calculate script hashes
+    try {
+      await transaction.prepare({
+        wallet: this.watchingWallet,
+        address: address,
+        value: value
+      });
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to prepare transaction', e);
+    }
+
+    return transaction;
+  }
+
+  public async pushTransaction() {
+    if (this.signSession.transaction) {
+      try {
+        const raw = this.signSession.transaction.toRaw();
+        await this.provider.pushTransaction(raw);
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to push transaction', e);
+      }
+    }
+  }
+}
+
+@Injectable()
+export class WalletService {
+  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
+
+  private network = 'testnet'; // 'main'; | 'testnet';
+
+  public currencyWallet: BitcoinWallet =
+    new BitcoinWallet(
+      this.network,
+      this.keychain,
+      1,
+      this.messageSubject,
+      this.bt
+    );
+
+  public syncProgress: Observable<number> = combineLatest(
+    [this.currencyWallet.syncProgress],
+    (... values) => {
+      return values.reduce((a, b) => a + b, 0);
+    }
+  );
+
+  public status: Observable<Status> = combineLatest(
+    [this.currencyWallet.status],
+    (... values) => {
+      return values.reduce((a, b) => Math.min(a, b) as Status, Status.Ready);
+    }
+  );
+
+  public synchronizing: Observable<boolean> = combineLatest(
+    [this.currencyWallet.synchronizing],
+    (... values) => {
+      return values.reduce((a, b) => a || b, false);
+    }
+  );
+
+  public ready: Observable<boolean> = combineLatest(
+    [this.currencyWallet.ready],
+    (... values) => {
+      return values.reduce((a, b) => a && b, true);
+    }
+  );
+
+  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
+
+  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
+  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
+  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
+  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
+
+  constructor(
+    private readonly bt: BluetoothService,
+    private readonly keychain: KeyChainService
+  ) {
+    bcoin.set(this.network);
+
+    this.bt.message.subscribe((message) => {
+      this.messageSubject.next(JSON.parse(message));
+    });
+
+    this.messageSubject
+      .filter(object => object.type === 'verifyTransaction')
+      .map(object => object.content)
+      .subscribe(async content => {
+        return await this.currencyWallet.startTransactionVerify(
+          BitcoinTransaction.fromJSON(content)
+        );
+      });
+  }
+
+  public async reset() {
+    await this.currencyWallet.reset();
+  }
+
+  public async startSync() {
+    await this.currencyWallet.sync();
+  }
+
+  public async cancelSync() {
+    await this.currencyWallet.cancelSync();
   }
 }
 

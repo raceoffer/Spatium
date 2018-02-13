@@ -37,6 +37,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   rateBtcUsd = 15000;
 
+  public currencyWallet = this.walletService.currencyWallet;
+
   get sendBtc() {
     return this._sendBtc;
   }
@@ -64,23 +66,23 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscriptions.push(
-      this.walletService.balance.subscribe((balance) => {
+      this.currencyWallet.balance.subscribe((balance) => {
         this.updataBalance(balance);
       }));
 
     this.subscriptions.push(
-      this.walletService.rejectedEvent.subscribe(async () => {
+      this.currencyWallet.rejectedEvent.subscribe(async () => {
         await this.rejected();
       }));
 
     this.subscriptions.push(
-      this.walletService.signedEvent.subscribe(async () => {
+      this.currencyWallet.signedEvent.subscribe(async () => {
         await this.finalaized();
       }));
 
-    this.walletAddress = this.walletService.address.getValue();
+    this.walletAddress = this.currencyWallet.address.getValue();
     this.selected = this.walletAddress;
-    this.updataBalance(this.walletService.balance.getValue());
+    this.updataBalance(this.currencyWallet.balance.getValue());
   }
 
   ngOnDestroy() {
@@ -96,25 +98,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const tx = await this.walletService.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value, false);
+    const tx = await this.currencyWallet.createTransaction(this.addressReceiver, bcoin.amount.fromBTC(this.sendBtc).value);
     if (tx) {
       this.phase = Phase.Confirmation;
-      await this.walletService.requestTransactionVerify(tx);
+      await this.currencyWallet.requestTransactionVerify(tx);
     }
   }
 
   async cancelTransaction() {
     this.phase = Phase.Creation;
 
-    await this.walletService.rejectTransaction();
+    await this.currencyWallet.rejectTransaction();
   }
 
   async sendTransaction() {
     this.phase = Phase.Creation;
 
     try {
-      await this.walletService.verifySignature();
-      await this.walletService.pushTransaction();
+      await this.currencyWallet.verifySignature();
+      await this.currencyWallet.pushTransaction();
 
       this.notification.show('The transaction was successfully sent');
     } catch (e) {
