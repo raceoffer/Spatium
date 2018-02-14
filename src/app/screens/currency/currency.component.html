@@ -12,14 +12,8 @@
 
     <div class="full-width field" style="margin-bottom: 13px;">
       <mat-select [(value)]="selectedAddress">
-        <mat-option value="option1">
-          Address
-        </mat-option>
-        <mat-option value="option2">
-          Address2
-        </mat-option>
-        <mat-option value="option3">
-          Address3
+        <mat-option *ngFor="let address of addresses" [value]="address">
+          {{ address }}
         </mat-option>
       </mat-select>
     </div> 
@@ -30,7 +24,7 @@
           <span class="label" style="margin-left: 5px;">{{ currencySymbol }}</span>
           <div class="field">
             <span>
-              {{ currencyValue }}
+              {{ currencyValueConfirmed }}
             </span>
           </div>
         </td>
@@ -38,7 +32,7 @@
           <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
           <div class="field right">
             <span>
-              {{ usdValue }}
+              {{ usdValueConfirmed }}
             </span>
           </div>
         </td>
@@ -54,22 +48,17 @@
     <mat-list class="full-width text-center transaction-list">
       <mat-list-item class="list-item" *ngFor="let transaction of transactions" [class.unconfirmed]="!transaction.confirmed">
         <span matLine class="transaction-amount" 
-          [class.input]="transaction.type=='Input'" 
-          [class.output]="transaction.type=='Output'">
-          {{ transaction.amount }} {{ currencySymbol }}
+          [class.input]="transaction.type==0" 
+          [class.output]="transaction.type==1">
+          {{ transaction.formattedAmount }} {{ currencySymbol }}
         </span>
-        <span matLine class="transaction-time"> {{ transaction.time }} </span>
-        <span matLine class="transaction-address"> {{ transaction.address }} </span>
+        <span matLine class="transaction-time" *ngIf="transaction.confirmed"> {{ transaction.time | date:'dd-MM-yyyy HH:mm' }}</span>
+        <span matLine class="transaction-address" *ngIf="transaction.type==0"> {{ transaction.from }} </span>
+        <span matLine class="transaction-address" *ngIf="transaction.type==1"> {{ transaction.to }} </span>
         <mat-divider></mat-divider>
       </mat-list-item>
     </mat-list>
   </div>
-
-  <!-- <div class="footer full-width" fxLayout="column" fxLayoutAlign="center center">
-    <button mat-raised-button color="accent" class="width-button-full color" (click)="send()">
-      {{ sendLabel }}
-    </button>
-  </div> -->
 
   <div class="footer text-center send-button-background">
 

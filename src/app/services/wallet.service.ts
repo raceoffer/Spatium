@@ -480,7 +480,8 @@ export class HistoryEntry {
       json.from,
       json.to,
       json.amount,
-      json.confirmed
+      json.confirmed,
+      json.time
     );
   }
 
@@ -490,6 +491,7 @@ export class HistoryEntry {
     public to: string,
     public amount: number,
     public confirmed: boolean,
+    public time: number
   ) {}
 }
 
@@ -782,7 +784,8 @@ export class WalletService {
           from: this.watchingWallet.getAddress('base58'),
           to: outputs.filter(output => output.address !== this.watchingWallet.getAddress('base58'))[0],
           amount: value,
-          confirmed: record.meta !== null
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
         });
       } else { // in
         // go find our output
@@ -795,7 +798,8 @@ export class WalletService {
           from: inputs[0].address,
           to: this.watchingWallet.getAddress('base58'),
           amount: value,
-          confirmed: record.meta !== null
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
         });
       }
     });

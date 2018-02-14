@@ -69,11 +69,12 @@ app-root {
 }
 
 .currency-component .mat-select-value-text {
-  padding: 6px 20px 8px 20px;
-  font-size: 20px;
+  padding: 0 20px 0 20px;
   color: #373741;
   font-family: 'Roboto-Light';
   display: block;
+  line-height: 40px;
+
 }
 
 .currency-component .mat-select-arrow {
