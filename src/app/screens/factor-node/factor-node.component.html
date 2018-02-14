@@ -7,41 +7,14 @@
         </button>
       </mat-toolbar-row>
     </mat-toolbar>
-
-    <div class="entry-margin start-logo-text" ></div>
-
-    <div class="start-tagline-padding">
-      <span class="start-tagline">Secure your funds</span>
-    </div>
   </div>
 
   <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
     <div class="header text-center">
-      <div class="entry" style="padding-bottom: 20px">
-        <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
-          {{ username }}
-        </div>
-        <button matSuffix mat-icon-button style="position: absolute; right:24px; display: inline-block; margin-top: -10.5px;" (click)="generateNewLogin()">
-          <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
-          <mat-icon class="button-imitator-30 sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
-          <mat-icon class="button-imitator-30" *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
-        </button>
-      </div>
-
-      <div class="spatium-textfield entry bottom32">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password">
-      </div>
-
       <div class="top-arrow-scroll" id="top-scroller">
         <button mat-icon-button (click)="goTop()">
           <mat-icon>keyboard_arrow_up</mat-icon>
         </button>
-      </div>
-    </div>
-
-    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;" *ngIf="!advancedMode">
-      <div class="reg-warning">
-         <span>{{ stWarning }}</span>
       </div>
     </div>
 
@@ -68,19 +41,13 @@
         </button>
       </div>
 
-      <div class="margin-top-18" style="padding-bottom: 10px;" *ngIf="advancedMode">
+      <div class="margin-top-18" style="padding-bottom: 10px;">
         <button color="accent" mat-fab (click)="addNewFactor()" type="button">
           <mat-icon>add</mat-icon>
         </button>
       </div>
 
-      <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
-        <button mat-icon-button type="button" style="float: right;" (click)="openAdvanced()">
-          <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
-        </button>
-      </div>
-
-      <button type="submit" mat-raised-button color="accent" (click)="signUp()" [disabled]="password.length < 1 || usernameState !== stateType.Ready || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
+      <button type="submit" mat-raised-button color="accent" class="width-button color" >hhh</button>
     </div>
   </form>
 </div>
