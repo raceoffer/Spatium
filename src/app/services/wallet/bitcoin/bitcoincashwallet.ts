@@ -44,13 +44,8 @@ export class BitcoinCashWallet extends CurrencyWallet {
       db: 'memory'
     });
 
-    const publicKey =  new Cashjs.PublicKey(
-      this.compoundKey.getCompoundPublicKey(), {
-        network: this.network === 'mainnet' ? 'livenet' : 'testnet'
-      });
-
     try {
-      this.address.next(publicKey.toAddress().toString());
+      this.address.next(this.compoundKey.getCompoundKeyAddress('base58'));
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
@@ -102,10 +97,10 @@ export class BitcoinCashWallet extends CurrencyWallet {
     // Initiate update routine
 
     try {
-      this.provider.pullTransactions(publicKey.toAddress().toString()).catch(() => {});
+      this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(() => {});
       clearInterval(this.routineTimer);
       this.routineTimer = setInterval(() => {
-        this.provider.pullTransactions(publicKey.toAddress().toString()).catch(() => {});
+        this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(() => {});
       }, 20000);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to pull transactions into provider', e);

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { Coin } from '../../services/keychain.service';
 
 @Component({
   selector: 'app-wallet',
@@ -8,9 +9,9 @@ import { Router } from '@angular/router';
 })
 export class WalletComponent {
   tiles = [
-    {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
-    {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc'},
-    {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin'},
+    {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum', coin: Coin.ETH},
+    {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc', coin: Coin.BTC},
+    {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.BCH},
     {title: 'Bitcoin Cash', cols: 1, rows: 1},
     {title: 'Cardano', cols: 1, rows: 1},
     {title: 'NEO', cols: 1, rows: 1},
@@ -24,7 +25,7 @@ export class WalletComponent {
     private readonly router: Router
   ) { }
 
-  async onTileClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['send-transaction'] } }]);
+  async onTileClicked(coin: Coin) {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['send-transaction', coin] } }]);
   }
 }

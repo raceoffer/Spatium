@@ -1,8 +1,8 @@
 <div fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
   <mat-form-field class="full-width" color="accent">
     <mat-select [placeholder]="currentWalletPh" [disabled]="phase !== phaseType.Creation" [(value)]="selected">
-      <mat-option *ngIf="walletAddress" [value]="walletAddress">
-        <span class="address">{{ walletAddress }}</span> ({{ balanceBtcUnconfirmed }} BTC)
+      <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
+        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} BTC)
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -11,12 +11,12 @@
     <tr>
       <td align="left" width="50%">
         <mat-form-field style="width: 120px;">
-          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed" disabled>
+          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed | async" disabled>
         </mat-form-field>
       </td>
       <td align="right" width="50%">
         <mat-form-field style="width: 120px;">
-          <input matInput placeholder="USD" [value]="balanceUsd" disabled>
+          <input matInput placeholder="USD" [value]="balanceUsd | async" disabled>
         </mat-form-field>
       </td>
     </tr>
@@ -56,7 +56,7 @@
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="phase === phaseType.Sending"></mat-progress-bar>
 
-    <button *ngIf="phase === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="balanceBtcUnconfirmed < sendBtc">
+    <button *ngIf="phase === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="(balanceBtcUnconfirmed | async) < sendBtc">
       {{ stTransfer }}
     </button>
     <button *ngIf="phase === phaseType.Confirmation" mat-raised-button color="accent" class="width-button-full color" (click)="cancelTransaction()">

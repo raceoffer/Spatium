@@ -34,13 +34,5 @@ export class KeyChainService {
     return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
   }
 
-  getBitcoinSecret(account: number) {
-    return this.getCoinSecret(Coin.BTC, account);
-  }
-
-  getEthereumSecret(account: number) {
-    return this.getCoinSecret(Coin.ETH, account);
-  }
-
   constructor() { }
 }

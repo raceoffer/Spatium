@@ -1,8 +1,10 @@
 import { OnInit, Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
 import { WalletService } from '../../services/wallet.service';
 import { NotificationService } from '../../services/notification.service';
+import { CurrencyWallet } from '../../services/wallet/currencywallet';
 import { Coin } from '../../services/keychain.service';
-import { BitcoinWallet } from '../../services/wallet/bitcoin/bitcoinwallet';
+import { Observable } from 'rxjs/Observable';
 
 declare const bcoin: any;
 
@@ -20,8 +22,6 @@ enum Phase {
 export class SendTransactionComponent implements OnInit, OnDestroy {
   public phaseType = Phase; // for template
 
-  addressReceiver = 'n3bizXy1mhAkAEXQ1qoWw1hq8N5LktwPeC';
-
   currentWalletPh = 'Wallet';
   receiverPh = 'Recipient';
 
@@ -35,11 +35,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   selected = '';
 
-  _sendBtc = 0.1;
+  _sendBtc = 0.0;
+  addressReceiver = '';
 
   rateBtcUsd = 15000;
-
-  public currencyWallet = this.walletService.currencyWallets.get(Coin.BTC) as BitcoinWallet;
 
   get sendBtc() {
     return this._sendBtc;
@@ -52,50 +51,56 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   sendUsd = this.sendBtc * this.rateBtcUsd;
 
-  walletAddress = '';
-  balanceBtcConfirmed = 0;
-  balanceBtcUnconfirmed = 0;
-  balanceUsd = 0;
+  public currencyWallet: CurrencyWallet;
 
-  phase = Phase.Creation;
+  public walletAddress: Observable<string>;
+  public balanceBtcConfirmed: Observable<number>;
+  public balanceBtcUnconfirmed: Observable<number>;
+  public balanceUsd: Observable<number>;
 
-  subscriptions = [];
+  public phase = Phase.Creation;
+
+  private subscriptions = [];
 
   constructor(
-    private walletService: WalletService,
-    private notification: NotificationService
-  ) {}
+    private readonly walletService: WalletService,
+    private readonly notification: NotificationService,
+    private readonly route: ActivatedRoute
+  ) { }
 
   ngOnInit() {
     this.subscriptions.push(
-      this.currencyWallet.balance.subscribe((balance) => {
-        this.updataBalance(balance);
-      }));
+      this.route.params.subscribe((params: Params) => {
+        const coin = Number(params['coin']) as Coin;
 
-    this.subscriptions.push(
-      this.currencyWallet.rejectedEvent.subscribe(async () => {
-        await this.rejected();
-      }));
+        this.currencyWallet = this.walletService.currencyWallets.get(coin);
 
-    this.subscriptions.push(
-      this.currencyWallet.signedEvent.subscribe(async () => {
-        await this.finalaized();
-      }));
+        this.subscriptions.push(
+          this.currencyWallet.rejectedEvent.subscribe(async () => {
+            await this.rejected();
+          }));
 
-    this.walletAddress = this.currencyWallet.address.getValue();
-    this.selected = this.walletAddress;
-    this.updataBalance(this.currencyWallet.balance.getValue());
+        this.subscriptions.push(
+          this.currencyWallet.signedEvent.subscribe(async () => {
+            await this.finalaized();
+          }));
+
+        this.walletAddress = this.currencyWallet.address;
+        this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.unconfirmed));
+        this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.confirmed));
+        this.balanceUsd = this.balanceBtcUnconfirmed.map(balance => balance * this.rateBtcUsd);
+
+        this.subscriptions.push(
+          this.walletAddress.subscribe(address => {
+            this.selected = address;
+          })
+        );
+      }));
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-  }
-
-  updataBalance(balance) {
-    this.balanceBtcConfirmed = bcoin.amount.btc(balance.confirmed);
-    this.balanceBtcUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
-    this.balanceUsd = (this.balanceBtcUnconfirmed) * this.rateBtcUsd;
   }
 
   // Pressed start signature

@@ -4,7 +4,7 @@
     [colspan]="tile.cols"
     [rowspan]="tile.rows">
 
-    <div class="grid-item" (click)='onTileClicked()'>
+    <div class="grid-item" (click)='onTileClicked(tile.coin)'>
       <div class="block">
         <div class="logo {{tile.logo}}">
         </div>

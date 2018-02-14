@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
-import { KeyChainService } from '../../services/keychain.service';
+import { KeyChainService, Coin } from '../../services/keychain.service';
 import * as $ from 'jquery';
 
 declare const Utils: any;
@@ -185,7 +185,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.password = '';
 
     this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
-    this.authSevice.ethereumSecret = this.keychain.getEthereumSecret(0);
+    this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
     await this.router.navigate(['/backup']);
   }

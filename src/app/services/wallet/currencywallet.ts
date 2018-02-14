@@ -83,21 +83,18 @@ export class CurrencyWallet {
       );
     });
     this.syncSession.canceled.subscribe(() => {
-      console.log('received cancel event');
       // pop the queue
       this.messageSubject.next({});
       this.status.next(Status.Cancelled);
       this.syncSession = null;
     });
     this.syncSession.failed.subscribe(() => {
-      console.log('received failed event');
       // pop the queue
       this.messageSubject.next({});
       this.status.next(Status.Failed);
       this.syncSession = null;
     });
     this.syncSession.finished.subscribe(async (data) => {
-      console.log('received finished event');
       // pop the queue
       this.messageSubject.next({});
       this.syncSession = null;
@@ -124,6 +121,7 @@ export class CurrencyWallet {
 
     this.address.next('');
     this.balance.next({ confirmed: 0, unconfirmed: 0 });
+    this.syncProgress.next(0);
   }
 
   public async cancelSync() {
@@ -201,15 +199,15 @@ export class CurrencyWallet {
       this.bt
     );
 
-    this.signSession.ready.subscribe(async () => {
+    this.signSession.ready.subscribe(() => {
       this.verifyEvent.next(transaction);
     });
-    this.signSession.canceled.subscribe(async () => {
+    this.signSession.canceled.subscribe(() => {
       this.messageSubject.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
-    this.signSession.failed.subscribe(async () => {
+    this.signSession.failed.subscribe(() => {
       this.messageSubject.next({});
       this.signSession = null;
       this.rejectedEvent.next();
@@ -227,4 +225,10 @@ export class CurrencyWallet {
 
     return verify;
   }
+
+  public async createTransaction(address, value) {
+    return null;
+  }
+
+  public async pushTransaction() { }
 }

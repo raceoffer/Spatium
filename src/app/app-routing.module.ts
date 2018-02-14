@@ -17,8 +17,8 @@ import { FactorParentComponent } from './screens/factor/factor-parent.component'
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { WalletComponent } from './screens/wallet/wallet.component';
-import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
-import {FingerPrintComponent} from "./screens/finger-print/finger-print.component";
+import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
+import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -41,7 +41,7 @@ const appRoutes: Routes = [
   ]},
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
-    { path: 'send-transaction', component: SendTransactionComponent, outlet: 'navigator' }
+    { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' }
   ]}
 ];
 

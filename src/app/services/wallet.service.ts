@@ -11,12 +11,13 @@ import { BluetoothService } from './bluetooth.service';
 import { Coin, KeyChainService } from './keychain.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
-import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { CurrencyWallet, Status } from './wallet/currencywallet';
+import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 
 declare const bcoin: any;
 declare const BitcoinTransaction: any;
+declare const BitcoinCashTransaction: any;
 
 @Injectable()
 export class WalletService {
@@ -116,7 +117,7 @@ export class WalletService {
             );
           case Coin.BCH:
             return await this.currencyWallets.get(Coin.BCH).startTransactionVerify(
-              BitcoinTransaction.fromJSON(content.tx)
+              BitcoinCashTransaction.fromJSON(content.tx)
             );
         }
       });
