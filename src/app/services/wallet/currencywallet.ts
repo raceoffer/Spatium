@@ -6,6 +6,7 @@ import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
 import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService } from '../keychain.service';
+import { NgZone } from '@angular/core';
 
 declare const CompoundKey: any;
 
@@ -50,7 +51,8 @@ export class CurrencyWallet {
     private currency: Coin,
     private account: number,
     private messageSubject: any,
-    private bt: BluetoothService
+    private bt: BluetoothService,
+    protected ngZone: NgZone
   ) {
     this.bt.disconnectedEvent.subscribe(() => this.status.next(Status.None));
 

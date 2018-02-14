@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Observable } from 'rxjs/Observable';
 
@@ -44,7 +44,8 @@ export class WalletService {
 
   constructor(
     private readonly bt: BluetoothService,
-    private readonly keychain: KeyChainService
+    private readonly keychain: KeyChainService,
+    private readonly ngZone: NgZone
   ) {
     bcoin.set(this.network);
 
@@ -55,7 +56,8 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt
+        this.bt,
+        this.ngZone
       ));
     this.currencyWallets.set(
       Coin.BCH,
@@ -64,7 +66,8 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt
+        this.bt,
+        this.ngZone
       ));
 
     this.status = combineLatest(

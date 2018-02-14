@@ -2,6 +2,7 @@ import { CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
+import { NgZone } from '@angular/core';
 
 declare const bcoin: any;
 declare const WatchingWallet: any;
@@ -19,9 +20,10 @@ export class BitcoinWallet extends CurrencyWallet {
     keychain: KeyChainService,
     account: number,
     messageSubject: any,
-    bt: BluetoothService
+    bt: BluetoothService,
+    ngZone: NgZone
   ) {
-    super(network, keychain, Coin.BTC, account, messageSubject, bt);
+    super(network, keychain, Coin.BTC, account, messageSubject, bt, ngZone);
   }
 
   public async reset() {
@@ -66,9 +68,9 @@ export class BitcoinWallet extends CurrencyWallet {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);
     }
 
-    this.watchingWallet.on('balance', (balance) => {
+    this.watchingWallet.on('balance', (balance) => this.ngZone.run(() => {
       this.balance.next(balance);
-    });
+    }));
 
     this.watchingWallet.on('transaction', (transaction) => {
       console.log(transaction);
