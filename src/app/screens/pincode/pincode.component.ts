@@ -9,6 +9,12 @@ declare const Utils: any;
 declare const Buffer: any;
 declare const window: any;
 
+enum State {
+  Create,
+  Unlock,
+  Factor
+}
+
 @Component({
   selector: 'app-pincode',
   host: {'class': 'child'},
@@ -20,6 +26,12 @@ export class PincodeComponent implements AfterViewInit {
 
   next: string = null;
   back: string = null;
+
+  stCreate = 'Create secret';
+  stUnlock = 'Unlock secret';
+
+  stateType = State;
+  state: State = null;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -41,11 +53,25 @@ export class PincodeComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    if (this.next && this.next === 'waiting') {
+      if (this.authService.encryptedSeed === null) {
+        this.state = State.Create;
+      } else {
+        this.state = State.Unlock;
+      }
+    } else {
+      this.state = State.Factor;
+    }
+
     this.pincode = '';
   }
 
   onAddClicked(symbol) {
     this.pincode = this.pincode + symbol;
+  }
+
+  async onDeleteClicked() {
+    await this.router.navigate(['/delete-secret', 'pincode']);
   }
 
   onBackspaceClicked() {

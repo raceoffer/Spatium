@@ -327,6 +327,10 @@ body, buttons, html, input, textarea {
   margin-top: 35px;
 }
 
+.margin15 {
+  margin-top: 15px;
+}
+
 .margin32 {
   margin-top: 32px;
 }
@@ -509,14 +513,14 @@ td{
   cursor: pointer; /* Add a pointer on hover */
 }
 
-input[type="password-pin"]
-{
+input[type="password-pin"] {
   -webkit-text-security: disc!important;
   font:small-caption!important;
   font-size:16px!important;
   -webkit-text-stroke-width: .3em!important;
   letter-spacing: 0.5em!important;
   cursor: none;
+  padding-left: 0.7em
 }
 
 

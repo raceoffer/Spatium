@@ -1,4 +1,13 @@
 <div fxLayout="column" fxLayoutAlign="start center">
+  <div *ngIf="state === stateType.Create" style="height: 20px">
+    {{ stCreate }}
+  </div>
+
+  <div *ngIf="state === stateType.Unlock" style="height: 20px">
+    {{ stUnlock }}
+  </div>
+
+  <div *ngIf="state === stateType.Factor" style="height: 20px"></div>
 
   <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%;">
     <div class="spatium-textfield entry noborder">
@@ -9,7 +18,7 @@
     </button>
   </div>
 
-  <div class="keyboard-row margin35" fxLayout="row" fxLayoutAlign="center stretch">
+  <div class="keyboard-row margin15" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
       <button mat-icon-button class="keyboard-size" (click)="onAddClicked(1)">
         1
@@ -62,6 +71,9 @@
   </div>
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
+      <button mat-icon-button *ngIf="state === stateType.Unlock" class="keyboard-size" (click)="onDeleteClicked()">
+        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">delete_forever</mat-icon>
+      </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
       <button mat-icon-button class="keyboard-size" (click)="onAddClicked(0)">

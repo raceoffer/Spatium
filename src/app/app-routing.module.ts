@@ -57,7 +57,8 @@ const appRoutes: Routes = [
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },
     { path: 'delete-secret', component: DeleteSecretComponent, outlet: 'navigator' }
-  ]}
+  ]},
+  { path: 'delete-secret/:back', component: DeleteSecretComponent }
 ];
 
 @NgModule({

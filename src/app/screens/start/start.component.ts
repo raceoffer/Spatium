@@ -5,7 +5,6 @@ import { FileService } from '../../services/file.service';
 import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
-import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: 'app-start',
@@ -16,7 +15,6 @@ export class StartComponent implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
-    private readonly notification: NotificationService,
     private readonly fs: FileService,
     private readonly wallet: WalletService,
     private readonly keychain: KeyChainService,
@@ -38,7 +36,6 @@ export class StartComponent implements OnInit {
       this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
     } catch (e) {
       this.authService.encryptedSeed = null;
-      this.notification.show('No stored seed found');
     }
 
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
