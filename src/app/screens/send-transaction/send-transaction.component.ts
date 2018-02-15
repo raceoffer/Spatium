@@ -49,6 +49,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   rateBtcUsd = 15000;
 
+  coin: Coin = null;
+
   public currencyWallet: CurrencyWallet;
 
   public walletAddress: Observable<string>;
@@ -70,9 +72,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscriptions.push(
       this.route.params.subscribe((params: Params) => {
-        const coin = Number(params['coin']) as Coin;
+        this.coin = Number(params['coin']) as Coin;
 
-        this.currencyWallet = this.walletService.currencyWallets.get(coin);
+        this.currencyWallet = this.walletService.currencyWallets.get(this.coin);
 
         this.subscriptions.push(
           this.currencyWallet.rejectedEvent.subscribe(async () => {
@@ -94,7 +96,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.amount.valueChanges,
           this.receiver.valueChanges,
           (balance, amount, receiver) => {
-            console.log(balance, amount, receiver);
             return balance > amount && amount > 0 && receiver.length > 0;
           });
 
