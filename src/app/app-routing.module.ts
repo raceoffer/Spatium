@@ -20,7 +20,7 @@ import { WalletComponent } from './screens/wallet/wallet.component';
 import {RegistrationSuccessComponent} from "./screens/registration-success/registration-success.component";
 import {FingerPrintComponent} from "./screens/finger-print/finger-print.component";
 import { CurrencyComponent } from './screens/currency/currency.component';
-import { DeleteSecretComponent } from './screens/delete-seed/delete-seed.component';
+import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.component';
 
 
 const appRoutes: Routes = [

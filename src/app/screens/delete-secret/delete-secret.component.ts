@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -16,6 +17,7 @@ export class DeleteSecretComponent implements OnInit {
   confirmButton = "Confirm";
 
   constructor(
+    private readonly router: Router,
     private readonly fs: FileService,
     private readonly notification: NotificationService
   ) { 
@@ -25,8 +27,13 @@ export class DeleteSecretComponent implements OnInit {
   ngOnInit() {
   }
 
-  delete() {
-    await this.fs.deleteFile(this.fs.safeFileName('seed'));
+  async delete() {
+    try {
+      await this.fs.deleteFile(this.fs.safeFileName('seed'));
+    } catch(e) {
+      this.notification.show('Delete error');
+      return;
+    }
     this.notification.show('The secret successfully removed');
     await this.router.navigate(['/login']);
   }
