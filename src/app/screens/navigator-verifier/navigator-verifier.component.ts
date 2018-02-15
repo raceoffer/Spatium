@@ -1,46 +1,34 @@
-import {Component, NgZone, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {BluetoothService} from '../../services/bluetooth.service';
-import {WalletService} from '../../services/wallet.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { WalletService } from '../../services/wallet.service';
+import { BluetoothService } from '../../services/bluetooth.service';
 
 @Component({
   selector: 'app-navigator-verifier',
   templateUrl: './navigator-verifier.component.html',
   styleUrls: ['./navigator-verifier.component.css']
 })
-export class NavigatorVerifierComponent implements OnInit {
-  public navLinks = [{
-    name: 'Export secret',
-    link: ['/secret-export']
-  }, {
-    name: 'Change PIN',
-    link: ['/factor', { back: 'navigator-verifier' }, { outlets: { 'factor': ['pincode', { next: 'navigator-verifier' }] } }]
-  }, {
-    name: 'Delete secret',
-    link: ['/secret-delete']
-  }, {
-    name: 'Exit',
-    link: ['/start']
-  }];
+export class NavigatorVerifierComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly bt: BluetoothService,
-              private readonly wallet: WalletService) { }
+  constructor(
+    private readonly router: Router,
+    private readonly wallet: WalletService,
+    private readonly bt: BluetoothService
+  ) {}
 
-  ngOnInit() {
-    console.log('Entered navigation');
+  public ngOnInit() {
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(async () => {
+        await this.router.navigate(['/verify-waiting']);
+      }));
   }
 
-  async onLinkClick(navLink) {
-    if (navLink === this.navLinks[3]) {
-      await this.wallet.reset();
-      await this.bt.disconnect();
-    }
+  public async ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
 
-    this.ngZone.run(async () => {
-      await this.router.navigate(navLink.link);
-    });
+    await this.wallet.reset();
+    await this.bt.disconnect();
   }
-
 }

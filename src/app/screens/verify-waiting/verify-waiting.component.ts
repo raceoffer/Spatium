@@ -1,9 +1,7 @@
-import {Component, OnInit, AfterViewInit, OnDestroy, NgZone} from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
-import {Router} from '@angular/router';
-
-declare const bcoin: any;
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-verify-waiting',
@@ -11,11 +9,6 @@ declare const bcoin: any;
   styleUrls: ['./verify-waiting.component.css']
 })
 export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy {
-  address = '';
-  btc;
-  rateBtcUsd = 15000;
-  usd;
-
   enableBTmessage = 'Enable Bluetooth to proceed';
 
   enabled = this.bt.enabled;
@@ -27,20 +20,14 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
 
   constructor(
     private readonly router: Router,
-    private readonly ngZone: NgZone,
     private readonly bt: BluetoothService,
     private readonly wallet: WalletService
   ) { }
 
-  async ngOnInit() {
-    await this.bt.disconnect();
-
+  ngOnInit() {
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
-        console.log(this.wallet.address.getValue());
-        this.ngZone.run(async () => {
-          await this.router.navigate(['/navigator-verifier']);
-        });
+        await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
       }));
 
     this.subscriptions.push(
@@ -51,16 +38,6 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
     this.subscriptions.push(
       this.wallet.failedEvent.subscribe(async () => {
         await this.bt.disconnect();
-      }));
-
-    this.subscriptions.push(
-      this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
-      }));
-
-    this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.reset();
       }));
 
     this.subscriptions.push(
@@ -75,13 +52,9 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
         await this.wallet.reset();
         await this.bt.ensureListening();
       }));
-
-
-    console.log('Entered waiting verify');
   }
 
-  async ngOnDestroy() {
-    console.log('Left verify');
+  ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

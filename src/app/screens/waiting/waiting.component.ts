@@ -28,12 +28,10 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router
   ) { }
 
-  async ngOnInit() {
-    await this.bt.disconnect();
-
+  ngOnInit() {
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
-        await this.router.navigate(['/navigator', '/waiting', { outlets: { 'navigator': ['wallet'] } }]);
+        await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
       }));
 
     this.subscriptions.push(
@@ -79,11 +77,9 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         return devices;
       }).subscribe(devices => this.devices = devices));
-    console.log('Entered waiting');
   }
 
-  async ngOnDestroy() {
-    console.log('Left waiting');
+  ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

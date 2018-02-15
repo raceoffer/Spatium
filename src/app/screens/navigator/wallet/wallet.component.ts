@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Coin } from '../../services/keychain.service';
+import { Coin } from '../../../services/keychain.service';
 
 @Component({
   selector: 'app-wallet',
@@ -11,7 +11,7 @@ export class WalletComponent {
   public title = 'Wallet';
   public navLinks = [{
       name: 'Wallet',
-      link: ['/navigator', '/waiting', { outlets: { navigator: ['wallet'] } }],
+      link: ['/navigator', { outlets: { navigator: ['wallet'] } }],
       isSelected: true,
       isActive: true
     }, {
@@ -41,7 +41,7 @@ export class WalletComponent {
       isActive: false
     }, {
       name: 'Exit',
-      link: '/start',
+      link: ['/start'],
       isSelected: false,
       isActive: true
     }];
@@ -62,11 +62,10 @@ export class WalletComponent {
   constructor(private readonly router: Router) { }
 
   public async onNav(navLink) {
-    console.log(navLink);
     await this.router.navigate(navLink.link);
   }
 
   async onTileClicked(coin: Coin) {
-    await this.router.navigate(['/navigator', '/waiting', { outlets: { 'navigator': ['currency', coin] } }]);
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', coin] } }]);
   }
 }

@@ -59,13 +59,12 @@ import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
-import { CurrencyComponent } from './screens/currency/currency.component';
+import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
-
 
 @NgModule({
   declarations: [
@@ -96,7 +95,6 @@ import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.com
     AutofocusDirective,
     CurrencyComponent,
     MainDrawerComponent,
-
     NavigatorVerifierComponent,
     VerifyWaitingComponent,
     SecretExportComponent,

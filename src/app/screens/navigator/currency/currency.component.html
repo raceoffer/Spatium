@@ -2,7 +2,7 @@
   <div class="header top-panel text-center">
     <mat-toolbar color="primary">
       <mat-toolbar-row>
-        <button mat-icon-button [routerLink]="['/navigator', '/waiting', { outlets: { 'navigator': ['wallet'] } }]">
+        <button mat-icon-button [routerLink]="['/navigator', { outlets: { 'navigator': ['wallet'] } }]">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <span>{{ currencyTitle | async }}</span>

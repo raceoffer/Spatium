@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
+import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
-import { CurrencyWallet, HistoryEntry, TransactionType } from '../../services/wallet/currencywallet';
-import { Coin } from '../../services/keychain.service';
+import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
+import { Coin } from '../../../services/keychain.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const bcoin: any;
@@ -101,6 +101,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
         this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * this.rateBtcUsd);
         this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));
 
+        this.subscriptions.push(this.currencyWallet.transactions.subscribe(txs => {
+          console.log(txs);
+        }));
+
         this.subscriptions.push(
           this.walletAddress.subscribe(address => {
             this.selectedAddress = address;
@@ -115,6 +119,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async send() {
-    await this.router.navigate(['/navigator', '/waiting', { outlets: { navigator: ['send-transaction', this.coin] } }]);
+    await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.coin] } }]);
   }
 }

@@ -1,16 +1,14 @@
 import { OnInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { FormControl } from '@angular/forms';
-import { WalletService } from '../../services/wallet.service';
-import { NotificationService } from '../../services/notification.service';
-import { CurrencyWallet } from '../../services/wallet/currencywallet';
-import { Coin } from '../../services/keychain.service';
+import { WalletService } from '../../../services/wallet.service';
+import { NotificationService } from '../../../services/notification.service';
+import { CurrencyWallet } from '../../../services/wallet/currencywallet';
+import { Coin } from '../../../services/keychain.service';
 import { Observable } from 'rxjs/Observable';
 
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-import 'rxjs/add/operator/defaultIfEmpty';
 
 declare const bcoin: any;
 
