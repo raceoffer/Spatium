@@ -1,31 +1,36 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="sidenav.toggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
 
-  <span>{{ title }}</span>
-</mat-toolbar>
+      <span>{{ title }}</span>
+    </mat-toolbar>
+  </div>
 
-<mat-sidenav-container>
-  <mat-sidenav #sidenav class="width-sidenav" mode="over" [fixedInViewport]="true">
-    <mat-list-item>
-      <div fxLayout="row" fxLayoutAlign="space-between center" class="spatium-logo-text">
-        <button mat-icon-button (click)="sidenav.toggle()">
-          <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
-        </button>
+  <mat-sidenav-container class="content">
+    <mat-sidenav #sidenav class="width-sidenav" mode="over" [fixedInViewport]="true">
+      <mat-list-item>
+        <div fxLayout="row" fxLayoutAlign="space-between center" class="spatium-logo-text">
+          <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
+          </button>
 
-        <div class="nav-logo-text"></div>
-      </div>
-    </mat-list-item>
+          <div class="nav-logo-text"></div>
+        </div>
+      </mat-list-item>
 
-    <mat-nav-list *ngFor="let navLink of navLinks">
-      <a mat-list-item [routerLink]="navLink.link" [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
-        (click)="!navLink.isActive || sidenav.toggle()"
-        [ngClass]="{'selected' : navLink.isSelected, 'disabled' : !navLink.isActive}">
-        {{ navLink.name }}
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
+      <mat-nav-list *ngFor="let navLink of navLinks">
+        <a mat-list-item [routerLink]="navLink.link" [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
+           (click)="!navLink.isActive || sidenav.toggle()"
+           [ngClass]="{'selected' : navLink.isSelected, 'disabled' : !navLink.isActive}">
+          {{ navLink.name }}
+        </a>
+      </mat-nav-list>
+    </mat-sidenav>
 
-  <router-outlet name="navigator"></router-outlet>
-</mat-sidenav-container>
+    <router-outlet name="navigator"></router-outlet>
+  </mat-sidenav-container>
+</div>
+

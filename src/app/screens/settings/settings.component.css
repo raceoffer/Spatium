@@ -1,0 +1,10 @@
+.main-nav-list-custom {
+  height: 60px !important;
+  display: block !important;
+  border-bottom: 1px solid #f1f1f4;
+}
+
+.selected {
+  background-color: rgba(29, 29, 38, 0.03) !important;
+  font-weight: bold;
+}
