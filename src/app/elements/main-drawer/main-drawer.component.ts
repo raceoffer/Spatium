@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-main-drawer',
@@ -20,6 +20,7 @@ export class MainDrawerComponent implements OnInit {
   }
 
   public onClicked(navLink) {
+    this.toggle();
     this.linkClicked.emit(navLink);
   }
 }

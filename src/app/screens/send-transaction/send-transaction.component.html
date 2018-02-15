@@ -1,4 +1,13 @@
 <div fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button [routerLink]="['/navigator', '/waiting', { outlets: { 'navigator': ['wallet'] } }]">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span>{{ titile }}</span>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
   <mat-form-field class="full-width" color="accent">
     <mat-select [placeholder]="currentWalletPh" [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
       <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">

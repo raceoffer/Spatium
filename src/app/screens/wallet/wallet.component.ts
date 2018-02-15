@@ -49,8 +49,8 @@ export class WalletComponent {
   public tiles = [
     {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
     {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc', coin: Coin.BTC},
-    {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.BCH},
-    {title: 'Bitcoin Cash', cols: 1, rows: 1},
+    {title: 'Bitcoin Cash', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.BCH},
+    {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin'},
     {title: 'Cardano', cols: 1, rows: 1},
     {title: 'NEO', cols: 1, rows: 1},
     {title: 'Ripple', cols: 1, rows: 1},
@@ -62,6 +62,7 @@ export class WalletComponent {
   constructor(private readonly router: Router) { }
 
   public async onNav(navLink) {
+    console.log(navLink);
     await this.router.navigate(navLink.link);
   }
 

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../services/wallet/currencywallet';
@@ -38,6 +38,8 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
+  private coin: Coin = null
+
   private static compareTransactions(a, b) {
     // First unconfirmed transactions
     if (!a.confirmed && !b.confirmed) {
@@ -65,6 +67,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   constructor(
+    private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly wallet: WalletService
   ) {}
@@ -72,9 +75,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscriptions.push(
       this.route.params.subscribe((params: Params) => {
-        const coin = Number(params['coin']) as Coin;
+        this.coin = Number(params['coin']) as Coin;
 
-        switch (coin) {
+        switch (this.coin) {
           case Coin.BTC:
             this.currencyTitle.next('Bitcoin');
             this.currencySymbol.next('BTC');
@@ -89,7 +92,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             break;
         }
 
-        this.currencyWallet = this.wallet.currencyWallets.get(coin);
+        this.currencyWallet = this.wallet.currencyWallets.get(this.coin);
 
         this.walletAddress = this.currencyWallet.address;
         this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => Number(bcoin.amount.btc(balance.unconfirmed)));
@@ -111,5 +114,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  send() {}
+  async send() {
+    await this.router.navigate(['/navigator', '/waiting', { outlets: { navigator: ['send-transaction', this.coin] } }]);
+  }
 }

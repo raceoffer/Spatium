@@ -11,7 +11,8 @@
 
   <mat-nav-list *ngFor="let navLink of navLinks">
     <a mat-list-item [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
-       (click)="!navLink.isActive || onClicked(navLink)">
+       (click)="!navLink.isActive || onClicked(navLink)"
+       [ngClass]="{'selected' : navLink.isSelected, 'disabled' : !navLink.isActive}">
       {{ navLink.name }}
     </a>
   </mat-nav-list>

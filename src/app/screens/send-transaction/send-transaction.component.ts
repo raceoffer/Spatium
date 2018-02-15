@@ -35,6 +35,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   currentWalletPh = 'Wallet';
   receiverPh = 'Recipient';
 
+  titile = 'Send transaction';
+
   stAwaitConfirm = 'Confirm on the second device';
   stSigningResult = 'Transaction is signed';
 
