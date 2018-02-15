@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TransactionType, WalletService } from '../../services/wallet.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
+import { WalletService } from '../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
+import { CurrencyWallet, HistoryEntry, TransactionType } from '../../services/wallet/currencywallet';
+import { Coin } from '../../services/keychain.service';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const bcoin: any;
 
@@ -10,83 +13,103 @@ declare const bcoin: any;
   templateUrl: './currency.component.html',
   styleUrls: ['./currency.component.css']
 })
-export class CurrencyComponent implements OnInit {
+export class CurrencyComponent implements OnInit, OnDestroy {
+  public usdTitle = 'USD';
 
-  transactions: any = [];
-  
-  currencyTitle = this.route.paramMap.map(params => params.get('currency'));
-  currencySymbol: string = 'BTC';
-  usdTitle: string = 'USD';
+  public txType = TransactionType;
 
-  addresses = [];
-  selectedAddress;
+  public selectedAddress: string = null;
 
-  currencyValueConfirmed;
-  currencyValueUnconfirmed;
-  usdValueConfirmed;
-  usdValueUnconfirmed;
+  public currencyWallet: CurrencyWallet;
 
-  addressLabel: string = "Address";
-  sendLabel: string = "Send";
+  public walletAddress: Observable<string>;
+  public balanceCurrencyConfirmed: Observable<number>;
+  public balanceCurrencyUnconfirmed: Observable<number>;
+  public balanceUsdConfirmed: Observable<number>;
+  public balanceUsdUnconfirmed: Observable<number>;
+  public transactions: Observable<Array<HistoryEntry>>;
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly wallet: WalletService
-  ) {
-    this.wallet.listTransactionHistory().then(txs => { 
-      this.transactions = (txs || [])
-        .map(function(tx){
-          tx.formattedAmount = bcoin.amount.btc(tx.amount);
-          return tx;
-        })
-        .sort(this.compareTransactions)
-        ;
+  public currencySymbol: BehaviorSubject<string> = new BehaviorSubject('');
+  public currencyTitle: BehaviorSubject<string> = new BehaviorSubject('');
 
-      console.log("txs");
-      console.log(txs);
-    });
+  public rateBtcUsd = 15000;
 
-    this.wallet.address.subscribe(address => {
-      this.addresses = [address];
-      this.selectedAddress = this.addresses[0];
-    });
+  public sendLabel = 'Send';
 
-    this.wallet.balance.subscribe(balance => {
-      this.currencyValueConfirmed = bcoin.amount.btc(balance.confirmed);
-      this.usdValueConfirmed = this.currencyValueConfirmed;
+  private subscriptions = [];
 
-      this.currencyValueUnconfirmed = bcoin.amount.btc(balance.unconfirmed);
-      this.usdValueUnconfirmed = this.currencyValueUnconfirmed;
-    });
-  }
-
-  ngOnInit() {}
-
-  send() {}
-
-  compareTransactions(a, b) {
+  private static compareTransactions(a, b) {
     // First unconfirmed transactions
-    if (!a.confirmed && !b.confirmed)
+    if (!a.confirmed && !b.confirmed) {
       return 0;
+    }
 
-    if (!a.confirmed && b.confirmed)
+    if (!a.confirmed && b.confirmed) {
       return 1;
+    }
 
-    if (a.confirmed && !b.confirmed)
+    if (a.confirmed && !b.confirmed) {
       return -1;
+    }
 
     // then confirmed transactions sorted by time
-    if (a.time > b.time)
+    if (a.time > b.time) {
       return 1;
+    }
 
-    if (a.time < b.time)
+    if (a.time < b.time) {
       return -1;
+    }
 
     return 0;
   }
 
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly wallet: WalletService
+  ) {}
+
+  ngOnInit() {
+    this.subscriptions.push(
+      this.route.params.subscribe((params: Params) => {
+        const coin = Number(params['coin']) as Coin;
+
+        switch (coin) {
+          case Coin.BTC:
+            this.currencyTitle.next('Bitcoin');
+            this.currencySymbol.next('BTC');
+            break;
+          case Coin.BCH:
+            this.currencyTitle.next('Bitcoin Cash');
+            this.currencySymbol.next('BCH');
+            break;
+          case Coin.ETH:
+            this.currencyTitle.next('Ethereum');
+            this.currencySymbol.next('ETH');
+            break;
+        }
+
+        this.currencyWallet = this.wallet.currencyWallets.get(coin);
+
+        this.walletAddress = this.currencyWallet.address;
+        this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => Number(bcoin.amount.btc(balance.unconfirmed)));
+        this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => Number(bcoin.amount.btc(balance.confirmed)));
+        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * this.rateBtcUsd);
+        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * this.rateBtcUsd);
+        this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));
+
+        this.subscriptions.push(
+          this.walletAddress.subscribe(address => {
+            this.selectedAddress = address;
+          })
+        );
+      }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  send() {}
 }
-/*
-[{"type":0,"from":null,"to":"myYjGjcC3S3RQ1zWDHkZz1Kh73t4FAp94n","amount":75639038,"confirmed":false},
-{"type":0,"from":null,"to":"myYjGjcC3S3RQ1zWDHkZz1Kh73t4FAp94n","amount":104472709,"confirmed":false}]
-*/

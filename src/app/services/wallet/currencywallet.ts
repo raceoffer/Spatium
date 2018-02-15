@@ -8,6 +8,7 @@ import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
+declare const bcoin: any;
 declare const CompoundKey: any;
 
 export enum Status {
@@ -16,6 +17,35 @@ export enum Status {
   Failed,
   Synchronizing,
   Ready
+}
+
+export enum TransactionType {
+  In,
+  Out
+}
+
+export class HistoryEntry {
+  static fromJSON(json) {
+    return new HistoryEntry(
+      json.type,
+      json.from,
+      json.to,
+      json.amount,
+      bcoin.amount.btc(json.amount),
+      json.confirmed,
+      json.time
+    );
+  }
+
+  constructor(
+    public type: TransactionType,
+    public from: string,
+    public to: string,
+    public amount: number,
+    public formattedAmount: number,
+    public confirmed: boolean,
+    public time: number
+  ) {}
 }
 
 export class CurrencyWallet {
@@ -44,6 +74,7 @@ export class CurrencyWallet {
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+  public transactions: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
 
   constructor(
     protected network: string,

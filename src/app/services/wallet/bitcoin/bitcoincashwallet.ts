@@ -1,4 +1,4 @@
-import { CurrencyWallet, Status } from '../currencywallet';
+import {CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
@@ -72,9 +72,9 @@ export class BitcoinCashWallet extends CurrencyWallet {
       this.balance.next(balance);
     }));
 
-    this.watchingWallet.on('transaction', (transaction) => {
-      console.log(transaction);
-    });
+    this.watchingWallet.on('transaction', (transaction) => this.ngZone.run(async () => {
+      this.transactions.next(await this.listTransactionHistory());
+    }));
 
     try {
       this.balance.next(await this.watchingWallet.getBalance());
@@ -110,6 +110,56 @@ export class BitcoinCashWallet extends CurrencyWallet {
     // End: configuring a provider
 
     this.status.next(Status.Ready);
+  }
+
+  public async listTransactionHistory() {
+    const txs = await this.watchingWallet.getTransactions();
+
+    return txs.map(record => {
+      const inputs = record.tx.inputs.map(input => {
+        const address = bcoin.address.fromScript(input.script);
+        return {
+          address: address ? address.toString() : null
+        };
+      });
+      const outputs = record.tx.outputs.map(output => {
+        const address = bcoin.address.fromScript(output.script);
+        return {
+          address: address ? address.toString() : null,
+          value: output.value
+        };
+      });
+
+      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
+        // go find change
+        const value =
+          outputs
+            .filter(output => output.address !== this.watchingWallet.getAddress('base58'))
+            .reduce((sum, output) => sum + output.value, 0);
+        return HistoryEntry.fromJSON({
+          type: TransactionType.Out,
+          from: this.watchingWallet.getAddress('base58'),
+          to: outputs.filter(output => output.address !== this.watchingWallet.getAddress('base58'))[0],
+          amount: value,
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      } else { // in
+        // go find our output
+        const value =
+          outputs
+            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
+            .reduce((sum, output) => sum + output.value, 0);
+        return HistoryEntry.fromJSON({
+          type: TransactionType.In,
+          from: inputs[0].address,
+          to: this.watchingWallet.getAddress('base58'),
+          amount: value,
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      }
+    });
   }
 
   public async createTransaction(address, value) {

@@ -19,61 +19,6 @@ declare const bcoin: any;
 declare const BitcoinTransaction: any;
 declare const BitcoinCashTransaction: any;
 
-export enum TransactionType {
-  In,
-  Out
-}
-
-  public async listTransactionHistory() {
-    const txs = await this.watchingWallet.getTransactions();
-
-    return txs.map(record => {
-      const inputs = record.tx.inputs.map(input => {
-        const address = bcoin.address.fromScript(input.script);
-        return {
-          address: address ? address.toString() : null
-        };
-      });
-      const outputs = record.tx.outputs.map(output => {
-        const address = bcoin.address.fromScript(output.script);
-        return {
-          address: address ? address.toString() : null,
-          value: output.value
-        };
-      });
-
-      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
-        // go find change
-        const value =
-          outputs
-            .filter(output => output.address !== this.watchingWallet.getAddress('base58'))
-            .reduce((sum, output) => sum + output.value, 0);
-        return HistoryEntry.fromJSON({
-          type: TransactionType.Out,
-          from: this.watchingWallet.getAddress('base58'),
-          to: outputs.filter(output => output.address !== this.watchingWallet.getAddress('base58'))[0],
-          amount: value,
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      } else { // in
-        // go find our output
-        const value =
-          outputs
-            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
-            .reduce((sum, output) => sum + output.value, 0);
-        return HistoryEntry.fromJSON({
-          type: TransactionType.In,
-          from: inputs[0].address,
-          to: this.watchingWallet.getAddress('base58'),
-          amount: value,
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      }
-    });
-  }
-
 @Injectable()
 export class WalletService {
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);

@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Coin } from '../../services/keychain.service';
 
@@ -8,7 +8,45 @@ import { Coin } from '../../services/keychain.service';
   styleUrls: ['./wallet.component.css']
 })
 export class WalletComponent {
-  tiles = [
+  public title = 'Wallet';
+  public navLinks = [{
+      name: 'Wallet',
+      link: ['/navigator', '/waiting', { outlets: { navigator: ['wallet'] } }],
+      isSelected: true,
+      isActive: true
+    }, {
+      name: 'Exchange',
+      link: '',
+      isSelected: false,
+      isActive: false
+    }, {
+      name: 'ICO',
+      link: '',
+      isSelected: false,
+      isActive: false
+    }, {
+      name: 'Portfolio Investment',
+      link: '',
+      isSelected: false,
+      isActive: false
+    }, {
+      name: 'Verification',
+      link: '',
+      isSelected: false,
+      isActive: false
+    }, {
+      name: 'Settings',
+      link: '',
+      isSelected: false,
+      isActive: false
+    }, {
+      name: 'Exit',
+      link: '/start',
+      isSelected: false,
+      isActive: true
+    }];
+
+  public tiles = [
     {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
     {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc', coin: Coin.BTC},
     {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.BCH},
@@ -21,10 +59,13 @@ export class WalletComponent {
     {title: 'NEM', cols: 1, rows: 1}
   ];
 
-  constructor(
-  ) { }
+  constructor(private readonly router: Router) { }
+
+  public async onNav(navLink) {
+    await this.router.navigate(navLink.link);
+  }
 
   async onTileClicked(coin: Coin) {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['send-transaction', coin] } }]);
+    await this.router.navigate(['/navigator', '/waiting', { outlets: { 'navigator': ['currency', coin] } }]);
   }
 }

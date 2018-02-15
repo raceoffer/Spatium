@@ -40,8 +40,9 @@ const appRoutes: Routes = [
     { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
     { path: 'nfc', component: NfcComponent, outlet: 'factor' }
   ]},
-  { path: 'navigator', component: NavigatorComponent, children: [
+  { path: 'navigator/:back', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
+    { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' }
   ]}
 ];

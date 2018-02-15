@@ -33,7 +33,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
-        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+        await this.router.navigate(['/navigator', '/waiting', { outlets: { 'navigator': ['wallet'] } }]);
       }));
 
     this.subscriptions.push(
