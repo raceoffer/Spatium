@@ -1,0 +1,30 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <mat-toolbar-row>
+        <button mat-icon-button (click)="onBackClick()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ title }}</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+  </div>
+
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: scroll;max-height: 100%;" *ngIf="state === 0">
+    <mat-nav-list *ngFor="let navLink of navLinks" style="width: 100%;">
+      <a mat-list-item class="main-nav-list-custom" (click)="onSettingsClick(navLink)">
+        {{ navLink.name }}
+      </a>
+    </mat-nav-list>
+  </div>
+
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: scroll;max-height: 100%;" *ngIf="state === 1">
+    <mat-nav-list *ngFor="let language of languages" style="width: 100%;">
+      <a mat-list-item class="main-nav-list-custom selected" (click)="onLanguageClick(language)">
+        {{ language.name }}
+      </a>
+    </mat-nav-list>
+  </div>
+</div>
+
+

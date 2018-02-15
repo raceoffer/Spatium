@@ -37,9 +37,9 @@ export class NavigatorComponent implements OnInit, OnDestroy {
       isActive: false
     }, {
       name: 'Settings',
-      link: '',
+      link: '/settings',
       isSelected: false,
-      isActive: false
+      isActive: true
     }, {
       name: 'Exit',
       link: '/start',

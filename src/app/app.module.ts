@@ -59,6 +59,7 @@ import { RegistrationSuccessComponent } from './screens/registration-success/reg
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { FactorNodeComponent } from './screens/factor-node/factor-node.component';
+import { SettingsComponent } from './screens/settings/settings.component';
 
 @NgModule({
   declarations: [
@@ -88,6 +89,7 @@ import { FactorNodeComponent } from './screens/factor-node/factor-node.component
     FingerPrintComponent,
     AutofocusDirective,
     FactorNodeComponent
+    SettingsComponent
   ],
   imports: [
     FormsModule,
