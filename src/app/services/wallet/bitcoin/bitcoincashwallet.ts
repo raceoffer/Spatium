@@ -68,8 +68,9 @@ export class BitcoinCashWallet extends CurrencyWallet {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);
     }
 
-    this.watchingWallet.on('balance', (balance) => this.ngZone.run(() => {
+    this.watchingWallet.on('balance', (balance) => this.ngZone.run(async () => {
       this.balance.next(balance);
+      this.transactions.next(await this.listTransactionHistory());
     }));
 
     this.watchingWallet.on('transaction', (transaction) => this.ngZone.run(async () => {
@@ -117,7 +118,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
 
     return txs.map(record => {
       const inputs = record.tx.inputs.map(input => {
-        const address = bcoin.address.fromScript(input.script);
+        const address = input.getAddress();
         return {
           address: address ? address.toString() : null
         };
@@ -132,15 +133,13 @@ export class BitcoinCashWallet extends CurrencyWallet {
 
       if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
         // go find change
-        const value =
-          outputs
-            .filter(output => output.address !== this.watchingWallet.getAddress('base58'))
-            .reduce((sum, output) => sum + output.value, 0);
+        const output = outputs.length > 0 ? outputs[0] : null;
+
         return HistoryEntry.fromJSON({
           type: TransactionType.Out,
           from: this.watchingWallet.getAddress('base58'),
-          to: outputs.filter(output => output.address !== this.watchingWallet.getAddress('base58'))[0],
-          amount: value,
+          to: output ? output.address : null,
+          amount: output ? output.value : 0,
           confirmed: record.meta !== null,
           time: record.meta == null ? null : record.meta.time
         });
