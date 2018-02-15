@@ -24,8 +24,8 @@ app-root {
 
 /* Currencies */
 
-.btc {
-  background: url(assets/images/drawable/currency/btc.svg);
+.bitcoin {
+  background: url(assets/images/drawable/currency/bitcoin.svg);
 }
 
 .ethereum {
@@ -37,7 +37,7 @@ app-root {
 }
 
 .bitcoin-cash {
-  background: url(assets/images/drawable/currency/litecoin.svg);
+  background: url(assets/images/drawable/currency/bitcoin-cash.svg);
 }
 
 .cardano {
