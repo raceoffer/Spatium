@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
-import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
+import {NotificationService} from "../../services/notification.service";
 
 @Component({
   selector: 'app-start',
@@ -16,8 +16,8 @@ export class StartComponent implements OnInit {
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
-    private readonly fs: FileService,
     private readonly notification: NotificationService,
+    private readonly fs: FileService,
     private readonly wallet: WalletService,
     private readonly keychain: KeyChainService,
     private readonly bt: BluetoothService

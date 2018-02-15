@@ -2,7 +2,8 @@
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <button mat-icon-button routerLink="/{{back}}">
-        <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+        <mat-icon class="color-custom-dark" *ngIf="isBlack">arrow_back</mat-icon>
+        <mat-icon *ngIf="!isBlack">arrow_back</mat-icon>
       </button>
     </mat-toolbar-row>
   </mat-toolbar>
