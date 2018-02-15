@@ -4,7 +4,8 @@ declare const KeyChain: any;
 
 export enum Coin {
   BTC = 0,
-  ETH = 60
+  ETH = 60,
+  BCH = 145
 }
 
 @Injectable()
@@ -31,14 +32,6 @@ export class KeyChainService {
 
   getCoinSecret(coin: Coin, account: number) {
     return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
-  }
-
-  getBitcoinSecret(account: number) {
-    return this.getCoinSecret(Coin.BTC, account);
-  }
-
-  getEthereumSecret(account: number) {
-    return this.getCoinSecret(Coin.ETH, account);
   }
 
   constructor() { }

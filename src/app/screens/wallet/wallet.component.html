@@ -4,8 +4,8 @@
     [colspan]="tile.cols"
     [rowspan]="tile.rows">
 
-    <div class="grid-item" (click)='onTileClicked(tile.link)'>
-      <button mat-button class="block" [disabled]="tile.link == undefined">
+    <div class="grid-item" (click)='onTileClicked(tile.coin)'>
+      <button mat-button class="block" [disabled]="!tile.coin">
         <div class="logo {{tile.logo}}">
         </div>
       </button>

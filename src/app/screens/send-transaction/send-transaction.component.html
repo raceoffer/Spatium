@@ -1,8 +1,8 @@
 <div fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
   <mat-form-field class="full-width" color="accent">
-    <mat-select [placeholder]="currentWalletPh" [disabled]="phase !== phaseType.Creation" [(value)]="selected">
-      <mat-option *ngIf="walletAddress" [value]="walletAddress">
-        <span class="address">{{walletAddress}}</span> ({{balanceBtcUnconfirmed}} BTC)
+    <mat-select [placeholder]="currentWalletPh" [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
+      <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
+        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} BTC)
       </mat-option>
     </mat-select>
   </mat-form-field>
@@ -11,32 +11,32 @@
     <tr>
       <td align="left" width="50%">
         <mat-form-field style="width: 120px;">
-          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed" disabled>
+          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed | async" disabled>
         </mat-form-field>
       </td>
       <td align="right" width="50%">
         <mat-form-field style="width: 120px;">
-          <input matInput placeholder="USD" [value]="balanceUsd" disabled>
+          <input matInput placeholder="USD" [value]="balanceUsd | async" disabled>
         </mat-form-field>
       </td>
     </tr>
   </table>
 
   <mat-form-field class="full-width" color="accent">
-    <input matInput [placeholder]="receiverPh" [(ngModel)]="addressReceiver" [disabled]="phase !== phaseType.Creation">
+    <input matInput [placeholder]="receiverPh" [formControl]="receiver">
   </mat-form-field>
 
   <table class="full-width">
     <tr>
       <td align="left" width="50%">
         <mat-form-field style="width: 120px;" color="accent">
-          <input matInput placeholder="BTC" [(ngModel)]="sendBtc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                 step="0.01" [disabled]="phase !== phaseType.Creation">
+          <input matInput placeholder="BTC" [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                 step="0.01">
         </mat-form-field>
       </td>
       <td align="right" width="50%">
         <mat-form-field style="width: 120px;" color="accent">
-          <input matInput placeholder="USD" [(ngModel)]="sendUsd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+          <input matInput placeholder="USD" [value]="amountUsd | async" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                  step="0.01" disabled>
         </mat-form-field>
       </td>
@@ -46,27 +46,27 @@
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
 
     <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="phase === phaseType.Confirmation">{{stAwaitConfirm}}</span>
+          *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
     <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="phase === phaseType.Confirmation"></mat-progress-bar>
+                      *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
 
-    <span *ngIf="phase === phaseType.Sending"
-          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{stSigningResult}}
+    <span *ngIf="(phase | async) === phaseType.Sending"
+          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="phase === phaseType.Sending"></mat-progress-bar>
+                      *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
 
-    <button *ngIf="phase === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="balanceBtcUnconfirmed < sendBtc">
-      {{stTransfer}}
+    <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(validatorObserver | async)">
+      {{ stTransfer }}
     </button>
-    <button *ngIf="phase === phaseType.Confirmation" mat-raised-button color="accent" class="width-button-full color" (click)="cancelTransaction()">
-      {{stCancel}}
+    <button *ngIf="(phase | async) === phaseType.Confirmation" mat-raised-button color="accent" class="width-button-full color" (click)="cancelTransaction()">
+      {{ stCancel }}
     </button>
-    <button *ngIf="phase === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
-      {{stSend}}
+    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
+      {{ stSend }}
     </button>
-    <button *ngIf="phase === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
-      {{stContinue}}
+    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
+      {{ stContinue }}
     </button>
   </div>
 </div>

@@ -1,5 +1,5 @@
-<app-connect *ngIf="synchronizing.getValue()"></app-connect>
-<div *ngIf="!synchronizing.getValue()" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
+<app-connect *ngIf="synchronizing | async"></app-connect>
+<div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
   <mat-toolbar color="primary" class="shadow">
     <mat-toolbar-row>
       <button mat-icon-button routerLink="/start">
@@ -8,10 +8,10 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!enabled.getValue()">
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!(enabled | async)">
 
     <div class="connect-text">
-      <span>{{enableBTmessage}}</span>
+      <span>{{ enableBTmessage }}</span>
     </div>
 
     <button mat-fab  class="width-button">
@@ -21,17 +21,17 @@
 
   </div>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled.getValue()">
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled | async">
 
-    <div class="verify-transaction-text" *ngIf="ready.getValue()">
+    <div class="verify-transaction-text" *ngIf="ready | async">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="verify-transaction-text" *ngIf="!ready.getValue()">
+    <div class="verify-transaction-text" *ngIf="!(ready | async)">
       <span>Awaiting connection from the main device.</span>
     </div>
 
-    <button *ngIf="!discoverable.getValue() && !ready.getValue()" mat-button color="accent" (click)="enableDiscoverable()">Enable device discovery</button>
+    <button *ngIf="!(discoverable | async) && !(ready | async)" mat-button color="accent" (click)="enableDiscoverable()">Enable device discovery</button>
 
     <div class="transaction-container" *ngIf="showTransaction">
 
