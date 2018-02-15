@@ -59,6 +59,7 @@ import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { SettingsComponent } from './screens/settings/settings.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
@@ -98,7 +99,8 @@ import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.com
     NavigatorVerifierComponent,
     VerifyWaitingComponent,
     SecretExportComponent,
-    SecretDeleteComponent
+    SecretDeleteComponent,
+    SettingsComponent
   ],
   imports: [
     FormsModule,
