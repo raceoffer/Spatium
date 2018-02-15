@@ -88,7 +88,7 @@ import { SettingsComponent } from './screens/settings/settings.component';
     RegistrationSuccessComponent,
     FingerPrintComponent,
     AutofocusDirective,
-    FactorNodeComponent
+    FactorNodeComponent,
     SettingsComponent
   ],
   imports: [

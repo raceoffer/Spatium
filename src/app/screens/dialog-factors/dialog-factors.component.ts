@@ -12,6 +12,7 @@ export class DialogFactorsComponent {
   factors: any;
   next: string = null;
   back: string = null;
+  isAuth: false;
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
@@ -21,7 +22,15 @@ export class DialogFactorsComponent {
     @Inject(MAT_DIALOG_DATA) public data: any) {
 
     console.log(this.authSevice.getAllAvailableFactors());
-    this.factors = this.authSevice.getAllAvailableFactors();
+
+    this.isAuth = data.isFirst;
+
+    if (this.isAuth) {
+      this.factors = this.authSevice.getAuthFactors();
+    } else {
+      this.factors = this.authSevice.getAllAvailableFactors();
+    }
+
     this.back = data.back;
     this.next = data.next;
   }
@@ -31,7 +40,7 @@ export class DialogFactorsComponent {
     this.dialogRef.close();
 
     this.ngZone.run(async () => {
-      await this.router.navigate(['/factor', { back: this.back }, {outlets: {'factor': [factor.link, {next: this.next}]}}]);
+      await this.router.navigate(['/factor', { back: this.back }, {outlets: {'factor': [factor.link, {next: this.next, isAuth: this.isAuth}]}}]);
     });
   }
 

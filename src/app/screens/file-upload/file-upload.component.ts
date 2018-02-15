@@ -68,6 +68,12 @@ export class FileUploadComponent implements AfterViewInit {
       this.ngZone.run(() => {
         this.router.navigate(['/registration']);
       });
+    } else if (this.next && this.next === 'factornode') {
+      this.authService.addFactor(FactorType.FILE, Buffer.from(this.file, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/factornode']);
+      });
     }
   }
 }

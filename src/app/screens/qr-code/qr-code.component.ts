@@ -128,6 +128,12 @@ export class QrCodeComponent implements OnInit {
       this.ngZone.run(async () => {
         await this.router.navigate(['/registration']);
       });
+    } else if (this.next && this.next === 'factornode') {
+      this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/factornode']);
+      });
     } else {
        // if at login-parent
        this.canScanAgain = true;

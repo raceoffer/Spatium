@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
 enum State {
@@ -18,7 +18,7 @@ export class SettingsComponent implements OnInit {
 
   navLinks = [{
     name: ' Add authentication path',
-    link: 'tree'
+    link: 'factornode'
   }, {
     name: 'Language',
     link: 'lang',
@@ -29,8 +29,7 @@ export class SettingsComponent implements OnInit {
     value: 'en'
   }];
 
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone) { }
+  constructor(private readonly router: Router) { }
 
   ngOnInit() {
   }
@@ -49,13 +48,13 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  onSettingsClick(navLink) {
+  async onSettingsClick(navLink) {
     console.log(navLink);
 
-    if (navLink.link === 'tree') {
-
+    if (navLink.link === 'factornode') {
+      await this.router.navigate(['/factornode']);
     } else if (navLink.link === 'lang') {
-        this.state = State.lang;
+      this.state = State.lang;
     }
   }
 

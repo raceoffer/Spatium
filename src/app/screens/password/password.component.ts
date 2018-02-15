@@ -46,10 +46,16 @@ export class PasswordComponent implements AfterViewInit {
           await this.router.navigate(['/auth']);
         });
       } else if (this.next && this.next === 'registration') {
-        this.authService.addFactor(FactorType.PIN, Buffer.from(this.password, 'utf-8'));
+        this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
 
         this.ngZone.run(async () => {
           await this.router.navigate(['/registration']);
+        });
+      } else if (this.next && this.next === 'factornode') {
+        this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+
+        this.ngZone.run(async () => {
+          await this.router.navigate(['/factornode']);
         });
       }
     }

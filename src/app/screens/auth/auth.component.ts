@@ -99,6 +99,10 @@ export class AuthComponent implements OnInit, AfterViewInit {
     this.factors = this.authSevice.factors;
     this.ready = this.authSevice.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
+
+    this.sleep(650).then(() => {
+      this.checkOverflow(this.factorContainer);
+    });
   }
 
   async letLogin() {
@@ -111,6 +115,14 @@ export class AuthComponent implements OnInit, AfterViewInit {
     this.authSevice.reset();
 
     await this.router.navigate(['/waiting']);
+  }
+
+  async sleep(ms: number) {
+    await this._sleep(ms);
+  }
+
+  _sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

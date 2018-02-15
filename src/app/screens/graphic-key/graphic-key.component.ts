@@ -60,6 +60,12 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
       this.ngZone.run(() => {
         this.router.navigate(['/registration']);
       });
+    } else if (this.next && this.next === 'factornode') {
+      this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/factornode']);
+      });
     }
   }
 
