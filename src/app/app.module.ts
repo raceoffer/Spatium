@@ -60,6 +60,7 @@ import { RegistrationSuccessComponent } from './screens/registration-success/reg
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { CurrencyComponent } from './screens/currency/currency.component';
+import { DeleteSecretComponent } from './screens/delete-seed/delete-seed.component';
 
 
 @NgModule({
@@ -89,7 +90,8 @@ import { CurrencyComponent } from './screens/currency/currency.component';
     RegistrationSuccessComponent,
     FingerPrintComponent,
     AutofocusDirective,
-    CurrencyComponent
+    CurrencyComponent,
+    DeleteSecretComponent
   ],
   imports: [
     FormsModule,

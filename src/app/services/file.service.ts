@@ -41,4 +41,14 @@ export class FileService {
       });
     });
   }
+
+  async deleteFile(filename) {
+    return await new Promise<string>((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        fs.root.getFile(filename, {create: false}, fileEntry => {
+          fileEntry.remove(function(){}, reject);
+        }, reject);
+      });
+    });
+  }
 }
