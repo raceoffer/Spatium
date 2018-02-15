@@ -4,11 +4,11 @@ import { WalletService } from '../../services/wallet.service';
 import { BluetoothService } from '../../services/bluetooth.service';
 
 @Component({
-  selector: 'app-navigator',
-  templateUrl: './navigator.component.html',
-  styleUrls: ['./navigator.component.css']
+  selector: 'app-navigator-verifier',
+  templateUrl: './navigator-verifier.component.html',
+  styleUrls: ['./navigator-verifier.component.css']
 })
-export class NavigatorComponent implements OnInit, OnDestroy {
+export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
@@ -20,7 +20,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
-        await this.router.navigate(['/waiting']);
+        await this.router.navigate(['/verify-waiting']);
       }));
   }
 
@@ -29,7 +29,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
-
     await this.bt.disconnect();
   }
 }

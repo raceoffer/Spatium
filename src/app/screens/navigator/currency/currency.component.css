@@ -1,0 +1,105 @@
+.mat-form-field-infix {
+  width: 100%!important;
+}
+
+.top-panel {
+  padding-bottom: 10px;
+  background-color: #f5f5f5;
+}
+
+table td {
+  width: 50%;
+  padding: 0;
+}
+
+.field {
+	width: calc(100% - 14px);
+	height: 40px;
+	background-color: #e2e3e3;
+	border-radius: 2px;
+  margin-top: 18px;
+  text-align: left;
+  overflow: none;
+}
+
+.field span {
+  margin: 0 20px 0 20px;
+  font-size: 16px;
+  color: #373741;
+  font-family: 'Roboto-Light';
+  display: block;
+  line-height: 40px;
+}
+
+.field.right {
+	position: relative;
+	left: 14px;
+}
+
+.label {
+  color: #373741;
+  font-family: 'Roboto-Light';
+  font-size: 13px;
+}
+
+.label, .mat-select-value-text {
+  position: absolute;
+}
+
+mat-select {
+  height: 100%;
+}
+
+.qrcode {
+  margin: 32px 0 32px 0;
+}
+
+.transaction-list {
+  text-align: left;
+  margin-bottom: 110px;
+}
+
+.transaction-amount {
+  font-family: 'Roboto-Medium';
+}
+
+.transaction-address {
+  font-family: 'Roboto-Light';
+  margin: 5px 0 2px 0 !important;
+}
+
+.transaction-time {
+  font-family: 'Roboto-Light';
+  position: absolute;
+  right: 16px;
+}
+
+.list-item {
+  position: relative;
+}
+
+.input {
+  color: #009688;
+}
+
+.output {
+  color: #F44336;
+}
+
+.unconfirmed {
+  opacity: 0.6;
+}
+
+.send-button-background {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding: 10px 0 30px 0;
+  background-color: #f5f5f5;
+}
+
+.currency-component .full-width {
+  width: 100% !important;
+  margin-left: 24px;
+  margin-right: 24px;
+}

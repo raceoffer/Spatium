@@ -29,13 +29,13 @@ export class SettingsComponent implements OnInit {
     value: 'en'
   }];
 
-  constructor(private readonly router: Router) { }
+  constructor(
+    private readonly router: Router
+  ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   async onBackClick() {
-
     switch (this.state) {
       case State.nav: {
         await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
@@ -49,8 +49,6 @@ export class SettingsComponent implements OnInit {
   }
 
   async onSettingsClick(navLink) {
-    console.log(navLink);
-
     if (navLink.link === 'factornode') {
       await this.router.navigate(['/factornode']);
     } else if (navLink.link === 'lang') {
@@ -58,8 +56,6 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  onLanguageClick(language) {
-
-  }
+  onLanguageClick(language) {}
 
 }

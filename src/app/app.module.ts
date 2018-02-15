@@ -1,7 +1,7 @@
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NoopAnimationsModule, BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
   MatButtonToggleModule,
@@ -20,6 +20,7 @@ import {
   MatFormFieldModule,
   MatGridListModule
 } from '@angular/material';
+import { QRCodeModule } from 'angular2-qrcode';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { AppComponent } from './app.component';
@@ -30,8 +31,8 @@ import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ClipboardModule} from 'ngx-clipboard/dist';
 import { BackupComponent } from './screens/backup/backup.component';
-import { SendTransactionComponent } from './screens/send-transaction/send-transaction.component';
-import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
+import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
+import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
 import { LoggerService } from './services/logger.service';
 import { BluetoothService } from './services/bluetooth.service';
@@ -54,12 +55,18 @@ import { LoginParentComponent } from './screens/login-parent/login-parent.compon
 import { NgInitDirective } from './directives/ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { KeyChainService } from './services/keychain.service';
-import { WalletComponent } from './screens/wallet/wallet.component';
+import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { FactorNodeComponent } from './screens/factor-node/factor-node.component';
-import { SettingsComponent } from './screens/settings/settings.component';
+import { SettingsComponent } from './screens/navigator/settings/settings.component';
+import { CurrencyComponent } from './screens/navigator/currency/currency.component';
+import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
+import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
+import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
+import { SecretExportComponent } from './screens/secret-export/secret-export.component';
+import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
 
 @NgModule({
   declarations: [
@@ -89,6 +96,12 @@ import { SettingsComponent } from './screens/settings/settings.component';
     FingerPrintComponent,
     AutofocusDirective,
     FactorNodeComponent,
+    CurrencyComponent,
+    MainDrawerComponent,
+    NavigatorVerifierComponent,
+    VerifyWaitingComponent,
+    SecretExportComponent,
+    SecretDeleteComponent,
     SettingsComponent
   ],
   imports: [
@@ -116,6 +129,7 @@ import { SettingsComponent } from './screens/settings/settings.component';
     MatSnackBarModule,
     MatFormFieldModule,
     MatGridListModule,
+    QRCodeModule,
     NgxZxingModule.forRoot()
   ],
   providers: [

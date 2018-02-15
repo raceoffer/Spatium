@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BluetoothService, Device } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
@@ -28,13 +28,10 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router
   ) { }
 
-  async ngOnInit() {
-    await this.bt.disconnect();
-
+  ngOnInit() {
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
-        console.log(this.wallet.address.getValue());
-        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+        await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
       }));
 
     this.subscriptions.push(
@@ -80,11 +77,9 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         return devices;
       }).subscribe(devices => this.devices = devices));
-    console.log('Entered waiting');
   }
 
-  async ngOnDestroy() {
-    console.log('Left waiting');
+  ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

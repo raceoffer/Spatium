@@ -1,0 +1,29 @@
+<app-connect *ngIf="(synchronizing | async)"></app-connect>
+<div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
+  <mat-toolbar color="primary" class="shadow">
+    <mat-toolbar-row>
+      <button mat-icon-button routerLink="/start">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!(enabled | async)">
+    <div class="connect-text">
+      <span>{{enableBTmessage}}</span>
+    </div>
+
+    <button mat-fab  class="width-button">
+      <mat-icon (click)="enableBluetooth()">bluetooth_disabled
+      </mat-icon>
+    </button>
+  </div>
+
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="(enabled | async)">
+    <div class="verify-transaction-text" *ngIf="!(ready | async)">
+      <span>Awaiting connection from the main device.</span>
+    </div>
+
+    <button *ngIf="!(discoverable | async) && !(ready | async)" mat-button color="accent" (click)="enableDiscoverable()">Enable device discovery</button>
+  </div>
+</div>

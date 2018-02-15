@@ -10,6 +10,7 @@ export class FactorParentComponent implements OnInit {
 
   next: string = null;
   back: string = null;
+  isBlack = true;
 
 
   constructor(private route: ActivatedRoute) {
@@ -21,6 +22,10 @@ export class FactorParentComponent implements OnInit {
         this.back = params['back'];
       }
     });
+
+    if (this.back && this.back === 'navigator-verifier') {
+      this.isBlack = false;
+    }
   }
 
   ngOnInit() {

@@ -1,40 +1,22 @@
-<app-connect *ngIf="synchronizing.getValue()"></app-connect>
-<div *ngIf="!synchronizing.getValue()" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
-  <mat-toolbar color="primary" class="shadow">
-    <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
-        <mat-icon>arrow_back</mat-icon>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
       </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!enabled.getValue()">
-
-    <div class="connect-text">
-      <span>{{enableBTmessage}}</span>
-    </div>
-
-    <button mat-fab  class="width-button">
-      <mat-icon (click)="enableBluetooth()">bluetooth_disabled
-      </mat-icon>
-    </button>
-
+      <span>{{ title }}</span>
+    </mat-toolbar>
   </div>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled.getValue()">
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <div class="verify-transaction-text" *ngIf="ready.getValue()">
+    <div class="verify-transaction-text" *ngIf="!showTransaction">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="verify-transaction-text" *ngIf="!ready.getValue()">
-      <span>Awaiting connection from the main device.</span>
-    </div>
-
-    <button *ngIf="!discoverable.getValue() && !ready.getValue()" mat-button color="accent" (click)="enableDiscoverable()">Enable device discovery</button>
-
     <div class="transaction-container" *ngIf="showTransaction">
-
       <mat-form-field class="full-width" color="accent">
         <input matInput placeholder="Recipient address" [(ngModel)]="address" disabled>
       </mat-form-field>
@@ -61,5 +43,5 @@
         <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
       </div>
     </div>
-  </div>
+  </mat-sidenav-container>
 </div>

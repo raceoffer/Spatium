@@ -1,0 +1,32 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span>{{ title }}</span>
+    </mat-toolbar>
+  </div>
+
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
+
+    <mat-grid-list cols="3">
+      <mat-grid-tile
+        *ngFor="let tile of tiles"
+        [colspan]="tile.cols"
+        [rowspan]="tile.rows">
+
+        <div class="grid-item">
+          <button mat-button class="block" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
+            <div class="logo {{tile.logo}}"></div>
+          </button>
+          <span class="title">{{tile.title}}</span>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </mat-sidenav-container>
+</div>
+
+
