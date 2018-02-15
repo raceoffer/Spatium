@@ -2,7 +2,7 @@
   <div class="header text-center">
     <mat-toolbar color="primary" class="shadow">
       <mat-toolbar-row>
-        <button mat-icon-button routerLink="/login">
+        <button mat-icon-button (click)="onBackClick()">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <span>{{ title }}</span>
@@ -50,7 +50,7 @@
         </button>
       </div>
 
-      <button type="submit" mat-raised-button color="accent" class="width-button color" >Save</button>
+      <button type="submit" mat-raised-button color="accent" class="width-button color" [disabled]="factors.length < 2" (click)="onSaveClicked()">Save</button>
     </div>
   </form>
 </div>

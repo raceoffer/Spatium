@@ -39,7 +39,6 @@ const appRoutes: Routes = [
   { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factornode', component: FactorNodeComponent},
-  { path: 'settings', component: SettingsComponent},
   { path: 'secret-export', component: SecretExportComponent},
   { path: 'secret-delete', component: SecretDeleteComponent},
   { path: 'factor', component: FactorParentComponent, children: [
@@ -54,7 +53,9 @@ const appRoutes: Routes = [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
-    { path: 'settings', component: SettingsComponent, outlet: 'navigator' }
+    { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
+    { path: 'backup', component: BackupComponent},
+    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' }
