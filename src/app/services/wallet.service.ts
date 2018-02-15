@@ -52,6 +52,11 @@ export enum Status {
   Ready
 }
 
+export enum TransactionType {
+  In,
+  Out
+}
+
 class SyncSession {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
 
@@ -468,6 +473,28 @@ class SignSession {
   }
 }
 
+export class HistoryEntry {
+  static fromJSON(json) {
+    return new HistoryEntry(
+      json.type,
+      json.from,
+      json.to,
+      json.amount,
+      json.confirmed,
+      json.time
+    );
+  }
+
+  constructor(
+    public type: TransactionType,
+    public from: string,
+    public to: string,
+    public amount: number,
+    public confirmed: boolean,
+    public time: number
+  ) {}
+}
+
 @Injectable()
 export class WalletService {
   private compoundKey: any = null;
@@ -486,6 +513,7 @@ export class WalletService {
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+  public history: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
 
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
   public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -727,6 +755,56 @@ export class WalletService {
     return verify;
   }
 
+  public async listTransactionHistory() {
+    const txs = await this.watchingWallet.getTransactions();
+
+    return txs.map(record => {
+      const inputs = record.tx.inputs.map(input => {
+        const address = bcoin.address.fromScript(input.script);
+        return {
+          address: address ? address.toString() : null
+        };
+      });
+      const outputs = record.tx.outputs.map(output => {
+        const address = bcoin.address.fromScript(output.script);
+        return {
+          address: address ? address.toString() : null,
+          value: output.value
+        };
+      });
+
+      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
+        // go find change
+        const value =
+          outputs
+            .filter(output => output.address !== this.watchingWallet.getAddress('base58'))
+            .reduce((sum, output) => sum + output.value, 0);
+        return HistoryEntry.fromJSON({
+          type: TransactionType.Out,
+          from: this.watchingWallet.getAddress('base58'),
+          to: outputs.filter(output => output.address !== this.watchingWallet.getAddress('base58'))[0],
+          amount: value,
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      } else { // in
+        // go find our output
+        const value =
+          outputs
+            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
+            .reduce((sum, output) => sum + output.value, 0);
+        return HistoryEntry.fromJSON({
+          type: TransactionType.In,
+          from: inputs[0].address,
+          to: this.watchingWallet.getAddress('base58'),
+          amount: value,
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      }
+    });
+  }
+
   public async pushTransaction() {
     if (this.signSession) {
       const tx = this.signSession.transaction.toTX();
@@ -776,8 +854,8 @@ export class WalletService {
       this.balance.next(balance);
     });
 
-    this.watchingWallet.on('transaction', (transaction) => {
-      console.log(transaction);
+    this.watchingWallet.on('transaction', async () => {
+      this.history.next(await this.listTransactionHistory());
     });
 
     try {
@@ -785,6 +863,8 @@ export class WalletService {
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get the balance', e);
     }
+
+    this.history.next(await this.listTransactionHistory());
 
     // Start: configuring a provider
     this.provider = new BlockchainInfoProvider({

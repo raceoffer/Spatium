@@ -24,6 +24,7 @@
     left: 12.5%;
     background-position: center !important;
     background-size: 100% !important;
+    background-repeat: no-repeat;
 }
 
 .title {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 export class WalletComponent {
   tiles = [
     {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
-    {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc'},
+    {title: 'Bitcoin', cols: 1, rows: 1, logo: 'btc', link: 'Bitcoin'},
     {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin'},
     {title: 'Bitcoin Cash', cols: 1, rows: 1},
     {title: 'Cardano', cols: 1, rows: 1},
@@ -21,10 +21,17 @@ export class WalletComponent {
   ];
 
   constructor(
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
   ) { }
 
-  async onTileClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['send-transaction'] } }]);
+  async onTileClicked(currency) {
+    if (currency == undefined || currency.length == 0) {
+      return;
+    }
+
+    this.ngZone.run(async () => {
+      await this.router.navigate(['/wallet/' + currency]);
+    });
   }
 }
