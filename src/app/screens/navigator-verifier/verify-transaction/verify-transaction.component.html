@@ -1,43 +1,47 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="sidenav.toggle()">
-    <mat-icon>menu</mat-icon>
-  </button>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
 
-  <span>{{ title }}</span>
-</mat-toolbar>
-
-<mat-sidenav-container>
-  <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
-
-  <div class="verify-transaction-text" *ngIf="!showTransaction">
-    <span>This device is linked. All transactions will be confirmed by you.</span>
+      <span>{{ title }}</span>
+    </mat-toolbar>
   </div>
 
-  <div class="transaction-container" *ngIf="showTransaction">
-    <mat-form-field class="full-width" color="accent">
-      <input matInput placeholder="Recipient address" [(ngModel)]="address" disabled>
-    </mat-form-field>
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <table class="full-width">
-      <tr>
-        <td align="left" width="50%">
-          <mat-form-field style="width: 120px;" color="accent">
-            <input matInput placeholder="BTC" [(ngModel)]="btc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01" disabled>
-          </mat-form-field>
-        </td>
-        <td align="right" width="50%">
-          <mat-form-field style="width: 120px;" color="accent">
-            <input matInput placeholder="USD" [(ngModel)]="usd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01" disabled>
-          </mat-form-field>
-        </td>
-      </tr>
-    </table>
-
-    <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-      <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
-      <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+    <div class="verify-transaction-text" *ngIf="!showTransaction">
+      <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
-  </div>
-</mat-sidenav-container>
+
+    <div class="transaction-container" *ngIf="showTransaction">
+      <mat-form-field class="full-width" color="accent">
+        <input matInput placeholder="Recipient address" [(ngModel)]="address" disabled>
+      </mat-form-field>
+
+      <table class="full-width">
+        <tr>
+          <td align="left" width="50%">
+            <mat-form-field style="width: 120px;" color="accent">
+              <input matInput placeholder="BTC" [(ngModel)]="btc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                     step="0.01" disabled>
+            </mat-form-field>
+          </td>
+          <td align="right" width="50%">
+            <mat-form-field style="width: 120px;" color="accent">
+              <input matInput placeholder="USD" [(ngModel)]="usd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                     step="0.01" disabled>
+            </mat-form-field>
+          </td>
+        </tr>
+      </table>
+
+      <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
+        <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
+        <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+      </div>
+    </div>
+  </mat-sidenav-container>
+</div>

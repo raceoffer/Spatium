@@ -36,9 +36,9 @@ export class WalletComponent {
       isActive: false
     }, {
       name: 'Settings',
-      link: '',
+      link: ['/navigator', { outlets: { navigator: ['settings'] } }],
       isSelected: false,
-      isActive: false
+      isActive: true
     }, {
       name: 'Exit',
       link: ['/start'],

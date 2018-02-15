@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
 enum State {
@@ -29,14 +29,13 @@ export class SettingsComponent implements OnInit {
     value: 'en'
   }];
 
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone) { }
+  constructor(
+    private readonly router: Router
+  ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   async onBackClick() {
-
     switch (this.state) {
       case State.nav: {
         await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
@@ -50,8 +49,6 @@ export class SettingsComponent implements OnInit {
   }
 
   onSettingsClick(navLink) {
-    console.log(navLink);
-
     if (navLink.link === 'tree') {
 
     } else if (navLink.link === 'lang') {
@@ -59,8 +56,6 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  onLanguageClick(language) {
-
-  }
+  onLanguageClick(language) {}
 
 }

@@ -24,7 +24,7 @@ import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigat
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
-import {SettingsComponent} from "./screens/settings/settings.component";
+import {SettingsComponent} from "./screens/navigator/settings/settings.component";
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -37,7 +37,6 @@ const appRoutes: Routes = [
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'fingerprint', component: FingerPrintComponent},
-  { path: 'settings', component: SettingsComponent},
   { path: 'secret-export', component: SecretExportComponent},
   { path: 'secret-delete', component: SecretDeleteComponent},
   { path: 'factor', component: FactorParentComponent, children: [
@@ -51,7 +50,8 @@ const appRoutes: Routes = [
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
-    { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' }
+    { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
+    { path: 'settings', component: SettingsComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' }
