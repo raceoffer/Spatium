@@ -24,7 +24,8 @@ import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigat
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
-import {SettingsComponent} from "./screens/navigator/settings/settings.component";
+import { SettingsComponent } from './screens/navigator/settings/settings.component';
+import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -54,7 +55,8 @@ const appRoutes: Routes = [
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
-    { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' }
+    { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },
+    { path: 'delete-secret', component: DeleteSecretComponent, outlet: 'navigator' }
   ]}
 ];
 

@@ -66,7 +66,7 @@ import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigat
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
-import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.component';
+import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 
 @NgModule({
   declarations: [
@@ -96,7 +96,7 @@ import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.com
     FingerPrintComponent,
     AutofocusDirective,
     CurrencyComponent,
-    DeleteSecretComponent
+    DeleteSecretComponent,
     MainDrawerComponent,
     NavigatorVerifierComponent,
     VerifyWaitingComponent,
