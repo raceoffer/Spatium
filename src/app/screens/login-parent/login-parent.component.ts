@@ -1,4 +1,4 @@
-import {Component, NgZone, OnInit} from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -91,11 +91,11 @@ export class LoginParentComponent  implements OnInit {
   }
 
   async checkInput(input: string) {
-    /*if (!await Utils.testNetwork()) {
+    if (!await Utils.testNetwork()) {
       this.notification.show('No network connection');
       this.buttonState = State.Error;
       return;
-    }*/
+    }
     try {
       this.buttonState = State.Updating;
       const exists = await this.dds.exists(AuthService.toId(input));
@@ -110,8 +110,7 @@ export class LoginParentComponent  implements OnInit {
           this.buttonState = State.Empty;
           do {
             this.qrGenerate = this.authService.makeNewLogin(10);
-            const exists = await this.dds.exists(AuthService.toId(this.qrGenerate));
-            if (!exists) {
+            if (!await this.dds.exists(AuthService.toId(this.qrGenerate))) {
               break;
             }
           } while (true);

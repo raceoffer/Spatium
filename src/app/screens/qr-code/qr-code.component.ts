@@ -74,19 +74,15 @@ export class QrCodeComponent implements OnInit {
       await this.generateLogin();
     } else {
       const permissions = cordova.plugins.permissions;
-      permissions.hasPermission(permissions.CAMERA, function( status ){
+      permissions.hasPermission(permissions.CAMERA, (status) => this.ngZone.run(async () => {
         if ( status.hasPermission ) {
-          this.ngZone.run(async () => {
-            this.permissionCam = true;
-          });
+          this.permissionCam = true;
         } else {
-          this.ngZone.run(async () => {
-            this.permissionCam = false;
-          });
+          this.permissionCam = false;
 
-          permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
+          await permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
         }
-      }.bind(this));
+      }));
     }
   }
 
@@ -118,8 +114,8 @@ export class QrCodeComponent implements OnInit {
     this.notification.show('Camera permission is not turned on');
   }
 
-  success( status ) {
-    if ( !status.hasPermission ) {
+  success(status) {
+    if (!status.hasPermission) {
       this.notification.show('Camera permission is not turned on');
       this.ngZone.run(async () => {
         this.permissionCam = false;
@@ -142,18 +138,16 @@ export class QrCodeComponent implements OnInit {
   }
 
   async handleQrCodeResult(event) {
-
     if (!this.isRepeatable) {
-    this._qrcode = event.toString();
+      this._qrcode = event.toString();
     } else {
       const buffer = Buffer.from(event.toString(), 'hex');
       this._qrcode = Utils.tryUnpackLogin(buffer);
     }
-    console.log(this._qrcode);
-    this.onSuccess();
+    await this.onSuccess();
   }
 
-  onSuccess() {
+  async onSuccess() {
     this.camStarted = false;
 
     switch (this.next) {
@@ -184,8 +178,8 @@ export class QrCodeComponent implements OnInit {
     this.clearEvent.emit();
   }
 
-  saveQr() {
-    this.onSuccess();
-}
+  async saveQr() {
+    await this.onSuccess();
+  }
 }
 
