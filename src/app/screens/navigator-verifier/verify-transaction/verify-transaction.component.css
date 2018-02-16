@@ -7,6 +7,7 @@
 
 .transaction-container {
   width: 100%;
+  margin-top: 13px;
 }
 
 .mat-form-field-infix {
@@ -14,9 +15,13 @@
 }
 
 .full-width{
-  padding-left: 24px;
+  margin-left: 24px;
 }
 
 table .full-width td {
   width: 100px;
+}
+
+.mat-form-field {
+  margin-top: 4px;
 }
