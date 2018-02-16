@@ -112,6 +112,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
 
   goBottom() {
     const container = $('#factor-container');
+    console.log(container);
     container.animate({scrollTop: container.height()}, 500, 'swing');
   }
 

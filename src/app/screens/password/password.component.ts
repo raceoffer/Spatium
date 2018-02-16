@@ -4,7 +4,7 @@ import { AuthService, FactorType } from '../../services/auth.service';
 
 @Component({
   selector: 'app-password',
-  host: {'class': 'child'},
+  host: {'class': 'child content text-center'},
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })

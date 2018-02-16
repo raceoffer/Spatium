@@ -5,7 +5,7 @@ declare const nfc: any;
 
 @Component({
   selector: 'app-login',
-  host: {'class': 'child'},
+  host: {'class': 'child content text-center'},
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

@@ -9,7 +9,7 @@ declare const cordova: any;
 
 @Component({
   selector: 'app-qr-code',
-  host: {'class': 'child box'},
+  host: {'class': 'child box content text-center'},
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
@@ -63,7 +63,7 @@ export class QrCodeComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.canScanAgain = false;
     this.classVideoContainer = 'content';
     this._qrcode = '';
@@ -71,7 +71,7 @@ export class QrCodeComponent implements OnInit {
     this.spinnerClass = 'spinner-video-container';
 
     if (this.isAuth) {
-      this.generateLogin();
+      await this.generateLogin();
     } else {
       const permissions = cordova.plugins.permissions;
       permissions.hasPermission(permissions.CAMERA, function( status ){
@@ -100,7 +100,8 @@ export class QrCodeComponent implements OnInit {
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(AuthService.toId(login));
         if (!exists) {
-          this.genericLogin = login;
+          const packedLogin = Utils.packLogin(login);
+          this.genericLogin = packedLogin.toString('hex');
           break;
         }
       } while (true);
@@ -141,8 +142,18 @@ export class QrCodeComponent implements OnInit {
   }
 
   async handleQrCodeResult(event) {
-    this._qrcode = event.toString();
 
+    if (!this.isRepeatable) {
+    this._qrcode = event.toString();
+    } else {
+      const buffer = Buffer.from(event.toString(), 'hex');
+      this._qrcode = Utils.tryUnpackLogin(buffer);
+    }
+    console.log(this._qrcode);
+    this.onSuccess();
+  }
+
+  onSuccess() {
     this.camStarted = false;
 
     switch (this.next) {
@@ -172,5 +183,9 @@ export class QrCodeComponent implements OnInit {
     this.camStarted = true;
     this.clearEvent.emit();
   }
+
+  saveQr() {
+    this.onSuccess();
+}
 }
 

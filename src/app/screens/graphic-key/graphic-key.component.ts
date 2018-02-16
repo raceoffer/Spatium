@@ -7,7 +7,7 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-graphic-key',
-  host: {'class': 'child'},
+  host: {'class': 'child content text-center'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })

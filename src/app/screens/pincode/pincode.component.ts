@@ -17,7 +17,7 @@ enum State {
 
 @Component({
   selector: 'app-pincode',
-  host: {'class': 'child'},
+  host: {'class': 'child content text-center'},
   templateUrl: './pincode.component.html',
   styleUrls: ['./pincode.component.css']
 })

@@ -11,7 +11,7 @@ declare const Utils: any;
 
 @Component({
   selector: 'app-nfc',
-  host: {'class': 'child box'},
+  host: {'class': 'child box content text-center'},
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
