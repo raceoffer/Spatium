@@ -2,8 +2,10 @@ import { AfterViewInit, Component, EventEmitter, NgZone, OnDestroy, OnInit, Outp
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import {DDSService} from "../../services/dds.service";
 
 declare const nfc: any;
+declare const ndef: any;
 declare const navigator: any;
 declare const Utils: any;
 
@@ -19,6 +21,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   buttonState = 0; // sign in = 0, sign up = 1
   next: string = null;
   back: string = null;
+  isAuth = false;
   text = 'Touch an NFC tag';
   enableNFCmessage = 'Turn on NFC to proceed';
   isActive = false;
@@ -46,6 +49,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
+    private readonly dds: DDSService,
     private readonly notification: NotificationService
   ) {
     this.route.params.subscribe(params => {
@@ -55,8 +59,10 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
       if (params['back']) {
         this.back = params['back'];
       }
+      if (params['isAuth']) {
+        this.isAuth = (params['isAuth'] === 'true');
+      }
     });
-
   }
 
   ngOnInit() {
@@ -103,7 +109,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
       );
 
       this.isCreatedListener = true;
-  }
+   }
 
     this.timeout();
 }
@@ -141,15 +147,18 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
   onNfc (nfcEvent) {
     if (this.isActive) {
-      console.log('onNfc');
-      console.log(JSON.stringify(nfcEvent));
+      if (this.isAuth) {
+        this.generateAndWrite();
+      } else {
+        console.log('onNfc');
+        console.log(JSON.stringify(nfcEvent));
 
-      this._nfc = nfcEvent.tag.id;
+        this._nfc = nfcEvent.tag.id;
 
-      navigator.vibrate(100);
+        navigator.vibrate(100);
 
-      this.onSuccess();
-
+        this.onSuccess();
+      }
     } else {
       console.log('inactive');
     }
@@ -157,37 +166,78 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
   onNdef (nfcEvent) {
     if (this.isActive) {
-      console.log('onNdef');
-      console.log(JSON.stringify(nfcEvent));
-
-      const tag = nfcEvent.tag;
-
-      // BB7 has different names, copy to Android names
-      if (tag.serialNumber) {
-        tag.id = tag.serialNumber;
-        tag.isWritable = !tag.isLocked;
-        tag.canMakeReadOnly = tag.isLockable;
-      }
-
-      if (!this.isRepeatable) {
-        this._nfc = tag.id;
-
-        navigator.vibrate(100);
-
-        this.onSuccess();
+      if (this.isAuth) {
+        this.generateAndWrite();
       } else {
-        const payload = Buffer.from(tag.ndefMessage[0].payload);
-        const login = Utils.tryUnpackLogin(payload);
+        console.log('onNdef');
+        console.log(JSON.stringify(nfcEvent));
 
-        console.log(login);
+        const tag = nfcEvent.tag;
 
-        this._nfc = login;
+        // BB7 has different names, copy to Android names
+        if (tag.serialNumber) {
+          tag.id = tag.serialNumber;
+          tag.isWritable = !tag.isLocked;
+          tag.canMakeReadOnly = tag.isLockable;
+        }
 
-        navigator.vibrate(100);
+        if (!this.isRepeatable) {
+          this._nfc = tag.id;
 
-        this.onSuccess();
+          navigator.vibrate(100);
+
+          this.onSuccess();
+        } else {
+          const payload = Buffer.from(tag.ndefMessage[0].payload);
+          const login = Utils.tryUnpackLogin(payload);
+
+          console.log(login);
+
+          this._nfc = login;
+
+          navigator.vibrate(100);
+
+          this.onSuccess();
+        }
       }
     }
+  }
+
+  async generateAndWrite() {
+    if (!await Utils.testNetwork()) {
+      this.notification.show('No network connection');
+      return;
+    }
+    try {
+      do {
+        const login = this.authService.makeNewLogin(10);
+        const exists = await this.dds.exists(AuthService.toId(login));
+        if (!exists) {
+          this._nfc = login;
+          this.writeTag();
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+    }
+  }
+
+  writeTag() {
+    const content = Utils.packLogin(this._nfc);
+    const payload = Array.from(content);
+    const mimeType = 'text/pg';
+
+    const record = ndef.mimeMediaRecord(mimeType, payload);
+
+    nfc.write([record], function () {
+      console.log('Success write');
+      this.notification.show('Success write NFC tag');
+      this.onSuccess();
+    }.bind(this), function (e) {
+      console.log('Error write ' + JSON.stringify(e));
+      this.notification.show('Error write NFC tag');
+    }.bind(this));
+
   }
 
   onSuccess() {
@@ -204,6 +254,12 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/registration']);
+      });
+    } else if (this.next && this.next === 'factornode') {
+      this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/factornode']);
       });
     } else {
       // if at login-parent

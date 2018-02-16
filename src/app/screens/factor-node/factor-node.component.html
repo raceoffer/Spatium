@@ -1,0 +1,58 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <mat-toolbar-row>
+        <button mat-icon-button (click)="onBackClick()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ title }}</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+  </div>
+
+  <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
+    <div class="header text-center">
+      <div class="top-arrow-scroll" id="top-scroller">
+        <button mat-icon-button (click)="goTop()">
+          <mat-icon>keyboard_arrow_up</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center content" style="overflow: scroll;max-height: 100%; margin-bottom: 30px;" id="factor-container" #factorContainer>
+      <mat-icon >lock_outline</mat-icon>
+      <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
+        <div style="margin-left: 50px;">
+          <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+            <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
+          </button>
+        </div>
+
+        <div>
+          <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
+          <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
+          </div>
+        </div>
+      </div>
+
+      <div class="margin-top-18" style="padding-bottom: 10px;">
+        <button color="accent" mat-mini-fab (click)="addNewFactor()" type="button">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <mat-icon class="margin-top-18" *ngIf="factors.length > 0">lock_open</mat-icon>
+    </div>
+
+    <div class="footer text-center" style="bottom: 0px;">
+      <div class="bottom-arrow-scroll" id="bottom-scroller" style="margin-top: -60px;">
+        <button mat-icon-button (click)="goBottom()">
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+      </div>
+
+      <button type="submit" mat-raised-button color="accent" class="width-button color" [disabled]="factors.length < 2" (click)="onSaveClicked()">Save</button>
+    </div>
+  </form>
+</div>
+
+

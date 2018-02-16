@@ -14,6 +14,7 @@ export class AuthService {
 
   factors: Factor[] = [];
   available: AvailableFactor[] = [];
+  authFactors: AvailableFactor[] = [];
 
   decryptedSeed: any = null;
 
@@ -41,13 +42,19 @@ export class AuthService {
       FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY));
     this.available.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR));
+    this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
+      FactorIconAsset.QR, FactorLink.QR));
 
     nfc.enabled(function () {
         this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
           FactorIconAsset.NFC, FactorLink.NFC));
+        this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+          FactorIconAsset.NFC, FactorLink.NFC));
       }.bind(this), function (e) {
       if (e !== 'NO_NFC') {
         this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+          FactorIconAsset.NFC, FactorLink.NFC));
+        this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
           FactorIconAsset.NFC, FactorLink.NFC));
       }
     }.bind(this));
@@ -55,6 +62,10 @@ export class AuthService {
 
   getAllAvailableFactors() {
     return this.available;
+  }
+
+  getAuthFactors() {
+    return this.authFactors;
   }
 
   newFactor(type, value) {
@@ -117,6 +128,12 @@ export class AuthService {
 
   rmFactor(factor) {
     this.factors.splice(this.factors.indexOf(factor), 1);
+  }
+
+  rmFactorWithChildren(factor) {
+    const index = this.factors.indexOf(factor);
+
+    this.factors = this.factors.slice(0, index);
   }
 
   rmAuthFactor(factor) {

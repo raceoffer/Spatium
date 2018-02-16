@@ -148,6 +148,10 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.authSevice.rmFactor(factor);
     this.factors = this.authSevice.factors;
     this.changeDetectorRef.detectChanges();
+
+    this.sleep(650).then(() => {
+      this.checkOverflow(this.factorContainer);
+    });
   }
 
   openAdvanced() {
@@ -177,5 +181,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
     await this.router.navigate(['/backup']);
+  }
+
+  async sleep(ms: number) {
+    await this._sleep(ms);
+  }
+
+  _sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

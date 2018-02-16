@@ -14,6 +14,7 @@ import { NfcComponent } from './screens/nfc/nfc.component';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
+import {FactorNodeComponent} from './screens/factor-node/factor-node.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
@@ -38,6 +39,7 @@ const appRoutes: Routes = [
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'fingerprint', component: FingerPrintComponent},
+  { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-export', component: SecretExportComponent},
   { path: 'secret-delete', component: SecretDeleteComponent},
   { path: 'factor', component: FactorParentComponent, children: [
@@ -52,7 +54,9 @@ const appRoutes: Routes = [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
-    { path: 'settings', component: SettingsComponent, outlet: 'navigator' }
+    { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
+    { path: 'backup', component: BackupComponent},
+    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },

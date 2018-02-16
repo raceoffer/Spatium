@@ -2,6 +2,7 @@ import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import {DDSService} from "../../services/dds.service";
 
 declare const Utils: any;
 declare const cordova: any;
@@ -23,6 +24,7 @@ export class QrCodeComponent implements OnInit {
 
   next: string = null;
   back: string = null;
+  isAuth = false;
 
   camStarted = false;
   selectedDevice = undefined;
@@ -30,12 +32,14 @@ export class QrCodeComponent implements OnInit {
   text = 'Scan a QR-code';
   spinnerClass = '';
   permissionCam = false;
+  genericLogin = '';
 
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
 
   constructor(
+    private readonly dds: DDSService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly ngZone: NgZone,
@@ -48,6 +52,9 @@ export class QrCodeComponent implements OnInit {
       }
       if (params['back']) {
         this.back = params['back'];
+      }
+      if (params['isAuth']) {
+        this.isAuth = (params['isAuth'] === 'true');
       }
     });
 
@@ -63,20 +70,42 @@ export class QrCodeComponent implements OnInit {
     this.classVideo = 'small-video';
     this.spinnerClass = 'spinner-video-container';
 
-    const permissions = cordova.plugins.permissions;
-    permissions.hasPermission(permissions.CAMERA, function( status ){
-      if ( status.hasPermission ) {
-        this.ngZone.run(async () => {
-          this.permissionCam = true;
-        });
-      } else {
-        this.ngZone.run(async () => {
-          this.permissionCam = false;
-        });
+    if (this.isAuth) {
+      this.generateLogin();
+    } else {
+      const permissions = cordova.plugins.permissions;
+      permissions.hasPermission(permissions.CAMERA, function( status ){
+        if ( status.hasPermission ) {
+          this.ngZone.run(async () => {
+            this.permissionCam = true;
+          });
+        } else {
+          this.ngZone.run(async () => {
+            this.permissionCam = false;
+          });
 
-        permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
-      }
-    }.bind(this));
+          permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
+        }
+      }.bind(this));
+    }
+  }
+
+  async generateLogin() {
+    if (!await Utils.testNetwork()) {
+      this.notification.show('No network connection');
+      return;
+    }
+    try {
+      do {
+        const login = this.authService.makeNewLogin(10);
+        const exists = await this.dds.exists(AuthService.toId(login));
+        if (!exists) {
+          this.genericLogin = login;
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+    }
   }
 
   addVideoContainer() {
@@ -127,6 +156,12 @@ export class QrCodeComponent implements OnInit {
 
       this.ngZone.run(async () => {
         await this.router.navigate(['/registration']);
+      });
+    } else if (this.next && this.next === 'factornode') {
+      this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+
+      this.ngZone.run(async () => {
+        await this.router.navigate(['/factornode']);
       });
     } else {
        // if at login-parent

@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
+import {AuthService} from "../../../services/auth.service";
 
 enum State {
   nav = 0,
@@ -18,7 +19,7 @@ export class SettingsComponent implements OnInit {
 
   navLinks = [{
     name: ' Add authentication path',
-    link: 'tree'
+    link: 'factornode'
   }, {
     name: 'Language',
     link: 'lang',
@@ -30,7 +31,8 @@ export class SettingsComponent implements OnInit {
   }];
 
   constructor(
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly authService: AuthService
   ) { }
 
   ngOnInit() { }
@@ -48,11 +50,12 @@ export class SettingsComponent implements OnInit {
     }
   }
 
-  onSettingsClick(navLink) {
-    if (navLink.link === 'tree') {
-
+  async onSettingsClick(navLink) {
+    if (navLink.link === 'factornode') {
+      this.authService.clearFactors();
+      await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
     } else if (navLink.link === 'lang') {
-        this.state = State.lang;
+      this.state = State.lang;
     }
   }
 
