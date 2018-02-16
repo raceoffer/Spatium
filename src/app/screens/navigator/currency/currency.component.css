@@ -7,49 +7,6 @@
   background-color: #f5f5f5;
 }
 
-table td {
-  width: 50%;
-  padding: 0;
-}
-
-.field {
-	width: calc(100% - 14px);
-	height: 40px;
-	background-color: #e2e3e3;
-	border-radius: 2px;
-  margin-top: 18px;
-  text-align: left;
-  overflow: none;
-}
-
-.field span {
-  margin: 0 20px 0 20px;
-  font-size: 16px;
-  color: #373741;
-  font-family: 'Roboto-Light';
-  display: block;
-  line-height: 40px;
-}
-
-.field.right {
-	position: relative;
-	left: 14px;
-}
-
-.label {
-  color: #373741;
-  font-family: 'Roboto-Light';
-  font-size: 13px;
-}
-
-.label, .mat-select-value-text {
-  position: absolute;
-}
-
-mat-select {
-  height: 100%;
-}
-
 .qrcode {
   margin: 32px 0 32px 0;
 }

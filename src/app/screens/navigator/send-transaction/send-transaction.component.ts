@@ -30,7 +30,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public amount = new FormControl();
   public amountUsd = this.amount.valueChanges.map(value => value * this.rateBtcUsd);
 
-  currentWalletPh = 'Wallet';
+  accountPh = 'Account';
   receiverPh = 'Recipient';
 
   titile = 'Send transaction';

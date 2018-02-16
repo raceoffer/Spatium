@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
+<div class="currency-component" fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <button mat-icon-button [routerLink]="['/navigator', { outlets: { 'navigator': ['currency', coin] } }]">
@@ -8,46 +8,60 @@
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <mat-form-field class="full-width" color="accent">
-    <mat-select [placeholder]="currentWalletPh" [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
+  <span class="full-width label full-width-label">{{ accountPh }}</span>
+  <div class="full-width field" style="margin-bottom: 13px;">
+    <mat-select [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
       <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
         <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} BTC)
       </mat-option>
     </mat-select>
-  </mat-form-field>
+  </div>
 
-  <table class="full-width">
+  <table class="full-width text-center two-columns">
     <tr>
-      <td align="left" width="50%">
-        <mat-form-field style="width: 120px;">
-          <input matInput placeholder="BTC" [value]="balanceBtcUnconfirmed | async" disabled>
-        </mat-form-field>
-      </td>
-      <td align="right" width="50%">
-        <mat-form-field style="width: 120px;">
-          <input matInput placeholder="USD" [value]="balanceUsd | async" disabled>
-        </mat-form-field>
-      </td>
+      <td>
+          <span class="label" style="margin-left: 5px;">BTC</span>
+          <div class="field">
+            <span>
+              {{ balanceBtcUnconfirmed | async }}
+            </span>
+          </div>
+        </td>
+        <td>
+          <span class="label" style="margin-left: 19px;">USD</span>
+          <div class="field right">
+            <span>
+              {{ balanceUsd | async }}
+            </span>
+          </div>
+        </td>
     </tr>
   </table>
 
-  <mat-form-field class="full-width" color="accent">
-    <input matInput [placeholder]="receiverPh" [formControl]="receiver">
+  <span class="full-width label full-width-label">{{ receiverPh }}</span>
+  <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
+    <input matInput [formControl]="receiver">
   </mat-form-field>
 
-  <table class="full-width">
+  <table class="full-width text-center two-columns">
     <tr>
-      <td align="left" width="50%">
-        <mat-form-field style="width: 120px;" color="accent">
-          <input matInput placeholder="BTC" [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                 step="0.01">
-        </mat-form-field>
+      <td>
+        <span class="label" style="margin-left: 5px;">BTC</span>
+        <div class="field">
+          <span>
+            <input matInput [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+               step="0.01">
+          </span>
+        </div>
       </td>
-      <td align="right" width="50%">
-        <mat-form-field style="width: 120px;" color="accent">
-          <input matInput placeholder="USD" [value]="amountUsd | async" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+      <td>
+        <span class="label" style="margin-left: 19px;">USD</span>
+        <div class="field right">
+          <span>
+            <input matInput [value]="amountUsd | async" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                  step="0.01" disabled>
-        </mat-form-field>
+          </span>
+        </div>
       </td>
     </tr>
   </table>
@@ -67,9 +81,6 @@
 
     <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(validatorObserver | async)">
       {{ stTransfer }}
-    </button>
-    <button *ngIf="(phase | async) === phaseType.Confirmation" mat-raised-button color="accent" class="width-button-full color" (click)="cancelTransaction()">
-      {{ stCancel }}
     </button>
     <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       {{ stSend }}
