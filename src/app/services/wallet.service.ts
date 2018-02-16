@@ -73,29 +73,41 @@ export class WalletService {
     this.status = combineLatest(
       Array.from(this.currencyWallets.values()).map(wallet => wallet.status),
       (... values) => {
-        return values.reduce((a, b) => Math.min(a, b) as Status, Status.Ready);
+        if (values.every(value => value === Status.Ready)) {
+          return Status.Ready;
         }
+        if (values.some(value => value === Status.Failed)) {
+          return Status.Failed;
+        }
+        if (values.some(value => value === Status.Cancelled)) {
+          return Status.Cancelled;
+        }
+        if (values.some(value => value === Status.Synchronizing)) {
+          return Status.Synchronizing;
+        }
+        return Status.None;
+      }
     );
 
     this.synchronizing = combineLatest(
       Array.from(this.currencyWallets.values()).map(wallet => wallet.synchronizing),
       (... values) => {
         return values.reduce((a, b) => a || b, false);
-  }
+      }
     );
 
     this.ready = combineLatest(
       Array.from(this.currencyWallets.values()).map(wallet => wallet.ready),
       (... values) => {
         return values.reduce((a, b) => a && b, true);
-  }
+      }
     );
 
     this.syncProgress = combineLatest(
       Array.from(this.currencyWallets.values()).map(wallet => wallet.syncProgress),
       (... values) => {
         return values.reduce((a, b) => a + b, 0) / values.length;
-  }
+      }
     );
 
     this.statusChanged = this.status.skip(1).distinctUntilChanged();
@@ -117,7 +129,7 @@ export class WalletService {
           case Coin.BTC:
             return await this.currencyWallets.get(Coin.BTC).startTransactionVerify(
               BitcoinTransaction.fromJSON(content.tx)
-        );
+            );
           case Coin.BCH:
             return await this.currencyWallets.get(Coin.BCH).startTransactionVerify(
               BitcoinCashTransaction.fromJSON(content.tx)
@@ -130,7 +142,7 @@ export class WalletService {
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
     }
-    }
+  }
 
   public async startSync() {
     for (const wallet of Array.from(this.currencyWallets.values())) {
@@ -140,12 +152,12 @@ export class WalletService {
 
       await syncEvent;
     }
-    }
+  }
 
   public async cancelSync() {
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.cancelSync();
     }
   }
-    }
+}
 
