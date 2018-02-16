@@ -86,7 +86,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   async onBack() {
     switch (this.back) {
       case 'factor-node':
-        if (this.saving) {
+        if (!this.saving) {
           await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         } else {
           await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
