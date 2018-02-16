@@ -34,6 +34,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public rateBtcUsd = 15000;
 
+  public accountLabel = 'Account';
   public sendLabel = 'Send';
 
   private subscriptions = [];

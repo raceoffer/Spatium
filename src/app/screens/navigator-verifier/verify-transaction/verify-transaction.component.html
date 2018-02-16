@@ -16,29 +16,34 @@
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="transaction-container" *ngIf="showTransaction">
-      <mat-form-field class="full-width" color="accent">
-        <input matInput placeholder="Recipient address" [(ngModel)]="address" disabled>
+    <div class="transaction-container currency-component" *ngIf="showTransaction">
+      <span class="full-width label full-width-label">Recipient address</span>
+      <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
+        <input matInput [(ngModel)]="address" disabled>
       </mat-form-field>
 
-      <table class="full-width">
+      <table class="full-width text-center two-columns">
         <tr>
-          <td align="left" width="50%">
-            <mat-form-field style="width: 120px;" color="accent">
-              <input matInput placeholder="BTC" [(ngModel)]="btc" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                     step="0.01" disabled>
-            </mat-form-field>
-          </td>
-          <td align="right" width="50%">
-            <mat-form-field style="width: 120px;" color="accent">
-              <input matInput placeholder="USD" [(ngModel)]="usd" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                     step="0.01" disabled>
-            </mat-form-field>
-          </td>
+          <td>
+              <span class="label" style="margin-left: 5px;">BTC</span>
+              <div class="field">
+                <span>
+                  {{ btc | async }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span class="label" style="margin-left: 19px;">USD</span>
+              <div class="field right">
+                <span>
+                  {{ usd | async }}
+                </span>
+              </div>
+            </td>
         </tr>
-      </table>
+      </table>      
 
-      <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
+      <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
         <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
         <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
       </div>
