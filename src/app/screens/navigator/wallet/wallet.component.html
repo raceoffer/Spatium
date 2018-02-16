@@ -19,7 +19,7 @@
         [rowspan]="tile.rows">
 
         <div class="grid-item">
-          <button mat-button class="block" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
+          <button mat-raised-button color="accent" class="block" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
             <div class="logo {{tile.logo}}"></div>
           </button>
           <span class="title">{{tile.title}}</span>
