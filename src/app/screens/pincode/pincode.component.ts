@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
@@ -36,7 +36,6 @@ export class PincodeComponent implements AfterViewInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly ngZone: NgZone,
     private readonly authService: AuthService,
     private readonly fs: FileService,
     private readonly notification: NotificationService,
@@ -79,47 +78,38 @@ export class PincodeComponent implements AfterViewInit {
   }
 
   async onSubmitClicked() {
-    if (this.next && this.next === 'waiting') {
-      const aesKey = await Utils.deriveAesKey(Buffer.from(this.pincode, 'utf-8'));
+    switch (this.next) {
+      case 'waiting':
+        try {
+          const aesKey = await Utils.deriveAesKey(Buffer.from(this.pincode, 'utf-8'));
 
-      try {
-        if (this.authService.encryptedSeed) {
-          const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-          this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
-        } else {
-          this.keyChain.seed = Utils.randomBytes(64);
-          this.authService.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
+          if (this.authService.encryptedSeed) {
+            const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
+            this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
+          } else {
+            this.keyChain.seed = Utils.randomBytes(64);
+            this.authService.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
 
-          await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
+            await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
+          }
+
+          await this.router.navigate(['/verify-waiting']);
+        } catch (ignored) {
+          this.notification.show('Authorization error');
         }
-
-        await this.router.navigate(['/verify-waiting']);
-      } catch (ignored) {
-        this.notification.show('Authorization error');
-      }
-    } else if (this.next && this.next === 'auth') {
-      this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-
-      this.ngZone.run(async () => {
+        break;
+      case 'auth':
+        this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
         await this.router.navigate(['/auth']);
-      });
-    } else if (this.next && this.next === 'registration') {
-      this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-
-      this.ngZone.run(async () => {
+        break;
+      case 'registration':
+        this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
         await this.router.navigate(['/registration']);
-      });
-    } else if (this.next && this.next === 'factornode') {
-      this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factornode']);
-      });
-    } else if (this.next && this.next === 'navigator-verifier') {
-      this.ngZone.run(async () => {
-        // pincode change
-        await this.router.navigate(['/navigator-verifier']);
-      });
+        break;
+      case 'factornode':
+        this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+        break;
     }
   }
 

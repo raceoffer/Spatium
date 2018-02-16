@@ -1,22 +1,21 @@
-
 <div class="dialog-label" fxLayout="row" fxLayoutAlign="end center" >
   <mat-icon class="color-custom-dark" style="padding-right: 10px;">info_outline</mat-icon>
 </div>
 
-  <div mat-dialog-content>
-    <mat-nav-list>
-      <mat-list-item style="height: 54.5px!important; border-bottom: 1px solid #e0e0e0;" *ngFor="let factor of factors; let last = last"
-                     [class.last-item]="last"
-                     (click)="goTo(factor)">
+<div mat-dialog-content>
+  <mat-nav-list>
+    <mat-list-item style="height: 54.5px!important; border-bottom: 1px solid #e0e0e0;" *ngFor="let factor of factors; let last = last"
+                   [class.last-item]="last"
+                   (click)="goTo(factor)">
 
-        <h4 mat-line class="factor-text">
-          <div class="factor-icon">
-            <mat-icon matPrefix class="factor-icon-padding" *ngIf="factor.icon">{{factor.icon}}</mat-icon>
-            <div class="{{factor.icon_asset}}" *ngIf="factor.icon_asset"></div>
-          </div>
-          {{factor.name}}
-        </h4>
-      </mat-list-item>
-    </mat-nav-list>
-  </div>
+      <h4 mat-line class="factor-text">
+        <div class="factor-icon">
+          <mat-icon matPrefix class="factor-icon-padding" *ngIf="factor.icon">{{factor.icon}}</mat-icon>
+          <div class="{{factor.icon_asset}}" *ngIf="factor.icon_asset"></div>
+        </div>
+        {{factor.name}}
+      </h4>
+    </mat-list-item>
+  </mat-nav-list>
+</div>
 

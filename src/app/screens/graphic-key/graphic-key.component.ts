@@ -1,6 +1,6 @@
-import {AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService, FactorType} from '../../services/auth.service';
+import { AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
 import * as PatternLock from 'PatternLock';
 
 declare const Buffer: any;
@@ -19,10 +19,14 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   back: string = null;
   graphKey: string = null;
 
-  constructor(private readonly router: Router,
-              private route: ActivatedRoute,
-              private ngZone: NgZone,
-              private authService: AuthService) {
+  lock: any = null;
+
+  constructor(
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly ngZone: NgZone,
+    private readonly authService: AuthService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -38,34 +42,28 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    const lock =  new PatternLock(this.el.nativeElement, {
-      onDraw: function(pattern){
-        console.log(pattern);
+    this.lock =  new PatternLock(this.el.nativeElement, {
+      onDraw: (pattern) => this.ngZone.run(async () => {
         this.graphKey = pattern;
-        this.goNext();
-      }.bind(this)
+        await this.goNext();
+      })
     });
-
-    console.log(lock);
   }
 
-  goNext(): void {
-    if (this.next && this.next === 'auth') {
-      this.authService.addAuthFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-      this.ngZone.run(() => {
-        this.router.navigate(['/auth']);
-      });
-    } else if (this.next && this.next === 'registration') {
-      this.authService.addFactor( FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-      this.ngZone.run(() => {
-        this.router.navigate(['/registration']);
-      });
-    } else if (this.next && this.next === 'factornode') {
-      this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factornode']);
-      });
+  async goNext() {
+    switch (this.next) {
+      case 'auth':
+        this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.router.navigate(['/auth']);
+        break;
+      case 'registration':
+        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.router.navigate(['/registration']);
+        break;
+      case 'factornode':
+        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+        break;
     }
   }
 

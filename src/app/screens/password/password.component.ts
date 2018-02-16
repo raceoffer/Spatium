@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService, FactorType} from '../../services/auth.service';
+import { OnInit, Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, FactorType } from '../../services/auth.service';
 
 @Component({
   selector: 'app-password',
@@ -8,7 +8,7 @@ import {AuthService, FactorType} from '../../services/auth.service';
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })
-export class PasswordComponent implements AfterViewInit {
+export class PasswordComponent implements OnInit {
   stContinue = 'Continue';
   stPassword = 'Password';
 
@@ -20,7 +20,6 @@ export class PasswordComponent implements AfterViewInit {
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly ngZone: NgZone,
     private readonly authService: AuthService
   ) {
     this.route.params.subscribe(params => {
@@ -33,30 +32,25 @@ export class PasswordComponent implements AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
+  ngOnInit() {
     this.password = '';
   }
 
-  goNext(): void {
+  async goNext() {
     if (this.password !== '') {
-      if (this.next && this.next === 'auth') {
-        this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-
-        this.ngZone.run(async () => {
+      switch (this.next) {
+        case 'auth':
+          this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/auth']);
-        });
-      } else if (this.next && this.next === 'registration') {
-        this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-
-        this.ngZone.run(async () => {
+          break;
+        case 'registration':
+          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/registration']);
-        });
-      } else if (this.next && this.next === 'factornode') {
-        this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-
-        this.ngZone.run(async () => {
-          await this.router.navigate(['/factornode']);
-        });
+          break;
+        case 'factornode':
+          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+          break;
       }
     }
   }

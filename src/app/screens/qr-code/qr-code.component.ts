@@ -2,7 +2,7 @@ import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
-import {DDSService} from "../../services/dds.service";
+import { DDSService } from '../../services/dds.service';
 
 declare const Utils: any;
 declare const cordova: any;
@@ -145,25 +145,20 @@ export class QrCodeComponent implements OnInit {
 
     this.camStarted = false;
 
-    if (this.next && this.next === 'auth') {
-      this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-
-      this.ngZone.run(async () => {
+    switch (this.next) {
+      case 'auth':
+        this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         await this.router.navigate(['/auth']);
-      });
-    } else if (this.next && this.next === 'registration') {
-      this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-
-      this.ngZone.run(async () => {
+        break;
+      case 'registration':
+        this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         await this.router.navigate(['/registration']);
-      });
-    } else if (this.next && this.next === 'factornode') {
-      this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factornode']);
-      });
-    } else {
+        break;
+      case 'factornode':
+        this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+        break;
+      default:
        // if at login-parent
        this.canScanAgain = true;
        this.classVideoContainer = 'invisible';
@@ -172,7 +167,6 @@ export class QrCodeComponent implements OnInit {
   }
 
   scanAgain() {
-    console.log('qr ' + this.authService.qr);
     this.canScanAgain = false;
     this.classVideoContainer = 'content';
     this.camStarted = true;

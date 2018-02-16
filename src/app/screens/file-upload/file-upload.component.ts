@@ -16,6 +16,7 @@ export class FileUploadComponent implements AfterViewInit {
   back: string = null;
 
   file: any = null;
+  reader: any = null;
 
   constructor(
     private readonly router: Router,
@@ -44,36 +45,32 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   readFile (file) {
-    const reader = new FileReader();
-    const self = this;
+    this.reader = new FileReader();
 
-    reader.onloadend = function () {
+    this.reader.onloadend = () => this.ngZone.run(async () => {
       const arrayBufferToBuffer = require('arraybuffer-to-buffer');
-      self.file = arrayBufferToBuffer(reader.result);
+      this.file = arrayBufferToBuffer(this.reader.result);
 
-      self.goNext();
-    };
+      await this.goNext();
+    });
 
-    reader.readAsArrayBuffer(file);
+    this.reader.readAsArrayBuffer(file);
   }
 
-  goNext(): void {
-    if (this.next && this.next === 'auth') {
-      this.authService.addAuthFactor( FactorType.FILE, this.file);
-      this.ngZone.run(() => {
-        this.router.navigate(['/auth']);
-      });
-    } else if (this.next && this.next === 'registration') {
-      this.authService.addFactor( FactorType.FILE, this.file);
-      this.ngZone.run(() => {
-        this.router.navigate(['/registration']);
-      });
-    } else if (this.next && this.next === 'factornode') {
-      this.authService.addFactor(FactorType.FILE, Buffer.from(this.file, 'utf-8'));
-
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factornode']);
-      });
+  async goNext() {
+    switch (this.next) {
+      case 'auth':
+        this.authService.addAuthFactor(FactorType.FILE, this.file);
+        await this.router.navigate(['/auth']);
+        break;
+      case 'registration':
+        this.authService.addFactor(FactorType.FILE, this.file);
+        await this.router.navigate(['/registration']);
+        break;
+      case 'factornode':
+        this.authService.addFactor(FactorType.FILE, this.file);
+        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+        break;
     }
   }
 }

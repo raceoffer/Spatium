@@ -56,7 +56,15 @@ const appRoutes: Routes = [
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
     { path: 'backup/:back', component: BackupComponent},
-    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' }
+    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
+    { path: 'factor', component: FactorParentComponent, outlet: 'navigator', children: [
+      { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
+      { path: 'password', component: PasswordComponent, outlet: 'factor' },
+      { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
+      { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
+      { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
+      { path: 'nfc', component: NfcComponent, outlet: 'factor' }
+    ]}
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },
