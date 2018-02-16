@@ -13,13 +13,13 @@ export class KeyChainService {
   private _seed: any = null;
   private keyChain: any = null;
 
-  get seed() {
-    return this._seed;
+  getSeed() {
+    return Buffer.from(this._seed);
   }
 
-  set seed(seed) {
-    this._seed = seed;
-    this.keyChain = this._seed ? KeyChain.fromSeed(this.seed) : null;
+  setSeed(seed) {
+    this._seed = Buffer.from(seed);
+    this.keyChain = this._seed ? KeyChain.fromSeed(Buffer.from(seed)) : null;
   }
 
   reset() {

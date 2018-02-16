@@ -178,7 +178,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.factors = [];
     this.password = '';
 
-    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
+    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
     this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
     await this.router.navigate(['/backup', 'registration']);

@@ -154,6 +154,7 @@ export class CurrencyWallet {
 
     this.address.next('');
     this.balance.next({ confirmed: 0, unconfirmed: 0 });
+    this.transactions.next([]);
     this.syncProgress.next(0);
   }
 

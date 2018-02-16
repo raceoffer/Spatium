@@ -160,7 +160,11 @@ export class QrCodeComponent implements OnInit {
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
-        this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+        if (this.isAuth) {
+          this.authService.addFactor(FactorType.QR, Buffer.from(this.genericLogin, 'hex'));
+        } else {
+          this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+        }
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
       default:

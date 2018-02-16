@@ -111,7 +111,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.keyChain.seed = this.authSevice.decryptedSeed;
+    this.keyChain.setSeed(this.authSevice.decryptedSeed);
     this.authSevice.reset();
 
     await this.router.navigate(['/waiting']);

@@ -85,10 +85,10 @@ export class PincodeComponent implements AfterViewInit {
 
           if (this.authService.encryptedSeed) {
             const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-            this.keyChain.seed = Utils.decrypt(ciphertext, aesKey);
+            this.keyChain.setSeed(Utils.decrypt(ciphertext, aesKey));
           } else {
-            this.keyChain.seed = Utils.randomBytes(64);
-            this.authService.encryptedSeed = Utils.encrypt(this.keyChain.seed, aesKey).toString('hex');
+            this.keyChain.setSeed(Utils.randomBytes(64));
+            this.authService.encryptedSeed = Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
 
             await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
           }

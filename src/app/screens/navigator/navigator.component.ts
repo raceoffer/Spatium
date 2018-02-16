@@ -29,7 +29,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
-
     await this.bt.disconnect();
   }
 }

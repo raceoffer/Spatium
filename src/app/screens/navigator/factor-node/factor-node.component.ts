@@ -112,7 +112,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   }
 
   async onSaveClicked() {
-    const factors = this.factors.map(factor => factor.toBuffer()).reverse();
+    const idFactor = this.factors[0].value;
+    const factors = this.factors.slice(1).map(factor => factor.toBuffer()).reverse();
     const tree = factors.reduce((rest, factor) => {
       const node = {
         factor: factor
@@ -127,7 +128,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
     this.authSevice.password = '';
     this.factors = [];
 
-    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
+    this.authSevice.login = Utils.tryUnpackLogin(idFactor).toString('utf-8');
+    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
     this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
     await this.router.navigate(['/navigator', { outlets: { navigator: ['backup', 'factor-node'] } }]);
