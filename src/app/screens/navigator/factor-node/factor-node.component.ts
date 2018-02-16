@@ -77,12 +77,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   }
 
   goTop() {
-    $('#factor-container').animate({scrollTop: 0}, 500, 'swing');
+    const container = $('#factor-container');
+    container.animate({scrollTop: 0}, 500, 'swing');
   }
 
   goBottom() {
     const container = $('#factor-container');
-    container.animate({scrollTop: container.height()}, 500, 'swing');
+    const height = document.getElementById("factor-container").scrollHeight;
+    container.animate({scrollTop: height}, 500, 'swing');
   }
 
   addNewFactor() {

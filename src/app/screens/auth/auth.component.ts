@@ -63,11 +63,14 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   goTop() {
-    $('#factor-container').animate({scrollTop: 0}, 500, 'swing');
+    const container = $('#factor-container');
+    container.animate({scrollTop: 0}, 500, 'swing');
   }
 
   goBottom() {
-    $('#factor-container').animate({scrollTop: $('#factor-container').height()}, 500, 'swing');
+    const container = $('#factor-container');
+    const height = document.getElementById("factor-container").scrollHeight;
+    container.animate({scrollTop: height}, 500, 'swing');
   }
 
   ngAfterViewInit() {
