@@ -47,20 +47,20 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     }
 
     if (!a.confirmed && b.confirmed) {
-      return 1;
+      return -1;
     }
 
     if (a.confirmed && !b.confirmed) {
-      return -1;
+      return 1;
     }
 
     // then confirmed transactions sorted by time
     if (a.time > b.time) {
-      return 1;
+      return -1;
     }
 
     if (a.time < b.time) {
-      return -1;
+      return 1;
     }
 
     return 0;

@@ -51,7 +51,7 @@
           [class.output]="transaction.type==txType.Out">
           {{ transaction.formattedAmount }} {{ currencySymbol | async }}
         </span>
-        <span matLine class="transaction-time" *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date }}</span>
+        <span matLine class="transaction-time" *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
         <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
         <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
         <mat-divider></mat-divider>
