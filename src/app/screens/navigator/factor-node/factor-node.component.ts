@@ -136,5 +136,4 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   async onBackClick() {
     await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
   }
-
 }

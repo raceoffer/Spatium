@@ -55,7 +55,7 @@ const appRoutes: Routes = [
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
-    { path: 'backup/:back', component: BackupComponent},
+    { path: 'backup/:back', component: BackupComponent, outlet: 'navigator' },
     { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
     { path: 'factor', component: FactorParentComponent, outlet: 'navigator', children: [
       { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
