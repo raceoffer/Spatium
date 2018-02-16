@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SecretDeleteComponent } from './secret-delete.component';
+import { SecretImportComponent } from './secret-import.component';
 
-describe('SecretDeleteComponent', () => {
-  let component: SecretDeleteComponent;
-  let fixture: ComponentFixture<SecretDeleteComponent>;
+describe('SecretImportComponent', () => {
+  let component: SecretImportComponent;
+  let fixture: ComponentFixture<SecretImportComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SecretDeleteComponent ]
+      declarations: [ SecretImportComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SecretDeleteComponent);
+    fixture = TestBed.createComponent(SecretImportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

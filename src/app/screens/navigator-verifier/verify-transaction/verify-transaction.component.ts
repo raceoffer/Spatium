@@ -31,7 +31,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     isActive: false
   }, {
     name: 'Delete secret',
-    link: ['/navigator-verifier', { outlets: { 'navigator': ['delete-secret'] } }],
+    link: ['/navigator-verifier', { outlets: { 'navigator': ['delete-secret', 'verify-transaction'] } }],
     isSelected: false,
     isActive: true
   }, {

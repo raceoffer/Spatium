@@ -59,14 +59,14 @@ import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
-import { FactorNodeComponent } from './screens/factor-node/factor-node.component';
+import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
-import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
+import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 
 @NgModule({
@@ -103,7 +103,7 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
     NavigatorVerifierComponent,
     VerifyWaitingComponent,
     SecretExportComponent,
-    SecretDeleteComponent,
+    SecretImportComponent,
     SettingsComponent
   ],
   imports: [

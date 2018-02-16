@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
@@ -50,12 +50,21 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   public gasPrice: number = this.dds.toWei('5', 'gwei');
 
+  private back: string = null;
+
   constructor(
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly dds: DDSService,
     private readonly notification: NotificationService,
     private readonly authService: AuthService
-  ) { }
+  ) {
+    this.route.params.subscribe((params: Params) => {
+      if (params['back']) {
+        this.back = params['back'];
+      }
+    });
+  }
 
   async ngOnInit() {
     this.id = Utils.sha256(Buffer.from(this.authService.login, 'utf-8')).toString('hex');
@@ -67,14 +76,30 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
 
     await this.updateBalance();
-
-    console.log('Entered backup');
   }
 
   async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    console.log('Exited backup');
+  }
+
+  async onBack() {
+    switch (this.back) {
+      case 'factor-node':
+        if (this.saving) {
+          await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+        } else {
+          await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
+        }
+        break;
+      case 'registration':
+        if (!this.saving) {
+          await this.router.navigate(['/registration']);
+        } else {
+          await this.router.navigate(['/start']);
+        }
+        break;
+    }
   }
 
   async updateBalance() {
@@ -97,9 +122,17 @@ export class BackupComponent implements OnInit, OnDestroy {
         .subscribe(async (success) => {
           this.saving = false;
           if (success) {
-            await this.router.navigate(['/reg-success']);
+            switch (this.back) {
+              case 'factor-node':
+                this.notification.show('Successfully uploaded the secret');
+                await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
+                break;
+              case 'registration':
+                await this.router.navigate(['/reg-success']);
+                break;
+            }
           } else {
-            this.notification.show('Failed to upload a secret');
+            this.notification.show('Failed to upload the secret');
           }
         }));
   }

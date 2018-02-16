@@ -37,10 +37,13 @@ export class DeleteSecretComponent implements OnInit {
   }
 
   async onBack() {
-    if (this.back === 'pincode') {
-      await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
-    } else {
-      await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+    switch (this.back) {
+      case 'pincode':
+        await this.router.navigate(['/factor', { back: 'start' }, { outlets: {'factor': ['pincode', { next: 'waiting' }] } }]);
+        break;
+      case 'verify-transaction':
+        await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+        break;
     }
   }
 

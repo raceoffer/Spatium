@@ -14,7 +14,7 @@ import { NfcComponent } from './screens/nfc/nfc.component';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
-import {FactorNodeComponent} from './screens/factor-node/factor-node.component';
+import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
@@ -23,7 +23,7 @@ import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
-import { SecretDeleteComponent } from './screens/secret-delete/secret-delete.component';
+import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
@@ -32,7 +32,7 @@ const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
   { path: 'auth', component: AuthComponent },
-  { path: 'backup', component: BackupComponent},
+  { path: 'backup/:back', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'verify-waiting', component: VerifyWaitingComponent },
   { path: 'login', component: LoginParentComponent},
@@ -41,7 +41,7 @@ const appRoutes: Routes = [
   { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-export', component: SecretExportComponent},
-  { path: 'secret-delete', component: SecretDeleteComponent},
+  { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [
     { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
     { path: 'password', component: PasswordComponent, outlet: 'factor' },
@@ -55,12 +55,12 @@ const appRoutes: Routes = [
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
-    { path: 'backup', component: BackupComponent},
+    { path: 'backup/:back', component: BackupComponent},
     { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },
-    { path: 'delete-secret', component: DeleteSecretComponent, outlet: 'navigator' }
+    { path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator' }
   ]},
   { path: 'delete-secret/:back', component: DeleteSecretComponent }
 ];

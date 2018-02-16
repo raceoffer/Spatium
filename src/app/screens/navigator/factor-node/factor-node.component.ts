@@ -2,13 +2,11 @@ import {
   AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, OnInit, sequence, style, transition,
   trigger, ViewChild
 } from '@angular/core';
-import {DialogFactorsComponent} from '../dialog-factors/dialog-factors.component';
-import {MatDialog} from '@angular/material';
-import {Coin, KeyChainService} from '../../services/keychain.service';
-import {AuthService} from '../../services/auth.service';
-import {Router} from '@angular/router';
-import {NotificationService} from '../../services/notification.service';
-import {DDSService} from '../../services/dds.service';
+import { MatDialog } from '@angular/material';
+import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
+import { Coin, KeyChainService } from '../../../services/keychain.service';
+import { AuthService } from '../../../services/auth.service';
+import { Router } from '@angular/router';
 import * as $ from 'jquery';
 
 declare const Utils: any;
@@ -35,11 +33,13 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
-  constructor(public  dialog: MatDialog,
-              private readonly router: Router,
-              private readonly keychain: KeyChainService,
-              private readonly changeDetectorRef: ChangeDetectorRef,
-              private readonly authSevice: AuthService) { }
+  constructor(
+    public  dialog: MatDialog,
+    private readonly router: Router,
+    private readonly keychain: KeyChainService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly authSevice: AuthService
+  ) { }
 
   ngOnInit() {
     this.factors = this.authSevice.factors;
@@ -130,7 +130,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
     this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
     this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['backup'] } }]);
+    await this.router.navigate(['/navigator', { outlets: { navigator: ['backup', 'factor-node'] } }]);
   }
 
   async onBackClick() {

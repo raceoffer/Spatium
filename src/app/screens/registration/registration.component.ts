@@ -136,7 +136,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     }
   }
 
-  sddNewFactor() {
+  addNewFactor() {
     this.authSevice.password = this.password;
     this.dialog.open(DialogFactorsComponent, {
       width: '250px',
@@ -180,7 +180,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.seed);
     this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
 
-    await this.router.navigate(['/backup']);
+    await this.router.navigate(['/backup', 'registration']);
   }
 
   async sleep(ms: number) {
