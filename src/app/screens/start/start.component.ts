@@ -6,6 +6,8 @@ import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
 
+declare const Utils: any;
+
 @Component({
   selector: 'app-start',
   templateUrl: './start.component.html',
@@ -40,4 +42,6 @@ export class StartComponent implements OnInit {
 
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
   }
+
+
 }

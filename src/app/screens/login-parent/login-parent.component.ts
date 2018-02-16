@@ -115,13 +115,17 @@ export class LoginParentComponent  implements OnInit {
               break;
             }
           } while (true);
-
         } else {
           this.buttonState = State.New;
         }
       }
     } catch (ignored) {
-      this.buttonState = State.Error;
+      if (this.content === this.contentType.QR) {
+        this.notRecognized = '';
+        this.buttonState = State.Empty;
+      } else {
+        this.buttonState = State.Error;
+      }
     }
   }
 
