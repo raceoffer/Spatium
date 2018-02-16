@@ -9,6 +9,7 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
+    <span class="full-width label full-width-label">{{ accountLabel }}</span>
     <div class="full-width field" style="margin-bottom: 13px;">
       <mat-select [(value)]="selectedAddress">
         <mat-option [value]="walletAddress | async">
