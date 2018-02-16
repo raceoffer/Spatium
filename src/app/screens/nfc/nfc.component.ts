@@ -248,7 +248,11 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
-        this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        if (this.isAuth) {
+          this.authService.addFactor(FactorType.QR, Utils.packLogin(this._nfc));
+        } else {
+          this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        }
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
       default:
