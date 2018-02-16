@@ -145,7 +145,9 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
     KeyChainService
   ],
   bootstrap: [
-    AppComponent,
+    AppComponent
+  ],
+  entryComponents: [
     DialogFactorsComponent
   ]
 })
