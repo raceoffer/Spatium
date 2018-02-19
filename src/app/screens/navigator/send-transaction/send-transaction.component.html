@@ -31,12 +31,14 @@
           <span class="label" style="margin-left: 19px;">USD</span>
           <div class="field right">
             <span>
-              {{ balanceUsd | async }}
+              {{ balanceUsdUnconfirmed | async }}
             </span>
           </div>
         </td>
     </tr>
   </table>
+
+  <span class="full-width label full-width-label subtitle">Unconfirmed balance</span>
 
   <span class="full-width label full-width-label">{{ receiverPh }}</span>
   <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
