@@ -1,3 +1,8 @@
+.custom {
+  padding:0 44px 0 11px!important;
+  background-color: white;
+}
+
 .width-sidenav {
   width: 278px;
 }
