@@ -1,7 +1,7 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
     <mat-toolbar color="primary" class="shadow">
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <button mat-icon-button (click)="sidenav.toggle()" *ngIf="!isOpened">
         <mat-icon>menu</mat-icon>
       </button>
 
@@ -10,7 +10,7 @@
   </div>
 
   <mat-sidenav-container class="content">
-    <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
+    <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
     <div class="verify-transaction-text" *ngIf="!showTransaction">
       <span>This device is linked. All transactions will be confirmed by you.</span>

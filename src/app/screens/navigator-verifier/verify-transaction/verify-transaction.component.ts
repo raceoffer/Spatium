@@ -11,6 +11,8 @@ declare const bcoin: any;
   styleUrls: ['./verify-transaction.component.css']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
+  isOpened = false;
+
   showTransaction = false;
 
   address = '';
@@ -90,6 +92,10 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
   async onNav(navLink) {
     await this.router.navigate(navLink.link);
+  }
+
+  public toggle() {
+    this.isOpened = !this.isOpened;
   }
 
   async confirm() {

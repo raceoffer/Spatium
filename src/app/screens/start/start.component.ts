@@ -42,10 +42,4 @@ export class StartComponent implements OnInit {
 
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
   }
-
-  async onNavClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
-  }
-
-
 }
