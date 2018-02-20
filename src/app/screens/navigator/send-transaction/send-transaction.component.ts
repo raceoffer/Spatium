@@ -54,7 +54,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public walletAddress: Observable<string>;
   public balanceBtcConfirmed: Observable<number>;
   public balanceBtcUnconfirmed: Observable<number>;
-  public balanceUsd: Observable<number>;
+  public balanceUsdConfirmed: Observable<number>;
+  public balanceUsdUnconfirmed: Observable<number>;
   public validatorObserver: Observable<boolean>;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
@@ -87,7 +88,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
         this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.unconfirmed));
         this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.confirmed));
-        this.balanceUsd = this.balanceBtcUnconfirmed.map(balance => balance * this.rateBtcUsd);
+        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * this.rateBtcUsd);
+        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * this.rateBtcUsd);
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,

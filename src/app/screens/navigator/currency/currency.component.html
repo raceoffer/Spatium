@@ -20,11 +20,11 @@
 
     <table class="full-width text-center two-columns">
       <tr>
-        <td>
+        <td fxLayout="column" fxLayoutAlign="start center">
           <span class="label" style="margin-left: 5px;">{{ currencySymbol | async }}</span>
           <div class="field">
             <span>
-              {{ balanceCurrencyConfirmed | async }}
+              {{ balanceCurrencyUnconfirmed | async }}
             </span>
           </div>
         </td>
@@ -32,12 +32,14 @@
           <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
           <div class="field right">
             <span>
-              {{ balanceUsdConfirmed | async }}
+              {{ balanceUsdUnconfirmed | async }}
             </span>
           </div>
         </td>
       </tr>
     </table>
+
+    <span class="full-width label full-width-label subtitle">Unconfirmed balance</span>
   </div>
 
   <div class="content text-center" style="overflow: scroll;max-height: 100%;">
