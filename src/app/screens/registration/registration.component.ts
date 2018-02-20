@@ -6,19 +6,10 @@ import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
 import { KeyChainService, Coin } from '../../services/keychain.service';
 import * as $ from 'jquery';
 
 declare const Utils: any;
-
-enum State {
-  Ready,
-  Updating,
-  Exists,
-  Error
-}
 
 @Component({
   selector: 'app-registration',
@@ -47,9 +38,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
 
   factors = [];
 
-  stateType = State;
-  usernameState = State.Ready;
-
   @ViewChild('factorContainer') factorContainer: ElementRef;
 
   constructor(
@@ -57,9 +45,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     private readonly router: Router,
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly authSevice: AuthService,
-    private readonly notification: NotificationService,
-    private readonly dds: DDSService
+    private readonly authSevice: AuthService
   ) {
     this.changeDetectorRef = changeDetectorRef;
   }
@@ -115,27 +101,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     const container = $('#factor-container');
     const height = document.getElementById("factor-container").scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
-  }
-
-  async generateNewLogin() {
-    if (!await Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      this.usernameState = State.Error;
-      return;
-    }
-    this.usernameState = State.Updating;
-    try {
-      do {
-        this.username = this.authSevice.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(this.username));
-        if (!exists) {
-          this.usernameState = State.Ready;
-          break;
-        }
-      } while (true);
-    } catch (ignored) {
-      this.usernameState = State.Error;
-    }
   }
 
   addNewFactor() {

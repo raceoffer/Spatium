@@ -1,7 +1,17 @@
 import {Component, AfterViewInit, Output, EventEmitter, Input} from '@angular/core';
+import {AuthService} from '../../services/auth.service';
+import {NotificationService} from '../../services/notification.service';
+import {DDSService} from '../../services/dds.service';
 
 declare const Utils: any;
 declare const nfc: any;
+
+enum State {
+  Ready,
+  Updating,
+  Exists,
+  Error
+}
 
 @Component({
   selector: 'app-login',
@@ -13,6 +23,9 @@ export class LoginComponent implements AfterViewInit {
   private _userName = '';
 
   stLogin = 'Username';
+
+  stateType = State;
+  usernameState = State.Ready;
 
   @Input() genericLogin: string;
 
@@ -44,7 +57,9 @@ export class LoginComponent implements AfterViewInit {
     }
   }
 
-  constructor() { }
+  constructor(private readonly dds: DDSService,
+              private readonly authSevice: AuthService,
+              private readonly notification: NotificationService) { }
 
   ngAfterViewInit() {
     if (this.genericLogin !== null) {
@@ -52,6 +67,28 @@ export class LoginComponent implements AfterViewInit {
       this.genericLogin == null;
     } else {
       this.userName = '';
+    }
+  }
+
+  async generateNewLogin() {
+    if (!await Utils.testNetwork()) {
+      this.notification.show('No network connection');
+      this.usernameState = State.Error;
+      return;
+    }
+    this.usernameState = State.Updating;
+    try {
+      do {
+        this.userName = this.authSevice.makeNewLogin(10);
+        const exists = await this.dds.exists(AuthService.toId(this._userName));
+        if (!exists) {
+          this.notification.show('Unique login was generated');
+          this.usernameState = State.Ready;
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+      this.usernameState = State.Error;
     }
   }
 }

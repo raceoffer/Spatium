@@ -5,6 +5,11 @@
     <div class="spatium-textfield entry bottom32">
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName" [autofocus]>
     </div>
+    <button matSuffix mat-icon-button style="position: absolute; right:24px; display: inline-block; margin-top: -10.5px;" (click)="generateNewLogin()">
+      <mat-icon style="opacity: 0.5;" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
+      <mat-icon class="sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
+      <mat-icon *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
+    </button>
   </form>
 
   <router-outlet name="login"></router-outlet>
