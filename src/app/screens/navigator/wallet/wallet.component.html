@@ -15,17 +15,27 @@
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <mat-grid-list cols="3">
+    <mat-grid-list cols="2">
       <mat-grid-tile
         *ngFor="let tile of tiles"
         [colspan]="tile.cols"
         [rowspan]="tile.rows">
 
         <div class="grid-item">
-          <button mat-raised-button color="accent" class="block" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
-            <div class="logo {{tile.logo}}"></div>
+          <button mat-button class="block" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
+            <div class="half-height"  fxLayout="row" fxLayoutAlign="center center" >
+              <div class="logo {{tile.logo}}"></div>
+              <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;">
+                <span class="sym">{{tile.symbols}}</span>
+                <span class="title">{{tile.title}}</span>
+              </div>
+            </div>
+            <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
+              <span class="balance" *ngIf="tile.balance">{{tile.balance}} {{tile.symbols}}</span>
+              <span class="balanceUSD" *ngIf="tile.balanceUsd">{{tile.balanceUsd}} USD</span>
+            </div>
+
           </button>
-          <span class="title">{{tile.title}}</span>
         </div>
       </mat-grid-tile>
     </mat-grid-list>

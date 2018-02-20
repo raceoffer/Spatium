@@ -48,16 +48,16 @@ export class WalletComponent {
     }];
 
   public tiles = [
-    {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
-    {title: 'Bitcoin', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
-    {title: 'Bitcoin Cash', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
-    {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin'},
-    {title: 'Cardano', cols: 1, rows: 1, logo: 'cardano'},
-    {title: 'NEO', cols: 1, rows: 1, logo: 'neo'},
-    {title: 'Ripple', cols: 1, rows: 1, logo: 'ripple'},
-    {title: 'Stellar', cols: 2, rows: 2, logo: 'stellar'},
-    {title: 'EOS', cols: 1, rows: 1, logo: 'eos'},
-    {title: 'NEM', cols: 1, rows: 1, logo: 'nem'}
+    {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
+    {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
+    {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum'},
+    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin'},
+    {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
+    {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
+    {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
+    {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
+    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos'},
+    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
 
   constructor(private readonly router: Router) { }
