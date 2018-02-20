@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Output} from '@angular/core';
 import { Router } from '@angular/router';
 import { Coin } from '../../../services/keychain.service';
 
@@ -8,6 +8,7 @@ import { Coin } from '../../../services/keychain.service';
   styleUrls: ['./wallet.component.css']
 })
 export class WalletComponent {
+  public isOpened = false;
   public title = 'Wallet';
   public navLinks = [{
       name: 'Wallet',
@@ -63,6 +64,10 @@ export class WalletComponent {
 
   public async onNav(navLink) {
     await this.router.navigate(navLink.link);
+  }
+
+  public toggle() {
+    this.isOpened = !this.isOpened;
   }
 
   async onTileClicked(coin: Coin) {

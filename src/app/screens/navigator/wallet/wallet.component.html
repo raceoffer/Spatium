@@ -1,7 +1,10 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
     <mat-toolbar color="primary" class="shadow">
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <div style="height:0px!important; width:0px!important;">
+        <button mat-icon-button style="height:0px!important; width:0px!important;"></button>
+      </div>
+      <button mat-icon-button (click)="sidenav.toggle()" *ngIf="!isOpened">
         <mat-icon>menu</mat-icon>
       </button>
 
@@ -10,7 +13,7 @@
   </div>
 
   <mat-sidenav-container class="content">
-    <app-main-drawer #sidenav [navLinks]="navLinks" (linkClicked)="onNav($event)"></app-main-drawer>
+    <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
     <mat-grid-list cols="3">
       <mat-grid-tile

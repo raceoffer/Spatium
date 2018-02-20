@@ -1,14 +1,13 @@
 <mat-sidenav #sidenav class="width-sidenav" mode="over" [fixedInViewport]="true">
-  <mat-list-item>
-    <div fxLayout="row" fxLayoutAlign="space-between center" class="spatium-logo-text">
-      <button mat-icon-button (click)="sidenav.toggle()">
-        <mat-icon class="size-30 color-custom" aria-hidden="true">clear</mat-icon>
-      </button>
-
-      <div class="nav-logo-text"></div>
-    </div>
-  </mat-list-item>
-
+  <div style="height:0px!important; width:0px!important;">
+    <button mat-icon-button style="height:0px!important; width:0px!important;"></button>
+  </div>
+  <mat-toolbar color="primary" class="custom">
+    <button mat-icon-button (click)="toggle()">
+      <mat-icon class="size-30 color-custom" >clear</mat-icon>
+    </button>
+    <div class="nav-logo-text"></div>
+  </mat-toolbar>
   <mat-nav-list *ngFor="let navLink of navLinks">
     <a mat-list-item [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
        (click)="!navLink.isActive || onClicked(navLink)"

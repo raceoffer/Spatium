@@ -8,6 +8,7 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 export class MainDrawerComponent implements OnInit {
   @Input() navLinks: Array<any> = [];
   @Output() linkClicked: EventEmitter<any> = new EventEmitter<any>();
+  @Output() closeClicked: EventEmitter<any> = new EventEmitter<any>();
 
   @ViewChild('sidenav') sidenav;
 
@@ -17,6 +18,7 @@ export class MainDrawerComponent implements OnInit {
 
   public toggle() {
     this.sidenav.toggle();
+    this.closeClicked.emit();
   }
 
   public onClicked(navLink) {
