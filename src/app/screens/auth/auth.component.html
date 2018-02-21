@@ -25,6 +25,8 @@
     </div>
   </div>
 
+  <app-password *ngIf="isLoginAuth && !isPasswordFirst" (isPasswordChanged)="isPasswordChanged($event)"></app-password>
+
   <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
     <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
       <div style="margin-left: 50px;">
@@ -34,13 +36,13 @@
       </div>
 
       <div>
-        <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{factor.icon}}</mat-icon>
+        <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
         <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''"></div>
       </div>
     </div>
   </div>
 
-  <div class="footer text-center" style="bottom: 0px;">
+  <div class="footer text-center" style="bottom: 0px;" *ngIf="isPasswordFirst">
     <div class="bottom-arrow-scroll" id="bottom-scroller">
       <button mat-icon-button (click)="goBottom()">
         <mat-icon>keyboard_arrow_down</mat-icon>
@@ -48,7 +50,7 @@
     </div>
 
     <div *ngIf="!ready" style="padding-bottom: 23px">
-      <button mat-fab (click)="sddNewFactor()">
+      <button #dialogButton mat-fab (click)="sddNewFactor()" color="primary">
         <mat-icon>add</mat-icon>
       </button>
     </div>

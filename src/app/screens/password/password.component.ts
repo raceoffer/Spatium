@@ -1,4 +1,4 @@
-import { OnInit, Component } from '@angular/core';
+import {OnInit, Component, Input, Output, EventEmitter} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 
@@ -9,6 +9,8 @@ import { AuthService, FactorType } from '../../services/auth.service';
   styleUrls: ['./password.component.css']
 })
 export class PasswordComponent implements OnInit {
+  @Output() isPasswordChanged: EventEmitter<any> = new EventEmitter<any>();
+
   stContinue = 'Continue';
   stPassword = 'Password';
 
@@ -39,6 +41,10 @@ export class PasswordComponent implements OnInit {
   async goNext() {
     if (this.password !== '') {
       switch (this.next) {
+        case null:
+          const isPassword = this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          this.isPasswordChanged.emit(isPassword);
+          break;
         case 'auth':
           this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/auth']);

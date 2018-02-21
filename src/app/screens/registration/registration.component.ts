@@ -39,6 +39,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   factors = [];
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
 
   constructor(
     public  dialog: MatDialog,
@@ -99,15 +100,19 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
 
   goBottom() {
     const container = $('#factor-container');
-    const height = document.getElementById("factor-container").scrollHeight;
+    const height = document.getElementById('factor-container').scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
   addNewFactor() {
     this.authSevice.password = this.password;
-    this.dialog.open(DialogFactorsComponent, {
+    const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { back: 'registration', next: 'registration' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
     });
   }
 

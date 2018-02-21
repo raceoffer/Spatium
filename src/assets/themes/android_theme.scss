@@ -17,20 +17,20 @@ $mat-custom: (
   A400: #f5f5f5,
   A700: #f5f5f5,
   contrast: (
-    50: #2277ba,
-    100: #2277ba,
-    200: #2277ba,
-    300: #2277ba,
-    400: #2277ba,
-    500: #2277ba,
-    600: #2277ba,
-    700: #2277ba,
-    800: #2277ba,
-    900: #2277ba,
-    A100: #2277ba,
-    A200: #2277ba,
-    A400: #2277ba,
-    A700: #2277ba,
+    50: #E4EFF7,
+    100: #BDD6EA,
+    200: #91BBDD,
+    300:  #64A0CF,
+    400:  #438BC4,
+    500:#2277BA,
+    600: #1E6FB3,
+    700: #1964AB,
+    800: #145AA3,
+    900: #0C4794,
+    A100: #C3DAFF,
+    A200: #90BBFF,
+    A400: #5D9CFF,
+    A700: #438CFF,
   )
 );
 
@@ -67,7 +67,7 @@ $mat-custom-inverse: (
   )
 );
 
-$my-app-primary: mat-palette($mat-custom);//'#2277ba';
+$my-app-primary: mat-palette($mat-custom, 500);//'#2277ba';
 $my-app-accent:  mat-palette($mat-custom-inverse, 500);//$mat-teal, 500, 900, A100);
 $my-app-warn:    mat-palette($mat-deep-orange);
 

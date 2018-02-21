@@ -249,7 +249,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         break;
       case 'factornode':
         if (this.isAuth) {
-          this.authService.addFactor(FactorType.QR, Utils.packLogin(this._nfc));
+          this.authService.addFactor(FactorType.NFC, Utils.packLogin(this._nfc));
         } else {
           this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         }

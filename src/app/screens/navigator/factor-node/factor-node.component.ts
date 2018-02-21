@@ -32,6 +32,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   factors = [];
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
 
   constructor(
     public  dialog: MatDialog,
@@ -83,15 +84,19 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
 
   goBottom() {
     const container = $('#factor-container');
-    const height = document.getElementById("factor-container").scrollHeight;
+    const height = document.getElementById('factor-container').scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
   addNewFactor() {
     const isFirst = this.factors.length === 0;
-    this.dialog.open(DialogFactorsComponent, {
+    const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { back: 'factornode', next: 'factornode', isFirst: isFirst }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
     });
   }
 
