@@ -1,14 +1,14 @@
-import { CurrencyWallet, HistoryEntry, Status, TransactionType } from '../currencywallet';
+import { CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
-import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-export class EthereumWallet extends CurrencyWallet {
-  private walletDB: any = null;
-  private watchingWallet: any = null;
-  private provider: any = null;
-  private routineTimer: any = null;
+declare const EthereumWallet: any;
+declare const Currency: any;
+
+export class EthereumCurrencyWallet extends CurrencyWallet {
+  private ethereumWallet: any = null;
+  private currencyCoin: any = null;
 
   constructor(
     network: string,
@@ -19,53 +19,67 @@ export class EthereumWallet extends CurrencyWallet {
     ngZone: NgZone
   ) {
     super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+
+    this.currencyCoin = Currency.get(Currency.ETH);
   }
 
   public async reset() {
     await super.reset();
 
-    if (this.routineTimer) {
-      clearInterval(this.routineTimer);
-    }
+    this.ethereumWallet = null;
+  }
 
-    this.walletDB = null;
-    this.watchingWallet = null;
-    this.provider = null;
+  public toInternal(amount: number): string {
+    return this.ethereumWallet.toWei(amount.toString(), 'ether');
+  }
+
+  public fromInternal(amount: string): number {
+    return Number(this.ethereumWallet.fromWei(amount, 'ether'));
+  }
+
+  public fromJSON(tx) {
+    return this.currencyCoin.fromJSON(tx);
   }
 
   public async finishSync(data) {
     await super.finishSync(data);
 
-    // this.address.next(this.compoundKey.getCompoundKeyAddress('base58'));
+    this.ethereumWallet = await new EthereumWallet({
+      infuraToken: 'DKG18gIcGSFXCxcpvkBm',
+      address: this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()),
+      network: this.network
+    }).load();
 
-    // this.watchingWallet.on('balance', (balance) => this.ngZone.run(async () => {
-    //   this.balance.next(balance);
-    //   this.transactions.next(await this.listTransactionHistory());
-    // }));
+    this.address.next(this.ethereumWallet.address);
 
-    // this.watchingWallet.on('transaction', (transaction) => this.ngZone.run(async () => {
-    //   this.transactions.next(await this.listTransactionHistory());
-    // }));
+    this.ethereumWallet.on('balance', (balance) => this.ngZone.run(async () => {
+      this.balance.next({
+        confirmed: this.fromInternal(balance),
+        unconfirmed: this.fromInternal(balance)
+      });
+    }));
 
-    // this.balance.next(await this.watchingWallet.getBalance());
-
-    // this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(() => {});
-    // clearInterval(this.routineTimer);
-    // this.routineTimer = setInterval(() => {
-    //   this.provider.pullTransactions(this.watchingWallet.getAddress('base58')).catch(() => {});
-    // }, 20000);
-
-    // End: configuring a provider
+    const initialBalance = await this.ethereumWallet.getBalance();
+    this.balance.next({
+      confirmed: this.fromInternal(initialBalance),
+      unconfirmed: this.fromInternal(initialBalance)
+    });
 
     this.status.next(Status.Ready);
   }
 
   public async createTransaction(address, value) {
-    const transaction = null;
+    const transaction = this.currencyCoin.createTransaction({
+      network: this.network
+    });
 
-    // BitcoinTransaction.fromOptions({
-    //   network: this.network
-    // });
+    await transaction.prepare({
+      wallet: this.ethereumWallet,
+      from: this.ethereumWallet.address,
+      to: address,
+      value: this.toInternal(value),
+      gasPrice: this.ethereumWallet.toWei('5', 'gwei')
+    });
 
     return transaction;
   }
@@ -75,6 +89,9 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async pushTransaction() {
-    return;
+    if (this.signSession.transaction) {
+      const raw = this.signSession.transaction.toRaw();
+      await this.ethereumWallet.sendSignedTransaction(raw);
+    }
   }
 }

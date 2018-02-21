@@ -1,7 +1,7 @@
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button [routerLink]="['/navigator', { outlets: { 'navigator': ['currency', coin] } }]">
+      <button mat-icon-button (click)="onBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{ titile }}</span>

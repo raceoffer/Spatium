@@ -1,5 +1,5 @@
 import { OnInit, Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { WalletService } from '../../../services/wallet.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -64,7 +64,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   constructor(
     private readonly walletService: WalletService,
     private readonly notification: NotificationService,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) { }
 
   ngOnInit() {
@@ -85,8 +86,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }));
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.unconfirmed));
-        this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => bcoin.amount.btc(balance.confirmed));
+        this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
+        this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
         this.balanceUsd = this.balanceBtcUnconfirmed.map(balance => balance * this.rateBtcUsd);
 
         this.validatorObserver = combineLatest(
@@ -117,6 +118,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.amount.setValue(0);
   }
 
   ngOnDestroy() {
@@ -124,9 +127,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
+  async onBack() {
+    if (this.phase.getValue() === Phase.Confirmation) {
+      await this.currencyWallet.rejectTransaction();
+    }
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.coin] } }]);
+  }
+
   // Pressed start signature
   async startSigning() {
-    const tx = await this.currencyWallet.createTransaction(this.receiver.value, bcoin.amount.fromBTC(this.amount.value).value);
+    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value);
     if (tx) {
       this.phase.next(Phase.Confirmation);
       await this.currencyWallet.requestTransactionVerify(tx);

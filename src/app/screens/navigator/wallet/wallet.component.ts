@@ -47,7 +47,7 @@ export class WalletComponent {
     }];
 
   public tiles = [
-    {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum'},
+    {title: 'Ethereum', cols: 2, rows: 2, logo: 'ethereum', coin: Coin.ETH},
     {title: 'Bitcoin', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Cash', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Litecoin', cols: 1, rows: 1, logo: 'litecoin'},
