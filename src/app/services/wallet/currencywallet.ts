@@ -8,7 +8,6 @@ import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
-declare const bcoin: any;
 declare const CompoundKey: any;
 
 export enum Status {
@@ -31,7 +30,6 @@ export class HistoryEntry {
       json.from,
       json.to,
       json.amount,
-      bcoin.amount.btc(json.amount),
       json.confirmed,
       json.time
     );
@@ -42,7 +40,6 @@ export class HistoryEntry {
     public from: string,
     public to: string,
     public amount: number,
-    public formattedAmount: number,
     public confirmed: boolean,
     public time: number
   ) {}
@@ -90,6 +87,18 @@ export class CurrencyWallet {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
   }
 
+  public toInternal(amount: number): string {
+    return '';
+  }
+
+  public fromInternal(amount: string): number {
+    return 0;
+  }
+
+  public fromJSON(ignored) {
+    return null;
+  }
+
   public sync() {
     if (this.status.getValue() === Status.Synchronizing) {
       LoggerService.log('Sync in progress', {});
@@ -97,7 +106,7 @@ export class CurrencyWallet {
     }
 
     this.compoundKey = new CompoundKey({
-      localPrivateKeyring: CompoundKey.keyringFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
+      localPrivateKey: CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
     });
 
     let prover = null;
@@ -185,6 +194,9 @@ export class CurrencyWallet {
   }
 
   public async requestTransactionVerify(transaction) {
+    console.log(transaction);
+    console.log(transaction.toJSON());
+
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
       content: {

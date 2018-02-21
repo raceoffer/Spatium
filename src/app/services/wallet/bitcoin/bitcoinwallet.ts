@@ -4,6 +4,7 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
+declare const Currency: any;
 declare const bcoin: any;
 declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
@@ -14,6 +15,7 @@ export class BitcoinWallet extends CurrencyWallet {
   private watchingWallet: any = null;
   private provider: any = null;
   private routineTimer: any = null;
+  private currencyCoin: any = null;
 
   constructor(
     network: string,
@@ -24,6 +26,7 @@ export class BitcoinWallet extends CurrencyWallet {
     ngZone: NgZone
   ) {
     super(network, keychain, Coin.BTC, account, messageSubject, bt, ngZone);
+    this.currencyCoin = Currency.get(Currency.BTC);
   }
 
   public async reset() {
@@ -38,6 +41,18 @@ export class BitcoinWallet extends CurrencyWallet {
     this.provider = null;
   }
 
+  public toInternal(amount: number): string {
+    return bcoin.amount.fromBTC(amount).value;
+  }
+
+  public fromInternal(amount: string): number {
+    return Number(bcoin.amount.btc(amount));
+  }
+
+  public fromJSON(tx) {
+    return this.currencyCoin.fromJSON(tx);
+  }
+
   public async finishSync(data) {
     await super.finishSync(data);
 
@@ -46,7 +61,7 @@ export class BitcoinWallet extends CurrencyWallet {
     });
 
     try {
-      this.address.next(this.compoundKey.getCompoundKeyAddress('base58'));
+      this.address.next(this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()));
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
@@ -60,8 +75,8 @@ export class BitcoinWallet extends CurrencyWallet {
     try {
       this.watchingWallet = await new WatchingWallet({
         accounts: [{
-          name: this.compoundKey.getCompoundKeyAddress('base58'),
-          key: this.compoundKey.compoundPublicKeyring
+          name: this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()),
+          key: bcoin.keyring.fromPublic(Buffer.from(this.compoundKey.getCompoundPublicKey().encode(true, 'array')))
         }]
       }).load(this.walletDB);
     } catch (e) {
@@ -69,7 +84,10 @@ export class BitcoinWallet extends CurrencyWallet {
     }
 
     this.watchingWallet.on('balance', (balance) => this.ngZone.run(async () => {
-      this.balance.next(balance);
+      this.balance.next({
+        confirmed: this.fromInternal(balance.confirmed),
+        unconfirmed: this.fromInternal(balance.unconfirmed)
+      });
       this.transactions.next(await this.listTransactionHistory());
     }));
 
@@ -78,7 +96,11 @@ export class BitcoinWallet extends CurrencyWallet {
     }));
 
     try {
-      this.balance.next(await this.watchingWallet.getBalance());
+      const balance = await this.watchingWallet.getBalance();
+      this.balance.next({
+        confirmed: this.fromInternal(balance.confirmed),
+        unconfirmed: this.fromInternal(balance.unconfirmed)
+      });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get the balance', e);
     }
@@ -118,12 +140,14 @@ export class BitcoinWallet extends CurrencyWallet {
       network: this.network
     });
 
+    const satoshis = Number(this.toInternal(value));
+
     /// Fill inputs and calculate script hashes
     try {
       await transaction.prepare({
         wallet: this.watchingWallet,
         address: address,
-        value: value
+        value: satoshis
       });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to prepare transaction', e);
@@ -158,7 +182,7 @@ export class BitcoinWallet extends CurrencyWallet {
           type: TransactionType.Out,
           from: this.watchingWallet.getAddress('base58'),
           to: output ? output.address : null,
-          amount: output ? output.value : 0,
+          amount: this.fromInternal(output ? output.value : 0),
           confirmed: record.meta !== null,
           time: record.meta == null ? null : record.meta.time
         });
@@ -172,7 +196,7 @@ export class BitcoinWallet extends CurrencyWallet {
           type: TransactionType.In,
           from: inputs[0].address,
           to: this.watchingWallet.getAddress('base58'),
-          amount: value,
+          amount: this.fromInternal(value),
           confirmed: record.meta !== null,
           time: record.meta == null ? null : record.meta.time
         });

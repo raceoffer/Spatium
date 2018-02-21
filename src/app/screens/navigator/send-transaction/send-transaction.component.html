@@ -1,7 +1,7 @@
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button [routerLink]="['/navigator', { outlets: { 'navigator': ['currency', coin] } }]">
+      <button mat-icon-button (click)="onBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{ titile }}</span>
@@ -60,7 +60,7 @@
         <span class="label" style="margin-left: 19px;">USD</span>
         <div class="field right">
           <span>
-            <input matInput [value]="amountUsd | async" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+            <input matInput [value]="(amountUsd | async) || 0" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                  step="0.01" disabled>
           </span>
         </div>

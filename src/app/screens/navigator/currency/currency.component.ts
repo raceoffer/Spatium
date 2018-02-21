@@ -39,7 +39,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  private coin: Coin = null
+  private coin: Coin = null;
 
   private static compareTransactions(a, b) {
     // First unconfirmed transactions
@@ -96,8 +96,8 @@ export class CurrencyComponent implements OnInit, OnDestroy {
         this.currencyWallet = this.wallet.currencyWallets.get(this.coin);
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => Number(bcoin.amount.btc(balance.unconfirmed)));
-        this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => Number(bcoin.amount.btc(balance.confirmed)));
+        this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
+        this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
         this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * this.rateBtcUsd);
         this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * this.rateBtcUsd);
         this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));

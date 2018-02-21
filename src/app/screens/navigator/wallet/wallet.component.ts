@@ -50,7 +50,7 @@ export class WalletComponent {
   public tiles = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
-    {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum'},
+    {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
     {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin'},
     {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},

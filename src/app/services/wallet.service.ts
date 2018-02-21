@@ -14,10 +14,9 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
+import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 
 declare const bcoin: any;
-declare const BitcoinTransaction: any;
-declare const BitcoinCashTransaction: any;
 
 @Injectable()
 export class WalletService {
@@ -62,6 +61,17 @@ export class WalletService {
     this.currencyWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
+        this.network,
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone
+      ));
+
+    this.currencyWallets.set(
+      Coin.ETH,
+      new EthereumCurrencyWallet(
         this.network,
         this.keychain,
         1,
@@ -125,16 +135,8 @@ export class WalletService {
       .filter(object => object.type === 'verifyTransaction')
       .map(object => object.content)
       .subscribe(async content => {
-        switch (content.coin) {
-          case Coin.BTC:
-            return await this.currencyWallets.get(Coin.BTC).startTransactionVerify(
-              BitcoinTransaction.fromJSON(content.tx)
-            );
-          case Coin.BCH:
-            return await this.currencyWallets.get(Coin.BCH).startTransactionVerify(
-              BitcoinCashTransaction.fromJSON(content.tx)
-            );
-        }
+        const wallet = this.currencyWallets.get(content.coin);
+        return await wallet.startTransactionVerify(wallet.fromJSON(content.tx));
       });
   }
 

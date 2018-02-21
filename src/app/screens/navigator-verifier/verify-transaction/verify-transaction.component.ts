@@ -62,6 +62,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(
         currencyWallet.verifyEvent.subscribe(async (transaction) => {
+          console.log(transaction);
           this.currentCoin = coin;
 
           const outputs = transaction.totalOutputs();
@@ -73,7 +74,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           }
 
           this.address = outputs[0].address;
-          this.btc = bcoin.amount.btc(outputs[0].value);
+          this.btc = currencyWallet.fromInternal(outputs[0].value);
           this.usd = this.btc * this.rateBtcUsd;
           this.showTransaction = true;
 
