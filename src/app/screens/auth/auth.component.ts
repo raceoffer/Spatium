@@ -1,10 +1,10 @@
 import {
   Component, AfterViewInit, ChangeDetectorRef, OnInit, ElementRef,
-  ViewChild, trigger, transition, style, animate, sequence
+  ViewChild, trigger, transition, style, animate, sequence, AfterViewChecked
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { AuthService } from '../../services/auth.service';
+import {AuthService, FactorType} from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import {KeyChainService} from '../../services/keychain.service';
 import * as $ from 'jquery';
@@ -34,17 +34,22 @@ export class AuthComponent implements OnInit, AfterViewInit {
   factors = [];
 
   ready = false;
+  isLoginAuth = false;
+  isPasswordFirst = false;
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
 
   constructor(
     public dialog: MatDialog,
     private readonly router: Router,
-    private readonly authSevice: AuthService,
+    private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService
-  ) { }
+  ) {
+    this.dialog = dialog;
+  }
 
   ngOnInit() {
     $('#factor-container').scroll(function () {
@@ -60,6 +65,13 @@ export class AuthComponent implements OnInit, AfterViewInit {
           $('#bottom-scroller').fadeOut();
         }
     });
+
+    this.isLoginAuth = this.authService.isLoginAuth;
+    this.isPasswordFirst = this.authService.isPasswordFirst;
+  }
+
+  isPasswordChanged(val) {
+    this.isPasswordFirst = val;
   }
 
   goTop() {
@@ -69,17 +81,21 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
   goBottom() {
     const container = $('#factor-container');
-    const height = document.getElementById("factor-container").scrollHeight;
+    const height = document.getElementById('factor-container').scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
   ngAfterViewInit() {
-    this.username = this.authSevice.login;
-    this.factors = this.authSevice.factors;
-    this.ready = this.authSevice.decryptedSeed !== null;
+    this.username = this.authService.login;
+    this.factors = this.authService.factors;
+    this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
     this.checkOverflow(this.factorContainer);
     this.goBottom();
+
+    if (!this.isLoginAuth) {
+      this.sddNewFactor();
+    }
   }
 
   checkOverflow (element) {
@@ -91,16 +107,20 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   sddNewFactor(): void {
-    this.dialog.open(DialogFactorsComponent, {
+    const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { back: 'auth', next: 'auth' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
     });
   }
 
   removeFactor(factor): void {
-    this.authSevice.rmAuthFactor(factor);
-    this.factors = this.authSevice.factors;
-    this.ready = this.authSevice.decryptedSeed !== null;
+    this.isPasswordFirst = this.authService.rmAuthFactor(factor);
+    this.factors = this.authService.factors;
+    this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
 
     this.sleep(650).then(() => {
@@ -109,13 +129,13 @@ export class AuthComponent implements OnInit, AfterViewInit {
   }
 
   async letLogin() {
-    if (!this.authSevice.decryptedSeed) {
+    if (!this.authService.decryptedSeed) {
       this.notification.show('Authorization error');
       return;
     }
 
-    this.keyChain.setSeed(this.authSevice.decryptedSeed);
-    this.authSevice.reset();
+    this.keyChain.setSeed(this.authService.decryptedSeed);
+    this.authService.reset();
 
     await this.router.navigate(['/waiting']);
   }

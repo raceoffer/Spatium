@@ -9,8 +9,8 @@ declare const nfc: any;
 export class AuthService {
   login: string;
   password: string;
-  qr: string;
-  nfc: string;
+  isLoginAuth: boolean;
+  isPasswordFirst: boolean;
 
   factors: Factor[] = [];
   available: AvailableFactor[] = [];
@@ -121,9 +121,14 @@ export class AuthService {
 
     if (success) {
       this.factors.push(newFactor);
+      if (this.factors.length === 1 && this.isLoginAuth) {
+        this.isPasswordFirst = true;
+      }
     } else {
       this.notification.show(this.stFactorError + newFactor.name);
     }
+
+    return this.isPasswordFirst;
   }
 
   rmFactor(factor) {
@@ -145,6 +150,12 @@ export class AuthService {
       this.decryptedSeed.fill(0);
       this.decryptedSeed = null;
     }
+
+    if (this.factors.length === 0 && this.isLoginAuth) {
+      this.isPasswordFirst = false;
+    }
+
+    return this.isPasswordFirst;
   }
 
   clearFactors() {

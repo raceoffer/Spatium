@@ -129,6 +129,14 @@ export class LoginParentComponent  implements OnInit {
   }
 
   async letLogin() {
+    if (this.content === this.contentType.Login) {
+      this.authService.isLoginAuth = true;
+      this.authService.isPasswordFirst = false;
+    } else {
+      this.authService.isLoginAuth = false;
+      this.authService.isPasswordFirst = true;
+    }
+
     if (this.buttonState === State.Exists) {
       this.authService.login = this.input;
       this.authService.clearFactors();
