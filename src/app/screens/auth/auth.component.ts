@@ -72,6 +72,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
   isPasswordChanged(val) {
     this.isPasswordFirst = val;
+    this.ready = this.authService.decryptedSeed !== null;
   }
 
   goTop() {
