@@ -2,9 +2,16 @@
 
   <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
 
-    <div class="spatium-textfield entry bottom32">
+    <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName" [autofocus]>
+
+      <button matSuffix mat-icon-button (click)="generateNewLogin()" style="position: absolute; right: 0px;">
+        <mat-icon style="opacity: 0.5;" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
+        <mat-icon *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
+      </button>
     </div>
+
   </form>
 
   <router-outlet name="login"></router-outlet>
