@@ -118,8 +118,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    this.amount.setValue(0);
   }
 
   ngOnDestroy() {

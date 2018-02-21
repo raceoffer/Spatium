@@ -17,8 +17,6 @@ import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 
 declare const bcoin: any;
-declare const BitcoinTransaction: any;
-declare const BitcoinCashTransaction: any;
 
 @Injectable()
 export class WalletService {
