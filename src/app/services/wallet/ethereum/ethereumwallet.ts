@@ -59,7 +59,10 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
       });
     }));
 
-    const initialBalance = await this.ethereumWallet.getBalance();
+    let initialBalance = '0';
+    try {
+      initialBalance = await this.ethereumWallet.getBalance();
+    } catch (ignored) {}
     this.balance.next({
       confirmed: this.fromInternal(initialBalance),
       unconfirmed: this.fromInternal(initialBalance)
