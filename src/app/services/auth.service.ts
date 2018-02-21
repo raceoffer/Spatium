@@ -9,7 +9,7 @@ declare const nfc: any;
 export class AuthService {
   login: string;
   password: string;
-  isLoginAuth: boolean;
+  loginType: LoginType;
   isPasswordFirst: boolean;
 
   factors: Factor[] = [];
@@ -121,7 +121,7 @@ export class AuthService {
 
     if (success) {
       this.factors.push(newFactor);
-      if (this.factors.length === 1 && this.isLoginAuth) {
+      if (this.factors.length === 1 && this.loginType === LoginType.LOGIN) {
         this.isPasswordFirst = true;
       }
     } else {
@@ -151,7 +151,7 @@ export class AuthService {
       this.decryptedSeed = null;
     }
 
-    if (this.factors.length === 0 && this.isLoginAuth) {
+    if (this.factors.length === 0 && this.loginType === LoginType.LOGIN) {
       this.isPasswordFirst = false;
     }
 
@@ -182,6 +182,12 @@ export class AuthService {
     return text;
   }
 }
+
+  export enum LoginType {
+    LOGIN = 0,
+    QR = 1,
+    NFC = 2
+  }
 
   export enum FactorType {
     PIN,
