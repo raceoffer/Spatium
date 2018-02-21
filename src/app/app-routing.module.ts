@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
-import { BackupComponent } from './screens/backup/backup.component';
 import { PincodeComponent } from './screens/pincode/pincode.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { PasswordComponent } from './screens/password/password.component';
@@ -32,7 +31,6 @@ const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
   { path: 'auth', component: AuthComponent },
-  { path: 'backup/:back', component: BackupComponent},
   { path: 'waiting', component: WaitingComponent },
   { path: 'verify-waiting', component: VerifyWaitingComponent },
   { path: 'login', component: LoginParentComponent},
@@ -55,7 +53,6 @@ const appRoutes: Routes = [
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
-    { path: 'backup/:back', component: BackupComponent, outlet: 'navigator' },
     { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
     { path: 'factor', component: FactorParentComponent, outlet: 'navigator', children: [
       { path: 'pincode', component: PincodeComponent, outlet: 'factor' },

@@ -6,8 +6,10 @@ import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { KeyChainService, Coin } from '../../services/keychain.service';
+import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
+import { DDSService } from '../../services/dds.service';
+import {NotificationService} from "../../services/notification.service";
 
 declare const Utils: any;
 
@@ -44,8 +46,10 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   constructor(
     public  dialog: MatDialog,
     private readonly router: Router,
+    private readonly dds: DDSService,
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly notification: NotificationService,
     private readonly authSevice: AuthService
   ) {
     this.changeDetectorRef = changeDetectorRef;
@@ -149,10 +153,15 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.factors = [];
     this.password = '';
 
-    this.authSevice.encryptedTreeData = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
-    this.authSevice.ethereumSecret = this.keychain.getCoinSecret(Coin.ETH, 0);
+    const id = Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
+    const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
 
-    await this.router.navigate(['/backup', 'registration']);
+    try {
+      await this.dds.sponsorStore(id, data);
+      await this.router.navigate(['/reg-success']);
+    } catch (ignored) {
+      this.notification.show('Failed to upload the secret');
+    }
   }
 
   async sleep(ms: number) {
