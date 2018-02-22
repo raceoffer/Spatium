@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import {AuthService, FactorType} from '../../services/auth.service';
+import {AuthService, FactorIconAsset, FactorType, LoginType} from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import {KeyChainService} from '../../services/keychain.service';
 import * as $ from 'jquery';
@@ -34,8 +34,10 @@ export class AuthComponent implements OnInit, AfterViewInit {
   factors = [];
 
   ready = false;
-  isLoginAuth = false;
+  loginType = LoginType.LOGIN;
   isPasswordFirst = false;
+
+  icon_qr = '';
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
@@ -66,8 +68,9 @@ export class AuthComponent implements OnInit, AfterViewInit {
         }
     });
 
-    this.isLoginAuth = this.authService.isLoginAuth;
+    this.loginType = this.authService.loginType;
     this.isPasswordFirst = this.authService.isPasswordFirst;
+    this.icon_qr = FactorIconAsset.QR;
   }
 
   isPasswordChanged(val) {
@@ -94,7 +97,7 @@ export class AuthComponent implements OnInit, AfterViewInit {
     this.checkOverflow(this.factorContainer);
     this.goBottom();
 
-    if (!this.isLoginAuth) {
+    if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
       this.sddNewFactor();
     }
   }
