@@ -12,7 +12,7 @@
   <div class="full-width field" style="margin-bottom: 13px;">
     <mat-select [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
       <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} BTC)
+        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} {{currencySymbol}})
       </mat-option>
     </mat-select>
   </div>
@@ -20,7 +20,7 @@
   <table class="full-width text-center two-columns">
     <tr>
       <td>
-          <span class="label" style="margin-left: 5px;">BTC</span>
+          <span class="label" style="margin-left: 5px;">{{currencySymbol}}</span>
           <div class="field disable">
             <span>
               {{ balanceBtcUnconfirmed | async }}
@@ -48,7 +48,7 @@
   <table class="full-width text-center two-columns">
     <tr>
       <td>
-        <span class="label" style="margin-left: 5px;">BTC</span>
+        <span class="label" style="margin-left: 5px;">{{currencySymbol}}</span>
         <div class="field">
           <span>
             <input matInput [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
@@ -67,12 +67,15 @@
     </tr>
   </table>
 
-  <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 30px">
+  <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 0px">
 
-    <span style="font-family: 'Roboto-Medium'; font-size: 15px"
-          *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
-    <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
+    <div style=" bottom: 23px; position: relative;
+    width: 100%;">
+      <span style="font-family: 'Roboto-Medium'; font-size: 15px"
+            *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
+      <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
+                        *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
+    </div>
 
     <span *ngIf="(phase | async) === phaseType.Sending"
           style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}

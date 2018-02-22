@@ -44,6 +44,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   }];
 
   public currentCoin: Coin = null;
+  public currencySymbol = '';
   public currencyWallets = this.wallet.currencyWallets;
 
   private subscriptions = [];
@@ -64,6 +65,18 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
         currencyWallet.verifyEvent.subscribe(async (transaction) => {
           console.log(transaction);
           this.currentCoin = coin;
+
+          switch (this.currentCoin) {
+            case Coin.BTC:
+              this.currencySymbol = 'BTC';
+              break;
+            case Coin.BCH:
+              this.currencySymbol = 'BCH';
+              break;
+            case Coin.ETH:
+              this.currencySymbol = 'ETH';
+              break;
+          }
 
           const outputs = transaction.totalOutputs();
 

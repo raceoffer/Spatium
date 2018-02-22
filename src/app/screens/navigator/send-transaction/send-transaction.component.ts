@@ -48,6 +48,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   rateBtcUsd = 15000;
 
   coin: Coin = null;
+  public currencySymbol = '';
 
   public currencyWallet: CurrencyWallet;
 
@@ -73,6 +74,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.route.params.subscribe((params: Params) => {
         this.coin = Number(params['coin']) as Coin;
+
+        switch (this.coin) {
+          case Coin.BTC:
+            this.currencySymbol = 'BTC';
+            break;
+          case Coin.BCH:
+            this.currencySymbol = 'BCH';
+            break;
+          case Coin.ETH:
+            this.currencySymbol = 'ETH';
+            break;
+        }
 
         this.currencyWallet = this.walletService.currencyWallets.get(this.coin);
 
