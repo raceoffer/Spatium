@@ -18,7 +18,7 @@
 
     <div class="transaction-container currency-component" *ngIf="showTransaction">
       <span class="full-width label full-width-label">Recipient address</span>
-      <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
+      <mat-form-field class="full-width field disable" color="accent" style="margin-bottom: 13px;">
         <input matInput [(ngModel)]="address" disabled>
       </mat-form-field>
 
@@ -26,7 +26,7 @@
         <tr>
           <td>
               <span class="label" style="margin-left: 5px;">{{ currencySymbol }}</span>
-              <div class="field">
+              <div class="field disable">
                 <span>
                   {{ btc }}
                 </span>
@@ -34,7 +34,7 @@
             </td>
             <td>
               <span class="label" style="margin-left: 19px;">USD</span>
-              <div class="field right">
+              <div class="field right disable">
                 <span>
                   {{ usd }}
                 </span>
