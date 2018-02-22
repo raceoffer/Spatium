@@ -22,7 +22,7 @@
       <tr>
         <td fxLayout="column" fxLayoutAlign="start center">
           <span class="label" style="margin-left: 5px;">{{ currencySymbol | async }}</span>
-          <div class="field">
+          <div class="field disable">
             <span>
               {{ balanceCurrencyUnconfirmed | async }}
             </span>
@@ -30,7 +30,7 @@
         </td>
         <td>
           <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
-          <div class="field right">
+          <div class="field right disable">
             <span>
               {{ balanceUsdUnconfirmed | async }}
             </span>
