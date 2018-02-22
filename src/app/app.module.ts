@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
   MatButtonModule,
@@ -30,7 +31,6 @@ import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
 import { ClipboardModule} from 'ngx-clipboard/dist';
-import { BackupComponent } from './screens/backup/backup.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
@@ -76,7 +76,6 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
     StartComponent,
     ConnectComponent,
     WaitingComponent,
-    BackupComponent,
     SendTransactionComponent,
     VerifyTransactionComponent,
     PincodeComponent,
@@ -108,6 +107,7 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
   ],
   imports: [
     FormsModule,
+    HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,
