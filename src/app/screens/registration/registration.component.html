@@ -2,7 +2,7 @@
   <div class="header text-center">
     <mat-toolbar color="primary">
       <mat-toolbar-row>
-        <button mat-icon-button routerLink="/login">
+        <button mat-icon-button (click)="onBack()">
           <mat-icon class="color-custom-dark">arrow_back</mat-icon>
         </button>
       </mat-toolbar-row>
@@ -24,7 +24,7 @@
       </div>
 
       <div class="spatium-textfield entry bottom32">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password">
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password" [disabled]="uploading">
       </div>
 
       <div class="top-arrow-scroll" id="top-scroller">
@@ -43,7 +43,7 @@
     <div class="text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
         <div style="margin-left: 50px;">
-          <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+          <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
             <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
           </button>
         </div>
@@ -64,18 +64,19 @@
       </div>
 
       <div class="margin-top-18" style="padding-bottom: 10px;" *ngIf="advancedMode">
-        <button #dialogButton color="accent" mat-fab (click)="addNewFactor()" type="button">
+        <button #dialogButton [disabled]="uploading" color="accent" mat-fab (click)="addNewFactor()" type="button">
           <mat-icon>add</mat-icon>
         </button>
       </div>
 
       <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
-        <button mat-icon-button type="button" style="float: right;" (click)="openAdvanced()">
+        <button mat-icon-button [disabled]="uploading" type="button" style="float: right;" (click)="openAdvanced()">
           <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
         </button>
       </div>
 
-      <button type="submit" mat-raised-button color="accent" (click)="signUp()" [disabled]="password.length < 1 || username.length < 1" class="width-button color" >{{ stRegistration }}</button>
+      <button type="submit" mat-raised-button color="accent" (click)="signUp()" [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{ stRegistration }}</button>
+      <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
     </div>
   </form>
 </div>

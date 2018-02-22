@@ -9,7 +9,9 @@ import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.compone
 import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
 import { DDSService } from '../../services/dds.service';
-import {NotificationService} from "../../services/notification.service";
+import { NotificationService } from '../../services/notification.service';
+import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/take';
 
 declare const Utils: any;
 
@@ -39,6 +41,10 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   advancedMode = false;
 
   factors = [];
+
+  uploading = false;
+
+  cancel = new Subject<boolean>();
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
@@ -82,7 +88,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-
     this.checkOverflow(this.factorContainer);
     this.goBottom();
 
@@ -135,32 +140,47 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.factorContainer.nativeElement.classList.add('content');
   }
 
+  async onBack() {
+    this.cancel.next(true);
+    await this.router.navigate(['/login']);
+  }
+
   async signUp() {
-    const factors = this.factors.map(factor => factor.toBuffer()).reverse();
-    factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
-    const tree = factors.reduce((rest, factor) => {
-      const node = {
-        factor: factor
-      };
-      if (rest) {
-        node['children'] = [ rest ];
-      }
-      return node;
-    }, null);
-
-    this.authSevice.clearFactors();
-    this.authSevice.password = '';
-    this.factors = [];
-    this.password = '';
-
-    const id = Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
-    const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
-
     try {
-      await this.dds.sponsorStore(id, data);
-      await this.router.navigate(['/reg-success']);
-    } catch (ignored) {
-      this.notification.show('Failed to upload the secret');
+      this.uploading = true;
+
+      const factors = this.factors.map(factor => factor.toBuffer()).reverse();
+      factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+      const tree = factors.reduce((rest, factor) => {
+        const node = {
+          factor: factor
+        };
+        if (rest) {
+          node['children'] = [rest];
+        }
+        return node;
+      }, null);
+
+      const id = Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
+      const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
+
+      try {
+        const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();
+        if (!success) {
+          return;
+        }
+
+        this.authSevice.clearFactors();
+        this.authSevice.password = '';
+        this.factors = [];
+        this.password = '';
+
+        await this.router.navigate(['/reg-success']);
+      } catch (ignored) {
+        this.notification.show('Failed to upload the secret');
+      }
+    } finally {
+      this.uploading = false;
     }
   }
 

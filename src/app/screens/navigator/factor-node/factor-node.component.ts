@@ -4,12 +4,13 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
-import { Coin, KeyChainService } from '../../../services/keychain.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import {DDSService} from "../../../services/dds.service";
-import {NotificationService} from "../../../services/notification.service";
+import { DDSService } from '../../../services/dds.service';
+import { NotificationService } from '../../../services/notification.service';
+import { Subject } from 'rxjs/Subject';
 
 declare const Utils: any;
 
@@ -32,6 +33,10 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
 
   title = 'Adding authentication path';
   factors = [];
+
+  uploading = false;
+
+  cancel = new Subject<boolean>();
 
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
@@ -66,7 +71,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-
     this.checkOverflow(this.factorContainer);
     this.goBottom();
 
@@ -123,37 +127,48 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
   }
 
   async onSaveClicked() {
-    const idFactor = this.factors[0].value;
-    const factors = this.factors.slice(1).map(factor => factor.toBuffer()).reverse();
-    const tree = factors.reduce((rest, factor) => {
-      const node = {
-        factor: factor
-      };
-      if (rest) {
-        node['children'] = [ rest ];
-      }
-      return node;
-    }, null);
-
-    this.authSevice.clearFactors();
-    this.authSevice.password = '';
-    this.factors = [];
-
-    const login = Utils.tryUnpackLogin(idFactor).toString('utf-8');
-
-    const id = Utils.sha256(Buffer.from(login, 'utf-8')).toString('hex');
-    const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
-
     try {
-      await this.dds.sponsorStore(id, data);
-      this.notification.show('Successfully uploaded the secret');
-      await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
-    } catch (ignored) {
-      this.notification.show('Failed to upload the secret');
+      this.uploading = true;
+
+      const idFactor = this.factors[0].value;
+      const factors = this.factors.slice(1).map(factor => factor.toBuffer()).reverse();
+      const tree = factors.reduce((rest, factor) => {
+        const node = {
+          factor: factor
+        };
+        if (rest) {
+          node['children'] = [rest];
+        }
+        return node;
+      }, null);
+
+      const login = Utils.tryUnpackLogin(idFactor).toString('utf-8');
+
+      const id = Utils.sha256(Buffer.from(login, 'utf-8')).toString('hex');
+      const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
+
+      try {
+        const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();
+        if (!success) {
+          return;
+        }
+
+        this.authSevice.clearFactors();
+        this.authSevice.password = '';
+        this.factors = [];
+
+        this.notification.show('Successfully uploaded the secret');
+        await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
+      } catch (ignored) {
+        this.notification.show('Failed to upload the secret');
+      }
+    } finally {
+      this.uploading = false;
     }
   }
 
   async onBackClick() {
+    this.cancel.next(true);
     await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
   }
 }
