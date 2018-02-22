@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="capital.spatium.wallet" version="1.1.1-gamma" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="capital.spatium.wallet" version="1.1.2-gamma" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Spatium</name>
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/replaceAndroidMainActivity.js" type="after_plugin_install" />

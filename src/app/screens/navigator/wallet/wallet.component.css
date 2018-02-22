@@ -64,3 +64,7 @@
   max-height: 50%;
   min-height: 50%;
 }
+
+.div-height {
+  height: 99.9%;
+}
