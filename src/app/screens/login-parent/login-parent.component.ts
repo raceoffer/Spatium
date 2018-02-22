@@ -1,6 +1,6 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import {AuthService, LoginType} from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
@@ -129,12 +129,22 @@ export class LoginParentComponent  implements OnInit {
   }
 
   async letLogin() {
-    if (this.content === this.contentType.Login) {
-      this.authService.isLoginAuth = true;
-      this.authService.isPasswordFirst = false;
-    } else {
-      this.authService.isLoginAuth = false;
-      this.authService.isPasswordFirst = true;
+    switch (this.content) {
+      case this.contentType.Login: {
+        this.authService.loginType = LoginType.LOGIN;
+        this.authService.isPasswordFirst = false;
+        break;
+      }
+      case this.contentType.NFC: {
+        this.authService.loginType = LoginType.NFC;
+        this.authService.isPasswordFirst = true;
+        break;
+      }
+      case this.contentType.QR: {
+        this.authService.loginType = LoginType.QR;
+        this.authService.isPasswordFirst = true;
+        break;
+      }
     }
 
     if (this.buttonState === State.Exists) {

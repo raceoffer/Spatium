@@ -14,8 +14,14 @@
       <span class="start-tagline">Secure your funds</span>
     </div>
 
-    <div class="margin-top-18 light">
+    <div class="margin-top-18 light" *ngIf="loginType == 0">
       {{ username }}
+    </div>
+    <div class="margin-top-18 light" style="display: inline-block;" *ngIf="loginType == 1">
+      <div class="{{icon_qr}}-mask"></div>
+    </div>
+    <div class="margin-top-18 light" *ngIf="loginType == 2">
+      <mat-icon color="accent"  matPrefix class="factor-icon-big">nfc</mat-icon>
     </div>
 
     <div class="top-arrow-scroll" id="top-scroller">
@@ -25,7 +31,7 @@
     </div>
   </div>
 
-  <app-password *ngIf="isLoginAuth && !isPasswordFirst" (isPasswordChanged)="isPasswordChanged($event)"></app-password>
+  <app-password *ngIf="loginType == 0 && !isPasswordFirst" (isPasswordChanged)="isPasswordChanged($event)"></app-password>
 
   <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
     <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
@@ -49,9 +55,9 @@
       </button>
     </div>
 
-    <div *ngIf="!ready" style="padding-bottom: 23px">
-      <button #dialogButton mat-fab (click)="sddNewFactor()" color="primary">
-        <mat-icon>add</mat-icon>
+    <div class="width-button-width" style="display: inline-block; padding-bottom: 23px" *ngIf="!ready">
+      <button #dialogButton mat-icon-button type="button" style="float: right;" (click)="sddNewFactor()">
+        <mat-icon style="opacity: 0.5;">add</mat-icon>
       </button>
     </div>
 
