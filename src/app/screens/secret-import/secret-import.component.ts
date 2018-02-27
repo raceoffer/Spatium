@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FactorIcon, FactorIconAsset } from '../../services/auth.service';
 
 declare const nfc: any;
 
