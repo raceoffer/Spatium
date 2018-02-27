@@ -695,10 +695,6 @@ input[type="password-pin"] {
   mask-size: contain;
 }
 
-.mat-radio-checked .mat-radio-label .mat-radio-label-content .qr-code-sizeless {
-  background: $bluish!important;
-}
-
 .qr-code-mask {
   background: $bluish;
   mask: url(../../assets/images/drawable/qr_code.svg) center;
