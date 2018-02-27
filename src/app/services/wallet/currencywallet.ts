@@ -179,6 +179,10 @@ export class CurrencyWallet {
     }
   }
 
+  public outputs(transaction) {
+    return transaction.totalOutputs();
+  }
+
   public async acceptTransaction() {
     if (this.signSession) {
       await this.signSession.submitChiphertexts();
@@ -194,8 +198,6 @@ export class CurrencyWallet {
   }
 
   public async requestTransactionVerify(transaction) {
-    console.log(transaction);
-    console.log(transaction.toJSON());
 
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
@@ -259,7 +261,7 @@ export class CurrencyWallet {
       this.rejectedEvent.next();
     });
 
-    this.signSession.sync().catch(() => {});
+    this.signSession.sync().catch((e) => { console.log(e); });
   }
 
   public async verifySignature() {

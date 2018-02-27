@@ -56,7 +56,7 @@ export class WalletComponent {
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos'},
+    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos', coin: Coin.EOS},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
 

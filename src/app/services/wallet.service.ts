@@ -15,6 +15,7 @@ import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
+import { ERC20CurrencyWallet } from "./wallet/ethereum/erc20wallet";
 
 declare const bcoin: any;
 
@@ -68,7 +69,6 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
-
     this.currencyWallets.set(
       Coin.ETH,
       new EthereumCurrencyWallet(
@@ -78,6 +78,18 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone
+      ));
+    this.currencyWallets.set(
+      Coin.EOS,
+      new ERC20CurrencyWallet(
+        this.network,
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone,
+        Coin.EOS,
+        '0x1014003937b6fcd21f1a27df897b5888bbb73b9f'
       ));
 
     this.status = combineLatest(

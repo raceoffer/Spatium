@@ -91,6 +91,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             this.currencyTitle.next('Ethereum');
             this.currencySymbol.next('ETH');
             break;
+          case Coin.EOS:
+            this.currencyTitle.next('EOS');
+            this.currencySymbol.next('EOS');
+            break;
         }
 
         this.currencyWallet = this.wallet.currencyWallets.get(this.coin);

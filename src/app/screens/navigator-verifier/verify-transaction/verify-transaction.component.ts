@@ -62,10 +62,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(
         currencyWallet.verifyEvent.subscribe(async (transaction) => {
-          console.log(transaction);
           this.currentCoin = coin;
 
-          const outputs = transaction.totalOutputs();
+          const outputs = currencyWallet.outputs(transaction);
 
           if (outputs.length < 1) {
             console.log('Received invalid transaction');
@@ -74,7 +73,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           }
 
           this.address = outputs[0].address;
-          this.btc = currencyWallet.fromInternal(outputs[0].value);
+          this.btc = currencyWallet.fromInternal(outputs[0].value.toString());
           this.usd = this.btc * this.rateBtcUsd;
           this.showTransaction = true;
 
