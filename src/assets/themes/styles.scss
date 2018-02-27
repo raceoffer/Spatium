@@ -685,6 +685,20 @@ input[type="password-pin"] {
   width: 30px !important;
 }
 
+.qr-code-sizeless {
+  background: $dark;
+  mask: url(../../assets/images/drawable/qr_code.svg) center;
+  -webkit-mask: url(../../assets/images/drawable/qr_code.svg) center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-size: contain;
+  mask-size: contain;
+}
+
+.mat-radio-checked .mat-radio-label .mat-radio-label-content .qr-code-sizeless {
+  background: $bluish!important;
+}
+
 .qr-code-mask {
   background: $bluish;
   mask: url(../../assets/images/drawable/qr_code.svg) center;
@@ -981,4 +995,13 @@ input[type="password-pin"] {
 
 .mat-option.mat-selected:not(.mat-option-multiple):not(.mat-option-disabled) {
   background: rgba(0, 0, 0, 0.04);
+}
+
+.mat-radio-label-content {
+  align-items: center;
+  display: inline-flex!important;
+}
+
+.mat-radio-checked {
+  color: $bluish;
 }
