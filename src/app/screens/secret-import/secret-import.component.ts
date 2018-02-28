@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
+declare const Utils: any;
 declare const nfc: any;
 
 enum Content {

@@ -21,11 +21,11 @@ import { CurrencyComponent } from './screens/navigator/currency/currency.compone
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
-import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import {SecretExportComponent} from './screens/navigator-verifier/secret-export/secret-export.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
@@ -38,7 +38,6 @@ const appRoutes: Routes = [
   { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factornode', component: FactorNodeComponent},
-  { path: 'secret-export', component: SecretExportComponent},
   { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [
     { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
@@ -65,6 +64,7 @@ const appRoutes: Routes = [
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator' },
+    { path: 'secret-export', component: SecretExportComponent, outlet: 'navigator' },
     { path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator' }
   ]},
   { path: 'delete-secret/:back', component: DeleteSecretComponent }

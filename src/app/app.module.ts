@@ -66,9 +66,9 @@ import { CurrencyComponent } from './screens/navigator/currency/currency.compone
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
-import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
 
 @NgModule({
   declarations: [

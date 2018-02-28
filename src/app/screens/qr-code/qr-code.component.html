@@ -41,7 +41,7 @@
 <div fxLayout="column" fxLayoutAlign="center center" class="box" *ngIf="isAuth || isExport">
   <div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
     <div class="qrcode" *ngIf="genericValue.length > 0">
-      <qr-code id="}" [value]="genericValue" [size]="200" [canvas]="true" [background]="'#f5f5f5'"></qr-code>
+      <qr-code id="qr" [value]="genericValue" [size]="200" [canvas]="true" [background]="'#f5f5f5'"></qr-code>
     </div>
 
     <div *ngIf="genericValue.length == 0">

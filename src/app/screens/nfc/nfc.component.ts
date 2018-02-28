@@ -4,6 +4,7 @@ import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import {FileService} from "../../services/file.service";
+import {KeyChainService} from "../../services/keychain.service";
 
 declare const nfc: any;
 declare const ndef: any;
@@ -41,6 +42,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
   @Input() isExport = false;
+  @Input() isImport = false;
 
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
@@ -51,6 +53,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
+    private readonly keyChainService: KeyChainService,
     private readonly fs: FileService,
     private readonly dds: DDSService,
     private readonly notification: NotificationService
@@ -194,11 +197,15 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
           await this.onSuccess();
         } else {
           const payload = Buffer.from(tag.ndefMessage[0].payload);
-          const login = Utils.tryUnpackLogin(payload);
+          let value = '';
+          if (this.isImport) {
+            value = Utils.tryUnpackSeed(payload);
+          } else {
+            value = Utils.tryUnpackLogin(payload);
+          }
+          console.log(value);
 
-          console.log(login);
-
-          this._nfc = login;
+          this._nfc = value;
 
           navigator.vibrate(100);
 
@@ -209,9 +216,9 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async writeSecret() {
-    this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
-    const bufferSeed = Buffer.from(this.authService.encryptedSeed, 'hex');
-    this.writeTag(bufferSeed, 'Secret is exported to NFC tag', 'Secret was not exported to NFC tag');
+    const encryptedSeed = this.keyChainService.getSeed();
+    const packSeed = Utils.packSeed(encryptedSeed);
+    this.writeTag(packSeed, 'Secret is exported to NFC tag', 'Secret was not exported to NFC tag');
   }
 
   async generateAndWrite() {

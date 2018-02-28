@@ -23,9 +23,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   public title = 'Awaiting confirmations';
   public navLinks = [{
     name: 'Export secret',
-    link: null,
+    link: ['/navigator-verifier', { outlets: { 'navigator': ['secret-export'] } }],
     isSelected: false,
-    isActive: false
+    isActive: true
   }, {
     name: 'Change PIN',
     link: null,

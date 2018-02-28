@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 declare const nfc: any;
 
@@ -36,7 +37,7 @@ export class SecretExportComponent implements OnInit {
 
   isNfcAvailable = true;
 
-  constructor() { }
+  constructor(private readonly router: Router) { }
 
   ngOnInit() {
     nfc.enabled(function () {}, function (e) {
@@ -46,6 +47,10 @@ export class SecretExportComponent implements OnInit {
         });
       }
     }.bind(this));
+  }
+
+  async onBack() {
+    await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
   }
 
   toggleContent(content) {
