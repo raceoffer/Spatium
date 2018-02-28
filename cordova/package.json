@@ -17,11 +17,13 @@
     "cordova-ios": "^4.5.4",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
+    "cordova-plugin-canvas2image": "git+https://github.com/devgeeks/Canvas2ImagePlugin.git",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-vibration": "^3.0.1",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-plugin-x-toast": "^2.6.0",
-    "phonegap-nfc": "^0.7.1"
+    "phonegap-nfc": "^0.7.1",
+    "org.devgeeks.Canvas2ImagePlugin": "https://github.com/devgeeks/Canvas2ImagePlugin.git"
   },
   "cordova": {
     "plugins": {
@@ -38,7 +40,8 @@
         "NFC_USAGE_DESCRIPTION": "Read NFC Tags"
       },
       "cordova-plugin-vibration": {},
-      "cordova-plugin-android-permissions": {}
+      "cordova-plugin-android-permissions": {},
+      "org.devgeeks.Canvas2ImagePlugin": {}
     },
     "platforms": [
       "ios",

@@ -42,6 +42,7 @@
         <preference name="loadUrlTimeoutValue" value="700000" />
         <custom-config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
         </custom-config-file>
     </platform>
     <engine name="ios" spec="^4.5.4" />
@@ -61,4 +62,5 @@
     </plugin>
     <plugin name="cordova-plugin-vibration" spec="^3.0.1" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
+    <plugin name="org.devgeeks.Canvas2ImagePlugin" spec="https://github.com/devgeeks/Canvas2ImagePlugin.git" />
 </widget>

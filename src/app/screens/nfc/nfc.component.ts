@@ -1,8 +1,10 @@
-import { AfterViewInit, Component, EventEmitter, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
+import {FileService} from "../../services/file.service";
+import {KeyChainService} from "../../services/keychain.service";
 
 declare const nfc: any;
 declare const ndef: any;
@@ -39,6 +41,8 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+  @Input() isExport = false;
+  @Input() isImport = false;
 
   static async isEthernetAvailable() {
     return await Utils.testNetwork();
@@ -49,6 +53,8 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
+    private readonly keyChainService: KeyChainService,
+    private readonly fs: FileService,
     private readonly dds: DDSService,
     private readonly notification: NotificationService
   ) {
@@ -147,6 +153,14 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isActive) {
       if (this.isAuth) {
         await this.generateAndWrite();
+        navigator.vibrate(100);
+      } else if (this.isExport) {
+        await this.writeSecret();
+        navigator.vibrate(100);
+      } else if (this.isImport) {
+        this._nfc = null;
+        navigator.vibrate(100);
+        await this.onSuccess();
       } else {
         console.log('onNfc');
         console.log(JSON.stringify(nfcEvent));
@@ -166,6 +180,10 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isActive) {
       if (this.isAuth) {
         await this.generateAndWrite();
+        navigator.vibrate(100);
+      } else if (this.isExport) {
+        await this.writeSecret();
+        navigator.vibrate(100);
       } else {
         console.log('onNdef');
         console.log(JSON.stringify(nfcEvent));
@@ -187,11 +205,19 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
           await this.onSuccess();
         } else {
           const payload = Buffer.from(tag.ndefMessage[0].payload);
-          const login = Utils.tryUnpackLogin(payload);
+          console.log(payload);
 
-          console.log(login);
-
-          this._nfc = login;
+          if (this.isImport) {
+            try {
+              const value = Utils.tryUnpackEncryptedSeed(payload);
+              this._nfc = value.toString('hex');
+            } catch (exc) {
+              console.log(exc);
+              this._nfc = null;
+            }
+          } else {
+            this._nfc = Utils.tryUnpackLogin(payload);
+          }
 
           navigator.vibrate(100);
 
@@ -199,6 +225,14 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }
     }
+  }
+
+  async writeSecret() {
+    const encryptedSeed = this.authService.encryptedSeed;
+    console.log(encryptedSeed);
+    const buffesSeed = Buffer.from(encryptedSeed, 'hex');
+    const packSeed = Utils.packSeed(buffesSeed);
+    this.writeTag(packSeed, 'Secret is exported to NFC tag', 'Secret is not exported to NFC tag');
   }
 
   async generateAndWrite() {
@@ -212,26 +246,26 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         const exists = await this.dds.exists(AuthService.toId(login));
         if (!exists) {
           this._nfc = login;
-          this.writeTag();
+          const content = Utils.packLogin(this._nfc);
+          this.writeTag(content, 'Success write NFC tag', 'Error write NFC tag');
           break;
         }
       } while (true);
     } catch (ignored) {}
   }
 
-  writeTag() {
-    const content = Utils.packLogin(this._nfc);
+  writeTag(content, success, error) {
     const payload = Array.from(content);
     const mimeType = 'text/pg';
 
     const record = ndef.mimeMediaRecord(mimeType, payload);
 
     nfc.write([record], () => this.ngZone.run(async () => {
-      this.notification.show('Success write NFC tag');
+      this.notification.show(success);
       await this.onSuccess();
     }), (e) => this.ngZone.run(() => {
       console.log('Error write ' + JSON.stringify(e));
-      this.notification.show('Error write NFC tag');
+      this.notification.show(error);
     }));
   }
 

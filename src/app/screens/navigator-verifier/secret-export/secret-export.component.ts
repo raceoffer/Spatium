@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FileService } from '../../services/file.service';
-import {NotificationService} from '../../services/notification.service';
-import {AuthService} from '../../services/auth.service';
 
-declare const Utils: any;
 declare const nfc: any;
 
 enum Content {
@@ -18,11 +14,12 @@ enum State {
 }
 
 @Component({
-  selector: 'app-secret-remove',
-  templateUrl: './secret-import.component.html',
-  styleUrls: ['./secret-import.component.css']
+  selector: 'app-secret-export',
+  templateUrl: './secret-export.component.html',
+  styleUrls: ['./secret-export.component.css']
 })
-export class SecretImportComponent implements OnInit {
+export class SecretExportComponent implements OnInit {
+
   contentType = Content;
   content = Content.QR;
 
@@ -40,10 +37,7 @@ export class SecretImportComponent implements OnInit {
 
   isNfcAvailable = true;
 
-  constructor(private readonly router: Router,
-              private readonly fs: FileService,
-              private readonly authService: AuthService,
-              private readonly notification: NotificationService) { }
+  constructor(private readonly router: Router) { }
 
   ngOnInit() {
     nfc.enabled(function () {}, function (e) {
@@ -56,7 +50,7 @@ export class SecretImportComponent implements OnInit {
   }
 
   async onBack() {
-    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+    await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
   }
 
   toggleContent(content) {
@@ -73,11 +67,11 @@ export class SecretImportComponent implements OnInit {
   async setInput(input: string) {
     console.log(input);
     this.input = input;
-    await this.checkInput();
+    await this.checkInput(this.input);
   }
 
-  async checkInput() {
-    if (this.input !== '' && this.input !== null) {
+  async checkInput(input: string) {
+    if (input !== '' && input !== null) {
       this.incorrectSecret = 'hide';
       this.buttonState = State.Import;
     } else {
@@ -85,14 +79,6 @@ export class SecretImportComponent implements OnInit {
       this.buttonState = State.Empty;
     }
 
-  }
-
-  async overwriteSeed() {
-    console.log(this.input);
-    await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
-    this.authService.encryptedSeed = this.input;
-    this.notification.show('Secret is imported successfully');
-    this.onBack();
   }
 
 }

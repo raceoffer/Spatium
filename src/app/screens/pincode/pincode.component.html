@@ -74,6 +74,9 @@
       <button mat-icon-button *ngIf="state === stateType.Unlock" class="keyboard-size" (click)="onDeleteClicked()">
         <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">delete_forever</mat-icon>
       </button>
+      <button mat-icon-button *ngIf="state === stateType.Create" class="keyboard-size" (click)="onImportClicked()">
+        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">import_export</mat-icon>
+      </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
       <button mat-icon-button class="keyboard-size" (click)="onAddClicked(0)">
