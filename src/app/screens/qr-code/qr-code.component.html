@@ -18,11 +18,11 @@
     </div>
 
     <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="camStarted && isRepeatable">
-      <span >{{text}}</span>
+      <span >{{ text }}</span>
     </div>
 
     <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="camStarted && !isRepeatable">
-      <span >{{text}}</span>
+      <span >{{ text }}</span>
     </div>
 
     <div fxLayout="column" fxLayoutAlign="center center" class="content" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
@@ -41,7 +41,7 @@
 <div fxLayout="column" fxLayoutAlign="center center" class="box" *ngIf="isAuth || isExport">
   <div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
     <div class="qrcode" *ngIf="genericValue.length > 0">
-      <qr-code [value]="genericValue" [size]="200" [background]="'#f5f5f5'"></qr-code>
+      <qr-code id="}" [value]="genericValue" [size]="200" [canvas]="true" [background]="'#f5f5f5'"></qr-code>
     </div>
 
     <div *ngIf="genericValue.length == 0">
@@ -50,7 +50,7 @@
   </div>
 
   <div class="footer text-center" style="bottom: 0px;" *ngIf="genericValue.length > 0">
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="saveQr()">Save</button>
+    <button id="download" download="qwe.jpg" type="button" mat-raised-button color="accent" class="width-button color" (click)="saveQr()">Save</button>
   </div>
 </div>
 

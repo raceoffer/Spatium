@@ -3,10 +3,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
-import {FileService} from "../../services/file.service";
+import {FileService} from '../../services/file.service';
 
 declare const Utils: any;
 declare const cordova: any;
+declare const window: any;
 
 @Component({
   selector: 'app-qr-code',
@@ -33,6 +34,7 @@ export class QrCodeComponent implements OnInit {
   text = 'Scan a QR-code';
   spinnerClass = '';
   permissionCam = false;
+  _permissionCStorage = false;
   genericValue = '';
 
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
@@ -83,7 +85,7 @@ export class QrCodeComponent implements OnInit {
         } else {
           this.permissionCam = false;
 
-          await permissions.requestPermission(permissions.CAMERA, this.success.bind(this), this.error.bind(this));
+          await permissions.requestPermission(permissions.CAMERA, this.successCam.bind(this), this.errorCam.bind(this));
         }
       }));
     }
@@ -118,11 +120,15 @@ export class QrCodeComponent implements OnInit {
     el.setAttribute('poster', '#');
   }
 
-  error() {
+  errorCam() {
     this.notification.show('Camera permission is not turned on');
   }
 
-  success(status) {
+  errorStorage() {
+    this.notification.show('Storage permission is not turned on');
+  }
+
+  successCam(status) {
     if (!status.hasPermission) {
       this.notification.show('Camera permission is not turned on');
       this.ngZone.run(async () => {
@@ -131,6 +137,20 @@ export class QrCodeComponent implements OnInit {
     } else {
       this.ngZone.run(async () => {
         this.permissionCam = true;
+      });
+    }
+  }
+
+  successStorage(status) {
+    if (!status.hasPermission) {
+      this.notification.show('Storage permission is not turned on');
+      this.ngZone.run(async () => {
+        this._permissionCStorage = false;
+      });
+    } else {
+      this.ngZone.run(async () => {
+        this._permissionCStorage = true;
+        this.saveToStorage();
       });
     }
   }
@@ -191,7 +211,38 @@ export class QrCodeComponent implements OnInit {
   }
 
   async saveQr() {
-    await this.onSuccess();
+    this.requestStorage();
+  }
+
+  requestStorage() {
+    const permissions = cordova.plugins.permissions;
+    permissions.hasPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => this.ngZone.run(() => {
+      if ( status.hasPermission ) {
+        this._permissionCStorage = true;
+        this.saveToStorage();
+      } else {
+        this._permissionCStorage = false;
+
+        permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, this.successStorage.bind(this), this.errorStorage.bind(this));
+      }
+    }));
+  }
+
+  saveToStorage() {
+    console.log(this._permissionCStorage);
+    if (this._permissionCStorage) {
+      const canvas = document.getElementsByTagName('canvas')[0];
+      window.canvas2ImagePlugin.saveImageDataToLibrary(
+        function(msg){
+          console.log(msg);
+          this.notification.show('Secret was saved as QR');
+        }.bind(this),
+        function(err){
+          console.log(err);
+        },
+        canvas
+      );
+    }
   }
 }
 
