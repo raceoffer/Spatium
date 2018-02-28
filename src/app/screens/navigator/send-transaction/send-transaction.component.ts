@@ -4,11 +4,12 @@ import { FormControl } from '@angular/forms';
 import { WalletService } from '../../../services/wallet.service';
 import { NotificationService } from '../../../services/notification.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
-import { Coin } from '../../../services/keychain.service';
+import { Coin, Token } from '../../../services/keychain.service';
 import { Observable } from 'rxjs/Observable';
 
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CurrencyService, Info } from '../../../services/currency.service';
 
 declare const bcoin: any;
 
@@ -28,12 +29,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiver = new FormControl();
   public amount = new FormControl();
-  public amountUsd = this.amount.valueChanges.map(value => value * this.rateBtcUsd);
+  public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
 
-  titile = 'Send transaction';
+  titile = 'Transfer';
 
   stAwaitConfirm = 'Confirm on the second device';
   stSigningResult = 'Transaction is signed';
@@ -43,21 +44,17 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stTransfer = 'Transfer';
   stSend = 'Send';
 
-  selected = '';
+  public currency: Coin | Token = null;
+  public currencyInfo: Info = null;
 
-  rateBtcUsd = 15000;
+  public currencyWallet: CurrencyWallet = null;
 
-  coin: Coin = null;
-  public currencySymbol = '';
-
-  public currencyWallet: CurrencyWallet;
-
-  public walletAddress: Observable<string>;
-  public balanceBtcConfirmed: Observable<number>;
-  public balanceBtcUnconfirmed: Observable<number>;
-  public balanceUsdConfirmed: Observable<number>;
-  public balanceUsdUnconfirmed: Observable<number>;
-  public validatorObserver: Observable<boolean>;
+  public walletAddress: Observable<string> = null;
+  public balanceBtcConfirmed: Observable<number> = null;
+  public balanceBtcUnconfirmed: Observable<number> = null;
+  public balanceUsdConfirmed: Observable<number> = null;
+  public balanceUsdUnconfirmed: Observable<number> = null;
+  public validatorObserver: Observable<boolean> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
@@ -67,27 +64,17 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     private readonly walletService: WalletService,
     private readonly notification: NotificationService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly currencyService: CurrencyService
   ) { }
 
   ngOnInit() {
     this.subscriptions.push(
-      this.route.params.subscribe((params: Params) => {
-        this.coin = Number(params['coin']) as Coin;
+      this.route.params.subscribe(async (params: Params) => {
+        this.currency = Number(params['coin']) as Coin | Token;
+        this.currencyInfo = await this.currencyService.getInfo(this.currency);
 
-        switch (this.coin) {
-          case Coin.BTC:
-            this.currencySymbol = 'BTC';
-            break;
-          case Coin.BCH:
-            this.currencySymbol = 'BCH';
-            break;
-          case Coin.ETH:
-            this.currencySymbol = 'ETH';
-            break;
-        }
-
-        this.currencyWallet = this.walletService.currencyWallets.get(this.coin);
+        this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
 
         this.subscriptions.push(
           this.currencyWallet.rejectedEvent.subscribe(async () => {
@@ -102,8 +89,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
         this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
         this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * this.rateBtcUsd);
-        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * this.rateBtcUsd);
+        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
+        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
@@ -112,12 +99,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           (balance, amount, receiver) => {
             return balance > amount && amount > 0 && receiver.length > 0;
           });
-
-        this.subscriptions.push(
-          this.walletAddress.subscribe(address => {
-            this.selected = address;
-          })
-        );
       }));
 
     this.subscriptions.push(
@@ -144,7 +125,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     if (this.phase.getValue() === Phase.Confirmation) {
       await this.currencyWallet.rejectTransaction();
     }
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.coin] } }]);
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
   }
 
   // Pressed start signature

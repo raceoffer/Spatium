@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { WalletService } from '../../../services/wallet.service';
-import { Coin } from '../../../services/keychain.service';
-import { Router } from "@angular/router";
+import { Coin, Token } from '../../../services/keychain.service';
+import { Router } from '@angular/router';
+import { Info, CurrencyService } from '../../../services/currency.service';
 
 declare const bcoin: any;
 
@@ -17,7 +18,6 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
   address = '';
   btc;
-  rateBtcUsd = 15000;
   usd;
 
   public title = 'Awaiting confirmations';
@@ -43,15 +43,16 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     isActive: true
   }];
 
-  public currentCoin: Coin = null;
-  public currencySymbol = '';
+  public currentCoin: Coin | Token = null;
+  public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
 
   private subscriptions = [];
 
   constructor(
     private readonly wallet: WalletService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly currencyService: CurrencyService
   ) { }
 
   ngOnInit() {
@@ -63,22 +64,10 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(
         currencyWallet.verifyEvent.subscribe(async (transaction) => {
-          console.log(transaction);
           this.currentCoin = coin;
+          this.currentInfo = await this.currencyService.getInfo(this.currentCoin);
 
-          switch (this.currentCoin) {
-            case Coin.BTC:
-              this.currencySymbol = 'BTC';
-              break;
-            case Coin.BCH:
-              this.currencySymbol = 'BCH';
-              break;
-            case Coin.ETH:
-              this.currencySymbol = 'ETH';
-              break;
-          }
-
-          const outputs = transaction.totalOutputs();
+          const outputs = currencyWallet.outputs(transaction);
 
           if (outputs.length < 1) {
             console.log('Received invalid transaction');
@@ -87,8 +76,8 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           }
 
           this.address = outputs[0].address;
-          this.btc = currencyWallet.fromInternal(outputs[0].value);
-          this.usd = this.btc * this.rateBtcUsd;
+          this.btc = currencyWallet.fromInternal(outputs[0].value.toString());
+          this.usd = this.btc * this.currentInfo.rate;
           this.showTransaction = true;
 
           console.log('Transaction:');

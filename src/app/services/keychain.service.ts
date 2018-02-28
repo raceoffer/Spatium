@@ -8,6 +8,10 @@ export enum Coin {
   BCH = 145
 }
 
+export enum Token {
+  EOS = 56146
+}
+
 @Injectable()
 export class KeyChainService {
   private _seed: any = null;

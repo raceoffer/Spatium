@@ -8,13 +8,14 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
-import { Coin, KeyChainService } from './keychain.service';
+import { Coin, Token, KeyChainService } from './keychain.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
+import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
 
 declare const bcoin: any;
 
@@ -24,7 +25,10 @@ export class WalletService {
 
   private network = 'testnet'; // 'main'; | 'testnet';
 
-  public currencyWallets = new Map<Coin, CurrencyWallet>();
+  public coinWallets = new Map<Coin, CurrencyWallet>();
+  public tokenWallets = new Map<Token, ERC20CurrencyWallet>();
+
+  public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
 
   public status: Observable<Status>;
 
@@ -48,7 +52,7 @@ export class WalletService {
   ) {
     bcoin.set(this.network);
 
-    this.currencyWallets.set(
+    this.coinWallets.set(
       Coin.BTC,
       new BitcoinWallet(
         this.network,
@@ -58,7 +62,7 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
-    this.currencyWallets.set(
+    this.coinWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
         this.network,
@@ -68,8 +72,7 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
-
-    this.currencyWallets.set(
+    this.coinWallets.set(
       Coin.ETH,
       new EthereumCurrencyWallet(
         this.network,
@@ -79,9 +82,28 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
+    this.tokenWallets.set(
+      Token.EOS,
+      new ERC20CurrencyWallet(
+        this.network,
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone,
+        Token.EOS,
+        '0x1014003937b6fcd21f1a27df897b5888bbb73b9f'
+      ));
+
+    for (const coin of Array.from(this.coinWallets.keys())) {
+      this.currencyWallets.set(coin, this.coinWallets.get(coin));
+    }
+    for (const token of Array.from(this.tokenWallets.keys())) {
+      this.currencyWallets.set(token, this.tokenWallets.get(token));
+    }
 
     this.status = combineLatest(
-      Array.from(this.currencyWallets.values()).map(wallet => wallet.status),
+      Array.from(this.coinWallets.values()).map(wallet => wallet.status),
       (... values) => {
         if (values.every(value => value === Status.Ready)) {
           return Status.Ready;
@@ -100,21 +122,21 @@ export class WalletService {
     );
 
     this.synchronizing = combineLatest(
-      Array.from(this.currencyWallets.values()).map(wallet => wallet.synchronizing),
+      Array.from(this.coinWallets.values()).map(wallet => wallet.synchronizing),
       (... values) => {
         return values.reduce((a, b) => a || b, false);
       }
     );
 
     this.ready = combineLatest(
-      Array.from(this.currencyWallets.values()).map(wallet => wallet.ready),
+      Array.from(this.coinWallets.values()).map(wallet => wallet.ready),
       (... values) => {
         return values.reduce((a, b) => a && b, true);
       }
     );
 
     this.syncProgress = combineLatest(
-      Array.from(this.currencyWallets.values()).map(wallet => wallet.syncProgress),
+      Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
       (... values) => {
         return values.reduce((a, b) => a + b, 0) / values.length;
       }
@@ -147,17 +169,23 @@ export class WalletService {
   }
 
   public async startSync() {
-    for (const wallet of Array.from(this.currencyWallets.values())) {
+    for (const wallet of Array.from(this.coinWallets.values())) {
       const syncEvent = wallet.readyEvent.take(1).takeUntil(combineLatest(this.cancelledEvent, this.failedEvent)).toPromise();
 
       await wallet.sync();
 
       await syncEvent;
     }
+
+    const ethWallet = this.coinWallets.get(Coin.ETH);
+
+    for (const wallet of Array.from(this.tokenWallets.values())) {
+      await wallet.syncDuplicate(ethWallet);
+    }
   }
 
   public async cancelSync() {
-    for (const wallet of Array.from(this.currencyWallets.values())) {
+    for (const wallet of Array.from(this.coinWallets.values())) {
       await wallet.cancelSync();
     }
   }
