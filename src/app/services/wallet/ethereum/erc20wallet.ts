@@ -47,7 +47,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   }
 
   public outputs(transaction) {
-    return [{ address: 'contract', value: '100500' }];
+    return transaction.transferData();
   }
 
   public async finishSync(data) {
