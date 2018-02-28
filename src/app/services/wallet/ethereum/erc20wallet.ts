@@ -1,5 +1,5 @@
 import { CurrencyWallet, Status } from '../currencywallet';
-import { Coin, KeyChainService } from '../../keychain.service';
+import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
@@ -10,6 +10,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   private erc20Wallet: any = null;
   private currencyCoin: any = null;
   private contractAddress: string = null;
+  private token: Token = null;
 
   constructor(
     network: string,
@@ -18,12 +19,13 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     messageSubject: any,
     bt: BluetoothService,
     ngZone: NgZone,
-    coin: Coin,
+    token: Token,
     address: string
   ) {
-    super(network, keychain, coin, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
 
     this.contractAddress = address;
+    this.token = token;
 
     this.currencyCoin = Currency.get(Currency.ETH);
   }
@@ -48,6 +50,10 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
   public outputs(transaction) {
     return transaction.transferData();
+  }
+
+  public currencyCode(): Coin | Token {
+    return this.token;
   }
 
   public async finishSync(data) {

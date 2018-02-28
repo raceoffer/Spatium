@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { WalletService } from '../../../services/wallet.service';
-import { Coin } from '../../../services/keychain.service';
+import {Coin, Token} from '../../../services/keychain.service';
 import { Router } from "@angular/router";
 
 declare const bcoin: any;
@@ -43,7 +43,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     isActive: true
   }];
 
-  public currentCoin: Coin = null;
+  public currentCoin: Coin | Token = null;
   public currencyWallets = this.wallet.currencyWallets;
 
   private subscriptions = [];

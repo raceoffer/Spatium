@@ -3,7 +3,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
-import { Coin } from '../../../services/keychain.service';
+import {Coin, Token} from '../../../services/keychain.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const bcoin: any;
@@ -39,7 +39,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  private coin: Coin = null;
+  private coin: Coin | Token = null;
 
   private static compareTransactions(a, b) {
     // First unconfirmed transactions
@@ -76,7 +76,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscriptions.push(
       this.route.params.subscribe((params: Params) => {
-        this.coin = Number(params['coin']) as Coin;
+        this.coin = Number(params['coin']) as Coin | Token;
 
         switch (this.coin) {
           case Coin.BTC:
@@ -91,7 +91,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             this.currencyTitle.next('Ethereum');
             this.currencySymbol.next('ETH');
             break;
-          case Coin.EOS:
+          case Token.EOS:
             this.currencyTitle.next('EOS');
             this.currencySymbol.next('EOS');
             break;

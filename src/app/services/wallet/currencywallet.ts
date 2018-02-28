@@ -5,7 +5,7 @@ import { LoggerService } from '../logger.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
 import { Subject } from 'rxjs/Subject';
-import { Coin, KeyChainService } from '../keychain.service';
+import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
 declare const CompoundKey: any;
@@ -189,6 +189,11 @@ export class CurrencyWallet {
     }
   }
 
+  public async syncDuplicate(other: CurrencyWallet) {
+    this.compoundKey = other.compoundKey;
+    await this.finishSync(other.compoundKey.extractSyncData());
+  }
+
   public async finishSync(data) {
     try {
       this.compoundKey.finishInitialSync(data);
@@ -197,13 +202,16 @@ export class CurrencyWallet {
     }
   }
 
-  public async requestTransactionVerify(transaction) {
+  public currencyCode(): Coin | Token  {
+    return this.currency;
+  }
 
+  public async requestTransactionVerify(transaction) {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
       content: {
         tx: transaction.toJSON(),
-        coin: this.currency
+        coin: this.currencyCode()
       }
     }));
 
