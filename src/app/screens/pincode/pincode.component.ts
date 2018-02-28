@@ -73,6 +73,10 @@ export class PincodeComponent implements AfterViewInit {
     await this.router.navigate(['/delete-secret', 'pincode']);
   }
 
+  async onImportClicked() {
+    await this.router.navigate(['/secret-import']);
+  }
+
   onBackspaceClicked() {
     this.pincode = this.pincode.substr(0, this.pincode.length - 1);
   }

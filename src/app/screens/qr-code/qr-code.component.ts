@@ -4,7 +4,7 @@ import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import {FileService} from '../../services/file.service';
-import {KeyChainService} from "../../services/keychain.service";
+import {KeyChainService} from '../../services/keychain.service';
 
 declare const Utils: any;
 declare const cordova: any;
@@ -95,8 +95,9 @@ export class QrCodeComponent implements OnInit {
   }
 
   async writeSecret() {
-    const encryptedSeed = await this.keyChainService.getSeed();
-    const packSeed = Utils.packSeed(encryptedSeed);
+    const encryptedSeed = this.authService.encryptedSeed;
+    const buffesSeed = Buffer.from(encryptedSeed, 'hex');
+    const packSeed = Utils.packSeed(buffesSeed);
     this.genericValue = packSeed.toString('hex');
     console.log(this.genericValue);
   }
@@ -175,10 +176,16 @@ export class QrCodeComponent implements OnInit {
       this._qrcode = event.toString();
     } else {
       const buffer = Buffer.from(event.toString(), 'hex');
-      if(this.isImport) {
-        console.log(buffer);
-        this._qrcode = Utils.tryUnpackSeed(buffer);
-        console.log(this._qrcode);
+      if (this.isImport) {
+        try {
+          console.log(buffer);
+          const value = Utils.tryUnpackEncryptedSeed(buffer);
+          this._qrcode = value.toString('hex');
+          console.log(this._qrcode);
+        } catch (exc) {
+          console.log(exc);
+          this._qrcode = null;
+        }
       } else {
         this._qrcode = Utils.tryUnpackLogin(buffer);
       }
@@ -246,7 +253,7 @@ export class QrCodeComponent implements OnInit {
       window.canvas2ImagePlugin.saveImageDataToLibrary(
         function(msg){
           console.log(msg);
-          this.notification.show('Secret was saved as QR');
+          this.notification.show('Secret has been saved as QR image');
         }.bind(this),
         function(err){
           console.log(err);

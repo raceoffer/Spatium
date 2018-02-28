@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { FileService } from '../../services/file.service';
+import {NotificationService} from '../../services/notification.service';
+import {AuthService} from '../../services/auth.service';
 
 declare const Utils: any;
 declare const nfc: any;
@@ -36,7 +40,10 @@ export class SecretImportComponent implements OnInit {
 
   isNfcAvailable = true;
 
-  constructor() { }
+  constructor(private readonly router: Router,
+              private readonly fs: FileService,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService) { }
 
   ngOnInit() {
     nfc.enabled(function () {}, function (e) {
@@ -46,6 +53,10 @@ export class SecretImportComponent implements OnInit {
         });
       }
     }.bind(this));
+  }
+
+  async onBack() {
+    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
   }
 
   toggleContent(content) {
@@ -62,11 +73,11 @@ export class SecretImportComponent implements OnInit {
   async setInput(input: string) {
     console.log(input);
     this.input = input;
-    await this.checkInput(this.input);
+    await this.checkInput();
   }
 
-  async checkInput(input: string) {
-    if (input !== '' && input !== null) {
+  async checkInput() {
+    if (this.input !== '' && this.input !== null) {
       this.incorrectSecret = 'hide';
       this.buttonState = State.Import;
     } else {
@@ -74,6 +85,14 @@ export class SecretImportComponent implements OnInit {
       this.buttonState = State.Empty;
     }
 
+  }
+
+  async overwriteSeed() {
+    console.log(this.input);
+    await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
+    this.authService.encryptedSeed = this.input;
+    this.notification.show('Secret is imported successfully');
+    this.onBack();
   }
 
 }
