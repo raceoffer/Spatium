@@ -46,7 +46,7 @@ export class BitcoinWallet extends CurrencyWallet {
   }
 
   public fromInternal(amount: string): number {
-    return Number(bcoin.amount.btc(amount));
+    return Number(bcoin.amount.btc(Number(amount)));
   }
 
   public fromJSON(tx) {
