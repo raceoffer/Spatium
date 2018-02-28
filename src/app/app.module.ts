@@ -68,6 +68,7 @@ import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import { CurrencyService } from './services/currency.service';
 
 @NgModule({
   declarations: [
@@ -142,7 +143,8 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
     FileService,
     NotificationService,
     DDSService,
-    KeyChainService
+    KeyChainService,
+    CurrencyService
   ],
   bootstrap: [
     AppComponent

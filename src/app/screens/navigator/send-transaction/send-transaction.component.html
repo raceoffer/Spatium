@@ -4,15 +4,15 @@
       <button mat-icon-button (click)="onBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <span>{{ titile }}</span>
+      <span>{{ titile }} {{ currencyInfo?.name }}</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
   <span class="full-width label full-width-label">{{ accountPh }}</span>
   <div class="full-width field" style="margin-bottom: 13px;">
-    <mat-select [disabled]="(phase | async) !== phaseType.Creation" [(value)]="selected">
+    <mat-select [disabled]="(phase | async) !== phaseType.Creation" [value]="walletAddress | async">
       <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} BTC)
+        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} {{ currencyInfo?.symbol }})
       </mat-option>
     </mat-select>
   </div>
@@ -20,7 +20,7 @@
   <table class="full-width text-center two-columns">
     <tr>
       <td>
-          <span class="label" style="margin-left: 5px;">BTC</span>
+          <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
           <div class="field">
             <span>
               {{ balanceBtcUnconfirmed | async }}
@@ -48,7 +48,7 @@
   <table class="full-width text-center two-columns">
     <tr>
       <td>
-        <span class="label" style="margin-left: 5px;">BTC</span>
+        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
         <div class="field">
           <span>
             <input matInput [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"

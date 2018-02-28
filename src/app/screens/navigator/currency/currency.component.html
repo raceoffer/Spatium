@@ -5,14 +5,14 @@
         <button mat-icon-button [routerLink]="['/navigator', { outlets: { 'navigator': ['wallet'] } }]">
           <mat-icon>arrow_back</mat-icon>
         </button>
-        <span>{{ currencyTitle | async }}</span>
+        <span>{{ currencyInfo?.name }}</span>
       </mat-toolbar-row>
     </mat-toolbar>
 
     <span class="full-width label full-width-label">{{ accountLabel }}</span>
     <div class="full-width field" style="margin-bottom: 13px;">
-      <mat-select [(value)]="selectedAddress">
-        <mat-option [value]="walletAddress | async">
+      <mat-select [value]="walletAddress | async">
+        <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
           {{ walletAddress | async }}
         </mat-option>
       </mat-select>
@@ -21,7 +21,7 @@
     <table class="full-width text-center two-columns">
       <tr>
         <td fxLayout="column" fxLayoutAlign="start center">
-          <span class="label" style="margin-left: 5px;">{{ currencySymbol | async }}</span>
+          <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
           <div class="field">
             <span>
               {{ balanceCurrencyUnconfirmed | async }}
@@ -44,7 +44,7 @@
 
   <div class="content text-center" style="overflow: scroll;max-height: 100%;">
     <div class="qrcode">
-      <qr-code [value]="selectedAddress" [size]="150" [background]="'#f5f5f5'"></qr-code>
+      <qr-code [value]="walletAddress | async" [size]="150" [background]="'#f5f5f5'"></qr-code>
     </div>
 
     <mat-list class="full-width text-center transaction-list">
@@ -52,7 +52,7 @@
         <span matLine class="transaction-amount"
           [class.input]="transaction.type==txType.In"
           [class.output]="transaction.type==txType.Out">
-          {{ transaction.amount }} {{ currencySymbol | async }}
+          {{ transaction.amount }} {{ currencyInfo?.symbol }}
         </span>
         <span matLine class="transaction-time" *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
         <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
