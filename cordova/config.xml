@@ -63,4 +63,5 @@
     <plugin name="cordova-plugin-vibration" spec="^3.0.1" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
     <plugin name="org.devgeeks.Canvas2ImagePlugin" spec="https://github.com/devgeeks/Canvas2ImagePlugin.git" />
+    <plugin name="cordova-plugin-clipboard" spec="file:../cordova-plugin-clipboard" />
 </widget>

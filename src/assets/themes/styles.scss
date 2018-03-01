@@ -960,6 +960,13 @@ input[type="password-pin"] {
   position: absolute;
 }
 
+.currency-component .mat-button-wrapper {
+  margin: inherit!important;
+  overflow: initial!important;
+  width: inherit!important;
+  line-height: normal!important;
+}
+
 .currency-component .full-width-label {
   position: relative;
   text-align: left;
@@ -987,6 +994,16 @@ input[type="password-pin"] {
 .currency-component .mat-input-underline {
   display: none;
   padding: 0 20px 0 20px;
+}
+
+.currency-component .mat-form-field-flex {
+  align-items: normal!important;
+}
+
+.currency-component .mat-form-field-prefix, .mat-form-field-suffix{
+  margin-top: 8px;
+  padding-left: 19.5px;
+  padding-right: 19.5px;
 }
 
 .mat-option.mat-selected:not(.mat-option-multiple):not(.mat-option-disabled) {

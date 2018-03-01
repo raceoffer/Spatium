@@ -6,11 +6,12 @@ import { NotificationService } from '../../../services/notification.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { Coin } from '../../../services/keychain.service';
 import { Observable } from 'rxjs/Observable';
-
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import * as $ from 'jquery';
 
 declare const bcoin: any;
+declare const cordova: any;
 
 enum Phase {
   Creation,
@@ -125,7 +126,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         if (creation) {
           this.receiver.enable();
           this.amount.enable();
-          this.receiver.setValue('');
+          this.receiver.setValue('ggggggg');
           this.amount.setValue(0);
         } else {
           this.receiver.disable();
@@ -138,6 +139,14 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  get Receiver() {
+    return this.receiver;
+  }
+
+  set Receiver(newUserName) {
+    this.receiver.setValue(newUserName);
   }
 
   async onBack() {
@@ -189,5 +198,20 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   async finalaized() {
     this.phase.next(Phase.Sending);
   }
+
+  paste (e) {
+    const qwe = e.currentTarget;
+    let paste = '';
+    cordova.plugins.clipboard.paste(function (text) {
+      console.log(text);
+      paste = text;
+      if (paste !== '') {
+        this.receiver.setValue(paste);
+      }
+    }.bind(this), function (e) {console.log(e)});
+
+    // button stay focused >:
+  }
+
 }
 
