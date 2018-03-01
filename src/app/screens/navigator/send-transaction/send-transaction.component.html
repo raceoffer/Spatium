@@ -43,7 +43,7 @@
   <span class="full-width label full-width-label">{{ receiverPh }}</span>
   <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
     <input matInput [formControl]="receiver">
-    <button id="paste" mat-button matSuffix mat-icon-button (click)="paste($event)">
+    <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
       <mat-icon>content_paste</mat-icon>
     </button>
   </mat-form-field>
@@ -97,4 +97,5 @@
     </button>
   </div>
 </div>
+
 

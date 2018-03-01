@@ -199,8 +199,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Sending);
   }
 
-  paste (e) {
-    const qwe = e.currentTarget;
+  paste () {
     let paste = '';
     cordova.plugins.clipboard.paste(function (text) {
       console.log(text);
@@ -210,7 +209,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }
     }.bind(this), function (e) {console.log(e)});
 
-    // button stay focused >:
   }
 
 }

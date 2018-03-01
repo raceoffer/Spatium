@@ -1006,6 +1006,10 @@ input[type="password-pin"] {
   padding-right: 19.5px;
 }
 
+.mat-button-focus-overlay {
+  background-color: transparent!important;
+}
+
 .mat-option.mat-selected:not(.mat-option-multiple):not(.mat-option-disabled) {
   background: rgba(0, 0, 0, 0.04);
 }
