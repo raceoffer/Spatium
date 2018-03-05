@@ -36,7 +36,6 @@ const appRoutes: Routes = [
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
-  { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [
@@ -45,7 +44,8 @@ const appRoutes: Routes = [
     { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
     { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
     { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
-    { path: 'nfc', component: NfcComponent, outlet: 'factor' }
+    { path: 'nfc', component: NfcComponent, outlet: 'factor' },
+    { path: 'fingerprint', component: FingerPrintComponent, outlet: 'factor'}
   ]},
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
@@ -59,7 +59,8 @@ const appRoutes: Routes = [
       { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
       { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
       { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
-      { path: 'nfc', component: NfcComponent, outlet: 'factor' }
+      { path: 'nfc', component: NfcComponent, outlet: 'factor' },
+      { path: 'fingerprint', component: FingerPrintComponent, outlet: 'factor'}
     ]}
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
