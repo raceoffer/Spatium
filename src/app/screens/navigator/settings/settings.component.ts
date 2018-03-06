@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 enum State {
   nav = 0,
@@ -12,7 +13,8 @@ enum State {
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
 
   title = 'Settings';
   state = State.nav;
@@ -32,12 +34,24 @@ export class SettingsComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly navigationService: NavigationService
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+  }
 
-  async onBackClick() {
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  async onBackClicked() {
     switch (this.state) {
       case State.nav: {
         await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);

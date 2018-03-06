@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { WalletService } from '../../../services/wallet.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { Router } from '@angular/router';
 import { Info, CurrencyService } from '../../../services/currency.service';
+import {NavigationService} from '../../../services/navigation.service';
 
 declare const bcoin: any;
 
@@ -49,13 +50,22 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
+  @ViewChild('sidenav') sidenav;
+
   constructor(
     private readonly wallet: WalletService,
     private readonly router: Router,
-    private readonly currencyService: CurrencyService
+    private readonly currencyService: CurrencyService,
+    private readonly navigationService: NavigationService
   ) { }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.currencyWallets.forEach((currencyWallet, coin) => {
       this.subscriptions.push(
         currencyWallet.rejectedEvent.subscribe(() => {
@@ -109,5 +119,11 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   async decline() {
     this.showTransaction = false;
     await this.currencyWallets.get(this.currentCoin).rejectTransaction();
+  }
+
+  async onBackClicked() {
+    if (this.isOpened) {
+      this.sidenav.toggle();
+    }
   }
 }

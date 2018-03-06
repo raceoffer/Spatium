@@ -1,5 +1,6 @@
 import {
-  AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, OnInit, sequence, style, transition,
+  AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, sequence, style,
+  transition,
   trigger, ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
@@ -11,6 +12,7 @@ import * as $ from 'jquery';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const Utils: any;
 
@@ -29,7 +31,8 @@ declare const Utils: any;
   templateUrl: './factor-node.component.html',
   styleUrls: ['./factor-node.component.css']
 })
-export class FactorNodeComponent implements OnInit, AfterViewInit {
+export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
+  private subscriptions = [];
 
   title = 'Adding authentication path';
   factors = [];
@@ -48,10 +51,17 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
     private readonly notification: NotificationService,
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly authSevice: AuthService
-  ) { }
+    private readonly authSevice: AuthService,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.factors = this.authSevice.factors;
 
     $('#factor-container').scroll(function () {
@@ -75,6 +85,11 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
     this.goBottom();
 
     this.changeDetectorRef.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   checkOverflow (element) {
@@ -167,7 +182,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async onBackClick() {
+  async onBackClicked() {
     this.cancel.next(true);
     await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
   }

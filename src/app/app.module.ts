@@ -70,6 +70,7 @@ import { SecretImportComponent } from './screens/secret-import/secret-import.com
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
 import { CurrencyService } from './services/currency.service';
+import { NavigationService } from './services/navigation.service';
 
 @NgModule({
   declarations: [
@@ -146,7 +147,8 @@ import { CurrencyService } from './services/currency.service';
     NotificationService,
     DDSService,
     KeyChainService,
-    CurrencyService
+    CurrencyService,
+    NavigationService
   ],
   bootstrap: [
     AppComponent

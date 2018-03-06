@@ -1,8 +1,8 @@
-<app-connect *ngIf="(synchronizing | async)"></app-connect>
+<app-connect *ngIf="(synchronizing | async)" (cancel)="cancelConnect()"></app-connect>
 <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%">
   <mat-toolbar color="primary" class="shadow">
     <mat-toolbar-row>
-      <button mat-icon-button routerLink="/start">
+      <button mat-icon-button (click)="onBackClicked()">
         <mat-icon>arrow_back</mat-icon>
       </button>
     </mat-toolbar-row>
