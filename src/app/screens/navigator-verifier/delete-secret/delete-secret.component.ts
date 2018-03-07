@@ -4,6 +4,8 @@ import { FileService } from '../../../services/file.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
 
+declare const window: any;
+
 @Component({
   selector: 'app-delete-secret',
   templateUrl: './delete-secret.component.html',
@@ -17,6 +19,8 @@ export class DeleteSecretComponent implements OnInit {
   confirmButton = 'Confirm';
 
   back = 'verify';
+
+  hasTouch = false;
 
   constructor(
     private readonly router: Router,
@@ -34,6 +38,19 @@ export class DeleteSecretComponent implements OnInit {
         this.back = params['back'];
       }
     });
+
+    if (window.plugins) {
+      window.plugins.touchid.isAvailable(() => {
+        window.plugins.touchid.has('spatium', () => {
+          console.log('Touch ID avaialble and Password key available');
+          this.hasTouch = true;
+        }, () => {
+          console.log('Touch ID available but no Password Key available');
+        });
+      }, () => {
+        console.log('no touch id');
+      });
+    }
   }
 
   async onBack() {
@@ -48,15 +65,21 @@ export class DeleteSecretComponent implements OnInit {
   }
 
   async delete() {
-    try {
-      await this.fs.deleteFile(this.fs.safeFileName('seed'));
-      this.authService.encryptedSeed = null;
-      this.notification.show('The secret successfully removed');
-      await this.router.navigate(['/start']);
-    } catch (e) {
-      this.notification.show('Delete error');
-      return;
+    if (this.hasTouch) {
+      window.plugins.touchid.delete('spatium', async() => {
+        console.log('Password key deleted');
+        await this.deleteFileSecret();
+      });
+    } else {
+      await this.deleteFileSecret();
     }
+  }
+
+  async deleteFileSecret() {
+    await this.fs.deleteFile(this.fs.safeFileName('seed'));
+    this.authService.encryptedSeed = null;
+    this.notification.show('The secret successfully removed');
+    await this.router.navigate(['/start']);
   }
 
   сapitalizeRandomChars(s: string) {

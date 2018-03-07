@@ -47,31 +47,24 @@ export class StartComponent implements OnInit {
       window.plugins.touchid.isAvailable(async function() {
         window.plugins.touchid.has('spatium', async function() {
           console.log('Touch ID avaialble and Password key available');
-          await self.navigate(true);
+          await self.navigate();
           // await self.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['fingerprint', { next: 'waiting' }] } }]);
         }, async function() {
           console.log('Touch ID available but no Password Key available');
-          await self.navigate(true);
+          await self.navigate();
           // self.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['fingerprint', { next: 'waiting' }] } }]);
         });
       }, async function() {
         console.log('no Touch ID available');
-        await self.navigate(false);
+        await self.navigate();
         // await self.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
       });
     }
   }
 
-  async navigate (isTouchId: boolean) {
-    if (isTouchId) {
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['fingerprint', { next: 'waiting' }] } }]);
-      });
-
-    } else {
-      this.ngZone.run(async () => {
-        await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
-      });
-    }
+  async navigate () {
+    this.ngZone.run(async () => {
+      await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+    });
   }
 }
