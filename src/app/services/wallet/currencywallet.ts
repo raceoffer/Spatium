@@ -183,7 +183,7 @@ export class CurrencyWallet {
     return transaction.totalOutputs().outputs;
   }
 
-  public verify(transaction): boolean {
+  public verify(transaction: any, maxFee?: number): boolean {
     const statistics = transaction.totalOutputs();
 
     if (!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0) {

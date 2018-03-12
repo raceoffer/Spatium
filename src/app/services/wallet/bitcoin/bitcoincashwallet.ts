@@ -183,8 +183,8 @@ export class BitcoinCashWallet extends CurrencyWallet {
     });
   }
 
-  public verify(transaction): boolean {
-    if (!super.verify(transaction)) {
+  public verify(transaction: any, maxFee?: number): boolean {
+    if (!super.verify(transaction, maxFee)) {
       return false;
     }
 
@@ -208,8 +208,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
     tax -= statistics.outputs.reduce((sum, output) => sum + output.value, 0);
     tax -= statistics.change.reduce((sum, change) => sum + change.value, 0);
 
-    // which?
-    if (tax > 100500000) {
+    if (maxFee ? tax > maxFee : false) {
       return false;
     }
 
