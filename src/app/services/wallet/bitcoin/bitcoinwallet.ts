@@ -156,6 +156,39 @@ export class BitcoinWallet extends CurrencyWallet {
     return transaction;
   }
 
+  public verify(transaction): boolean {
+    if (!super.verify(transaction)) {
+      return false;
+    }
+
+    const statistics = transaction.totalOutputs();
+
+    // check if every input belongs to owned address
+    if (!statistics.inputs
+      || statistics.inputs.length < 1
+      || statistics.inputs.some(input => input.address !== this.address.getValue())) {
+      return false;
+    }
+
+    // check if change goes to owned address
+    if (statistics.change.some(change => change.address !== this.address.getValue())) {
+      return false;
+    }
+
+    // check for tax value
+    let tax = 0;
+    tax += statistics.inputs.reduce((sum, input) => sum + input.value, 0);
+    tax -= statistics.outputs.reduce((sum, output) => sum + output.value, 0);
+    tax -= statistics.change.reduce((sum, change) => sum + change.value, 0);
+
+    // which?
+    if (tax > 100500000) {
+      return false;
+    }
+
+    return true;
+  }
+
   public async listTransactionHistory() {
     const txs = await this.watchingWallet.getTransactions();
 

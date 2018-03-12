@@ -43,12 +43,14 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly fs: FileService,
-              private readonly authService: AuthService,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) {  }
+  constructor(
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly fs: FileService,
+    private readonly authService: AuthService,
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService
+  ) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -57,13 +59,13 @@ export class SecretImportComponent implements OnInit, OnDestroy {
       })
     );
 
-    nfc.enabled(function () {}, function (e) {
+    nfc.enabled(() => {}, e => {
       if (e === 'NO_NFC') {
-        this.ngZone.run(async () => {
+        this.ngZone.run(() => {
           this.isNfcAvailable = false;
         });
       }
-    }.bind(this));
+    });
   }
 
   ngOnDestroy() {
@@ -100,7 +102,6 @@ export class SecretImportComponent implements OnInit, OnDestroy {
       this.incorrectSecret = '';
       this.buttonState = State.Empty;
     }
-
   }
 
   async overwriteSeed() {
@@ -108,7 +109,6 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
     this.authService.encryptedSeed = this.input;
     this.notification.show('Secret is imported successfully');
-    this.onBackClicked();
+    await this.onBackClicked();
   }
-
 }
