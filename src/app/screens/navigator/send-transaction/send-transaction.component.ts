@@ -12,6 +12,7 @@ import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 
 declare const bcoin: any;
+declare const cordova: any;
 
 enum Phase {
   Creation,
@@ -113,7 +114,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         if (creation) {
           this.receiver.enable();
           this.amount.enable();
-          this.receiver.setValue('');
+          this.receiver.setValue('ggggggg');
           this.amount.setValue(0);
         } else {
           this.receiver.disable();
@@ -177,5 +178,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   async finalaized() {
     this.phase.next(Phase.Sending);
   }
+
+  paste () {
+    let paste = '';
+    cordova.plugins.clipboard.paste(function (text) {
+      console.log(text);
+      paste = text;
+      if (paste !== '') {
+        this.receiver.setValue(paste);
+      }
+    }.bind(this), function (e) {console.log(e)});
+
+  }
+
 }
 
