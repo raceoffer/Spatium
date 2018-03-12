@@ -40,7 +40,7 @@
                (buisyEvent)="setBusy()"
                (clearEvent)="setEmpty()"
                (inputEvent)="setInput($event)"
-               [genericLogin]="qrGenerate"
+               [genericLogin]="loginGenerate"
     ></app-login>
     <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
                  (clearEvent)="setEmpty()"

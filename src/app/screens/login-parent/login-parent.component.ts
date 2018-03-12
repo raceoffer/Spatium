@@ -43,7 +43,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   stError = 'Retry';
 
   notRecognized = 'hide';
-  qrGenerate = null;
+  loginGenerate = null;
 
   input = '';
 
@@ -85,10 +85,10 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     this.buttonState = State.Empty;
     this.content = content;
     this.notRecognized = 'hide';
-    if (this.qrGenerate && content === this.contentType.Login) {
-      console.log(this.qrGenerate);
+    if (this.loginGenerate && content === this.contentType.Login) {
+      console.log(this.loginGenerate);
     } else {
-      this.qrGenerate = null;
+      this.loginGenerate = null;
     }
   }
 
@@ -121,27 +121,30 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       if (exists) {
         this.buttonState = State.Exists;
       } else {
-        if (this.content === this.contentType.NFC) {
-          this.notRecognized = '';
-          this.buttonState = State.Empty;
-          do {
-            this.qrGenerate = this.authService.makeNewLogin(10);
-            if (!await this.dds.exists(AuthService.toId(this.qrGenerate))) {
-              break;
-            }
-          } while (true);
+        if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+          this.generate();
         } else {
           this.buttonState = State.New;
         }
       }
     } catch (ignored) {
-      if (this.content === this.contentType.QR) {
-        this.notRecognized = '';
-        this.buttonState = State.Empty;
+      if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+        this.generate();
       } else {
         this.buttonState = State.Error;
       }
     }
+  }
+
+  async generate () {
+    this.notRecognized = '';
+    this.buttonState = State.Empty;
+    do {
+      this.loginGenerate = this.authService.makeNewLogin(10);
+      if (!await this.dds.exists(AuthService.toId(this.loginGenerate))) {
+        break;
+      }
+    } while (true);
   }
 
   async letLogin() {
