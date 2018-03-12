@@ -1,15 +1,20 @@
-import {Component, Output} from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Coin } from '../../../services/keychain.service';
+import { Coin, Token } from '../../../services/keychain.service';
+import { NotificationService } from '../../../services/notification.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent {
+export class WalletComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
+
   public isOpened = false;
   public title = 'Wallet';
+  public isExitTap = false;
   public navLinks = [{
       name: 'Wallet',
       link: ['/navigator', { outlets: { navigator: ['wallet'] } }],
@@ -56,11 +61,30 @@ export class WalletComponent {
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos'},
+    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos', coin: Token.EOS},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
 
-  constructor(private readonly router: Router) { }
+  @ViewChild('sidenav') sidenav;
+
+  constructor(
+              private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService) { }
+
+  ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
 
   public async onNav(navLink) {
     await this.router.navigate(navLink.link);
@@ -72,5 +96,23 @@ export class WalletComponent {
 
   async onTileClicked(coin: Coin) {
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', coin] } }]);
+  }
+
+  async onBackClicked() {
+    if (this.isOpened) {
+      console.log('isOpened');
+      this.sidenav.toggle();
+    } else if (this.isExitTap) {
+      console.log('isExitTap');
+      this.notification.hide();
+      await this.router.navigate(['/start']);
+    } else {
+      console.log('await');
+      this.notification.show('Tap again to exit');
+      this.isExitTap = true;
+      setTimeout(() => this.ngZone.run(() => {
+        this.isExitTap = false;
+      }), 3000);
+    }
   }
 }

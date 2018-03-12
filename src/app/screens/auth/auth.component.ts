@@ -1,14 +1,15 @@
 import {
   Component, AfterViewInit, ChangeDetectorRef, OnInit, ElementRef,
-  ViewChild, trigger, transition, style, animate, sequence, AfterViewChecked
+  ViewChild, trigger, transition, style, animate, sequence, OnDestroy
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import {AuthService, FactorIconAsset, FactorType, LoginType} from '../../services/auth.service';
+import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
-import {KeyChainService} from '../../services/keychain.service';
+import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
+import { NavigationService } from '../../services/navigation.service';
 
 declare const Utils: any;
 
@@ -27,7 +28,9 @@ declare const Utils: any;
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent implements OnInit, AfterViewInit {
+export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
+  private subscriptions = [];
+
   username = '';
   login = 'Sign in';
 
@@ -48,12 +51,17 @@ export class AuthComponent implements OnInit, AfterViewInit {
     private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
-    private readonly keyChain: KeyChainService
-  ) {
-    this.dialog = dialog;
-  }
+    private readonly keyChain: KeyChainService,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     $('#factor-container').scroll(function () {
       if ($(this).scrollTop() > 0) {
         $('#top-scroller').fadeIn();
@@ -71,6 +79,11 @@ export class AuthComponent implements OnInit, AfterViewInit {
     this.loginType = this.authService.loginType;
     this.isPasswordFirst = this.authService.isPasswordFirst;
     this.icon_qr = FactorIconAsset.QR;
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   isPasswordChanged(val) {
@@ -150,6 +163,10 @@ export class AuthComponent implements OnInit, AfterViewInit {
 
   _sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/login']);
   }
 }
 

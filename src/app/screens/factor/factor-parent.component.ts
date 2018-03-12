@@ -1,19 +1,23 @@
-import {Component, NgZone, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-factor',
   templateUrl: './factor-parent.component.html',
   styleUrls: ['./factor-parent.component.css']
 })
-export class FactorParentComponent implements OnInit {
+export class FactorParentComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
+
   next: string = null;
   back: string = null;
   isBlack = true;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly navigationService: NavigationService
   ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
@@ -29,9 +33,20 @@ export class FactorParentComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+  }
 
-  async onBack() {
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  async onBackClicked() {
     switch (this.back) {
       case 'start':
         await this.router.navigate(['/start']);

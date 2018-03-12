@@ -9,4 +9,8 @@ export class NotificationService {
   show(message: string) {
     window.plugins.toast.showLongBottom(message, 3000, message, console.log(message));
   }
+
+  hide() {
+    window.plugins.toast.hide();
+  }
 }

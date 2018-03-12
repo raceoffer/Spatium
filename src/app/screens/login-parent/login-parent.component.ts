@@ -1,9 +1,10 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {AuthService, LoginType} from '../../services/auth.service';
+import { AuthService, LoginType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
+import { NavigationService } from '../../services/navigation.service';
 
 declare const Utils: any;
 
@@ -28,7 +29,9 @@ declare const nfc: any;
   templateUrl: './login-parent.component.html',
   styleUrls: ['./login-parent.component.css']
 })
-export class LoginParentComponent  implements OnInit {
+export class LoginParentComponent  implements OnInit, OnDestroy {
+  private subscriptions = [];
+
   contentType = Content;
   content = Content.Login;
 
@@ -52,10 +55,18 @@ export class LoginParentComponent  implements OnInit {
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
     private readonly keychain: KeyChainService,
-    private readonly dds: DDSService
-  ) { }
+    private readonly dds: DDSService,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
+
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     nfc.enabled(function () {}, function (e) {
       if (e === 'NO_NFC') {
         this.ngZone.run(async () => {
@@ -63,6 +74,11 @@ export class LoginParentComponent  implements OnInit {
         });
       }
     }.bind(this));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   toggleContent(content) {
@@ -169,5 +185,9 @@ export class LoginParentComponent  implements OnInit {
     } else {
       // do nothing
     }
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/start']);
   }
 }

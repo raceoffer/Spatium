@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {WalletService} from '../../services/wallet.service';
 
 @Component({
@@ -12,9 +12,11 @@ export class ConnectComponent {
 
   progress = this.wallet.syncProgress;
 
+  @Output() cancel: EventEmitter<any> = new EventEmitter<any>();
+
   constructor(private wallet: WalletService) {}
 
   async cancelSync() {
-    await this.wallet.cancelSync();
+    this.cancel.emit();
   }
 }

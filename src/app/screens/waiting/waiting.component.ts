@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { BluetoothService, Device } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-waiting',
@@ -18,17 +19,36 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   discovering = this.bt.discovering;
   synchronizing = this.wallet.synchronizing;
 
-  subscriptions = [];
+  syncBool = false;
+
+  private subscriptions = [];
 
   devices = [];
 
   constructor(
     private bt: BluetoothService,
     private wallet: WalletService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.synchronizing.subscribe((state) => {
+        this.syncBool = state;
+      })
+    );
+
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        if (!this.syncBool) {
+          await this.onBackClicked();
+        } else {
+          await this.cancelConnect();
+        }
+      })
+    );
+
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
         await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
@@ -105,5 +125,13 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async startDiscovery() {
     await this.bt.startDiscovery();
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/start']);
+  }
+
+  async cancelConnect() {
+    await this.wallet.cancelSync();
   }
 }

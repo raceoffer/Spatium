@@ -1,6 +1,6 @@
 import {
   Component, OnInit, ElementRef,
-  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style
+  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
@@ -12,6 +12,7 @@ import { DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
+import { NavigationService } from '../../services/navigation.service';
 
 declare const Utils: any;
 
@@ -30,7 +31,9 @@ declare const Utils: any;
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']
 })
-export class RegistrationComponent implements OnInit, AfterViewInit {
+export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
+  private subscriptions = [];
+
   stPassword = 'Password';
   stRegistration = 'Sign up';
   username: string = null;
@@ -56,12 +59,19 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
-    private readonly authSevice: AuthService
+    private readonly authSevice: AuthService,
+    private readonly navigationService: NavigationService
   ) {
     this.changeDetectorRef = changeDetectorRef;
   }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.username = this.authSevice.login;
     this.password = this.authSevice.password;
     this.factors = this.authSevice.factors;
@@ -92,6 +102,11 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.goBottom();
 
     this.changeDetectorRef.detectChanges();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   checkOverflow (element) {
@@ -140,7 +155,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit {
     this.factorContainer.nativeElement.classList.add('content');
   }
 
-  async onBack() {
+  async onBackClicked() {
     this.cancel.next(true);
     await this.router.navigate(['/login']);
   }

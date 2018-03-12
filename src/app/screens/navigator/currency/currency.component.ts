@@ -1,10 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
-import { Coin } from '../../../services/keychain.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Coin, Token } from '../../../services/keychain.service';
+import { CurrencyService, Info } from '../../../services/currency.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const bcoin: any;
 
@@ -18,28 +19,22 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public txType = TransactionType;
 
-  public selectedAddress: string = null;
+  public currency: Coin | Token = null;
+  public currencyInfo: Info = null;
 
-  public currencyWallet: CurrencyWallet;
+  public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: Observable<string>;
-  public balanceCurrencyConfirmed: Observable<number>;
-  public balanceCurrencyUnconfirmed: Observable<number>;
-  public balanceUsdConfirmed: Observable<number>;
-  public balanceUsdUnconfirmed: Observable<number>;
-  public transactions: Observable<Array<HistoryEntry>>;
-
-  public currencySymbol: BehaviorSubject<string> = new BehaviorSubject('');
-  public currencyTitle: BehaviorSubject<string> = new BehaviorSubject('');
-
-  public rateBtcUsd = 15000;
+  public walletAddress: Observable<string> = null;
+  public balanceCurrencyConfirmed: Observable<number> = null;
+  public balanceCurrencyUnconfirmed: Observable<number> = null;
+  public balanceUsdConfirmed: Observable<number> = null;
+  public balanceUsdUnconfirmed: Observable<number> = null;
+  public transactions: Observable<Array<HistoryEntry>> = null;
 
   public accountLabel = 'Account';
   public sendLabel = 'Send';
 
   private subscriptions = [];
-
-  private coin: Coin = null;
 
   private static compareTransactions(a, b) {
     // First unconfirmed transactions
@@ -69,48 +64,33 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
+    private readonly ngZone: NgZone,
     private readonly route: ActivatedRoute,
-    private readonly wallet: WalletService
-  ) {}
+    private readonly wallet: WalletService,
+    private readonly currencyService: CurrencyService,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
     this.subscriptions.push(
-      this.route.params.subscribe((params: Params) => {
-        this.coin = Number(params['coin']) as Coin;
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
 
-        switch (this.coin) {
-          case Coin.BTC:
-            this.currencyTitle.next('Bitcoin');
-            this.currencySymbol.next('BTC');
-            break;
-          case Coin.BCH:
-            this.currencyTitle.next('Bitcoin Cash');
-            this.currencySymbol.next('BCH');
-            break;
-          case Coin.ETH:
-            this.currencyTitle.next('Ethereum');
-            this.currencySymbol.next('ETH');
-            break;
-        }
+    this.subscriptions.push(
+      this.route.params.subscribe(async (params: Params) => {
+        this.currency = Number(params['coin']) as Coin | Token;
+        this.currencyInfo = await this.currencyService.getInfo(this.currency);
 
-        this.currencyWallet = this.wallet.currencyWallets.get(this.coin);
+        this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
 
         this.walletAddress = this.currencyWallet.address;
         this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
         this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * this.rateBtcUsd);
-        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * this.rateBtcUsd);
+        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
+        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
         this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));
-
-        this.subscriptions.push(this.currencyWallet.transactions.subscribe(txs => {
-          console.log(txs);
-        }));
-
-        this.subscriptions.push(
-          this.walletAddress.subscribe(address => {
-            this.selectedAddress = address;
-          })
-        );
       }));
   }
 
@@ -120,6 +100,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async send() {
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.coin] } }]);
+    await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.currency] } }]);
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
   }
 }
