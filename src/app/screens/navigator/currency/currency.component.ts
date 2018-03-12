@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
 import { Coin, Token } from '../../../services/keychain.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CurrencyService, Info } from '../../../services/currency.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const bcoin: any;
 
@@ -64,12 +64,20 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
+    private readonly ngZone: NgZone,
     private readonly route: ActivatedRoute,
     private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService
-  ) {}
+    private readonly currencyService: CurrencyService,
+    private readonly navigationService: NavigationService
+  ) {  }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.subscriptions.push(
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
@@ -93,5 +101,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async send() {
     await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.currency] } }]);
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
   }
 }

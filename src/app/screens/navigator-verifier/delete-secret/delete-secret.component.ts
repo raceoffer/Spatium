@@ -1,15 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FileService } from '../../../services/file.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import {NavigationService} from '../../../services/navigation.service';
 
 @Component({
   selector: 'app-delete-secret',
   templateUrl: './delete-secret.component.html',
   styleUrls: ['./delete-secret.component.css']
 })
-export class DeleteSecretComponent implements OnInit {
+export class DeleteSecretComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
+
   title = 'Deleting secret';
   description = 'Please confirm that you want to delete the secret from this device. Type the following word with respect to the register.';
   checkPhrase = 'delete';
@@ -23,12 +26,19 @@ export class DeleteSecretComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly fs: FileService,
     private readonly authService: AuthService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService
   ) {
     this.checkPhrase = this.сapitalizeRandomChars(this.checkPhrase);
   }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.route.params.subscribe((params: Params) => {
       if (params['back']) {
         this.back = params['back'];
@@ -36,10 +46,15 @@ export class DeleteSecretComponent implements OnInit {
     });
   }
 
-  async onBack() {
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  async onBackClicked() {
     switch (this.back) {
       case 'pincode':
-        await this.router.navigate(['/factor', { back: 'start' }, { outlets: {'factor': ['pincode', { next: 'waiting' }] } }]);
+        await this.router.navigate(['/factor', { back: 'start' }, { outlets: {'factor': ['pincode', { next: 'waiting' }]}}]);
         break;
       case 'verify-transaction':
         await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);

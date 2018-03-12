@@ -6,10 +6,10 @@ import { NotificationService } from '../../../services/notification.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { Coin, Token } from '../../../services/keychain.service';
 import { Observable } from 'rxjs/Observable';
-
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CurrencyService, Info } from '../../../services/currency.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const bcoin: any;
 
@@ -65,10 +65,17 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     private readonly notification: NotificationService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly currencyService: CurrencyService
+    private readonly currencyService: CurrencyService,
+    private readonly navigationService: NavigationService
   ) { }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.subscriptions.push(
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
@@ -121,7 +128,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async onBack() {
+  async onBackClicked() {
     if (this.phase.getValue() === Phase.Confirmation) {
       await this.currencyWallet.rejectTransaction();
     }

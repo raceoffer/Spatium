@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const nfc: any;
 
@@ -18,7 +19,8 @@ enum State {
   templateUrl: './secret-export.component.html',
   styleUrls: ['./secret-export.component.css']
 })
-export class SecretExportComponent implements OnInit {
+export class SecretExportComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
 
   contentType = Content;
   content = Content.QR;
@@ -37,9 +39,17 @@ export class SecretExportComponent implements OnInit {
 
   isNfcAvailable = true;
 
-  constructor(private readonly router: Router) { }
+  constructor(private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     nfc.enabled(function () {}, function (e) {
       if (e === 'NO_NFC') {
         this.ngZone.run(async () => {
@@ -49,7 +59,12 @@ export class SecretExportComponent implements OnInit {
     }.bind(this));
   }
 
-  async onBack() {
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  async onBackClicked() {
     await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
   }
 

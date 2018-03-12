@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
 import { Router } from '@angular/router';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-verify-waiting',
@@ -16,15 +17,35 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
   synchronizing = this.wallet.synchronizing;
   ready = this.wallet.ready;
 
-  subscriptions = [];
+  syncBool = false;
+
+  private subscriptions = [];
 
   constructor(
     private readonly router: Router,
     private readonly bt: BluetoothService,
-    private readonly wallet: WalletService
+    private readonly wallet: WalletService,
+    private readonly navigationService: NavigationService
   ) { }
 
   ngOnInit() {
+
+    this.subscriptions.push(
+      this.synchronizing.subscribe((state) => {
+        this.syncBool = state;
+      })
+    );
+
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        if (!this.syncBool) {
+          await this.onBackClicked();
+        } else {
+          await this.cancelConnect();
+        }
+      })
+    );
+
     this.subscriptions.push(
       this.wallet.readyEvent.subscribe(async () =>  {
         await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
@@ -83,5 +104,13 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
 
   async enableDiscoverable() {
     await this.bt.enableDiscovery();
+  }
+
+  async onBackClicked() {
+    await this.router.navigate(['/start']);
+  }
+
+  async cancelConnect() {
+    await this.wallet.cancelSync();
   }
 }

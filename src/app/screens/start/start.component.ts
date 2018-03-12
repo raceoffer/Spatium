@@ -1,32 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
+import { NavigationService } from '../../services/navigation.service';
 
 declare const Utils: any;
+declare const navigator: any;
 
 @Component({
   selector: 'app-start',
   templateUrl: './start.component.html',
   styleUrls: ['./start.component.css']
 })
-export class StartComponent implements OnInit {
+export class StartComponent implements OnInit, OnDestroy {
+  private subscriptions = [];
+
   constructor(
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly fs: FileService,
     private readonly wallet: WalletService,
     private readonly keychain: KeyChainService,
-    private readonly bt: BluetoothService
+    private readonly bt: BluetoothService,
+    private readonly navigationService: NavigationService
   ) {}
 
   async ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async (e) => {
+        await this.eventOnBackClicked(e);
+      })
+    );
+
     await this.bt.disconnect();
     await this.wallet.reset();
     this.keychain.reset();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   async onOpenClicked() {
@@ -41,5 +57,10 @@ export class StartComponent implements OnInit {
     }
 
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+  }
+
+  eventOnBackClicked(e) {
+    e.preventDefault();
+    navigator.app.exitApp();
   }
 }
