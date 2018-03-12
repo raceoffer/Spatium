@@ -64,4 +64,5 @@
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
     <plugin name="org.devgeeks.Canvas2ImagePlugin" spec="https://github.com/devgeeks/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-clipboard" spec="file:../cordova-plugin-clipboard" />
+    <plugin name="cordova-plugin-keychain-touch-id" spec="^3.2.1" />
 </widget>

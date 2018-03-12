@@ -16,7 +16,6 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
-import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
@@ -36,7 +35,6 @@ const appRoutes: Routes = [
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
-  { path: 'fingerprint', component: FingerPrintComponent},
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [

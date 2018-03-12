@@ -58,7 +58,6 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { KeyChainService } from './services/keychain.service';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
-import { FingerPrintComponent } from './screens/finger-print/finger-print.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
@@ -96,7 +95,6 @@ import { NavigationService } from './services/navigation.service';
     NgInitDirective,
     WalletComponent,
     RegistrationSuccessComponent,
-    FingerPrintComponent,
     AutofocusDirective,
     FactorNodeComponent,
     CurrencyComponent,

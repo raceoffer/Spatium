@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutAlign="center center">
+<div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
   <div *ngIf="state === stateType.Create" style="height: 20px">
     {{ stCreate }}
   </div>
@@ -71,11 +71,8 @@
   </div>
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
-      <button mat-icon-button *ngIf="state === stateType.Unlock" class="keyboard-size" (click)="onDeleteClicked()">
-        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">delete_forever</mat-icon>
-      </button>
-      <button mat-icon-button *ngIf="state === stateType.Create" class="keyboard-size" (click)="onImportClicked()">
-        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">import_export</mat-icon>
+      <button mat-icon-button class="keyboard-size" *ngIf="hasTouch" (click)="onFingerClicked()">
+        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">fingerprint</mat-icon>
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
@@ -89,4 +86,22 @@
       </button>
     </div>
   </div>
+</div>
+<div class="footer text-center" style="bottom: 0px;">
+  <div class="width-button-width" style="display: inline-block;">
+    <button mat-icon-button [matMenuTriggerFor]="menu" style="float: right;">
+      <mat-icon style="opacity: 0.5;">settings</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item *ngIf="state === stateType.Create" (click)="onImportClicked()">
+        <mat-icon>import_export</mat-icon>
+        <span>Import secret</span>
+      </button>
+      <button mat-menu-item *ngIf="state === stateType.Unlock" (click)="onDeleteClicked()">
+        <mat-icon>delete_forever</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </div>
+
 </div>
