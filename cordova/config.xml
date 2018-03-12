@@ -65,4 +65,5 @@
     <plugin name="org.devgeeks.Canvas2ImagePlugin" spec="https://github.com/devgeeks/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-clipboard" spec="file:../cordova-plugin-clipboard" />
     <plugin name="cordova-plugin-keychain-touch-id" spec="^3.2.1" />
+    <plugin name="phonegap-plugin-mobile-accessibility" spec="git+https://github.com/phonegap/phonegap-mobile-accessibility.git" />
 </widget>
