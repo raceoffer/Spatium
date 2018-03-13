@@ -77,13 +77,13 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           this.currentCoin = coin;
           this.currentInfo = await this.currencyService.getInfo(this.currentCoin);
 
-          const outputs = currencyWallet.outputs(transaction);
-
-          if (outputs.length < 1) {
+          if (!currencyWallet.verify(transaction)) {
             console.log('Received invalid transaction');
             await currencyWallet.rejectTransaction();
             return;
           }
+
+          const outputs = currencyWallet.outputs(transaction);
 
           this.address = outputs[0].address;
           this.btc = currencyWallet.fromInternal(outputs[0].value.toString());

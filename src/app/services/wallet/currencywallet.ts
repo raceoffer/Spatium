@@ -180,7 +180,17 @@ export class CurrencyWallet {
   }
 
   public outputs(transaction) {
-    return transaction.totalOutputs();
+    return transaction.totalOutputs().outputs;
+  }
+
+  public verify(transaction: any, maxFee?: number): boolean {
+    const statistics = transaction.totalOutputs();
+
+    if (!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0) {
+      return false;
+    }
+
+    return true;
   }
 
   public async acceptTransaction() {
