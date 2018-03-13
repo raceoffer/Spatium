@@ -180,7 +180,7 @@ export class CurrencyWallet {
   }
 
   public outputs(transaction) {
-    return transaction.totalOutputs().outputs;
+    return transaction.totalOutputs();
   }
 
   public verify(transaction: any, maxFee?: number): boolean {
@@ -292,7 +292,7 @@ export class CurrencyWallet {
     return verify;
   }
 
-  public async createTransaction(address, value) {
+  public async createTransaction(address, value, fee?) {
     return null;
   }
 

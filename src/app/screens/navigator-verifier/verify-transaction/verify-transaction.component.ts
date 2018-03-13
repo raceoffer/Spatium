@@ -20,6 +20,8 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   address = '';
   btc;
   usd;
+  fee;
+  feeUsd;
 
   public title = 'Awaiting confirmations';
   public navLinks = [{
@@ -85,15 +87,17 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
           const outputs = currencyWallet.outputs(transaction);
 
-          this.address = outputs[0].address;
-          this.btc = currencyWallet.fromInternal(outputs[0].value.toString());
-          this.usd = this.btc * this.currentInfo.rate;
-          this.showTransaction = true;
+          let fee = 0;
+          fee += outputs.inputs.reduce((sum, input) => sum + input.value, 0);
+          fee -= outputs.outputs.reduce((sum, output) => sum + output.value, 0);
+          fee -= outputs.change.reduce((sum, change) => sum + change.value, 0);
 
-          console.log('Transaction:');
-          console.log(this.address);
-          console.log(this.btc);
-          console.log(this.usd);
+          this.address = outputs.outputs[0].address;
+          this.btc = currencyWallet.fromInternal(outputs.outputs[0].value.toString());
+          this.usd = this.btc * this.currentInfo.rate;
+          this.fee = currencyWallet.fromInternal(fee.toString());
+          this.feeUsd = this.fee * this.currentInfo.rate;
+          this.showTransaction = true;
         }));
     });
   }

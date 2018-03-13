@@ -71,7 +71,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public async createTransaction(address, value) {
+  public async createTransaction(address, value, fee?) {
     const transaction = await this.ethereumWallet.createTransaction(
       address,
       this.toInternal(value),

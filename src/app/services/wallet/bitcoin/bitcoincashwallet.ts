@@ -215,7 +215,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
     return true;
   }
 
-  public async createTransaction(address, value) {
+  public async createTransaction(address, value, fee) {
     const transaction = BitcoinCashTransaction.fromOptions({
       network: this.network
     });

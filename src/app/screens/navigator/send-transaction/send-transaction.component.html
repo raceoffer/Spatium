@@ -70,6 +70,43 @@
     </tr>
   </table>
 
+  <span class="full-width label full-width-label">{{ stFee }}</span>
+  <div class="full-width field" style="margin-bottom: 13px;">
+    <mat-select [formControl]="feeTypeControl">
+      <mat-option [value]="feeType.Manual">
+        {{stManual}}
+      </mat-option>
+      <mat-option [value]="feeType.Normal">
+        {{stNormal}}
+      </mat-option>
+      <mat-option [value]="feeType.Economy">
+        {{stEconomy}}
+      </mat-option>
+    </mat-select>
+  </div>
+
+  <table class="full-width text-center two-columns">
+    <tr>
+      <td>
+        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+        <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
+          <span>
+            <input matInput [formControl]="fee" [readonly]="feeTypeControl.value !== feeType.Manual" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01">
+          </span>
+        </div>
+      </td>
+      <td>
+        <span class="label" style="margin-left: 19px;">USD</span>
+        <div class="field right disable">
+            <span>
+              {{(feeUsd | async) || 0 }}
+            </span>
+        </div>
+      </td>
+    </tr>
+  </table>
+
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 0px">
 
     <div style=" bottom: 23px; position: relative;

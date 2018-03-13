@@ -1,4 +1,4 @@
-import { OnInit, Component, OnDestroy } from '@angular/core';
+import { OnInit, Component, OnDestroy, NgZone } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { WalletService } from '../../../services/wallet.service';
@@ -20,6 +20,12 @@ enum Phase {
   Sending
 }
 
+enum Fee {
+  Manual,
+  Normal,
+  Economy
+}
+
 @Component({
   selector: 'app-send-transaction',
   templateUrl: './send-transaction.component.html',
@@ -31,6 +37,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public receiver = new FormControl();
   public amount = new FormControl();
   public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
+
+  public feeType: any = Fee;
+  public feeTypeControl = new FormControl();
+  public fee = new FormControl();
+  public feeUsd = this.fee.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -44,6 +55,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stCancel = 'Cancel';
   stTransfer = 'Transfer';
   stSend = 'Send';
+
+  stFee = 'Transaction fee';
+  stManual = 'Manual';
+  stNormal = 'Normal (0-1h)';
+  stEconomy = 'Economy (1-24h)';
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -62,6 +78,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
+    private readonly ngZone: NgZone,
     private readonly walletService: WalletService,
     private readonly notification: NotificationService,
     private readonly route: ActivatedRoute,
@@ -100,13 +117,24 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
         this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
 
+        this.balanceBtcUnconfirmed.subscribe(v => console.log('balance', v));
+        this.amount.valueChanges.subscribe(v => console.log('amount', v));
+        this.receiver.valueChanges.subscribe(v => console.log('receiver', v));
+        this.fee.valueChanges.subscribe(v => console.log('fee', v));
+
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
           this.amount.valueChanges,
           this.receiver.valueChanges,
-          (balance, amount, receiver) => {
-            return balance > amount && amount > 0 && receiver.length > 0;
+          this.fee.valueChanges,
+          (balance, amount, receiver, fee) => {
+            console.log('validator', balance, amount, receiver, fee);
+            return balance > (amount + fee) && amount > 0 && receiver.length > 0;
           });
+
+        console.log('redy');
+
+        this.feeTypeControl.setValue(Fee.Normal);
       }));
 
     this.subscriptions.push(
@@ -114,11 +142,29 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         if (creation) {
           this.receiver.enable();
           this.amount.enable();
-          this.receiver.setValue('ggggggg');
+          this.feeTypeControl.enable();
+          this.fee.enable();
+          this.receiver.setValue('');
           this.amount.setValue(0);
+          this.feeTypeControl.setValue(Fee.Normal);
         } else {
           this.receiver.disable();
           this.amount.disable();
+          this.feeTypeControl.disable();
+          this.fee.disable();
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.feeTypeControl.valueChanges.subscribe(value => {
+        switch (value) {
+          case Fee.Normal:
+            this.fee.setValue(0.001);
+            break;
+          case Fee.Economy:
+            this.fee.setValue(0.0001);
+            break;
         }
       })
     );
@@ -138,7 +184,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value);
+    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value, this.fee.value);
     if (tx) {
       this.phase.next(Phase.Confirmation);
       await this.currencyWallet.requestTransactionVerify(tx);
@@ -180,16 +226,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   paste () {
-    let paste = '';
-    cordova.plugins.clipboard.paste(function (text) {
-      console.log(text);
-      paste = text;
-      if (paste !== '') {
-        this.receiver.setValue(paste);
+    cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
+      if (text !== '') {
+        this.receiver.setValue(text);
       }
-    }.bind(this), function (e) {console.log(e)});
-
+    }), e => console.log(e));
   }
-
 }
 

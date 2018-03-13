@@ -87,7 +87,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public async createTransaction(address, value) {
+  public async createTransaction(address, value, fee?) {
     const transaction = await this.erc20Wallet.createTransaction(
       address,
       this.toInternal(value),
