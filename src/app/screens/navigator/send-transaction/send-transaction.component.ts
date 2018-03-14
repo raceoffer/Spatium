@@ -37,7 +37,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiver = new FormControl();
   public amount = new FormControl();
-  public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
+  public amountUsd = new FormControl();
 
   public feeType: any = Fee;
   public feeTypeControl = new FormControl();
@@ -53,7 +53,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stSigningResult = 'Transaction is signed';
 
   stContinue = 'Continue';
-  stCancel = 'Cancel';
   stTransfer = 'Transfer';
   stSend = 'Send';
 
@@ -151,16 +150,30 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
+      this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
+        this.amountUsd.setValue(value * (this.currencyInfo ? this.currencyInfo.rate : 1) );
+      })
+    );
+
+    this.subscriptions.push(
+      this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+        this.amount.setValue(value / (this.currencyInfo ? this.currencyInfo.rate : 1) );
+      })
+    );
+
+    this.subscriptions.push(
       this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
         if (creation) {
           this.receiver.enable();
           this.amount.enable();
+          this.amountUsd.enable();
           this.feeTypeControl.enable();
           this.fee.enable();
           this.feeUsd.enable();
         } else {
           this.receiver.disable();
           this.amount.disable();
+          this.amountUsd.enable();
           this.feeTypeControl.disable();
           this.fee.disable();
           this.feeUsd.disable();
