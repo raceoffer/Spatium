@@ -42,7 +42,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feeType: any = Fee;
   public feeTypeControl = new FormControl();
   public fee = new FormControl();
-  public feeUsd = this.fee.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
+  public feeUsd = new FormControl();
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -59,8 +59,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   stFee = 'Transaction fee';
   stManual = 'Manual';
-  stNormal = 'Normal (0-1h)';
-  stEconomy = 'Economy (1-24h)';
+  stNormal = 'Normal (0-1 hour)';
+  stEconomy = 'Economy (1-24 hours)';
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -120,10 +120,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.currencyWallet.balance.map(balance => balance.confirmed),
           0);
         this.balanceUsdUnconfirmed = toBehaviourSubject(
-          this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0)),
+          this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 1)),
           0);
         this.balanceUsdConfirmed = toBehaviourSubject(
-          this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0)),
+          this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 1)),
           0);
 
         this.validatorObserver = combineLatest(
@@ -139,17 +139,31 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }));
 
     this.subscriptions.push(
+      this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
+        this.feeUsd.setValue(value * (this.currencyInfo ? this.currencyInfo.rate : 1) );
+      })
+    );
+
+    this.subscriptions.push(
+      this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+        this.fee.setValue(value / (this.currencyInfo ? this.currencyInfo.rate : 1) );
+      })
+    );
+
+    this.subscriptions.push(
       this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
         if (creation) {
           this.receiver.enable();
           this.amount.enable();
           this.feeTypeControl.enable();
           this.fee.enable();
+          this.feeUsd.enable();
         } else {
           this.receiver.disable();
           this.amount.disable();
           this.feeTypeControl.disable();
           this.fee.disable();
+          this.feeUsd.disable();
         }
       })
     );
