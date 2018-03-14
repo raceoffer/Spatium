@@ -88,8 +88,8 @@ export class CurrencyComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
         this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
         this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
+        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate.getValue() : 0));
+        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate.getValue() : 0));
         this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));
       }));
   }

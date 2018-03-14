@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Coin, Token } from './keychain.service';
-import {CurrencyPriceService} from './price.service';
-import {Observable} from 'rxjs/Observable';
+import { CurrencyPriceService } from './price.service';
+import * as bsHelper from '../utils/transformers';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export class Info {
   name: string;
   symbol: string;
-  rate: Observable<number>;
+  rate: BehaviorSubject<number>;
 
-  constructor(name: string, symbol: string, rate: Observable<number>) {
+  constructor(name: string, symbol: string, rate: BehaviorSubject<number>) {
     this.name = name;
     this.symbol = symbol;
     this.rate = rate;
@@ -21,22 +22,22 @@ export class CurrencyService {
     [ Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
-      this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC')).distinctUntilChanged()
+      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC')).distinctUntilChanged(), 1)
     ) ],
     [ Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',
-      this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH')).distinctUntilChanged()
+      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH')).distinctUntilChanged(), 1)
     ) ],
     [ Coin.ETH, new Info(
       'Ethereum',
       'ETH',
-      this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH')).distinctUntilChanged()
+      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH')).distinctUntilChanged(), 1)
     ) ],
     [ Token.EOS, new Info(
       'EOS',
       'EOS',
-      this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS')).distinctUntilChanged()
+      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS')).distinctUntilChanged(), 1)
     ) ]
   ]);
 

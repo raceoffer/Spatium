@@ -97,8 +97,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
         this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
         this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
+        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate.getValue() : 0));
+        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate.getValue() : 0));
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
@@ -187,7 +187,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (paste !== '') {
         this.receiver.setValue(paste);
       }
-    }.bind(this), function (e) {console.log(e)});
+    }.bind(this), function (e) {console.log(e); }
+    );
 
   }
 

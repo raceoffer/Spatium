@@ -87,7 +87,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
           this.address = outputs[0].address;
           this.btc = currencyWallet.fromInternal(outputs[0].value.toString());
-          this.usd = this.btc * this.currentInfo.rate;
+          this.usd = this.btc * this.currentInfo.rate.getValue();
           this.showTransaction = true;
 
           console.log('Transaction:');
