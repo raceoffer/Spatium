@@ -10,6 +10,7 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const bcoin: any;
 declare const cordova: any;
@@ -66,11 +67,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: Observable<string> = null;
-  public balanceBtcConfirmed: Observable<number> = null;
-  public balanceBtcUnconfirmed: Observable<number> = null;
-  public balanceUsdConfirmed: Observable<number> = null;
-  public balanceUsdUnconfirmed: Observable<number> = null;
+  public walletAddress: BehaviorSubject<string> = null;
+  public balanceBtcConfirmed: BehaviorSubject<number> = null;
+  public balanceBtcUnconfirmed: BehaviorSubject<number> = null;
+  public balanceUsdConfirmed: BehaviorSubject<number> = null;
+  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
   public validatorObserver: Observable<boolean> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
@@ -112,27 +113,27 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }));
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
-        this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-
-        this.balanceBtcUnconfirmed.subscribe(v => console.log('balance', v));
-        this.amount.valueChanges.subscribe(v => console.log('amount', v));
-        this.receiver.valueChanges.subscribe(v => console.log('receiver', v));
-        this.fee.valueChanges.subscribe(v => console.log('fee', v));
+        this.balanceBtcUnconfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance.unconfirmed),
+          0);
+        this.balanceBtcConfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance.confirmed),
+          0);
+        this.balanceUsdUnconfirmed = toBehaviourSubject(
+          this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0)),
+          0);
+        this.balanceUsdConfirmed = toBehaviourSubject(
+          this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0)),
+          0);
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
-          this.amount.valueChanges,
-          this.receiver.valueChanges,
-          this.fee.valueChanges,
+          toBehaviourSubject(this.amount.valueChanges, 0),
+          toBehaviourSubject(this.receiver.valueChanges, ''),
+          toBehaviourSubject(this.fee.valueChanges, 0),
           (balance, amount, receiver, fee) => {
-            console.log('validator', balance, amount, receiver, fee);
             return balance > (amount + fee) && amount > 0 && receiver.length > 0;
           });
-
-        console.log('redy');
 
         this.feeTypeControl.setValue(Fee.Normal);
       }));
@@ -144,9 +145,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.amount.enable();
           this.feeTypeControl.enable();
           this.fee.enable();
-          this.receiver.setValue('');
-          this.amount.setValue(0);
-          this.feeTypeControl.setValue(Fee.Normal);
         } else {
           this.receiver.disable();
           this.amount.disable();

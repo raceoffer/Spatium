@@ -63,7 +63,7 @@
         <span class="label" style="margin-left: 19px;">USD</span>
         <div class="field right disable">
             <span>
-              {{(amountUsd | async) || 0 }}
+              {{ (amountUsd | async) || 0 }}
             </span>
         </div>
       </td>
@@ -74,13 +74,13 @@
   <div class="full-width field" style="margin-bottom: 13px;">
     <mat-select [formControl]="feeTypeControl">
       <mat-option [value]="feeType.Manual">
-        {{stManual}}
+        {{ stManual }}
       </mat-option>
       <mat-option [value]="feeType.Normal">
-        {{stNormal}}
+        {{ stNormal }}
       </mat-option>
       <mat-option [value]="feeType.Economy">
-        {{stEconomy}}
+        {{ stEconomy }}
       </mat-option>
     </mat-select>
   </div>
@@ -100,7 +100,7 @@
         <span class="label" style="margin-left: 19px;">USD</span>
         <div class="field right disable">
             <span>
-              {{(feeUsd | async) || 0 }}
+              {{ (feeUsd | async) || 0 }}
             </span>
         </div>
       </td>
