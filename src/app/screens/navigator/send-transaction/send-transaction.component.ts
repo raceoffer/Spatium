@@ -30,7 +30,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiver = new FormControl();
   public amount = new FormControl();
-  public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
+  public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate.getValue() : 0) );
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
