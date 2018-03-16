@@ -31,9 +31,10 @@
         <td>
           <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
           <div class="field right disable">
-            <span>
+            <span *ngIf="balanceUsdUnconfirmed | async">
               {{ balanceUsdUnconfirmed | async }}
             </span>
+            <mat-spinner *ngIf="!(balanceUsdUnconfirmed | async)" diameter="25" style="margin: auto;"></mat-spinner>
           </div>
         </td>
       </tr>

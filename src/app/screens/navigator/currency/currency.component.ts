@@ -92,6 +92,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
           this.balanceCurrencyUnconfirmed,
           this.currencyInfo.rate,
           (balance, rate) => {
+            if (rate === null) {
+              return null;
+            }
             return balance * rate;
           }), 0);
 
@@ -99,6 +102,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
           this.balanceCurrencyConfirmed,
           this.currencyInfo.rate,
           (balance, rate) => {
+            if (rate === null) {
+              return null;
+            }
             return balance * rate;
           }), 0);
 

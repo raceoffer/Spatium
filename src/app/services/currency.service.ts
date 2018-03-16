@@ -22,22 +22,30 @@ export class CurrencyService {
     [ Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
-      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC')).distinctUntilChanged(), 1)
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
+        null)
     ) ],
     [ Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',
-      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH')).distinctUntilChanged(), 1)
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH') || null).distinctUntilChanged(),
+        null)
     ) ],
     [ Coin.ETH, new Info(
       'Ethereum',
       'ETH',
-      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH')).distinctUntilChanged(), 1)
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null)
     ) ],
     [ Token.EOS, new Info(
       'EOS',
       'EOS',
-      bsHelper.toBehaviourSubject(this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS')).distinctUntilChanged(), 1)
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS') || null).distinctUntilChanged(),
+        null)
     ) ]
   ]);
 
@@ -52,8 +60,6 @@ export class CurrencyService {
       return null;
     }
 
-    const info = this.staticInfo.get(currency);
-    // get real-time price if needed
-    return info;
+    return this.staticInfo.get(currency);
   }
 }

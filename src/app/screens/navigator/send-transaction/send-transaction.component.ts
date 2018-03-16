@@ -123,6 +123,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.balanceBtcUnconfirmed,
             this.currencyInfo.rate,
             (balance, rate) => {
+              if (rate === null) {
+                return null;
+              }
               return balance * rate;
             }
           ),
@@ -132,6 +135,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.balanceBtcConfirmed,
             this.currencyInfo.rate,
             (balance, rate) => {
+              if (rate === null) {
+                return null;
+              }
               return balance * rate;
             }
           ),
@@ -143,30 +149,30 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           toBehaviourSubject(this.receiver.valueChanges, ''),
           toBehaviourSubject(this.fee.valueChanges, 0),
           (balance, amount, receiver, fee) => {
-            return balance > (amount + fee) && amount > 0 && receiver.length > 0;
+            return balance > (amount + fee) && amount > 0 && receiver && receiver.length > 0;
           });
 
         this.subscriptions.push(
           this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.feeUsd.setValue(value * this.currencyInfo.rate.getValue());
+            this.feeUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1));
           })
         );
 
         this.subscriptions.push(
           this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(value / this.currencyInfo.rate.getValue());
+            this.fee.setValue(value / (this.currencyInfo.rate.getValue() || 1));
           })
         );
 
         this.subscriptions.push(
           this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amountUsd.setValue(value * this.currencyInfo.rate.getValue());
+            this.amountUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1));
           })
         );
 
         this.subscriptions.push(
           this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amount.setValue(value / this.currencyInfo.rate.getValue());
+            this.amount.setValue(value / (this.currencyInfo.rate.getValue() || 1));
           })
         );
 
