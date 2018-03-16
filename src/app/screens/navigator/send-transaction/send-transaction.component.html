@@ -103,7 +103,7 @@
   <table class="full-width text-center two-columns" *ngIf="feeTypeControl.value === feeType.Manual" style="padding-top: 10px">
     <tr>
       <td>
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
         <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
           <span>
             <input matInput

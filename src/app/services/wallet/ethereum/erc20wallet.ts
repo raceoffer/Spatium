@@ -44,6 +44,10 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     return this.erc20Wallet.fromUnits(Number(amount));
   }
 
+  public fee(transaction): number {
+    return transaction.tx.gas * transaction.tx.gasPrice;
+  }
+
   public fromJSON(tx) {
     return this.currencyCoin.fromJSON(tx);
   }
@@ -91,7 +95,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     const transaction = await this.erc20Wallet.createTransaction(
       address,
       this.toInternal(value),
-      '5000000000'
+      fee ? this.erc20Wallet.toWei(fee.toString(), 'ether') : undefined
     );
 
     return transaction;

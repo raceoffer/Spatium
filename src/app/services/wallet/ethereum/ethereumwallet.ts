@@ -29,6 +29,10 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
     this.ethereumWallet = null;
   }
 
+  public fee(transaction): number {
+    return transaction.tx.gas * transaction.tx.gasPrice;
+  }
+
   public toInternal(amount: number): string {
     return this.ethereumWallet.toWei(amount.toString(), 'ether');
   }
@@ -75,7 +79,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
     const transaction = await this.ethereumWallet.createTransaction(
       address,
       this.toInternal(value),
-      this.ethereumWallet.toWei('5', 'gwei')
+      fee ? this.ethereumWallet.toWei(fee.toString(), 'ether') : undefined
     );
 
     return transaction;

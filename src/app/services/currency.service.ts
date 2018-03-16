@@ -7,11 +7,24 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 export class Info {
   name: string;
   symbol: string;
+  gasPrice: number;
+  gasPriceLow: number;
+  gasUnit: string;
   rate: BehaviorSubject<number>;
 
-  constructor(name: string, symbol: string, rate: BehaviorSubject<number>) {
+  constructor(
+    name: string,
+    symbol: string,
+    gasPrice: number,
+    gasPriceLow: number,
+    gasUnit: string,
+    rate: BehaviorSubject<number>
+  ) {
     this.name = name;
     this.symbol = symbol;
+    this.gasPrice = gasPrice;
+    this.gasPriceLow = gasPriceLow;
+    this.gasUnit = gasUnit;
     this.rate = rate;
   }
 }
@@ -22,6 +35,9 @@ export class CurrencyService {
     [ Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
+      0.001,
+      0.0002,
+      'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
         null)
@@ -29,6 +45,9 @@ export class CurrencyService {
     [ Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',
+      0.001,
+      0.0002,
+      'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH') || null).distinctUntilChanged(),
         null)
@@ -36,6 +55,9 @@ export class CurrencyService {
     [ Coin.ETH, new Info(
       'Ethereum',
       'ETH',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
         null)
@@ -43,6 +65,9 @@ export class CurrencyService {
     [ Token.EOS, new Info(
       'EOS',
       'EOS',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS') || null).distinctUntilChanged(),
         null)

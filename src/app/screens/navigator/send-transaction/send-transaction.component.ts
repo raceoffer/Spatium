@@ -285,10 +285,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feeTypeControl.valueChanges.subscribe(value => {
             switch (value) {
               case Fee.Normal:
-                this.feePrice.setValue(0.001);
+                this.feePrice.setValue(this.currencyInfo.gasPrice);
                 break;
               case Fee.Economy:
-                this.feePrice.setValue(0.0002);
+                this.feePrice.setValue(this.currencyInfo.gasPriceLow);
                 break;
             }
           })
