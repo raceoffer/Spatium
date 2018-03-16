@@ -79,7 +79,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
     const transaction = await this.ethereumWallet.createTransaction(
       address,
       this.toInternal(value),
-      fee ? this.ethereumWallet.toWei(fee.toString(), 'ether') : undefined
+      fee ? this.toInternal(fee.toString()) : undefined
     );
 
     return transaction;

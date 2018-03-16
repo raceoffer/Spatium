@@ -95,7 +95,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     const transaction = await this.erc20Wallet.createTransaction(
       address,
       this.toInternal(value),
-      fee ? this.erc20Wallet.toWei(fee.toString(), 'ether') : undefined
+      fee ? this.toInternal(fee.toString()) : undefined
     );
 
     return transaction;
