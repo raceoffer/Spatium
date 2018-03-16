@@ -11,6 +11,9 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { roundFloat } from '../../../utils/numeric';
+
+import 'rxjs/add/operator/mergeMap';
 
 declare const cordova: any;
 
@@ -43,6 +46,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feeTypeControl = new FormControl();
   public fee = new FormControl();
   public feeUsd = new FormControl();
+  public feePrice = new FormControl();
+  public feePriceUsd = new FormControl();
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -72,6 +77,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public balanceUsdConfirmed: BehaviorSubject<number> = null;
   public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
   public validatorObserver: Observable<boolean> = null;
+
+  public estimatedSize: BehaviorSubject<number> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
@@ -112,12 +119,14 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }));
 
         this.walletAddress = this.currencyWallet.address;
+
         this.balanceBtcUnconfirmed = toBehaviourSubject(
           this.currencyWallet.balance.map(balance => balance.unconfirmed),
           0);
         this.balanceBtcConfirmed = toBehaviourSubject(
           this.currencyWallet.balance.map(balance => balance.confirmed),
           0);
+
         this.balanceUsdUnconfirmed = toBehaviourSubject(
           combineLatest(
             this.balanceBtcUnconfirmed,
@@ -152,27 +161,99 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             return balance > (amount + fee) && amount > 0 && receiver && receiver.length > 0;
           });
 
-        this.subscriptions.push(
-          this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.feeUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
-          })
-        );
+        this.estimatedSize = toBehaviourSubject(
+          this.balanceBtcUnconfirmed.flatMap(async balance => {
+            const testTx = await this.currencyWallet.createTransaction(
+              this.walletAddress.getValue(),
+              balance / 2);
 
-        this.subscriptions.push(
-          this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(value / (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
-          })
-        );
+            return testTx.estimateSize();
+          }),
+          0);
 
         this.subscriptions.push(
           this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amountUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
+            this.amountUsd.setValue(
+              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
           })
         );
-
         this.subscriptions.push(
           this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amount.setValue(value / (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
+            this.amount.setValue(
+              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.feeUsd.setValue(
+              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+            this.feePrice.setValue(
+              roundFloat(value / this.estimatedSize.getValue()),
+              { emitEvent: false });
+            this.feePriceUsd.setValue(
+              roundFloat(value / this.estimatedSize.getValue() * (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(
+              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+            this.feePrice.setValue(
+              roundFloat(value / this.estimatedSize.getValue() / (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+            this.feePriceUsd.setValue(
+              roundFloat(value / this.estimatedSize.getValue()),
+              { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.feePrice.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(
+              roundFloat(value * this.estimatedSize.getValue()),
+              { emitEvent: false });
+            this.feeUsd.setValue(
+              roundFloat(value * this.estimatedSize.getValue() * (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+            this.feePriceUsd.setValue(
+              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.feePriceUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(
+              roundFloat(value * this.estimatedSize.getValue() / (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+            this.feeUsd.setValue(
+              roundFloat(value * this.estimatedSize.getValue()),
+              { emitEvent: false });
+            this.feePrice.setValue(
+              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
+              { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.estimatedSize.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(roundFloat(value * this.feePrice.value));
+            this.feeUsd.setValue(roundFloat(value * this.feePrice.value * (this.currencyInfo.rate.getValue() || 1)));
+          })
+        );
+        this.subscriptions.push(
+          this.currencyInfo.rate.distinctUntilChanged().subscribe(value => {
+            this.amountUsd.setValue(
+              roundFloat(value * this.amount.value),
+              { emitEvent: false });
+            this.feeUsd.setValue(
+              roundFloat(value * this.fee.value),
+              { emitEvent: false });
+            this.feePriceUsd.setValue(
+              roundFloat(value * this.feePrice.value),
+              { emitEvent: false });
           })
         );
 
@@ -185,6 +266,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               this.feeTypeControl.enable();
               this.fee.enable();
               this.feeUsd.enable();
+              this.feePrice.enable();
+              this.feePriceUsd.enable();
             } else {
               this.receiver.disable();
               this.amount.disable();
@@ -192,6 +275,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               this.feeTypeControl.disable();
               this.fee.disable();
               this.feeUsd.disable();
+              this.feePrice.disable();
+              this.feePriceUsd.disable();
             }
           })
         );
@@ -200,10 +285,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feeTypeControl.valueChanges.subscribe(value => {
             switch (value) {
               case Fee.Normal:
-                this.fee.setValue(0.001);
+                this.feePrice.setValue(0.001);
                 break;
               case Fee.Economy:
-                this.fee.setValue(0.0001);
+                this.feePrice.setValue(0.0002);
                 break;
             }
           })

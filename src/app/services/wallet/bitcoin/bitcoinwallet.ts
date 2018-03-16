@@ -140,14 +140,13 @@ export class BitcoinWallet extends CurrencyWallet {
       network: this.network
     });
 
-    const satoshis = Number(this.toInternal(value));
-
     /// Fill inputs and calculate script hashes
     try {
       await transaction.prepare({
         wallet: this.watchingWallet,
         address: address,
-        value: satoshis
+        value: Number(this.toInternal(value)),
+        fee: fee ? Number(this.toInternal(fee)) : undefined
       });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to prepare transaction', e);
