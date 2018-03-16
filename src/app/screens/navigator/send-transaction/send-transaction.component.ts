@@ -154,25 +154,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.subscriptions.push(
           this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.feeUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1));
+            this.feeUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
           })
         );
 
         this.subscriptions.push(
           this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(value / (this.currencyInfo.rate.getValue() || 1));
+            this.fee.setValue(value / (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
           })
         );
 
         this.subscriptions.push(
           this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amountUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1));
+            this.amountUsd.setValue(value * (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
           })
         );
 
         this.subscriptions.push(
           this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amount.setValue(value / (this.currencyInfo.rate.getValue() || 1));
+            this.amount.setValue(value / (this.currencyInfo.rate.getValue() || 1), { emitEvent: false });
           })
         );
 
