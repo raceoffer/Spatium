@@ -1,4 +1,4 @@
-import { OnInit, Component, OnDestroy } from '@angular/core';
+import { OnInit, Component, OnDestroy, NgZone } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { WalletService } from '../../../services/wallet.service';
@@ -10,14 +10,20 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
-declare const bcoin: any;
 declare const cordova: any;
 
 enum Phase {
   Creation,
   Confirmation,
   Sending
+}
+
+enum Fee {
+  Manual,
+  Normal,
+  Economy
 }
 
 @Component({
@@ -30,7 +36,13 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiver = new FormControl();
   public amount = new FormControl();
-  public amountUsd = this.amount.valueChanges.map(value => value * (this.currencyInfo ? this.currencyInfo.rate : 0) );
+  public amountUsd = new FormControl();
+
+  public feeType: any = Fee;
+
+  public feeTypeControl = new FormControl();
+  public fee = new FormControl();
+  public feeUsd = new FormControl();
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -41,20 +53,24 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stSigningResult = 'Transaction is signed';
 
   stContinue = 'Continue';
-  stCancel = 'Cancel';
   stTransfer = 'Transfer';
   stSend = 'Send';
+
+  stFee = 'Transaction fee';
+  stManual = 'Manual';
+  stNormal = 'Normal (0-1 hour)';
+  stEconomy = 'Economy (1-24 hours)';
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
 
   public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: Observable<string> = null;
-  public balanceBtcConfirmed: Observable<number> = null;
-  public balanceBtcUnconfirmed: Observable<number> = null;
-  public balanceUsdConfirmed: Observable<number> = null;
-  public balanceUsdUnconfirmed: Observable<number> = null;
+  public walletAddress: BehaviorSubject<string> = null;
+  public balanceBtcConfirmed: BehaviorSubject<number> = null;
+  public balanceBtcUnconfirmed: BehaviorSubject<number> = null;
+  public balanceUsdConfirmed: BehaviorSubject<number> = null;
+  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
   public validatorObserver: Observable<boolean> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
@@ -62,6 +78,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
+    private readonly ngZone: NgZone,
     private readonly walletService: WalletService,
     private readonly notification: NotificationService,
     private readonly route: ActivatedRoute,
@@ -95,33 +112,99 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }));
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceBtcUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
-        this.balanceBtcConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.balanceUsdConfirmed = this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
+        this.balanceBtcUnconfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance.unconfirmed),
+          0);
+        this.balanceBtcConfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance.confirmed),
+          0);
+        this.balanceUsdUnconfirmed = toBehaviourSubject(
+          combineLatest(
+            this.balanceBtcUnconfirmed,
+            this.currencyInfo.rate,
+            (balance, rate) => {
+              return balance * rate;
+            }
+          ),
+          0);
+        this.balanceUsdConfirmed = toBehaviourSubject(
+          combineLatest(
+            this.balanceBtcConfirmed,
+            this.currencyInfo.rate,
+            (balance, rate) => {
+              return balance * rate;
+            }
+          ),
+          0);
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
-          this.amount.valueChanges,
-          this.receiver.valueChanges,
-          (balance, amount, receiver) => {
-            return balance > amount && amount > 0 && receiver.length > 0;
+          toBehaviourSubject(this.amount.valueChanges, 0),
+          toBehaviourSubject(this.receiver.valueChanges, ''),
+          toBehaviourSubject(this.fee.valueChanges, 0),
+          (balance, amount, receiver, fee) => {
+            return balance > (amount + fee) && amount > 0 && receiver.length > 0;
           });
-      }));
 
-    this.subscriptions.push(
-      this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
-        if (creation) {
-          this.receiver.enable();
-          this.amount.enable();
-          this.receiver.setValue('ggggggg');
-          this.amount.setValue(0);
-        } else {
-          this.receiver.disable();
-          this.amount.disable();
-        }
-      })
-    );
+        this.subscriptions.push(
+          this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.feeUsd.setValue(value * this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(value / this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amountUsd.setValue(value * this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amount.setValue(value / this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
+            if (creation) {
+              this.receiver.enable();
+              this.amount.enable();
+              this.amountUsd.enable();
+              this.feeTypeControl.enable();
+              this.fee.enable();
+              this.feeUsd.enable();
+            } else {
+              this.receiver.disable();
+              this.amount.disable();
+              this.amountUsd.enable();
+              this.feeTypeControl.disable();
+              this.fee.disable();
+              this.feeUsd.disable();
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.feeTypeControl.valueChanges.subscribe(value => {
+            switch (value) {
+              case Fee.Normal:
+                this.fee.setValue(0.001);
+                break;
+              case Fee.Economy:
+                this.fee.setValue(0.0001);
+                break;
+            }
+          })
+        );
+
+        this.feeTypeControl.setValue(Fee.Normal);
+      }));
   }
 
   ngOnDestroy() {
@@ -138,7 +221,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value);
+    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value, this.fee.value);
     if (tx) {
       this.phase.next(Phase.Confirmation);
       await this.currencyWallet.requestTransactionVerify(tx);
@@ -180,16 +263,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   paste () {
-    let paste = '';
-    cordova.plugins.clipboard.paste(function (text) {
-      console.log(text);
-      paste = text;
-      if (paste !== '') {
-        this.receiver.setValue(paste);
+    cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
+      if (text !== '') {
+        this.receiver.setValue(text);
       }
-    }.bind(this), function (e) {console.log(e)});
-
+    }), e => console.log(e));
   }
-
 }
 

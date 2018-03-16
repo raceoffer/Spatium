@@ -17,29 +17,6 @@
     </mat-select>
   </div>
 
-  <table class="full-width text-center two-columns">
-    <tr>
-      <td>
-          <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
-          <div class="field disable">
-            <span>
-              {{ balanceBtcUnconfirmed | async }}
-            </span>
-          </div>
-        </td>
-        <td>
-          <span class="label" style="margin-left: 19px;">USD</span>
-          <div class="field right disable">
-            <span>
-              {{ balanceUsdUnconfirmed | async }}
-            </span>
-          </div>
-        </td>
-    </tr>
-  </table>
-
-  <span class="full-width label full-width-label subtitle">Unconfirmed balance</span>
-
   <span class="full-width label full-width-label">{{ receiverPh }}</span>
   <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
     <input matInput [formControl]="receiver">
@@ -54,16 +31,69 @@
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
         <div class="field">
           <span>
-            <input matInput [formControl]="amount" type="number" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-               step="0.01">
+            <input matInput
+                   [formControl]="amount"
+                   type="number"
+                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01">
           </span>
         </div>
       </td>
       <td>
         <span class="label" style="margin-left: 19px;">USD</span>
-        <div class="field right disable">
+        <div class="field right">
+          <span>
+            <input matInput
+                   [formControl]="amountUsd"
+                   type="number"
+                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01">
+          </span>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <span class="full-width label full-width-label">{{ stFee }}</span>
+  <div class="full-width field" style="margin-bottom: 13px;">
+    <mat-select [formControl]="feeTypeControl">
+      <mat-option [value]="feeType.Manual">
+        {{ stManual }}
+      </mat-option>
+      <mat-option [value]="feeType.Normal">
+        {{ stNormal }}
+      </mat-option>
+      <mat-option [value]="feeType.Economy">
+        {{ stEconomy }}
+      </mat-option>
+    </mat-select>
+  </div>
+
+  <table class="full-width text-center two-columns">
+    <tr>
+      <td>
+        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+        <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
+          <span>
+            <input matInput
+                   [formControl]="fee"
+                   [readonly]="feeTypeControl.value !== feeType.Manual"
+                   type="number"
+                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                   step="0.01">
+          </span>
+        </div>
+      </td>
+      <td>
+        <span class="label" style="margin-left: 19px;">USD</span>
+        <div class="field right" [class.disable]="feeTypeControl.value !== feeType.Manual">
             <span>
-              {{(amountUsd | async) || 0 }}
+              <input matInput
+                     [formControl]="feeUsd"
+                     [readonly]="feeTypeControl.value !== feeType.Manual"
+                     type="number"
+                     ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+                     step="0.01">
             </span>
         </div>
       </td>
@@ -76,7 +106,9 @@
     width: 100%;">
       <span style="font-family: 'Roboto-Medium'; font-size: 15px"
             *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
-      <mat-progress-bar mode="indeterminate" color="accent" style="width: 100%; margin: 5px 0"
+      <mat-progress-bar mode="indeterminate"
+                        color="accent"
+                        style="width: 100%; margin: 5px 0"
                         *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
     </div>
 

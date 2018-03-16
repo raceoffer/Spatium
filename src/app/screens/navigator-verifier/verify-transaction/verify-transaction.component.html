@@ -42,6 +42,26 @@
             </td>
         </tr>
       </table>
+      <table class="full-width text-center two-columns">
+        <tr>
+          <td>
+            <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+            <div class="field disable">
+                <span>
+                  {{ fee }}
+                </span>
+            </div>
+          </td>
+          <td>
+            <span class="label" style="margin-left: 19px;">USD</span>
+            <div class="field right disable">
+                <span>
+                  {{ feeUsd }}
+                </span>
+            </div>
+          </td>
+        </tr>
+      </table>
 
       <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
         <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>

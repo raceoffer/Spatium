@@ -70,6 +70,7 @@ import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secre
 import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
 import { CurrencyService } from './services/currency.service';
 import { NavigationService } from './services/navigation.service';
+import { CurrencyPriceService } from './services/price.service';
 
 @NgModule({
   declarations: [
@@ -138,6 +139,7 @@ import { NavigationService } from './services/navigation.service';
   ],
   providers: [
     WalletService,
+    CurrencyPriceService,
     BluetoothService,
     LoggerService,
     AuthService,
