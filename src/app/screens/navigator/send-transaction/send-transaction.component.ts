@@ -188,23 +188,23 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
           this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
             this.feeUsd.setValue(
-              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
             this.feePrice.setValue(
               roundFloat(value / this.estimatedSize.getValue()),
               { emitEvent: false });
             this.feePriceUsd.setValue(
-              roundFloat(value / this.estimatedSize.getValue() * (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value / this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
           })
         );
         this.subscriptions.push(
           this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(
-              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
             this.feePrice.setValue(
-              roundFloat(value / this.estimatedSize.getValue() / (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value / this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
             this.feePriceUsd.setValue(
               roundFloat(value / this.estimatedSize.getValue()),
@@ -217,30 +217,30 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               roundFloat(value * this.estimatedSize.getValue()),
               { emitEvent: false });
             this.feeUsd.setValue(
-              roundFloat(value * this.estimatedSize.getValue() * (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value * this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
             this.feePriceUsd.setValue(
-              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
           })
         );
         this.subscriptions.push(
           this.feePriceUsd.valueChanges.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(
-              roundFloat(value * this.estimatedSize.getValue() / (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value * this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
             this.feeUsd.setValue(
               roundFloat(value * this.estimatedSize.getValue()),
               { emitEvent: false });
             this.feePrice.setValue(
-              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
+              roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
               { emitEvent: false });
           })
         );
         this.subscriptions.push(
           this.estimatedSize.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(roundFloat(value * this.feePrice.value));
-            this.feeUsd.setValue(roundFloat(value * this.feePrice.value * (this.currencyInfo.rate.getValue() || 1)));
+            this.feeUsd.setValue(roundFloat(value * this.feePrice.value * (this.currencyInfo.gasRate.getValue() || 1)));
           })
         );
         this.subscriptions.push(
@@ -248,6 +248,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.amountUsd.setValue(
               roundFloat(value * this.amount.value),
               { emitEvent: false });
+          })
+        );
+        this.subscriptions.push(
+          this.currencyInfo.gasRate.distinctUntilChanged().subscribe(value => {
             this.feeUsd.setValue(
               roundFloat(value * this.fee.value),
               { emitEvent: false });

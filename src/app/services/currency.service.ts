@@ -11,6 +11,7 @@ export class Info {
   gasPriceLow: number;
   gasUnit: string;
   rate: BehaviorSubject<number>;
+  gasRate: BehaviorSubject<number>;
 
   constructor(
     name: string,
@@ -18,7 +19,8 @@ export class Info {
     gasPrice: number,
     gasPriceLow: number,
     gasUnit: string,
-    rate: BehaviorSubject<number>
+    rate: BehaviorSubject<number>,
+    gasRate?: BehaviorSubject<number>
   ) {
     this.name = name;
     this.symbol = symbol;
@@ -26,6 +28,7 @@ export class Info {
     this.gasPriceLow = gasPriceLow;
     this.gasUnit = gasUnit;
     this.rate = rate;
+    this.gasRate = gasRate ? this.gasRate : rate;
   }
 }
 
@@ -70,6 +73,9 @@ export class CurrencyService {
       'ETH/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('EOS') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
         null)
     ) ]
   ]);

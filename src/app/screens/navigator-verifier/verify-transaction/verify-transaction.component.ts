@@ -93,7 +93,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           this.btc = currencyWallet.fromInternal(outputs.outputs[0].value.toString());
           this.usd = this.btc * this.currentInfo.rate.getValue();
           this.fee = currencyWallet.fromInternal(fee.toString());
-          this.feeUsd = this.fee * this.currentInfo.rate.getValue();
+          this.feeUsd = this.fee * this.currentInfo.gasRate.getValue();
           this.showTransaction = true;
         }));
     });
