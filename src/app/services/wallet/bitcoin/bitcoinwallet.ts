@@ -176,16 +176,20 @@ export class BitcoinWallet extends CurrencyWallet {
     }
 
     // check for tax value
-    let tax = 0;
-    tax += statistics.inputs.reduce((sum, input) => sum + input.value, 0);
-    tax -= statistics.outputs.reduce((sum, output) => sum + output.value, 0);
-    tax -= statistics.change.reduce((sum, change) => sum + change.value, 0);
+    const fee = this.fee(transaction);
 
-    if (maxFee ? tax > maxFee : false) {
-      return false;
-    }
+    return !(maxFee ? fee > maxFee : false);
+  }
 
-    return true;
+  public fee(transaction): number {
+    const statistics = transaction.totalOutputs();
+
+    let fee = 0;
+    fee += statistics.inputs.reduce((sum, input) => sum + input.value, 0);
+    fee -= statistics.outputs.reduce((sum, output) => sum + output.value, 0);
+    fee -= statistics.change.reduce((sum, change) => sum + change.value, 0);
+
+    return fee;
   }
 
   public async listTransactionHistory() {

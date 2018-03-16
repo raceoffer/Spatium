@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
@@ -6,8 +6,8 @@ import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services
 import { Coin, Token } from '../../../services/keychain.service';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
-
-declare const bcoin: any;
+import { toBehaviourSubject } from '../../../utils/transformers';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-currency',
@@ -64,7 +64,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
-    private readonly ngZone: NgZone,
     private readonly route: ActivatedRoute,
     private readonly wallet: WalletService,
     private readonly currencyService: CurrencyService,
@@ -86,11 +85,26 @@ export class CurrencyComponent implements OnInit, OnDestroy {
         this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceCurrencyUnconfirmed = this.currencyWallet.balance.map(balance => balance.unconfirmed);
-        this.balanceCurrencyConfirmed = this.currencyWallet.balance.map(balance => balance.confirmed);
-        this.balanceUsdUnconfirmed = this.balanceCurrencyUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.balanceUsdConfirmed = this.balanceCurrencyConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 0));
-        this.transactions = this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions));
+        this.balanceCurrencyUnconfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.unconfirmed), 0);
+        this.balanceCurrencyConfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.confirmed), 0);
+
+        this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest(
+          this.balanceCurrencyUnconfirmed,
+          this.currencyInfo.rate,
+          (balance, rate) => {
+            return balance * rate;
+          }), 0);
+
+        this.balanceUsdConfirmed = toBehaviourSubject(combineLatest(
+          this.balanceCurrencyConfirmed,
+          this.currencyInfo.rate,
+          (balance, rate) => {
+            return balance * rate;
+          }), 0);
+
+        this.transactions = toBehaviourSubject(
+          this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions)),
+          []);
       }));
   }
 

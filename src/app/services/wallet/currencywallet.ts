@@ -183,6 +183,10 @@ export class CurrencyWallet {
     return transaction.totalOutputs();
   }
 
+  public fee(transaction): number {
+    return 0;
+  }
+
   public verify(transaction: any, maxFee?: number): boolean {
     const statistics = transaction.totalOutputs();
 

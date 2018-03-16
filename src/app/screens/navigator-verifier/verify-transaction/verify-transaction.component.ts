@@ -87,16 +87,13 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
           const outputs = currencyWallet.outputs(transaction);
 
-          let fee = 0;
-          fee += outputs.inputs.reduce((sum, input) => sum + input.value, 0);
-          fee -= outputs.outputs.reduce((sum, output) => sum + output.value, 0);
-          fee -= outputs.change.reduce((sum, change) => sum + change.value, 0);
+          const fee = currencyWallet.fee(transaction);
 
           this.address = outputs.outputs[0].address;
           this.btc = currencyWallet.fromInternal(outputs.outputs[0].value.toString());
-          this.usd = this.btc * this.currentInfo.rate;
+          this.usd = this.btc * this.currentInfo.rate.getValue();
           this.fee = currencyWallet.fromInternal(fee.toString());
-          this.feeUsd = this.fee * this.currentInfo.rate;
+          this.feeUsd = this.fee * this.currentInfo.rate.getValue();
           this.showTransaction = true;
         }));
     });

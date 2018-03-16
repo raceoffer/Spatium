@@ -12,7 +12,6 @@ import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
-declare const bcoin: any;
 declare const cordova: any;
 
 enum Phase {
@@ -40,6 +39,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public amountUsd = new FormControl();
 
   public feeType: any = Fee;
+
   public feeTypeControl = new FormControl();
   public fee = new FormControl();
   public feeUsd = new FormControl();
@@ -119,10 +119,22 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.currencyWallet.balance.map(balance => balance.confirmed),
           0);
         this.balanceUsdUnconfirmed = toBehaviourSubject(
-          this.balanceBtcUnconfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 1)),
+          combineLatest(
+            this.balanceBtcUnconfirmed,
+            this.currencyInfo.rate,
+            (balance, rate) => {
+              return balance * rate;
+            }
+          ),
           0);
         this.balanceUsdConfirmed = toBehaviourSubject(
-          this.balanceBtcConfirmed.map(balance => balance * (this.currencyInfo ? this.currencyInfo.rate : 1)),
+          combineLatest(
+            this.balanceBtcConfirmed,
+            this.currencyInfo.rate,
+            (balance, rate) => {
+              return balance * rate;
+            }
+          ),
           0);
 
         this.validatorObserver = combineLatest(
@@ -134,65 +146,65 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             return balance > (amount + fee) && amount > 0 && receiver.length > 0;
           });
 
+        this.subscriptions.push(
+          this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.feeUsd.setValue(value * this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.fee.setValue(value / this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amountUsd.setValue(value * this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amount.setValue(value / this.currencyInfo.rate.getValue());
+          })
+        );
+
+        this.subscriptions.push(
+          this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
+            if (creation) {
+              this.receiver.enable();
+              this.amount.enable();
+              this.amountUsd.enable();
+              this.feeTypeControl.enable();
+              this.fee.enable();
+              this.feeUsd.enable();
+            } else {
+              this.receiver.disable();
+              this.amount.disable();
+              this.amountUsd.enable();
+              this.feeTypeControl.disable();
+              this.fee.disable();
+              this.feeUsd.disable();
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.feeTypeControl.valueChanges.subscribe(value => {
+            switch (value) {
+              case Fee.Normal:
+                this.fee.setValue(0.001);
+                break;
+              case Fee.Economy:
+                this.fee.setValue(0.0001);
+                break;
+            }
+          })
+        );
+
         this.feeTypeControl.setValue(Fee.Normal);
       }));
-
-    this.subscriptions.push(
-      this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
-        this.feeUsd.setValue(value * (this.currencyInfo ? this.currencyInfo.rate : 1) );
-      })
-    );
-
-    this.subscriptions.push(
-      this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-        this.fee.setValue(value / (this.currencyInfo ? this.currencyInfo.rate : 1) );
-      })
-    );
-
-    this.subscriptions.push(
-      this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
-        this.amountUsd.setValue(value * (this.currencyInfo ? this.currencyInfo.rate : 1) );
-      })
-    );
-
-    this.subscriptions.push(
-      this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-        this.amount.setValue(value / (this.currencyInfo ? this.currencyInfo.rate : 1) );
-      })
-    );
-
-    this.subscriptions.push(
-      this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
-        if (creation) {
-          this.receiver.enable();
-          this.amount.enable();
-          this.amountUsd.enable();
-          this.feeTypeControl.enable();
-          this.fee.enable();
-          this.feeUsd.enable();
-        } else {
-          this.receiver.disable();
-          this.amount.disable();
-          this.amountUsd.enable();
-          this.feeTypeControl.disable();
-          this.fee.disable();
-          this.feeUsd.disable();
-        }
-      })
-    );
-
-    this.subscriptions.push(
-      this.feeTypeControl.valueChanges.subscribe(value => {
-        switch (value) {
-          case Fee.Normal:
-            this.fee.setValue(0.001);
-            break;
-          case Fee.Economy:
-            this.fee.setValue(0.0001);
-            break;
-        }
-      })
-    );
   }
 
   ngOnDestroy() {
