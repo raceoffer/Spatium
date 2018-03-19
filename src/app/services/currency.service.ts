@@ -28,7 +28,7 @@ export class Info {
     this.gasPriceLow = gasPriceLow;
     this.gasUnit = gasUnit;
     this.rate = rate;
-    this.gasRate = gasRate ? this.gasRate : rate;
+    this.gasRate = gasRate || rate;
   }
 }
 

@@ -66,6 +66,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stNormal = 'Normal (0-1 hour)';
   stEconomy = 'Economy (1-24 hours)';
 
+  stFeeOrigin = 'Take fee from';
+  stFeeOriginSender = 'Sender';
+  stFeeOriginRecipient = 'Recipient';
+
+  public subtractFee = false;
+
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
 
@@ -316,7 +322,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value, this.fee.value);
+    const tx = await this.currencyWallet.createTransaction(this.receiver.value, this.amount.value, this.fee.value, this.subtractFee);
     if (tx) {
       this.phase.next(Phase.Confirmation);
       await this.currencyWallet.requestTransactionVerify(tx);
