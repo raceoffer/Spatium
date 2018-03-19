@@ -299,8 +299,7 @@ export class CurrencyWallet {
   public async createTransaction(
     address: string,
     value: number,
-    fee?: number,
-    subtractFee: boolean = false
+    fee?: number
   ) {
     return null;
   }

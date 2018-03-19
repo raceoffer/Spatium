@@ -222,8 +222,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
   public async createTransaction(
     address: string,
     value: number,
-    fee?: number,
-    subtractFee: boolean = false
+    fee?: number
   ) {
     const transaction = BitcoinCashTransaction.fromOptions({
       network: this.network
@@ -234,7 +233,7 @@ export class BitcoinCashWallet extends CurrencyWallet {
       await transaction.prepare({
         wallet: this.watchingWallet,
         address: address,
-        value: Number(this.toInternal(subtractFee ? value - fee : value)),
+        value: Number(this.toInternal(value)),
         fee: fee ? Number(this.toInternal(fee)) : undefined
       });
     } catch (e) {
