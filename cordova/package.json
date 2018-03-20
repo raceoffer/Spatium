@@ -16,19 +16,21 @@
     "cordova-fabric-plugin": "^1.1.10",
     "cordova-ios": "^4.5.4",
     "cordova-plugin-android-permissions": "^1.0.0",
+    "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
     "cordova-plugin-canvas2image": "git+https://github.com/devgeeks/Canvas2ImagePlugin.git",
-    "cordova-plugin-clipboard": "file:../cordova-plugin-clipboard",
+    "cordova-plugin-clipboard": "^1.0.0",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-keychain-touch-id": "^3.2.1",
+    "cordova-plugin-local-notification": "^0.9.0-beta.2",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-vibration": "^3.0.1",
     "cordova-plugin-whitelist": "^1.3.3",
-    "cordova-plugin-x-toast": "^2.6.0",
+    "cordova-plugin-x-toast": "^2.6.2",
     "org.devgeeks.Canvas2ImagePlugin": "https://github.com/devgeeks/Canvas2ImagePlugin.git",
     "phonegap-nfc": "^0.7.1",
-    "phonegap-plugin-mobile-accessibility": "git+https://github.com/phonegap/phonegap-mobile-accessibility.git"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5"
   },
   "cordova": {
     "plugins": {
@@ -49,7 +51,8 @@
       "org.devgeeks.Canvas2ImagePlugin": {},
       "cordova-plugin-clipboard": {},
       "cordova-plugin-keychain-touch-id": {},
-      "phonegap-plugin-mobile-accessibility": {}
+      "phonegap-plugin-mobile-accessibility": {},
+      "cordova-plugin-local-notification": {}
     },
     "platforms": [
       "ios",
