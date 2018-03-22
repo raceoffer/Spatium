@@ -81,7 +81,8 @@ export class BitcoinCashWallet extends CurrencyWallet {
         accounts: [{
           name: keyring.getKeyAddress('base58'),
           key: keyring
-        }]
+        }],
+        network: this.network
       }).load(this.walletDB);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);
