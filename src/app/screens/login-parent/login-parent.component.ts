@@ -5,8 +5,10 @@ import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
+import { Observable } from 'rxjs/Observable';
 
 declare const Utils: any;
+declare const cordova: any;
 
 enum State {
   Empty,
@@ -60,7 +62,6 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   ) {  }
 
   ngOnInit() {
-
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();

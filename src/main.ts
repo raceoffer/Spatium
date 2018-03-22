@@ -6,6 +6,7 @@ import { environment } from './environments/environment';
 
 declare const window: any;
 const cordovaScript = document.createElement('script');
+
 cordovaScript.setAttribute('src', 'cordova.js');
 document.body.appendChild(cordovaScript);
 
