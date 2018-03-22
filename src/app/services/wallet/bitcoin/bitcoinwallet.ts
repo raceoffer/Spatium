@@ -54,7 +54,8 @@ export class BitcoinWallet extends CurrencyWallet {
     await super.finishSync(data);
 
     this.walletDB = new bcoin.walletdb({
-      db: 'memory'
+      db: 'memory',
+      network: this.network
     });
 
     const keyring = bcoin.keyring.fromPublic(
