@@ -148,7 +148,7 @@ export class CurrencyService {
         null),
       'omisego'
     ) ],
-    [ Token.BINACLECOIN, new Info(
+    [ Token.BINANCECOIN, new Info(
       'Binance Coin',
       'BNB',
       0.000000005,
@@ -176,7 +176,7 @@ export class CurrencyService {
         null),
       'digixdao'
     ) ],
-    [ Token.POPULUS, new Info(
+    [ Token.POPULOUS, new Info(
       'Populous',
       'PPT',
       0.000000005,

@@ -69,9 +69,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.tokenEntry(Token.VECHAIN),
     this.tokenEntry(Token.ICON),
     this.tokenEntry(Token.OMNISEGO),
-    this.tokenEntry(Token.BINACLECOIN),
+    this.tokenEntry(Token.BINANCECOIN),
     this.tokenEntry(Token.DIGIXDAO),
-    this.tokenEntry(Token.POPULUS),
+    this.tokenEntry(Token.POPULOUS),
     this.tokenEntry(Token.RCHAIN),
     this.tokenEntry(Token.MAKER),
     this.tokenEntry(Token.AETHERNITY)

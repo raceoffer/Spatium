@@ -147,7 +147,7 @@ export class WalletService {
         '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07'
       ));
     this.tokenWallets.set(
-      Token.BINACLECOIN,
+      Token.BINANCECOIN,
       new ERC20CurrencyWallet(
         'main',
         this.keychain,
@@ -155,7 +155,7 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone,
-        Token.BINACLECOIN,
+        Token.BINANCECOIN,
         '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
       ));
     this.tokenWallets.set(
@@ -171,7 +171,7 @@ export class WalletService {
         '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a'
       ));
     this.tokenWallets.set(
-      Token.POPULUS,
+      Token.POPULOUS,
       new ERC20CurrencyWallet(
         'main',
         this.keychain,
@@ -179,7 +179,7 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone,
-        Token.POPULUS,
+        Token.POPULOUS,
         '0xd4fa1460f537bb9085d22c7bccb5dd450ef28e3a'
       ));
     this.tokenWallets.set(
