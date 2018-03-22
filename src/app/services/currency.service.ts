@@ -12,6 +12,7 @@ export class Info {
   gasUnit: string;
   rate: BehaviorSubject<number>;
   gasRate: BehaviorSubject<number>;
+  icon: string = null;
 
   constructor(
     name: string,
@@ -20,7 +21,8 @@ export class Info {
     gasPriceLow: number,
     gasUnit: string,
     rate: BehaviorSubject<number>,
-    gasRate?: BehaviorSubject<number>
+    gasRate?: BehaviorSubject<number>,
+    icon?: string
   ) {
     this.name = name;
     this.symbol = symbol;
@@ -29,6 +31,7 @@ export class Info {
     this.gasUnit = gasUnit;
     this.rate = rate;
     this.gasRate = gasRate || rate;
+    this.icon = icon || null;
   }
 }
 
@@ -86,7 +89,148 @@ export class CurrencyService {
         null),
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
-        null)
+        null),
+      'eos'
+    ) ],
+    [ Token.TRON, new Info(
+      'TRON',
+      'TRX',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('TRX') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'tron'
+    ) ],
+    [ Token.VECHAIN, new Info(
+      'VeChain',
+      'VEN',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('VEN') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'vechain'
+    ) ],
+    [ Token.ICON, new Info(
+      'ICON',
+      'ICX',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ICX') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'icon'
+    ) ],
+    [ Token.OMNISEGO, new Info(
+      'OmiseGO',
+      'OMG',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('OMG') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'omisego'
+    ) ],
+    [ Token.BINACLECOIN, new Info(
+      'Binance Coin',
+      'BNB',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BNB') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'binacle'
+    ) ],
+    [ Token.DIGIXDAO, new Info(
+      'DigixDAO',
+      'DGD',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('DGD') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'digixdao'
+    ) ],
+    [ Token.POPULUS, new Info(
+      'Populous',
+      'PPT',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('PPT') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'populus'
+    ) ],
+    [ Token.RCHAIN, new Info(
+      'RChain',
+      'RHOC',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('RHOC') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'rchain'
+    ) ],
+    [ Token.MAKER, new Info(
+      'Maker',
+      'MKR',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('MKR') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'maker'
+    ) ],
+    [ Token.AETHERNITY, new Info(
+      'Aeternity',
+      'AE',
+      0.000000005,
+      0.000000002,
+      'ETH/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('AE') || null).distinctUntilChanged(),
+        null),
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        null),
+      'aeternity'
     ) ]
   ]);
 
@@ -96,7 +240,7 @@ export class CurrencyService {
     this.currencyPriceService.getPrices();
   }
 
-  async getInfo(currency: Coin | Token) {
+  public getInfo(currency: Coin | Token) {
     if (currency === null) {
       return null;
     }

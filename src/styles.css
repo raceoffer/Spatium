@@ -64,6 +64,46 @@ app-root {
   background: url(assets/images/drawable/currency/nem.svg);
 }
 
+.tron {
+  background: url(assets/images/drawable/currency/tron.svg);
+}
+
+.vechain {
+  background: url(assets/images/drawable/currency/ven-1.svg);
+}
+
+.icon {
+  background: url(assets/images/drawable/currency/icon-2.svg);
+}
+
+.omisego {
+  background: url(assets/images/drawable/currency/omisego.svg);
+}
+
+.binacle {
+  background: url(assets/images/drawable/currency/binance-coin.svg);
+}
+
+.digixdao {
+  background: url(assets/images/drawable/currency/digix-dao.svg);
+}
+
+.populus {
+  background: url(assets/images/drawable/currency/populous-1.svg);
+}
+
+.rchain {
+  background: url(assets/images/drawable/currency/rchain.svg);
+}
+
+.maker {
+  background: url(assets/images/drawable/currency/maker-1.svg);
+}
+
+.aeternity {
+  background: url(assets/images/drawable/currency/aeternity.svg);
+}
+
 .currency-component .mat-select-trigger {
   height: 100%;
 }

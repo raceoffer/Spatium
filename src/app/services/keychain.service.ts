@@ -10,7 +10,17 @@ export enum Coin {
 }
 
 export enum Token {
-  EOS = 56146
+  EOS = 56146,
+  TRON = 56147,
+  VECHAIN = 56148,
+  ICON = 56149,
+  OMNISEGO = 56150,
+  BINACLECOIN = 56151,
+  DIGIXDAO = 56152,
+  POPULUS = 56153,
+  RCHAIN = 56154,
+  MAKER = 56155,
+  AETHERNITY = 56156
 }
 
 @Injectable()

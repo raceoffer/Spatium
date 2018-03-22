@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
+import {CurrencyService} from "../../../services/currency.service";
 
 @Component({
   selector: 'app-wallet',
@@ -62,8 +63,18 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'EOS', symbols: 'EOS', cols: 1, rows: 1, logo: 'eos', coin: Token.EOS},
-    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
+    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'},
+    this.tokenEntry(Token.EOS),
+    this.tokenEntry(Token.TRON),
+    this.tokenEntry(Token.VECHAIN),
+    this.tokenEntry(Token.ICON),
+    this.tokenEntry(Token.OMNISEGO),
+    this.tokenEntry(Token.BINACLECOIN),
+    this.tokenEntry(Token.DIGIXDAO),
+    this.tokenEntry(Token.POPULUS),
+    this.tokenEntry(Token.RCHAIN),
+    this.tokenEntry(Token.MAKER),
+    this.tokenEntry(Token.AETHERNITY)
   ];
 
   @ViewChild('sidenav') sidenav;
@@ -72,8 +83,21 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly ngZone: NgZone,
     private readonly router: Router,
     private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly currency: CurrencyService
   ) { }
+
+  public tokenEntry(coin: Token) {
+    const currencyInfo = this.currency.getInfo(coin);
+    return {
+      title: currencyInfo.name,
+      symbols: currencyInfo.symbol,
+      logo: currencyInfo.icon,
+      cols: 1,
+      rows: 1,
+      coin: coin
+    };
+  }
 
   ngOnInit() {
     this.subscriptions.push(
