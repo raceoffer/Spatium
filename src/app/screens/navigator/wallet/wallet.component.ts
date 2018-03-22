@@ -54,6 +54,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public tiles = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
+    {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
     {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin'},
@@ -68,10 +69,11 @@ export class WalletComponent implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav;
 
   constructor(
-              private readonly ngZone: NgZone,
-              private readonly router: Router,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) { }
+    private readonly ngZone: NgZone,
+    private readonly router: Router,
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService
+  ) { }
 
   ngOnInit() {
     this.subscriptions.push(

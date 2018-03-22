@@ -4,11 +4,10 @@ import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
 declare const ERC20Wallet: any;
-declare const Currency: any;
+declare const EthereumTransaction: any;
 
 export class ERC20CurrencyWallet extends CurrencyWallet {
   private erc20Wallet: any = null;
-  private currencyCoin: any = null;
   private contractAddress: string = null;
   private token: Token = null;
 
@@ -26,8 +25,6 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
     this.contractAddress = address;
     this.token = token;
-
-    this.currencyCoin = Currency.get(Currency.ETH);
   }
 
   public async reset() {
@@ -49,7 +46,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return this.currencyCoin.fromJSON(tx);
+    return EthereumTransaction.fromJSON(tx);
   }
 
   public outputs(transaction) {
@@ -65,7 +62,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
     this.erc20Wallet = await new ERC20Wallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()),
+      address: ERC20Wallet.address(this.compoundKey.getCompoundPublicKey()),
       contractAddress: this.contractAddress,
       network: this.network
     }).load();

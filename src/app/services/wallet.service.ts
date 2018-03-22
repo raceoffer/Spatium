@@ -17,13 +17,9 @@ import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
 
-declare const bcoin: any;
-
 @Injectable()
 export class WalletService {
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
-
-  private network = 'testnet'; // 'main'; | 'testnet';
 
   public coinWallets = new Map<Coin, CurrencyWallet>();
   public tokenWallets = new Map<Token, ERC20CurrencyWallet>();
@@ -50,12 +46,20 @@ export class WalletService {
     private readonly keychain: KeyChainService,
     private readonly ngZone: NgZone
   ) {
-    bcoin.set(this.network);
-
+    this.coinWallets.set(
+      Coin.BTC_test,
+      new BitcoinWallet(
+        'testnet',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone
+      ));
     this.coinWallets.set(
       Coin.BTC,
       new BitcoinWallet(
-        this.network,
+        'main',
         this.keychain,
         1,
         this.messageSubject,
@@ -65,7 +69,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
-        this.network,
+        'main',
         this.keychain,
         1,
         this.messageSubject,
@@ -75,7 +79,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.ETH,
       new EthereumCurrencyWallet(
-        this.network,
+        'main',
         this.keychain,
         1,
         this.messageSubject,
@@ -85,14 +89,14 @@ export class WalletService {
     this.tokenWallets.set(
       Token.EOS,
       new ERC20CurrencyWallet(
-        this.network,
+        'main',
         this.keychain,
         1,
         this.messageSubject,
         this.bt,
         this.ngZone,
         Token.EOS,
-        '0x1014003937b6fcd21f1a27df897b5888bbb73b9f'
+        '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0'
       ));
 
     for (const coin of Array.from(this.coinWallets.keys())) {

@@ -4,7 +4,6 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-declare const Currency: any;
 declare const bcoin: any;
 declare const WatchingWallet: any;
 declare const BlockchainInfoProvider: any;
@@ -15,7 +14,6 @@ export class BitcoinWallet extends CurrencyWallet {
   private watchingWallet: any = null;
   private provider: any = null;
   private routineTimer: any = null;
-  private currencyCoin: any = null;
 
   constructor(
     network: string,
@@ -25,8 +23,7 @@ export class BitcoinWallet extends CurrencyWallet {
     bt: BluetoothService,
     ngZone: NgZone
   ) {
-    super(network, keychain, Coin.BTC, account, messageSubject, bt, ngZone);
-    this.currencyCoin = Currency.get(Currency.BTC);
+    super(network, keychain, network === 'main' ? Coin.BTC : Coin.BTC_test, account, messageSubject, bt, ngZone);
   }
 
   public async reset() {
@@ -50,7 +47,7 @@ export class BitcoinWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return this.currencyCoin.fromJSON(tx);
+    return BitcoinTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
@@ -60,8 +57,15 @@ export class BitcoinWallet extends CurrencyWallet {
       db: 'memory'
     });
 
+    const keyring = bcoin.keyring.fromPublic(
+      Buffer.from(
+        this.compoundKey.getCompoundPublicKey().encode(true, 'array')
+      ),
+      this.network
+    );
+
     try {
-      this.address.next(this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()));
+      this.address.next(keyring.getKeyAddress('base58'));
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
@@ -75,8 +79,8 @@ export class BitcoinWallet extends CurrencyWallet {
     try {
       this.watchingWallet = await new WatchingWallet({
         accounts: [{
-          name: this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()),
-          key: bcoin.keyring.fromPublic(Buffer.from(this.compoundKey.getCompoundPublicKey().encode(true, 'array')))
+          name: keyring.getKeyAddress('base58'),
+          key: keyring
         }]
       }).load(this.walletDB);
     } catch (e) {
@@ -202,13 +206,13 @@ export class BitcoinWallet extends CurrencyWallet {
       const inputs = record.tx.inputs.map(input => {
         const address = input.getAddress();
         return {
-          address: address ? address.toString() : null
+          address: address ? address.toString(this.network) : null
         };
       });
       const outputs = record.tx.outputs.map(output => {
         const address = bcoin.address.fromScript(output.script);
         return {
-          address: address ? address.toString() : null,
+          address: address ? address.toString(this.network) : null,
           value: output.value
         };
       });

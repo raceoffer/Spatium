@@ -45,6 +45,16 @@ export class CurrencyService {
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
         null)
     ) ],
+    [ Coin.BTC_test, new Info(
+      'Bitcoin Test',
+      'BTC',
+      0.001,
+      0.0002,
+      'BTC/kb',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
+        null)
+    ) ],
     [ Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',

@@ -4,6 +4,7 @@ declare const KeyChain: any;
 
 export enum Coin {
   BTC = 0,
+  BTC_test = 1,
   ETH = 60,
   BCH = 145
 }

@@ -4,11 +4,10 @@ import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
 declare const EthereumWallet: any;
-declare const Currency: any;
+declare const EthereumTransaction: any;
 
 export class EthereumCurrencyWallet extends CurrencyWallet {
   private ethereumWallet: any = null;
-  private currencyCoin: any = null;
 
   constructor(
     network: string,
@@ -19,8 +18,6 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
     ngZone: NgZone
   ) {
     super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
-
-    this.currencyCoin = Currency.get(Currency.ETH);
   }
 
   public async reset() {
@@ -42,7 +39,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return this.currencyCoin.fromJSON(tx);
+    return EthereumTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
@@ -50,7 +47,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
 
     this.ethereumWallet = await new EthereumWallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: this.currencyCoin.address(this.compoundKey.getCompoundPublicKey()),
+      address: EthereumWallet.address(this.compoundKey.getCompoundPublicKey()),
       network: this.network
     }).load();
 
