@@ -75,22 +75,6 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
         });
       }
     }.bind(this));
-
-    console.log(cordova.plugins.notification.local.getDefaults());
-
-    Observable.timer(2000, 10000).subscribe(() => {
-      cordova.plugins.notification.local.schedule({
-        title: 'Confirm transacton',
-        text: '3 btc to ms4512312312312312931',
-        icon: 'res://icon',
-        smallIcon: 'res://ic_stat_res',
-        foreground: true,
-        actions: [
-          {id: 'yes', title: 'Confirm'},
-          {id: 'no', title: 'Decline'}
-        ]
-      });
-    });
   }
 
   ngOnDestroy() {

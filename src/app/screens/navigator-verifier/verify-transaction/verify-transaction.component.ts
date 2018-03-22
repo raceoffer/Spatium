@@ -3,9 +3,8 @@ import { WalletService } from '../../../services/wallet.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { Router } from '@angular/router';
 import { Info, CurrencyService } from '../../../services/currency.service';
-import {NavigationService} from '../../../services/navigation.service';
-
-declare const bcoin: any;
+import { NavigationService } from '../../../services/navigation.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-verify-transaction',
@@ -58,7 +57,8 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly wallet: WalletService,
     private readonly router: Router,
     private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService
   ) { }
 
   ngOnInit() {
@@ -67,6 +67,14 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.subscriptions.push(this.notification.confirm.subscribe(async () => {
+      await this.confirm();
+    }));
+
+    this.subscriptions.push(this.notification.decline.subscribe(async () => {
+      await this.decline();
+    }));
 
     this.currencyWallets.forEach((currencyWallet, coin) => {
       this.subscriptions.push(
@@ -95,6 +103,11 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           this.fee = currencyWallet.fromInternal(fee.toString());
           this.feeUsd = this.fee * this.currentInfo.gasRate.getValue();
           this.showTransaction = true;
+
+          this.notification.askConfirmation(
+            'Confirm ' + this.currentInfo.name + ' transacton',
+            this.btc + ' ' + this.currentInfo.symbol + ' to ' + this.address
+          );
         }));
     });
   }
