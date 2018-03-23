@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="201px" height="201px" viewBox="0 0 201 201" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.1 (47250) - http://www.bohemiancoding.com/sketch -->
+    <title>GNX</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="10.2204933%" y1="26.7168838%" x2="89.7731383%" y2="73.2686111%" id="linearGradient-1">
+            <stop stop-color="#0A5689" offset="0%"></stop>
+            <stop stop-color="#134262" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-735.000000, -8397.000000)">
+        <g id="GNX" transform="translate(735.000000, 8397.000000)">
+            <circle id="Oval-3" fill="#E1F1FC" cx="100.5" cy="100.5" r="100.5"></circle>
+            <path d="M155.045965,69.632817 L101.270597,69.632817 L74.3954734,116.410413 L101.289437,163.181702 L155.061665,163.181702 L181.936789,116.38834 L155.045965,69.632817 Z M146.27285,147.882417 L110.071973,147.882417 L91.9636845,116.400953 L110.059413,84.913183 L146.26343,84.913183 L164.368578,116.394647 L146.27285,147.882417 Z" id="Shape" fill="url(#linearGradient-1)" fill-rule="nonzero"></path>
+            <polygon id="Shape" fill="#F8DC19" fill-rule="nonzero" points="110.059413 84.8185872 91.9636845 116.306357 100.6897 131.476362 127.505165 84.815434"></polygon>
+            <polygon id="Shape" fill="#F8DC19" fill-rule="nonzero" points="74.3954734 116.309511 74.4268733 116.252753 55.6717483 116.25906 37.5634599 84.7744426 55.6591883 53.2866723 91.863205 53.280366 101.242338 69.5886723 101.270597 69.5413745 118.785429 69.5382213 100.645741 38 46.8703728 38.0094596 19.9952489 84.7775957 46.8892127 131.533119 83.1497491 131.529966"></polygon>
+            <polygon id="Shape" fill="#F8DC19" fill-rule="nonzero" points="109.732855 84.9699404 91.6967859 116.353655 55.4990491 116.363115 37.4410006 84.9699404 19.8696495 84.9699404 46.7133736 131.637174 100.485601 131.630868 127.301066 84.9699404"></polygon>
+            <polyline id="Shape" fill="#F8C721" fill-rule="nonzero" points="127.859983 84.9699404 109.918114 84.9037234 102.909669 96.9552213 112.028183 88.3028638 127.859983 84.9699404"></polyline>
+            <polygon id="Shape" fill="#1C3052" fill-rule="nonzero" points="83.3004684 131.492128 85.338318 135.089919 100.454202 131.561498"></polygon>
+        </g>
+    </g>
+</svg>

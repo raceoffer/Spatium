@@ -314,7 +314,7 @@ export class CurrencyService {
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
         null),
-      '0x'
+      'ox'
     ) ],
     [ Token.ZILLIQA, new Info(
       'Zilliqa',
