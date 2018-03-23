@@ -2,13 +2,14 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 
+declare const Buffer: any;
+
 @Component({
   selector: 'app-file-upload',
   host: {'class': 'child content text-center'},
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
-
 export class FileUploadComponent implements AfterViewInit {
   uploadFile = 'Choose a file';
 
@@ -48,8 +49,7 @@ export class FileUploadComponent implements AfterViewInit {
     this.reader = new FileReader();
 
     this.reader.onloadend = () => this.ngZone.run(async () => {
-      const arrayBufferToBuffer = require('arraybuffer-to-buffer');
-      this.file = arrayBufferToBuffer(this.reader.result);
+      this.file = new Buffer(this.reader.result);
 
       await this.goNext();
     });

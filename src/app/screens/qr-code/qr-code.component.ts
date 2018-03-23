@@ -1,14 +1,13 @@
-import {Component, EventEmitter, Input, NgZone, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
-import {FileService} from '../../services/file.service';
-import {KeyChainService} from '../../services/keychain.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
 declare const cordova: any;
 declare const window: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-qr-code',
@@ -44,14 +43,14 @@ export class QrCodeComponent implements OnInit {
   @Input() isExport = false;
   @Input() isImport = false;
 
-  constructor(private readonly fs: FileService,
-              private readonly dds: DDSService,
-              private readonly route: ActivatedRoute,
-              private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly notification: NotificationService,
-              private readonly authService: AuthService,
-              private readonly keyChainService: KeyChainService) {
+  constructor(
+    private readonly dds: DDSService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService
+  ) {
     this.route.params.subscribe(params => {
       if (params['next']) {
         this.next = params['next'];
@@ -97,13 +96,13 @@ export class QrCodeComponent implements OnInit {
   async writeSecret() {
     const encryptedSeed = this.authService.encryptedSeed;
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    const packSeed = Utils.packSeed(buffesSeed);
+    const packSeed = CryptoCore.Utils.packSeed(buffesSeed);
     this.genericValue = packSeed.toString('hex');
     console.log(this.genericValue);
   }
 
   async generateLogin() {
-    if (!await Utils.testNetwork()) {
+    if (!await CryptoCore.Utils.testNetwork()) {
       this.notification.show('No network connection');
       return;
     }
@@ -112,7 +111,7 @@ export class QrCodeComponent implements OnInit {
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(AuthService.toId(login));
         if (!exists) {
-          const packedLogin = Utils.packLogin(login);
+          const packedLogin = CryptoCore.Utils.packLogin(login);
           this.genericValue = packedLogin.toString('hex');
           break;
         }
@@ -179,7 +178,7 @@ export class QrCodeComponent implements OnInit {
       if (this.isImport) {
         try {
           console.log(buffer);
-          const value = Utils.tryUnpackEncryptedSeed(buffer);
+          const value = CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
           this._qrcode = value.toString('hex');
           console.log(this._qrcode);
         } catch (exc) {
@@ -187,7 +186,7 @@ export class QrCodeComponent implements OnInit {
           this._qrcode = null;
         }
       } else {
-        this._qrcode = Utils.tryUnpackLogin(buffer);
+        this._qrcode = CryptoCore.Utils.tryUnpackLogin(buffer);
       }
     }
     await this.onSuccess();
@@ -251,11 +250,11 @@ export class QrCodeComponent implements OnInit {
     if (this._permissionCStorage) {
       const canvas = document.getElementsByTagName('canvas')[0];
       window.canvas2ImagePlugin.saveImageDataToLibrary(
-        function(msg){
+        function(msg) {
           console.log(msg);
           this.notification.show('Secret has been saved as QR image');
         }.bind(this),
-        function(err){
+        function(err) {
           console.log(err);
         },
         canvas

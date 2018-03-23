@@ -11,7 +11,7 @@ module.exports = function(context) {
         "npm run webpack",
         {
           maxBuffer: 1024*1024,
-          cwd: basePath + '/../src/bcoinlib'
+          cwd: basePath + '/../src/crypto-core-async'
         }).toString('utf8')
       );
   }
