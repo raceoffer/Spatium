@@ -14,7 +14,8 @@ import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
 import { NavigationService } from '../../services/navigation.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-registration',
@@ -176,8 +177,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
-      const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
+      const id = CryptoCore.Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
+      const data = CryptoCore.Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
 
       try {
         const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();

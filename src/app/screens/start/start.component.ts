@@ -7,7 +7,6 @@ import { KeyChainService } from '../../services/keychain.service';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { NavigationService } from '../../services/navigation.service';
 
-declare const Utils: any;
 declare const navigator: any;
 
 @Component({

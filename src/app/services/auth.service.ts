@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NotificationService } from './notification.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
 declare const Buffer: any;
 declare const nfc: any;
 
@@ -20,15 +20,12 @@ export class AuthService {
 
   encryptedSeed: string = null;
 
-  ethereumSecret: any = null;
-  encryptedTreeData: any = null;
-
   remoteEncryptedTrees: Array<Array<any>> = [];
 
   stFactorError = 'Incorrect factor ';
 
   static toId(name: string): string {
-    return Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
+    return CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
   }
 
   constructor(private readonly notification: NotificationService) {
@@ -94,7 +91,7 @@ export class AuthService {
   tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = Utils.matchPassphrase(currentData, factor.toBuffer());
+    const matchResult = CryptoCore.Utils.matchPassphrase(currentData, factor.toBuffer());
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
@@ -291,7 +288,7 @@ export class AuthService {
       const prefix = Buffer.alloc(4);
       prefix.writeUInt32BE(this.type, 0);
 
-      return Utils.sha256(Buffer.concat([prefix, this.value]));
+      return CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
     }
   }
 

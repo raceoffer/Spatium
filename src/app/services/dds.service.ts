@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
-declare const DDS: any;
+declare const CryptoCore: any;
 
 export class DDSAccount {
   public address: string = this.account.address;
@@ -42,7 +42,7 @@ export class DDSService {
   private sponsor = 'http://185.219.80.169';
 
   constructor(private readonly http: HttpClient) {
-    this.dds = new DDS({
+    this.dds = new CryptoCore.DDS({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network
     });

@@ -1,6 +1,8 @@
-import {OnInit, Component, Input, Output, EventEmitter} from '@angular/core';
+import {OnInit, Component, Output, EventEmitter} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
+
+declare const Buffer: any;
 
 @Component({
   selector: 'app-password',

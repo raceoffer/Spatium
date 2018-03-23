@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
-declare const KeyChain: any;
+declare const CryptoCore: any;
+declare const Buffer: any;
 
 export enum Coin {
   BTC = 0,
@@ -34,7 +35,7 @@ export class KeyChainService {
 
   setSeed(seed) {
     this._seed = Buffer.from(seed);
-    this.keyChain = this._seed ? KeyChain.fromSeed(Buffer.from(seed)) : null;
+    this.keyChain = this._seed ? CryptoCore.KeyChain.fromSeed(Buffer.from(seed)) : null;
   }
 
   reset() {

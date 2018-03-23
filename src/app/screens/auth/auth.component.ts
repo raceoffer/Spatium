@@ -11,8 +11,6 @@ import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
-declare const Utils: any;
-
 @Component({
   selector: 'app-auth',
   animations: [
