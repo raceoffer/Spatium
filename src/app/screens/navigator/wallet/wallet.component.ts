@@ -160,7 +160,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.tokenEntry(Token.BLOCKV),
     this.tokenEntry(Token.CYBERMILES),
     this.tokenEntry(Token.RIPIO_CREDIT_NETWORK),
-    this.tokenEntry(Token.PUNDI_X),
+    this.tokenEntry(Token.TELCOIN),
     this.tokenEntry(Token.VIBE),
     this.tokenEntry(Token.SONM),
     this.tokenEntry(Token.LOOM_NETWORK)
