@@ -30,8 +30,8 @@
 
 
 .logo {
-	width: 50%;
-  min-width: 50%;
+	width: 40%;
+  max-width: 50%;
   height: 75%;
   background-position: center !important;
   background-size: contain !important;
@@ -55,7 +55,7 @@
 
 .title {
   font-size: 12px;
-  line-height: 20px;
+  line-height: 14px;
 }
 
 .half-height {
