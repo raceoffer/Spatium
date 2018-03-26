@@ -71,7 +71,7 @@ Utils.tryUnpackMultiple = async buffer => Utils.invokeStatic({
 
 Utils.packTree = async (tree, seed) => Utils.invokeStatic({
   method: 'tryUnpackMultiple',
-  arguments: [tree, transformer, seed]
+  arguments: [tree, seed]
 });
 
 Utils.matchPassphrase = async (chiphertexts, passphase) => Utils.invokeStatic({
