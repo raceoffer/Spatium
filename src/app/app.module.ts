@@ -49,7 +49,7 @@ import { FileUploadComponent } from './screens/file-upload/file-upload.component
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
-import { NgxZxingModule } from 'ngx-zxing';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './directives/ng-init.directive';
@@ -134,7 +134,7 @@ import { CurrencyPriceService } from './services/price.service';
     MatFormFieldModule,
     MatGridListModule,
     QRCodeModule,
-    NgxZxingModule.forRoot()
+    ZXingScannerModule.forRoot()
   ],
   providers: [
     WalletService,
