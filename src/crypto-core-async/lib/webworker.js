@@ -54,6 +54,7 @@ registerPromiseWorker(async message => {
         _.isString(message.method) && _.isFunction(_.get(objectClass, message.method)),
         'message.method should be one of ' + _.keys(CryptoCore)
       );
+      console.log(message.class, message.method, _.map(_.defaultTo(message.arguments, []), Marshal.unwrap));
       return Marshal.wrap(await _.invoke(
         objectClass,
         message.method,

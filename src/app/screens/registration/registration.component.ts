@@ -165,8 +165,14 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.uploading = true;
 
-      const factors = this.factors.map(factor => factor.toBuffer()).reverse();
-      factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+      let factors = [];
+      for (let i = 0; i < this.factors.length; ++i) {
+        factors.push(await this.factors[i].toBuffer());
+      }
+
+      factors = factors.reverse();
+
+      factors.push(await this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
       const tree = factors.reduce((rest, factor) => {
         const node = {
           factor: factor

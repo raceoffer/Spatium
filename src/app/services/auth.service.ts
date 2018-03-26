@@ -25,7 +25,7 @@ export class AuthService {
   stFactorError = 'Incorrect factor ';
 
   static async toId(name: string) {
-    return await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
+    return (await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8'))).toString('hex');
   }
 
   constructor(private readonly notification: NotificationService) {
@@ -91,7 +91,7 @@ export class AuthService {
   async tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = await CryptoCore.Utils.matchPassphrase(currentData, factor.toBuffer());
+    const matchResult = await CryptoCore.Utils.matchPassphrase(currentData, await factor.toBuffer());
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
