@@ -2,7 +2,10 @@ const registerPromiseWorker = require('promise-worker/register');
 const assert = require('assert');
 const _ = require('lodash');
 
-const CryptoCore = require('crypto-core');
+const CryptoCore = {
+  Utils: require('crypto-core/lib/utils')
+};
+
 const Marshal = require('./marshal');
 
 registerPromiseWorker(async message => {

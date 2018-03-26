@@ -1,11 +1,10 @@
-const PromiseWorker = require('promise-worker');
 const _ = require('lodash');
 const Marshal = require('./marshal');
 
-function Utils() {}
-
-// temporary
-Utils.worker = new PromiseWorker(new Worker('webworker.bundle.js'));
+function Utils(worker) {
+  Utils.worker = worker;
+  return Utils;
+}
 
 Utils.invokeStatic = async message => Marshal.unwrap(
   await Utils.worker.postMessage({
@@ -17,88 +16,87 @@ Utils.invokeStatic = async message => Marshal.unwrap(
 
 Utils.deriveAesKey = async passwd => Utils.invokeStatic({
   method: 'deriveAesKey',
-  arguments: arguments
+  arguments: [passwd]
 });
 
 Utils.randomBytes = async n => Utils.invokeStatic({
   method: 'randomBytes',
-  arguments: arguments
+  arguments: [n]
 });
 
 Utils.decrypt = async (ciphertext, key) => Utils.invokeStatic({
   method: 'decrypt',
-  arguments: arguments
+  arguments: [ciphertext, key]
 });
 
 Utils.encrypt = async (buffer, key) => Utils.invokeStatic({
   method: 'encrypt',
-  arguments: arguments
+  arguments: [buffer, key]
 });
 
 Utils.sha256 = async buffer => Utils.invokeStatic({
   method: 'sha256',
-  arguments: arguments
+  arguments: [buffer]
 });
 
 Utils.checksum = async buffer => Utils.invokeStatic({
   method: 'checksum',
-  arguments: arguments
+  arguments: [buffer]
 });
 
 Utils.packSeed = async seed => Utils.invokeStatic({
   method: 'packSeed',
-  arguments: arguments
+  arguments: [seed]
 });
 
 Utils.tryUnpackSeed = async seed => Utils.invokeStatic({
   method: 'tryUnpackSeed',
-  arguments: arguments
+  arguments: [seed]
 });
 
 Utils.tryUnpackEncryptedSeed = async seed => Utils.invokeStatic({
   method: 'tryUnpackEncryptedSeed',
-  arguments: arguments
+  arguments: [seed]
 });
 
 Utils.packMultiple = async array => Utils.invokeStatic({
   method: 'packMultiple',
-  arguments: arguments
+  arguments: [array]
 });
 
 Utils.tryUnpackMultiple = async buffer => Utils.invokeStatic({
   method: 'tryUnpackMultiple',
-  arguments: arguments
+  arguments: [buffer]
 });
 
-// remove transformer from here
-Utils.packTree = async (tree, transformer, seed) => Utils.invokeStatic({
+Utils.packTree = async (tree, seed) => Utils.invokeStatic({
   method: 'tryUnpackMultiple',
-  arguments: arguments
+  arguments: [tree, transformer, seed]
 });
 
 Utils.matchPassphrase = async (chiphertexts, passphase) => Utils.invokeStatic({
   method: 'matchPassphrase',
-  arguments: arguments
+  arguments: [chiphertexts, passphase]
 });
 
 Utils.packLogin = async login => Utils.invokeStatic({
   method: 'packLogin',
-  arguments: arguments
+  arguments: [login]
 });
 
 Utils.tryUnpackLogin = async chiphertext => Utils.invokeStatic({
   method: 'tryUnpackLogin',
-  arguments: arguments
+  arguments: [chiphertext]
 });
 
 Utils.testNetwork = async () => Utils.invokeStatic({
   method: 'testNetwork',
-  arguments: arguments
+  arguments: []
 });
 
 Utils.reverse = async data => Utils.invokeStatic({
   method: 'reverse',
-  arguments: arguments
+  arguments: [data]
 });
 
 module.exports = Utils;

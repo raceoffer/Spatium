@@ -44,19 +44,19 @@ export class PasswordComponent implements OnInit {
     if (this.password !== '') {
       switch (this.next) {
         case null:
-          const isPassword = this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          const isPassword = await this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           this.isPasswordChanged.emit(isPassword);
           break;
         case 'auth':
-          this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          await this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/auth']);
           break;
         case 'registration':
-          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          await this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/registration']);
           break;
         case 'factornode':
-          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+          await this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
           await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
           break;
       }

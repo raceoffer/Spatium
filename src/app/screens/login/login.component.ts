@@ -57,9 +57,11 @@ export class LoginComponent implements AfterViewInit {
     }
   }
 
-  constructor(private readonly dds: DDSService,
-              private readonly authSevice: AuthService,
-              private readonly notification: NotificationService) { }
+  constructor(
+    private readonly dds: DDSService,
+    private readonly authSevice: AuthService,
+    private readonly notification: NotificationService
+  ) { }
 
   ngAfterViewInit() {
     if (this.genericLogin !== null) {
@@ -80,7 +82,7 @@ export class LoginComponent implements AfterViewInit {
     try {
       do {
         this.userName = this.authSevice.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(this._userName));
+        const exists = await this.dds.exists(await AuthService.toId(this._userName));
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.usernameState = State.Ready;

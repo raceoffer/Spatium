@@ -24,8 +24,8 @@ export class AuthService {
 
   stFactorError = 'Incorrect factor ';
 
-  static toId(name: string): string {
-    return CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
+  static async toId(name: string) {
+    return await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8')).toString('hex');
   }
 
   constructor(private readonly notification: NotificationService) {
@@ -88,10 +88,10 @@ export class AuthService {
     }
   }
 
-  tryDecryptWith(factor) {
+  async tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = CryptoCore.Utils.matchPassphrase(currentData, factor.toBuffer());
+    const matchResult = await CryptoCore.Utils.matchPassphrase(currentData, factor.toBuffer());
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
@@ -107,14 +107,14 @@ export class AuthService {
     return true;
   }
 
-  addFactor(type, value) {
+  async addFactor(type, value) {
     this.factors.push(this.newFactor(type, value));
   }
 
-  addAuthFactor(type, value) {
+  async addAuthFactor(type, value) {
     const newFactor = this.newFactor(type, value);
 
-    const success = this.tryDecryptWith(newFactor);
+    const success = await this.tryDecryptWith(newFactor);
 
     if (success) {
       this.factors.push(newFactor);
@@ -284,11 +284,11 @@ export class AuthService {
       this.state = 'active';
     }
 
-    public toBuffer() {
+    public async toBuffer() {
       const prefix = Buffer.alloc(4);
       prefix.writeUInt32BE(this.type, 0);
 
-      return CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
+      return await CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
     }
   }
 
