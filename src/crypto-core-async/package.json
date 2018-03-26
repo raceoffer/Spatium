@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "crypto-core": "file:../crypto-core"
+    "crypto-core": "file:../crypto-core",
+    "promise-worker": "^1.1.1"
   }
 }

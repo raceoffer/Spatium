@@ -5,7 +5,8 @@ const path = require('path');
 module.exports = {
   target: 'web',
   entry: {
-    'index': './index.js'
+    'index': './index.js',
+	  'webworker': './lib/webworker.js'
   },
   output: {
     path: __dirname,
