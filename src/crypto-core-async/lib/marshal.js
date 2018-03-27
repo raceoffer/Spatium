@@ -78,8 +78,6 @@ Marshal.wrap = function (data) {
     }
   }
 
-  console.log('wrap', data, data.constructor.name);
-
   if (_.isArray(data)) {
     return _.map(data, Marshal.wrap);
   }
