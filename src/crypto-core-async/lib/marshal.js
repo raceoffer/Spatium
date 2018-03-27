@@ -9,8 +9,8 @@ const CompoundKey = require('crypto-core/lib/compoundkey');
 function Marshal() {}
 
 Marshal.wrap = function (data) {
-  if (!data) {
-    return null;
+  if (_.isUndefined(data) || data === null) {
+    return data;
   }
 
   if (Buffer.isBuffer(data)) {
