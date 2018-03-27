@@ -17,6 +17,8 @@ import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
 
+declare const CryptoCore: any;
+
 @Injectable()
 export class WalletService {
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
@@ -40,6 +42,8 @@ export class WalletService {
   public cancelledEvent: Observable<any>;
   public failedEvent: Observable<any>;
   public readyEvent: Observable<any>;
+
+  public paillierKeys: any = null;
 
   constructor(
     private readonly bt: BluetoothService,
@@ -1362,10 +1366,12 @@ export class WalletService {
   }
 
   public async startSync() {
+    this.paillierKeys = CryptoCore.CompoundKey.generatePaillierKeys();
+
     for (const wallet of Array.from(this.coinWallets.values())) {
       const syncEvent = wallet.readyEvent.take(1).takeUntil(combineLatest(this.cancelledEvent, this.failedEvent)).toPromise();
 
-      await wallet.sync();
+      await wallet.sync(this.paillierKeys);
 
       await syncEvent;
     }

@@ -99,14 +99,15 @@ export class CurrencyWallet {
     return null;
   }
 
-  public sync() {
+  public sync(paillierKeys: any) {
     if (this.status.getValue() === Status.Synchronizing) {
       LoggerService.log('Sync in progress', {});
       return;
     }
 
     this.compoundKey = new CryptoCore.CompoundKey({
-      localPrivateKey: CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
+      localPrivateKey: CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+      localPaillierKeys: paillierKeys
     });
 
     let prover = null;
