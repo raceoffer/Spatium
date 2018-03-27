@@ -3,7 +3,8 @@ const assert = require('assert');
 const _ = require('lodash');
 
 const CryptoCore = {
-  Utils: require('crypto-core/lib/utils')
+  Utils: require('crypto-core/lib/utils'),
+  CompoundKey: require('crypto-core/lib/compoundkey')
 };
 
 const Marshal = require('./marshal');
@@ -22,20 +23,11 @@ registerPromiseWorker(async message => {
 
   switch(message.action) {
     case 'invoke':
-      assert(
-        _.isObject(message.self) && _.isFunction(objectClass.fromJSON),
-        'message.self should be a JSON object to reconstruct ' + message.class + ' from'
-      );
-
-      const self = objectClass.fromJSON(message.self);
+      const self = Marshal.unwrap(message.self);
 
       assert(
-          _.isString(message.method) && _.isFunction(_.get(self, message.method)),
-          'message.method should be an instance method of ' + message.class
-        );
-      assert(
-        _.isFunction(self.toJSON),
-        'An instance of ' + message.class + ' should be convertible to JSON'
+        _.isString(message.method) && _.isFunction(_.get(self, message.method)),
+        'message.method should be an instance method of ' + message.class
       );
 
       const result = await _.invoke(
@@ -46,15 +38,14 @@ registerPromiseWorker(async message => {
 
       return {
         result: Marshal.wrap(result),
-        self: self.toJSON()
+        self: Marshal.wrap(self)
       };
     case 'invokeStatic':
-      assert
-      (
+      assert(
         _.isString(message.method) && _.isFunction(_.get(objectClass, message.method)),
         'message.method should be one of ' + _.keys(CryptoCore)
       );
-      console.log(message.class, message.method, _.map(_.defaultTo(message.arguments, []), Marshal.unwrap));
+
       return Marshal.wrap(await _.invoke(
         objectClass,
         message.method,
