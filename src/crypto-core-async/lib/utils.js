@@ -1,10 +1,12 @@
 const _ = require('lodash');
 const Marshal = require('./marshal');
 
-function Utils(worker) {
+function Utils() {}
+
+Utils.set = function(worker) {
   Utils.worker = worker;
   return Utils;
-}
+};
 
 Utils.invokeStatic = async message => Marshal.unwrap(
   await Utils.worker.postMessage({
