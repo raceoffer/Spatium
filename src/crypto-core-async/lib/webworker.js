@@ -1,13 +1,14 @@
 const registerPromiseWorker = require('promise-worker/register');
 const assert = require('assert');
+const Marshal = require('marshal');
 const _ = require('lodash');
 
 const CryptoCore = {
   Utils: require('crypto-core/lib/utils'),
-  CompoundKey: require('crypto-core/lib/compoundkey')
+  CompoundKey: require('crypto-core/lib/compoundkey'),
+  PaillierProver: require('crypto-core/lib/paillierprover'),
+  PaillierVerifier: require('crypto-core/lib/paillierverifier')
 };
-
-const Marshal = require('./marshal');
 
 registerPromiseWorker(async message => {
   assert(

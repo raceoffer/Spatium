@@ -1,5 +1,7 @@
 const _ = require('lodash');
-const Marshal = require('./marshal');
+const Marshal = require('marshal');
+
+const PaillierProver = require('paillierprover');
 
 function CompoundKey(state) {
   this.state = state || { type: 'CompoundKey' }
@@ -7,10 +9,11 @@ function CompoundKey(state) {
 
 CompoundKey.set = function(worker) {
   CompoundKey.worker = worker;
+  PaillierProver.set(worker);
   return CompoundKey;
 };
 
-CompoundKey.prototype.invoke = async function(message) {
+CompoundKey.prototype.invoke = async function(message, wrapped) {
   const result = await CompoundKey.worker.postMessage({
     action: 'invoke',
     class: 'CompoundKey',
@@ -21,38 +24,18 @@ CompoundKey.prototype.invoke = async function(message) {
 
   this.state = result.self;
 
-  return Marshal.unwrap(result.result);
+  return wrapped ? result.result : Marshal.unwrap(result.result);
 };
 
-CompoundKey.prototype.invokeSelf = async function(message) {
+CompoundKey.invokeStatic = async function(message, wrapped) {
   const result = await CompoundKey.worker.postMessage({
-    action: 'invoke',
+    action: 'invokeStatic',
     class: 'CompoundKey',
-    self: this.state,
     method: message.method,
     arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
-
-  this.state = result.self;
-
-  return this;
+  return wrapped ? result : Marshal.unwrap(result);
 };
-
-CompoundKey.invokeStatic = async message =>
-  Marshal.unwrap(await CompoundKey.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'CompoundKey',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  }));
-
-CompoundKey.invokeStaticSelf = async message =>
-  new CompoundKey(await CompoundKey.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'CompoundKey',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  }));
 
 CompoundKey.generatePaillierKeys = async () => CompoundKey.invokeStatic({
   method: 'generatePaillierKeys',
@@ -64,32 +47,33 @@ CompoundKey.generateKey = async () => CompoundKey.invokeStatic({
   arguments: []
 });
 
-CompoundKey.generate = async () => CompoundKey.invokeStaticSelf({
+CompoundKey.generate = async () => new CompoundKey(await CompoundKey.invokeStatic({
   method: 'generate',
   arguments: []
-});
+}, true));
 
 CompoundKey.keyFromSecret = async secret => CompoundKey.invokeStatic({
   method: 'keyFromSecret',
   arguments: [secret]
 });
 
-CompoundKey.fromSecret = async secret => CompoundKey.invokeStaticSelf({
+CompoundKey.fromSecret = async secret => new CompoundKey(await CompoundKey.invokeStatic({
   method: 'fromSecret',
   arguments: [secret]
-});
+}, true));
 
 CompoundKey.prototype.fromOptions = async function(options) {
-  return this.invokeSelf({
+  await this.invoke({
     method: 'fromOptions',
     arguments: [options]
-  });
+  }, true);
+  return this;
 };
 
-CompoundKey.fromOptions = options => CompoundKey.invokeStaticSelf({
+CompoundKey.fromOptions = async options => new CompoundKey(await CompoundKey.invokeStatic({
   method: 'fromOptions',
   arguments: [options]
-});
+}, true));
 
 CompoundKey.prototype.getPrivateKey = async function(enc) {
   return this.invoke({
@@ -113,10 +97,10 @@ CompoundKey.prototype.getCompoundPublicKey = async function(compress, enc) {
 };
 
 CompoundKey.prototype.startInitialCommitment = async function() {
-  return this.invoke({
+  return new PaillierProver(this.invoke({
     method: 'startInitialCommitment',
     arguments: []
-  });
+  }, true));
 };
 
 CompoundKey.prototype.finishInitialSync = async function(syncData) {
