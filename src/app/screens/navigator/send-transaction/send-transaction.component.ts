@@ -49,6 +49,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feePrice = new FormControl();
   public feePriceUsd = new FormControl();
 
+  public subtractFee = new FormControl();
+
   accountPh = 'Account';
   receiverPh = 'Recipient';
 
@@ -66,11 +68,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stNormal = 'Normal (0-1 hour)';
   stEconomy = 'Economy (1-24 hours)';
 
-  stFeeOrigin = 'Take fee from';
-  stFeeOriginSender = 'Sender';
-  stFeeOriginRecipient = 'Recipient';
+  stFeeOriginRecipient = 'Subtract fee';
 
-  public subtractFee = false;
+
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -83,6 +83,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public balanceUsdConfirmed: BehaviorSubject<number> = null;
   public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
   public validatorObserver: Observable<boolean> = null;
+  public enougthCashObserver: Observable<boolean> = null;
 
   public estimatedSize: BehaviorSubject<number> = null;
 
@@ -160,12 +161,35 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.validatorObserver = combineLatest(
           this.balanceBtcUnconfirmed,
+          toBehaviourSubject(this.subtractFee.valueChanges, false),
           toBehaviourSubject(this.amount.valueChanges, 0),
           toBehaviourSubject(this.receiver.valueChanges, ''),
           toBehaviourSubject(this.fee.valueChanges, 0),
-          (balance, amount, receiver, fee) => {
-            return balance > (amount + fee) && amount > 0 && receiver && receiver.length > 0;
+          (balance, substractFee, amount, receiver, fee) => {
+            if (!substractFee) {
+              return balance > (amount + fee) && amount > 0 && receiver && receiver.length > 0;
+            } else {
+              return balance > (amount) && amount > 0 && receiver && receiver.length > 0;
+            }
           });
+
+        this.enougthCashObserver = combineLatest(
+          this.balanceBtcUnconfirmed,
+          toBehaviourSubject(this.subtractFee.valueChanges, false),
+          toBehaviourSubject(this.amount.valueChanges, 0),
+          toBehaviourSubject(this.fee.valueChanges, 0),
+          (balance, substractFee, amount, fee) => {
+            if (amount > 0) {
+              if (!substractFee) {
+                return balance > (amount + fee);
+              } else {
+                return balance > (amount);
+              }
+            } else {
+              return true;
+            }
+          }
+        )
 
         this.estimatedSize = toBehaviourSubject(
           this.balanceBtcUnconfirmed.flatMap(async balance => {
