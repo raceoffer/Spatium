@@ -5,6 +5,8 @@ const jspaillier = require('jspaillier');
 const BigInteger = require("jsbn").BigInteger;
 
 const CompoundKey = require('crypto-core/lib/compoundkey');
+const PaillierProof = require('crypto-core/lib/paillierproof');
+const PedersenScheme = require('crypto-core/lib/pedersenscheme');
 
 function Marshal() {}
 
@@ -62,6 +64,29 @@ Marshal.wrap = function (data) {
     }
   }
 
+  if (data.constructor && data.constructor.name === 'Prover') {
+    return {
+      type: 'Prover',
+      pk: Marshal.wrap(data.pk),
+      sk: Marshal.wrap(data.sk),
+      x: Marshal.wrap(data.x),
+      pedersenScheme: Marshal.wrap(data.pedersenScheme),
+      remoteParams: Marshal.wrap(data.remoteParams),
+      iCommitment: Marshal.wrap(data.iCommitment),
+      iDecommitment: Marshal.wrap(data.iDecommitment),
+      sCommitment: Marshal.wrap(data.sCommitment),
+      aDecommitment: Marshal.wrap(data.aDecommitment)
+    }
+  }
+
+  if (data.constructor && data.constructor.name === 'PedersenScheme') {
+    return {
+      type: 'PedersenScheme',
+      a: Marshal.wrap(data.a),
+      H: Marshal.wrap(data.H)
+    }
+  }
+
   if (_.isObject(data) && _.difference(['bits', 'n', 'n2', 'np1', 'rncache'], _.keys(data)).length === 0) {
     return {
       type: 'PaillierPublicKey',
@@ -81,6 +106,8 @@ Marshal.wrap = function (data) {
   if (_.isArray(data)) {
     return _.map(data, Marshal.wrap);
   }
+
+  console.log('wrap', data, data.constructor.name);
 
   if (_.isObject(data)) {
     return _.mapValues(data, Marshal.wrap);
@@ -126,6 +153,27 @@ Marshal.unwrap = function(data) {
     compoundKey.remotePrivateCiphertext = Marshal.unwrap(data.remotePrivateCiphertext);
     compoundKey.remotePaillierPublicKey = Marshal.unwrap(data.remotePaillierPublicKey);
     return compoundKey;
+  }
+
+  if (_.isObject(data) && data.type === 'Prover') {
+    const prover = new PaillierProof.Prover();
+    prover.pk = Marshal.unwrap(data.pk);
+    prover.sk = Marshal.unwrap(data.sk);
+    prover.x = Marshal.unwrap(data.x);
+    prover.pedersenScheme = Marshal.unwrap(data.pedersenScheme);
+    prover.remoteParams = Marshal.unwrap(data.remoteParams);
+    prover.iCommitment = Marshal.unwrap(data.iCommitment);
+    prover.iDecommitment = Marshal.unwrap(data.iDecommitment);
+    prover.sCommitment = Marshal.unwrap(data.sCommitment);
+    prover.aDecommitment = Marshal.unwrap(data.aDecommitment);
+    return prover;
+  }
+
+  if (_.isObject(data) && data.type === 'PedersenScheme') {
+    const pedersenScheme = new PedersenScheme();
+    pedersenScheme.a = Marshal.unwrap(data.a);
+    pedersenScheme.H = Marshal.unwrap(data.H);
+    return pedersenScheme;
   }
 
   if (_.isObject(data) && data.type === 'PaillierPublicKey') {
