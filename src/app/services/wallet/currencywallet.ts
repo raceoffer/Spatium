@@ -8,6 +8,8 @@ import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
+import { toBehaviourSubject } from '../../utils/transformers';
+
 declare const CryptoCore: any;
 
 export enum Status {
@@ -52,8 +54,8 @@ export class CurrencyWallet {
   protected signSession: SignSession = null;
 
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: Observable<boolean> = this.status.map(status => status === Status.Synchronizing);
-  public ready: Observable<boolean> = this.status.map(status => status === Status.Ready);
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
 
   public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
 

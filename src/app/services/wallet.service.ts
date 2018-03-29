@@ -10,6 +10,7 @@ import 'rxjs/add/operator/takeUntil';
 import { BluetoothService } from './bluetooth.service';
 import { Coin, Token, KeyChainService } from './keychain.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { toBehaviourSubject } from '../utils/transformers';
 
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
@@ -1291,7 +1292,6 @@ export class WalletService {
         '0xa4e8c3ec456107ea67d3075bf9e3df3a75823db0'
       ));
 
-
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
     }
@@ -1300,7 +1300,7 @@ export class WalletService {
     }
 
     this.status = combineLatest(
-      Array.from(this.coinWallets.values()).map(wallet => wallet.status),
+      Array.from(this.coinWallets.values()).concat(Array.from(this.tokenWallets.values())).map(wallet => wallet.status),
       (... values) => {
         if (values.every(value => value === Status.Ready)) {
           return Status.Ready;
@@ -1321,15 +1321,25 @@ export class WalletService {
       }
     );
 
-    this.synchronizing = this.status.map(status => status === Status.Synchronizing);
-    this.ready = this.status.map(status => status === Status.Ready);
+    this.synchronizing = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
+    this.ready = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
 
-    this.syncProgress = combineLatest(
-      Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
-      (... values) => {
-        return values.reduce((a, b) => a + b, 0) / values.length;
-      }
-    );
+    this.syncProgress = toBehaviourSubject(combineLatest(
+      toBehaviourSubject(combineLatest(
+        Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
+        (... values) => {
+          return values.reduce((a, b) => a + b, 0);
+        }
+      ), 0),
+      toBehaviourSubject(combineLatest(
+        Array.from(this.tokenWallets.values()).map(wallet => wallet.ready),
+        (... values) => {
+          return values.map(ready => ready ? 50 : 0).reduce((a, b) => a + b, 0);
+        }
+      ), 0),
+      (a, b) => {
+        return (a + b) / (this.coinWallets.size + this.tokenWallets.size / 2);
+      }), 0);
 
     this.statusChanged = this.status.skip(1).distinctUntilChanged();
 
