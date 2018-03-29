@@ -9,10 +9,6 @@
     <mat-progress-spinner mode="determinate" color="accent" [value]="progress | async"></mat-progress-spinner>
   </div>
 
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
-    <mat-spinner mode="indeterminate" color="accent"></mat-spinner>
-  </div>
-
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
     <button mat-raised-button color="accent" class="width-button" (click)="cancelSync()">{{cancelLabel}}</button>
   </div>
