@@ -48,7 +48,7 @@ export class HistoryEntry {
 }
 
 export class CurrencyWallet {
-  protected compoundKey: any = null;
+  public compoundKey: any = null;
 
   protected syncSession: SyncSession = null;
   protected signSession: SignSession = null;
@@ -202,9 +202,9 @@ export class CurrencyWallet {
     }
   }
 
-  public async syncDuplicate(other: CurrencyWallet) {
+  public async syncDuplicate(other: CurrencyWallet, syncData: any) {
     this.compoundKey = other.compoundKey;
-    await this.finishSync(await other.compoundKey.extractSyncData());
+    await this.finishSync(syncData);
   }
 
   public async finishSync(data) {

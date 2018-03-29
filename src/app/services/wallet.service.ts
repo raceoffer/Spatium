@@ -17,6 +17,7 @@ import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const CryptoCore: any;
 
@@ -45,6 +46,8 @@ export class WalletService {
   public readyEvent: Observable<any>;
 
   public paillierKeys: any = null;
+
+  public generatedKeys: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
 
   constructor(
     private readonly bt: BluetoothService,
@@ -1299,8 +1302,11 @@ export class WalletService {
       this.currencyWallets.set(token, this.tokenWallets.get(token));
     }
 
-    this.status = combineLatest(
-      Array.from(this.coinWallets.values()).concat(Array.from(this.tokenWallets.values())).map(wallet => wallet.status),
+    this.status = toBehaviourSubject(combineLatest(
+      Array.from(this.coinWallets.values())
+        .concat(Array.from(this.tokenWallets.values()))
+        .map(wallet => wallet.status)
+        .concat(this.generatedKeys),
       (... values) => {
         if (values.every(value => value === Status.Ready)) {
           return Status.Ready;
@@ -1311,15 +1317,12 @@ export class WalletService {
         if (values.some(value => value === Status.Cancelled)) {
           return Status.Cancelled;
         }
-        if (values.some(value => value === Status.Synchronizing)) {
-          return Status.Synchronizing;
+        if (values.every(value => value === Status.None)) {
+          return Status.None;
         }
-        if (values.some(value => value === Status.Ready) && values.some(value => value === Status.None)) {
-          return Status.Synchronizing;
-        }
-        return Status.None;
+        return Status.Synchronizing;
       }
-    );
+    ), Status.None);
 
     this.synchronizing = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
     this.ready = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
@@ -1334,11 +1337,12 @@ export class WalletService {
       toBehaviourSubject(combineLatest(
         Array.from(this.tokenWallets.values()).map(wallet => wallet.ready),
         (... values) => {
-          return values.map(ready => ready ? 50 : 0).reduce((a, b) => a + b, 0);
+          return values.map(ready => ready ? 25 : 0).reduce((a, b) => a + b, 0);
         }
       ), 0),
-      (a, b) => {
-        return (a + b) / (this.coinWallets.size + this.tokenWallets.size / 2);
+      toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 0), 0),
+      (a, b, c) => {
+        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 4 + 1);
       }), 0);
 
     this.statusChanged = this.status.skip(1).distinctUntilChanged();
@@ -1362,13 +1366,18 @@ export class WalletService {
   }
 
   public async reset() {
+    this.generatedKeys.next(Status.None);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
     }
   }
 
   public async startSync() {
+    this.generatedKeys.next(Status.Synchronizing);
+
     this.paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
+
+    this.generatedKeys.next(Status.Ready);
 
     for (const wallet of Array.from(this.coinWallets.values())) {
       const syncEvent = wallet.readyEvent.take(1).takeUntil(combineLatest(this.cancelledEvent, this.failedEvent)).toPromise();
@@ -1379,9 +1388,10 @@ export class WalletService {
     }
 
     const ethWallet = this.coinWallets.get(Coin.ETH);
+    const syncData = await ethWallet.compoundKey.extractSyncData();
 
     for (const wallet of Array.from(this.tokenWallets.values())) {
-      await wallet.syncDuplicate(ethWallet);
+      await wallet.syncDuplicate(ethWallet, syncData);
     }
   }
 
