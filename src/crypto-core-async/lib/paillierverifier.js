@@ -48,7 +48,6 @@ PaillierVerifier.fromOptions = async options => new PaillierVerifier(await Paill
   arguments: [options]
 }, true));
 
-
 PaillierVerifier.prototype.getCommitment = async function() {
   return await this.invoke({
     method: 'getCommitment',

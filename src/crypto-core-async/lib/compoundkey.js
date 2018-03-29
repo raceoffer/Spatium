@@ -3,6 +3,7 @@ const _ = require('lodash');
 const Marshal = require('crypto-core/lib/marshal');
 
 const PaillierProver = require('./paillierprover');
+const Signer = require('./signer');
 
 function CompoundKey(state) {
   this.state = state || { type: 'CompoundKey' }
@@ -116,6 +117,13 @@ CompoundKey.prototype.extractSyncData = async function() {
     method: 'extractSyncData',
     arguments: []
   });
+};
+
+CompoundKey.prototype.startSign = async function(message) {
+  return new Signer(await this.invoke({
+    method: 'startSign',
+    arguments: [message]
+  }, true));
 };
 
 module.exports = CompoundKey;

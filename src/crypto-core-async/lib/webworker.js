@@ -8,7 +8,8 @@ const CryptoCore = {
   Utils: require('crypto-core/lib/utils'),
   CompoundKey: require('crypto-core/lib/compoundkey'),
   PaillierProver: require('crypto-core/lib/paillierprover'),
-  PaillierVerifier: require('crypto-core/lib/paillierverifier')
+  PaillierVerifier: require('crypto-core/lib/paillierverifier'),
+  Signer: require('crypto-core/lib/signer')
 };
 
 registerPromiseWorker(async message => {
