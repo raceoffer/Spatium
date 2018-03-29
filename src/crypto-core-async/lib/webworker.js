@@ -1,6 +1,6 @@
 const registerPromiseWorker = require('promise-worker/register');
 const assert = require('assert');
-const Marshal = require('marshal');
+const Marshal = require('./marshal');
 const _ = require('lodash');
 
 const CryptoCore = {

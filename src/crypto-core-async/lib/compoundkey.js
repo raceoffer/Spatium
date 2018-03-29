@@ -1,7 +1,7 @@
 const _ = require('lodash');
-const Marshal = require('marshal');
+const Marshal = require('./marshal');
 
-const PaillierProver = require('paillierprover');
+const PaillierProver = require('./paillierprover');
 
 function CompoundKey(state) {
   this.state = state || { type: 'CompoundKey' }
@@ -76,42 +76,42 @@ CompoundKey.fromOptions = async options => new CompoundKey(await CompoundKey.inv
 }, true));
 
 CompoundKey.prototype.getPrivateKey = async function(enc) {
-  return this.invoke({
+  return await this.invoke({
     method: 'getPrivateKey',
     arguments: [enc]
   });
 };
 
 CompoundKey.prototype.getPublicKey = async function(compress, enc) {
-  return this.invoke({
+  return await this.invoke({
     method: 'getPublicKey',
     arguments: [compress, enc]
   });
 };
 
 CompoundKey.prototype.getCompoundPublicKey = async function(compress, enc) {
-  return this.invoke({
+  return await this.invoke({
     method: 'getCompoundPublicKey',
     arguments: [compress, enc]
   });
 };
 
 CompoundKey.prototype.startInitialCommitment = async function() {
-  return new PaillierProver(this.invoke({
+  return new PaillierProver(await this.invoke({
     method: 'startInitialCommitment',
     arguments: []
   }, true));
 };
 
 CompoundKey.prototype.finishInitialSync = async function(syncData) {
-  return this.invoke({
+  return await this.invoke({
     method: 'finishInitialSync',
     arguments: [syncData]
   });
 };
 
 CompoundKey.prototype.extractSyncData = async function() {
-  return this.invoke({
+  return await this.invoke({
     method: 'extractSyncData',
     arguments: []
   });

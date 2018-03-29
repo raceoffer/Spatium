@@ -1,13 +1,14 @@
 const _ = require('lodash');
-const ec = require('elliptic').ec('secp256k1');
-const BN = require('bn.js');
-const jspaillier = require('jspaillier');
-const BigInteger = require("jsbn").BigInteger;
 
 const CompoundKey = require('crypto-core/lib/compoundkey');
 const PaillierProver = require('crypto-core/lib/paillierprover');
 const PaillierVerifier = require('crypto-core/lib/paillierverifier');
 const PedersenScheme = require('crypto-core/lib/pedersenscheme');
+
+const ec = require('elliptic').ec('secp256k1');
+const BN = require('bn.js');
+const jspaillier = require('jspaillier');
+const BigInteger = require("jsbn").BigInteger;
 
 function Marshal() {}
 
@@ -26,8 +27,8 @@ Marshal.wrap = function (data) {
   if (data.constructor && data.constructor.name === 'KeyPair') {
     return {
       type: 'KeyPair',
-      priv: data.priv ? data.getPrivate().toString(16) : null,
-      pub: data.pub ? Buffer.from(data.getPublic().encode(true)).toString('hex') : null
+      priv: data.priv ? Marshal.wrap(data.getPrivate()) : null,
+      pub: data.pub ? Marshal.wrap(data.getPublic()) : null
     }
   }
 
@@ -41,7 +42,7 @@ Marshal.wrap = function (data) {
   if (data.constructor && data.constructor.name === 'Point') {
     return {
       type: 'Point',
-      value: Buffer.from(data.encode(true)).toString('hex')
+      value: data.toJSON()
     }
   }
 
@@ -76,7 +77,8 @@ Marshal.wrap = function (data) {
       iCommitment: Marshal.wrap(data.iCommitment),
       iDecommitment: Marshal.wrap(data.iDecommitment),
       sCommitment: Marshal.wrap(data.sCommitment),
-      aDecommitment: Marshal.wrap(data.aDecommitment)
+      aDecommitment: Marshal.wrap(data.aDecommitment),
+      alpha: Marshal.wrap(data.alpha)
     }
   }
 
@@ -107,14 +109,14 @@ Marshal.wrap = function (data) {
     return {
       type: 'PaillierPublicKey',
       bits: data.bits,
-      n: data.n.toString(16)
+      n: Marshal.wrap(data.n)
     }
   }
 
   if (_.isObject(data) && _.difference(['lambda', 'pubkey', 'x'], _.keys(data)).length === 0) {
     return {
       type: 'PaillierPrivateKey',
-      lambda: data.lambda.toString(16),
+      lambda: Marshal.wrap(data.lambda),
       pubkey: Marshal.wrap(data.pubkey)
     }
   }
@@ -122,8 +124,6 @@ Marshal.wrap = function (data) {
   if (_.isArray(data)) {
     return _.map(data, Marshal.wrap);
   }
-
-  console.log('wrap', data, data.constructor.name);
 
   if (_.isObject(data)) {
     return _.mapValues(data, Marshal.wrap);
@@ -139,9 +139,9 @@ Marshal.unwrap = function(data) {
 
   if (_.isObject(data) && data.type === 'KeyPair') {
     if (data.priv) {
-      return ec.keyFromPrivate(new BN(data.priv, 16))
+      return ec.keyFromPrivate(Marshal.unwrap(data.priv))
     } else if (data.pub) {
-      return ec.keyFromPblic(ec.curve.decodePoint(Buffer.from(data.pub, 'hex')));
+      return ec.keyFromPublic(Marshal.unwrap(data.pub, 'hex'));
     } else {
       return null;
     }
@@ -152,7 +152,7 @@ Marshal.unwrap = function(data) {
   }
 
   if (_.isObject(data) && data.type === 'Point') {
-    return ec.curve.decodePoint(Buffer.from(data.value, 'hex'));
+    return ec.curve.pointFromJSON(data.value, true);
   }
 
   if (_.isObject(data) && data.type === 'BigInteger') {
@@ -182,6 +182,7 @@ Marshal.unwrap = function(data) {
     prover.iDecommitment = Marshal.unwrap(data.iDecommitment);
     prover.sCommitment = Marshal.unwrap(data.sCommitment);
     prover.aDecommitment = Marshal.unwrap(data.aDecommitment);
+    prover.alpha = Marshal.unwrap(data.alpha);
     return prover;
   }
 
@@ -207,11 +208,11 @@ Marshal.unwrap = function(data) {
   }
 
   if (_.isObject(data) && data.type === 'PaillierPublicKey') {
-    return new jspaillier.publicKey(data.bits, new BigInteger(data.n, 16));
+    return new jspaillier.publicKey(data.bits, Marshal.unwrap(data.n));
   }
 
   if (_.isObject(data) && data.type === 'PaillierPrivateKey') {
-    return new jspaillier.privateKey(new BigInteger(data.lambda, 16), Marshal.unwrap(data.pubkey));
+    return new jspaillier.privateKey(Marshal.unwrap(data.lambda), Marshal.unwrap(data.pubkey));
   }
 
   if (_.isArray(data)) {

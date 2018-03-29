@@ -11,7 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "crypto-core": "file:../crypto-core",
-    "jspaillier": "^0.1.1",
     "promise-worker": "^1.1.1"
   }
 }

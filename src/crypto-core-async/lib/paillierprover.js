@@ -1,7 +1,7 @@
 const _ = require('lodash');
-const Marshal = require('marshal');
+const Marshal = require('./marshal');
 
-const PaillierVerifier = require('paillierverifier');
+const PaillierVerifier = require('./paillierverifier');
 
 function PaillierProver(state) {
   this.state = state || { type: 'PaillierProver' }
