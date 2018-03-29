@@ -1314,23 +1314,15 @@ export class WalletService {
         if (values.some(value => value === Status.Synchronizing)) {
           return Status.Synchronizing;
         }
+        if (values.some(value => value === Status.Ready) && values.some(value => value === Status.None)) {
+          return Status.Synchronizing;
+        }
         return Status.None;
       }
     );
 
-    this.synchronizing = combineLatest(
-      Array.from(this.coinWallets.values()).map(wallet => wallet.synchronizing),
-      (... values) => {
-        return values.reduce((a, b) => a || b, false);
-      }
-    );
-
-    this.ready = combineLatest(
-      Array.from(this.coinWallets.values()).map(wallet => wallet.ready),
-      (... values) => {
-        return values.reduce((a, b) => a && b, true);
-      }
-    );
+    this.synchronizing = this.status.map(status => status === Status.Synchronizing);
+    this.ready = this.status.map(status => status === Status.Ready);
 
     this.syncProgress = combineLatest(
       Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
@@ -1366,7 +1358,7 @@ export class WalletService {
   }
 
   public async startSync() {
-    this.paillierKeys = CryptoCore.CompoundKey.generatePaillierKeys();
+    this.paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
 
     for (const wallet of Array.from(this.coinWallets.values())) {
       const syncEvent = wallet.readyEvent.take(1).takeUntil(combineLatest(this.cancelledEvent, this.failedEvent)).toPromise();

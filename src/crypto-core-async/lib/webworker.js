@@ -1,7 +1,8 @@
 const registerPromiseWorker = require('promise-worker/register');
 const assert = require('assert');
-const Marshal = require('./marshal');
 const _ = require('lodash');
+
+const Marshal = require('crypto-core/lib/marshal');
 
 const CryptoCore = {
   Utils: require('crypto-core/lib/utils'),

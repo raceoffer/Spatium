@@ -61,7 +61,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
     this.erc20Wallet = await new CryptoCore.ERC20Wallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.ERC20Wallet.address(this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.ERC20Wallet.address(await this.compoundKey.getCompoundPublicKey()),
       contractAddress: this.contractAddress,
       network: this.network
     }).load();

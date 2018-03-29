@@ -46,7 +46,7 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
 
     this.ethereumWallet = await new CryptoCore.EthereumWallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.EthereumWallet.address(this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.EthereumWallet.address(await this.compoundKey.getCompoundPublicKey()),
       network: this.network
     }).load();
 

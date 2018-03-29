@@ -1,5 +1,6 @@
 const _ = require('lodash');
-const Marshal = require('./marshal');
+
+const Marshal = require('crypto-core/lib/marshal');
 
 function Utils() {}
 

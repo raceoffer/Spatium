@@ -101,7 +101,7 @@ export class SyncSession {
     this.status.next(SynchronizationStatus.Started);
     let initialCommitment = null;
     try {
-      initialCommitment = this.prover.getInitialCommitment();
+      initialCommitment = await this.prover.getInitialCommitment();
     } catch (e) {
       return handleFailure('Failed to get initialCommitment', e);
     }
@@ -123,7 +123,7 @@ export class SyncSession {
     LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     let initialDecommitment = null;
     try {
-      initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+      initialDecommitment = await this.prover.processInitialCommitment(remoteInitialCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteInitialCommitment', e);
     }
@@ -145,12 +145,12 @@ export class SyncSession {
     LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     let verifier = null;
     try {
-      verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+      verifier = await this.prover.processInitialDecommitment(remoteInitialDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteInitialDecommitment', e);
     }
 
-    const verifierCommitment = verifier.getCommitment();
+    const verifierCommitment = await verifier.getCommitment();
 
     LoggerService.log('Sending verifierCommitment', verifierCommitment);
     if (!await this.bt.send(JSON.stringify({
@@ -169,7 +169,7 @@ export class SyncSession {
     LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     let proverCommitment = null;
     try {
-      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+      proverCommitment = await this.prover.processCommitment(remoteVerifierCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteVerifierCommitment', e);
     }
@@ -191,7 +191,7 @@ export class SyncSession {
     LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
     let verifierDecommitment = null;
     try {
-      verifierDecommitment = verifier.processCommitment(remoteProverCommitment);
+      verifierDecommitment = await verifier.processCommitment(remoteProverCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteProverCommitment', e);
     }
@@ -213,7 +213,7 @@ export class SyncSession {
     LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     let proverDecommitment = null;
     try {
-      proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+      proverDecommitment = await this.prover.processDecommitment(remoteVerifierDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
@@ -235,7 +235,7 @@ export class SyncSession {
     LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     let verifiedData = null;
     try {
-      verifiedData = verifier.processDecommitment(remoteProverDecommitment);
+      verifiedData = await verifier.processDecommitment(remoteProverDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteProverDecommitment', e);
     }

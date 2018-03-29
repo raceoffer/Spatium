@@ -1,5 +1,6 @@
 const _ = require('lodash');
-const Marshal = require('./marshal');
+
+const Marshal = require('crypto-core/lib/marshal');
 
 const PaillierProver = require('./paillierprover');
 

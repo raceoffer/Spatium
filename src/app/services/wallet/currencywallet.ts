@@ -99,20 +99,20 @@ export class CurrencyWallet {
     return null;
   }
 
-  public sync(paillierKeys: any) {
+  public async sync(paillierKeys: any) {
     if (this.status.getValue() === Status.Synchronizing) {
       LoggerService.log('Sync in progress', {});
       return;
     }
 
-    this.compoundKey = new CryptoCore.CompoundKey({
-      localPrivateKey: CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+    this.compoundKey = await CryptoCore.CompoundKey.fromOptions({
+      localPrivateKey: await CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
       localPaillierKeys: paillierKeys
     });
 
     let prover = null;
     try {
-      prover = this.compoundKey.startInitialCommitment();
+      prover = await this.compoundKey.startInitialCommitment();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start initial commitment', e);
       return;
@@ -202,12 +202,12 @@ export class CurrencyWallet {
 
   public async syncDuplicate(other: CurrencyWallet) {
     this.compoundKey = other.compoundKey;
-    await this.finishSync(other.compoundKey.extractSyncData());
+    await this.finishSync(await other.compoundKey.extractSyncData());
   }
 
   public async finishSync(data) {
     try {
-      this.compoundKey.finishInitialSync(data);
+      await this.compoundKey.finishInitialSync(data);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed synchronization finish', e);
     }

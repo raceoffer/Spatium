@@ -54,7 +54,7 @@ export class BitcoinWallet extends CurrencyWallet {
     try {
       this.watchingWallet = await new CryptoCore.WatchingWallet({
         accounts: [{
-          key: this.compoundKey.getCompoundPublicKey()
+          key: await this.compoundKey.getCompoundPublicKey()
         }],
         network: this.network
       }).load(this.walletDB);
