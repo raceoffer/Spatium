@@ -75,10 +75,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
       });
     }));
 
-    let initialBalance = '0';
-    try {
-      initialBalance = await this.erc20Wallet.getBalance();
-    } catch (ignored) {}
+    const initialBalance = '0';
     this.balance.next({
       confirmed: this.fromInternal(initialBalance),
       unconfirmed: this.fromInternal(initialBalance)

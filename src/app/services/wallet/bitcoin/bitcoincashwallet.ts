@@ -80,15 +80,10 @@ export class BitcoinCashWallet extends CurrencyWallet {
       this.transactions.next(await this.listTransactionHistory());
     }));
 
-    try {
-      const balance = await this.watchingWallet.getBalance();
-      this.balance.next({
-        confirmed: this.fromInternal(balance.confirmed),
-        unconfirmed: this.fromInternal(balance.unconfirmed)
-      });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to get the balance', e);
-    }
+    this.balance.next({
+      confirmed: this.fromInternal('0'),
+      unconfirmed: this.fromInternal('0')
+    });
 
     // Start: configuring a provider
     this.provider = new CryptoCore.InsightProvider({

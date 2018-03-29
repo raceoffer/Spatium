@@ -1340,7 +1340,7 @@ export class WalletService {
           return values.map(ready => ready ? 25 : 0).reduce((a, b) => a + b, 0);
         }
       ), 0),
-      toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 0), 0),
+      toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 20), 0),
       (a, b, c) => {
         return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 4 + 1);
       }), 0);
