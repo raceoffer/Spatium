@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
-import { Coin, Token, KeyChainService, TokenEntry } from './keychain.service';
+import { Coin, Token, KeyChainService } from './keychain.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { toBehaviourSubject } from '../utils/transformers';
 
@@ -16,7 +16,7 @@ import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
-import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
+import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const CryptoCore: any;
@@ -26,7 +26,7 @@ export class WalletService {
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
   public coinWallets = new Map<Coin, CurrencyWallet>();
-  public tokenWallets = new Map<Token, ERC20CurrencyWallet>();
+  public tokenWallets = new Map<Token, ERC20Wallet>();
 
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
 
@@ -97,7 +97,7 @@ export class WalletService {
 
     keychain.topTokens.forEach((tokenInfo) => {
       this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress);
-    })
+    });
 
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
@@ -209,7 +209,7 @@ export class WalletService {
   createTokenWallet (token: Token, contractAddress: string) {
     this.tokenWallets.set(
       token,
-      new ERC20CurrencyWallet(
+      new ERC20Wallet(
         'main',
         this.keychain,
         1,

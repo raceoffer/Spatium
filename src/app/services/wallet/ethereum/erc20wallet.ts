@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 
 declare const CryptoCore: any;
 
-export class ERC20CurrencyWallet extends CurrencyWallet {
+export class ERC20Wallet extends CurrencyWallet {
   private erc20Wallet: any = null;
   private contractAddress: string = null;
   private token: Token = null;
