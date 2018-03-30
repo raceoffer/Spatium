@@ -119,7 +119,6 @@ export class SignSession implements OnDestroy {
       return this.handleFailure('Failed to get entropyCommitments', e);
     }
 
-    LoggerService.log('Sending entropyCommitments', entropyCommitments);
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyCommitments',
         content: entropyCommitments
@@ -133,7 +132,6 @@ export class SignSession implements OnDestroy {
     }
 
     this.status.next(TransactionStatus.EntropyCommitments);
-    LoggerService.log('Received remoteEntropyCommitments', remoteEntropyCommitments);
     let entropyDecommitments = null;
     try {
       entropyDecommitments = this.tx.processEntropyCommitments(this.signers, remoteEntropyCommitments);
@@ -141,7 +139,6 @@ export class SignSession implements OnDestroy {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
 
-    LoggerService.log('Sending entropyDecommitments', entropyDecommitments);
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyDecommitments',
         content: entropyDecommitments
@@ -155,7 +152,6 @@ export class SignSession implements OnDestroy {
     }
 
     this.status.next(TransactionStatus.EntropyDecommitments);
-    LoggerService.log('Received remoteEntropyDecommitments', remoteEntropyDecommitments);
     try {
       this.tx.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
     } catch (e) {
@@ -179,7 +175,6 @@ export class SignSession implements OnDestroy {
       return this.handleFailure('Failed to compute chiphertexts', e);
     }
 
-    LoggerService.log('Sending chiphertexts', chiphertexts);
     if (!await this.bt.send(JSON.stringify({
         type: 'chiphertexts',
         content: chiphertexts
@@ -199,7 +194,6 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    LoggerService.log('Received remoteChiphertexts', remoteChiphertexts);
     let rawSignatures = null;
     try {
       rawSignatures = this.tx.extractSignatures(this.signers, remoteChiphertexts);

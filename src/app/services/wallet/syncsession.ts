@@ -113,7 +113,6 @@ export class SyncSession implements OnDestroy {
       return handleFailure('Failed to get initialCommitment', e);
     }
 
-    LoggerService.log('Sending initialCommitment:', initialCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'initialCommitment',
         content: initialCommitment
@@ -127,7 +126,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.InitialCommitment);
-    LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     let initialDecommitment = null;
     try {
       initialDecommitment = await this.prover.processInitialCommitment(remoteInitialCommitment);
@@ -135,7 +133,6 @@ export class SyncSession implements OnDestroy {
       return handleFailure('Failed to process remoteInitialCommitment', e);
     }
 
-    LoggerService.log('Sending initialDecommitment', initialDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'initialDecommitment',
         content: initialDecommitment
@@ -149,7 +146,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.InitialDecommitment);
-    LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     let verifier = null;
     try {
       verifier = await this.prover.processInitialDecommitment(remoteInitialDecommitment);
@@ -159,7 +155,6 @@ export class SyncSession implements OnDestroy {
 
     const verifierCommitment = await verifier.getCommitment();
 
-    LoggerService.log('Sending verifierCommitment', verifierCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierCommitment',
         content: verifierCommitment
@@ -173,7 +168,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.VerifierCommitment);
-    LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     let proverCommitment = null;
     try {
       proverCommitment = await this.prover.processCommitment(remoteVerifierCommitment);
@@ -181,7 +175,6 @@ export class SyncSession implements OnDestroy {
       return handleFailure('Failed to process remoteVerifierCommitment', e);
     }
 
-    LoggerService.log('Sending proverCommitment', proverCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'proverCommitment',
         content: proverCommitment
@@ -195,7 +188,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.ProverCommitment);
-    LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
     let verifierDecommitment = null;
     try {
       verifierDecommitment = await verifier.processCommitment(remoteProverCommitment);
@@ -203,7 +195,6 @@ export class SyncSession implements OnDestroy {
       return handleFailure('Failed to process remoteProverCommitment', e);
     }
 
-    LoggerService.log('Sending verifierDecommitment', verifierDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierDecommitment',
         content: verifierDecommitment
@@ -217,7 +208,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.VerifierDecommitment);
-    LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     let proverDecommitment = null;
     try {
       proverDecommitment = await this.prover.processDecommitment(remoteVerifierDecommitment);
@@ -225,7 +215,6 @@ export class SyncSession implements OnDestroy {
       return handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
 
-    LoggerService.log('Sending proverDecommitment', proverDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'proverDecommitment',
         content: proverDecommitment
@@ -239,7 +228,6 @@ export class SyncSession implements OnDestroy {
     }
 
     this.status.next(SynchronizationStatus.ProverDecommitment);
-    LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     let verifiedData = null;
     try {
       verifiedData = await verifier.processDecommitment(remoteProverDecommitment);
