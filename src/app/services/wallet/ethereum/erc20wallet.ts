@@ -2,6 +2,7 @@ import { CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 declare const CryptoCore: any;
 
@@ -9,6 +10,8 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   private erc20Wallet: any = null;
   private contractAddress: string = null;
   private token: Token = null;
+
+  private routineTimerSub: any = null;
 
   constructor(
     network: string,
@@ -30,6 +33,11 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
     await super.reset();
 
     this.erc20Wallet = null;
+
+    if (this.routineTimerSub) {
+      this.routineTimerSub.unsubscribe();
+      this.routineTimerSub = null;
+    }
   }
 
   public toInternal(amount: number): string {
@@ -68,17 +76,12 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
     this.address.next(this.erc20Wallet.address);
 
-    this.erc20Wallet.on('balance', (balance) => this.ngZone.run(async () => {
+    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+      const balance = await this.erc20Wallet.getBalance();
       this.balance.next({
         confirmed: this.fromInternal(balance),
         unconfirmed: this.fromInternal(balance)
       });
-    }));
-
-    const initialBalance = '0';
-    this.balance.next({
-      confirmed: this.fromInternal(initialBalance),
-      unconfirmed: this.fromInternal(initialBalance)
     });
 
     this.status.next(Status.Ready);
@@ -96,17 +99,12 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
 
     this.address.next(this.erc20Wallet.address);
 
-    this.erc20Wallet.on('balance', (balance) => this.ngZone.run(async () => {
+    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+      const balance = await this.erc20Wallet.getBalance();
       this.balance.next({
         confirmed: this.fromInternal(balance),
         unconfirmed: this.fromInternal(balance)
       });
-    }));
-
-    const initialBalance = '0';
-    this.balance.next({
-      confirmed: this.fromInternal(initialBalance),
-      unconfirmed: this.fromInternal(initialBalance)
     });
 
     this.status.next(Status.Ready);

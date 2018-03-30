@@ -2,11 +2,13 @@ import { CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 declare const CryptoCore: any;
 
 export class EthereumWallet extends CurrencyWallet {
   private ethereumWallet: any = null;
+  private routineTimerSub: any = null;
 
   constructor(
     network: string,
@@ -23,6 +25,11 @@ export class EthereumWallet extends CurrencyWallet {
     await super.reset();
 
     this.ethereumWallet = null;
+
+    if (this.routineTimerSub) {
+      this.routineTimerSub.unsubscribe();
+      this.routineTimerSub = null;
+    }
   }
 
   public fee(transaction): number {
@@ -52,17 +59,12 @@ export class EthereumWallet extends CurrencyWallet {
 
     this.address.next(this.ethereumWallet.address);
 
-    this.ethereumWallet.on('balance', (balance) => this.ngZone.run(async () => {
+    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+      const balance = await this.ethereumWallet.getBalance();
       this.balance.next({
         confirmed: this.fromInternal(balance),
         unconfirmed: this.fromInternal(balance)
       });
-    }));
-
-    const initialBalance = '0';
-    this.balance.next({
-      confirmed: this.fromInternal(initialBalance),
-      unconfirmed: this.fromInternal(initialBalance)
     });
 
     this.status.next(Status.Ready);
