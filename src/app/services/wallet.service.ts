@@ -1388,10 +1388,9 @@ export class WalletService {
     }
 
     const ethWallet = this.coinWallets.get(Coin.ETH);
-    const syncData = await ethWallet.compoundKey.extractSyncData();
 
     for (const wallet of Array.from(this.tokenWallets.values())) {
-      await wallet.syncDuplicate(ethWallet, syncData);
+      await wallet.syncDuplicate(ethWallet);
     }
   }
 

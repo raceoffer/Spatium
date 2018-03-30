@@ -202,9 +202,8 @@ export class CurrencyWallet {
     }
   }
 
-  public async syncDuplicate(other: CurrencyWallet, syncData: any) {
+  public async syncDuplicate(other: CurrencyWallet) {
     this.compoundKey = other.compoundKey;
-    await this.finishSync(syncData);
   }
 
   public async finishSync(data) {
