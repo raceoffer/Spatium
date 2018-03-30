@@ -8,7 +8,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
-import { Coin, Token, KeyChainService } from './keychain.service';
+import { Coin, Token, KeyChainService, TokenEntry } from './keychain.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 import { CurrencyWallet, Status } from './wallet/currencywallet';
@@ -86,138 +86,10 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
-    this.tokenWallets.set(
-      Token.EOS,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.EOS,
-        '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0'
-      ));
-    this.tokenWallets.set(
-      Token.TRON,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.TRON,
-        '0xf230b790e05390fc8295f4d3f60332c93bed42e2'
-      ));
-    this.tokenWallets.set(
-      Token.VECHAIN,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.VECHAIN,
-        '0xd850942ef8811f2a866692a623011bde52a462c1'
-      ));
-    this.tokenWallets.set(
-      Token.ICON,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.ICON,
-        '0xb5a5f22694352c15b00323844ad545abb2b11028'
-      ));
-    this.tokenWallets.set(
-      Token.OMNISEGO,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.OMNISEGO,
-        '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07'
-      ));
-    this.tokenWallets.set(
-      Token.BINACLECOIN,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.BINACLECOIN,
-        '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
-      ));
-    this.tokenWallets.set(
-      Token.DIGIXDAO,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.DIGIXDAO,
-        '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a'
-      ));
-    this.tokenWallets.set(
-      Token.POPULUS,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.POPULUS,
-        '0xd4fa1460f537bb9085d22c7bccb5dd450ef28e3a'
-      ));
-    this.tokenWallets.set(
-      Token.RCHAIN,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.RCHAIN,
-        '0x168296bb09e24a88805cb9c33356536b980d3fc5'
-      ));
-    this.tokenWallets.set(
-      Token.MAKER,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.MAKER,
-        '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
-      ));
-    this.tokenWallets.set(
-      Token.AETHERNITY,
-      new ERC20CurrencyWallet(
-        'main',
-        this.keychain,
-        1,
-        this.messageSubject,
-        this.bt,
-        this.ngZone,
-        Token.AETHERNITY,
-        '0x5ca9a71b1d01849c0a95490cc00559717fcf0d1d'
-      ));
+
+    keychain.topTokens.forEach((tokenInfo) => {
+      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress);
+    })
 
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
@@ -313,5 +185,21 @@ export class WalletService {
       await wallet.cancelSync();
     }
   }
+
+  createTokenWallet (token: Token, contractAddress: string) {
+    this.tokenWallets.set(
+      token,
+      new ERC20CurrencyWallet(
+        'main',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone,
+        token,
+        contractAddress
+      ));
+  }
+
 }
 

@@ -5,15 +5,15 @@
       </div>
 
       <div style="position: relative;" *ngIf="permissionCam" [ngInit]="addVideoContainer">
-        <ngx-zxing
-          [start]="camStarted"
+        <zxing-scanner
+          [scannerEnabled]="camStarted"
           [device]="selectedDevice"
-          (onCamsFound)="displayCameras($event)"
-          (onScan)="handleQrCodeResult($event)"
+          (camerasFound)="displayCameras($event)"
+          (scanSuccess)="handleQrCodeResult($event)"
           [cssClass]="classVideo"
           class="small-video-container"
           #videoContainer
-        ></ngx-zxing>
+        ></zxing-scanner>
       </div>
     </div>
 

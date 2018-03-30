@@ -14,7 +14,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import { NavigationService } from '../../../services/navigation.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-factor-node',
@@ -157,10 +158,10 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const login = Utils.tryUnpackLogin(idFactor).toString('utf-8');
+      const login = CryptoCore.Utils.tryUnpackLogin(idFactor).toString('utf-8');
 
-      const id = Utils.sha256(Buffer.from(login, 'utf-8')).toString('hex');
-      const data = Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
+      const id = CryptoCore.Utils.sha256(Buffer.from(login, 'utf-8')).toString('hex');
+      const data = CryptoCore.Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
 
       try {
         const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();

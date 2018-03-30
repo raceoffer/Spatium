@@ -8,7 +8,7 @@ import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
-declare const CompoundKey: any;
+declare const CryptoCore: any;
 
 export enum Status {
   None = 0,
@@ -105,8 +105,8 @@ export class CurrencyWallet {
       return;
     }
 
-    this.compoundKey = new CompoundKey({
-      localPrivateKey: CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
+    this.compoundKey = new CryptoCore.CompoundKey({
+      localPrivateKey: CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
     });
 
     let prover = null;

@@ -5,7 +5,6 @@ import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
-declare const Utils: any;
 declare const nfc: any;
 
 enum Content {

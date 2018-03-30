@@ -1,9 +1,9 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Coin, Token } from '../../../services/keychain.service';
+import { Coin, KeyChainService, Token, TokenEntry } from '../../../services/keychain.service';
 import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
-import {CurrencyService} from "../../../services/currency.service";
+import { CurrencyService } from '../../../services/currency.service';
 
 @Component({
   selector: 'app-wallet',
@@ -63,18 +63,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'},
-    this.tokenEntry(Token.EOS),
-    this.tokenEntry(Token.TRON),
-    this.tokenEntry(Token.VECHAIN),
-    this.tokenEntry(Token.ICON),
-    this.tokenEntry(Token.OMNISEGO),
-    this.tokenEntry(Token.BINACLECOIN),
-    this.tokenEntry(Token.DIGIXDAO),
-    this.tokenEntry(Token.POPULUS),
-    this.tokenEntry(Token.RCHAIN),
-    this.tokenEntry(Token.MAKER),
-    this.tokenEntry(Token.AETHERNITY)
+    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
 
   @ViewChild('sidenav') sidenav;
@@ -82,20 +71,25 @@ export class WalletComponent implements OnInit, OnDestroy {
   constructor(
     private readonly ngZone: NgZone,
     private readonly router: Router,
+    private readonly keychain: KeyChainService,
     private readonly notification: NotificationService,
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService
-  ) { }
+  ) {
+    keychain.topTokens.forEach((tokenInfo) => {
+      this.tiles.push(this.tokenEntry(tokenInfo));
+    });
 
-  public tokenEntry(coin: Token) {
-    const currencyInfo = this.currency.getInfo(coin);
+  }
+
+  public tokenEntry(tokenInfo: TokenEntry) {
     return {
-      title: currencyInfo.name,
-      symbols: currencyInfo.symbol,
-      logo: currencyInfo.icon,
+      title: tokenInfo.name,
+      symbols: tokenInfo.ico,
+      logo: tokenInfo.className,
       cols: 1,
       rows: 1,
-      coin: coin
+      coin: tokenInfo.token
     };
   }
 

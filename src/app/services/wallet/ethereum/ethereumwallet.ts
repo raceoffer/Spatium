@@ -3,8 +3,7 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
-declare const EthereumWallet: any;
-declare const EthereumTransaction: any;
+declare const CryptoCore: any;
 
 export class EthereumCurrencyWallet extends CurrencyWallet {
   private ethereumWallet: any = null;
@@ -39,15 +38,15 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return EthereumTransaction.fromJSON(tx);
+    return CryptoCore.EthereumTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.ethereumWallet = await new EthereumWallet({
+    this.ethereumWallet = await new CryptoCore.EthereumWallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: EthereumWallet.address(this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.EthereumWallet.address(this.compoundKey.getCompoundPublicKey()),
       network: this.network
     }).load();
 
@@ -73,13 +72,11 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    const transaction = await this.ethereumWallet.createTransaction(
+    return await this.ethereumWallet.createTransaction(
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
-
-    return transaction;
   }
 
   public async listTransactionHistory() {

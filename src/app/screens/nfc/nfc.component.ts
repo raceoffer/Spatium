@@ -1,15 +1,14 @@
-import {AfterViewInit, Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
-import {FileService} from "../../services/file.service";
-import {KeyChainService} from "../../services/keychain.service";
 
 declare const nfc: any;
 declare const ndef: any;
 declare const navigator: any;
-declare const Utils: any;
+declare const CryptoCore: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-nfc',
@@ -45,7 +44,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() isImport = false;
 
   static async isEthernetAvailable() {
-    return await Utils.testNetwork();
+    return await CryptoCore.Utils.testNetwork();
   }
 
   constructor(
@@ -53,8 +52,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
-    private readonly keyChainService: KeyChainService,
-    private readonly fs: FileService,
     private readonly dds: DDSService,
     private readonly notification: NotificationService
   ) {
@@ -209,14 +206,14 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
           if (this.isImport) {
             try {
-              const value = Utils.tryUnpackEncryptedSeed(payload);
+              const value = CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
               this._nfc = value.toString('hex');
             } catch (exc) {
               console.log(exc);
               this._nfc = null;
             }
           } else {
-            this._nfc = Utils.tryUnpackLogin(payload);
+            this._nfc = CryptoCore.Utils.tryUnpackLogin(payload);
           }
 
           navigator.vibrate(100);
@@ -231,12 +228,12 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     const encryptedSeed = this.authService.encryptedSeed;
     console.log(encryptedSeed);
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    const packSeed = Utils.packSeed(buffesSeed);
+    const packSeed = CryptoCore.Utils.packSeed(buffesSeed);
     this.writeTag(packSeed, 'Secret is exported to NFC tag', 'Secret is not exported to NFC tag');
   }
 
   async generateAndWrite() {
-    if (!await Utils.testNetwork()) {
+    if (!await CryptoCore.Utils.testNetwork()) {
       this.notification.show('No network connection');
       return;
     }
@@ -246,7 +243,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         const exists = await this.dds.exists(AuthService.toId(login));
         if (!exists) {
           this._nfc = login;
-          const content = Utils.packLogin(this._nfc);
+          const content = CryptoCore.Utils.packLogin(this._nfc);
           this.writeTag(content, 'Success write NFC tag', 'Error write NFC tag');
           break;
         }
@@ -283,7 +280,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         break;
       case 'factornode':
         if (this.isAuth) {
-          this.authService.addFactor(FactorType.NFC, Utils.packLogin(this._nfc));
+          this.authService.addFactor(FactorType.NFC, CryptoCore.Utils.packLogin(this._nfc));
         } else {
           this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         }

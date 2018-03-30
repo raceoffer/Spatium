@@ -5,9 +5,8 @@ import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
-import { Observable } from 'rxjs/Observable';
 
-declare const Utils: any;
+declare const CryptoCore: any;
 declare const cordova: any;
 
 enum State {
@@ -108,7 +107,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async checkInput(input: string) {
-    if (!await Utils.testNetwork()) {
+    if (!await CryptoCore.Utils.testNetwork()) {
       this.notification.show('No network connection');
       this.buttonState = State.Error;
       return;
@@ -123,14 +122,14 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
         this.buttonState = State.Exists;
       } else {
         if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-          this.generate();
+          await this.generate();
         } else {
           this.buttonState = State.New;
         }
       }
     } catch (ignored) {
       if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-        this.generate();
+        await this.generate();
       } else {
         this.buttonState = State.Error;
       }
@@ -183,7 +182,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       this.authService.login = this.input;
       this.authService.password = '';
       this.authService.clearFactors();
-      this.keychain.setSeed(Utils.randomBytes(64));
+      this.keychain.setSeed(CryptoCore.Utils.randomBytes(64));
 
       await this.router.navigate(['/registration']);
     } else {

@@ -5,7 +5,7 @@ import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 import { KeyChainService } from '../../services/keychain.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
 declare const Buffer: any;
 declare const window: any;
 
@@ -132,11 +132,11 @@ export class PincodeComponent implements OnInit {
     switch (this.next) {
       case 'waiting':
         try {
-          const aesKey = await Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
+          const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
 
           if (this.authService.encryptedSeed) {
             const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-            this.keyChain.setSeed(Utils.decrypt(ciphertext, aesKey));
+            this.keyChain.setSeed(CryptoCore.Utils.decrypt(ciphertext, aesKey));
 
             await this.router.navigate(['/verify-waiting']);
           } else {
@@ -173,8 +173,8 @@ export class PincodeComponent implements OnInit {
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(Utils.randomBytes(64));
-    this.authService.encryptedSeed = Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
+    this.keyChain.setSeed(CryptoCore.Utils.randomBytes(64));
+    this.authService.encryptedSeed = CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 

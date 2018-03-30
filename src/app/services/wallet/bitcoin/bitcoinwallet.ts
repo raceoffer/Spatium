@@ -4,10 +4,8 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-declare const bcoin: any;
-declare const WatchingWallet: any;
-declare const BlockchainInfoProvider: any;
-declare const BitcoinTransaction: any;
+declare const Buffer: any;
+declare const CryptoCore: any;
 
 export class BitcoinWallet extends CurrencyWallet {
   private walletDB: any = null;
@@ -39,54 +37,35 @@ export class BitcoinWallet extends CurrencyWallet {
   }
 
   public toInternal(amount: number): string {
-    return bcoin.amount.fromBTC(amount).value;
+    return CryptoCore.WatchingWallet.toInternal(amount);
   }
 
   public fromInternal(amount: string): number {
-    return Number(bcoin.amount.btc(Number(amount)));
+    return Number(CryptoCore.WatchingWallet.fromInternal(Number(amount)));
   }
 
   public fromJSON(tx) {
-    return BitcoinTransaction.fromJSON(tx);
+    return CryptoCore.BitcoinTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.walletDB = new bcoin.walletdb({
-      db: 'memory',
-      network: this.network
-    });
-
-    const keyring = bcoin.keyring.fromPublic(
-      Buffer.from(
-        this.compoundKey.getCompoundPublicKey().encode(true, 'array')
-      ),
-      this.network
-    );
-
     try {
-      this.address.next(keyring.getKeyAddress('base58'));
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to get compound key address', e);
-    }
-
-    try {
-      await this.walletDB.open();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed open database', e);
-    }
-
-    try {
-      this.watchingWallet = await new WatchingWallet({
+      this.watchingWallet = await new CryptoCore.WatchingWallet({
         accounts: [{
-          name: keyring.getKeyAddress('base58'),
-          key: keyring
+          key: this.compoundKey.getCompoundPublicKey()
         }],
         network: this.network
       }).load(this.walletDB);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to create watching wallet', e);
+    }
+
+    try {
+      this.address.next(this.watchingWallet.getAddress('base58'));
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
 
     this.watchingWallet.on('balance', (balance) => this.ngZone.run(async () => {
@@ -112,7 +91,7 @@ export class BitcoinWallet extends CurrencyWallet {
     }
 
     // Start: configuring a provider
-    this.provider = new BlockchainInfoProvider({
+    this.provider = new CryptoCore.BlockchainInfoProvider({
       network: this.network
     });
 
@@ -146,7 +125,7 @@ export class BitcoinWallet extends CurrencyWallet {
     value: number,
     fee?: number
   ) {
-    const transaction = BitcoinTransaction.fromOptions({
+    const transaction = CryptoCore.BitcoinTransaction.fromOptions({
       network: this.network
     });
 
@@ -212,7 +191,7 @@ export class BitcoinWallet extends CurrencyWallet {
         };
       });
       const outputs = record.tx.outputs.map(output => {
-        const address = bcoin.address.fromScript(output.script);
+        const address = CryptoCore.WatchingWallet.addressFromScript(output.script);
         return {
           address: address ? address.toString(this.network) : null,
           value: output.value

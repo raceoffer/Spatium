@@ -3,8 +3,7 @@ import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
-declare const ERC20Wallet: any;
-declare const EthereumTransaction: any;
+declare const CryptoCore: any;
 
 export class ERC20CurrencyWallet extends CurrencyWallet {
   private erc20Wallet: any = null;
@@ -46,7 +45,7 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return EthereumTransaction.fromJSON(tx);
+    return CryptoCore.EthereumTransaction.fromJSON(tx);
   }
 
   public outputs(transaction) {
@@ -60,9 +59,9 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.erc20Wallet = await new ERC20Wallet({
+    this.erc20Wallet = await new CryptoCore.ERC20Wallet({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: ERC20Wallet.address(this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.ERC20Wallet.address(this.compoundKey.getCompoundPublicKey()),
       contractAddress: this.contractAddress,
       network: this.network
     }).load();
@@ -89,13 +88,11 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    const transaction = await this.erc20Wallet.createTransaction(
+    return await this.erc20Wallet.createTransaction(
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
-
-    return transaction;
   }
 
   public async listTransactionHistory() {

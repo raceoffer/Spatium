@@ -23,7 +23,6 @@ import {
   MatGridListModule
 } from '@angular/material';
 import { QRCodeModule } from 'angular2-qrcode';
-import { OverlayContainer } from '@angular/cdk/overlay';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -31,8 +30,7 @@ import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
-import { ClipboardModule} from 'ngx-clipboard';
-import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
+import { ClipboardModule} from 'ngx-clipboard';import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
 import { LoggerService } from './services/logger.service';
@@ -50,7 +48,7 @@ import { FileUploadComponent } from './screens/file-upload/file-upload.component
 import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
 import { QrCodeComponent } from './screens/qr-code/qr-code.component';
 import { NfcComponent } from './screens/nfc/nfc.component';
-import { NgxZxingModule } from 'ngx-zxing';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FactorParentComponent } from './screens/factor/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './directives/ng-init.directive';
@@ -135,7 +133,7 @@ import { CurrencyPriceService } from './services/price.service';
     MatFormFieldModule,
     MatGridListModule,
     QRCodeModule,
-    NgxZxingModule.forRoot()
+    ZXingScannerModule.forRoot()
   ],
   providers: [
     WalletService,
@@ -158,8 +156,4 @@ import { CurrencyPriceService } from './services/price.service';
   ]
 })
 
-export class AppModule {
-  constructor(overlayContainer: OverlayContainer) {
-    // overlayContainer.getContainerElement().classList.add('dark-theme');
-  }
-}
+export class AppModule {}

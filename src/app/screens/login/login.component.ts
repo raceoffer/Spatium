@@ -1,9 +1,9 @@
-import {Component, AfterViewInit, Output, EventEmitter, Input} from '@angular/core';
-import {AuthService} from '../../services/auth.service';
-import {NotificationService} from '../../services/notification.service';
-import {DDSService} from '../../services/dds.service';
+import { Component, AfterViewInit, Output, EventEmitter, Input } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
+import { DDSService } from '../../services/dds.service';
 
-declare const Utils: any;
+declare const CryptoCore: any;
 declare const nfc: any;
 
 enum State {
@@ -64,14 +64,14 @@ export class LoginComponent implements AfterViewInit {
   ngAfterViewInit() {
     if (this.genericLogin !== null) {
       this.userName = this.genericLogin;
-      this.genericLogin == null;
+      this.genericLogin = null;
     } else {
       this.userName = '';
     }
   }
 
   async generateNewLogin() {
-    if (!await Utils.testNetwork()) {
+    if (!await CryptoCore.Utils.testNetwork()) {
       this.notification.show('No network connection');
       this.usernameState = State.Error;
       return;

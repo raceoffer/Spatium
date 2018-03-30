@@ -1,0 +1,1 @@
+CryptoCore = require('../crypto-core');
