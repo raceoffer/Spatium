@@ -305,6 +305,13 @@ mat-icon.size-40{
   animation-name: mui-textfield-inserted;
 }
 
+.search-wallet > input {
+  border-bottom: 0px;
+  text-align: left;
+  caret-color: $bluish;
+  color: $bluish;
+}
+
 
 //dont show placeholder on focus
 input:focus::-webkit-input-placeholder { color:transparent; }

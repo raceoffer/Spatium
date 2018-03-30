@@ -1,6 +1,6 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
-    <mat-toolbar color="primary" class="shadow">
+    <mat-toolbar color="primary" class="shadow" *ngIf="!isSearch">
       <div style="height:0px!important; width:0px!important;">
         <button mat-icon-button style="height:0px!important; width:0px!important;"></button>
       </div>
@@ -9,6 +9,26 @@
       </button>
 
       <span>{{ title }}</span>
+
+      <span class="spacer"></span>
+
+      <button mat-icon-button (click)="toggleSearch(true)">
+        <mat-icon>search</mat-icon>
+      </button>
+
+    </mat-toolbar>
+
+    <mat-toolbar color="primary" class="shadow" *ngIf="isSearch" [@anim]="(isSearch) ? 'show' : 'hide'">
+      <button mat-icon-button (click)="toggleSearch(false)">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
+        <input placeholder="Search" name="UserName" [(ngModel)]="filterValue">
+      </div>
+
+      <button mat-button mat-icon-button (click)="clearFilterValue()">
+        <mat-icon>close</mat-icon>
+      </button>
     </mat-toolbar>
   </div>
 
@@ -17,7 +37,7 @@
 
     <mat-grid-list cols="2" rowHeight="2:1">
       <mat-grid-tile
-        *ngFor="let tile of tiles"
+        *ngFor="let tile of filtredTitles"
         [colspan]="tile.cols"
         [rowspan]="tile.rows">
 
