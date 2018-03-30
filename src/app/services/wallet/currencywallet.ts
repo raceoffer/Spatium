@@ -49,6 +49,7 @@ export class HistoryEntry {
 
 export class CurrencyWallet {
   public compoundKey: any = null;
+  public publicKey: any = null;
 
   protected syncSession: SyncSession = null;
   protected signSession: SignSession = null;
@@ -153,6 +154,7 @@ export class CurrencyWallet {
     this.status.next(Status.None);
 
     this.compoundKey = null;
+    this.publicKey = null;
 
     if (this.syncSession) {
       await this.syncSession.cancel();
@@ -204,11 +206,13 @@ export class CurrencyWallet {
 
   public async syncDuplicate(other: CurrencyWallet) {
     this.compoundKey = other.compoundKey;
+    this.publicKey = other.publicKey;
   }
 
   public async finishSync(data) {
     try {
       await this.compoundKey.finishInitialSync(data);
+      this.publicKey = await this.compoundKey.getCompoundPublicKey();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed synchronization finish', e);
     }

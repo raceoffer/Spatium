@@ -15,7 +15,7 @@ import { toBehaviourSubject } from '../utils/transformers';
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
-import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
+import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -86,7 +86,7 @@ export class WalletService {
       ));
     this.coinWallets.set(
       Coin.ETH,
-      new EthereumCurrencyWallet(
+      new EthereumWallet(
         'main',
         this.keychain,
         1,
@@ -1337,12 +1337,12 @@ export class WalletService {
       toBehaviourSubject(combineLatest(
         Array.from(this.tokenWallets.values()).map(wallet => wallet.ready),
         (... values) => {
-          return values.map(ready => ready ? 25 : 0).reduce((a, b) => a + b, 0);
+          return values.map(ready => ready ? 20 : 0).reduce((a, b) => a + b, 0);
         }
       ), 0),
       toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 20), 0),
       (a, b, c) => {
-        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 4 + 1);
+        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 5 + 1);
       }), 0);
 
     this.statusChanged = this.status.skip(1).distinctUntilChanged();

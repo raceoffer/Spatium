@@ -42,11 +42,11 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public toInternal(amount: number): string {
-    return CryptoCore.WatchingWallet.toInternal(amount);
+    return CryptoCore.BitcoreWallet.toInternal(amount);
   }
 
   public fromInternal(amount: string): number {
-    return Number(CryptoCore.WatchingWallet.fromInternal(Number(amount)));
+    return Number(CryptoCore.BitcoreWallet.fromInternal(Number(amount)));
   }
 
   public fromJSON(tx) {
@@ -56,12 +56,10 @@ export class BitcoreWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    const compoundPublicKey = await this.compoundKey.getCompoundPublicKey();
-
     try {
-      this.watchingWallet = await new CryptoCore.WatchingWallet.load({
+      this.watchingWallet = await new CryptoCore.BitcoreWallet.load({
         accounts: [{
-          key: compoundPublicKey
+          key: this.publicKey
         }],
         network: this.network
       });
@@ -126,7 +124,7 @@ export class BitcoreWallet extends CurrencyWallet {
         };
       });
       const outputs = record.tx.outputs.map(output => {
-        const address = CryptoCore.WatchingWallet.addressAromScript(output.script);
+        const address = CryptoCore.BitcoreWallet.addressFromScript(output.script);
         return {
           address: address ? address.toString(this.network) : null,
           value: output.value

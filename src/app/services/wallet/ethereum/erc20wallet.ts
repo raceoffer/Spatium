@@ -59,12 +59,12 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.erc20Wallet = await new CryptoCore.ERC20Wallet({
+    this.erc20Wallet = await CryptoCore.ERC20Wallet.load({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.ERC20Wallet.address(await this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.ERC20Wallet.address(this.publicKey),
       contractAddress: this.contractAddress,
       network: this.network
-    }).load();
+    });
 
     this.address.next(this.erc20Wallet.address);
 
@@ -87,12 +87,12 @@ export class ERC20CurrencyWallet extends CurrencyWallet {
   public async syncDuplicate(other: CurrencyWallet) {
     await super.syncDuplicate(other);
 
-    this.erc20Wallet = await new CryptoCore.ERC20Wallet({
+    this.erc20Wallet = await CryptoCore.ERC20Wallet.load({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.ERC20Wallet.address(other.address.getValue()),
+      address: CryptoCore.ERC20Wallet.address(this.publicKey),
       contractAddress: this.contractAddress,
       network: this.network
-    }).load();
+    });
 
     this.address.next(this.erc20Wallet.address);
 

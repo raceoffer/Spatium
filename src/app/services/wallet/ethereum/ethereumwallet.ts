@@ -5,7 +5,7 @@ import { NgZone } from '@angular/core';
 
 declare const CryptoCore: any;
 
-export class EthereumCurrencyWallet extends CurrencyWallet {
+export class EthereumWallet extends CurrencyWallet {
   private ethereumWallet: any = null;
 
   constructor(
@@ -44,11 +44,11 @@ export class EthereumCurrencyWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.ethereumWallet = await new CryptoCore.EthereumWallet({
+    this.ethereumWallet = await CryptoCore.EthereumWallet.load({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.EthereumWallet.address(await this.compoundKey.getCompoundPublicKey()),
+      address: CryptoCore.EthereumWallet.address(this.publicKey),
       network: this.network
-    }).load();
+    });
 
     this.address.next(this.ethereumWallet.address);
 
