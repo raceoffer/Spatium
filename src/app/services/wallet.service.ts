@@ -1327,6 +1327,8 @@ export class WalletService {
     this.synchronizing = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
     this.ready = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
 
+    // That's a progress magic:
+    // progress = (keygen_progress + sum(coin_progress, n) + sum(0.1*token_progress, m)) / (1 + n + 0.1*m)
     this.syncProgress = toBehaviourSubject(combineLatest(
       toBehaviourSubject(combineLatest(
         Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
@@ -1337,12 +1339,12 @@ export class WalletService {
       toBehaviourSubject(combineLatest(
         Array.from(this.tokenWallets.values()).map(wallet => wallet.ready),
         (... values) => {
-          return values.map(ready => ready ? 20 : 0).reduce((a, b) => a + b, 0);
+          return values.map(ready => (ready ? 100 : 0) / 10).reduce((a, b) => a + b, 0);
         }
       ), 0),
       toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 20), 0),
       (a, b, c) => {
-        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 5 + 1);
+        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 10 + 1);
       }), 0);
 
     this.statusChanged = this.status.skip(1).distinctUntilChanged();
