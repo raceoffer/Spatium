@@ -10,7 +10,7 @@ declare const Buffer: any;
 declare const CryptoCore: any;
 
 export class BitcoreWallet extends CurrencyWallet {
-  private watchingWallet: any = null;
+  private bitcoreWallet: any = null;
   private provider: any = null;
 
   private routineTimerSub: any = null;
@@ -37,7 +37,7 @@ export class BitcoreWallet extends CurrencyWallet {
       this.routineTimerSub = null;
     }
 
-    this.watchingWallet = null;
+    this.bitcoreWallet = null;
     this.provider = null;
   }
 
@@ -57,7 +57,7 @@ export class BitcoreWallet extends CurrencyWallet {
     await super.finishSync(data);
 
     try {
-      this.watchingWallet = await new CryptoCore.BitcoreWallet.load({
+      this.bitcoreWallet = await CryptoCore.BitcoreWallet.load({
         accounts: [{
           key: this.publicKey
         }],
@@ -68,7 +68,7 @@ export class BitcoreWallet extends CurrencyWallet {
     }
 
     try {
-      this.address.next(this.watchingWallet.getAddress('base58'));
+      this.address.next(this.bitcoreWallet.getAddress('base58'));
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to get compound key address', e);
     }
@@ -78,7 +78,7 @@ export class BitcoreWallet extends CurrencyWallet {
       unconfirmed: this.fromInternal('0')
     });
 
-    this.watchingWallet.on('balance', (balance) => this.ngZone.run(async () => {
+    this.bitcoreWallet.on('balance', (balance) => this.ngZone.run(async () => {
       this.balance.next({
         confirmed: this.fromInternal(balance.confirmed),
         unconfirmed: this.fromInternal(balance.unconfirmed)
@@ -92,17 +92,17 @@ export class BitcoreWallet extends CurrencyWallet {
     });
 
     this.provider.on('transaction', async (hash, meta) => {
-      let hex = await this.watchingWallet.getRawTransaction(hash);
+      let hex = await this.bitcoreWallet.getRawTransaction(hash);
       if (!hex) {
         hex = await this.provider.pullRawTransaction(hash);
       }
-      await this.watchingWallet.addRawTransaction(hex, meta);
+      await this.bitcoreWallet.addRawTransaction(hex, meta);
     });
 
     // Initiate update routine
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
-        await this.provider.pullTransactions(this.watchingWallet.getAddress('base58'));
+        await this.provider.pullTransactions(this.bitcoreWallet.getAddress('base58'));
       } catch (e) {
         console.log(e);
       }
@@ -114,7 +114,7 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    const txs = await this.watchingWallet.getTransactions();
+    const txs = await this.bitcoreWallet.getTransactions();
 
     return txs.map(record => {
       const inputs = record.tx.inputs.map(input => {
@@ -131,13 +131,13 @@ export class BitcoreWallet extends CurrencyWallet {
         };
       });
 
-      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
+      if (inputs.some(input => input.address === this.bitcoreWallet.getAddress('base58'))) { // out
         // go find change
         const output = outputs.length > 0 ? outputs[0] : null;
 
         return HistoryEntry.fromJSON({
           type: TransactionType.Out,
-          from: this.watchingWallet.getAddress('base58'),
+          from: this.bitcoreWallet.getAddress('base58'),
           to: output ? output.address : null,
           amount: this.fromInternal(output ? output.value : 0),
           confirmed: record.meta !== null,
@@ -147,12 +147,12 @@ export class BitcoreWallet extends CurrencyWallet {
         // go find our output
         const value =
           outputs
-            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
+            .filter(output => output.address === this.bitcoreWallet.getAddress('base58'))
             .reduce((sum, output) => sum + output.value, 0);
         return HistoryEntry.fromJSON({
           type: TransactionType.In,
           from: inputs[0].address,
-          to: this.watchingWallet.getAddress('base58'),
+          to: this.bitcoreWallet.getAddress('base58'),
           amount: this.fromInternal(value),
           confirmed: record.meta !== null,
           time: record.meta == null ? null : record.meta.time
@@ -209,7 +209,7 @@ export class BitcoreWallet extends CurrencyWallet {
     /// Fill inputs and calculate script hashes
     try {
       await transaction.prepare({
-        wallet: this.watchingWallet,
+        wallet: this.bitcoreWallet,
         address: address,
         value: Number(this.toInternal(value)),
         fee: fee ? Number(this.toInternal(fee)) : undefined

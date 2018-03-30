@@ -42,7 +42,7 @@ export class DDSService {
   private sponsor = 'http://185.219.80.169';
 
   constructor(private readonly http: HttpClient) {
-    this.dds = new CryptoCore.DDS({
+    this.dds = CryptoCore.DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network
     });
