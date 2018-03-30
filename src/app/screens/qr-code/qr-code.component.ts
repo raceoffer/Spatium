@@ -163,6 +163,8 @@ export class QrCodeComponent implements OnInit {
   displayCameras(cams: any[]) {
     this.availableDevices = cams;
 
+    console.log(cams);
+
     if (cams && cams.length > 0) {
       this.spinnerClass = 'invisible';
       this.selectedDevice = cams[1];

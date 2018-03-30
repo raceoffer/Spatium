@@ -109,7 +109,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.goBottom();
 
     if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
-      this.sddNewFactor();
+      this.addNewFactor();
     }
   }
 
@@ -121,7 +121,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  sddNewFactor(): void {
+  addNewFactor(): void {
     const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { back: 'auth', next: 'auth' }
