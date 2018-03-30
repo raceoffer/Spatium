@@ -1,4 +1,4 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
@@ -17,7 +17,7 @@ export enum SynchronizationStatus {
   Finished
 }
 
-export class SyncSession {
+export class SyncSession implements OnDestroy {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
 
   private initialCommitmentObserver:    Observable<any>;
@@ -32,6 +32,8 @@ export class SyncSession {
   public failed:   EventEmitter<any> = new EventEmitter();
 
   private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
+
+  private subscriptions = [];
 
   constructor(
     private prover: any,
@@ -68,9 +70,14 @@ export class SyncSession {
         .filter(object => object.type === 'proverDecommitment')
         .map(object => object.content);
 
-    this.messageSubject
+    this.subscriptions.push(this.messageSubject
       .filter(object => object.type === 'cancel')
-      .subscribe(() => this.cancelObserver.next(true));
+      .subscribe(() => this.cancelObserver.next(true)));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public async cancel() {

@@ -1,4 +1,4 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
@@ -16,7 +16,7 @@ export enum TransactionStatus {
   Failed
 }
 
-export class SignSession {
+export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
 
   private entropyCommitmentsObserver:   Observable<any>;
@@ -33,6 +33,8 @@ export class SignSession {
 
   private signers: any = null;
   private mapping: any = null;
+
+  private subscriptions = [];
 
   constructor(
     private tx: any,
@@ -55,16 +57,22 @@ export class SignSession {
         .filter(object => object.type === 'chiphertexts')
         .map(object => object.content);
 
-    this.messageSubject
-      .filter(object => object.type === 'cancelTransaction')
-      .subscribe(() => {
-        this.cancelObserver.next(true);
-        if (this.status.getValue() === TransactionStatus.Ready) {
-          LoggerService.log('Cancelled after sync', {});
-          this.status.next(TransactionStatus.Cancelled);
-          this.canceled.emit();
-        }
-      });
+    this.subscriptions.push(
+      this.messageSubject
+        .filter(object => object.type === 'cancelTransaction')
+        .subscribe(() => {
+          this.cancelObserver.next(true);
+          if (this.status.getValue() === TransactionStatus.Ready) {
+            LoggerService.log('Cancelled after sync', {});
+            this.status.next(TransactionStatus.Cancelled);
+            this.canceled.emit();
+          }
+        }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public get transaction() {
