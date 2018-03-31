@@ -103,9 +103,7 @@ export class BitcoreWallet extends CurrencyWallet {
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         await this.provider.pullTransactions(this.bitcoreWallet.getAddress('base58'));
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (ignored) {}
     });
 
     // End: configuring a provider
@@ -161,12 +159,12 @@ export class BitcoreWallet extends CurrencyWallet {
     });
   }
 
-  public verify(transaction: any, maxFee?: number): boolean {
-    if (!super.verify(transaction, maxFee)) {
+  public async verify(transaction: any, maxFee?: number) {
+    if (!await super.verify(transaction, maxFee)) {
       return false;
     }
 
-    const statistics = transaction.totalOutputs();
+    const statistics = await transaction.totalOutputs();
 
     // check if every input belongs to owned address
     if (!statistics.inputs
@@ -181,13 +179,13 @@ export class BitcoreWallet extends CurrencyWallet {
     }
 
     // check for tax value
-    const fee = this.fee(transaction);
+    const fee = await this.fee(transaction);
 
     return !(maxFee ? fee > maxFee : false);
   }
 
-  public fee(transaction): number {
-    const statistics = transaction.totalOutputs();
+  public async fee(transaction) {
+    const statistics = await transaction.totalOutputs();
 
     let fee = 0;
     fee += statistics.inputs.reduce((sum, input) => sum + input.value, 0);
@@ -202,14 +200,15 @@ export class BitcoreWallet extends CurrencyWallet {
     value: number,
     fee?: number
   ) {
-    const transaction = this.Transaction.fromOptions({
+    const transaction = await this.Transaction.fromOptions({
       network: this.network
     });
 
     /// Fill inputs and calculate script hashes
     try {
       await transaction.prepare({
-        wallet: this.bitcoreWallet,
+        utxos: await this.bitcoreWallet.getUTXOs(),
+        from: this.bitcoreWallet.getAddress('base58'),
         address: address,
         value: Number(this.toInternal(value)),
         fee: fee ? Number(this.toInternal(fee)) : undefined
@@ -224,7 +223,7 @@ export class BitcoreWallet extends CurrencyWallet {
   public async pushTransaction() {
     if (this.signSession.transaction) {
       try {
-        const raw = this.signSession.transaction.toRaw();
+        const raw = await this.signSession.transaction.toRaw();
         await this.provider.pushTransaction(raw);
       } catch (e) {
         LoggerService.nonFatalCrash('Failed to push transaction', e);

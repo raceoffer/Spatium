@@ -78,7 +78,7 @@ Signer.prototype.computeCiphertext = async function() {
 
 Signer.prototype.extractSignature = async function(ciphertext) {
   return await this.invoke({
-    method: 'computeCiphertext',
+    method: 'extractSignature',
     arguments: [ciphertext]
   });
 };

@@ -32,7 +32,7 @@ export class EthereumWallet extends CurrencyWallet {
     }
   }
 
-  public fee(transaction): number {
+  public async fee(transaction) {
     return transaction.tx.gas * transaction.tx.gasPrice;
   }
 
@@ -60,11 +60,13 @@ export class EthereumWallet extends CurrencyWallet {
     this.address.next(this.ethereumWallet.address);
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
-      const balance = await this.ethereumWallet.getBalance();
-      this.balance.next({
-        confirmed: this.fromInternal(balance),
-        unconfirmed: this.fromInternal(balance)
-      });
+      try {
+        const balance = await this.ethereumWallet.getBalance();
+        this.balance.next({
+          confirmed: this.fromInternal(balance),
+          unconfirmed: this.fromInternal(balance)
+        });
+      } catch (ignored) {}
     });
 
     this.status.next(Status.Ready);

@@ -167,7 +167,7 @@ export class WalletService {
       .map(object => object.content)
       .subscribe(async content => {
         const wallet = this.currencyWallets.get(content.coin);
-        return await wallet.startTransactionVerify(wallet.fromJSON(content.tx));
+        return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
       });
   }
 

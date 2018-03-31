@@ -31,7 +31,6 @@ export class SignSession implements OnDestroy {
 
   private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  private signers: any = null;
   private mapping: any = null;
 
   private subscriptions = [];
@@ -106,15 +105,15 @@ export class SignSession implements OnDestroy {
   public async sync() {
     this.status.next(TransactionStatus.Started);
 
-    this.mapping = this.tx.mapInputs(this.compoundKey);
+    this.mapping = await this.tx.mapInputs(this.compoundKey);
 
-    const hashes = this.tx.getHashes(this.mapping);
+    const hashes = await this.tx.getHashes(this.mapping);
 
-    this.signers = this.tx.startSign(hashes, this.mapping);
+    await this.tx.startSign(hashes, this.mapping);
 
     let entropyCommitments = null;
     try {
-      entropyCommitments = this.tx.createEntropyCommitments(this.signers);
+      entropyCommitments = await this.tx.createEntropyCommitments();
     } catch (e) {
       return this.handleFailure('Failed to get entropyCommitments', e);
     }
@@ -134,7 +133,7 @@ export class SignSession implements OnDestroy {
     this.status.next(TransactionStatus.EntropyCommitments);
     let entropyDecommitments = null;
     try {
-      entropyDecommitments = this.tx.processEntropyCommitments(this.signers, remoteEntropyCommitments);
+      entropyDecommitments = await this.tx.processEntropyCommitments(remoteEntropyCommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
@@ -153,7 +152,7 @@ export class SignSession implements OnDestroy {
 
     this.status.next(TransactionStatus.EntropyDecommitments);
     try {
-      this.tx.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
+      await this.tx.processEntropyDecommitments(remoteEntropyDecommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyDecommitments', e);
     }
@@ -170,7 +169,7 @@ export class SignSession implements OnDestroy {
 
     let chiphertexts = null;
     try {
-      chiphertexts = this.tx.computeCiphertexts(this.signers);
+      chiphertexts = await this.tx.computeCiphertexts();
     } catch (e) {
       return this.handleFailure('Failed to compute chiphertexts', e);
     }
@@ -196,14 +195,14 @@ export class SignSession implements OnDestroy {
 
     let rawSignatures = null;
     try {
-      rawSignatures = this.tx.extractSignatures(this.signers, remoteChiphertexts);
+      rawSignatures = await this.tx.extractSignatures(remoteChiphertexts);
     } catch (e) {
       return this.handleFailure('Failed to process remoteChiphertexts', e);
     }
 
-    const signatures = this.tx.normalizeSignatures(this.mapping, rawSignatures);
+    const signatures = await this.tx.normalizeSignatures(this.mapping, rawSignatures);
 
-    this.tx.applySignatures(signatures);
+    await this.tx.applySignatures(signatures);
 
     this.status.next(TransactionStatus.Signed);
     this.signed.emit();

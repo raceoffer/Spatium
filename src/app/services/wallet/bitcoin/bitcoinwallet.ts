@@ -15,7 +15,7 @@ export class BitcoinWallet extends BitcoreWallet {
     ngZone: NgZone
   ) {
     super(
-      CryptoCore.BitcoinTranaction,
+      CryptoCore.BitcoinTransaction,
       CryptoCore.BlockchainInfoProvider,
       network,
       keychain,

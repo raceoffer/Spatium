@@ -173,7 +173,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               this.walletAddress.getValue(),
               balance / 2);
 
-            return testTx.estimateSize();
+            return await testTx.estimateSize();
           }),
           0);
 

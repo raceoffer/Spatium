@@ -188,12 +188,12 @@ export class CurrencyWallet {
     return transaction.totalOutputs();
   }
 
-  public fee(transaction): number {
+  public async fee(transaction) {
     return 0;
   }
 
-  public verify(transaction: any, maxFee?: number): boolean {
-    const statistics = transaction.totalOutputs();
+  public async verify(transaction: any, maxFee?: number) {
+    const statistics = await transaction.totalOutputs();
 
     return !(!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0);
   }
@@ -226,7 +226,7 @@ export class CurrencyWallet {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
       content: {
-        tx: transaction.toJSON(),
+        tx: await transaction.toJSON(),
         coin: this.currencyCode()
       }
     }));
@@ -292,7 +292,7 @@ export class CurrencyWallet {
     let verify = false;
 
     if (this.signSession) {
-      verify = this.signSession.transaction.verify();
+      verify = await this.signSession.transaction.verify();
     }
 
     return verify;

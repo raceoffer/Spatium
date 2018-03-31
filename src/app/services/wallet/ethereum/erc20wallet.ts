@@ -48,7 +48,7 @@ export class ERC20Wallet extends CurrencyWallet {
     return this.erc20Wallet.fromUnits(Number(amount));
   }
 
-  public fee(transaction): number {
+  public async fee(transaction) {
     return transaction.tx.gas * transaction.tx.gasPrice;
   }
 
@@ -77,11 +77,13 @@ export class ERC20Wallet extends CurrencyWallet {
     this.address.next(this.erc20Wallet.address);
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
-      const balance = await this.erc20Wallet.getBalance();
-      this.balance.next({
-        confirmed: this.fromInternal(balance),
-        unconfirmed: this.fromInternal(balance)
-      });
+      try {
+        const balance = await this.erc20Wallet.getBalance();
+        this.balance.next({
+          confirmed: this.fromInternal(balance),
+          unconfirmed: this.fromInternal(balance)
+        });
+      } catch (ignored) {}
     });
 
     this.status.next(Status.Ready);
@@ -100,11 +102,13 @@ export class ERC20Wallet extends CurrencyWallet {
     this.address.next(this.erc20Wallet.address);
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
-      const balance = await this.erc20Wallet.getBalance();
-      this.balance.next({
-        confirmed: this.fromInternal(balance),
-        unconfirmed: this.fromInternal(balance)
-      });
+      try {
+        const balance = await this.erc20Wallet.getBalance();
+        this.balance.next({
+          confirmed: this.fromInternal(balance),
+          unconfirmed: this.fromInternal(balance)
+        });
+      } catch (ignored) {}
     });
 
     this.status.next(Status.Ready);
