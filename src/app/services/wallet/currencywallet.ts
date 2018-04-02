@@ -185,8 +185,8 @@ export class CurrencyWallet {
     }
   }
 
-  public outputs(transaction) {
-    return transaction.totalOutputs();
+  public async outputs(transaction) {
+    return await transaction.totalOutputs();
   }
 
   public async fee(transaction) {

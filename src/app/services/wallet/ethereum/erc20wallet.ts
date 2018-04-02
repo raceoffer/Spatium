@@ -56,8 +56,8 @@ export class ERC20Wallet extends CurrencyWallet {
     return await CryptoCore.EthereumTransaction.fromJSON(tx);
   }
 
-  public outputs(transaction) {
-    return transaction.transferData();
+  public async outputs(transaction) {
+    return await transaction.transferData();
   }
 
   public currencyCode(): Coin | Token {
