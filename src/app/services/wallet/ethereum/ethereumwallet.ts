@@ -73,11 +73,13 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    return await this.ethereumWallet.createTransaction(
+    const tx = await this.ethereumWallet.prepareTransaction(
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
+
+    return await CryptoCore.EthereumTransaction.fromOptions(tx);
   }
 
   public async listTransactionHistory() {

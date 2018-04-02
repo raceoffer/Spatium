@@ -10,7 +10,9 @@ const CryptoCore = {
   PaillierProver: require('crypto-core/lib/paillierprover'),
   PaillierVerifier: require('crypto-core/lib/paillierverifier'),
   Signer: require('crypto-core/lib/signer'),
-  BitcoinTransaction: require('crypto-core/lib/bitcore/bitcointransaction')
+  BitcoinTransaction: require('crypto-core/lib/bitcore/bitcointransaction'),
+  BitcoinCashTransaction: require('crypto-core/lib/bitcore/bitcoincashtransaction'),
+  EthereumTransaction: require('crypto-core/lib/ethereum/ethereumtransaction')
 };
 
 registerPromiseWorker(async message => {
