@@ -58,6 +58,10 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
   }
 
+  async onWClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
+  }
+
   eventOnBackClicked(e) {
     e.preventDefault();
     navigator.app.exitApp();

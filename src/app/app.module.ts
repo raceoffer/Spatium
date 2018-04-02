@@ -71,6 +71,7 @@ import { SecretExportComponent } from './screens/navigator-verifier/secret-expor
 import { CurrencyService } from './services/currency.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
+import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 
 @NgModule({
   declarations: [
@@ -105,7 +106,8 @@ import { CurrencyPriceService } from './services/price.service';
     VerifyWaitingComponent,
     SecretExportComponent,
     SecretImportComponent,
-    SettingsComponent
+    SettingsComponent,
+    LogoBlockComponent
   ],
   imports: [
     FormsModule,

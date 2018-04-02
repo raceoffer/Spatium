@@ -1,35 +1,39 @@
-<div class="currency-component" fxLayout="column" fxLayoutAlign="start center" style="height: 100%">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button (click)="onBackClicked()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <span>{{ titile }} {{ currencyInfo?.name }}</span>
-    </mat-toolbar-row>
-  </mat-toolbar>
-
-  <span class="full-width label full-width-label">{{ accountPh }}</span>
-  <div class="full-width field" style="margin-bottom: 13px;">
-    <mat-select [disabled]="(phase | async) !== phaseType.Creation" [value]="walletAddress | async">
-      <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-        <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} {{ currencyInfo?.symbol }})
-      </mat-option>
-    </mat-select>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <mat-toolbar color="primary" class="shadow">
+      <mat-toolbar-row>
+        <button mat-icon-button (click)="onBackClicked()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>{{ titile }} {{ currencyInfo?.name }}</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
   </div>
 
-  <span class="full-width label full-width-label">{{ receiverPh }}</span>
-  <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
-    <input matInput [formControl]="receiver">
-    <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
-      <mat-icon>content_paste</mat-icon>
-    </button>
-  </mat-form-field>
+  <div class="currency-component content" fxLayout="column" fxLayoutAlign="start center">
 
-  <table class="full-width text-center two-columns">
-    <tr>
-      <td>
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
-        <div class="field">
+      <span class="full-width label full-width-label">{{ accountPh }}</span>
+      <div class="full-width field" style="margin-bottom: 13px;">
+        <mat-select [disabled]="(phase | async) !== phaseType.Creation" [value]="walletAddress | async">
+          <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
+            <span class="address">{{ walletAddress | async }}</span> ({{ balanceBtcUnconfirmed | async }} {{ currencyInfo?.symbol }})
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <span class="full-width label full-width-label">{{ receiverPh }}</span>
+      <mat-form-field class="full-width field" color="accent" style="margin-bottom: 13px;">
+        <input matInput [formControl]="receiver">
+        <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
+          <mat-icon>content_paste</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <table class="full-width text-center two-columns">
+        <tr>
+          <td>
+            <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+            <div class="field">
           <span>
             <input matInput
                    [formControl]="amount"
@@ -37,11 +41,11 @@
                    ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                    step="0.01">
           </span>
-        </div>
-      </td>
-      <td>
-        <span class="label" style="margin-left: 19px;">USD</span>
-        <div class="field right">
+            </div>
+          </td>
+          <td>
+            <span class="label" style="margin-left: 19px;">USD</span>
+            <div class="field right">
           <span>
             <input matInput
                    [formControl]="amountUsd"
@@ -49,31 +53,31 @@
                    ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                    step="0.01">
           </span>
-        </div>
-      </td>
-    </tr>
-  </table>
+            </div>
+          </td>
+        </tr>
+      </table>
 
-  <span class="full-width label full-width-label">{{ stFee }}</span>
-  <div class="full-width field" style="margin-bottom: 13px;">
-    <mat-select [formControl]="feeTypeControl">
-      <mat-option [value]="feeType.Manual">
-        {{ stManual }}
-      </mat-option>
-      <mat-option [value]="feeType.Normal">
-        {{ stNormal }}
-      </mat-option>
-      <mat-option [value]="feeType.Economy">
-        {{ stEconomy }}
-      </mat-option>
-    </mat-select>
-  </div>
+      <span class="full-width label full-width-label">{{ stFee }}</span>
+      <div class="full-width field" style="margin-bottom: 13px;">
+        <mat-select [formControl]="feeTypeControl">
+          <mat-option [value]="feeType.Manual">
+            {{ stManual }}
+          </mat-option>
+          <mat-option [value]="feeType.Normal">
+            {{ stNormal }}
+          </mat-option>
+          <mat-option [value]="feeType.Economy">
+            {{ stEconomy }}
+          </mat-option>
+        </mat-select>
+      </div>
 
-  <table class="full-width text-center two-columns">
-    <tr>
-      <td>
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
-        <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
+      <table class="full-width text-center two-columns">
+        <tr>
+          <td>
+            <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+            <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
           <span>
             <input matInput
                    [formControl]="fee"
@@ -82,11 +86,11 @@
                    ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                    step="0.01">
           </span>
-        </div>
-      </td>
-      <td>
-        <span class="label" style="margin-left: 19px;">USD</span>
-        <div class="field right" [class.disable]="feeTypeControl.value !== feeType.Manual">
+            </div>
+          </td>
+          <td>
+            <span class="label" style="margin-left: 19px;">USD</span>
+            <div class="field right" [class.disable]="feeTypeControl.value !== feeType.Manual">
             <span>
               <input matInput
                      [formControl]="feeUsd"
@@ -95,16 +99,16 @@
                      ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                      step="0.01">
             </span>
-        </div>
-      </td>
-    </tr>
-  </table>
+            </div>
+          </td>
+        </tr>
+      </table>
 
-  <table class="full-width text-center two-columns" *ngIf="feeTypeControl.value === feeType.Manual" style="padding-top: 10px">
-    <tr>
-      <td>
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
-        <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
+      <table class="full-width text-center two-columns" *ngIf="feeTypeControl.value === feeType.Manual" style="padding-top: 10px">
+        <tr>
+          <td>
+            <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
+            <div class="field" [class.disable]="feeTypeControl.value !== feeType.Manual">
           <span>
             <input matInput
                    [formControl]="feePrice"
@@ -113,11 +117,11 @@
                    ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                    step="0.01">
           </span>
-        </div>
-      </td>
-      <td>
-        <span class="label" style="margin-left: 19px;">USD</span>
-        <div class="field right" [class.disable]="feeTypeControl.value !== feeType.Manual">
+            </div>
+          </td>
+          <td>
+            <span class="label" style="margin-left: 19px;">USD</span>
+            <div class="field right" [class.disable]="feeTypeControl.value !== feeType.Manual">
             <span>
               <input matInput
                      [formControl]="feePriceUsd"
@@ -126,46 +130,48 @@
                      ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
                      step="0.01">
             </span>
-        </div>
-      </td>
-    </tr>
-  </table>
+            </div>
+          </td>
+        </tr>
+      </table>
 
-  <div class="full-width full-width-label">
-    <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFee">{{stFeeOriginRecipient}}</mat-checkbox>
-  </div>
+      <div class="full-width full-width-label" style="padding-bottom: 13px;">
+        <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFee">{{stFeeOriginRecipient}}</mat-checkbox>
+      </div>
 
 
-  <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 0px">
+      <div class="full-width" fxLayout="column" fxLayoutAlign="center center">
 
-    <div style=" bottom: 23px; position: relative;
+        <div style=" bottom: 23px; position: relative;
     width: 100%;">
       <span style="font-family: 'Roboto-Medium'; font-size: 15px"
             *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
-      <mat-progress-bar mode="indeterminate"
-                        color="accent"
-                        style="width: 100%; margin: 5px 0"
-                        *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
-    </div>
+          <mat-progress-bar mode="indeterminate"
+                            color="accent"
+                            style="width: 100%; margin: 5px 0"
+                            *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
+        </div>
 
-    <span *ngIf="(phase | async) === phaseType.Sending"
-          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
+        <span *ngIf="(phase | async) === phaseType.Sending"
+              style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
     </span>
-    <span *ngIf="!(enougthCashObserver | async)"
-          style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
+        <span *ngIf="!(enougthCashObserver | async)"
+              style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
     </span>
-    <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
-                      *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
+        <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
+                          *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
 
-    <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(validatorObserver | async)">
-      {{ stTransfer }}
-    </button>
-    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
-      {{ stSend }}
-    </button>
-    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
-      {{ stContinue }}
-    </button>
+        <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(validatorObserver | async)">
+          {{ stTransfer }}
+        </button>
+        <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
+          {{ stSend }}
+        </button>
+        <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
+          {{ stContinue }}
+        </button>
+      </div>
+
   </div>
 </div>
 
