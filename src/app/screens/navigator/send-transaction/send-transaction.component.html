@@ -131,11 +131,10 @@
     </tr>
   </table>
 
-  <span class="full-width label full-width-label">{{ stFeeOrigin }}</span>
-  <mat-radio-group [(ngModel)]="subtractFee">
-    <mat-radio-button [value]="false">{{ stFeeOriginSender }}</mat-radio-button>
-    <mat-radio-button [value]="true">{{ stFeeOriginRecipient }}</mat-radio-button>
-  </mat-radio-group>
+  <div class="full-width full-width-label">
+    <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFee">{{stFeeOriginRecipient}}</mat-checkbox>
+  </div>
+
 
   <div class="full-width" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; bottom: 0px">
 
@@ -151,6 +150,9 @@
 
     <span *ngIf="(phase | async) === phaseType.Sending"
           style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
+    </span>
+    <span *ngIf="!(enougthCashObserver | async)"
+          style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                       *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>

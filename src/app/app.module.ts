@@ -6,6 +6,7 @@ import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform
 import {
   MatButtonModule,
   MatButtonToggleModule,
+  MatCheckboxModule,
   MatIconModule,
   MatListModule,
   MatMenuModule,
@@ -118,6 +119,7 @@ import { CurrencyPriceService } from './services/price.service';
     MatRadioModule,
     MatButtonModule,
     MatButtonToggleModule,
+    MatCheckboxModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatIconModule,
