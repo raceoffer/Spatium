@@ -55,6 +55,13 @@ EthereumTransaction.prototype.estimateSize = async function() {
   });
 };
 
+EthereumTransaction.prototype.estimateFee = async function() {
+  return await this.invoke({
+    method: 'estimateFee',
+    arguments: []
+  });
+};
+
 EthereumTransaction.prototype.totalOutputs = async function() {
   return await this.invoke({
     method: 'totalOutputs',
@@ -89,13 +96,10 @@ EthereumTransaction.fromJSON = async json => new EthereumTransaction(await Ether
   arguments: [json]
 }, true));
 
-EthereumTransaction.prototype.mapInputs = async function(compoundKeys) {
-  if (!_.isArray(compoundKeys)) {
-    compoundKeys = [compoundKeys];
-  }
+EthereumTransaction.prototype.mapInputs = async function(compoundKey) {
   return await this.invoke({
     method: 'mapInputs',
-    arguments: [_.map(compoundKeys, key => Marshal.unwrap(key.state))]
+    arguments: [Marshal.unwrap(compoundKey.state)]
   });
 };
 

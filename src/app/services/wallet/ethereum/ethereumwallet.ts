@@ -33,7 +33,7 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async fee(transaction) {
-    return transaction.tx.gas * transaction.tx.gasPrice;
+    return await transaction.estimateFee();
   }
 
   public toInternal(amount: number): string {
@@ -44,8 +44,8 @@ export class EthereumWallet extends CurrencyWallet {
     return Number(this.ethereumWallet.fromWei(amount, 'ether'));
   }
 
-  public fromJSON(tx) {
-    return CryptoCore.EthereumTransaction.fromJSON(tx);
+  public async fromJSON(tx) {
+    return await CryptoCore.EthereumTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
@@ -88,7 +88,7 @@ export class EthereumWallet extends CurrencyWallet {
 
   public async pushTransaction() {
     if (this.signSession.transaction) {
-      const raw = this.signSession.transaction.toRaw();
+      const raw = await this.signSession.transaction.toRaw();
       await this.ethereumWallet.sendSignedTransaction(raw);
     }
   }

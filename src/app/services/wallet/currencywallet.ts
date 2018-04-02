@@ -65,6 +65,7 @@ export class CurrencyWallet {
   public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
   public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
 
+  public startVerifyEvent: Subject<any> = new Subject<any>();
   public verifyEvent: Subject<any> = new Subject<any>();
   public signedEvent: Subject<any> = new Subject<any>();
   public acceptedEvent: Subject<any> = new Subject<any>();
@@ -270,6 +271,8 @@ export class CurrencyWallet {
       this.messageSubject,
       this.bt
     );
+
+    this.startVerifyEvent.next();
 
     this.signSession.ready.subscribe(() => {
       this.verifyEvent.next(transaction);

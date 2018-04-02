@@ -49,11 +49,11 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async fee(transaction) {
-    return transaction.tx.gas * transaction.tx.gasPrice;
+    return await transaction.estimateFee();
   }
 
-  public fromJSON(tx) {
-    return CryptoCore.EthereumTransaction.fromJSON(tx);
+  public async fromJSON(tx) {
+    return await CryptoCore.EthereumTransaction.fromJSON(tx);
   }
 
   public outputs(transaction) {
@@ -115,11 +115,13 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    return await this.erc20Wallet.createTransaction(
+    const tx = await this.erc20Wallet.createTransaction(
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
+
+    return await CryptoCore.EthereumTransaction.fromOptions(tx);
   }
 
   public async listTransactionHistory() {
@@ -128,7 +130,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
   public async pushTransaction() {
     if (this.signSession.transaction) {
-      const raw = this.signSession.transaction.toRaw();
+      const raw = await this.signSession.transaction.toRaw();
       await this.erc20Wallet.sendSignedTransaction(raw);
     }
   }
