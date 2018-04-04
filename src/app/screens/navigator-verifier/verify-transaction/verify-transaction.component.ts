@@ -23,7 +23,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   fee;
   feeUsd;
 
-  public title = 'Awaiting confirmations';
+  public title = 'Confirmations mode';
   public navLinks = [{
     name: 'Export secret',
     link: ['/navigator-verifier', { outlets: { 'navigator': ['secret-export'] } }],

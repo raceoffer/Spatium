@@ -4,6 +4,7 @@
       <mat-icon class="color-custom-dark" *ngIf="isBlack">arrow_back</mat-icon>
       <mat-icon *ngIf="!isBlack">arrow_back</mat-icon>
     </button>
+    <span class="color-custom-dark" *ngIf="isBlack">{{label}}</span>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -11,7 +12,6 @@
   <div class="header text-center">
     <app-logo-block></app-logo-block>
   </div>
-
 
   <router-outlet name="factor"></router-outlet>
 
