@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
@@ -8,6 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./registration-success.component.css']
 })
 export class RegistrationSuccessComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   stSuccess0 = 'You have successfully created a secure,';

@@ -1,16 +1,15 @@
+<mat-toolbar color="primary" class="header-toolbar shadow">
+  <button mat-icon-button (click)="sidenav.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>{{ title }}</span>
+</mat-toolbar>
+
+
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
-  <div class="header text-center">
-    <mat-toolbar color="primary" class="shadow">
-      <button mat-icon-button (click)="sidenav.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
-
-      <span>{{ title }}</span>
-    </mat-toolbar>
-  </div>
-
   <mat-sidenav-container class="content">
-    <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
+    <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
+                     (linkClicked)="onNav($event)"></app-main-drawer>
 
     <div class="verify-transaction-text" *ngIf="!showTransaction">
       <span>This device is linked. All transactions will be confirmed by you.</span>
@@ -25,21 +24,21 @@
       <table class="full-width text-center two-columns">
         <tr>
           <td>
-              <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
-              <div class="field disable">
+            <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+            <div class="field disable">
                 <span>
                   {{ btc }}
                 </span>
-              </div>
-            </td>
-            <td>
-              <span class="label" style="margin-left: 19px;">USD</span>
-              <div class="field right disable">
+            </div>
+          </td>
+          <td>
+            <span class="label" style="margin-left: 19px;">USD</span>
+            <div class="field right disable">
                 <span>
                   {{ usd }}
                 </span>
-              </div>
-            </td>
+            </div>
+          </td>
         </tr>
       </table>
       <table class="full-width text-center two-columns">

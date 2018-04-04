@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild, HostBinding} from '@angular/core';
 import { WalletService } from '../../../services/wallet.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { NotificationService } from '../../../services/notification.service';
   styleUrls: ['./verify-transaction.component.css']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   isOpened = false;
 
   showTransaction = false;

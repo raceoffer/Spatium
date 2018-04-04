@@ -1,16 +1,16 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import {AfterViewInit, Component, HostBinding, NgZone} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
 
 declare const Buffer: any;
 
 @Component({
   selector: 'app-file-upload',
-  host: {'class': 'child content text-center'},
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
 export class FileUploadComponent implements AfterViewInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   uploadFile = 'Choose a file';
 
   next: string = null;

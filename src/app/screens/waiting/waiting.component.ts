@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import {AfterViewInit, Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { BluetoothService, Device } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
@@ -11,6 +11,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./waiting.component.css']
 })
 export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   enableBTmessage = 'Turn on Bluetooth to proceed';
   Label = 'Connect to a device';
   overlayClass = 'overlay invisible';

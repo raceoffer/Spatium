@@ -1,9 +1,9 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import {Component, OnInit, NgZone, HostBinding} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
-import { NotificationService } from '../../services/notification.service';
-import { KeyChainService } from '../../services/keychain.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { FileService } from '../../../services/file.service';
+import { NotificationService } from '../../../services/notification.service';
+import { KeyChainService } from '../../../services/keychain.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -17,11 +17,11 @@ enum State {
 
 @Component({
   selector: 'app-pincode',
-  host: {'class': 'child box content text-center'},
   templateUrl: './pincode.component.html',
   styleUrls: ['./pincode.component.css']
 })
 export class PincodeComponent implements OnInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   pincode = '';
   _pincode = '';
 

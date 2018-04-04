@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -14,6 +14,7 @@ enum State {
   styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   title = 'Settings';

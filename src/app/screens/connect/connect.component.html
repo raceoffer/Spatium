@@ -1,17 +1,14 @@
-<div fxLayout="column" fxLayoutAlign="start center">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <span>{{stConnect}}</span>
-    </mat-toolbar-row>
-  </mat-toolbar>
+<mat-toolbar color="primary" class="color-custom-dark header-toolbar">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>{{stConnect}}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
 
-  <app-logo-block></app-logo-block>
-
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center">
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center">
     <mat-progress-spinner mode="determinate" color="accent" [value]="progress | async"></mat-progress-spinner>
-  </div>
-
-  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-raised-button color="accent" class="width-button" (click)="cancelSync()">{{cancelLabel}}</button>
   </div>
 </div>

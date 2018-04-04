@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -11,6 +11,7 @@ import { CurrencyService } from '../../../services/currency.service';
   styleUrls: ['./wallet.component.css']
 })
 export class WalletComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   public isOpened = false;

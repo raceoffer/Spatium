@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, HostBinding } from '@angular/core';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./verify-waiting.component.css']
 })
 export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   enableBTmessage = 'Enable Bluetooth to proceed';
 
   enabled = this.bt.enabled;

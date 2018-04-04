@@ -1,8 +1,11 @@
-import { AfterViewInit, Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit, Component, EventEmitter, HostBinding, Input, NgZone, OnDestroy, OnInit,
+  Output
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { DDSService } from '../../../services/dds.service';
 
 declare const nfc: any;
 declare const ndef: any;
@@ -12,11 +15,12 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-nfc',
-  host: {'class': 'child box content text-center'},
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
 export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
+  @HostBinding('class') classes = 'content factor-content text-center';
+
   _nfc = '';
   entry = 'Sign in';
   buttonState = 0; // sign in = 0, sign up = 1

@@ -1,6 +1,6 @@
 import {
   Component, OnInit, ElementRef,
-  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy
+  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy, HostBinding
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
@@ -33,6 +33,7 @@ declare const Buffer: any;
   styleUrls: ['./registration.component.css']
 })
 export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   stPassword = 'Password';

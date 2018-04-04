@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, LoginType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -31,6 +31,7 @@ declare const nfc: any;
   styleUrls: ['./login-parent.component.css']
 })
 export class LoginParentComponent  implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   contentType = Content;

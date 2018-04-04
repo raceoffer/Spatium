@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutAlign="center center" class="box" *ngIf="!isAuth && !isExport">
+<div fxLayout="column" fxLayoutAlign="center center" class="content" *ngIf="!isAuth && !isExport">
     <div fxLayout="column" fxLayoutAlign="center center" [class]="classVideoContainer">
       <div [class]="spinnerClass" fxLayout="column" fxLayoutAlign="center center" style="position: fixed; z-index: 3;">
         <mat-spinner color="accent"></mat-spinner>
@@ -17,11 +17,11 @@
       </div>
     </div>
 
-    <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="camStarted && isRepeatable">
+    <div style="width: 100%; text-align: center; bottom: 0px;" *ngIf="camStarted && isRepeatable">
       <span >{{ text }}</span>
     </div>
 
-    <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="camStarted && !isRepeatable">
+    <div style="width: 100%; text-align: center; bottom: 30px;" *ngIf="camStarted && !isRepeatable">
       <span >{{ text }}</span>
     </div>
 

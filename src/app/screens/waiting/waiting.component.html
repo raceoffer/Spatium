@@ -1,17 +1,18 @@
 <app-connect *ngIf="synchronizing | async" (cancel)="cancelConnect()"></app-connect>
+
 <div *ngIf="!(synchronizing | async)" [class]="overlayClass"></div>
-<div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;">
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <button mat-icon-button (click)="onBackClicked()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <span>{{Label}}</span>
-    </mat-toolbar-row>
 
-  </mat-toolbar>
+<mat-toolbar color="primary" class="header-toolbar" *ngIf="!(synchronizing | async)">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>{{Label}}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
 
-  <div class="width-button-container margin97" fxLayout="column" fxLayoutAlign="start center" *ngIf="!(enabled | async)">
+<div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
+  <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center" *ngIf="!(enabled | async)">
     <div class="connect-text">
       <span>{{enableBTmessage}}</span>
     </div>

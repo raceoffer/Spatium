@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { DDSService } from '../../../services/dds.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
@@ -11,17 +11,18 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-qr-code',
-  host: {'class': 'child box content text-center'},
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
 export class QrCodeComponent implements OnInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
+
   entry = 'Sign in';
 
   _qrcode: string = null;
   isRepeatable = false;
   canScanAgain = false;
-  classVideoContainer = 'content';
+  classVideoContainer = '';
   classVideo = '';
 
   next: string = null;
@@ -70,7 +71,7 @@ export class QrCodeComponent implements OnInit {
 
   async ngOnInit() {
     this.canScanAgain = false;
-    this.classVideoContainer = 'content';
+    this.classVideoContainer = '';
     this._qrcode = '';
     this.classVideo = 'small-video';
     this.spinnerClass = 'spinner-video-container';
@@ -224,7 +225,7 @@ export class QrCodeComponent implements OnInit {
 
   scanAgain() {
     this.canScanAgain = false;
-    this.classVideoContainer = 'content';
+    this.classVideoContainer = '';
     this.camStarted = true;
     this.clearEvent.emit();
   }

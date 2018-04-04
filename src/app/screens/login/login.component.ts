@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Output, EventEmitter, Input } from '@angular/core';
+import {Component, AfterViewInit, Output, EventEmitter, Input, HostBinding} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
@@ -15,11 +15,11 @@ enum State {
 
 @Component({
   selector: 'app-login',
-  host: {'class': 'child content text-center'},
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements AfterViewInit {
+  @HostBinding('class') classes = 'full-width_nopadding';
   private _userName = '';
 
   stLogin = 'Username';

@@ -1,4 +1,4 @@
-import { OnInit, Component, OnDestroy, NgZone } from '@angular/core';
+import {OnInit, Component, OnDestroy, NgZone, HostBinding} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { WalletService } from '../../../services/wallet.service';
@@ -35,6 +35,7 @@ enum Fee {
   styleUrls: ['./send-transaction.component.css']
 })
 export class SendTransactionComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   public phaseType = Phase; // for template
 
   public receiver = new FormControl();

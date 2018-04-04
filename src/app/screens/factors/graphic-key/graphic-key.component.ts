@@ -1,18 +1,18 @@
-import { AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, ElementRef, HostBinding, NgZone, ViewChild} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
 import * as PatternLock from 'PatternLock';
 
 declare const Buffer: any;
 
 @Component({
   selector: 'app-graphic-key',
-  host: {'class': 'child content text-center'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })
 
 export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   @ViewChild('patternContainer') el: ElementRef;
 
   next: string = null;

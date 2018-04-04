@@ -1,18 +1,18 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
-    <mat-toolbar color="primary">
-      <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()">
-          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-        </button>
-      </mat-toolbar-row>
-    </mat-toolbar>
-
     <app-logo-block></app-logo-block>
   </div>
 
-  <div class="content text-center" style="overflow: scroll;max-height: 100%;" fxLayout="column" fxLayoutAlign="center center">
-    <div style="font-size: 18px;line-height: 48px;padding-bottom: 48px;">
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="space-around center">
+    <div style="font-size: 18px;line-height: 48px;">
       <span>{{stSuccess0}}</span>
       <span>{{stSuccess1}}</span>
     </div>

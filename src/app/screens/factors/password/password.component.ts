@@ -1,16 +1,16 @@
-import {OnInit, Component, Output, EventEmitter} from '@angular/core';
+import {OnInit, Component, Output, EventEmitter, HostBinding} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
 
 declare const Buffer: any;
 
 @Component({
   selector: 'app-password',
-  host: {'class': 'child content text-center'},
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })
 export class PasswordComponent implements OnInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   @Output() isPasswordChanged: EventEmitter<any> = new EventEmitter<any>();
 
   stContinue = 'Continue';

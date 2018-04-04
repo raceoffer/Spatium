@@ -1,5 +1,5 @@
 import {
-  AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, sequence, style,
+  AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, HostBinding, OnDestroy, OnInit, sequence, style,
   transition,
   trigger, ViewChild
 } from '@angular/core';
@@ -33,6 +33,7 @@ declare const Buffer: any;
   styleUrls: ['./factor-node.component.css']
 })
 export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   title = 'Adding authentication path';
@@ -65,7 +66,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.factors = this.authSevice.factors;
 
-    $('#factor-container').scroll(function () {
+    $('#factorContainer').scroll(function () {
 
       if ($(this).scrollTop() > 0) {
         $('#top-scroller').fadeIn();

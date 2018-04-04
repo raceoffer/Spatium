@@ -1,17 +1,19 @@
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
-  <div class="header text-center">
-    <mat-toolbar color="primary">
-      <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()">
-          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-        </button>
-      </mat-toolbar-row>
-    </mat-toolbar>
+<mat-toolbar color="primary" class="header-toolbar">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
 
+<div fxLayout="column" fxLayoutAlign="start center" class="box" id="factor-container" #factorContainer
+     style="overflow: scroll;">
+  <div class="header text-center">
     <app-logo-block></app-logo-block>
   </div>
 
-  <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
+  <form class="width-button-container content text-center"
+        style="margin-top: 30px; margin-bottom: 0px; overflow: unset; display: flex; flex-flow: column; display: flex; flex-flow: column;">
     <div class="header text-center">
       <div class="entry" style="padding-bottom: 20px">
         <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
@@ -20,32 +22,32 @@
       </div>
 
       <div class="spatium-textfield entry bottom10">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password" [disabled]="uploading">
-      </div>
-
-      <div class="top-arrow-scroll" id="top-scroller">
-        <button mat-icon-button (click)="goTop()">
-          <mat-icon>keyboard_arrow_up</mat-icon>
-        </button>
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password"
+               [disabled]="uploading">
       </div>
     </div>
 
-    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;" *ngIf="!advancedMode">
+    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
+         style="overflow: scroll; max-height: 100%; min-height: fit-content;" *ngIf="!advancedMode">
       <div class="reg-warning">
-         <span>{{ stWarning }}</span>
+        <span>{{ stWarning }}</span>
       </div>
     </div>
 
-    <div class="text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
-      <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
+    <div class="content text-center" style="min-height: fit-content;"
+         style="overflow: scroll; max-height: 100%; min-height: fit-content;" *ngIf="advancedMode">
+      <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;"
+           [@anim]="factor.state">
         <div style="margin-left: 50px;">
-          <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+          <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px"
+                  (click)="removeFactor(factor)">
             <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
           </button>
         </div>
 
         <div>
-          <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
+          <mat-icon color="accent" matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}
+          </mat-icon>
           <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
           </div>
         </div>
@@ -59,20 +61,19 @@
     </div>
 
     <div class="footer text-center" style="bottom: 0px;">
-      <div class="bottom-arrow-scroll" id="bottom-scroller">
-        <button mat-icon-button (click)="goBottom()">
-          <mat-icon>keyboard_arrow_down</mat-icon>
-        </button>
-      </div>
-
       <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
         <button mat-icon-button [disabled]="uploading" type="button" style="float: right;" (click)="openAdvanced()">
           <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
         </button>
       </div>
 
-      <button type="submit" mat-raised-button color="accent" (click)="signUp()" [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{ stRegistration }}</button>
-      <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
+      <button type="submit" mat-raised-button color="accent" (click)="signUp()"
+              [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{
+        stRegistration }}
+      </button>
+      <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading">
+        <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+      </button>
     </div>
   </form>
 </div>
