@@ -96,7 +96,7 @@ export class WalletService {
       ));
 
     keychain.topTokens.forEach((tokenInfo) => {
-      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress);
+      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.network);
     });
 
     for (const coin of Array.from(this.coinWallets.keys())) {
@@ -206,11 +206,11 @@ export class WalletService {
     }
   }
 
-  createTokenWallet (token: Token, contractAddress: string) {
+  createTokenWallet (token: Token, contractAddress: string, network: string = 'main') {
     this.tokenWallets.set(
       token,
       new ERC20Wallet(
-        'main',
+        network,
         this.keychain,
         1,
         this.messageSubject,
