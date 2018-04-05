@@ -13,6 +13,7 @@ export class DialogFactorsComponent {
   next: string = null;
   back: string = null;
   isAuth: false;
+  label: string = null;
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
@@ -21,6 +22,11 @@ export class DialogFactorsComponent {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.isAuth = data.isFirst;
+
+    if (data.label){
+      this.label = data.label;
+    }
+
 
     if (this.isAuth) {
       this.factors = this.authSevice.getAuthFactors();

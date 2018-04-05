@@ -36,7 +36,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
-  title = 'Adding authentication path';
+  title = 'Adding authorization path';
   factors = [];
 
   uploading = false;
@@ -115,9 +115,13 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addNewFactor() {
     const isFirst = this.factors.length === 0;
+    let label = 'Authorization factor';
+    if (isFirst) {
+      label = 'Identification factor';
+    }
     const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { back: 'factornode', next: 'factornode', isFirst: isFirst }
+      data: { back: 'factornode', next: 'factornode', isFirst: isFirst, label: label },
     });
 
     dialogRef.afterClosed().subscribe(result => {
