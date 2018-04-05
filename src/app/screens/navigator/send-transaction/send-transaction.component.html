@@ -8,7 +8,7 @@
 </mat-toolbar>
 
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
-  <table class="full-width two-columns" style="text-align: left">
+  <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
     <tr>
       <td colspan="2">
         <span class="label full-width-label">{{ accountPh }}</span>
@@ -172,7 +172,7 @@
   </table>
 
   <div class="full-width">
-    <div style=" bottom: 23px; position: relative;
+    <div style=" bottom: 23px;
         width: 100%;">
       <span style="font-family: 'Roboto-Medium'; font-size: 15px" *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
       <mat-progress-bar mode="indeterminate"
