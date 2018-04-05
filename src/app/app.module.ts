@@ -72,6 +72,7 @@ import { CurrencyService } from './services/currency.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
+import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 
 @NgModule({
   declarations: [
@@ -107,7 +108,8 @@ import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
     SecretExportComponent,
     SecretImportComponent,
     SettingsComponent,
-    LogoBlockComponent
+    LogoBlockComponent,
+    ToolbarComponent
   ],
   imports: [
     FormsModule,
