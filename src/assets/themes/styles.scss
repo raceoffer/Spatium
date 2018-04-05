@@ -16,6 +16,10 @@ $white : rgb(245, 245, 245);//#f5f5f5,
 $dark_grey_21:rgba(44, 46, 49, 0.21);
 $green: rgb(24, 154, 57);//#189a39
 
+.mat-toolbar-row, .mat-toolbar-single-row {
+  height: 56px!important;
+}
+
 .child {
   width: 100%;
 }
@@ -878,6 +882,10 @@ input[type="password-pin"] {
 
 .box .footer{
   flex: 0 1 auto;
+  width: 100%;
+}
+
+.footer {
   width: 100%;
 }
 
