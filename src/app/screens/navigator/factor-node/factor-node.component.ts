@@ -161,7 +161,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const login = await CryptoCore.Utils.tryUnpackLogin(idFactor).toString('utf-8');
 
-      const id = await CryptoCore.Utils.sha256(Buffer.from(login, 'utf-8')).toString('hex');
+      const id = (await CryptoCore.Utils.sha256(Buffer.from(login, 'utf-8'))).toString('hex');
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {
