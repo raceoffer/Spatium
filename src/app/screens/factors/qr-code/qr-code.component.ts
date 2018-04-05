@@ -38,6 +38,8 @@ export class QrCodeComponent implements OnInit {
   _permissionCStorage = false;
   genericValue = '';
 
+  busy = false;
+
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
@@ -198,28 +200,33 @@ export class QrCodeComponent implements OnInit {
   async onSuccess() {
     this.camStarted = false;
 
-    switch (this.next) {
-      case 'auth':
-        await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        if (this.isAuth) {
-          await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
-        } else {
+    try {
+      this.busy = true;
+      switch (this.next) {
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
           await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        }
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
-      default:
-       // if at login-parent
-       this.canScanAgain = true;
-       this.classVideoContainer = 'invisible';
-       this.inputEvent.emit(this._qrcode);
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          if (this.isAuth) {
+            await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
+          } else {
+            await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          }
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+        default:
+          // if at login-parent
+          this.canScanAgain = true;
+          this.classVideoContainer = 'invisible';
+          this.inputEvent.emit(this._qrcode);
+      }
+    } finally {
+      this.busy = false;
     }
   }
 
