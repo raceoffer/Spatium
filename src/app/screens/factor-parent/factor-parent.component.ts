@@ -34,7 +34,7 @@ export class FactorParentComponent implements OnInit, OnDestroy {
       }
     });
 
-    if (this.back && this.back === 'navigator-verifier') {
+    if (this.back && this.back === 'factornode') {
       this.isBlack = false;
     }
 
