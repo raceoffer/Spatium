@@ -182,11 +182,10 @@ export class PincodeComponent implements OnInit {
 
   async savePin(aesKey) {
     this.keyChain.setSeed(await CryptoCore.Utils.randomBytes(64));
-    this.authService.encryptedSeed = await CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
+    this.authService.encryptedSeed = (await CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey)).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 
-    console.log('hgfghkkk');
     await this.router.navigate(['/verify-waiting']);
   }
 }
