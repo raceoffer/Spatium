@@ -20,7 +20,7 @@ PaillierProver.prototype.invoke = async function(message, wrapped) {
     class: 'PaillierProver',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'PaillierProver'))
   });
 
   this.state = result.self;
@@ -33,7 +33,7 @@ PaillierProver.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'PaillierProver',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'PaillierProver'))
   });
   return wrapped ? result : Marshal.unwrap(result);
 };

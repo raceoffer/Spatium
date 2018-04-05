@@ -17,7 +17,7 @@ EthereumTransaction.prototype.invoke = async function(message, wrapped) {
     class: 'EthereumTransaction',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'EthereumTransaction'))
   });
 
   this.state = result.self;
@@ -30,7 +30,7 @@ EthereumTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'EthereumTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'EthereumTransaction'))
   });
   return wrapped ? result : Marshal.unwrap(result);
 };

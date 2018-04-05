@@ -17,7 +17,7 @@ Signer.prototype.invoke = async function(message, wrapped) {
     class: 'Signer',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'Signer'))
   });
 
   this.state = result.self;
@@ -30,7 +30,7 @@ Signer.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'Signer',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'Signer'))
   });
   return wrapped ? result : Marshal.unwrap(result);
 };

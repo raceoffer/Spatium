@@ -22,7 +22,7 @@ BitcoinTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'BitcoinTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'BitcoinTransaction'))
   });
   return wrapped ? result : Marshal.unwrap(result);
 };

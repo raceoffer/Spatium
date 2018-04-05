@@ -18,7 +18,7 @@ BitcoreTransaction.prototype.invoke = async function(message, wrapped) {
     class: this.subclass,
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, this.subclass))
   });
 
   this.state = result.self;
@@ -31,7 +31,7 @@ BitcoreTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'BitcoreTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
+    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'BitcoreTransaction'))
   });
   return wrapped ? result : Marshal.unwrap(result);
 };
