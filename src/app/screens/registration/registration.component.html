@@ -48,9 +48,12 @@
           </button>
         </div>
 
-        <div>
-          <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
-          <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''">
+        <div *ngIf="factor.icon != ''">
+            <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
+        </div>
+        <div fxLayoutAlign="center center" *ngIf="factor.icon_asset != ''">
+          <div >
+            <span class="{{factor.icon_asset}}-mask"></span>
           </div>
         </div>
       </div>

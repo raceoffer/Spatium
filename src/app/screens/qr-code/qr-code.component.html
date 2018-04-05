@@ -28,7 +28,9 @@
     <div fxLayout="column" fxLayoutAlign="center center" class="content" style="height:250px;" *ngIf="isRepeatable && canScanAgain">
       <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
         <div class="glass">
-          <div class="qr-code-large"></div>
+          <div fxLayoutAlign="center center">
+              <span class="icon-qr_code_large"></span>
+          </div>
         </div>
 
         <button mat-icon-button class="gigantic-button" (click)="scanAgain()">

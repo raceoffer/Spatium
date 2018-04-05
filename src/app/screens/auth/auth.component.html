@@ -41,10 +41,14 @@
         </button>
       </div>
 
-      <div>
-        <mat-icon color="accent"  matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}</mat-icon>
-        <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''"></div>
+      <div *ngIf="factor.icon != ''">
+        <mat-icon color="accent"  matPrefix class="factor-icon-big" >{{ factor.icon }}</mat-icon>
       </div>
+      <div fxLayoutAlign="space-around center" *ngIf="factor.icon_asset != ''">
+          <div fxLayoutAlign="center center" >
+             <span class="{{factor.icon_asset}}-mask"></span>
+          </div>
+        </div>
     </div>
 
     <div class="margin-top-18" style="padding-bottom: 10px;" *ngIf="!ready && isPasswordFirst">

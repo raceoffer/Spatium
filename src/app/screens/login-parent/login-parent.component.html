@@ -23,8 +23,12 @@
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;">
         <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
-          <div class="qr-code-blue" *ngIf="content === contentType.QR"></div>
-          <div class="qr-code-black optical-4" *ngIf="content !== contentType.QR"></div>
+          <div fxLayoutAlign="center center" *ngIf="content === contentType.QR">
+              <span class="icon-qr_code_blue"></span>
+          </div>
+          <div fxLayoutAlign="center center" *ngIf="content !== contentType.QR">
+              <span class="icon-qr_code_black optical-4"></span>
+          </div>
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isNfcAvailable">

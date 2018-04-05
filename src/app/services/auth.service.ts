@@ -237,8 +237,8 @@ export class AuthService {
     PIN = '',
     PASSWORD = '',
     FILE = '',
-    GRAPHIC_KEY = 'graphic-key',
-    QR = 'qr-code',
+    GRAPHIC_KEY = 'icon-graphic_key',
+    QR = 'icon-qr_code',
     NFC = ''
   }
 
