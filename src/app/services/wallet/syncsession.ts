@@ -1,4 +1,4 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
@@ -17,7 +17,7 @@ export enum SynchronizationStatus {
   Finished
 }
 
-export class SyncSession {
+export class SyncSession implements OnDestroy {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
 
   private initialCommitmentObserver:    Observable<any>;
@@ -32,6 +32,8 @@ export class SyncSession {
   public failed:   EventEmitter<any> = new EventEmitter();
 
   private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
+
+  private subscriptions = [];
 
   constructor(
     private prover: any,
@@ -68,9 +70,14 @@ export class SyncSession {
         .filter(object => object.type === 'proverDecommitment')
         .map(object => object.content);
 
-    this.messageSubject
+    this.subscriptions.push(this.messageSubject
       .filter(object => object.type === 'cancel')
-      .subscribe(() => this.cancelObserver.next(true));
+      .subscribe(() => this.cancelObserver.next(true)));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public async cancel() {
@@ -101,12 +108,11 @@ export class SyncSession {
     this.status.next(SynchronizationStatus.Started);
     let initialCommitment = null;
     try {
-      initialCommitment = this.prover.getInitialCommitment();
+      initialCommitment = await this.prover.getInitialCommitment();
     } catch (e) {
       return handleFailure('Failed to get initialCommitment', e);
     }
 
-    LoggerService.log('Sending initialCommitment:', initialCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'initialCommitment',
         content: initialCommitment
@@ -120,15 +126,13 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.InitialCommitment);
-    LoggerService.log('Received remoteInitialCommitment', remoteInitialCommitment);
     let initialDecommitment = null;
     try {
-      initialDecommitment = this.prover.processInitialCommitment(remoteInitialCommitment);
+      initialDecommitment = await this.prover.processInitialCommitment(remoteInitialCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteInitialCommitment', e);
     }
 
-    LoggerService.log('Sending initialDecommitment', initialDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'initialDecommitment',
         content: initialDecommitment
@@ -142,17 +146,15 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.InitialDecommitment);
-    LoggerService.log('Received remoteInitialDecommitment', remoteInitialDecommitment);
     let verifier = null;
     try {
-      verifier = this.prover.processInitialDecommitment(remoteInitialDecommitment);
+      verifier = await this.prover.processInitialDecommitment(remoteInitialDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteInitialDecommitment', e);
     }
 
-    const verifierCommitment = verifier.getCommitment();
+    const verifierCommitment = await verifier.getCommitment();
 
-    LoggerService.log('Sending verifierCommitment', verifierCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierCommitment',
         content: verifierCommitment
@@ -166,15 +168,13 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.VerifierCommitment);
-    LoggerService.log('Received remoteVerifierCommitment', remoteVerifierCommitment);
     let proverCommitment = null;
     try {
-      proverCommitment = this.prover.processCommitment(remoteVerifierCommitment);
+      proverCommitment = await this.prover.processCommitment(remoteVerifierCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteVerifierCommitment', e);
     }
 
-    LoggerService.log('Sending proverCommitment', proverCommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'proverCommitment',
         content: proverCommitment
@@ -188,15 +188,13 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.ProverCommitment);
-    LoggerService.log('Received remoteProverCommitment', remoteProverCommitment);
     let verifierDecommitment = null;
     try {
-      verifierDecommitment = verifier.processCommitment(remoteProverCommitment);
+      verifierDecommitment = await verifier.processCommitment(remoteProverCommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteProverCommitment', e);
     }
 
-    LoggerService.log('Sending verifierDecommitment', verifierDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierDecommitment',
         content: verifierDecommitment
@@ -210,15 +208,13 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.VerifierDecommitment);
-    LoggerService.log('Received remoteVerifierDecommitment', remoteVerifierDecommitment);
     let proverDecommitment = null;
     try {
-      proverDecommitment = this.prover.processDecommitment(remoteVerifierDecommitment);
+      proverDecommitment = await this.prover.processDecommitment(remoteVerifierDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
 
-    LoggerService.log('Sending proverDecommitment', proverDecommitment);
     if (!await this.bt.send(JSON.stringify({
         type: 'proverDecommitment',
         content: proverDecommitment
@@ -232,10 +228,9 @@ export class SyncSession {
     }
 
     this.status.next(SynchronizationStatus.ProverDecommitment);
-    LoggerService.log('Received remoteProverDecommitment', remoteProverDecommitment);
     let verifiedData = null;
     try {
-      verifiedData = verifier.processDecommitment(remoteProverDecommitment);
+      verifiedData = await verifier.processDecommitment(remoteProverDecommitment);
     } catch (e) {
       return handleFailure('Failed to process remoteProverDecommitment', e);
     }

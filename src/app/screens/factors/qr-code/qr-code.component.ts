@@ -97,7 +97,7 @@ export class QrCodeComponent implements OnInit {
   async writeSecret() {
     const encryptedSeed = this.authService.encryptedSeed;
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    const packSeed = CryptoCore.Utils.packSeed(buffesSeed);
+    const packSeed = await CryptoCore.Utils.packSeed(buffesSeed);
     this.genericValue = packSeed.toString('hex');
     console.log(this.genericValue);
   }
@@ -110,9 +110,9 @@ export class QrCodeComponent implements OnInit {
     try {
       do {
         const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(login));
+        const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
-          const packedLogin = CryptoCore.Utils.packLogin(login);
+          const packedLogin = await CryptoCore.Utils.packLogin(login);
           this.genericValue = packedLogin.toString('hex');
           break;
         }
@@ -181,7 +181,7 @@ export class QrCodeComponent implements OnInit {
       if (this.isImport) {
         try {
           console.log(buffer);
-          const value = CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
+          const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
           this._qrcode = value.toString('hex');
           console.log(this._qrcode);
         } catch (exc) {
@@ -189,7 +189,7 @@ export class QrCodeComponent implements OnInit {
           this._qrcode = null;
         }
       } else {
-        this._qrcode = CryptoCore.Utils.tryUnpackLogin(buffer);
+        this._qrcode = await CryptoCore.Utils.tryUnpackLogin(buffer);
       }
     }
     await this.onSuccess();
@@ -200,18 +200,18 @@ export class QrCodeComponent implements OnInit {
 
     switch (this.next) {
       case 'auth':
-        this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+        await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+        await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
         if (this.isAuth) {
-          this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
+          await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
         } else {
-          this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         }
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;

@@ -136,7 +136,7 @@ export class PincodeComponent implements OnInit {
 
           if (this.authService.encryptedSeed) {
             const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-            this.keyChain.setSeed(CryptoCore.Utils.decrypt(ciphertext, aesKey));
+            this.keyChain.setSeed(await CryptoCore.Utils.decrypt(ciphertext, aesKey));
 
             await this.router.navigate(['/verify-waiting']);
           } else {
@@ -158,23 +158,23 @@ export class PincodeComponent implements OnInit {
         }
         break;
       case 'auth':
-        this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+        await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+        await this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
-        this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+        await this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
     }
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(CryptoCore.Utils.randomBytes(64));
-    this.authService.encryptedSeed = CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
+    this.keyChain.setSeed(await CryptoCore.Utils.randomBytes(64));
+    this.authService.encryptedSeed = await CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 

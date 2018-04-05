@@ -1,4 +1,4 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
@@ -16,7 +16,7 @@ export enum TransactionStatus {
   Failed
 }
 
-export class SignSession {
+export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
 
   private entropyCommitmentsObserver:   Observable<any>;
@@ -31,8 +31,9 @@ export class SignSession {
 
   private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  private signers: any = null;
   private mapping: any = null;
+
+  private subscriptions = [];
 
   constructor(
     private tx: any,
@@ -55,16 +56,22 @@ export class SignSession {
         .filter(object => object.type === 'chiphertexts')
         .map(object => object.content);
 
-    this.messageSubject
-      .filter(object => object.type === 'cancelTransaction')
-      .subscribe(() => {
-        this.cancelObserver.next(true);
-        if (this.status.getValue() === TransactionStatus.Ready) {
-          LoggerService.log('Cancelled after sync', {});
-          this.status.next(TransactionStatus.Cancelled);
-          this.canceled.emit();
-        }
-      });
+    this.subscriptions.push(
+      this.messageSubject
+        .filter(object => object.type === 'cancelTransaction')
+        .subscribe(() => {
+          this.cancelObserver.next(true);
+          if (this.status.getValue() === TransactionStatus.Ready) {
+            LoggerService.log('Cancelled after sync', {});
+            this.status.next(TransactionStatus.Cancelled);
+            this.canceled.emit();
+          }
+        }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public get transaction() {
@@ -98,20 +105,19 @@ export class SignSession {
   public async sync() {
     this.status.next(TransactionStatus.Started);
 
-    this.mapping = this.tx.mapInputs(this.compoundKey);
+    this.mapping = await this.tx.mapInputs(this.compoundKey);
 
-    const hashes = this.tx.getHashes(this.mapping);
+    const hashes = await this.tx.getHashes(this.mapping);
 
-    this.signers = this.tx.startSign(hashes, this.mapping);
+    await this.tx.startSign(hashes, this.mapping);
 
     let entropyCommitments = null;
     try {
-      entropyCommitments = this.tx.createEntropyCommitments(this.signers);
+      entropyCommitments = await this.tx.createEntropyCommitments();
     } catch (e) {
       return this.handleFailure('Failed to get entropyCommitments', e);
     }
 
-    LoggerService.log('Sending entropyCommitments', entropyCommitments);
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyCommitments',
         content: entropyCommitments
@@ -125,15 +131,13 @@ export class SignSession {
     }
 
     this.status.next(TransactionStatus.EntropyCommitments);
-    LoggerService.log('Received remoteEntropyCommitments', remoteEntropyCommitments);
     let entropyDecommitments = null;
     try {
-      entropyDecommitments = this.tx.processEntropyCommitments(this.signers, remoteEntropyCommitments);
+      entropyDecommitments = await this.tx.processEntropyCommitments(remoteEntropyCommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
 
-    LoggerService.log('Sending entropyDecommitments', entropyDecommitments);
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyDecommitments',
         content: entropyDecommitments
@@ -147,9 +151,8 @@ export class SignSession {
     }
 
     this.status.next(TransactionStatus.EntropyDecommitments);
-    LoggerService.log('Received remoteEntropyDecommitments', remoteEntropyDecommitments);
     try {
-      this.tx.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
+      await this.tx.processEntropyDecommitments(remoteEntropyDecommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyDecommitments', e);
     }
@@ -166,12 +169,11 @@ export class SignSession {
 
     let chiphertexts = null;
     try {
-      chiphertexts = this.tx.computeCiphertexts(this.signers);
+      chiphertexts = await this.tx.computeCiphertexts();
     } catch (e) {
       return this.handleFailure('Failed to compute chiphertexts', e);
     }
 
-    LoggerService.log('Sending chiphertexts', chiphertexts);
     if (!await this.bt.send(JSON.stringify({
         type: 'chiphertexts',
         content: chiphertexts
@@ -191,17 +193,16 @@ export class SignSession {
       return this.handleCancel();
     }
 
-    LoggerService.log('Received remoteChiphertexts', remoteChiphertexts);
     let rawSignatures = null;
     try {
-      rawSignatures = this.tx.extractSignatures(this.signers, remoteChiphertexts);
+      rawSignatures = await this.tx.extractSignatures(remoteChiphertexts);
     } catch (e) {
       return this.handleFailure('Failed to process remoteChiphertexts', e);
     }
 
-    const signatures = this.tx.normalizeSignatures(this.mapping, rawSignatures);
+    const signatures = await this.tx.normalizeSignatures(this.mapping, rawSignatures);
 
-    this.tx.applySignatures(signatures);
+    await this.tx.applySignatures(signatures);
 
     this.status.next(TransactionStatus.Signed);
     this.signed.emit();

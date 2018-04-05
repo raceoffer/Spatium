@@ -53,15 +53,15 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   async goNext() {
     switch (this.next) {
       case 'auth':
-        this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
-        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+        await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
     }

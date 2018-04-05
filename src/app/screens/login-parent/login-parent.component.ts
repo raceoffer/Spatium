@@ -115,7 +115,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     }
     try {
       this.buttonState = State.Updating;
-      const exists = await this.dds.exists(AuthService.toId(input));
+      const exists = await this.dds.exists(await AuthService.toId(input));
       if (input !== this.input) { // in case of updates to userName during lookup
         return;
       }
@@ -142,7 +142,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     this.buttonState = State.Empty;
     do {
       this.loginGenerate = this.authService.makeNewLogin(10);
-      if (!await this.dds.exists(AuthService.toId(this.loginGenerate))) {
+      if (!await this.dds.exists(await AuthService.toId(this.loginGenerate))) {
         break;
       }
     } while (true);
@@ -173,7 +173,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
 
       try {
         this.authService.remoteEncryptedTrees = [];
-        this.authService.remoteEncryptedTrees.push(await this.dds.read(AuthService.toId(this.input)));
+        this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
       } catch (e) {
         this.notification.show('No backup found');
       }
@@ -183,7 +183,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       this.authService.login = this.input;
       this.authService.password = '';
       this.authService.clearFactors();
-      this.keychain.setSeed(CryptoCore.Utils.randomBytes(64));
+      this.keychain.setSeed(await CryptoCore.Utils.randomBytes(64));
 
       await this.router.navigate(['/registration']);
     } else {

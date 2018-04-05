@@ -60,15 +60,15 @@ export class FileUploadComponent implements AfterViewInit {
   async goNext() {
     switch (this.next) {
       case 'auth':
-        this.authService.addAuthFactor(FactorType.FILE, this.file);
+        await this.authService.addAuthFactor(FactorType.FILE, this.file);
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        this.authService.addFactor(FactorType.FILE, this.file);
+        await this.authService.addFactor(FactorType.FILE, this.file);
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
-        this.authService.addFactor(FactorType.FILE, this.file);
+        await this.authService.addFactor(FactorType.FILE, this.file);
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
     }

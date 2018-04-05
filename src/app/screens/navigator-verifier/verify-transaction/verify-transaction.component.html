@@ -11,11 +11,15 @@
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
                      (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <div class="verify-transaction-text" *ngIf="!showTransaction">
+    <div class="verify-transaction-text" *ngIf="state === stateType.None">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="transaction-container currency-component" *ngIf="showTransaction">
+    <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
+      <mat-spinner mode="indeterminate" color="accent"></mat-spinner>
+    </div>
+
+    <div class="transaction-container currency-component" *ngIf="state === stateType.Verifying">
       <span class="full-width label full-width-label">Recipient address</span>
       <mat-form-field class="full-width field disable" color="accent" style="margin-bottom: 13px;">
         <input matInput [(ngModel)]="address" disabled>
