@@ -148,7 +148,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.uploading = true;
 
       const idFactor = this.factors[0].value;
-      const factors = this.factors.slice(1).map(factor => factor.toBuffer()).reverse();
+
+      let factors = [];
+      for (let i = 1; i < this.factors.length; ++i) {
+        factors.push(await this.factors[i].toBuffer());
+      }
+
+      factors = factors.reverse();
+
       const tree = factors.reduce((rest, factor) => {
         const node = {
           factor: factor
@@ -161,7 +168,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const login = (await CryptoCore.Utils.tryUnpackLogin(idFactor)).toString('utf-8');
 
-      const id = (await CryptoCore.Utils.sha256(Buffer.from(login, 'utf-8'))).toString('hex');
+      const id = await AuthService.toId(login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {
