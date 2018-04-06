@@ -108,11 +108,6 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async checkInput(input: string) {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      this.buttonState = State.Error;
-      return;
-    }
     try {
       this.buttonState = State.Updating;
       const exists = await this.dds.exists(await AuthService.toId(input));
@@ -132,6 +127,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
         await this.generate();
       } else {
+        this.notification.show('No network connection');
         this.buttonState = State.Error;
       }
     }

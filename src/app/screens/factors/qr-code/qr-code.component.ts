@@ -105,10 +105,6 @@ export class QrCodeComponent implements OnInit {
   }
 
   async generateLogin() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      return;
-    }
     try {
       do {
         const login = this.authService.makeNewLogin(10);
@@ -120,6 +116,7 @@ export class QrCodeComponent implements OnInit {
         }
       } while (true);
     } catch (ignored) {
+      this.notification.show('No network connection');
     }
   }
 

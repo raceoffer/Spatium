@@ -73,11 +73,6 @@ export class LoginComponent implements AfterViewInit {
   }
 
   async generateNewLogin() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      this.usernameState = State.Error;
-      return;
-    }
     this.usernameState = State.Updating;
     try {
       do {
@@ -90,6 +85,7 @@ export class LoginComponent implements AfterViewInit {
         }
       } while (true);
     } catch (ignored) {
+      this.notification.show('No network connection');
       this.usernameState = State.Error;
     }
   }

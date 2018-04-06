@@ -47,10 +47,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() isExport = false;
   @Input() isImport = false;
 
-  static async isEthernetAvailable() {
-    return await CryptoCore.Utils.testNetwork();
-  }
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -237,10 +233,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async generateAndWrite() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      return;
-    }
     try {
       do {
         const login = this.authService.makeNewLogin(10);
@@ -252,7 +244,9 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
           break;
         }
       } while (true);
-    } catch (ignored) {}
+    } catch (ignored) {
+      this.notification.show('No network connection');
+    }
   }
 
   writeTag(content, success, error) {
