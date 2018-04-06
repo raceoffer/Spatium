@@ -24,11 +24,14 @@ import { SecretImportComponent } from './screens/secret-import/secret-import.com
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
-import {SecretExportComponent} from './screens/navigator-verifier/secret-export/secret-export.component';
+import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
+import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
+
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { path: 'start', component: StartComponent },
+  { path: 'confirmation-entry', component: ConfirmationEntryComponent},
   { path: 'auth', component: AuthComponent },
   { path: 'waiting', component: WaitingComponent },
   { path: 'verify-waiting', component: VerifyWaitingComponent },

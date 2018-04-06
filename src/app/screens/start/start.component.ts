@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
@@ -55,7 +55,7 @@ export class StartComponent implements OnInit, OnDestroy {
       this.authService.encryptedSeed = null;
     }
 
-    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+    await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
   }
 
   eventOnBackClicked(e) {
