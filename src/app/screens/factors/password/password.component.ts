@@ -21,6 +21,8 @@ export class PasswordComponent implements OnInit {
   next: string = null;
   back: string = null;
 
+  busy = false;
+
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
@@ -41,25 +43,30 @@ export class PasswordComponent implements OnInit {
   }
 
   async goNext() {
-    if (this.password !== '') {
-      switch (this.next) {
-        case null:
-          const isPassword = this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-          this.isPasswordChanged.emit(isPassword);
-          break;
-        case 'auth':
-          this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-          await this.router.navigate(['/auth']);
-          break;
-        case 'registration':
-          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-          await this.router.navigate(['/registration']);
-          break;
-        case 'factornode':
-          this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
-          await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-          break;
+    try {
+      this.busy = true;
+      if (this.password !== '') {
+        switch (this.next) {
+          case null:
+            const isPassword = await this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+            this.isPasswordChanged.emit(isPassword);
+            break;
+          case 'auth':
+            await this.authService.addAuthFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+            await this.router.navigate(['/auth']);
+            break;
+          case 'registration':
+            await this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+            await this.router.navigate(['/registration']);
+            break;
+          case 'factornode':
+            await this.authService.addFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8'));
+            await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+            break;
+        }
       }
+    } finally {
+      this.busy = false;
     }
   }
 

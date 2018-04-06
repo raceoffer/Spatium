@@ -15,5 +15,9 @@
       "es2017",
       "dom"
     ]
-  }
+  },
+  "exclude": [
+    "src/crypto-core",
+    "src/crypto-core-async"
+  ]
 }

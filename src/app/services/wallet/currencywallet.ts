@@ -8,6 +8,8 @@ import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
+import { toBehaviourSubject } from '../../utils/transformers';
+
 declare const CryptoCore: any;
 
 export enum Status {
@@ -46,14 +48,15 @@ export class HistoryEntry {
 }
 
 export class CurrencyWallet {
-  protected compoundKey: any = null;
+  public compoundKey: any = null;
+  public publicKey: any = null;
 
   protected syncSession: SyncSession = null;
   protected signSession: SignSession = null;
 
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: Observable<boolean> = this.status.map(status => status === Status.Synchronizing);
-  public ready: Observable<boolean> = this.status.map(status => status === Status.Ready);
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
 
   public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
 
@@ -62,6 +65,7 @@ export class CurrencyWallet {
   public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
   public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
 
+  public startVerifyEvent: Subject<any> = new Subject<any>();
   public verifyEvent: Subject<any> = new Subject<any>();
   public signedEvent: Subject<any> = new Subject<any>();
   public acceptedEvent: Subject<any> = new Subject<any>();
@@ -99,19 +103,20 @@ export class CurrencyWallet {
     return null;
   }
 
-  public sync() {
+  public async sync(paillierKeys: any) {
     if (this.status.getValue() === Status.Synchronizing) {
       LoggerService.log('Sync in progress', {});
       return;
     }
 
-    this.compoundKey = new CryptoCore.CompoundKey({
-      localPrivateKey: CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account))
+    this.compoundKey = await CryptoCore.CompoundKey.fromOptions({
+      localPrivateKey: await CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+      localPaillierKeys: paillierKeys
     });
 
     let prover = null;
     try {
-      prover = this.compoundKey.startInitialCommitment();
+      prover = await this.compoundKey.startInitialCommitment();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start initial commitment', e);
       return;
@@ -150,6 +155,7 @@ export class CurrencyWallet {
     this.status.next(Status.None);
 
     this.compoundKey = null;
+    this.publicKey = null;
 
     if (this.syncSession) {
       await this.syncSession.cancel();
@@ -179,16 +185,16 @@ export class CurrencyWallet {
     }
   }
 
-  public outputs(transaction) {
-    return transaction.totalOutputs();
+  public async outputs(transaction) {
+    return await transaction.totalOutputs();
   }
 
-  public fee(transaction): number {
+  public async fee(transaction) {
     return 0;
   }
 
-  public verify(transaction: any, maxFee?: number): boolean {
-    const statistics = transaction.totalOutputs();
+  public async verify(transaction: any, maxFee?: number) {
+    const statistics = await transaction.totalOutputs();
 
     return !(!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0);
   }
@@ -201,12 +207,13 @@ export class CurrencyWallet {
 
   public async syncDuplicate(other: CurrencyWallet) {
     this.compoundKey = other.compoundKey;
-    await this.finishSync(other.compoundKey.extractSyncData());
+    this.publicKey = other.publicKey;
   }
 
   public async finishSync(data) {
     try {
-      this.compoundKey.finishInitialSync(data);
+      await this.compoundKey.finishInitialSync(data);
+      this.publicKey = await this.compoundKey.getCompoundPublicKey();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed synchronization finish', e);
     }
@@ -220,7 +227,7 @@ export class CurrencyWallet {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',
       content: {
-        tx: transaction.toJSON(),
+        tx: await transaction.toJSON(),
         coin: this.currencyCode()
       }
     }));
@@ -265,6 +272,8 @@ export class CurrencyWallet {
       this.bt
     );
 
+    this.startVerifyEvent.next();
+
     this.signSession.ready.subscribe(() => {
       this.verifyEvent.next(transaction);
     });
@@ -286,7 +295,7 @@ export class CurrencyWallet {
     let verify = false;
 
     if (this.signSession) {
-      verify = this.signSession.transaction.verify();
+      verify = await this.signSession.transaction.verify();
     }
 
     return verify;

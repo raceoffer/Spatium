@@ -4,95 +4,103 @@
     <div class="spatium-textfield entry noborder">
       <input type="password-pin" [(ngModel)]="pincode" disabled>
     </div>
-    <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspaceClicked()">
+    <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspaceClicked()" [disabled]="busy">
       <mat-icon matSuffix>backspace</mat-icon>
     </button>
   </div>
 
   <div class="keyboard-row margin15" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(1)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(1)" [disabled]="busy">
         1
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(2)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(2)" [disabled]="busy">
         2
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(3)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(3)" [disabled]="busy">
         3
       </button>
     </div>
   </div>
+
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(4)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(4)" [disabled]="busy">
         4
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(5)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(5)" [disabled]="busy">
         5
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(6)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(6)" [disabled]="busy">
         6
       </button>
     </div>
   </div>
+
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(7)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(7)" [disabled]="busy">
         7
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(8)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(8)" [disabled]="busy">
         8
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(9)">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(9)" [disabled]="busy">
         9
       </button>
     </div>
   </div>
+
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
-      <button mat-icon-button class="keyboard-size" *ngIf="hasTouch" (click)="onFingerClicked()">
+      <button mat-icon-button class="keyboard-size" *ngIf="hasTouch" (click)="onFingerClicked()" [disabled]="busy">
         <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">fingerprint</mat-icon>
       </button>
     </div>
-    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(0)">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
+      <button mat-icon-button class="keyboard-size" (click)="onAddClicked(0)" [disabled]="busy">
         0
       </button>
     </div>
-    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button" >
-      <button mat-icon-button class="keyboard-size" (click)="onSubmitClicked()">
+    <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
+      <button mat-icon-button class="keyboard-size" (click)="onSubmitClicked()" *ngIf="!busy">
         <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">check</mat-icon>
       </button>
+      <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="busy">
+        <mat-spinner mode="indeterminate" diameter="34" color="accent"></mat-spinner>
+      </div>
     </div>
   </div>
 </div>
+
 <div class="footer text-center" style="bottom: 0px;" *ngIf="state === stateType.Create || state === stateType.Unlock">
   <div class="width-button-width" style="display: inline-block;">
-    <button mat-icon-button [matMenuTriggerFor]="menu" style="float: right;">
+    <button mat-icon-button [matMenuTriggerFor]="menu" style="float: right;" [disabled]="busy">
       <mat-icon style="opacity: 0.5;">settings</mat-icon>
     </button>
+
     <mat-menu #menu="matMenu">
-      <button mat-menu-item *ngIf="state === stateType.Create" (click)="onImportClicked()">
+      <button mat-menu-item *ngIf="state === stateType.Create" (click)="onImportClicked()" [disabled]="busy">
         <mat-icon>import_export</mat-icon>
         <span>Import secret</span>
       </button>
-      <button mat-menu-item *ngIf="state === stateType.Unlock" (click)="onDeleteClicked()">
+
+      <button mat-menu-item *ngIf="state === stateType.Unlock" (click)="onDeleteClicked()" [disabled]="busy">
         <mat-icon>delete_forever</mat-icon>
         <span>Delete</span>
       </button>
     </mat-menu>
   </div>
-
 </div>

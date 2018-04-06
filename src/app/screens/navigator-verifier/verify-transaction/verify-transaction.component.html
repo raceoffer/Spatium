@@ -11,28 +11,46 @@
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
                      (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <div class="verify-transaction-text" *ngIf="!showTransaction">
+    <div class="verify-transaction-text" *ngIf="state === stateType.None">
       <span>This device is linked. All transactions will be confirmed by you.</span>
     </div>
 
-    <div class="transaction-container currency-component" *ngIf="showTransaction">
-      <span class="full-width label full-width-label">Recipient address</span>
-      <mat-form-field class="full-width field disable" color="accent" style="margin-bottom: 13px;">
-        <input matInput [(ngModel)]="address" disabled>
-      </mat-form-field>
+    <div class="width-button-container" style="margin-top:25px;"
+         fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
+      <mat-spinner mode="indeterminate" color="accent"></mat-spinner>
+    </div>
 
-      <table class="full-width text-center two-columns">
+    <div class="transaction-container currency-component" *ngIf="state === stateType.Verifying">
+      <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
         <tr>
-          <td>
+          <td colspan="2">
+            <span class="label" style="margin-left: 5px;">Recipient address</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <mat-form-field class="field disable" color="accent" style="margin-bottom: 13px;">
+              <input matInput [(ngModel)]="address" disabled>
+            </mat-form-field>
+          </td>
+        </tr>
+        <tr>
+          <td class="right">
             <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+          </td>
+          <td class="left">
+            <span class="label" style="margin-left: 5px;">USD</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="right">
             <div class="field disable">
                 <span>
                   {{ btc }}
                 </span>
             </div>
           </td>
-          <td>
-            <span class="label" style="margin-left: 19px;">USD</span>
+          <td class="left">
             <div class="field right disable">
                 <span>
                   {{ usd }}
@@ -40,19 +58,23 @@
             </div>
           </td>
         </tr>
-      </table>
-      <table class="full-width text-center two-columns">
         <tr>
-          <td>
+          <td class="right">
             <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+          </td>
+          <td class="left">
+            <span class="label" style="margin-left: 5px;">USD</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="right">
             <div class="field disable">
                 <span>
                   {{ fee }}
                 </span>
             </div>
           </td>
-          <td>
-            <span class="label" style="margin-left: 19px;">USD</span>
+          <td class="left">
             <div class="field right disable">
                 <span>
                   {{ feeUsd }}

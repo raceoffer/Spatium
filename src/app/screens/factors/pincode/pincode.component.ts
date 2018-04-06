@@ -37,6 +37,8 @@ export class PincodeComponent implements OnInit {
   hasTouch = false;
   hasTouchId = false;
 
+  busy = false;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly ngZone: NgZone,
@@ -129,18 +131,21 @@ export class PincodeComponent implements OnInit {
   }
 
   async onNext() {
-    switch (this.next) {
-      case 'waiting':
-        try {
-          const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
+    try {
+      this.busy = true;
 
-          if (this.authService.encryptedSeed) {
-            const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-            this.keyChain.setSeed(CryptoCore.Utils.decrypt(ciphertext, aesKey));
+      switch (this.next) {
+        case 'waiting':
+          try {
+            const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(this._pincode, 'utf-8'));
 
-            await this.router.navigate(['/verify-waiting']);
-          } else {
-            if (this.hasTouchId) {
+            if (this.authService.encryptedSeed) {
+              const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
+              this.keyChain.setSeed(await CryptoCore.Utils.decrypt(ciphertext, aesKey));
+
+              await this.router.navigate(['/verify-waiting']);
+            } else {
+              if (this.hasTouchId) {
                 try {
                   if (await this.saveTouchPassword()) {
                     console.log('Password saved ' + this._pincode);
@@ -149,37 +154,38 @@ export class PincodeComponent implements OnInit {
                 } catch (e) {
                   console.log(e);
                 }
-            } else {
-              await this.savePin(aesKey);
+              } else {
+                await this.savePin(aesKey);
+              }
             }
+          } catch (ignored) {
+            this.notification.show('Authorization error');
           }
-        } catch (ignored) {
-          this.notification.show('Authorization error');
-        }
-        break;
-      case 'auth':
-        this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
+          break;
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
+          await this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          await this.authService.addFactor(FactorType.PIN, Buffer.from(this._pincode, 'utf-8'));
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+      }
+    } finally {
+      this.busy = false;
     }
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(CryptoCore.Utils.randomBytes(64));
-    this.authService.encryptedSeed = CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey).toString('hex');
+    this.keyChain.setSeed(await CryptoCore.Utils.randomBytes(64));
+    this.authService.encryptedSeed = (await CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey)).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 
-    console.log('hgfghkkk');
     await this.router.navigate(['/verify-waiting']);
   }
-
 }

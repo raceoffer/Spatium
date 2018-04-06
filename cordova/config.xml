@@ -3,6 +3,7 @@
     <name>Spatium</name>
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
+    <hook src="hooks/copyWorker.js" type="before_prepare" />
     <hook src="hooks/replaceAndroidMainActivity.js" type="after_plugin_install" />
     <content src="index.html" />
     <access origin="*" />

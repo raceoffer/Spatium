@@ -19,6 +19,8 @@ export class FileUploadComponent implements AfterViewInit {
   file: any = null;
   reader: any = null;
 
+  busy = false;
+
   constructor(
     private readonly router: Router,
     private route: ActivatedRoute,
@@ -58,19 +60,24 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   async goNext() {
-    switch (this.next) {
-      case 'auth':
-        this.authService.addAuthFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        this.authService.addFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        this.authService.addFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
+    try {
+      this.busy = true;
+      switch (this.next) {
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
+          await this.authService.addFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          await this.authService.addFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+      }
+    } finally {
+      this.busy = false;
     }
   }
 }
