@@ -31,7 +31,7 @@ export class SyncSession implements OnDestroy {
   public canceled: EventEmitter<any> = new EventEmitter();
   public failed:   EventEmitter<any> = new EventEmitter();
 
-  private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
+  private cancelled: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private subscriptions = [];
 
@@ -69,10 +69,6 @@ export class SyncSession implements OnDestroy {
       this.messageSubject
         .filter(object => object.type === 'proverDecommitment')
         .map(object => object.content);
-
-    this.subscriptions.push(this.messageSubject
-      .filter(object => object.type === 'cancel')
-      .subscribe(() => this.cancelObserver.next(true)));
   }
 
   ngOnDestroy() {
@@ -81,48 +77,46 @@ export class SyncSession implements OnDestroy {
   }
 
   public async cancel() {
-    this.cancelObserver.next(true);
-    if (!await this.bt.send(JSON.stringify({
-        type: 'cancel',
-        content: {}
-      }))) {
-      LoggerService.nonFatalCrash('Failed to send cancel', null);
-    }
+    this.cancelled.next(true);
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(SynchronizationStatus.Finished);
+    this.failed.emit();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(SynchronizationStatus.Finished);
+    this.canceled.emit();
+    throw new Error('Cancelled');
   }
 
   public async sync() {
-    const handleFailure = (message, exception) => {
-      LoggerService.nonFatalCrash(message, exception);
-      this.status.next(SynchronizationStatus.Finished);
-      this.failed.emit();
-      throw new Error(message);
-    };
-
-    const handleCancel = () => {
-      LoggerService.log('Cancelled', {});
-      this.status.next(SynchronizationStatus.Finished);
-      this.canceled.emit();
-      throw new Error('Cancelled');
-    };
-
     this.status.next(SynchronizationStatus.Started);
     let initialCommitment = null;
     try {
       initialCommitment = await this.prover.getInitialCommitment();
     } catch (e) {
-      return handleFailure('Failed to get initialCommitment', e);
+      return this.handleFailure('Failed to get initialCommitment', e);
+    }
+
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     if (!await this.bt.send(JSON.stringify({
         type: 'initialCommitment',
         content: initialCommitment
       }))) {
-      return handleFailure('Failed to send initialCommitment', null);
+      return this.handleFailure('Failed to send initialCommitment', null);
     }
 
-    const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteInitialCommitment) {
-      return handleCancel();
+    const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.InitialCommitment);
@@ -130,19 +124,23 @@ export class SyncSession implements OnDestroy {
     try {
       initialDecommitment = await this.prover.processInitialCommitment(remoteInitialCommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteInitialCommitment', e);
+      return this.handleFailure('Failed to process remoteInitialCommitment', e);
+    }
+
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     if (!await this.bt.send(JSON.stringify({
         type: 'initialDecommitment',
         content: initialDecommitment
       }))) {
-      return handleFailure('Failed to send initialDecommitment', null);
+      return this.handleFailure('Failed to send initialDecommitment', null);
     }
 
-    const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteInitialDecommitment) {
-      return handleCancel();
+    const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.InitialDecommitment);
@@ -150,21 +148,25 @@ export class SyncSession implements OnDestroy {
     try {
       verifier = await this.prover.processInitialDecommitment(remoteInitialDecommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteInitialDecommitment', e);
+      return this.handleFailure('Failed to process remoteInitialDecommitment', e);
     }
 
     const verifierCommitment = await verifier.getCommitment();
+
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
+    }
 
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierCommitment',
         content: verifierCommitment
       }))) {
-      return handleFailure('Failed to send verifierCommitment', null);
+      return this.handleFailure('Failed to send verifierCommitment', null);
     }
 
-    const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteVerifierCommitment) {
-      return handleCancel();
+    const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.VerifierCommitment);
@@ -172,19 +174,23 @@ export class SyncSession implements OnDestroy {
     try {
       proverCommitment = await this.prover.processCommitment(remoteVerifierCommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteVerifierCommitment', e);
+      return this.handleFailure('Failed to process remoteVerifierCommitment', e);
+    }
+
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     if (!await this.bt.send(JSON.stringify({
         type: 'proverCommitment',
         content: proverCommitment
       }))) {
-      return handleFailure('Failed to send proverCommitment', null);
+      return this.handleFailure('Failed to send proverCommitment', null);
     }
 
-    const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteProverCommitment) {
-      return handleCancel();
+    const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.ProverCommitment);
@@ -192,19 +198,23 @@ export class SyncSession implements OnDestroy {
     try {
       verifierDecommitment = await verifier.processCommitment(remoteProverCommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteProverCommitment', e);
+      return this.handleFailure('Failed to process remoteProverCommitment', e);
+    }
+
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     if (!await this.bt.send(JSON.stringify({
         type: 'verifierDecommitment',
         content: verifierDecommitment
       }))) {
-      return handleFailure('Failed to send verifierDecommitment', null);
+      return this.handleFailure('Failed to send verifierDecommitment', null);
     }
 
-    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteVerifierDecommitment) {
-      return handleCancel();
+    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.VerifierDecommitment);
@@ -212,19 +222,21 @@ export class SyncSession implements OnDestroy {
     try {
       proverDecommitment = await this.prover.processDecommitment(remoteVerifierDecommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteVerifierDecommitment', e);
+      return this.handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
+
+
 
     if (!await this.bt.send(JSON.stringify({
         type: 'proverDecommitment',
         content: proverDecommitment
       }))) {
-      return handleFailure('Failed to send proverDecommitment', null);
+      return this.handleFailure('Failed to send proverDecommitment', null);
     }
 
-    const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteProverDecommitment) {
-      return handleCancel();
+    const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    if (this.cancelled.getValue()) {
+      return this.handleCancel();
     }
 
     this.status.next(SynchronizationStatus.ProverDecommitment);
@@ -232,7 +244,7 @@ export class SyncSession implements OnDestroy {
     try {
       verifiedData = await verifier.processDecommitment(remoteProverDecommitment);
     } catch (e) {
-      return handleFailure('Failed to process remoteProverDecommitment', e);
+      return this.handleFailure('Failed to process remoteProverDecommitment', e);
     }
 
     this.status.next(SynchronizationStatus.Finished);

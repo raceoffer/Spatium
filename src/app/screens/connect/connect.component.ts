@@ -34,6 +34,6 @@ export class ConnectComponent implements OnInit {
   }
 
   async onBackClicked() {
-    this.cancelSync();
+    await this.cancelSync();
   }
 }

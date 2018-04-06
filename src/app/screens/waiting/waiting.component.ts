@@ -76,6 +76,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
         await this.wallet.cancelSync();
+        await this.wallet.reset();
         this.overlayClass = 'overlay invisible';
       }));
 

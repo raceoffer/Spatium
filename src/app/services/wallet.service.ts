@@ -9,7 +9,6 @@ import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
 import { Coin, Token, KeyChainService } from './keychain.service';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { CurrencyWallet, Status } from './wallet/currencywallet';
@@ -30,24 +29,18 @@ export class WalletService {
 
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
 
-  public status: Observable<Status>;
+  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
 
-  public synchronizing: Observable<boolean>;
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
+  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-  public ready: Observable<boolean>;
+  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
 
-  public syncProgress: Observable<number>;
-
-  public statusChanged: Observable<Status>;
-
-  public synchronizingEvent: Observable<any>;
-  public cancelledEvent: Observable<any>;
-  public failedEvent: Observable<any>;
-  public readyEvent: Observable<any>;
-
-  public paillierKeys: any = null;
-
-  public generatedKeys: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
+  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
+  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
+  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
+  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
 
   constructor(
     private readonly bt: BluetoothService,
@@ -106,58 +99,6 @@ export class WalletService {
       this.currencyWallets.set(token, this.tokenWallets.get(token));
     }
 
-    this.status = toBehaviourSubject(combineLatest(
-      Array.from(this.coinWallets.values())
-        .concat(Array.from(this.tokenWallets.values()))
-        .map(wallet => wallet.status)
-        .concat(this.generatedKeys),
-      (... values) => {
-        if (values.every(value => value === Status.Ready)) {
-          return Status.Ready;
-        }
-        if (values.some(value => value === Status.Failed)) {
-          return Status.Failed;
-        }
-        if (values.some(value => value === Status.Cancelled)) {
-          return Status.Cancelled;
-        }
-        if (values.every(value => value === Status.None)) {
-          return Status.None;
-        }
-        return Status.Synchronizing;
-      }
-    ), Status.None);
-
-    this.synchronizing = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
-    this.ready = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
-
-    // That's a progress magic:
-    // progress = (keygen_progress + sum(coin_progress, n) + sum(0.1*token_progress, m)) / (1 + n + 0.1*m)
-    this.syncProgress = toBehaviourSubject(combineLatest(
-      toBehaviourSubject(combineLatest(
-        Array.from(this.coinWallets.values()).map(wallet => wallet.syncProgress),
-        (... values) => {
-          return values.reduce((a, b) => a + b, 0);
-        }
-      ), 0),
-      toBehaviourSubject(combineLatest(
-        Array.from(this.tokenWallets.values()).map(wallet => wallet.ready),
-        (... values) => {
-          return values.map(ready => (ready ? 100 : 0) / 10).reduce((a, b) => a + b, 0);
-        }
-      ), 0),
-      toBehaviourSubject(this.generatedKeys.map(keys => keys === Status.Ready ? 100 : 20), 0),
-      (a, b, c) => {
-        return (a + b + c) / (this.coinWallets.size + this.tokenWallets.size / 10 + 1);
-      }), 0);
-
-    this.statusChanged = this.status.skip(1).distinctUntilChanged();
-
-    this.synchronizingEvent = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
-    this.cancelledEvent = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
-    this.failedEvent = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
-    this.readyEvent = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
-
     this.bt.message.subscribe((message) => {
       this.messageSubject.next(JSON.parse(message));
     });
@@ -169,38 +110,101 @@ export class WalletService {
         const wallet = this.currencyWallets.get(content.coin);
         return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
       });
+
+    this.messageSubject
+      .filter(object => object.type === 'cancel')
+      .subscribe(async () => {
+        // pop the queue
+        this.messageSubject.next({});
+
+        this.status.next(Status.Cancelled);
+
+        for (const wallet of Array.from(this.coinWallets.values())) {
+          await wallet.cancelSync();
+        }
+      });
   }
 
   public async reset() {
-    this.generatedKeys.next(Status.None);
+    if (this.status.getValue() === Status.None) {
+      return;
+    }
+
+    this.status.next(Status.None);
+    this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
     }
   }
 
   public async startSync() {
-    this.generatedKeys.next(Status.Synchronizing);
-
-    this.paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
-
-    this.generatedKeys.next(Status.Ready);
-
-    for (const wallet of Array.from(this.coinWallets.values())) {
-      const syncEvent = wallet.readyEvent.take(1).takeUntil(combineLatest(this.cancelledEvent, this.failedEvent)).toPromise();
-
-      await wallet.sync(this.paillierKeys);
-
-      await syncEvent;
+    if (this.status.getValue() === Status.Synchronizing) {
+      throw new Error('Sync in progress');
     }
+    try {
+      this.status.next(Status.Synchronizing);
 
-    const ethWallet = this.coinWallets.get(Coin.ETH);
+      const paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
 
-    for (const wallet of Array.from(this.tokenWallets.values())) {
-      await wallet.syncDuplicate(ethWallet);
+      this.syncProgress.next(
+        Math.min(100, Math.max(0,
+          this.syncProgress.getValue() + 2 * 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
+        ));
+
+      for (const wallet of Array.from(this.coinWallets.values())) {
+        if (this.status.getValue() !== Status.Synchronizing) {
+          return;
+        }
+
+        await wallet.sync(paillierKeys);
+
+        this.syncProgress.next(
+          Math.min(100, Math.max(0,
+            this.syncProgress.getValue() + 10 * 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
+          ));
+      }
+
+      if (this.status.getValue() !== Status.Synchronizing) {
+        return;
+      }
+
+      const ethWallet = this.coinWallets.get(Coin.ETH);
+
+      for (const wallet of Array.from(this.tokenWallets.values())) {
+        if (this.status.getValue() !== Status.Synchronizing) {
+          return;
+        }
+
+        await wallet.syncDuplicate(ethWallet);
+
+        this.syncProgress.next(
+          Math.min(100, Math.max(0,
+            this.syncProgress.getValue() + 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
+          ));
+      }
+
+      if (this.status.getValue() === Status.Synchronizing) {
+        this.status.next(Status.Ready);
+      }
+    } catch (e) {
+      this.status.next(Status.Failed);
     }
   }
 
   public async cancelSync() {
+    if (this.status.getValue() !== Status.Synchronizing) {
+      return;
+    }
+
+    try {
+      await this.bt.send(JSON.stringify({
+        type: 'cancel',
+        content: {}
+      }));
+    } catch (ignored) {}
+
+    this.status.next(Status.Cancelled);
+
     for (const wallet of Array.from(this.coinWallets.values())) {
       await wallet.cancelSync();
     }
@@ -219,7 +223,6 @@ export class WalletService {
         token,
         contractAddress
       ));
-}
-
+  }
 }
 
