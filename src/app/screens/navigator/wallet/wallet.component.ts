@@ -62,7 +62,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
-    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin'},
+    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC},
     {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},

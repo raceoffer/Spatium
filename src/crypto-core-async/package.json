@@ -10,6 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "crypto-core": "file:../crypto-core"
+    "crypto-core": "file:../crypto-core",
+    "webpack": "^4.5.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^2.0.14"
   }
 }

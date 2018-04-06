@@ -77,7 +77,17 @@ export class CurrencyService {
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
         null)
-    ) ]
+    ) ],
+    [ Coin.LTC, new Info(
+      'Litecoin',
+      'LTC',
+      0.001,
+      0.0002,
+      'LTC/kb',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.map(ac => ac.get('LTC') || null).distinctUntilChanged(),
+        null)
+    ) ],
   ]);
 
 

@@ -14,6 +14,7 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
+import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
 import { EthereumCurrencyWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20CurrencyWallet } from './wallet/ethereum/erc20wallet';
 
@@ -86,7 +87,16 @@ export class WalletService {
         this.bt,
         this.ngZone
       ));
-
+    this.coinWallets.set(
+      Coin.LTC,
+      new LitecoinWallet(
+        'main',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone
+      ));
     keychain.topTokens.forEach((tokenInfo) => {
       this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress);
     })
