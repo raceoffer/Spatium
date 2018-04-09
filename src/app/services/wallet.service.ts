@@ -14,6 +14,7 @@ import { toBehaviourSubject } from '../utils/transformers';
 import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
+import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -70,6 +71,16 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
+        'main',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.ngZone
+      ));
+    this.coinWallets.set(
+      Coin.LTC,
+      new LitecoinWallet(
         'main',
         this.keychain,
         1,
