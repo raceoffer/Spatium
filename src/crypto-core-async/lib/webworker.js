@@ -12,6 +12,7 @@ const CryptoCore = {
   Signer: require('crypto-core/lib/signer'),
   BitcoinTransaction: require('crypto-core/lib/bitcore/bitcointransaction'),
   BitcoinCashTransaction: require('crypto-core/lib/bitcore/bitcoincashtransaction'),
+  LitecoinTransaction: require('crypto-core/lib/bitcore/litecointransaction'),
   EthereumTransaction: require('crypto-core/lib/ethereum/ethereumtransaction')
 };
 
