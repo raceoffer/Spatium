@@ -71,8 +71,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   stFeeOriginRecipient = 'Subtract fee';
 
-
-
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
 
@@ -190,7 +188,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               return true;
             }
           }
-        )
+        );
 
         this.estimatedSize = toBehaviourSubject(
           this.balanceBtcUnconfirmed.flatMap(async balance => {

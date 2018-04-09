@@ -141,6 +141,7 @@ export class WalletService {
     if (this.status.getValue() === Status.Synchronizing) {
       throw new Error('Sync in progress');
     }
+
     try {
       this.status.next(Status.Synchronizing);
 

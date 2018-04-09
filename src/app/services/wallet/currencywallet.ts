@@ -87,6 +87,18 @@ export class CurrencyWallet {
     protected ngZone: NgZone
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
+
+    this.messageSubject
+      .filter(object => object.type === 'cancelTransaction')
+      .subscribe(async () => {
+        // pop the queue
+        this.messageSubject.next({});
+
+        if (this.signSession) {
+          await this.signSession.cancel();
+          this.signSession = null;
+        }
+      });
   }
 
   public toInternal(amount: number): string {
@@ -161,6 +173,13 @@ export class CurrencyWallet {
   }
 
   public async rejectTransaction() {
+    try {
+      await this.bt.send(JSON.stringify({
+        type: 'cancelTransaction',
+        content: {}
+      }));
+    } catch (ignored) { }
+
     if (this.signSession) {
       await this.signSession.cancel();
       this.signSession = null;
