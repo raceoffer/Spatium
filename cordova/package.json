@@ -14,7 +14,6 @@
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
     "cordova-fabric-plugin": "^1.1.10",
-    "cordova-ios": "^4.5.4",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
@@ -56,8 +55,7 @@
     },
     "platforms": [
       "browser",
-      "android",
-      "ios"
+      "android"
     ]
   },
   "devDependencies": {

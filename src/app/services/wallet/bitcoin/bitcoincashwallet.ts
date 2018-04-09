@@ -1,4 +1,4 @@
-import { CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
+import {CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
@@ -120,28 +120,52 @@ export class BitcoinCashWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public async createTransaction(
-    address: string,
-    value: number,
-    fee?: number
-  ) {
-    const transaction = CryptoCore.BitcoinCashTransaction.fromOptions({
-      network: this.network
-    });
+  public async listTransactionHistory() {
+    const txs = await this.watchingWallet.getTransactions();
 
-    /// Fill inputs and calculate script hashes
-    try {
-      await transaction.prepare({
-        wallet: this.watchingWallet,
-        address: address,
-        value: Number(this.toInternal(value)),
-        fee: fee ? Number(this.toInternal(fee)) : undefined
+    return txs.map(record => {
+      const inputs = record.tx.inputs.map(input => {
+        const address = input.getAddress();
+        return {
+          address: address ? address.toString(this.network) : null
+        };
       });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to prepare transaction', e);
-    }
+      const outputs = record.tx.outputs.map(output => {
+        const address = CryptoCore.WatchingWallet.addressAromScript(output.script);
+        return {
+          address: address ? address.toString(this.network) : null,
+          value: output.value
+        };
+      });
 
-    return transaction;
+      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
+        // go find change
+        const output = outputs.length > 0 ? outputs[0] : null;
+
+        return HistoryEntry.fromJSON({
+          type: TransactionType.Out,
+          from: this.watchingWallet.getAddress('base58'),
+          to: output ? output.address : null,
+          amount: this.fromInternal(output ? output.value : 0),
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      } else { // in
+        // go find our output
+        const value =
+          outputs
+            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
+            .reduce((sum, output) => sum + output.value, 0);
+        return HistoryEntry.fromJSON({
+          type: TransactionType.In,
+          from: inputs[0].address,
+          to: this.watchingWallet.getAddress('base58'),
+          amount: this.fromInternal(value),
+          confirmed: record.meta !== null,
+          time: record.meta == null ? null : record.meta.time
+        });
+      }
+    });
   }
 
   public verify(transaction: any, maxFee?: number): boolean {
@@ -180,52 +204,28 @@ export class BitcoinCashWallet extends CurrencyWallet {
     return fee;
   }
 
-  public async listTransactionHistory() {
-    const txs = await this.watchingWallet.getTransactions();
-
-    return txs.map(record => {
-      const inputs = record.tx.inputs.map(input => {
-        const address = input.getAddress();
-        return {
-          address: address ? address.toString(this.network) : null
-        };
-      });
-      const outputs = record.tx.outputs.map(output => {
-        const address = CryptoCore.WatchingWallet.addressFromScript(output.script);
-        return {
-          address: address ? address.toString(this.network) : null,
-          value: output.value
-        };
-      });
-
-      if (inputs.some(input => input.address === this.watchingWallet.getAddress('base58'))) { // out
-        // go find change
-        const output = outputs.length > 0 ? outputs[0] : null;
-
-        return HistoryEntry.fromJSON({
-          type: TransactionType.Out,
-          from: this.watchingWallet.getAddress('base58'),
-          to: output ? output.address : null,
-          amount: this.fromInternal(output ? output.value : 0),
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      } else { // in
-        // go find our output
-        const value =
-          outputs
-            .filter(output => output.address === this.watchingWallet.getAddress('base58'))
-            .reduce((sum, output) => sum + output.value, 0);
-        return HistoryEntry.fromJSON({
-          type: TransactionType.In,
-          from: inputs[0].address,
-          to: this.watchingWallet.getAddress('base58'),
-          amount: this.fromInternal(value),
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      }
+  public async createTransaction(
+    address: string,
+    value: number,
+    fee?: number
+  ) {
+    const transaction = CryptoCore.BitcoinCashTransaction.fromOptions({
+      network: this.network
     });
+
+    /// Fill inputs and calculate script hashes
+    try {
+      await transaction.prepare({
+        wallet: this.watchingWallet,
+        address: address,
+        value: Number(this.toInternal(value)),
+        fee: fee ? Number(this.toInternal(fee)) : undefined
+      });
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to prepare transaction', e);
+    }
+
+    return transaction;
   }
 
   public async pushTransaction() {
