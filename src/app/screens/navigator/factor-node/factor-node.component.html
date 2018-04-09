@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="text-center content" style="overflow: scroll;max-height: 100%; margin-bottom: 30px;" id="factor-container" #factorContainer>
+    <div class="text-center content" style="overflow: auto;max-height: 100%; margin-bottom: 30px;" id="factor-container" #factorContainer>
       <mat-icon >lock_outline</mat-icon>
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
         <div style="margin-left: 50px;">

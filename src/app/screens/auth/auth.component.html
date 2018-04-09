@@ -33,7 +33,7 @@
 
   <app-password *ngIf="loginType == 0 && !isPasswordFirst" (isPasswordChanged)="isPasswordChanged($event)"></app-password>
 
-  <div class="content text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
+  <div class="content text-center" style="overflow: auto;max-height: 100%;" id="factor-container" #factorContainer>
     <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
       <div style="margin-left: 50px;">
         <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">

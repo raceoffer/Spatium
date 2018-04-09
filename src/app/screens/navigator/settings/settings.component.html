@@ -10,7 +10,7 @@
     </mat-toolbar>
   </div>
 
-  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: scroll;max-height: 100%;" *ngIf="state === 0">
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: auto;max-height: 100%;" *ngIf="state === 0">
     <mat-nav-list *ngFor="let navLink of navLinks" style="width: 100%;">
       <a mat-list-item class="main-nav-list-custom" (click)="onSettingsClick(navLink)">
         {{ navLink.name }}
@@ -18,7 +18,7 @@
     </mat-nav-list>
   </div>
 
-  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: scroll;max-height: 100%;" *ngIf="state === 1">
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" style="overflow: auto;max-height: 100%;" *ngIf="state === 1">
     <mat-nav-list *ngFor="let language of languages" style="width: 100%;">
       <a mat-list-item class="main-nav-list-custom selected" (click)="onLanguageClick(language)">
         {{ language.name }}

@@ -34,13 +34,13 @@
       </div>
     </div>
 
-    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: scroll;max-height: 100%;" *ngIf="!advancedMode">
+    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" style="overflow: auto;max-height: 100%;" *ngIf="!advancedMode">
       <div class="reg-warning">
          <span>{{ stWarning }}</span>
       </div>
     </div>
 
-    <div class="text-center" style="overflow: scroll;max-height: 100%;" id="factor-container" #factorContainer>
+    <div class="text-center" style="overflow: auto;max-height: 100%;" id="factor-container" #factorContainer>
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
         <div style="margin-left: 50px;">
           <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">

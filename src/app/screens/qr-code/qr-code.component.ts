@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnInit, OnDestroy, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -15,7 +15,7 @@ declare const Buffer: any;
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements OnInit {
+export class QrCodeComponent implements OnInit, OnDestroy {
   entry = 'Sign in';
 
   _qrcode: string = null;
@@ -69,6 +69,11 @@ export class QrCodeComponent implements OnInit {
   }
 
   async ngOnInit() {
+    this.router.events
+      .subscribe((event) => {
+      // example: NavigationStart, RoutesRecognized, NavigationEnd
+      console.log(event);
+    });
     this.canScanAgain = false;
     this.classVideoContainer = 'content';
     this._qrcode = '';
@@ -80,17 +85,25 @@ export class QrCodeComponent implements OnInit {
     } else if (this.isExport) {
       await this.writeSecret();
     } else {
-      const permissions = cordova.plugins.permissions;
-      permissions.hasPermission(permissions.CAMERA, (status) => this.ngZone.run(async () => {
-        if ( status.hasPermission ) {
-          this.permissionCam = true;
-        } else {
-          this.permissionCam = false;
+      // const permissions = cordova.plugins.permissions;
+      // permissions.hasPermission(permissions.CAMERA, (status) => this.ngZone.run(async () => {
+      //   if ( status.hasPermission ) {
+      //     this.permissionCam = true;
+      //   } else {
+      //     this.permissionCam = false;
 
-          await permissions.requestPermission(permissions.CAMERA, this.successCam.bind(this), this.errorCam.bind(this));
-        }
-      }));
+      //     await permissions.requestPermission(permissions.CAMERA, this.successCam.bind(this), this.errorCam.bind(this));
+      //   }
+      // }));
+
+      this.ngZone.run(async () => {
+        this.permissionCam = true;
+      });
     }
+  }
+
+  ngOnDestroy() {
+    console.log('I\'m being destroyed!');
   }
 
   async writeSecret() {
@@ -134,16 +147,19 @@ export class QrCodeComponent implements OnInit {
   }
 
   successCam(status) {
-    if (!status.hasPermission) {
-      this.notification.show('Camera permission is not turned on');
-      this.ngZone.run(async () => {
-        this.permissionCam = false;
-      });
-    } else {
-      this.ngZone.run(async () => {
-        this.permissionCam = true;
-      });
-    }
+    this.ngZone.run(async () => {
+      this.permissionCam = true;
+    });
+    // if (!status.hasPermission) {
+    //   this.notification.show('Camera permission is not turned on');
+    //   this.ngZone.run(async () => {
+    //     this.permissionCam = false;
+    //   });
+    // } else {
+    //   this.ngZone.run(async () => {
+    //     this.permissionCam = true;
+    //   });
+    // }
   }
 
   successStorage(status) {
@@ -163,14 +179,29 @@ export class QrCodeComponent implements OnInit {
   displayCameras(cams: any[]) {
     this.availableDevices = cams;
 
-    console.log(cams);
+    console.log(cams[0]);
 
-    if (cams && cams.length > 0) {
-      this.spinnerClass = 'invisible';
-      this.selectedDevice = cams[1];
-      this.camStarted = true;
+    if (!cams || cams.length === 0) {
+      console.log('no cameras');
+      return;
     }
-  }
+
+    this.spinnerClass = 'invisible';
+
+    for (const cam of cams) {
+      console.log('camera label: ' + cam.label);
+      if (/back|rear|environment/gi.test(cam.label)) {
+        this.selectedDevice = cam;
+        break;
+      }
+    }
+
+    if (this.selectedDevice === undefined) {
+      this.selectedDevice = cams.length > 1 ? cams[1] : cams[0];
+    }
+
+    this.camStarted = true;
+}
 
   async handleQrCodeResult(event) {
     if (!this.isRepeatable) {
@@ -205,6 +236,7 @@ export class QrCodeComponent implements OnInit {
       case 'registration':
         this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
         await this.router.navigate(['/registration']);
+        console.log('after await this.router.navigate([/registration]);');
         break;
       case 'factornode':
         if (this.isAuth) {
