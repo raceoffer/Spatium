@@ -16,6 +16,7 @@ import { NavigationService } from '../../services/navigation.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
+declare const device: any;
 
 @Component({
   selector: 'app-registration',
@@ -159,6 +160,10 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   async onBackClicked() {
     this.cancel.next(true);
     await this.router.navigate(['/login']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async signUp() {

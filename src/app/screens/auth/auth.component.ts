@@ -11,6 +11,8 @@ import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-auth',
   animations: [
@@ -165,6 +167,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/login']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }
 

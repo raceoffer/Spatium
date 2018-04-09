@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-registration-success',
   templateUrl: './registration-success.component.html',
@@ -38,5 +40,9 @@ export class RegistrationSuccessComponent implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/login']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

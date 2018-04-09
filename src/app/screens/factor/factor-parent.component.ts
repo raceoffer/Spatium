@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-factor',
   templateUrl: './factor-parent.component.html',
@@ -44,6 +46,10 @@ export class FactorParentComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async onBackClicked() {

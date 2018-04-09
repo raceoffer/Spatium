@@ -8,6 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
+declare const device: any;
 
 enum State {
   Empty,
@@ -192,5 +193,9 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/start']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

@@ -6,6 +6,7 @@ import { AuthService } from '../../../services/auth.service';
 import {NavigationService} from '../../../services/navigation.service';
 
 declare const window: any;
+declare const device: any;
 
 @Component({
   selector: 'app-delete-secret',
@@ -77,6 +78,10 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
         await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
         break;
     }
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async delete() {

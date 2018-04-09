@@ -16,6 +16,7 @@ import { roundFloat } from '../../../utils/numeric';
 import 'rxjs/add/operator/mergeMap';
 
 declare const cordova: any;
+declare const device: any;
 
 enum Phase {
   Creation,
@@ -318,6 +319,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       await this.currencyWallet.rejectTransaction();
     }
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   // Pressed start signature

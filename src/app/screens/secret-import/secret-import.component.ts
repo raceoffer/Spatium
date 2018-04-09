@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
 declare const nfc: any;
+declare const device: any;
 
 enum Content {
   QR = 'QR',
@@ -74,6 +75,10 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   toggleContent(content) {

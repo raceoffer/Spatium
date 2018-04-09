@@ -2,7 +2,7 @@
   <div class="header top-panel text-center">
     <mat-toolbar color="primary">
       <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()">
+        <button mat-icon-button (click)="onBackClicked()"  *ngIf="!isWindows()">
           <mat-icon>arrow_back</mat-icon>
         </button>
         <span>{{ currencyInfo?.name }}</span>

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { NavigationService } from '../../../services/navigation.service';
 
 declare const nfc: any;
+declare const device: any;
 
 enum Content {
   QR = 'QR',
@@ -66,6 +67,10 @@ export class SecretExportComponent implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   toggleContent(content) {

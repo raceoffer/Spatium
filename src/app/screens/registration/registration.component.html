@@ -1,6 +1,6 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
-    <mat-toolbar color="primary">
+    <mat-toolbar color="primary"  *ngIf="!isWindows()">
       <mat-toolbar-row>
         <button mat-icon-button (click)="onBackClicked()">
           <mat-icon class="color-custom-dark">arrow_back</mat-icon>

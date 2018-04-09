@@ -8,6 +8,7 @@ import { BluetoothService } from '../../services/bluetooth.service';
 import { NavigationService } from '../../services/navigation.service';
 
 declare const navigator: any;
+declare const device: any;
 
 @Component({
   selector: 'app-start',
@@ -42,6 +43,10 @@ export class StartComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async onOpenClicked() {

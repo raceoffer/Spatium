@@ -4,6 +4,8 @@ import { WalletService } from '../../services/wallet.service';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-verify-waiting',
   templateUrl: './verify-waiting.component.html',
@@ -108,6 +110,10 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
 
   async onBackClicked() {
     await this.router.navigate(['/start']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async cancelConnect() {

@@ -9,6 +9,8 @@ import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
+declare const device: any;
+
 @Component({
   selector: 'app-currency',
   templateUrl: './currency.component.html',
@@ -125,5 +127,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NavigationService } from '../../../services/navigation.service';
 
+declare const device: any;
+
 enum State {
   nav = 0,
   lang = 1
@@ -62,6 +64,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
         break;
       }
     }
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async onSettingsClick(navLink) {

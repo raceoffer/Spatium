@@ -16,6 +16,7 @@ import { NavigationService } from '../../../services/navigation.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
+declare const device: any;
 
 @Component({
   selector: 'app-factor-node',
@@ -186,5 +187,9 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   async onBackClicked() {
     this.cancel.next(true);
     await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

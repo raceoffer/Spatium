@@ -3,7 +3,7 @@
 <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;">
   <mat-toolbar color="primary">
     <mat-toolbar-row>
-      <button mat-icon-button (click)="onBackClicked()">
+      <button mat-icon-button (click)="onBackClicked()"  *ngIf="!isWindows()">
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>{{Label}}</span>

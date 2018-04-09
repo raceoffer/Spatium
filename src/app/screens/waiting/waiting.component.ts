@@ -5,6 +5,7 @@ import { WalletService } from '../../services/wallet.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const device: any;
 @Component({
   selector: 'app-waiting',
   templateUrl: './waiting.component.html',
@@ -129,6 +130,10 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/start']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async cancelConnect() {
