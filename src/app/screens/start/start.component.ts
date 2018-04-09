@@ -30,7 +30,8 @@ export class StartComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.router.events
+    if (this.isWindows()) {
+      this.router.events
       .subscribe((event) => {
         if (event instanceof NavigationStart) {
           const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
@@ -38,7 +39,9 @@ export class StartComponent implements OnInit, OnDestroy {
         }
       // example: NavigationStart, RoutesRecognized, NavigationEnd
       // console.log(event);
-    });
+      });
+    }
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async (e) => {
         await this.eventOnBackClicked(e);
