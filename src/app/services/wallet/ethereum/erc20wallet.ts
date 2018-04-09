@@ -10,6 +10,7 @@ export class ERC20Wallet extends CurrencyWallet {
   private erc20Wallet: any = null;
   private contractAddress: string = null;
   private token: Token = null;
+  private decimals = 18;
 
   private routineTimerSub: any = null;
 
@@ -21,12 +22,14 @@ export class ERC20Wallet extends CurrencyWallet {
     bt: BluetoothService,
     ngZone: NgZone,
     token: Token,
-    address: string
+    address: string,
+    decimals?: number
   ) {
     super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
 
     this.contractAddress = address;
     this.token = token;
+    this.decimals = decimals || 18;
   }
 
   public async reset() {
@@ -71,7 +74,8 @@ export class ERC20Wallet extends CurrencyWallet {
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       address: CryptoCore.ERC20Wallet.address(this.publicKey),
       contractAddress: this.contractAddress,
-      network: this.network
+      network: this.network,
+      digits: this.decimals
     });
 
     this.address.next(this.erc20Wallet.address);
@@ -96,7 +100,8 @@ export class ERC20Wallet extends CurrencyWallet {
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       address: CryptoCore.ERC20Wallet.address(this.publicKey),
       contractAddress: this.contractAddress,
-      network: this.network
+      network: this.network,
+      digits: this.decimals
     });
 
     this.address.next(this.erc20Wallet.address);
