@@ -69,11 +69,6 @@ export class QrCodeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.router.events
-      .subscribe((event) => {
-      // example: NavigationStart, RoutesRecognized, NavigationEnd
-      console.log(event);
-    });
     this.canScanAgain = false;
     this.classVideoContainer = 'content';
     this._qrcode = '';
