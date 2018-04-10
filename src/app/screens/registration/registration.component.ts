@@ -186,6 +186,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       factors = factors.reverse();
 
       factors.push(await this.authService.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+
       const tree = factors.reduce((rest, factor) => {
         const node = {
           factor: factor
@@ -196,7 +197,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = await CryptoCore.Utils.sha256(Buffer.from(this.authService.login, 'utf-8')).toString('hex');
+      const id = await AuthService.toId(this.authSevice.login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {

@@ -6,6 +6,7 @@ declare const Buffer: any;
 export enum Coin {
   BTC = 0,
   BTC_test = 1,
+  LTC = 2,
   ETH = 60,
   BCH = 145
 }
@@ -120,14 +121,16 @@ export class TokenEntry {
   ico: string;
   contractAddress: string;
   className: string;
+  decimals: number;
   network: string;
 
-  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string, network?: string) {
+  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string, digits?: number, network?: string) {
     this.token = token;
     this.name = name;
     this.ico = ico;
     this.contractAddress = contractAddress;
     this.className = className;
+    this.decimals = digits || 18;
     this.network = network || 'main';
   }
 }
@@ -138,7 +141,7 @@ export class KeyChainService {
   private keyChain: any = null;
 
   public readonly topTokens = [
-    new TokenEntry(Token.TEST, 'TEST', 'TEST', '0x1014003937b6fcd21f1a27df897b5888bbb73b9f', 'test', 'testnet'),
+    new TokenEntry(Token.TEST, 'TEST', 'TEST', '0x1014003937b6fcd21f1a27df897b5888bbb73b9f', 'test', 18, 'testnet'),
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos'),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron'),
     new TokenEntry(Token.VECHAIN, 'VeChain', 'VEN', '0xd850942ef8811f2a866692a623011bde52a462c1', 'veChain'),

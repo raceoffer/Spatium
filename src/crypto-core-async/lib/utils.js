@@ -73,7 +73,7 @@ Utils.tryUnpackMultiple = async buffer => Utils.invokeStatic({
 });
 
 Utils.packTree = async (tree, seed) => Utils.invokeStatic({
-  method: 'tryUnpackMultiple',
+  method: 'packTree',
   arguments: [tree, seed]
 });
 

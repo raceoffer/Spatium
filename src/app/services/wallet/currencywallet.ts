@@ -86,9 +86,19 @@ export class CurrencyWallet {
     private bt: BluetoothService,
     protected ngZone: NgZone
   ) {
-    this.bt.disconnectedEvent.subscribe(() => this.status.next(Status.None));
-
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
+
+    this.messageSubject
+      .filter(object => object.type === 'cancelTransaction')
+      .subscribe(async () => {
+        // pop the queue
+        this.messageSubject.next({});
+
+        if (this.signSession) {
+          await this.signSession.cancel();
+          this.signSession = null;
+        }
+      });
   }
 
   public toInternal(amount: number): string {
@@ -104,23 +114,12 @@ export class CurrencyWallet {
   }
 
   public async sync(paillierKeys: any) {
-    if (this.status.getValue() === Status.Synchronizing) {
-      LoggerService.log('Sync in progress', {});
-      return;
-    }
-
     this.compoundKey = await CryptoCore.CompoundKey.fromOptions({
       localPrivateKey: await CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
       localPaillierKeys: paillierKeys
     });
 
-    let prover = null;
-    try {
-      prover = await this.compoundKey.startInitialCommitment();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to start initial commitment', e);
-      return;
-    }
+    const prover = await this.compoundKey.startInitialCommitment();
 
     this.status.next(Status.Synchronizing);
     this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
@@ -130,25 +129,18 @@ export class CurrencyWallet {
       );
     });
     this.syncSession.canceled.subscribe(() => {
-      // pop the queue
-      this.messageSubject.next({});
       this.status.next(Status.Cancelled);
       this.syncSession = null;
     });
     this.syncSession.failed.subscribe(() => {
-      // pop the queue
-      this.messageSubject.next({});
       this.status.next(Status.Failed);
       this.syncSession = null;
     });
-    this.syncSession.finished.subscribe(async (data) => {
-      // pop the queue
-      this.messageSubject.next({});
-      this.syncSession = null;
-      await this.finishSync(data);
-    });
-    // We'll handle it via events instead
-    this.syncSession.sync().catch(() => {});
+
+    const data = await this.syncSession.sync();
+    this.syncSession = null;
+
+    await this.finishSync(data);
   }
 
   public async reset() {
@@ -176,12 +168,21 @@ export class CurrencyWallet {
   public async cancelSync() {
     if (this.syncSession) {
       await this.syncSession.cancel();
+      this.syncSession = null;
     }
   }
 
   public async rejectTransaction() {
+    try {
+      await this.bt.send(JSON.stringify({
+        type: 'cancelTransaction',
+        content: {}
+      }));
+    } catch (ignored) { }
+
     if (this.signSession) {
       await this.signSession.cancel();
+      this.signSession = null;
     }
   }
 
@@ -211,12 +212,8 @@ export class CurrencyWallet {
   }
 
   public async finishSync(data) {
-    try {
-      await this.compoundKey.finishInitialSync(data);
-      this.publicKey = await this.compoundKey.getCompoundPublicKey();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed synchronization finish', e);
-    }
+    await this.compoundKey.finishInitialSync(data);
+    this.publicKey = await this.compoundKey.getCompoundPublicKey();
   }
 
   public currencyCode(): Coin | Token  {

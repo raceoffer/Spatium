@@ -73,6 +73,7 @@ import { CurrencyService } from './services/currency.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
+import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
@@ -114,6 +115,7 @@ import { FactorParentOverlayService } from './screens/factor-parent-overlay/fact
     SecretImportComponent,
     SettingsComponent,
     LogoBlockComponent,
+    NumericSpinnerComponent
     ToolbarComponent,
     ConfirmationEntryComponent,
     FactorParentOverlayComponent

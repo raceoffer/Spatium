@@ -87,7 +87,7 @@ export class BitcoreWallet extends CurrencyWallet {
     }));
 
     // Start: configuring a provider
-    this.provider = new this.Provider({
+    this.provider = this.Provider.fromOptions({
       network: this.network
     });
 
