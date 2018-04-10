@@ -26,8 +26,7 @@ export class PasswordComponent implements OnInit {
   }
 
   async goNext() {
-    try {
-      this.onSuccess.emit({factor: FactorType.PASSWORD, value: this.password});
+    this.onSuccess.emit({factor: FactorType.PASSWORD, value: this.password});
       /*this.busy = true;
       if (this.password !== '') {
         switch (this.next) {
@@ -49,9 +48,6 @@ export class PasswordComponent implements OnInit {
             break;
         }
       }*/
-    } catch (e) {
-      console.log(e);
-    }
   }
 
 }

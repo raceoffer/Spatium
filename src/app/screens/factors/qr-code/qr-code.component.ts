@@ -181,8 +181,7 @@ export class QrCodeComponent implements OnInit {
   async onNext() {
     this.camStarted = false;
 
-    try {
-      this.onSuccess.emit({factor: FactorType.QR, value: this._qrcode});
+    this.onSuccess.emit({factor: FactorType.QR, value: this._qrcode});
 
       /*this.busy = true;
       switch (this.next) {
@@ -208,9 +207,6 @@ export class QrCodeComponent implements OnInit {
           this.classVideoContainer = 'invisible';
           this.inputEvent.emit(this._qrcode);
       }*/
-    } catch (e) {
-      console.log(e);
-    }
   }
 
   scanAgain() {

@@ -40,8 +40,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   async goNext() {
-    try {
-      this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: this.graphKey});
+    this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: this.graphKey});
       /*this.busy = true;
       switch (this.next) {
         case 'auth':
@@ -57,9 +56,6 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
           await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
           break;
       }*/
-    } catch (e) {
-      console.log(e);
-    }
   }
 
 }

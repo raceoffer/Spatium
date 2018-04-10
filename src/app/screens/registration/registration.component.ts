@@ -157,7 +157,11 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async addFactor(result) {
-    await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    try {
+      await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   openAdvanced() {

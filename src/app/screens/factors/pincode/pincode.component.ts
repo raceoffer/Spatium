@@ -85,8 +85,7 @@ export class PincodeComponent implements OnInit {
   }
 
   async onNext() {
-    try {
-      this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
+    this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
       /*switch (this.next) {
         case 'waiting':
           await this.onNext.emit(this.pincode);
@@ -104,8 +103,5 @@ export class PincodeComponent implements OnInit {
           await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
           break;
       }*/
-    } catch (e) {
-      console.log(e);
-    }
   }
 }

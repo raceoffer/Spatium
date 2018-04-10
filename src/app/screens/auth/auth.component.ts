@@ -28,6 +28,9 @@ import { NavigationService } from '../../services/navigation.service';
 })
 export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+
+  busy = false;
+
   private subscriptions = [];
 
   username = '';
@@ -128,6 +131,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       data: { back: 'auth', next: 'auth' }
     });
 
+    dialogRef.componentInstance.onAddFactor.subscribe((result) => {
+      this.addFactor(result);
+    });
+
     dialogRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
     });
@@ -142,6 +149,17 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sleep(650).then(() => {
       this.checkOverflow(this.factorContainer);
     });
+  }
+
+  async addFactor(result) {
+    try {
+      this.busy = true;
+      await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    } finally {
+      this.busy = false;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async letLogin() {
