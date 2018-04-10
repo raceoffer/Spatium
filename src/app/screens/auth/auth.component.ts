@@ -156,7 +156,8 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   async addFactor(result) {
     try {
       this.busy = true;
-      await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      this.isPasswordFirst = true;
+      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
     } catch (e) {
       console.log(e);
     } finally {
