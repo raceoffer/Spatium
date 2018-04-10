@@ -2,6 +2,19 @@
   width: 100%!important;
 }
 
+table .full-width td {
+  width: 100px;
+}
+
+.subtitle {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+input.mat-input-element{
+  margin-top: 0em;
+}
+
 .top-panel {
   padding-bottom: 10px;
   background-color: #f5f5f5;
@@ -13,7 +26,6 @@
 
 .transaction-list {
   text-align: left;
-  margin-bottom: 110px;
 }
 
 .transaction-amount {
@@ -55,13 +67,5 @@
   background-color: #f5f5f5;
 }
 
-.currency-component .full-width {
-  width: 100% !important;
-  margin-left: 24px;
-  margin-right: 24px;
-  display: block;
-}
 
-.subtitle {
-  margin-top: 5px;
-}
+

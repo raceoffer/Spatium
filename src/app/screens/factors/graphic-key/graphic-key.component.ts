@@ -1,18 +1,18 @@
-import { AfterContentInit, AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, ElementRef, HostBinding, NgZone, ViewChild} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
 import * as PatternLock from 'PatternLock';
 
 declare const Buffer: any;
 
 @Component({
   selector: 'app-graphic-key',
-  host: {'class': 'child content text-center'},
   templateUrl: './graphic-key.component.html',
   styleUrls: ['./graphic-key.component.css']
 })
 
 export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   @ViewChild('patternContainer') el: ElementRef;
 
   next: string = null;
@@ -20,6 +20,8 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   graphKey: string = null;
 
   lock: any = null;
+
+  busy = false;
 
   constructor(
     private readonly router: Router,
@@ -51,19 +53,24 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   async goNext() {
-    switch (this.next) {
-      case 'auth':
-        this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
+    try {
+      this.busy = true;
+      switch (this.next) {
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
+          await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+      }
+    } finally {
+      this.busy = false;
     }
   }
 

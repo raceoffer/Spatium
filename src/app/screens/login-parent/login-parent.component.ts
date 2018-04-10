@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, LoginType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -32,6 +32,7 @@ declare const nfc: any;
   styleUrls: ['./login-parent.component.css']
 })
 export class LoginParentComponent  implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   contentType = Content;
@@ -108,14 +109,9 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async checkInput(input: string) {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      this.buttonState = State.Error;
-      return;
-    }
     try {
       this.buttonState = State.Updating;
-      const exists = await this.dds.exists(AuthService.toId(input));
+      const exists = await this.dds.exists(await AuthService.toId(input));
       if (input !== this.input) { // in case of updates to userName during lookup
         return;
       }
@@ -132,6 +128,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
         await this.generate();
       } else {
+        this.notification.show('No network connection');
         this.buttonState = State.Error;
       }
     }
@@ -142,7 +139,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     this.buttonState = State.Empty;
     do {
       this.loginGenerate = this.authService.makeNewLogin(10);
-      if (!await this.dds.exists(AuthService.toId(this.loginGenerate))) {
+      if (!await this.dds.exists(await AuthService.toId(this.loginGenerate))) {
         break;
       }
     } while (true);
@@ -173,7 +170,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
 
       try {
         this.authService.remoteEncryptedTrees = [];
-        this.authService.remoteEncryptedTrees.push(await this.dds.read(AuthService.toId(this.input)));
+        this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
       } catch (e) {
         this.notification.show('No backup found');
       }
@@ -183,7 +180,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       this.authService.login = this.input;
       this.authService.password = '';
       this.authService.clearFactors();
-      this.keychain.setSeed(CryptoCore.Utils.randomBytes(64));
+      this.keychain.setSeed(await CryptoCore.Utils.randomBytes(64));
 
       await this.router.navigate(['/registration']);
     } else {

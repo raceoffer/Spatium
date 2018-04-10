@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../../services/navigation.service';
 
@@ -21,6 +21,7 @@ enum State {
   styleUrls: ['./secret-export.component.css']
 })
 export class SecretExportComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   contentType = Content;

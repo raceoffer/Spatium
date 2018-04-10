@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, OnDestroy, Output } from '@angular/core';
+import {Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { DDSService } from '../../../services/dds.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
@@ -11,17 +11,18 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-qr-code',
-  host: {'class': 'child box content text-center'},
   templateUrl: './qr-code.component.html',
   styleUrls: ['./qr-code.component.css']
 })
-export class QrCodeComponent implements OnInit, OnDestroy {
+export class QrCodeComponent implements OnInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
+
   entry = 'Sign in';
 
   _qrcode: string = null;
   isRepeatable = false;
   canScanAgain = false;
-  classVideoContainer = 'content';
+  classVideoContainer = '';
   classVideo = '';
 
   next: string = null;
@@ -36,6 +37,8 @@ export class QrCodeComponent implements OnInit, OnDestroy {
   permissionCam = false;
   _permissionCStorage = false;
   genericValue = '';
+
+  busy = false;
 
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
@@ -70,7 +73,7 @@ export class QrCodeComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.canScanAgain = false;
-    this.classVideoContainer = 'content';
+    this.classVideoContainer = '';
     this._qrcode = '';
     this.classVideo = 'small-video';
     this.spinnerClass = 'spinner-video-container';
@@ -97,34 +100,28 @@ export class QrCodeComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    console.log('I\'m being destroyed!');
-  }
 
   async writeSecret() {
     const encryptedSeed = this.authService.encryptedSeed;
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    const packSeed = CryptoCore.Utils.packSeed(buffesSeed);
+    const packSeed = await CryptoCore.Utils.packSeed(buffesSeed);
     this.genericValue = packSeed.toString('hex');
     console.log(this.genericValue);
   }
 
   async generateLogin() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      return;
-    }
     try {
       do {
         const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(login));
+        const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
-          const packedLogin = CryptoCore.Utils.packLogin(login);
+          const packedLogin = await CryptoCore.Utils.packLogin(login);
           this.genericValue = packedLogin.toString('hex');
           break;
         }
       } while (true);
     } catch (ignored) {
+      this.notification.show('No network connection');
     }
   }
 
@@ -206,7 +203,7 @@ export class QrCodeComponent implements OnInit, OnDestroy {
       if (this.isImport) {
         try {
           console.log(buffer);
-          const value = CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
+          const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
           this._qrcode = value.toString('hex');
           console.log(this._qrcode);
         } catch (exc) {
@@ -214,7 +211,7 @@ export class QrCodeComponent implements OnInit, OnDestroy {
           this._qrcode = null;
         }
       } else {
-        this._qrcode = CryptoCore.Utils.tryUnpackLogin(buffer);
+        this._qrcode = await CryptoCore.Utils.tryUnpackLogin(buffer);
       }
     }
     await this.onSuccess();
@@ -223,35 +220,39 @@ export class QrCodeComponent implements OnInit, OnDestroy {
   async onSuccess() {
     this.camStarted = false;
 
-    switch (this.next) {
-      case 'auth':
-        this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        console.log('after await this.router.navigate([/registration]);');
-        break;
-      case 'factornode':
-        if (this.isAuth) {
-          this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
-        } else {
-          this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
-        }
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
-      default:
-       // if at login-parent
-       this.canScanAgain = true;
-       this.classVideoContainer = 'invisible';
-       this.inputEvent.emit(this._qrcode);
+    try {
+      this.busy = true;
+      switch (this.next) {
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
+          await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          if (this.isAuth) {
+            await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
+          } else {
+            await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          }
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+        default:
+          // if at login-parent
+          this.canScanAgain = true;
+          this.classVideoContainer = 'invisible';
+          this.inputEvent.emit(this._qrcode);
+      }
+    } finally {
+      this.busy = false;
     }
   }
 
   scanAgain() {
     this.canScanAgain = false;
-    this.classVideoContainer = 'content';
+    this.classVideoContainer = '';
     this.camStarted = true;
     this.clearEvent.emit();
   }

@@ -1,15 +1,11 @@
 <div fxLayout="column" fxLayoutAlign="start center">
-  <div class="margin86 start-logo-text" >
-  </div>
-  <div class="start-tagline-padding">
-    <span class="start-tagline">Secure your funds</span>
-  </div>
+  <app-logo-block style="margin-top: 56px;"></app-logo-block>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
     <button mat-raised-button color="accent" class="width-button color"
-            (click)="onOpenClicked()">Open Wallet</button>
+            (click)="onOpenClicked()">Wallet mode</button>
     <button mat-raised-button color="accent" class="width-button color"
-            (click)="onConnectClicked()" *ngIf="!isWindows()" >Link Device</button>
+            (click)="onConnectClicked()" *ngIf="!isWindows()">Confirmation mode</button>
   </div>
 
 </div>

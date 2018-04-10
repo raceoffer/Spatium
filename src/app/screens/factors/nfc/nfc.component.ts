@@ -1,8 +1,11 @@
-import { AfterViewInit, Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit, Component, EventEmitter, HostBinding, Input, NgZone, OnDestroy, OnInit,
+  Output
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { DDSService } from '../../services/dds.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { DDSService } from '../../../services/dds.service';
 
 declare const nfc: any;
 declare const ndef: any;
@@ -12,11 +15,12 @@ declare const Buffer: any;
 
 @Component({
   selector: 'app-nfc',
-  host: {'class': 'child box content text-center'},
   templateUrl: './nfc.component.html',
   styleUrls: ['./nfc.component.css']
 })
 export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
+  @HostBinding('class') classes = 'content factor-content text-center';
+
   _nfc = '';
   entry = 'Sign in';
   buttonState = 0; // sign in = 0, sign up = 1
@@ -42,10 +46,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
   @Input() isExport = false;
   @Input() isImport = false;
-
-  static async isEthernetAvailable() {
-    return await CryptoCore.Utils.testNetwork();
-  }
 
   constructor(
     private route: ActivatedRoute,
@@ -206,14 +206,14 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
           if (this.isImport) {
             try {
-              const value = CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
+              const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
               this._nfc = value.toString('hex');
             } catch (exc) {
               console.log(exc);
               this._nfc = null;
             }
           } else {
-            this._nfc = CryptoCore.Utils.tryUnpackLogin(payload);
+            this._nfc = await CryptoCore.Utils.tryUnpackLogin(payload);
           }
 
           navigator.vibrate(100);
@@ -228,27 +228,25 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
     const encryptedSeed = this.authService.encryptedSeed;
     console.log(encryptedSeed);
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    const packSeed = CryptoCore.Utils.packSeed(buffesSeed);
+    const packSeed = await CryptoCore.Utils.packSeed(buffesSeed);
     this.writeTag(packSeed, 'Secret is exported to NFC tag', 'Secret is not exported to NFC tag');
   }
 
   async generateAndWrite() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      return;
-    }
     try {
       do {
         const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(login));
+        const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
           this._nfc = login;
-          const content = CryptoCore.Utils.packLogin(this._nfc);
+          const content = await CryptoCore.Utils.packLogin(this._nfc);
           this.writeTag(content, 'Success write NFC tag', 'Error write NFC tag');
           break;
         }
       } while (true);
-    } catch (ignored) {}
+    } catch (ignored) {
+      this.notification.show('No network connection');
+    }
   }
 
   writeTag(content, success, error) {
@@ -271,18 +269,18 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
     switch (this.next) {
       case 'auth':
-        this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        await this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        await this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
         if (this.isAuth) {
-          this.authService.addFactor(FactorType.NFC, CryptoCore.Utils.packLogin(this._nfc));
+          await this.authService.addFactor(FactorType.NFC, await CryptoCore.Utils.packLogin(this._nfc));
         } else {
-          this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+          await this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         }
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;

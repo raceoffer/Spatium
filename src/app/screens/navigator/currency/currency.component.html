@@ -1,61 +1,74 @@
-<div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
-  <div class="header top-panel text-center">
-    <mat-toolbar color="primary">
-      <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()"  *ngIf="!isWindows()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <span>{{ currencyInfo?.name }}</span>
-      </mat-toolbar-row>
-    </mat-toolbar>
+<mat-toolbar color="primary" class="header-toolbar shadow">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>{{ currencyInfo?.name }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
 
-    <span class="full-width label full-width-label">{{ accountLabel }}</span>
-    <div class="full-width field" style="margin-bottom: 13px;">
-      <mat-select [value]="walletAddress | async">
-        <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-          {{ walletAddress | async }}
-        </mat-option>
-      </mat-select>
-    </div>
-
-    <table class="full-width text-center two-columns">
-      <tr>
-        <td fxLayout="column" fxLayoutAlign="start center">
-          <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
-          <div class="field disable">
+<div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
+  <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
+    <tr>
+      <td colspan="2">
+        <span class="label full-width-label">{{ accountLabel }}</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div class="field" style="margin-bottom: 13px;">
+          <mat-select [value]="walletAddress | async">
+            <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
+              {{ walletAddress | async }}
+            </mat-option>
+          </mat-select>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="right">
+        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+      </td>
+      <td class="left">
+        <span class="label" style="margin-left: 5px;">{{ usdTitle }}</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="right">
+        <div class="field disable">
             <span>
               {{ balanceCurrencyUnconfirmed | async }}
             </span>
-          </div>
-        </td>
-        <td>
-          <span class="label" style="margin-left: 19px;">{{ usdTitle }}</span>
-          <div class="field right disable">
+        </div>
+      </td>
+      <td class="left">
+        <div class="field disable">
             <span *ngIf="(balanceUsdUnconfirmed | async) !== null">
               {{ balanceUsdUnconfirmed | async }}
             </span>
-            <mat-spinner *ngIf="(balanceUsdUnconfirmed | async) === null" diameter="25" style="margin: auto;"></mat-spinner>
-          </div>
-        </td>
-      </tr>
-    </table>
+          <mat-spinner *ngIf="(balanceUsdUnconfirmed | async) === null" diameter="25" style="margin: auto;"></mat-spinner>
+        </div>
+      </td>
+    </tr>
+  </table>
 
-    <span class="full-width label full-width-label subtitle">Unconfirmed balance</span>
-  </div>
+  <span class="full-width label full-width-label subtitle">Unconfirmed balance</span>
 
-  <div class="content text-center" style="overflow: auto;max-height: 100%;">
+  <div class="content text-center">
     <div class="qrcode">
       <qr-code [value]="walletAddress | async" [size]="150" [background]="'#f5f5f5'"></qr-code>
     </div>
 
-    <mat-list class="full-width text-center transaction-list">
-      <mat-list-item class="list-item" *ngFor="let transaction of (transactions | async)" [class.unconfirmed]="!transaction.confirmed">
+    <mat-list class="text-center transaction-list">
+      <mat-list-item class="list-item" *ngFor="let transaction of (transactions | async)"
+                     [class.unconfirmed]="!transaction.confirmed">
         <span matLine class="transaction-amount"
-          [class.input]="transaction.type==txType.In"
-          [class.output]="transaction.type==txType.Out">
+              [class.input]="transaction.type==txType.In"
+              [class.output]="transaction.type==txType.Out">
           {{ transaction.amount }} {{ currencyInfo?.symbol }}
         </span>
-        <span matLine class="transaction-time" *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
+        <span matLine class="transaction-time"
+              *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
         <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
         <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
         <mat-divider></mat-divider>
@@ -63,10 +76,14 @@
     </mat-list>
   </div>
 
-  <div class="footer text-center send-button-background">
+  <div class="footer text-center">
     <button mat-raised-button color="accent" class="width-button-full color full-width" (click)="send()">
       {{ sendLabel }}
     </button>
   </div>
 </div>
+
+
+
+
 

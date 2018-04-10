@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
 import { Observable } from 'rxjs/Observable';
@@ -17,6 +17,7 @@ declare const device: any;
   styleUrls: ['./currency.component.css']
 })
 export class CurrencyComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   public usdTitle = 'USD';
 
   public txType = TransactionType;

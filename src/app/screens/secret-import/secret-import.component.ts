@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
@@ -24,6 +24,8 @@ enum State {
   styleUrls: ['./secret-import.component.css']
 })
 export class SecretImportComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
+
   contentType = Content;
   content = Content.QR;
 

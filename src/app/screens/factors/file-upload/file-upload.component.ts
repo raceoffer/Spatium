@@ -1,16 +1,16 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import {AfterViewInit, Component, HostBinding, NgZone} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
 
 declare const Buffer: any;
 
 @Component({
   selector: 'app-file-upload',
-  host: {'class': 'child content text-center'},
   templateUrl: './file-upload.component.html',
   styleUrls: ['./file-upload.component.css']
 })
 export class FileUploadComponent implements AfterViewInit {
+  @HostBinding('class') classes = 'content factor-content text-center';
   uploadFile = 'Choose a file';
 
   next: string = null;
@@ -18,6 +18,8 @@ export class FileUploadComponent implements AfterViewInit {
 
   file: any = null;
   reader: any = null;
+
+  busy = false;
 
   constructor(
     private readonly router: Router,
@@ -58,19 +60,24 @@ export class FileUploadComponent implements AfterViewInit {
   }
 
   async goNext() {
-    switch (this.next) {
-      case 'auth':
-        this.authService.addAuthFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        this.authService.addFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        this.authService.addFactor(FactorType.FILE, this.file);
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        break;
+    try {
+      this.busy = true;
+      switch (this.next) {
+        case 'auth':
+          await this.authService.addAuthFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/auth']);
+          break;
+        case 'registration':
+          await this.authService.addFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/registration']);
+          break;
+        case 'factornode':
+          await this.authService.addFactor(FactorType.FILE, this.file);
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+          break;
+      }
+    } finally {
+      this.busy = false;
     }
   }
 }

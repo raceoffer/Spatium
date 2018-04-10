@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild, HostBinding} from '@angular/core';
 import { WalletService } from '../../../services/wallet.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { Router } from '@angular/router';
@@ -6,15 +6,20 @@ import { Info, CurrencyService } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 
+enum State {
+  None,
+  Preparing,
+  Verifying
+}
+
 @Component({
   selector: 'app-verify-transaction',
   templateUrl: './verify-transaction.component.html',
   styleUrls: ['./verify-transaction.component.css']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   isOpened = false;
-
-  showTransaction = false;
 
   address = '';
   btc;
@@ -22,7 +27,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   fee;
   feeUsd;
 
-  public title = 'Awaiting confirmations';
+  public title = 'Confirmations mode';
   public navLinks = [{
     name: 'Export secret',
     link: ['/navigator-verifier', { outlets: { 'navigator': ['secret-export'] } }],
@@ -44,6 +49,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     isSelected: false,
     isActive: true
   }];
+
+  public stateType: any = State;
+  public state: State = State.None;
 
   public currentCoin: Coin | Token = null;
   public currentInfo: Info = null;
@@ -79,30 +87,36 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     this.currencyWallets.forEach((currencyWallet, coin) => {
       this.subscriptions.push(
         currencyWallet.rejectedEvent.subscribe(() => {
-          this.showTransaction = false;
+          this.state = State.None;
         }));
+
+      this.subscriptions.push(
+        currencyWallet.startVerifyEvent.subscribe(() => {
+          this.state = State.Preparing;
+        })
+      );
 
       this.subscriptions.push(
         currencyWallet.verifyEvent.subscribe(async (transaction) => {
           this.currentCoin = coin;
           this.currentInfo = await this.currencyService.getInfo(this.currentCoin);
 
-          if (!currencyWallet.verify(transaction)) {
+          if (!await currencyWallet.verify(transaction)) {
             console.log('Received invalid transaction');
             await currencyWallet.rejectTransaction();
             return;
           }
 
-          const outputs = currencyWallet.outputs(transaction);
+          const outputs = await currencyWallet.outputs(transaction);
 
-          const fee = currencyWallet.fee(transaction);
+          const fee = await currencyWallet.fee(transaction);
 
           this.address = outputs.outputs[0].address;
           this.btc = currencyWallet.fromInternal(outputs.outputs[0].value.toString());
           this.usd = this.btc * this.currentInfo.rate.getValue();
           this.fee = currencyWallet.fromInternal(fee.toString());
           this.feeUsd = this.fee * this.currentInfo.gasRate.getValue();
-          this.showTransaction = true;
+          this.state = State.Verifying;
 
           this.notification.askConfirmation(
             'Confirm ' + this.currentInfo.name + ' transacton',
@@ -126,12 +140,12 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   }
 
   async confirm() {
-    this.showTransaction = false;
+    this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).acceptTransaction();
   }
 
   async decline() {
-    this.showTransaction = false;
+    this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).rejectTransaction();
   }
 

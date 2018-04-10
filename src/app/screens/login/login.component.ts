@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Output, EventEmitter, Input } from '@angular/core';
+import {Component, AfterViewInit, Output, EventEmitter, Input, HostBinding} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
@@ -15,11 +15,11 @@ enum State {
 
 @Component({
   selector: 'app-login',
-  host: {'class': 'child content text-center'},
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements AfterViewInit {
+  @HostBinding('class') classes = 'full-width_nopadding';
   private _userName = '';
 
   stLogin = 'Username';
@@ -57,9 +57,11 @@ export class LoginComponent implements AfterViewInit {
     }
   }
 
-  constructor(private readonly dds: DDSService,
-              private readonly authSevice: AuthService,
-              private readonly notification: NotificationService) { }
+  constructor(
+    private readonly dds: DDSService,
+    private readonly authSevice: AuthService,
+    private readonly notification: NotificationService
+  ) { }
 
   ngAfterViewInit() {
     if (this.genericLogin !== null) {
@@ -71,16 +73,11 @@ export class LoginComponent implements AfterViewInit {
   }
 
   async generateNewLogin() {
-    if (!await CryptoCore.Utils.testNetwork()) {
-      this.notification.show('No network connection');
-      this.usernameState = State.Error;
-      return;
-    }
     this.usernameState = State.Updating;
     try {
       do {
         this.userName = this.authSevice.makeNewLogin(10);
-        const exists = await this.dds.exists(AuthService.toId(this._userName));
+        const exists = await this.dds.exists(await AuthService.toId(this._userName));
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.usernameState = State.Ready;
@@ -88,6 +85,7 @@ export class LoginComponent implements AfterViewInit {
         }
       } while (true);
     } catch (ignored) {
+      this.notification.show('No network connection');
       this.usernameState = State.Error;
     }
   }

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FileService } from '../../../services/file.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -14,6 +14,7 @@ declare const device: any;
   styleUrls: ['./delete-secret.component.css']
 })
 export class DeleteSecretComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   title = 'Deleting secret';

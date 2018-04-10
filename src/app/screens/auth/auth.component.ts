@@ -1,6 +1,6 @@
 import {
   Component, AfterViewInit, ChangeDetectorRef, OnInit, ElementRef,
-  ViewChild, trigger, transition, style, animate, sequence, OnDestroy
+  ViewChild, trigger, transition, style, animate, sequence, OnDestroy, HostBinding
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
@@ -29,6 +29,7 @@ declare const device: any;
   styleUrls: ['./auth.component.css']
 })
 export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   username = '';

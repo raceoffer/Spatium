@@ -6,6 +6,7 @@ import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform
 import {
   MatButtonModule,
   MatButtonToggleModule,
+  MatCheckboxModule,
   MatIconModule,
   MatListModule,
   MatMenuModule,
@@ -39,17 +40,17 @@ import { AuthService } from './services/auth.service';
 import { FileService } from './services/file.service';
 import { NotificationService } from './services/notification.service';
 import { DDSService } from './services/dds.service';
-import { PincodeComponent } from './screens/pincode/pincode.component';
+import { PincodeComponent } from './screens/factors/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
-import { PasswordComponent } from './screens/password/password.component';
-import { FileUploadComponent } from './screens/file-upload/file-upload.component';
-import { GraphicKeyComponent } from './screens/graphic-key/graphic-key.component';
-import { QrCodeComponent } from './screens/qr-code/qr-code.component';
-import { NfcComponent } from './screens/nfc/nfc.component';
+import { PasswordComponent } from './screens/factors/password/password.component';
+import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
+import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
+import { QrCodeComponent } from './screens/factors/qr-code/qr-code.component';
+import { NfcComponent } from './screens/factors/nfc/nfc.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { FactorParentComponent } from './screens/factor/factor-parent.component';
+import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './directives/ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
@@ -69,6 +70,7 @@ import { SecretExportComponent } from './screens/navigator-verifier/secret-expor
 import { CurrencyService } from './services/currency.service';
 import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
+import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 
 @NgModule({
   declarations: [
@@ -103,7 +105,8 @@ import { CurrencyPriceService } from './services/price.service';
     VerifyWaitingComponent,
     SecretExportComponent,
     SecretImportComponent,
-    SettingsComponent
+    SettingsComponent,
+    LogoBlockComponent
   ],
   imports: [
     FormsModule,
@@ -117,6 +120,7 @@ import { CurrencyPriceService } from './services/price.service';
     MatRadioModule,
     MatButtonModule,
     MatButtonToggleModule,
+    MatCheckboxModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatIconModule,

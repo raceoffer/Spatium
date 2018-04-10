@@ -1,19 +1,14 @@
+<mat-toolbar color="primary" class="header-toolbar" *ngIf="!isWindows()">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
-    <mat-toolbar color="primary"  *ngIf="!isWindows()">
-      <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()">
-          <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-        </button>
-      </mat-toolbar-row>
-    </mat-toolbar>
-
-    <div class="entry-margin start-logo-text" >
-    </div>
-    <div class="start-tagline-padding">
-      <span class="start-tagline">Secure your funds</span>
-    </div>
-
+    <app-logo-block></app-logo-block>
     <div fxLayout="row" fxLayoutAlign="center center" style="width: 100%;" class="start-tagline-padding">
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;">
         <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
@@ -22,7 +17,8 @@
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;"  *ngIf="!isWindows()">
-        <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center" (click)="toggleContent(contentType.QR)">
+        <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center"
+                (click)="toggleContent(contentType.QR)">
           <div fxLayoutAlign="center center" *ngIf="content === contentType.QR">
               <span class="icon-qr_code_blue"></span>
           </div>
@@ -40,27 +36,37 @@
     </div>
   </div>
 
-    <app-login class="content-flex text-center" *ngIf="content === contentType.Login"
-               (buisyEvent)="setBusy()"
-               (clearEvent)="setEmpty()"
-               (inputEvent)="setInput($event)"
-               [genericLogin]="loginGenerate"
-    ></app-login>
-    <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
-                 (clearEvent)="setEmpty()"
-                 (inputEvent)="setInput($event)"
-    ></app-qr-code>
-    <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
+  <app-login class="header text-center" *ngIf="content === contentType.Login"
+             (buisyEvent)="setBusy()"
              (clearEvent)="setEmpty()"
              (inputEvent)="setInput($event)"
-    ></app-nfc>
+             [genericLogin]="loginGenerate"
+  ></app-login>
+  <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
+               (clearEvent)="setEmpty()"
+               (inputEvent)="setInput($event)"
+  ></app-qr-code>
+  <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
+           (clearEvent)="setEmpty()"
+           (inputEvent)="setInput($event)"
+  ></app-nfc>
 
   <span style="margin: 5px 0px;" [class]="notRecognized" (clearEvent)="setEmpty()">Not recognized login</span>
   <div class="footer text-center">
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" [disabled]="buttonState === stateType.Empty" *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{stLogIn}}</button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()" *ngIf="buttonState === stateType.New">{{stSignUp}}</button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="buttonState === stateType.Updating"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)" *ngIf="buttonState === stateType.Error">{{stError}}</button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()"
+            [disabled]="buttonState === stateType.Empty"
+            *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{stLogIn}}
+    </button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()"
+            *ngIf="buttonState === stateType.New">{{stSignUp}}
+    </button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" disabled
+            *ngIf="buttonState === stateType.Updating">
+      <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+    </button>
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)"
+            *ngIf="buttonState === stateType.Error">{{stError}}
+    </button>
   </div>
 
 </div>

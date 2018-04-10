@@ -1,9 +1,10 @@
-import { EventEmitter } from '@angular/core';
+import { OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { BluetoothService } from '../bluetooth.service';
 import { LoggerService } from '../logger.service';
+import { Subject } from 'rxjs/Subject';
 
 export enum TransactionStatus {
   None = 0,
@@ -16,23 +17,24 @@ export enum TransactionStatus {
   Failed
 }
 
-export class SignSession {
+export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
 
   private entropyCommitmentsObserver:   Observable<any>;
   private entropyDecommitmentsObserver: Observable<any>;
   private chiphertextsObserver:         Observable<any>;
 
-  public ready: EventEmitter<any> = new EventEmitter();
-  public signed: EventEmitter<any> = new EventEmitter();
+  public ready: Subject<any> = new Subject<any>();
+  public signed: Subject<any> = new Subject<any>();
 
-  public canceled: EventEmitter<any> = new EventEmitter();
-  public failed:   EventEmitter<any> = new EventEmitter();
+  public canceled: Subject<any> = new Subject<any>();
+  public failed:   Subject<any> = new Subject<any>();
 
-  private cancelObserver: ReplaySubject<boolean> = new ReplaySubject(1);
+  private canceledSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  private signers: any = null;
   private mapping: any = null;
+
+  private subscriptions = [];
 
   constructor(
     private tx: any,
@@ -54,17 +56,11 @@ export class SignSession {
       this.messageSubject
         .filter(object => object.type === 'chiphertexts')
         .map(object => object.content);
+  }
 
-    this.messageSubject
-      .filter(object => object.type === 'cancelTransaction')
-      .subscribe(() => {
-        this.cancelObserver.next(true);
-        if (this.status.getValue() === TransactionStatus.Ready) {
-          LoggerService.log('Cancelled after sync', {});
-          this.status.next(TransactionStatus.Cancelled);
-          this.canceled.emit();
-        }
-      });
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public get transaction() {
@@ -74,44 +70,46 @@ export class SignSession {
   private handleFailure(message, exception) {
     LoggerService.nonFatalCrash(message, exception);
     this.status.next(TransactionStatus.Failed);
-    this.failed.emit();
+    this.failed.next();
     throw new Error(message);
   }
 
   private handleCancel() {
     LoggerService.log('Cancelled', {});
     this.status.next(TransactionStatus.Cancelled);
-    this.canceled.emit();
+    this.canceled.next();
     throw new Error('Cancelled');
   }
 
   public async cancel() {
-    this.cancelObserver.next(true);
-    if (!await this.bt.send(JSON.stringify({
-        type: 'cancelTransaction',
-        content: {}
-      }))) {
-      LoggerService.nonFatalCrash('Failed to send cancel', null);
+    this.canceledSubject.next(true);
+
+    if (this.status.getValue() === TransactionStatus.Ready) {
+      this.status.next(TransactionStatus.Cancelled);
+      this.canceled.next();
     }
   }
 
   public async sync() {
     this.status.next(TransactionStatus.Started);
 
-    this.mapping = this.tx.mapInputs(this.compoundKey);
+    this.mapping = await this.tx.mapInputs(this.compoundKey);
 
-    const hashes = this.tx.getHashes(this.mapping);
+    const hashes = await this.tx.getHashes(this.mapping);
 
-    this.signers = this.tx.startSign(hashes, this.mapping);
+    await this.tx.startSign(hashes, this.mapping);
 
     let entropyCommitments = null;
     try {
-      entropyCommitments = this.tx.createEntropyCommitments(this.signers);
+      entropyCommitments = await this.tx.createEntropyCommitments();
     } catch (e) {
       return this.handleFailure('Failed to get entropyCommitments', e);
     }
 
-    LoggerService.log('Sending entropyCommitments', entropyCommitments);
+    if (this.canceledSubject.getValue()) {
+      return this.handleCancel();
+    }
+
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyCommitments',
         content: entropyCommitments
@@ -119,21 +117,24 @@ export class SignSession {
       return this.handleFailure('Failed to send entropyCommitment', null);
     }
 
-    const remoteEntropyCommitments = await this.entropyCommitmentsObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteEntropyCommitments) {
+    const remoteEntropyCommitments =
+      await this.entropyCommitmentsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
+    if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
 
     this.status.next(TransactionStatus.EntropyCommitments);
-    LoggerService.log('Received remoteEntropyCommitments', remoteEntropyCommitments);
     let entropyDecommitments = null;
     try {
-      entropyDecommitments = this.tx.processEntropyCommitments(this.signers, remoteEntropyCommitments);
+      entropyDecommitments = await this.tx.processEntropyCommitments(remoteEntropyCommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
 
-    LoggerService.log('Sending entropyDecommitments', entropyDecommitments);
+    if (this.canceledSubject.getValue()) {
+      return this.handleCancel();
+    }
+
     if (!await this.bt.send(JSON.stringify({
         type: 'entropyDecommitments',
         content: entropyDecommitments
@@ -141,21 +142,25 @@ export class SignSession {
       return this.handleFailure('Failed to send entropyDecommitments', null);
     }
 
-    const remoteEntropyDecommitments = await this.entropyDecommitmentsObserver.take(1).takeUntil(this.cancelObserver).toPromise();
-    if (!remoteEntropyDecommitments) {
+    const remoteEntropyDecommitments =
+      await this.entropyDecommitmentsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
+    if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
 
     this.status.next(TransactionStatus.EntropyDecommitments);
-    LoggerService.log('Received remoteEntropyDecommitments', remoteEntropyDecommitments);
     try {
-      this.tx.processEntropyDecommitments(this.signers, remoteEntropyDecommitments);
+      await this.tx.processEntropyDecommitments(remoteEntropyDecommitments);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyDecommitments', e);
     }
 
+    if (this.canceledSubject.getValue()) {
+      return this.handleCancel();
+    }
+
     this.status.next(TransactionStatus.Ready);
-    this.ready.emit();
+    this.ready.next();
   }
 
   public async submitChiphertexts() {
@@ -166,12 +171,15 @@ export class SignSession {
 
     let chiphertexts = null;
     try {
-      chiphertexts = this.tx.computeCiphertexts(this.signers);
+      chiphertexts = await this.tx.computeCiphertexts();
     } catch (e) {
       return this.handleFailure('Failed to compute chiphertexts', e);
     }
 
-    LoggerService.log('Sending chiphertexts', chiphertexts);
+    if (this.canceledSubject.getValue()) {
+      return this.handleCancel();
+    }
+
     if (!await this.bt.send(JSON.stringify({
         type: 'chiphertexts',
         content: chiphertexts
@@ -186,24 +194,23 @@ export class SignSession {
       return;
     }
 
-    const remoteChiphertexts = await this.chiphertextsObserver.take(1).takeUntil(this.cancelObserver).toPromise();
+    const remoteChiphertexts = await this.chiphertextsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
     if (!remoteChiphertexts) {
       return this.handleCancel();
     }
 
-    LoggerService.log('Received remoteChiphertexts', remoteChiphertexts);
     let rawSignatures = null;
     try {
-      rawSignatures = this.tx.extractSignatures(this.signers, remoteChiphertexts);
+      rawSignatures = await this.tx.extractSignatures(remoteChiphertexts);
     } catch (e) {
       return this.handleFailure('Failed to process remoteChiphertexts', e);
     }
 
-    const signatures = this.tx.normalizeSignatures(this.mapping, rawSignatures);
+    const signatures = await this.tx.normalizeSignatures(this.mapping, rawSignatures);
 
-    this.tx.applySignatures(signatures);
+    await this.tx.applySignatures(signatures);
 
     this.status.next(TransactionStatus.Signed);
-    this.signed.emit();
+    this.signed.next();
   }
 }

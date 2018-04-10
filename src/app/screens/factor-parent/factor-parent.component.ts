@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
+import {AuthService} from "../../services/auth.service";
 
 declare const device: any;
 
@@ -10,15 +11,20 @@ declare const device: any;
   styleUrls: ['./factor-parent.component.css']
 })
 export class FactorParentComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   next: string = null;
   back: string = null;
   isBlack = true;
+  label = '';
+  stCreate = 'Create secret';
+  stUnlock = 'Unlock secret';
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly authService: AuthService,
     private readonly navigationService: NavigationService
   ) {
     this.route.params.subscribe(params => {
@@ -30,8 +36,16 @@ export class FactorParentComponent implements OnInit, OnDestroy {
       }
     });
 
-    if (this.back && this.back === 'navigator-verifier') {
+    if (this.back && this.back === 'factornode') {
       this.isBlack = false;
+    }
+
+    if (this.back && this.back === 'start') {
+      if (this.authService.encryptedSeed === null) {
+        this.label = this.stCreate;
+      } else {
+        this.label = this.stUnlock;
+      }
     }
   }
 

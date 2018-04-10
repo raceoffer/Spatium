@@ -1,6 +1,6 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
-import { Coin, KeyChainService, Token, TokenEntry } from '../../../services/keychain.service';
+import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { CurrencyService } from '../../../services/currency.service';
@@ -11,11 +11,15 @@ import { CurrencyService } from '../../../services/currency.service';
   styleUrls: ['./wallet.component.css']
 })
 export class WalletComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   public isOpened = false;
   public title = 'Wallet';
   public isExitTap = false;
+  public isSearch = false;
+  public _filterValue = '';
+  public filtredTitles = [];
   public navLinks = [{
       name: 'Wallet',
       link: ['/navigator', { outlets: { navigator: ['wallet'] } }],
@@ -53,12 +57,12 @@ export class WalletComponent implements OnInit, OnDestroy {
       isActive: true
     }];
 
-  public tiles = [
+  public titles = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
-    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin'},
+    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC},
     {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
@@ -77,9 +81,29 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly currency: CurrencyService
   ) {
     keychain.topTokens.forEach((tokenInfo) => {
-      this.tiles.push(this.tokenEntry(tokenInfo));
+      this.titles.push(this.tokenEntry(tokenInfo));
     });
+    this.filtredTitles = this.titles;
+  }
 
+  get filterValue() {
+    return this._filterValue;
+  }
+
+  set filterValue(newUserName) {
+    this._filterValue = newUserName;
+    if (this._filterValue.length > 0) {
+      this.filtredTitles = this.titles.filter(
+        t => (t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
+          t.symbols.includes(this._filterValue.toUpperCase()))
+      );
+    } else {
+      this.filtredTitles = this.titles;
+    }
+  }
+
+  clearFilterValue() {
+    this.filterValue = '';
   }
 
   public tokenEntry(tokenInfo: TokenEntry) {
@@ -118,8 +142,15 @@ export class WalletComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', coin] } }]);
   }
 
+  async toggleSearch(value) {
+    this.isSearch = value;
+  }
+
   async onBackClicked() {
-    if (this.isOpened) {
+    if (this.isSearch) {
+      this.filterValue = '';
+      this.isSearch = false;
+    } else if (this.isOpened) {
       console.log('isOpened');
       this.sidenav.toggle();
     } else if (this.isExitTap) {

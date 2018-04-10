@@ -1,6 +1,6 @@
 import {
   Component, OnInit, ElementRef,
-  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy
+  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy, HostBinding
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
@@ -34,6 +34,7 @@ declare const device: any;
   styleUrls: ['./registration.component.css']
 })
 export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
   stPassword = 'Password';
@@ -170,8 +171,15 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.uploading = true;
 
-      const factors = this.factors.map(factor => factor.toBuffer()).reverse();
-      factors.push(this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+      let factors = [];
+      for (let i = 0; i < this.factors.length; ++i) {
+        factors.push(await this.factors[i].toBuffer());
+      }
+
+      factors = factors.reverse();
+
+      factors.push(await this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+
       const tree = factors.reduce((rest, factor) => {
         const node = {
           factor: factor
@@ -182,8 +190,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = CryptoCore.Utils.sha256(Buffer.from(this.authSevice.login, 'utf-8')).toString('hex');
-      const data = CryptoCore.Utils.packTree(tree, node => node.factor, this.keychain.getSeed());
+      const id = await AuthService.toId(this.authSevice.login);
+      const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {
         const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();

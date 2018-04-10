@@ -1,5 +1,5 @@
-<div fxLayout="column" fxLayoutAlign="center center"  class="content">
-  <div class="width-button-container text-center"  *ngIf="disabledNFC">
+<div fxLayout="column" fxLayoutAlign="center center" class="content">
+  <div class="width-button-container text-center" *ngIf="disabledNFC">
 
     <div class="connect-text">
       <span>{{ enableNFCmessage }}</span>
@@ -20,10 +20,10 @@
     </div>
   </div>
 
-  <div style="position: absolute; width: 100%; text-align: center; bottom: 0px;" *ngIf="!disabledNFC && isRepeatable && !canScanAgain">
+  <div style="width: 100%; text-align: center; bottom: 0px;" *ngIf="!disabledNFC && isRepeatable && !canScanAgain">
     <span >{{ text }}</span>
   </div>
-  <div style="position: absolute; width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !isRepeatable && !canScanAgain">
+  <div style="width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !isRepeatable && !canScanAgain">
     <span >{{ text }}</span>
   </div>
 

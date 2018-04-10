@@ -1,25 +1,15 @@
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
-  <div class="header text-center">
-    <mat-toolbar color="primary" class="shadow">
-      <mat-toolbar-row>
-        <button mat-icon-button (click)="onBackClicked()"  *ngIf="!isWindows()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <span>{{ title }}</span>
-      </mat-toolbar-row>
-    </mat-toolbar>
-  </div>
+<mat-toolbar color="primary" class="header-toolbar shadow">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>{{ title }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
 
-  <form class="width-button-container content text-center box" style="margin-top: 30px; margin-bottom: 0px">
-    <div class="header text-center">
-      <div class="top-arrow-scroll" id="top-scroller">
-        <button mat-icon-button (click)="goTop()">
-          <mat-icon>keyboard_arrow_up</mat-icon>
-        </button>
-      </div>
-    </div>
-
-    <div class="text-center content" style="overflow: auto;max-height: 100%; margin-bottom: 30px;" id="factor-container" #factorContainer>
+<div fxLayout="column" fxLayoutAlign="start center" class="box" id="factor-container" #factorContainer>
+  <form class="width-button-container content text-center" style="margin-top: 30px; margin-bottom: 0px">
+    <div class="text-center content" style="margin-bottom: 30px;">
       <mat-icon >lock_outline</mat-icon>
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;" [@anim]="factor.state">
         <div style="margin-left: 50px;">
@@ -47,12 +37,6 @@
     </div>
 
     <div class="footer text-center" style="bottom: 0px;">
-      <div class="bottom-arrow-scroll" id="bottom-scroller" style="margin-top: -60px;">
-        <button mat-icon-button (click)="goBottom()">
-          <mat-icon>keyboard_arrow_down</mat-icon>
-        </button>
-      </div>
-
       <button type="submit" mat-raised-button color="accent" class="width-button color" *ngIf="!uploading" [disabled]="factors.length < 2" (click)="onSaveClicked()">Save</button>
       <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading"><mat-spinner diameter="25" style="margin: auto;"></mat-spinner></button>
     </div>
