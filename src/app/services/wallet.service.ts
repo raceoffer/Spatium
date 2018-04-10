@@ -158,6 +158,7 @@ export class WalletService {
     }
 
     try {
+      this.setProgress(0);
       this.status.next(Status.Synchronizing);
 
       const paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
@@ -195,16 +196,14 @@ export class WalletService {
 
         await wallet.syncDuplicate(ethWallet);
 
-        if (tokenIndex % Math.trunc(this.tokenWallets.size / 8) === 0) {
+        if (tokenIndex % Math.trunc(this.tokenWallets.size / 10) === 0) {
           this.setProgress(0.9 + 0.1 * (coinIndex + 1) / this.tokenWallets.size);
-          await Observable.timer(10).toPromise();
+          await Observable.timer(200).toPromise();
         }
         tokenIndex++;
       }
 
       this.setProgress(1);
-
-      await Observable.timer(1000).toPromise();
 
       if (this.status.getValue() === Status.Synchronizing) {
         this.status.next(Status.Ready);
