@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -74,6 +75,9 @@ import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
+import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
+import { FactorParentOverlayService } from './screens/factor-parent-overlay/factor-parent-overlay.service';
+
 
 @NgModule({
   declarations: [
@@ -111,9 +115,11 @@ import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirm
     SettingsComponent,
     LogoBlockComponent,
     ToolbarComponent,
-    ConfirmationEntryComponent
+    ConfirmationEntryComponent,
+    FactorParentOverlayComponent
   ],
   imports: [
+    OverlayModule,
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -155,13 +161,15 @@ import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirm
     DDSService,
     KeyChainService,
     CurrencyService,
-    NavigationService
+    NavigationService,
+    FactorParentOverlayService
   ],
   bootstrap: [
     AppComponent
   ],
   entryComponents: [
-    DialogFactorsComponent
+    DialogFactorsComponent,
+    FactorParentOverlayComponent
   ]
 })
 

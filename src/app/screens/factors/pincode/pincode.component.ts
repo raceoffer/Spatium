@@ -1,5 +1,6 @@
 import { Component, OnInit, NgZone, HostBinding, Output, EventEmitter, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import {FactorType} from "../../../services/auth.service";
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -13,9 +14,9 @@ declare const window: any;
 export class PincodeComponent implements OnInit {
   @HostBinding('class') classes = 'content factor-content text-center';
 
-  @Input() busy: boolean;
-  @Input() isCreate: boolean;
-  @Input() isFactor: boolean;
+  @Input() busy: boolean = false;
+  @Input() isCreate: boolean = false;
+  @Input() isFactor: boolean = true;
 
   @Output() hasTouchId: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
@@ -31,21 +32,23 @@ export class PincodeComponent implements OnInit {
   ngOnInit() {
     this.pincode = '';
 
-    if (window.plugins) {
-      window.plugins.touchid.isAvailable(() => {
-        this.hasTouchId.emit(true);
-        if (!this.isCreate && !this.isFactor) {
-          window.plugins.touchid.has('spatium', () => {
-            console.log('Touch ID avaialble and Password key available');
-            this.hasTouch = true;
-          }, () => {
-            console.log('Touch ID available but no Password Key available');
-          });
-        }
-      }, () => {
-        this.hasTouchId.emit(false);
-        console.log('no touch id');
-      });
+    if (!this.isFactor) {
+      if (window.plugins) {
+        window.plugins.touchid.isAvailable(() => {
+          this.hasTouchId.emit(true);
+          if (!this.isCreate && !this.isFactor) {
+            window.plugins.touchid.has('spatium', () => {
+              console.log('Touch ID avaialble and Password key available');
+              this.hasTouch = true;
+            }, () => {
+              console.log('Touch ID available but no Password Key available');
+            });
+          }
+        }, () => {
+          this.hasTouchId.emit(false);
+          console.log('no touch id');
+        });
+      }
     }
   }
 
@@ -83,7 +86,7 @@ export class PincodeComponent implements OnInit {
 
   async onNext() {
     try {
-      await this.onSuccess.emit(this.pincode);
+      await this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
       /*switch (this.next) {
         case 'waiting':
           await this.onSuccess.emit(this.pincode);

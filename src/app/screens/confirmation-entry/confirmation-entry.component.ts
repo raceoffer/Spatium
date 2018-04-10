@@ -54,8 +54,9 @@ export class ConfirmationEntryComponent implements OnInit {
     this.hasTouchId = value;
   }
 
-  async onSuccess(pincode) {
+  async onSuccess(result) {
     try {
+      const pincode = result.value;
       this.busy = true;
 
       const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(pincode, 'utf-8'));

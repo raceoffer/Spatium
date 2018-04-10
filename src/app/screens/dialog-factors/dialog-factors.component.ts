@@ -1,7 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import {Component, EventEmitter, Inject} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
 @Component({
   selector: 'app-dialog-factors',
@@ -9,6 +10,9 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./dialog-factors.component.css']
 })
 export class DialogFactorsComponent {
+
+  onAddFactor = new EventEmitter();
+
   factors: any;
   next: string = null;
   back: string = null;
@@ -17,6 +21,7 @@ export class DialogFactorsComponent {
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
+    private factorParentDialog: FactorParentOverlayService,
     private authSevice: AuthService,
     private router: Router,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -68,11 +73,12 @@ export class DialogFactorsComponent {
         ]);
         break;
       default:
-        await this.router.navigate([
-          '/factor',
-          { back: this.back },
-          { outlets: { 'factor': [factor.link, { next: this.next, isAuth: this.isAuth }] } }
-        ]);
+        const factorParent = this.factorParentDialog.open({content: factor.component});
+
+        factorParent.onAddFactor.subscribe((result) => {
+          this.onAddFactor.emit(result);
+          factorParent.close();
+        });
     }
   }
 }
