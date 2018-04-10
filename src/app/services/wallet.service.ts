@@ -148,6 +148,10 @@ export class WalletService {
     }
   }
 
+  public setProgress(value: number): void {
+    this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
+  }
+
   public async startSync() {
     if (this.status.getValue() === Status.Synchronizing) {
       throw new Error('Sync in progress');
@@ -158,22 +162,23 @@ export class WalletService {
 
       const paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
 
-      this.syncProgress.next(
-        Math.min(100, Math.max(0,
-          this.syncProgress.getValue() + 2 * 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
-        ));
+      this.setProgress(0.1);
 
+      let coinIndex = 0;
       for (const wallet of Array.from(this.coinWallets.values())) {
         if (this.status.getValue() !== Status.Synchronizing) {
           return;
         }
 
+        const sub = wallet.syncProgress.subscribe(num => {
+          this.setProgress(0.1 + 0.8 * (coinIndex  + num / 100) / this.coinWallets.size);
+        });
+
         await wallet.sync(paillierKeys);
 
-        this.syncProgress.next(
-          Math.min(100, Math.max(0,
-            this.syncProgress.getValue() + 10 * 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
-          ));
+        sub.unsubscribe();
+
+        coinIndex++;
       }
 
       if (this.status.getValue() !== Status.Synchronizing) {
@@ -182,6 +187,7 @@ export class WalletService {
 
       const ethWallet = this.coinWallets.get(Coin.ETH);
 
+      let tokenIndex = 0;
       for (const wallet of Array.from(this.tokenWallets.values())) {
         if (this.status.getValue() !== Status.Synchronizing) {
           return;
@@ -189,11 +195,16 @@ export class WalletService {
 
         await wallet.syncDuplicate(ethWallet);
 
-        this.syncProgress.next(
-          Math.min(100, Math.max(0,
-            this.syncProgress.getValue() + 100 / (2 + 10 * this.coinWallets.size + this.tokenWallets.size))
-          ));
+        if (tokenIndex % Math.trunc(this.tokenWallets.size / 8) === 0) {
+          this.setProgress(0.9 + 0.1 * (coinIndex + 1) / this.tokenWallets.size);
+          await Observable.timer(10).toPromise();
+        }
+        tokenIndex++;
       }
+
+      this.setProgress(1);
+
+      await Observable.timer(1000).toPromise();
 
       if (this.status.getValue() === Status.Synchronizing) {
         this.status.next(Status.Ready);
