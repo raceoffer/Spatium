@@ -196,9 +196,9 @@ export class WalletService {
 
         await wallet.syncDuplicate(ethWallet);
 
-        if (tokenIndex % Math.trunc(this.tokenWallets.size / 10) === 0) {
+        if (tokenIndex % Math.trunc(this.tokenWallets.size / 4) === 0) {
           this.setProgress(0.9 + 0.1 * (coinIndex + 1) / this.tokenWallets.size);
-          await Observable.timer(200).toPromise();
+          await Observable.timer(1000).toPromise();
         }
         tokenIndex++;
       }
