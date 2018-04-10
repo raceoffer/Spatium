@@ -1,5 +1,4 @@
-import {Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
 import { AuthService, FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { DDSService } from '../../../services/dds.service';
@@ -17,6 +16,14 @@ declare const Buffer: any;
 export class QrCodeComponent implements OnInit {
   @HostBinding('class') classes = 'content factor-content text-center';
 
+  @Input() isExport = false;
+  @Input() isImport = false;
+
+  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+
   entry = 'Sign in';
 
   _qrcode: string = null;
@@ -25,8 +32,6 @@ export class QrCodeComponent implements OnInit {
   classVideoContainer = '';
   classVideo = '';
 
-  next: string = null;
-  back: string = null;
   isAuth = false;
 
   camStarted = false;
@@ -40,36 +45,12 @@ export class QrCodeComponent implements OnInit {
 
   busy = false;
 
-  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
-  @Input() isExport = false;
-  @Input() isImport = false;
-
   constructor(
     private readonly dds: DDSService,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly notification: NotificationService,
     private readonly authService: AuthService
-  ) {
-    this.route.params.subscribe(params => {
-      if (params['next']) {
-        this.next = params['next'];
-      }
-      if (params['back']) {
-        this.back = params['back'];
-      }
-      if (params['isAuth']) {
-        this.isAuth = (params['isAuth'] === 'true');
-      }
-    });
-
-    if (this.next == null && this.back == null) {
-      this.isRepeatable = true;
-    }
-  }
+  ) { }
 
   async ngOnInit() {
     this.canScanAgain = false;
@@ -194,14 +175,16 @@ export class QrCodeComponent implements OnInit {
         this._qrcode = await CryptoCore.Utils.tryUnpackLogin(buffer);
       }
     }
-    await this.onSuccess();
+    await this.onNext();
   }
 
-  async onSuccess() {
+  async onNext() {
     this.camStarted = false;
 
     try {
-      this.busy = true;
+      this.onSuccess.emit({factor: FactorType.QR, value: this._qrcode});
+
+      /*this.busy = true;
       switch (this.next) {
         case 'auth':
           await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
@@ -224,9 +207,9 @@ export class QrCodeComponent implements OnInit {
           this.canScanAgain = true;
           this.classVideoContainer = 'invisible';
           this.inputEvent.emit(this._qrcode);
-      }
-    } finally {
-      this.busy = false;
+      }*/
+    } catch (e) {
+      console.log(e);
     }
   }
 

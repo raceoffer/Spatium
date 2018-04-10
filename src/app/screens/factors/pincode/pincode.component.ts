@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, HostBinding, Output, EventEmitter, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import {FactorType} from "../../../services/auth.service";
+import { FactorType } from '../../../services/auth.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -14,9 +14,9 @@ declare const window: any;
 export class PincodeComponent implements OnInit {
   @HostBinding('class') classes = 'content factor-content text-center';
 
-  @Input() busy: boolean = false;
-  @Input() isCreate: boolean = false;
-  @Input() isFactor: boolean = true;
+  @Input() busy = false;
+  @Input() isCreate = false;
+  @Input() isFactor = true;
 
   @Output() hasTouchId: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
@@ -86,10 +86,10 @@ export class PincodeComponent implements OnInit {
 
   async onNext() {
     try {
-      await this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
+      this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
       /*switch (this.next) {
         case 'waiting':
-          await this.onSuccess.emit(this.pincode);
+          await this.onNext.emit(this.pincode);
           break;
         case 'auth':
           await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));

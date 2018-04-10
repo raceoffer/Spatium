@@ -1,13 +1,10 @@
 <div fxLayout="column" fxLayoutAlign="end center" class="content">
 
   <div mat-fab fxLayout="column" fxLayoutAlign="start center" style="padding-bottom: 30px">
-    <button mat-icon-button class="file-upload-size" *ngIf="!busy">
+    <button mat-icon-button class="file-upload-size">
       <mat-icon class="color-cool_grey icon-50">insert_drive_file</mat-icon>
       <input type='file' id='fileInput' style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" (change)="onUploadFileClick($event)">
     </button>
-    <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="busy">
-      <mat-spinner mode="indeterminate" diameter="34" color="accent"></mat-spinner>
-    </div>
     <div style="padding-top: 5px;" >
       {{ uploadFile }}
     </div>

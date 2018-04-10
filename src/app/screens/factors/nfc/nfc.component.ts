@@ -2,7 +2,7 @@ import {
   AfterViewInit, Component, EventEmitter, HostBinding, Input, NgZone, OnDestroy, OnInit,
   Output
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService, FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { DDSService } from '../../../services/dds.service';
@@ -20,6 +20,14 @@ declare const Buffer: any;
 })
 export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   @HostBinding('class') classes = 'content factor-content text-center';
+
+  @Input() isExport = false;
+  @Input() isImport = false;
+
+  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
 
   _nfc = '';
   entry = 'Sign in';
@@ -41,36 +49,17 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
   timer: any;
 
-  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
-  @Input() isExport = false;
-  @Input() isImport = false;
-
   static async isEthernetAvailable() {
     return await CryptoCore.Utils.testNetwork();
   }
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private ngZone: NgZone,
     private authService: AuthService,
     private readonly dds: DDSService,
     private readonly notification: NotificationService
-  ) {
-    this.route.params.subscribe(params => {
-      if (params['next']) {
-        this.next = params['next'];
-      }
-      if (params['back']) {
-        this.back = params['back'];
-      }
-      if (params['isAuth']) {
-        this.isAuth = (params['isAuth'] === 'true');
-      }
-    });
-  }
+  ) { }
 
   ngOnInit() {
     if (this.next == null && this.back == null) {
@@ -161,7 +150,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
       } else if (this.isImport) {
         this._nfc = null;
         navigator.vibrate(100);
-        await this.onSuccess();
+        await this.onNext();
       } else {
         console.log('onNfc');
         console.log(JSON.stringify(nfcEvent));
@@ -170,7 +159,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
         navigator.vibrate(100);
 
-        await this.onSuccess();
+        await this.onNext();
       }
     } else {
       console.log('inactive');
@@ -203,7 +192,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
           navigator.vibrate(100);
 
-          await this.onSuccess();
+          await this.onNext();
         } else {
           const payload = Buffer.from(tag.ndefMessage[0].payload);
           console.log(payload);
@@ -222,7 +211,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
           navigator.vibrate(100);
 
-          await this.onSuccess();
+          await this.onNext();
         }
       }
     }
@@ -263,17 +252,19 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
     nfc.write([record], () => this.ngZone.run(async () => {
       this.notification.show(success);
-      await this.onSuccess();
+      await this.onNext();
     }), (e) => this.ngZone.run(() => {
       console.log('Error write ' + JSON.stringify(e));
       this.notification.show(error);
     }));
   }
 
-  async onSuccess() {
-    this.isActive = false;
+  async onNext() {
+    // this.isActive = false;
 
-    switch (this.next) {
+    this.onSuccess.emit({factor: FactorType.NFC, value: this._nfc});
+
+    /*switch (this.next) {
       case 'auth':
         await this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
         await this.router.navigate(['/auth']);
@@ -295,7 +286,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         this.canScanAgain = true;
         this.classNfcContainer = 'invisible';
         this.inputEvent.emit(this._nfc);
-    }
+    }*/
   }
 
   scanAgain() {
