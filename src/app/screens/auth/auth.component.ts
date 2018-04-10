@@ -11,6 +11,8 @@ import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
+declare const Buffer: any;
+
 @Component({
   selector: 'app-auth',
   animations: [
@@ -155,10 +157,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.busy = true;
       await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-    } finally {
-      this.busy = false;
     } catch (e) {
       console.log(e);
+    } finally {
+      this.busy = false;
     }
   }
 

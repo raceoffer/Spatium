@@ -115,7 +115,7 @@ import { FactorParentOverlayService } from './screens/factor-parent-overlay/fact
     SecretImportComponent,
     SettingsComponent,
     LogoBlockComponent,
-    NumericSpinnerComponent
+    NumericSpinnerComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
     FactorParentOverlayComponent

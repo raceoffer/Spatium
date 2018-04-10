@@ -197,7 +197,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = await AuthService.toId(this.authSevice.login);
+      const id = await AuthService.toId(this.authService.login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {
