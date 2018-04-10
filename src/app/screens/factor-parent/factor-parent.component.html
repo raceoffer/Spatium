@@ -1,13 +1,13 @@
 <mat-toolbar color="primary" class="header-toolbar" *ngIf="isBlack">
   <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
+    <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
       <mat-icon class="color-custom-dark">arrow_back</mat-icon>
     </button>
     <span class="color-custom-dark">{{label}}</span>
   </mat-toolbar-row>
 </mat-toolbar>
 
-<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isBlack">
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isBlack && !isWindows()">
   <mat-toolbar-row>
     <button mat-icon-button (click)="onBackClicked()">
       <mat-icon>arrow_back</mat-icon>

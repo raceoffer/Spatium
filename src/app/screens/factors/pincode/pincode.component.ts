@@ -8,6 +8,7 @@ import { KeyChainService } from '../../../services/keychain.service';
 declare const CryptoCore: any;
 declare const Buffer: any;
 declare const window: any;
+declare const device: any;
 
 enum State {
   Create,
@@ -187,5 +188,9 @@ export class PincodeComponent implements OnInit {
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 
     await this.router.navigate(['/verify-waiting']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

@@ -5,6 +5,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { CurrencyService } from '../../../services/currency.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
@@ -165,5 +167,9 @@ export class WalletComponent implements OnInit, OnDestroy {
         this.isExitTap = false;
       }), 3000);
     }
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

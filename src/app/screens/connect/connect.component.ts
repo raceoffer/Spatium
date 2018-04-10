@@ -2,6 +2,8 @@ import {Component, EventEmitter, HostBinding, OnInit, Output} from '@angular/cor
 import {WalletService} from '../../services/wallet.service';
 import {NavigationService} from '../../services/navigation.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-connect',
   templateUrl: './connect.component.html',
@@ -35,5 +37,9 @@ export class ConnectComponent implements OnInit {
 
   async onBackClicked() {
     await this.cancelSync();
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

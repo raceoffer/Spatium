@@ -538,7 +538,9 @@ input[type="password-pin"] {
   padding-left: 0.7em
 }
 
-
+input[type=text]::-ms-clear {
+  display: none;
+}
 
 .keyboard-button{
   width: 100px;
@@ -821,7 +823,7 @@ input[type="password-pin"] {
   flex-flow: column;
   height: 100%;
   width: 100%;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .box .header{
@@ -1050,5 +1052,5 @@ input[type="password-pin"] {
   bottom: 0;
   left: 0;
   right: 0;
-  overflow: scroll;
+  overflow: auto;
 }
