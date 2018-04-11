@@ -1,4 +1,4 @@
-import { CurrencyWallet, Status } from '../currencywallet';
+import {CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
@@ -79,7 +79,8 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    return [];
+    const txs = await this.wallet.getTransactions();
+    return txs.map(tx => HistoryEntry.fromJSON(tx));
   }
 
   public async createTransaction(

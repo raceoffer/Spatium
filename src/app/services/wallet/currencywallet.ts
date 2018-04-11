@@ -27,7 +27,7 @@ export enum TransactionType {
 export class HistoryEntry {
   static fromJSON(json) {
     return new HistoryEntry(
-      json.type,
+      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
       json.from,
       json.to,
       json.amount,
@@ -281,6 +281,10 @@ export class CurrencyWallet {
     }
 
     return verify;
+  }
+
+  public async listTransactionHistory() {
+    return [];
   }
 
   public async createTransaction(
