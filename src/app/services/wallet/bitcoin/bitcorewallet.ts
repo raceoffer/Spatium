@@ -82,42 +82,6 @@ export class BitcoreWallet extends CurrencyWallet {
     return [];
   }
 
-  public async verify(transaction: any, maxFee?: number) {
-    if (!await super.verify(transaction, maxFee)) {
-      return false;
-    }
-
-    const statistics = await transaction.totalOutputs();
-
-    // check if every input belongs to owned address
-    if (!statistics.inputs
-      || statistics.inputs.length < 1
-      || statistics.inputs.some(input => input.address !== this.address.getValue())) {
-      return false;
-    }
-
-    // check if change goes to owned address
-    if (statistics.change.some(change => change.address !== this.address.getValue())) {
-      return false;
-    }
-
-    // check for tax value
-    const fee = await this.fee(transaction);
-
-    return !(maxFee ? fee > maxFee : false);
-  }
-
-  public async fee(transaction) {
-    const statistics = await transaction.totalOutputs();
-
-    let fee = 0;
-    fee += statistics.inputs.reduce((sum, input) => sum + input.value, 0);
-    fee -= statistics.outputs.reduce((sum, output) => sum + output.value, 0);
-    fee -= statistics.change.reduce((sum, change) => sum + change.value, 0);
-
-    return fee;
-  }
-
   public async createTransaction(
     address: string,
     value: number,

@@ -51,10 +51,6 @@ export class ERC20Wallet extends CurrencyWallet {
     return this.wallet.fromInternal(Number(amount));
   }
 
-  public async fee(transaction) {
-    return await transaction.estimateFee();
-  }
-
   public async fromJSON(tx) {
     return await CryptoCore.EthereumTransaction.fromJSON(tx);
   }

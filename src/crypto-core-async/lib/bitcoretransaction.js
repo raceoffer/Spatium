@@ -63,6 +63,20 @@ BitcoreTransaction.prototype.totalOutputs = async function() {
   });
 };
 
+BitcoreTransaction.prototype.estimateFee = async function() {
+  return await this.invoke({
+    method: 'estimateFee',
+    arguments: []
+  });
+};
+
+BitcoreTransaction.prototype.validate = async function(address) {
+  return await this.invoke({
+    method: 'validate',
+    arguments: [address]
+  });
+};
+
 BitcoreTransaction.prototype.prepare = async function(options) {
   await this.invoke({
     method: 'prepare',

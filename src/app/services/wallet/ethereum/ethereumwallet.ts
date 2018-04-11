@@ -32,10 +32,6 @@ export class EthereumWallet extends CurrencyWallet {
     }
   }
 
-  public async fee(transaction) {
-    return await transaction.estimateFee();
-  }
-
   public toInternal(amount: number): string {
     return this.wallet.toInternal(amount.toString());
   }

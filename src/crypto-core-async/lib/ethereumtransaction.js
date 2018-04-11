@@ -69,6 +69,13 @@ EthereumTransaction.prototype.totalOutputs = async function() {
   });
 };
 
+EthereumTransaction.prototype.validate = async function(address) {
+  return await this.invoke({
+    method: 'validate',
+    arguments: [address]
+  });
+};
+
 EthereumTransaction.prototype.toJSON = async function() {
   return await this.invoke({
     method: 'toJSON',
