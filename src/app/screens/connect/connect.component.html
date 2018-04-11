@@ -7,8 +7,10 @@
   </mat-toolbar-row>
 </mat-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
-  <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center">
-    <mat-progress-spinner mode="determinate" color="accent" [value]="progress | async"></mat-progress-spinner>
-  </div>
+<div fxLayout="column" fxLayoutAlign="center center" class="box">
+  <app-numeric-spinner
+    [value]="progress | async"
+    [outerDiameter]="200"
+    [innerDiameter]="170">
+  </app-numeric-spinner>
 </div>
