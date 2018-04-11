@@ -1,7 +1,6 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { BluetoothService } from '../bluetooth.service';
-import { LoggerService } from '../logger.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
 import { Subject } from 'rxjs/Subject';
@@ -28,7 +27,7 @@ export enum TransactionType {
 export class HistoryEntry {
   static fromJSON(json) {
     return new HistoryEntry(
-      json.type,
+      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
       json.from,
       json.to,
       json.amount,
@@ -186,20 +185,6 @@ export class CurrencyWallet {
     }
   }
 
-  public async outputs(transaction) {
-    return await transaction.totalOutputs();
-  }
-
-  public async fee(transaction) {
-    return 0;
-  }
-
-  public async verify(transaction: any, maxFee?: number) {
-    const statistics = await transaction.totalOutputs();
-
-    return !(!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0);
-  }
-
   public async acceptTransaction() {
     if (this.signSession) {
       await this.signSession.submitChiphertexts();
@@ -296,6 +281,10 @@ export class CurrencyWallet {
     }
 
     return verify;
+  }
+
+  public async listTransactionHistory() {
+    return [];
   }
 
   public async createTransaction(

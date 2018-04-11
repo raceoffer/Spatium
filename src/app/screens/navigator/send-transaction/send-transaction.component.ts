@@ -345,7 +345,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const value = this.subtractFee ? this.amount.value - this.fee.value : this.amount.value;
+    const value = this.subtractFee.value ? this.amount.value - this.fee.value : this.amount.value;
     const tx = await this.currencyWallet.createTransaction(this.receiver.value, value, this.fee.value);
     if (tx) {
       this.phase.next(Phase.Confirmation);

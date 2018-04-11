@@ -16,7 +16,7 @@ export class BitcoinCashWallet extends BitcoreWallet {
   ) {
     super(
       CryptoCore.BitcoinCashTransaction,
-      CryptoCore.BCHInsightProvider,
+      CryptoCore.BitcoinCashWallet,
       network,
       keychain,
       Coin.BCH,
