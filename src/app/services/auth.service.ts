@@ -4,6 +4,7 @@ import { NotificationService } from './notification.service';
 declare const CryptoCore: any;
 declare const Buffer: any;
 declare const nfc: any;
+declare const device: any;
 
 @Injectable()
 export class AuthService {
@@ -42,19 +43,18 @@ export class AuthService {
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR));
 
-    nfc.enabled(function () {
-        this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC));
-        this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC));
-      }.bind(this), function (e) {
-      if (e !== 'NO_NFC') {
-        this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC));
-        this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC));
-      }
-    }.bind(this));
+    const addNFCFactor = () => {
+      this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC));
+      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC));
+    };
+
+    nfc.enabled(addNFCFactor,  (e) => {
+        if (e === 'NO_NFC') { return; }
+        if (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED') { return; }
+        addNFCFactor();
+    });
   }
 
   getAllAvailableFactors() {
@@ -188,6 +188,10 @@ export class AuthService {
     }
 
     return text;
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }
 

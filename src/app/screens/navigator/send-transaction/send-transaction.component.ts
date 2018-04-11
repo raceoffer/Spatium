@@ -394,6 +394,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   paste () {
     cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
+      console.log('text to be pasted: ' + text);
       if (text !== '') {
         this.receiver.setValue(text);
       }

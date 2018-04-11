@@ -37,8 +37,6 @@ export class StartComponent implements OnInit, OnDestroy {
           const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
           currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.visible;
         }
-      // example: NavigationStart, RoutesRecognized, NavigationEnd
-      // console.log(event);
       });
     }
 
@@ -56,10 +54,6 @@ export class StartComponent implements OnInit, OnDestroy {
       const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
     }
-
-    // if (this.isWindows()) {
-    //   await this.router.navigate(['/login']);
-    // }
   }
 
   ngOnDestroy() {

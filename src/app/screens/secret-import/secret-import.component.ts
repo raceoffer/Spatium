@@ -62,7 +62,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     );
 
     nfc.enabled(() => {}, e => {
-      if (e === 'NO_NFC') {
+      if (e === 'NO_NFC'  || (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED')) {
         this.ngZone.run(() => {
           this.isNfcAvailable = false;
         });
