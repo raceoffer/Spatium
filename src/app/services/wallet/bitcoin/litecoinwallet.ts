@@ -16,7 +16,7 @@ export class LitecoinWallet extends BitcoreWallet {
   ) {
     super(
       CryptoCore.LitecoinTransaction,
-      CryptoCore.LTCInsightProvider,
+      CryptoCore.LitecoinWallet,
       network,
       keychain,
       Coin.LTC,

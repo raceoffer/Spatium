@@ -1,4 +1,4 @@
-import {CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
+import { CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
@@ -10,14 +10,12 @@ declare const Buffer: any;
 declare const CryptoCore: any;
 
 export class BitcoreWallet extends CurrencyWallet {
-  private bitcoreWallet: any = null;
-  private provider: any = null;
-
+  private wallet: any = null;
   private routineTimerSub: any = null;
 
   constructor(
     private Transaction: any,
-    private Provider: any,
+    private Wallet: any,
     network: string,
     keychain: KeyChainService,
     coin: Coin,
@@ -37,16 +35,15 @@ export class BitcoreWallet extends CurrencyWallet {
       this.routineTimerSub = null;
     }
 
-    this.bitcoreWallet = null;
-    this.provider = null;
+    this.wallet = null;
   }
 
   public toInternal(amount: number): string {
-    return CryptoCore.BitcoreWallet.toInternal(amount);
+    return this.wallet.toInternal(amount);
   }
 
   public fromInternal(amount: string): number {
-    return Number(CryptoCore.BitcoreWallet.fromInternal(Number(amount)));
+    return Number(this.wallet.fromInternal(Number(amount)));
   }
 
   public fromJSON(tx) {
@@ -56,107 +53,33 @@ export class BitcoreWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    try {
-      this.bitcoreWallet = await CryptoCore.BitcoreWallet.load({
-        accounts: [{
-          key: this.publicKey
-        }],
-        network: this.network
-      });
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to create watching wallet', e);
-    }
+    this.wallet = await this.Wallet.fromOptions({
+      key: this.publicKey,
+      network: this.network
+    });
 
-    try {
-      this.address.next(this.bitcoreWallet.getAddress('base58'));
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to get compound key address', e);
-    }
+    this.address.next(this.wallet.address);
 
     this.balance.next({
       confirmed: this.fromInternal('0'),
       unconfirmed: this.fromInternal('0')
     });
 
-    this.bitcoreWallet.on('balance', (balance) => this.ngZone.run(async () => {
-      this.balance.next({
-        confirmed: this.fromInternal(balance.confirmed),
-        unconfirmed: this.fromInternal(balance.unconfirmed)
-      });
-      this.transactions.next(await this.listTransactionHistory());
-    }));
-
-    // Start: configuring a provider
-    this.provider = this.Provider.fromOptions({
-      network: this.network
-    });
-
-    this.provider.on('transaction', async (hash, meta) => {
-      let hex = await this.bitcoreWallet.getRawTransaction(hash);
-      if (!hex) {
-        hex = await this.provider.pullRawTransaction(hash);
-      }
-      await this.bitcoreWallet.addRawTransaction(hex, meta);
-    });
-
-    // Initiate update routine
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
-        await this.provider.pullTransactions(this.bitcoreWallet.getAddress('base58'));
+        const balance = await this.wallet.getBalance();
+        this.balance.next({
+          confirmed: this.fromInternal(balance.confirmed),
+          unconfirmed: this.fromInternal(balance.unconfirmed)
+        });
       } catch (ignored) {}
     });
-
-    // End: configuring a provider
 
     this.status.next(Status.Ready);
   }
 
   public async listTransactionHistory() {
-    const txs = await this.bitcoreWallet.getTransactions();
-
-    return txs.map(record => {
-      const inputs = record.tx.inputs.map(input => {
-        const address = input.getAddress();
-        return {
-          address: address ? address.toString(this.network) : null
-        };
-      });
-      const outputs = record.tx.outputs.map(output => {
-        const address = CryptoCore.BitcoreWallet.addressFromScript(output.script);
-        return {
-          address: address ? address.toString(this.network) : null,
-          value: output.value
-        };
-      });
-
-      if (inputs.some(input => input.address === this.bitcoreWallet.getAddress('base58'))) { // out
-        // go find change
-        const output = outputs.length > 0 ? outputs[0] : null;
-
-        return HistoryEntry.fromJSON({
-          type: TransactionType.Out,
-          from: this.bitcoreWallet.getAddress('base58'),
-          to: output ? output.address : null,
-          amount: this.fromInternal(output ? output.value : 0),
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      } else { // in
-        // go find our output
-        const value =
-          outputs
-            .filter(output => output.address === this.bitcoreWallet.getAddress('base58'))
-            .reduce((sum, output) => sum + output.value, 0);
-        return HistoryEntry.fromJSON({
-          type: TransactionType.In,
-          from: inputs[0].address,
-          to: this.bitcoreWallet.getAddress('base58'),
-          amount: this.fromInternal(value),
-          confirmed: record.meta !== null,
-          time: record.meta == null ? null : record.meta.time
-        });
-      }
-    });
+    return [];
   }
 
   public async verify(transaction: any, maxFee?: number) {
@@ -200,31 +123,23 @@ export class BitcoreWallet extends CurrencyWallet {
     value: number,
     fee?: number
   ) {
-    const transaction = await this.Transaction.fromOptions({
-      network: this.network
-    });
-
-    /// Fill inputs and calculate script hashes
     try {
-      await transaction.prepare({
-        utxos: await this.bitcoreWallet.getUTXOs(),
-        from: this.bitcoreWallet.getAddress('base58'),
-        address: address,
-        value: Number(this.toInternal(value)),
-        fee: fee ? Number(this.toInternal(fee)) : undefined
-      });
+      return await this.wallet.prepareTransaction(
+        new this.Transaction(),
+        address,
+        Number(this.toInternal(value)),
+        fee ? Number(this.toInternal(fee)) : undefined
+      );
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to prepare transaction', e);
     }
-
-    return transaction;
   }
 
   public async pushTransaction() {
     if (this.signSession.transaction) {
       try {
         const raw = await this.signSession.transaction.toRaw();
-        await this.provider.pushTransaction(raw);
+        await this.wallet.sendSignedTransaction(raw);
       } catch (e) {
         LoggerService.nonFatalCrash('Failed to push transaction', e);
       }

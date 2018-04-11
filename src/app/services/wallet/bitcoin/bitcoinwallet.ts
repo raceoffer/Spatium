@@ -16,7 +16,7 @@ export class BitcoinWallet extends BitcoreWallet {
   ) {
     super(
       CryptoCore.BitcoinTransaction,
-      CryptoCore.BlockchainInfoProvider,
+      CryptoCore.BitcoinWallet,
       network,
       keychain,
       network === 'main' ? Coin.BTC : Coin.BTC_test,
