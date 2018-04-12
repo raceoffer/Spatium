@@ -59,7 +59,7 @@ export class ConfirmationEntryComponent implements OnInit {
       const pincode = result.value;
       this.busy = true;
 
-      const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(pincode, 'utf-8'));
+      const aesKey = await CryptoCore.Utils.deriveAesKey(pincode);
 
       if (this.authService.encryptedSeed) {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');

@@ -50,7 +50,6 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
   timer: any;
 
   constructor(
-    private route: ActivatedRoute,
     private ngZone: NgZone,
     private authService: AuthService,
     private readonly dds: DDSService,

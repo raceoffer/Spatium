@@ -1,7 +1,7 @@
 <app-toolbar
-  [label] = ""
-  [isColored] = "false"
-  [isShadowed] = "false"
+  [label]=""
+  [isColored]="false"
+  [isShadowed]="false"
   (backClicked)="onBackClicked()"></app-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
@@ -37,10 +37,11 @@
              (inputEvent)="setInput($event)"
              [genericLogin]="loginGenerate"
   ></app-login>
-  <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
-               (clearEvent)="setEmpty()"
-               (inputEvent)="setInput($event)"
-  ></app-qr-code>
+  <app-qr-reader class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
+                 [isRepeatable]="true"
+                 (clearEvent)="setEmpty()"
+                 (inputEvent)="setInput($event)"
+  ></app-qr-reader>
   <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
            (clearEvent)="setEmpty()"
            (inputEvent)="setInput($event)"

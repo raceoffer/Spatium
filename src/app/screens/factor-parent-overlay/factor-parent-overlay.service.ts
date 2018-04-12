@@ -7,10 +7,16 @@ import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
 
 
 interface FactorParentOverlayConfig {
+  isColored?: boolean;
+  isShadowed?: boolean;
+  label?: string;
   content?: any;
 }
 
 const DEFAULT_CONFIG: FactorParentOverlayConfig = {
+  isColored: false,
+  isShadowed: false,
+  label: '',
   content: null
 };
 
@@ -70,7 +76,7 @@ export class FactorParentOverlayService {
     const injectionTokens = new WeakMap();
 
     injectionTokens.set(FactorParentOverlayRef, dialogRef);
-    injectionTokens.set(FACTOR_PARENT_DIALOG_DATA, config.content);
+    injectionTokens.set(FACTOR_PARENT_DIALOG_DATA, config);
 
     return new PortalInjector(this.injector, injectionTokens);
   }

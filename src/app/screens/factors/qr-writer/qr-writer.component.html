@@ -1,0 +1,17 @@
+<div fxLayout="column" fxLayoutAlign="center center" class="content">
+  <div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
+    <div class="qrcode" *ngIf="(value | async).length > 0">
+      <qr-code id="qr" [value]="(value | async)" [size]="200" [canvas]="true" [background]="'#f5f5f5'" (click)="saveQr()"></qr-code>
+    </div>
+    <span *ngIf="(value | async).length > 0">Tap to save QR</span>
+
+    <div *ngIf="(value | async).length == 0">
+      <mat-spinner color="accent"></mat-spinner>
+    </div>
+  </div>
+
+  <div class="footer text-center" style="bottom: 0px;" *ngIf="(value | async).length > 0 && !isExport">
+    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="onNext()">Next</button>
+  </div>
+</div>
+

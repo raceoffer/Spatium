@@ -183,18 +183,18 @@ export class QrCodeComponent implements OnInit {
       /*this.busy = true;
       switch (this.next) {
         case 'auth':
-          await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
           await this.router.navigate(['/auth']);
           break;
         case 'registration':
-          await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+          await this.authService.addFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
           await this.router.navigate(['/registration']);
           break;
         case 'factornode':
           if (this.isAuth) {
             await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
           } else {
-            await this.authService.addFactor(FactorType.QR, Buffer.from(this._qrcode, 'utf-8'));
+            await this.authService.addFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
           }
           await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
           break;
@@ -202,7 +202,7 @@ export class QrCodeComponent implements OnInit {
           // if at login-parent
           this.canScanAgain = true;
           this.classVideoContainer = 'invisible';
-          this.inputEvent.emit(this._qrcode);
+          this.inputEvent.emit(this.qrcode);
       }*/
   }
 

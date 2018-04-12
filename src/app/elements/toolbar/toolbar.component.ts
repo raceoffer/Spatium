@@ -6,7 +6,7 @@ import {Component, OnInit, Output, EventEmitter, Input} from '@angular/core';
   styleUrls: ['./toolbar.component.css']
 })
 export class ToolbarComponent implements OnInit {
-  toolbarClass = 'header-toolbar';
+  toolbarClass = 'mat-toolbar mat-primary mat-toolbar-multiple-rows header-toolbar';
   SHADOW = ' shadow';
   MONOCHROME = ' color-custom-dark';
 

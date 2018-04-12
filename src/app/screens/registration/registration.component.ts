@@ -13,6 +13,8 @@ import { NotificationService } from '../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
 import { NavigationService } from '../../services/navigation.service';
+import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
+import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -34,6 +36,10 @@ declare const Buffer: any;
 })
 export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  @ViewChild(FactorParentOverlayRef) child;
+  @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
+
   private subscriptions = [];
 
   stPassword = 'Password';
@@ -51,11 +57,9 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cancel = new Subject<boolean>();
 
-  @ViewChild('factorContainer') factorContainer: ElementRef;
-  @ViewChild('dialogButton') dialogButton;
-
   constructor(
     public  dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
     private readonly keychain: KeyChainService,
@@ -134,7 +138,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.password = this.password;
     const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { back: 'registration', next: 'registration' }
+      data: { isColored: false, isShadowed: false }
     });
 
     dialogRef.componentInstance.onAddFactor.subscribe((result) => {
@@ -143,6 +147,21 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.openOverlay(result);
+    });
+  }
+
+  async openOverlay(component) {
+    this.child = this.factorParentDialog.open({
+      label: '',
+      isColored: true,
+      isShadowed: true,
+      content: component
+    });
+
+    this.child.onAddFactor.subscribe((result) => {
+      this.addFactor(result);
+      this.child.close();
     });
   }
 
@@ -158,7 +177,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async addFactor(result) {
     try {
-      await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      await this.authService.addFactor(result.factor, result.value);
     } catch (e) {
       console.log(e);
     }

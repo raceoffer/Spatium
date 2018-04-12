@@ -1,8 +1,6 @@
 import {Component, EventEmitter, Inject} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
 @Component({
   selector: 'app-dialog-factors',
@@ -14,71 +12,28 @@ export class DialogFactorsComponent {
   onAddFactor = new EventEmitter();
 
   factors: any;
-  next: string = null;
-  back: string = null;
   isAuth: false;
-  label: string = null;
+  label: '';
 
   constructor(
     public dialogRef: MatDialogRef<DialogFactorsComponent>,
-    private factorParentDialog: FactorParentOverlayService,
     private authSevice: AuthService,
-    private router: Router,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.isAuth = data.isFirst;
+    this.isAuth = data.isAuth;
 
-    if (data.label){
+    if (data.label) {
       this.label = data.label;
     }
-
 
     if (this.isAuth) {
       this.factors = this.authSevice.getAuthFactors();
     } else {
       this.factors = this.authSevice.getAllAvailableFactors();
     }
-
-    this.back = data.back;
-    this.next = data.next;
   }
 
   async goTo(factor) {
-    this.dialogRef.close();
-
-    switch (this.back) {
-      case 'factornode':
-        await this.router.navigate([
-          '/navigator',
-          {
-            outlets: {
-              navigator: [
-                'factor',
-                {
-                  back: this.back
-                },
-                {
-                  outlets: {
-                    factor: [
-                      factor.link, {
-                        next: this.next,
-                        isAuth: this.isAuth
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]);
-        break;
-      default:
-        const factorParent = this.factorParentDialog.open({content: factor.component});
-
-        factorParent.onAddFactor.subscribe((result) => {
-          this.onAddFactor.emit(result);
-          factorParent.close();
-        });
-    }
+    this.dialogRef.close(factor.component);
   }
 }

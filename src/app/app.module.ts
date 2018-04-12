@@ -78,6 +78,10 @@ import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
 import { FactorParentOverlayService } from './screens/factor-parent-overlay/factor-parent-overlay.service';
+import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
+import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
+import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
+import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
 
 
 @NgModule({
@@ -118,7 +122,11 @@ import { FactorParentOverlayService } from './screens/factor-parent-overlay/fact
     NumericSpinnerComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
-    FactorParentOverlayComponent
+    FactorParentOverlayComponent,
+    NfcReaderComponent,
+    NfcWriterComponent,
+    QrReaderComponent,
+    QrWriterComponent
   ],
   imports: [
     OverlayModule,
@@ -171,7 +179,15 @@ import { FactorParentOverlayService } from './screens/factor-parent-overlay/fact
   ],
   entryComponents: [
     DialogFactorsComponent,
-    FactorParentOverlayComponent
+    FactorParentOverlayComponent,
+    PincodeComponent,
+    PasswordComponent,
+    FileUploadComponent,
+    GraphicKeyComponent,
+    NfcReaderComponent,
+    NfcWriterComponent,
+    QrReaderComponent,
+    QrWriterComponent
   ]
 })
 

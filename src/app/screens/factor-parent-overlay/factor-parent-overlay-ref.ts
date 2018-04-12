@@ -1,10 +1,10 @@
 import { OverlayRef } from '@angular/cdk/overlay';
-import {EventEmitter} from '@angular/core';
-
+import { EventEmitter } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export class FactorParentOverlayRef<T = any> {
-
-  onAddFactor = new EventEmitter();
+  public onAddFactor = new EventEmitter();
+  public value: BehaviorSubject<string> = null;
 
   constructor(private overlayRef: OverlayRef) {  }
 

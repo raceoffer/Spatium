@@ -3,13 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
-import { PincodeComponent } from './screens/factors/pincode/pincode.component';
 import { AuthComponent } from './screens/auth/auth.component';
-import { PasswordComponent } from './screens/factors/password/password.component';
-import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
-import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
-import { QrCodeComponent } from './screens/factors/qr-code/qr-code.component';
-import { NfcComponent } from './screens/factors/nfc/nfc.component';
 import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
@@ -41,12 +35,6 @@ const appRoutes: Routes = [
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [
-    { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
-    { path: 'password', component: PasswordComponent, outlet: 'factor' },
-    { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
-    { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
-    { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
-    { path: 'nfc', component: NfcComponent, outlet: 'factor' }
   ]},
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
@@ -55,12 +43,6 @@ const appRoutes: Routes = [
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
     { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
     { path: 'factor', component: FactorParentComponent, outlet: 'navigator', children: [
-      { path: 'pincode', component: PincodeComponent, outlet: 'factor' },
-      { path: 'password', component: PasswordComponent, outlet: 'factor' },
-      { path: 'file-upload', component: FileUploadComponent, outlet: 'factor' },
-      { path: 'graphic-key', component: GraphicKeyComponent, outlet: 'factor' },
-      { path: 'qr-code', component: QrCodeComponent, outlet: 'factor' },
-      { path: 'nfc', component: NfcComponent, outlet: 'factor' }
     ]}
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [

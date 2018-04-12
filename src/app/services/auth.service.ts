@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { NotificationService } from './notification.service';
-import {PincodeComponent} from "../screens/factors/pincode/pincode.component";
-import {PasswordComponent} from "../screens/factors/password/password.component";
-import {FileUploadComponent} from "../screens/factors/file-upload/file-upload.component";
-import {GraphicKeyComponent} from "../screens/factors/graphic-key/graphic-key.component";
-import {QrCodeComponent} from "../screens/factors/qr-code/qr-code.component";
-import {NfcComponent} from "../screens/factors/nfc/nfc.component";
+import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
+import { PasswordComponent } from '../screens/factors/password/password.component';
+import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
+import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
+import { NfcWriterComponent } from '../screens/factors/nfc-writer/nfc-writer.component';
+import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
+import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
+import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -44,21 +46,21 @@ export class AuthService {
     this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, AvailableFactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY,
       FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, GraphicKeyComponent));
     this.available.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, QrCodeComponent));
+      FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, QrCodeComponent));
+      FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
 
     nfc.enabled(function () {
         this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC, NfcComponent));
+          FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
         this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC, NfcComponent));
+          FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
       }.bind(this), function (e) {
       if (e !== 'NO_NFC') {
         this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC, NfcComponent));
+          FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
         this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-          FactorIconAsset.NFC, FactorLink.NFC, NfcComponent));
+          FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
       }
     }.bind(this));
   }

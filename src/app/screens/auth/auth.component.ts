@@ -10,6 +10,8 @@ import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
+import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
+import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
 declare const Buffer: any;
 
@@ -30,6 +32,9 @@ declare const Buffer: any;
 })
 export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  @ViewChild(FactorParentOverlayRef) child;
+  @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
 
   busy = false;
 
@@ -46,11 +51,9 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   icon_qr = '';
 
-  @ViewChild('factorContainer') factorContainer: ElementRef;
-  @ViewChild('dialogButton') dialogButton;
-
   constructor(
     public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -130,7 +133,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   addNewFactor(): void {
     const dialogRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { back: 'auth', next: 'auth' }
+      data: { isColored: false, isShadowed: false }
     });
 
     dialogRef.componentInstance.onAddFactor.subscribe((result) => {
@@ -139,6 +142,21 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.openOverlay(result);
+    });
+  }
+
+  async openOverlay(component) {
+    this.child = this.factorParentDialog.open({
+      label: '',
+      isColored: true,
+      isShadowed: true,
+      content: component
+    });
+
+    this.child.onAddFactor.subscribe((result) => {
+      this.addFactor(result);
+      this.child.close();
     });
   }
 
@@ -157,7 +175,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.busy = true;
       this.isPasswordFirst = true;
-      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, result.value);
     } catch (e) {
       console.log(e);
     } finally {
