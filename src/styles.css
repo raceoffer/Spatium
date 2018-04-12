@@ -24,6 +24,10 @@ app-root {
 
 /* Currencies */
 
+.edc {
+  background: url(assets/images/drawable/currency/edc.svg);
+}
+
 .bitcoin {
   background: url(assets/images/drawable/currency/bitcoin.svg);
 }

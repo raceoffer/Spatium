@@ -46,6 +46,13 @@ export class HistoryEntry {
   ) {}
 }
 
+export class Balance {
+  constructor(
+    public confirmed: number,
+    public unconfirmed: number
+  ) {}
+}
+
 export class CurrencyWallet {
   public compoundKey: any = null;
   public publicKey: any = null;
@@ -73,7 +80,7 @@ export class CurrencyWallet {
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(new Balance(0, 0));
   public transactions: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
 
   constructor(
@@ -159,7 +166,7 @@ export class CurrencyWallet {
     }
 
     this.address.next('');
-    this.balance.next({ confirmed: 0, unconfirmed: 0 });
+    this.balance.next(new Balance(0, 0));
     this.transactions.next([]);
     this.syncProgress.next(0);
   }
