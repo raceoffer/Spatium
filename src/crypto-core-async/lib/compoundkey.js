@@ -21,7 +21,7 @@ CompoundKey.prototype.invoke = async function(message, wrapped) {
     class: 'CompoundKey',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'CompoundKey'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
 
   this.state = result.self;
@@ -34,7 +34,7 @@ CompoundKey.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'CompoundKey',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'CompoundKey'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
   return wrapped ? result : Marshal.unwrap(result);
 };
