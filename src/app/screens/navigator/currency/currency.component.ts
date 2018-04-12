@@ -1,13 +1,16 @@
-import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { WalletService } from '../../../services/wallet.service';
-import { Observable } from 'rxjs/Observable';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
 import { Coin, Token } from '../../../services/keychain.service';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { fromPromise } from 'rxjs/observable/fromPromise';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+
 
 @Component({
   selector: 'app-currency',
@@ -25,43 +28,20 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: Observable<string> = null;
-  public balanceCurrencyConfirmed: Observable<number> = null;
-  public balanceCurrencyUnconfirmed: Observable<number> = null;
-  public balanceUsdConfirmed: Observable<number> = null;
-  public balanceUsdUnconfirmed: Observable<number> = null;
-  public transactions: Observable<Array<HistoryEntry>> = null;
+  public walletAddress: BehaviorSubject<string> = null;
+  public balanceCurrencyConfirmed: BehaviorSubject<number> = null;
+  public balanceCurrencyUnconfirmed: BehaviorSubject<number> = null;
+  public balanceUsdConfirmed: BehaviorSubject<number> = null;
+  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
+
+  public transactionsRequest: Observable<Array<HistoryEntry>> = null;
+  public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
+  public transactionsReady: BehaviorSubject<boolean> = null;
 
   public accountLabel = 'Account';
   public sendLabel = 'Send';
 
   private subscriptions = [];
-
-  private static compareTransactions(a, b) {
-    // First unconfirmed transactions
-    if (!a.confirmed && !b.confirmed) {
-      return 0;
-    }
-
-    if (!a.confirmed && b.confirmed) {
-      return -1;
-    }
-
-    if (a.confirmed && !b.confirmed) {
-      return 1;
-    }
-
-    // then confirmed transactions sorted by time
-    if (a.time > b.time) {
-      return -1;
-    }
-
-    if (a.time < b.time) {
-      return 1;
-    }
-
-    return 0;
-  }
 
   constructor(
     private readonly router: Router,
@@ -109,9 +89,13 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             return balance * rate;
           }), 0);
 
+        this.transactionsRequest = fromPromise(this.currencyWallet.listTransactionHistory());
         this.transactions = toBehaviourSubject(
-          this.currencyWallet.transactions.map(transactions => transactions.sort(CurrencyComponent.compareTransactions)),
+          this.transactionsRequest,
           []);
+        this.transactionsReady = toBehaviourSubject(
+          this.transactionsRequest.mapTo(true),
+          false);
       }));
   }
 

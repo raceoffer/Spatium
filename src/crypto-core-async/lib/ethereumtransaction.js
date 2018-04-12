@@ -43,9 +43,9 @@ EthereumTransaction.prototype.fromOptions = async function(options) {
   return this;
 };
 
-EthereumTransaction.fromOptions = async options => new EthereumTransaction(await EthereumTransaction.invokeStatic({
+EthereumTransaction.fromOptions = async (tx, data) => new EthereumTransaction(await EthereumTransaction.invokeStatic({
   method: 'fromOptions',
-  arguments: [options]
+  arguments: [tx, data]
 }, true));
 
 EthereumTransaction.prototype.estimateSize = async function() {
@@ -69,10 +69,10 @@ EthereumTransaction.prototype.totalOutputs = async function() {
   });
 };
 
-EthereumTransaction.prototype.transferData = async function() {
+EthereumTransaction.prototype.validate = async function(address) {
   return await this.invoke({
-    method: 'transferData',
-    arguments: []
+    method: 'validate',
+    arguments: [address]
   });
 };
 

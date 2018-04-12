@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 declare const CryptoCore: any;
 
 export class EthereumWallet extends CurrencyWallet {
-  private ethereumWallet: any = null;
+  private wallet: any = null;
   private routineTimerSub: any = null;
 
   constructor(
@@ -24,7 +24,7 @@ export class EthereumWallet extends CurrencyWallet {
   public async reset() {
     await super.reset();
 
-    this.ethereumWallet = null;
+    this.wallet = null;
 
     if (this.routineTimerSub) {
       this.routineTimerSub.unsubscribe();
@@ -32,16 +32,12 @@ export class EthereumWallet extends CurrencyWallet {
     }
   }
 
-  public async fee(transaction) {
-    return await transaction.estimateFee();
-  }
-
   public toInternal(amount: number): string {
-    return this.ethereumWallet.toWei(amount.toString(), 'ether');
+    return this.wallet.toInternal(amount.toString());
   }
 
   public fromInternal(amount: string): number {
-    return Number(this.ethereumWallet.fromWei(amount, 'ether'));
+    return Number(this.wallet.fromInternal(amount));
   }
 
   public async fromJSON(tx) {
@@ -51,17 +47,22 @@ export class EthereumWallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.ethereumWallet = await CryptoCore.EthereumWallet.load({
+    this.wallet = await CryptoCore.EthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.EthereumWallet.address(this.publicKey),
+      key: this.publicKey,
       network: this.network
     });
 
-    this.address.next(this.ethereumWallet.address);
+    this.address.next(this.wallet.address);
+
+    this.balance.next({
+      confirmed: this.fromInternal('0'),
+      unconfirmed: this.fromInternal('0')
+    });
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
-        const balance = await this.ethereumWallet.getBalance();
+        const balance = await this.wallet.getBalance();
         this.balance.next({
           confirmed: this.fromInternal(balance),
           unconfirmed: this.fromInternal(balance)
@@ -73,13 +74,12 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    const tx = await this.ethereumWallet.prepareTransaction(
+    return await this.wallet.prepareTransaction(
+      new CryptoCore.EthereumTransaction(),
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
-
-    return await CryptoCore.EthereumTransaction.fromOptions(tx);
   }
 
   public async listTransactionHistory() {
@@ -89,7 +89,7 @@ export class EthereumWallet extends CurrencyWallet {
   public async pushTransaction() {
     if (this.signSession.transaction) {
       const raw = await this.signSession.transaction.toRaw();
-      await this.ethereumWallet.sendSignedTransaction(raw);
+      await this.wallet.sendSignedTransaction(raw);
     }
   }
 }
