@@ -18,9 +18,11 @@ module.exports = function(context) {
 
   console.log('Building Angular application into "./www" directory.');
 
+  let baseHref = context.cordova.platform === 'windows' ? "/www/" : "/android_asset/www/";
+  const buildCommand = "ng build --aot --output-path cordova/www/ --base-href " + baseHref;
+
   console.log(execSync(
-    //"ng build --aot --output-path cordova/www/ --base-href /android_asset/www/",
-    "ng build --aot --output-path cordova/www/ --base-href /www/",
+    buildCommand,
     {
       maxBuffer: 1024*1024,
       cwd: basePath + '/..'
