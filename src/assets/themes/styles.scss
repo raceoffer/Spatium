@@ -538,7 +538,7 @@ input[type="password-pin"] {
   padding-left: 0.7em
 }
 
-input[type=text]::-ms-clear {
+input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   display: none;
 }
 

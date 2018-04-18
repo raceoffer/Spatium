@@ -70,4 +70,11 @@ export class PasswordComponent implements OnInit {
     }
   }
 
+  onFocusOut() {
+    this.stPassword = 'Password';
+  }
+
+  onFocus() {
+    this.stPassword = '';
+  }
 }
