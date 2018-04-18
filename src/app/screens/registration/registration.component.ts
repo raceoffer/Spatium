@@ -220,4 +220,12 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   _sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+
+  onFocusOut() {
+    this.stPassword = 'Password';
+  }
+
+  onFocus() {
+    this.stPassword = '';
+  }
 }

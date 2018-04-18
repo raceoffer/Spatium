@@ -1,10 +1,8 @@
 <mat-toolbar color="primary" class="header-toolbar shadow">
-  <mat-toolbar-row>
     <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
-      <mat-icon>arrow_back</mat-icon>
+      <mat-icon style="display: flex; justify-content: center;">arrow_back</mat-icon>
     </button>
     <span>{{ currencyInfo?.name }}</span>
-  </mat-toolbar-row>
 </mat-toolbar>
 
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center">

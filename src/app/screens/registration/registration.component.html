@@ -22,8 +22,8 @@
       </div>
 
       <div class="spatium-textfield entry bottom10">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password"
-               [disabled]="uploading">
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password" [autofocus]
+               [disabled]="uploading" (focus)="onFocus()" (focusout)="onFocusOut()">
       </div>
     </div>
 
