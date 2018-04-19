@@ -35,8 +35,52 @@ export class Info {
   }
 }
 
+
+export enum CurrencyServerName {
+  Spatium = 'Spatium',
+  Custom = 'Custom',
+  BitPay = 'insight.bitpay.com',
+  TestBitPay = 'test-insight.bitpay.com',
+  Blockdozer = 'bch.blockdozer.com',
+  Infura = 'mainnet.infura.io',
+  Litecore = 'insight.litecore.io',
+}
+
+export class CurrencySettings {
+  serverName: CurrencyServerName;
+  serverUrl: string;
+
+  constructor() {
+    this.serverName = CurrencyServerName.Spatium;
+  }
+}
+
 @Injectable()
 export class CurrencyService {
+  private readonly spatiumBaseUrl = 'http://185.219.80.169:8080';
+  private readonly currencyApiServers = new Map<Coin | Token, Map<string,string>>([
+    [Coin.BTC, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/bitcoin/mainnet/insights`],
+      [CurrencyServerName.BitPay, 'https://insight.bitpay.com/api']
+    ])],
+    [Coin.BTC_test, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/bitcoin/testnet/insights`],
+      [CurrencyServerName.TestBitPay, 'https://test-insight.bitpay.com/api']
+    ])],
+    [Coin.BCH, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/bitcoincash/mainnet/insights`],
+      [CurrencyServerName.Blockdozer, 'https://bch.blockdozer.com/insight-api']
+    ])],
+    [Coin.ETH, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/etherium/mainnet/infura`],
+      [CurrencyServerName.Infura, 'https://mainnet.infura.io/dlYX0gLUjGGCk7IBFq2C']
+    ])],
+    [Coin.LTC, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/lightcoin/mainnet/insights`],
+      [CurrencyServerName.Litecore, 'https://insight.litecore.io/api']
+    ])]
+  ]);
+
   private readonly staticInfo = new Map<Coin | Token, Info>([
     [ Coin.BTC, new Info(
       'Bitcoin',
@@ -125,5 +169,47 @@ export class CurrencyService {
         null),
       tokenEntry.className
     )
+  }
+
+  public getAvailableApiServers(currency: Coin | Token) : Map<string, string> {
+    let servers = this.currencyApiServers.get(currency as Coin);
+    if(!servers)
+      servers = this.currencyApiServers.get(Coin.ETH);
+
+    return servers;
+  }
+
+  public getApiServer(currency: Coin | Token) : string {
+    let settings = this.getSettings(currency);
+
+    if(settings && settings.serverName == CurrencyServerName.Custom && settings.serverUrl) {
+      return settings.serverUrl;
+    }
+
+    return this.getAvailableApiServers(currency).get(settings ? settings.serverName : CurrencyServerName.Spatium);
+  }
+
+  public getSettings(currency: Coin | Token) : CurrencySettings {
+    let jsonSettings : any;
+    let settings : CurrencySettings = new CurrencySettings();
+
+    jsonSettings = localStorage.getItem('settings.currency');
+    if(jsonSettings) {
+      jsonSettings = JSON.parse(jsonSettings)[currency];
+    }
+
+    if(!jsonSettings)
+      return settings;
+
+    settings.serverName = jsonSettings.serverName
+    settings.serverUrl = jsonSettings.serverUrl;
+    return settings;
+  }
+
+  public saveSettings(currency: Coin | Token, settings: CurrencySettings) {
+    let items :any = localStorage.getItem('settings.currency');
+    items = items ? JSON.parse(items) : {};
+    items[currency] = settings;
+    localStorage.setItem('settings.currency', JSON.stringify(items));
   }
 }

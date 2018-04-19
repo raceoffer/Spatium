@@ -15,6 +15,7 @@ export class ERC20Wallet extends CurrencyWallet {
   private routineTimerSub: any = null;
 
   constructor(
+    private endpoint: string,
     network: string,
     keychain: KeyChainService,
     account: number,
@@ -67,7 +68,8 @@ export class ERC20Wallet extends CurrencyWallet {
       key: this.publicKey,
       network: this.network,
       contractAddress: this.contractAddress,
-      decimals: this.decimals
+      decimals: this.decimals,
+      endpoint: this.endpoint,
     });
 
     this.address.next(this.wallet.address);
@@ -98,7 +100,8 @@ export class ERC20Wallet extends CurrencyWallet {
       key: this.publicKey,
       contractAddress: this.contractAddress,
       network: this.network,
-      decimals: this.decimals
+      decimals: this.decimals,
+      endpoint: this.endpoint,
     });
 
     this.address.next(this.wallet.address);

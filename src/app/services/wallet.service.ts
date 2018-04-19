@@ -8,6 +8,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 import { BluetoothService } from './bluetooth.service';
+import { CurrencyService, CurrencySettings, CurrencyServerName } from './currency.service';
 import { Coin, Token, KeyChainService } from './keychain.service';
 import { toBehaviourSubject } from '../utils/transformers';
 
@@ -45,12 +46,14 @@ export class WalletService {
 
   constructor(
     private readonly bt: BluetoothService,
+    private readonly currencyService: CurrencyService,
     private readonly keychain: KeyChainService,
     private readonly ngZone: NgZone
   ) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
+        currencyService.getApiServer(Coin.BTC_test),
         'testnet',
         this.keychain,
         1,
@@ -61,6 +64,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BTC,
       new BitcoinWallet(
+        currencyService.getApiServer(Coin.BTC),
         'main',
         this.keychain,
         1,
@@ -71,6 +75,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
+        currencyService.getApiServer(Coin.BCH),
         'main',
         this.keychain,
         1,
@@ -81,6 +86,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.LTC,
       new LitecoinWallet(
+        currencyService.getApiServer(Coin.LTC),
         'main',
         this.keychain,
         1,
@@ -91,6 +97,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.ETH,
       new EthereumWallet(
+        currencyService.getApiServer(Coin.ETH),
         'main',
         this.keychain,
         1,
@@ -238,6 +245,7 @@ export class WalletService {
     this.tokenWallets.set(
       token,
       new ERC20Wallet(
+        this.currencyService.getApiServer(Coin.ETH),
         network,
         this.keychain,
         1,

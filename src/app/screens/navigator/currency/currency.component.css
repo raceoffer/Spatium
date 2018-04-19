@@ -67,5 +67,6 @@ input.mat-input-element{
   background-color: #f5f5f5;
 }
 
-
-
+.spacer {
+  flex: 1 1 auto;
+}

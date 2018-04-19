@@ -73,6 +73,7 @@ import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
+import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 
 @NgModule({
   declarations: [
@@ -109,7 +110,8 @@ import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spin
     SecretImportComponent,
     SettingsComponent,
     LogoBlockComponent,
-    NumericSpinnerComponent
+    NumericSpinnerComponent,
+    CurrencySettingsComponent
   ],
   imports: [
     FormsModule,

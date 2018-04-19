@@ -101,6 +101,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.currency] } }]);
   }
 
+  async onSettingsClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency, 'settings'] } }]);
+  }
+
   async onBackClicked() {
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
   }

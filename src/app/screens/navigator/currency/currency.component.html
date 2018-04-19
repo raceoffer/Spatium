@@ -4,6 +4,12 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <span>{{ currencyInfo?.name }}</span>
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="onSettingsClicked()">
+      <mat-icon>settings</mat-icon>
+    </button>
+
   </mat-toolbar-row>
 </mat-toolbar>
 

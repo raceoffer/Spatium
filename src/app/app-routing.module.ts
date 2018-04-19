@@ -17,6 +17,7 @@ import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
+import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
@@ -48,6 +49,7 @@ const appRoutes: Routes = [
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
+    { path: 'currency/:coin/settings', component: CurrencySettingsComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
     { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
