@@ -16,6 +16,8 @@ export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
+  cols: any = 2;
+
   public isOpened = false;
   public title = 'Wallet';
   public isExitTap = false;
@@ -171,5 +173,10 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   isWindows(): boolean {
     return device.platform === 'windows';
+  }
+
+  onResize(event): void {
+    const element = event.target.innerWidth;
+    this.cols = Math.ceil(element / 400);
   }
 }

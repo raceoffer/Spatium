@@ -29,11 +29,11 @@
   </button>
 </mat-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
+<div fxLayout="column" fxLayoutAlign="start center" class="box" (window:resize)="onResize($event)">
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <mat-grid-list cols="2" rowHeight="2:1">
+    <mat-grid-list cols="{{cols}}" rowHeight="2:1">
       <mat-grid-tile
         *ngFor="let tile of filtredTitles"
         [colspan]="tile.cols"
