@@ -400,5 +400,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }
     }), e => console.log(e));
   }
+
+  copy () {
+    console.log(this.walletAddress.value);
+    cordova.plugins.clipboard.copy(this.walletAddress.value);
+  }
 }
 

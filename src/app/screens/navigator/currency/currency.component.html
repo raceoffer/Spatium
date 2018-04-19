@@ -13,14 +13,13 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2">
-        <div class="field" style="margin-bottom: 13px;">
-          <mat-select [value]="walletAddress | async">
-            <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-              {{ walletAddress | async }}
-            </mat-option>
-          </mat-select>
-        </div>
+      <td colspan="2" style="margin-bottom: 13px;">
+        <mat-form-field class="field" color="accent">
+          <textarea readonly matInput [value]="walletAddress | async"></textarea>
+          <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </mat-form-field>
       </td>
     </tr>
     <tr>

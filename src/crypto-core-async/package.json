@@ -5,12 +5,18 @@
   "main": "index.js",
   "scripts": {
     "webpack": "webpack --config webpack.config.js",
+    "webpack-min": "webpack --config webpack.min.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "crypto-core": "file:../crypto-core",
-    "promise-worker": "^1.1.1"
+    "promise-worker": "^1.1.1",
+    "webpack": "^4.6.0"
+  },
+  "devDependencies": {
+    "uglifyjs-webpack-plugin": "^1.2.4",
+    "webpack-cli": "^2.0.14"
   }
 }

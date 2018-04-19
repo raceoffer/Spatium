@@ -64,9 +64,7 @@
 
     <div class="footer text-center" style="bottom: 0px;">
       <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
-        <button mat-icon-button [disabled]="uploading" type="button" style="float: right;" (click)="openAdvanced()">
-          <mat-icon style="opacity: 0.5;">lock_open</mat-icon>
-        </button>
+        <label style="opacity: 0.5; font-size: 12px; float: right; margin: 5px;" (click)="openAdvanced()">Advanced security</label>
       </div>
 
       <button type="submit" mat-raised-button color="accent" (click)="signUp()"
