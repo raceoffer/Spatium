@@ -127,6 +127,8 @@ export class WalletComponent implements OnInit, OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.onResize();
   }
 
   ngOnDestroy() {
@@ -175,8 +177,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     return device.platform === 'windows';
   }
 
-  onResize(event): void {
-    const element = event.target.innerWidth;
-    this.cols = Math.ceil(element / 400);
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 }

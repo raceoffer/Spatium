@@ -29,7 +29,7 @@
   </button>
 </mat-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box" (window:resize)="onResize($event)">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" (window:resize)="onResize()">
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 

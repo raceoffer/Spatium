@@ -466,6 +466,13 @@ app-root {
   background: url(assets/images/drawable/currency/loomNetwork.svg);
 }
 
+.currency-component {
+  max-width: 700px !important;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .currency-component .mat-select-trigger {
   height: 100%;
 }
