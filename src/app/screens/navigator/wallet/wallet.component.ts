@@ -16,6 +16,8 @@ export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
+  cols: any = 2;
+
   public isOpened = false;
   public title = 'Wallet';
   public isExitTap = false;
@@ -125,6 +127,8 @@ export class WalletComponent implements OnInit, OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.onResize();
   }
 
   ngOnDestroy() {
@@ -171,5 +175,9 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   isWindows(): boolean {
     return device.platform === 'windows';
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 }
