@@ -120,43 +120,45 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (isAuth) {
       label = 'Identification factor';
     }
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
+    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isAuth: isAuth, label: label, isColored: true, isShadowed: true },
     });
 
-    dialogRef.componentInstance.onAddFactor.subscribe((result) => {
+    dialogFactorRef.componentInstance.onAddFactor.subscribe((result) => {
       this.addFactor(result);
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogFactorRef.afterClosed().subscribe((result) => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.openOverlay(label, result);
+      this.openFactorOverlay(label, result);
     });
   }
 
-  async openOverlay(label, component) {
-    if (component === QrWriterComponent) {
-      this.generateLogin(true).catch(() => {});
-    } else if (component === NfcWriterComponent) {
-      this.generateLogin(false).catch(() => {});
+  async openFactorOverlay(label, component) {
+    if (typeof component !== 'undefined') {
+      if (component === QrWriterComponent) {
+        this.generateLogin(true).catch(() => {});
+      } else if (component === NfcWriterComponent) {
+        this.generateLogin(false).catch(() => {});
+      }
+
+      this.child = this.factorParentDialog.open({
+        label: label,
+        isColored: true,
+        isShadowed: true,
+        content: component
+      });
+
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+      });
+
+      this.child.value = this.value;
+
+      console.log(this.child);
     }
-
-    this.child = this.factorParentDialog.open({
-      label: label,
-      isColored: true,
-      isShadowed: true,
-      content: component
-    });
-
-    this.child.onAddFactor.subscribe((result) => {
-      this.addFactor(result);
-      this.child.close();
-    });
-
-    this.child.value = this.value;
-
-    console.log(this.child);
   }
 
   async addFactor(result) {

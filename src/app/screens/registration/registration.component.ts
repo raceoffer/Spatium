@@ -122,17 +122,19 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async openFactorOverlay(component) {
-    this.child = this.factorParentDialog.open({
-      label: '',
-      isColored: false,
-      isShadowed: false,
-      content: component
-    });
+    if (typeof component !== 'undefined') {
+      this.child = this.factorParentDialog.open({
+        label: '',
+        isColored: false,
+        isShadowed: false,
+        content: component
+      });
 
-    this.child.onAddFactor.subscribe((result) => {
-      this.addFactor(result);
-      this.child.close();
-    });
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+      });
+    }
   }
 
   removeFactor(factor): void {

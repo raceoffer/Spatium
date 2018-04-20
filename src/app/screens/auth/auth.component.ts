@@ -131,33 +131,35 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addNewFactor(): void {
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
+    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isColored: false, isShadowed: false }
     });
 
-    dialogRef.componentInstance.onAddFactor.subscribe((result) => {
+    dialogFactorRef.componentInstance.onAddFactor.subscribe((result) => {
       this.addFactor(result);
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogFactorRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
       this.openFactorOverlay(result);
     });
   }
 
   async openFactorOverlay(component) {
-    this.child = this.factorParentDialog.open({
-      label: '',
-      isColored: false,
-      isShadowed: false,
-      content: component
-    });
+    if (typeof component !== 'undefined') {
+      this.child = this.factorParentDialog.open({
+        label: '',
+        isColored: false,
+        isShadowed: false,
+        content: component
+      });
 
-    this.child.onAddFactor.subscribe((result) => {
-      this.addFactor(result);
-      this.child.close();
-    });
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+      });
+    }
   }
 
   removeFactor(factor): void {
