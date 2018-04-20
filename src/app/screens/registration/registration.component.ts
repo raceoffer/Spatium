@@ -90,8 +90,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.goBottom();
-
     this.changeDetectorRef.detectChanges();
   }
 

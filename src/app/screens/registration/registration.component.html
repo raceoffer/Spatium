@@ -7,7 +7,7 @@
 </mat-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box" id="factor-container" #factorContainer
-     style="overflow: auto;">
+     style="overflow: scroll;">
   <div class="header text-center">
     <app-logo-block></app-logo-block>
   </div>
@@ -28,14 +28,14 @@
     </div>
 
     <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
-         style="overflow: auto; max-height: 100%; min-height: fit-content;" *ngIf="!advancedMode">
+         style="overflow: scroll; max-height: 100%; min-height: fit-content;" *ngIf="!advancedMode">
       <div class="reg-warning">
         <span>{{ stWarning }}</span>
       </div>
     </div>
 
     <div class="content text-center" style="min-height: fit-content;"
-         style="overflow: auto; max-height: 100%; min-height: fit-content;" *ngIf="advancedMode">
+         style="overflow: scroll; max-height: 100%; min-height: fit-content;" *ngIf="advancedMode">
       <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;"
            [@anim]="factor.state">
         <div style="margin-left: 50px;">
