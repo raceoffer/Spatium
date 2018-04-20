@@ -58,7 +58,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   cancel = new Subject<boolean>();
 
   constructor(
-    public  dialog: MatDialog,
+    public dialog: MatDialog,
     public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
@@ -86,25 +86,9 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.advancedMode) {
       this.factorContainer.nativeElement.classList.add('content');
     }
-
-    $('#factor-container').scroll(function () {
-
-      if ($(this).scrollTop() > 0) {
-        $('#top-scroller').fadeIn();
-      } else {
-        $('#top-scroller').fadeOut();
-      }
-
-      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
-        $('#bottom-scroller').fadeIn();
-      } else {
-        $('#bottom-scroller').fadeOut();
-      }
-    });
   }
 
   ngAfterViewInit() {
-    this.checkOverflow(this.factorContainer);
     this.goBottom();
 
     this.changeDetectorRef.detectChanges();
@@ -115,19 +99,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  checkOverflow (element) {
-    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
-      $('#bottom-scroller').fadeIn();
-    } else {
-      $('#bottom-scroller').fadeOut();
-    }
-  }
-
-  goTop() {
-    const container = $('#factor-container');
-    container.animate({scrollTop: 0}, 500, 'swing');
-  }
-
   goBottom() {
     const container = $('#factor-container');
     const height = document.getElementById('factor-container').scrollHeight;
@@ -136,26 +107,26 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addNewFactor() {
     this.authService.password = this.password;
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
+    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isColored: false, isShadowed: false }
     });
 
-    dialogRef.componentInstance.onAddFactor.subscribe((result) => {
+    dialogFactorRef.componentInstance.onAddFactor.subscribe((result) => {
       this.addFactor(result);
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogFactorRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.openOverlay(result);
+      this.openFactorOverlay(result);
     });
   }
 
-  async openOverlay(component) {
+  async openFactorOverlay(component) {
     this.child = this.factorParentDialog.open({
       label: '',
-      isColored: true,
-      isShadowed: true,
+      isColored: false,
+      isShadowed: false,
       content: component
     });
 
@@ -169,15 +140,12 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.rmFactor(factor);
     this.factors = this.authService.factors;
     this.changeDetectorRef.detectChanges();
-
-    this.sleep(650).then(() => {
-      this.checkOverflow(this.factorContainer);
-    });
   }
 
   async addFactor(result) {
     try {
       await this.authService.addFactor(result.factor, result.value);
+      this.goBottom();
     } catch (e) {
       console.log(e);
     }
@@ -237,13 +205,5 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     } finally {
       this.uploading = false;
     }
-  }
-
-  async sleep(ms: number) {
-    await this._sleep(ms);
-  }
-
-  _sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
