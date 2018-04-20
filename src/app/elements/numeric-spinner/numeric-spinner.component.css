@@ -1,42 +1,42 @@
 .overlay-container {
-    position: relative;
-    display: table;
-  }
-  
-  .overlay-item {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    display: table;
-  }
-  
-  .outer-spinner-wrapper {
-    display: table-cell;
-    vertical-align: middle;
-    margin: auto;
-  }
-  
-  .inner-spinner-wrapper {
-    display: table-cell;
-    vertical-align: middle;
-  }
-  
-  .label-wrapper {
-    display: table-cell;
-    vertical-align: middle;
-    text-align: center;
-  }
-  
-  .outer-spinner {
-    margin: auto;
-  }
-  
-  .inner-spinner {
-    margin: auto;
-  }
-  
-  .label {
-  
-  }
+  position: relative;
+  display: table;
+}
+
+.overlay-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: table;
+}
+
+.outer-spinner-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+  margin: auto;
+}
+
+.inner-spinner-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.label-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.outer-spinner {
+  margin: auto;
+}
+
+.inner-spinner {
+  margin: auto;
+}
+
+.label {
+
+}

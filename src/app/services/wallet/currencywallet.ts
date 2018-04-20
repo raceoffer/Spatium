@@ -1,7 +1,6 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { BluetoothService } from '../bluetooth.service';
-import { LoggerService } from '../logger.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
 import { Subject } from 'rxjs/Subject';
@@ -28,7 +27,7 @@ export enum TransactionType {
 export class HistoryEntry {
   static fromJSON(json) {
     return new HistoryEntry(
-      json.type,
+      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
       json.from,
       json.to,
       json.amount,
@@ -44,6 +43,13 @@ export class HistoryEntry {
     public amount: number,
     public confirmed: boolean,
     public time: number
+  ) {}
+}
+
+export class Balance {
+  constructor(
+    public confirmed: number,
+    public unconfirmed: number
   ) {}
 }
 
@@ -74,7 +80,7 @@ export class CurrencyWallet {
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public balance: BehaviorSubject<any> = new BehaviorSubject<any>({ confirmed: 0, unconfirmed: 0 });
+  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(new Balance(0, 0));
   public transactions: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
 
   constructor(
@@ -160,7 +166,7 @@ export class CurrencyWallet {
     }
 
     this.address.next('');
-    this.balance.next({ confirmed: 0, unconfirmed: 0 });
+    this.balance.next(new Balance(0, 0));
     this.transactions.next([]);
     this.syncProgress.next(0);
   }
@@ -184,20 +190,6 @@ export class CurrencyWallet {
       await this.signSession.cancel();
       this.signSession = null;
     }
-  }
-
-  public async outputs(transaction) {
-    return await transaction.totalOutputs();
-  }
-
-  public async fee(transaction) {
-    return 0;
-  }
-
-  public async verify(transaction: any, maxFee?: number) {
-    const statistics = await transaction.totalOutputs();
-
-    return !(!statistics.outputs || statistics.outputs.length !== 1 || statistics.outputs[0].value <= 0);
   }
 
   public async acceptTransaction() {
@@ -296,6 +288,10 @@ export class CurrencyWallet {
     }
 
     return verify;
+  }
+
+  public async listTransactionHistory() {
+    return [];
   }
 
   public async createTransaction(

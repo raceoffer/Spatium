@@ -5,37 +5,42 @@ module.exports = function(context) {
   const basePath = context.opts.projectRoot;
   const baseWWW = basePath + '/www';
 
-  if (context.opts.options && context.opts.options['build-bcoin']) {
-    console.log('Building bcoin bundle.');
+  const prod = context.opts.options && context.opts.options['production'];
+  const noCore = context.opts.options && context.opts.options['nocore'];
+
+  if (!noCore) {
+    console.log('Building core bundle.');
+
+    const webpackCommand = 'npm run webpack' + (prod ? '-min' : '');
+    console.log('Command:', webpackCommand);
+
     console.log(execSync(
-        "npm run webpack",
-        {
-          maxBuffer: 1024*1024,
-          cwd: basePath + '/../src/crypto-core-async'
-        }).toString('utf8')
-      );
+      webpackCommand,
+      {
+        maxBuffer: 1024 * 1024,
+        cwd: basePath + '/../src/crypto-core-async'
+      }).toString('utf8')
+    );
   }
 
   console.log('Building Angular application into "./www" directory.');
 
-  let baseHref = "/www/";
+  let baseHref = "/android_asset/www/";
   if (context.opts.cordova.platforms.length === 1) {
-    baseHref = context.opts.cordova.platforms[0] === 'windows' ? baseHref : "/android_asset/www/";
-    console.log('baseHref: ' + baseHref);
+    baseHref = context.opts.cordova.platforms[0] === 'windows' ? "/www/" : baseHref;
   }
-
-  const buildCommand = "ng build --aot --output-path cordova/www/ --base-href " + baseHref;
-
+  const command = 'ng build --aot ' + (prod ? '--prod ' : '') + '--output-path cordova/www/ --base-href ' + baseHref;
+  console.log('Command:', command);
   console.log(execSync(
-    buildCommand,
+    command,
     {
       maxBuffer: 1024*1024,
       cwd: basePath + '/..'
     }).toString('utf8')
   );
 
-  var files = fs.readdirSync(baseWWW);
-  for (var i = 0; i < files.length; i++) {
+  const files = fs.readdirSync(baseWWW);
+  for (let i = 0; i < files.length; i++) {
     if (files[i].endsWith('.gz')) {
       fs.unlinkSync(baseWWW + '/' + files[i]);
     }

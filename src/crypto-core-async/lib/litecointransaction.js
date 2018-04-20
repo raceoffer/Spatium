@@ -22,7 +22,7 @@ LitecoinTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'LitecoinTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'LitecoinTransaction'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
   return wrapped ? result : Marshal.unwrap(result);
 };

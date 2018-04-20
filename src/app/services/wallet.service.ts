@@ -100,7 +100,7 @@ export class WalletService {
       ));
 
     keychain.topTokens.forEach((tokenInfo) => {
-      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.network);
+      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
     });
 
     for (const coin of Array.from(this.coinWallets.keys())) {
@@ -200,6 +200,7 @@ export class WalletService {
           this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
           await Observable.timer(200).toPromise();
         }
+
         tokenIndex++;
       }
 
@@ -209,6 +210,7 @@ export class WalletService {
         this.status.next(Status.Ready);
       }
     } catch (e) {
+      console.log(e);
       this.status.next(Status.Failed);
     }
   }
@@ -232,7 +234,7 @@ export class WalletService {
     }
   }
 
-  createTokenWallet (token: Token, contractAddress: string, network: string = 'main') {
+  createTokenWallet (token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
     this.tokenWallets.set(
       token,
       new ERC20Wallet(
@@ -243,7 +245,8 @@ export class WalletService {
         this.bt,
         this.ngZone,
         token,
-        contractAddress
+        contractAddress,
+        decimals,
       ));
   }
 }

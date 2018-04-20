@@ -6,14 +6,14 @@ const Marshal = require('crypto-core/lib/marshal');
 
 const CryptoCore = {
   Utils: require('crypto-core/lib/utils'),
-  CompoundKey: require('crypto-core/lib/compoundkey'),
-  PaillierProver: require('crypto-core/lib/paillierprover'),
-  PaillierVerifier: require('crypto-core/lib/paillierverifier'),
-  Signer: require('crypto-core/lib/signer'),
-  BitcoinTransaction: require('crypto-core/lib/bitcore/bitcointransaction'),
-  BitcoinCashTransaction: require('crypto-core/lib/bitcore/bitcoincashtransaction'),
-  LitecoinTransaction: require('crypto-core/lib/bitcore/litecointransaction'),
-  EthereumTransaction: require('crypto-core/lib/ethereum/ethereumtransaction')
+  CompoundKey: require('crypto-core/lib/primitives/compoundkey'),
+  PaillierProver: require('crypto-core/lib/primitives/paillierprover'),
+  PaillierVerifier: require('crypto-core/lib/primitives/paillierverifier'),
+  Signer: require('crypto-core/lib/primitives/signer'),
+  BitcoinTransaction: require('crypto-core/lib/transaction/bitcore/bitcointransaction'),
+  BitcoinCashTransaction: require('crypto-core/lib/transaction/bitcore/bitcoincashtransaction'),
+  LitecoinTransaction: require('crypto-core/lib/transaction/bitcore/litecointransaction'),
+  EthereumTransaction: require('crypto-core/lib/transaction/ethereum/ethereumtransaction')
 };
 
 registerPromiseWorker(async message => {
@@ -44,8 +44,8 @@ registerPromiseWorker(async message => {
       );
 
       return {
-        result: Marshal.wrap(result, message.class),
-        self: Marshal.wrap(self, message.class)
+        result: Marshal.wrap(result),
+        self: Marshal.wrap(self)
       };
     case 'invokeStatic':
       assert(
@@ -57,6 +57,6 @@ registerPromiseWorker(async message => {
         objectClass,
         message.method,
         ... _.map(_.defaultTo(message.arguments, []), Marshal.unwrap)
-      ), message.class);
+      ));
   }
 });

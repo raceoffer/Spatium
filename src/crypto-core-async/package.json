@@ -12,11 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "crypto-core": "file:../crypto-core",
-    "promise-worker": "^1.1.1",
-    "webpack": "^4.6.0"
+    "promise-worker": "^1.1.1"
   },
   "devDependencies": {
-    "uglifyjs-webpack-plugin": "^1.2.4",
-    "webpack-cli": "^2.0.14"
+    "uglifyjs-webpack-plugin": "^1.2.4"
   }
 }

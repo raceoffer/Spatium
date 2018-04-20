@@ -17,7 +17,7 @@ EthereumTransaction.prototype.invoke = async function(message, wrapped) {
     class: 'EthereumTransaction',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'EthereumTransaction'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
 
   this.state = result.self;
@@ -30,7 +30,7 @@ EthereumTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'EthereumTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'EthereumTransaction'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
   return wrapped ? result : Marshal.unwrap(result);
 };
@@ -43,9 +43,9 @@ EthereumTransaction.prototype.fromOptions = async function(options) {
   return this;
 };
 
-EthereumTransaction.fromOptions = async options => new EthereumTransaction(await EthereumTransaction.invokeStatic({
+EthereumTransaction.fromOptions = async (tx, data) => new EthereumTransaction(await EthereumTransaction.invokeStatic({
   method: 'fromOptions',
-  arguments: [options]
+  arguments: [tx, data]
 }, true));
 
 EthereumTransaction.prototype.estimateSize = async function() {
@@ -69,10 +69,10 @@ EthereumTransaction.prototype.totalOutputs = async function() {
   });
 };
 
-EthereumTransaction.prototype.transferData = async function() {
+EthereumTransaction.prototype.validate = async function(address) {
   return await this.invoke({
-    method: 'transferData',
-    arguments: []
+    method: 'validate',
+    arguments: [address]
   });
 };
 

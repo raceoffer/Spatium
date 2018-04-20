@@ -18,7 +18,7 @@ BitcoreTransaction.prototype.invoke = async function(message, wrapped) {
     class: this.subclass,
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, this.subclass))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
 
   this.state = result.self;
@@ -31,7 +31,7 @@ BitcoreTransaction.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'BitcoreTransaction',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'BitcoreTransaction'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
   return wrapped ? result : Marshal.unwrap(result);
 };
@@ -60,6 +60,20 @@ BitcoreTransaction.prototype.totalOutputs = async function() {
   return await this.invoke({
     method: 'totalOutputs',
     arguments: []
+  });
+};
+
+BitcoreTransaction.prototype.estimateFee = async function() {
+  return await this.invoke({
+    method: 'estimateFee',
+    arguments: []
+  });
+};
+
+BitcoreTransaction.prototype.validate = async function(address) {
+  return await this.invoke({
+    method: 'validate',
+    arguments: [address]
   });
 };
 

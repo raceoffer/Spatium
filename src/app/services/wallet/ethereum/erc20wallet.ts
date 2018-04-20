@@ -1,4 +1,4 @@
-import { CurrencyWallet, Status } from '../currencywallet';
+import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 declare const CryptoCore: any;
 
 export class ERC20Wallet extends CurrencyWallet {
-  private erc20Wallet: any = null;
+  private wallet: any = null;
   private contractAddress: string = null;
   private token: Token = null;
   private decimals = 18;
@@ -23,19 +23,19 @@ export class ERC20Wallet extends CurrencyWallet {
     ngZone: NgZone,
     token: Token,
     address: string,
-    decimals?: number
+    decimals: number = 18
   ) {
     super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
 
     this.contractAddress = address;
     this.token = token;
-    this.decimals = decimals || 18;
+    this.decimals = decimals;
   }
 
   public async reset() {
     await super.reset();
 
-    this.erc20Wallet = null;
+    this.wallet = null;
 
     if (this.routineTimerSub) {
       this.routineTimerSub.unsubscribe();
@@ -44,23 +44,15 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public toInternal(amount: number): string {
-    return this.erc20Wallet.toUnits(amount).toString();
+    return this.wallet.toInternal(amount).toString();
   }
 
   public fromInternal(amount: string): number {
-    return this.erc20Wallet.fromUnits(Number(amount));
-  }
-
-  public async fee(transaction) {
-    return await transaction.estimateFee();
+    return this.wallet.fromInternal(Number(amount));
   }
 
   public async fromJSON(tx) {
     return await CryptoCore.EthereumTransaction.fromJSON(tx);
-  }
-
-  public async outputs(transaction) {
-    return await transaction.transferData();
   }
 
   public currencyCode(): Coin | Token {
@@ -70,23 +62,28 @@ export class ERC20Wallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.erc20Wallet = await CryptoCore.ERC20Wallet.load({
+    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.ERC20Wallet.address(this.publicKey),
-      contractAddress: this.contractAddress,
+      key: this.publicKey,
       network: this.network,
-      digits: this.decimals
+      contractAddress: this.contractAddress,
+      decimals: this.decimals
     });
 
-    this.address.next(this.erc20Wallet.address);
+    this.address.next(this.wallet.address);
+
+    this.balance.next(new Balance(
+      this.fromInternal('0'),
+      this.fromInternal('0')
+    ));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
-        const balance = await this.erc20Wallet.getBalance();
-        this.balance.next({
-          confirmed: this.fromInternal(balance),
-          unconfirmed: this.fromInternal(balance)
-        });
+        const balance = await this.wallet.getBalance();
+        this.balance.next(new Balance(
+          this.fromInternal(balance.confirmed),
+          this.fromInternal(balance.unconfirmed)
+        ));
       } catch (ignored) {}
     });
 
@@ -96,23 +93,28 @@ export class ERC20Wallet extends CurrencyWallet {
   public async syncDuplicate(other: CurrencyWallet) {
     await super.syncDuplicate(other);
 
-    this.erc20Wallet = await CryptoCore.ERC20Wallet.load({
+    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      address: CryptoCore.ERC20Wallet.address(this.publicKey),
+      key: this.publicKey,
       contractAddress: this.contractAddress,
       network: this.network,
-      digits: this.decimals
+      decimals: this.decimals
     });
 
-    this.address.next(this.erc20Wallet.address);
+    this.address.next(this.wallet.address);
+
+    this.balance.next(new Balance(
+      this.fromInternal('0'),
+      this.fromInternal('0')
+    ));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
-        const balance = await this.erc20Wallet.getBalance();
-        this.balance.next({
-          confirmed: this.fromInternal(balance),
-          unconfirmed: this.fromInternal(balance)
-        });
+        const balance = await this.wallet.getBalance();
+        this.balance.next(new Balance(
+          this.fromInternal(balance.confirmed),
+          this.fromInternal(balance.unconfirmed)
+        ));
       } catch (ignored) {}
     });
 
@@ -120,13 +122,12 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async createTransaction(address, value, fee?) {
-    const tx = await this.erc20Wallet.createTransaction(
+    return await this.wallet.prepareTransaction(
+      new CryptoCore.EthereumTransaction(),
       address,
       this.toInternal(value),
       fee ? this.toInternal(fee.toString()) : undefined
     );
-
-    return await CryptoCore.EthereumTransaction.fromOptions(tx);
   }
 
   public async listTransactionHistory() {
@@ -136,7 +137,7 @@ export class ERC20Wallet extends CurrencyWallet {
   public async pushTransaction() {
     if (this.signSession.transaction) {
       const raw = await this.signSession.transaction.toRaw();
-      await this.erc20Wallet.sendSignedTransaction(raw);
+      await this.wallet.sendSignedTransaction(raw);
     }
   }
 }

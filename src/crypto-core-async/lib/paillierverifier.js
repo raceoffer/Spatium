@@ -17,7 +17,7 @@ PaillierVerifier.prototype.invoke = async function(message, wrapped) {
     class: 'PaillierVerifier',
     self: this.state,
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'PaillierVerifier'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
 
   this.state = result.self;
@@ -30,7 +30,7 @@ PaillierVerifier.invokeStatic = async function(message, wrapped) {
     action: 'invokeStatic',
     class: 'PaillierVerifier',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'PaillierVerifier'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   });
   return wrapped ? result : Marshal.unwrap(result);
 };
