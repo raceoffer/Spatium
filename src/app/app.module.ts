@@ -31,7 +31,7 @@ import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
 import { WaitingComponent } from './screens/waiting/waiting.component';
-import { ClipboardModule} from 'ngx-clipboard';import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
+import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
 import { LoggerService } from './services/logger.service';
@@ -132,7 +132,6 @@ import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spin
     MatMenuModule,
     FlexLayoutModule,
     MatSlideToggleModule,
-    ClipboardModule,
     MatDialogModule,
     MatSelectModule,
     MatSnackBarModule,

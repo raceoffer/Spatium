@@ -8,6 +8,7 @@ import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const device: any;
 
@@ -29,7 +30,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: Observable<string> = null;
+  public walletAddress: BehaviorSubject<string> = null;
   public balanceCurrencyConfirmed: Observable<number> = null;
   public balanceCurrencyUnconfirmed: Observable<number> = null;
   public balanceUsdConfirmed: Observable<number> = null;

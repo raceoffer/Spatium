@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="capital.spatium.wallet" version="1.1.2-gamma" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="capital.spatium.wallet" version="0.8.2" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Spatium</name>
+    <preference name="WindowsStorePublisherName" value="Caspian Technologies Pte. Ltd." />
+    <preference name="windows-target-version" value="10.0" />
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/copyWorker.js" type="before_prepare" />
@@ -55,6 +57,7 @@
         <variable name="FABRIC_API_KEY" value="752fc70596e44939199e6f2f35f9275dc6bae22c" />
         <variable name="FABRIC_API_SECRET" value="e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267" />
     </plugin>
+    <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
     <plugin name="phonegap-nfc" spec="^0.7.1">
         <variable name="NFC_USAGE_DESCRIPTION" value="Read NFC Tags" />
     </plugin>
@@ -65,8 +68,7 @@
     <plugin name="cordova-plugin-keychain-touch-id" spec="^3.2.1" />
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
-    <plugin name="cordova-plugin-bluetooth" spec="../cordova-plugin-bluetooth" />
-    <plugin name="cordova-plugin-clipboard-x" spec="^1.0.1" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="android" spec="^6.3.0" />
+    <engine name="windows" spec="^6.0.0" />
 </widget>
