@@ -17,6 +17,7 @@ import {FactorParentOverlayService} from '../../factor-parent-overlay/factor-par
 import {QrWriterComponent} from '../../factors/qr-writer/qr-writer.component';
 import {FactorParentOverlayRef} from '../../factor-parent-overlay/factor-parent-overlay-ref';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {NfcWriterComponent} from "../../factors/nfc-writer/nfc-writer.component";
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -92,15 +93,18 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
-  async generateQrLogin() {
+  async generateLogin(isQr) {
     try {
       do {
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
           const packedLogin = await CryptoCore.Utils.packLogin(login);
-          this.value.next(await packedLogin.toString('hex'));
-          console.log('qwe');
+          if (isQr) {
+            this.value.next(await packedLogin.toString('hex'));
+          } else {
+            this.value.next(packedLogin);
+          }
           break;
         }
       } while (true);
@@ -133,7 +137,9 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async openOverlay(label, component) {
     if (component === QrWriterComponent) {
-      this.generateQrLogin().catch(() => {});
+      this.generateLogin(true).catch(() => {});
+    } else if (component === NfcWriterComponent) {
+      this.generateLogin(false).catch(() => {});
     }
 
     this.child = this.factorParentDialog.open({

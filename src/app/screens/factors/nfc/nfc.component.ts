@@ -259,18 +259,18 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
 
     /*switch (this.next) {
       case 'auth':
-        await this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        await this.authService.addAuthFactor(FactorType.NFC, Buffer.from(this.nfc, 'utf-8'));
         await this.router.navigate(['/auth']);
         break;
       case 'registration':
-        await this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+        await this.authService.addFactor(FactorType.NFC, Buffer.from(this.nfc, 'utf-8'));
         await this.router.navigate(['/registration']);
         break;
       case 'factornode':
         if (this.isAuth) {
-          await this.authService.addFactor(FactorType.NFC, await CryptoCore.Utils.packLogin(this._nfc));
+          await this.authService.addFactor(FactorType.NFC, await CryptoCore.Utils.packLogin(this.nfc));
         } else {
-          await this.authService.addFactor(FactorType.NFC, Buffer.from(this._nfc, 'utf-8'));
+          await this.authService.addFactor(FactorType.NFC, Buffer.from(this.nfc, 'utf-8'));
         }
         await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
         break;
@@ -278,7 +278,7 @@ export class NfcComponent implements AfterViewInit, OnInit, OnDestroy {
         // if at login-parent
         this.canScanAgain = true;
         this.classNfcContainer = 'invisible';
-        this.inputEvent.emit(this._nfc);
+        this.inputEvent.emit(this.nfc);
     }*/
   }
 

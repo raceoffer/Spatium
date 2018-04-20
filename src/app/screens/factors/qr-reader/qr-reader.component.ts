@@ -136,33 +136,6 @@ export class QrReaderComponent implements OnInit {
     if (this.onSuccess) {
       this.onSuccess.emit({factor: FactorType.QR, value: Buffer.from(this.qrcode, 'utf-8')});
     }
-
-
-
-    /*this.busy = true;
-    switch (this.next) {
-      case 'auth':
-        await this.authService.addAuthFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        await this.authService.addFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        if (this.isAuth) {
-          await this.authService.addFactor(FactorType.QR, Buffer.from(this.genericValue, 'hex'));
-        } else {
-          await this.authService.addFactor(FactorType.QR, Buffer.from(this.qrcode, 'utf-8'));
-        }
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
-        break;
-      default:
-        // if at login-parent
-        this.canScanAgain = true;
-        this.classVideoContainer = 'invisible';
-        this.inputEvent.emit(this.qrcode);
-    }*/
   }
 
 

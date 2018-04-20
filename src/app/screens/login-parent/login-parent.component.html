@@ -31,21 +31,25 @@
     </div>
   </div>
 
-  <app-login class="header text-center" *ngIf="content === contentType.Login"
+  <app-login class="header text-center"
+             *ngIf="content === contentType.Login"
              (buisyEvent)="setBusy()"
              (clearEvent)="setEmpty()"
              (inputEvent)="setInput($event)"
              [genericLogin]="loginGenerate"
   ></app-login>
-  <app-qr-reader class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
+  <app-qr-reader class="content text-center" style="position: relative;"
+                 *ngIf="content === contentType.QR"
                  [isRepeatable]="true"
                  (clearEvent)="setEmpty()"
                  (inputEvent)="setInput($event)"
   ></app-qr-reader>
-  <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
-           (clearEvent)="setEmpty()"
-           (inputEvent)="setInput($event)"
-  ></app-nfc>
+  <app-nfc-reader class="content text-center" style="position: relative;"
+                   *ngIf="content === contentType.NFC && isNfcAvailable"
+                   [isRepeatable]="true"
+                   (clearEvent)="setEmpty()"
+                   (inputEvent)="setInput($event)"
+  ></app-nfc-reader>
 
   <span style="margin: 5px 0px;" [class]="notRecognized" (clearEvent)="setEmpty()">Not recognized login</span>
   <div class="footer text-center">

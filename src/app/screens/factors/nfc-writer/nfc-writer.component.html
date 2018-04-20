@@ -1,3 +1,30 @@
-<p>
-  nfc-writer works!
-</p>
+<div fxLayout="column" fxLayoutAlign="center center" class="content">
+  <div class="width-button-container text-center" *ngIf="disabledNFC">
+
+    <div class="connect-text">
+      <span>{{ enableNFCmessage }}</span>
+    </div>
+
+    <button mat-fab  class="width-button">
+      <mat-icon (click)="changeNFCState()">nfc
+      </mat-icon>
+    </button>
+
+  </div>
+
+  <div [class]="classNfcContainer" *ngIf="!disabledNFC">
+    <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
+      <mat-icon style="width: 200px;
+    height: 200px;
+    font-size: 200px;" class="pulse">nfc</mat-icon>
+    </div>
+  </div>
+
+  <div style="width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC">
+    <span >{{ text }}</span>
+  </div>
+
+</div>
+
+
+
