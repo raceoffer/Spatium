@@ -5,6 +5,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { CurrencyService } from '../../../services/currency.service';
 
+declare const device: any;
+
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
@@ -13,6 +15,8 @@ import { CurrencyService } from '../../../services/currency.service';
 export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
+
+  cols: any = 2;
 
   public isOpened = false;
   public title = 'Wallet';
@@ -123,6 +127,8 @@ export class WalletComponent implements OnInit, OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.onResize();
   }
 
   ngOnDestroy() {
@@ -165,5 +171,13 @@ export class WalletComponent implements OnInit, OnDestroy {
         this.isExitTap = false;
       }), 3000);
     }
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 }

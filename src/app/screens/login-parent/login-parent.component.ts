@@ -8,6 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
+declare const device: any;
 
 enum State {
   Empty,
@@ -69,7 +70,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     );
 
     nfc.enabled(function () {}, function (e) {
-      if (e === 'NO_NFC') {
+      if (e === 'NO_NFC' || (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED')) {
         this.ngZone.run(async () => {
           this.isNfcAvailable = false;
         });
@@ -189,5 +190,9 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/start']);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

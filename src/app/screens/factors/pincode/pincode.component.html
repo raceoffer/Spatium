@@ -1,9 +1,12 @@
 <div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
 
   <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%;">
-    <div class="spatium-textfield entry noborder">
-      <input type="password-pin" [(ngModel)]="pincode" disabled>
-    </div>
+    <div class="spatium-textfield entry noborder" *ngIf="!isWindows()">
+        <input type="password-pin" [(ngModel)]="pincode" disabled>
+      </div>
+      <div class="spatium-textfield entry bottom10" *ngIf="isWindows()">
+        <input type="password"  [(ngModel)]="pincode" disabled>
+      </div>
     <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspaceClicked()" [disabled]="busy">
       <mat-icon matSuffix>backspace</mat-icon>
     </button>

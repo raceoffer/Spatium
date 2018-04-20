@@ -5,6 +5,7 @@ import { FactorType } from '../../../services/auth.service';
 declare const CryptoCore: any;
 declare const Buffer: any;
 declare const window: any;
+declare const device: any;
 
 @Component({
   selector: 'app-pincode',
@@ -103,5 +104,9 @@ export class PincodeComponent implements OnInit {
           await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
           break;
       }*/
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }

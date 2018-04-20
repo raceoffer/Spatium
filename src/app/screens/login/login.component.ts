@@ -89,4 +89,12 @@ export class LoginComponent implements AfterViewInit {
       this.usernameState = State.Error;
     }
   }
+
+  onFocusOut() {
+    this.stLogin = 'Username';
+  }
+
+  onFocus() {
+    this.stLogin = '';
+  }
 }

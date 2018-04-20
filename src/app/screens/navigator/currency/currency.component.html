@@ -1,10 +1,8 @@
 <mat-toolbar color="primary" class="header-toolbar shadow">
-  <mat-toolbar-row>
     <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
+      <mat-icon style="display: flex; justify-content: center;">arrow_back</mat-icon>
     </button>
     <span>{{ currencyInfo?.name }}</span>
-  </mat-toolbar-row>
 </mat-toolbar>
 
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
@@ -15,14 +13,13 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2">
-        <div class="field" style="margin-bottom: 13px;">
-          <mat-select [value]="walletAddress | async">
-            <mat-option *ngIf="walletAddress | async" [value]="walletAddress | async">
-              {{ walletAddress | async }}
-            </mat-option>
-          </mat-select>
-        </div>
+      <td colspan="2" style="margin-bottom: 13px;">
+        <mat-form-field class="field" color="accent">
+          <textarea readonly matInput [value]="walletAddress | async"></textarea>
+          <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </mat-form-field>
       </td>
     </tr>
     <tr>

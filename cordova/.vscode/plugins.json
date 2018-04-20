@@ -1,0 +1,1 @@
+{"plugins":["cordova-plugin-whitelist","cordova-custom-config","cordova-plugin-file","cordova-plugin-x-toast","cordova-fabric-plugin","phonegap-nfc","cordova-plugin-vibration","cordova-plugin-android-permissions","cordova-plugin-bluetooth"]}

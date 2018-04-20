@@ -1,5 +1,7 @@
 import {Component, OnInit, Output, EventEmitter, Input} from '@angular/core';
 
+declare const device: any;
+
 @Component({
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
@@ -29,6 +31,10 @@ export class ToolbarComponent implements OnInit {
 
   async onBackClicked() {
     this.backClicked.emit();
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
 }

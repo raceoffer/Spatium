@@ -9,7 +9,8 @@
     "id": "cordova-plugin-bluetooth",
     "platforms": [
       "android",
-	  "browser"
+      "windows",
+	    "browser"
     ]
   }
 }

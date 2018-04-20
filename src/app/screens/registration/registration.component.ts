@@ -18,6 +18,7 @@ import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent
 
 declare const CryptoCore: any;
 declare const Buffer: any;
+declare const device: any;
 
 @Component({
   selector: 'app-registration',
@@ -161,6 +162,10 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.router.navigate(['/login']);
   }
 
+  isWindows(): boolean {
+    return device.platform === 'windows';
+  }
+
   async signUp() {
     try {
       this.uploading = true;
@@ -205,5 +210,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     } finally {
       this.uploading = false;
     }
+  }
+
+  onFocusOut() {
+    this.stPassword = 'Password';
+  }
+
+  onFocus() {
+    this.stPassword = '';
   }
 }

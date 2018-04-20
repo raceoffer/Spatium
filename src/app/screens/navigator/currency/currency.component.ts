@@ -11,6 +11,8 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
+declare const cordova: any;
+
 @Component({
   selector: 'app-currency',
   templateUrl: './currency.component.html',
@@ -99,6 +101,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async send() {
     await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.currency] } }]);
+  }
+
+  copy() {
+    cordova.plugins.clipboard.copy(this.walletAddress.value);
   }
 
   async onBackClicked() {

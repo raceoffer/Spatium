@@ -3,7 +3,7 @@
     <button mat-icon-button style="height:0px!important; width:0px!important;"></button>
   </div>
   <button mat-icon-button (click)="sidenav.toggle()">
-    <mat-icon>menu</mat-icon>
+    <mat-icon style="display: flex; justify-content: center;">menu</mat-icon>
   </button>
 
   <span>{{ title }}</span>
@@ -17,7 +17,7 @@
 </mat-toolbar>
 
 <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
-  <button mat-icon-button (click)="toggleSearch(false)">
+  <button mat-icon-button (click)="toggleSearch(false)" *ngIf="!isWindows()">
     <mat-icon>arrow_back</mat-icon>
   </button>
   <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
@@ -29,11 +29,11 @@
   </button>
 </mat-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" (window:resize)="onResize()">
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <mat-grid-list cols="2" rowHeight="2:1">
+    <mat-grid-list cols="{{cols}}" rowHeight="2:1">
       <mat-grid-tile
         *ngFor="let tile of filtredTitles"
         [colspan]="tile.cols"

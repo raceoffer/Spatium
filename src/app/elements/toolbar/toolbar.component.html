@@ -1,6 +1,6 @@
 <mat-toolbar color="primary" [class]="toolbarClass">
   <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
+    <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <span>{{label}}</span>

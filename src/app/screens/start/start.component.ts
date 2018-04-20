@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationStart } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { WalletService } from '../../services/wallet.service';
@@ -8,6 +8,8 @@ import { BluetoothService } from '../../services/bluetooth.service';
 import { NavigationService } from '../../services/navigation.service';
 
 declare const navigator: any;
+declare const device: any;
+declare const Windows: any;
 
 @Component({
   selector: 'app-start',
@@ -28,6 +30,16 @@ export class StartComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
+    if (this.isWindows()) {
+      this.router.events
+      .subscribe((event) => {
+        if (event instanceof NavigationStart) {
+          const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+          currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.visible;
+        }
+      });
+    }
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async (e) => {
         await this.eventOnBackClicked(e);
@@ -37,11 +49,20 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.bt.disconnect();
     await this.wallet.reset();
     this.keychain.reset();
+
+    if (this.isWindows()) {
+      const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
+      currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+  }
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async onOpenClicked() {

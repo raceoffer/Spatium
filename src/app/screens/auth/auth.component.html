@@ -8,7 +8,6 @@
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box" id="factor-container" #factorContainer>
   <div class="header text-center">
-
     <app-logo-block></app-logo-block>
 
     <div class="margin-top-18 light" *ngIf="loginType == 0">
@@ -39,6 +38,11 @@
         <mat-icon color="accent" matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}
         </mat-icon>
         <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''"></div>
+      </div>
+      <div fxLayoutAlign="space-around center" *ngIf="factor.icon_asset != ''">
+          <div fxLayoutAlign="center center" >
+             <span class="{{factor.icon_asset}}-mask"></span>
+          </div>
       </div>
     </div>
 
