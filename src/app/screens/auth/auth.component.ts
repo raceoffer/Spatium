@@ -142,15 +142,15 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.openOverlay(result);
+      this.openFactorOverlay(result);
     });
   }
 
-  async openOverlay(component) {
+  async openFactorOverlay(component) {
     this.child = this.factorParentDialog.open({
       label: '',
-      isColored: true,
-      isShadowed: true,
+      isColored: false,
+      isShadowed: false,
       content: component
     });
 
