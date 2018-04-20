@@ -14,7 +14,7 @@ Utils.invokeStatic = async message => Marshal.unwrap(
     action: 'invokeStatic',
     class: 'Utils',
     method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), arg => Marshal.wrap(arg, 'Utils'))
+    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
   }));
 
 Utils.deriveAesKey = async passwd => Utils.invokeStatic({

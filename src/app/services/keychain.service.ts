@@ -12,7 +12,7 @@ export enum Coin {
 }
 
 export enum Token {
-  TEST = 56145,
+  EDC = 56145,
   EOS = 56146,
   TRON = 56147,
   VECHAIN = 56148,
@@ -124,14 +124,14 @@ export class TokenEntry {
   decimals: number;
   network: string;
 
-  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string, digits?: number, network?: string) {
+  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string, decimals: number = 18, network: string = 'main') {
     this.token = token;
     this.name = name;
     this.ico = ico;
     this.contractAddress = contractAddress;
     this.className = className;
-    this.decimals = digits || 18;
-    this.network = network || 'main';
+    this.decimals = decimals;
+    this.network = network;
   }
 }
 
@@ -141,7 +141,7 @@ export class KeyChainService {
   private keyChain: any = null;
 
   public readonly topTokens = [
-    new TokenEntry(Token.TEST, 'TEST', 'TEST', '0x1014003937b6fcd21f1a27df897b5888bbb73b9f', 'test', 18, 'testnet'),
+    new TokenEntry(Token.EDC, 'Edicoin', 'EDC', '0x507f6f5C6e0034c368d73Ef45bFc3d2f4aD29E19', 'edc', 8, 'testnet'),
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos'),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron'),
     new TokenEntry(Token.VECHAIN, 'VeChain', 'VEN', '0xd850942ef8811f2a866692a623011bde52a462c1', 'veChain'),

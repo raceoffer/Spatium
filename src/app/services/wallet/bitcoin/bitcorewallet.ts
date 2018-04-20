@@ -1,4 +1,4 @@
-import {CurrencyWallet, HistoryEntry, Status, TransactionType} from '../currencywallet';
+import { Balance, CurrencyWallet, HistoryEntry, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
@@ -60,18 +60,18 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next({
-      confirmed: this.fromInternal('0'),
-      unconfirmed: this.fromInternal('0')
-    });
+    this.balance.next(new Balance(
+      this.fromInternal('0'),
+      this.fromInternal('0')
+    ));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
-        this.balance.next({
-          confirmed: this.fromInternal(balance.confirmed),
-          unconfirmed: this.fromInternal(balance.unconfirmed)
-        });
+        this.balance.next(new Balance(
+          this.fromInternal(balance.confirmed),
+          this.fromInternal(balance.unconfirmed)
+        ));
       } catch (ignored) {}
     });
 

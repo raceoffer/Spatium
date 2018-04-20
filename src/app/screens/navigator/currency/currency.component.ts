@@ -5,12 +5,11 @@ import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services
 import { Coin, Token } from '../../../services/keychain.service';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
-import { toBehaviourSubject } from '../../../utils/transformers';
+import { toBehaviourSubject, toReplaySubject } from '../../../utils/transformers';
 import { fromPromise } from 'rxjs/observable/fromPromise';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-
 
 @Component({
   selector: 'app-currency',
@@ -34,9 +33,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public balanceUsdConfirmed: BehaviorSubject<number> = null;
   public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
 
-  public transactionsRequest: Observable<Array<HistoryEntry>> = null;
   public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
-  public transactionsReady: BehaviorSubject<boolean> = null;
 
   public accountLabel = 'Account';
   public sendLabel = 'Send';
@@ -89,13 +86,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             return balance * rate;
           }), 0);
 
-        this.transactionsRequest = fromPromise(this.currencyWallet.listTransactionHistory());
         this.transactions = toBehaviourSubject(
-          this.transactionsRequest,
+          fromPromise(this.currencyWallet.listTransactionHistory()),
           []);
-        this.transactionsReady = toBehaviourSubject(
-          this.transactionsRequest.mapTo(true),
-          false);
       }));
   }
 

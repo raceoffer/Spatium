@@ -59,8 +59,6 @@
       <qr-code [value]="walletAddress | async" [size]="150" [background]="'#f5f5f5'"></qr-code>
     </div>
 
-    <mat-spinner color="accent" diameter="60" style="margin: auto" *ngIf="!(transactionsReady | async)"></mat-spinner>
-
     <mat-list class="text-center transaction-list">
       <mat-list-item class="list-item" *ngFor="let transaction of (transactions | async)"
                      [class.unconfirmed]="!transaction.confirmed">

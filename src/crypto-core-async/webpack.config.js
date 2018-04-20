@@ -16,6 +16,7 @@ module.exports = {
     modules: ['node_modules'],
     extensions: ['-browser.js', '.js', '.json']
   },
+  plugins: [],
   node: {
     fs: 'empty',
     net: 'empty',

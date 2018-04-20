@@ -44,8 +44,8 @@ registerPromiseWorker(async message => {
       );
 
       return {
-        result: Marshal.wrap(result, message.class),
-        self: Marshal.wrap(self, message.class)
+        result: Marshal.wrap(result),
+        self: Marshal.wrap(self)
       };
     case 'invokeStatic':
       assert(
@@ -57,6 +57,6 @@ registerPromiseWorker(async message => {
         objectClass,
         message.method,
         ... _.map(_.defaultTo(message.arguments, []), Marshal.unwrap)
-      ), message.class);
+      ));
   }
 });
