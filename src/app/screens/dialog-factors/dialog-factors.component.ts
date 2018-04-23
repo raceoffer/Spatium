@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class DialogFactorsComponent {
 
-  onAddFactor = new EventEmitter();
+  goToFactor = new EventEmitter();
 
   factors: any;
   isAuth: false;
@@ -34,6 +34,7 @@ export class DialogFactorsComponent {
   }
 
   async goTo(factor) {
-    this.dialogRef.close(factor.component);
+    this.goToFactor.emit(factor.component);
+    this.dialogRef.close();
   }
 }

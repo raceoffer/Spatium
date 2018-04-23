@@ -125,13 +125,12 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       data: { isAuth: isAuth, label: label, isColored: true, isShadowed: true },
     });
 
-    dialogFactorRef.componentInstance.onAddFactor.subscribe((result) => {
-      this.addFactor(result);
+    dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+      this.openFactorOverlay(label, result);
     });
 
-    dialogFactorRef.afterClosed().subscribe((result) => {
+    dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.openFactorOverlay(label, result);
     });
   }
 

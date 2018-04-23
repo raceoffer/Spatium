@@ -136,13 +136,12 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       data: { isColored: false, isShadowed: false }
     });
 
-    dialogFactorRef.componentInstance.onAddFactor.subscribe((result) => {
-      this.addFactor(result);
+    dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+      this.openFactorOverlay(result);
     });
 
-    dialogFactorRef.afterClosed().subscribe(result => {
+    dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.openFactorOverlay(result);
     });
   }
 
