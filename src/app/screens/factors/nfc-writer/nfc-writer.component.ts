@@ -137,7 +137,7 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.NFC, value: Buffer.from(this.value.getValue(), 'utf-8')});
+    this.onSuccess.emit({factor: FactorType.NFC, value: this.value.getValue()});
   }
 
 }

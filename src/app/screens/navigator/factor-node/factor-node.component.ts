@@ -6,7 +6,7 @@ import {
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
 import { KeyChainService } from '../../../services/keychain.service';
-import { AuthService } from '../../../services/auth.service';
+import {AuthService, FactorType} from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DDSService } from '../../../services/dds.service';
@@ -53,6 +53,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   uploading = false;
 
   cancel = new Subject<boolean>();
+
+  isAuth = false;
 
   constructor(
     public dialog: MatDialog,
@@ -113,14 +115,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addNewFactor() {
-    const isAuth = this.factors.length === 0;
+    this.isAuth = this.factors.length === 0;
     let label = 'Authorization factor';
-    if (isAuth) {
+    if (this.isAuth) {
       label = 'Identification factor';
     }
     const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { isAuth: isAuth, label: label, isColored: true, isShadowed: true },
+      data: { isAuth: this.isAuth, label: label, isColored: true, isShadowed: true },
     });
 
     dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
@@ -160,7 +162,27 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async addFactor(result) {
     try {
-      this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      switch (result.factor) {
+        case FactorType.QR: {
+          if (this.isAuth) {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
+          } else {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+          }
+          break;
+        }
+        case FactorType.NFC: {
+          if (this.isAuth) {
+            await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
+          } else {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+          }
+          break;
+        }
+        default: {
+          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+        }
+      }
       this.goBottom();
     } catch (e) {
       console.log(e);

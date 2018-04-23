@@ -180,7 +180,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.onSuccess) {
-      this.onSuccess.emit({factor: FactorType.NFC, value: Buffer.from(this.nfc, 'utf-8')});
+      this.onSuccess.emit({factor: FactorType.NFC, value: this.nfc});
     }
   }
 

@@ -18,6 +18,7 @@ export class QrWriterComponent implements OnInit {
   @HostBinding('class') classes = 'content factor-content text-center';
 
   @Input() isExport = false;
+  @Input() isAuth = false;
   value: BehaviorSubject<string> = null;
 
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
@@ -85,6 +86,6 @@ export class QrWriterComponent implements OnInit {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.QR, value: Buffer.from(this.value.getValue(), 'hex')});
+    this.onSuccess.emit({factor: FactorType.QR, value: this.value.getValue()});
   }
 }

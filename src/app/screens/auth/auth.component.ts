@@ -144,7 +144,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goBottom();
       this.busy = true;
       this.isPasswordFirst = true;
-      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, result.value);
+      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
       this.ready = this.authService.decryptedSeed !== null;
     } catch (e) {
       console.log(e);

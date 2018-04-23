@@ -48,8 +48,6 @@ import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.
 import { PasswordComponent } from './screens/factors/password/password.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
-import { QrCodeComponent } from './screens/factors/qr-code/qr-code.component';
-import { NfcComponent } from './screens/factors/nfc/nfc.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
@@ -99,8 +97,6 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     PasswordComponent,
     FileUploadComponent,
     GraphicKeyComponent,
-    QrCodeComponent,
-    NfcComponent,
     FactorParentComponent,
     LoginParentComponent,
     RegistrationComponent,

@@ -26,7 +26,7 @@ export class PasswordComponent implements OnInit {
   }
 
   async goNext() {
-    this.onSuccess.emit({factor: FactorType.PASSWORD, value: Buffer.from(this.password, 'utf-8')});
+    this.onSuccess.emit({factor: FactorType.PASSWORD, value: this.password});
       /*this.busy = true;
       if (this.password !== '') {
         switch (this.next) {

@@ -86,7 +86,7 @@ export class PincodeComponent implements OnInit {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.PIN, value: Buffer.from(this.pincode, 'utf-8')});
+    this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
       /*switch (this.next) {
         case 'waiting':
           await this.onNext.emit(this.pincode);

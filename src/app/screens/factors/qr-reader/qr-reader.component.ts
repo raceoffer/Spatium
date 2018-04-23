@@ -134,7 +134,7 @@ export class QrReaderComponent implements OnInit {
     }
 
     if (this.onSuccess) {
-      this.onSuccess.emit({factor: FactorType.QR, value: Buffer.from(this.qrcode, 'utf-8')});
+      this.onSuccess.emit({factor: FactorType.QR, value: this.qrcode});
     }
   }
 

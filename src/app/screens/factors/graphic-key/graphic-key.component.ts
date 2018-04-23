@@ -40,7 +40,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   async goNext() {
-    this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: Buffer.from(this.graphKey, 'utf-8')});
+    this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: this.graphKey});
   }
 
 }
