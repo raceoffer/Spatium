@@ -73,6 +73,11 @@ $green: rgb(24, 154, 57);//#189a39
 
 .mat-drawer-container {
   height: calc(100% - 56px) !important;
+  z-index: inherit !important;
+}
+
+.mat-drawer-content {
+  z-index: inherit !important;
 }
 
 .entry-margin {
@@ -814,7 +819,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 5;
+  z-index: 2;
 }
 
 //классы для заполнения всего экрана
