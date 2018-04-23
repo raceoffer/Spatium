@@ -30,15 +30,11 @@
         </button>
       </div>
 
-      <div>
-        <mat-icon color="accent" matPrefix class="factor-icon-big" *ngIf="factor.icon != ''">{{ factor.icon }}
-        </mat-icon>
-        <div class="{{factor.icon_asset}}-mask" *ngIf="factor.icon_asset != ''"></div>
+      <div *ngIf="factor.icon != ''">
+        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
       </div>
-      <div fxLayoutAlign="space-around center" *ngIf="factor.icon_asset != ''">
-          <div fxLayoutAlign="center center" >
-             <span class="{{factor.icon_asset}}-mask"></span>
-          </div>
+      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset != ''">
+        <span class="{{factor.icon_asset}}-mask"></span>
       </div>
     </div>
 

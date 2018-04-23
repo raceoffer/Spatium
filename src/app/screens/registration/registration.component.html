@@ -41,12 +41,10 @@
         </div>
 
         <div *ngIf="factor.icon != ''">
-            <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
+          <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
         </div>
-        <div fxLayoutAlign="center center" *ngIf="factor.icon_asset != ''">
-          <div >
-            <span class="{{factor.icon_asset}}-mask"></span>
-          </div>
+        <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset != ''">
+          <span class="{{factor.icon_asset}}-mask"></span>
         </div>
       </div>
 
