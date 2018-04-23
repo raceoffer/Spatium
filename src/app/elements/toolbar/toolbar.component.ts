@@ -12,8 +12,8 @@ export class ToolbarComponent implements OnInit {
   SHADOW = ' shadow';
   MONOCHROME = ' color-custom-dark';
 
-  @Input() isColored: boolean;
-  @Input() isShadowed: boolean;
+  @Input() isColored: false;
+  @Input() isShadowed: false;
   @Input() label: string;
 
   @Output() backClicked: EventEmitter<any> = new EventEmitter<any>();

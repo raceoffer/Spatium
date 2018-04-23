@@ -1,9 +1,8 @@
-<mat-toolbar color="primary" class="header-toolbar shadow">
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>{{ currencyInfo?.name }}</span>
-</mat-toolbar>
+<app-toolbar
+  [label] = "currencyInfo?.name"
+  [isColored] = "true"
+  [isShadowed] = "true"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">

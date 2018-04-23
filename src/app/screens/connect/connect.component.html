@@ -1,11 +1,6 @@
-<mat-toolbar color="primary" class="color-custom-dark header-toolbar">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>{{stConnect}}</span>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar
+  [label] = "stConnect"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="center center" class="box">
   <app-numeric-spinner

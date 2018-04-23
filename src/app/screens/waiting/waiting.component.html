@@ -2,14 +2,9 @@
 
 <div *ngIf="!(synchronizing | async)" [class]="overlayClass"></div>
 
-<mat-toolbar color="primary" class="header-toolbar" *ngIf="!(synchronizing | async)">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>{{Label}}</span>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar *ngIf="!(synchronizing | async)"
+  [label] = "Label"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
   <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center" *ngIf="!(enabled | async)">

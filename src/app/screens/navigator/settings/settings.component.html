@@ -1,11 +1,8 @@
-<mat-toolbar color="primary" class="header-toolbar shadow">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>{{ title }}</span>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar
+  [label] = "title"
+  [isColored] = "true"
+  [isShadowed] = "true"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div class="content text-center" fxLayout="column" fxLayoutAlign="start center" *ngIf="state === 0">
   <mat-nav-list *ngFor="let navLink of navLinks" style="width: 100%;">
