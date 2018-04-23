@@ -69,20 +69,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
 
-    $('#factor-container').scroll(function () {
-      if ($(this).scrollTop() > 0) {
-        $('#top-scroller').fadeIn();
-      } else {
-        $('#top-scroller').fadeOut();
-      }
-
-      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
-        $('#bottom-scroller').fadeIn();
-      } else {
-          $('#bottom-scroller').fadeOut();
-        }
-    });
-
     this.loginType = this.authService.loginType;
     this.isPasswordFirst = this.authService.isPasswordFirst;
     this.icon_qr = FactorIconAsset.QR;
@@ -98,11 +84,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ready = this.authService.decryptedSeed !== null;
   }
 
-  goTop() {
-    const container = $('#factor-container');
-    container.animate({scrollTop: 0}, 500, 'swing');
-  }
-
   goBottom() {
     const container = $('#factor-container');
     const height = document.getElementById('factor-container').scrollHeight;
@@ -114,19 +95,9 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.factors = this.authService.factors;
     this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
-    this.checkOverflow(this.factorContainer);
-    this.goBottom();
 
     if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
       this.addNewFactor();
-    }
-  }
-
-  checkOverflow (element) {
-    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
-      $('#bottom-scroller').fadeIn();
-    } else {
-      $('#bottom-scroller').fadeOut();
     }
   }
 
@@ -166,17 +137,15 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.factors = this.authService.factors;
     this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
-
-    this.sleep(650).then(() => {
-      this.checkOverflow(this.factorContainer);
-    });
   }
 
   async addFactor(result) {
     try {
+      this.goBottom();
       this.busy = true;
       this.isPasswordFirst = true;
       this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, result.value);
+      this.ready = this.authService.decryptedSeed !== null;
     } catch (e) {
       console.log(e);
     } finally {
@@ -194,14 +163,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.reset();
 
     await this.router.navigate(['/waiting']);
-  }
-
-  async sleep(ms: number) {
-    await this._sleep(ms);
-  }
-
-  _sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async onBackClicked() {

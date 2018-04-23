@@ -77,8 +77,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.goBottom();
-
     this.changeDetectorRef.detectChanges();
   }
 
