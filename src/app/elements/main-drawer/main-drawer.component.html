@@ -3,7 +3,11 @@
     <button mat-icon-button (click)="toggle()">
       <mat-icon class="size-30 color-custom" >clear</mat-icon>
     </button>
-    <div class="nav-logo-text"></div>
+    <div class="nav-logo-text">
+      <div class="beta-logo-text">
+        Beta
+      </div>
+    </div>
   </mat-toolbar>
   <mat-nav-list *ngFor="let navLink of navLinks">
     <a mat-list-item [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
