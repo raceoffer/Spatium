@@ -78,11 +78,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
     await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
   }
-
-  async onCClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
-  }
-
+  
   eventOnBackClicked(e) {
     e.preventDefault();
     navigator.app.exitApp();
