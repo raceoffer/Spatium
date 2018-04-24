@@ -13,6 +13,9 @@
   </div>
 
   <div [class]="classNfcContainer" *ngIf="!disabledNFC">
+    <div *ngIf="isExport ? secretValue.length == 0 : (value | async).length == 0">
+      <mat-spinner color="accent"></mat-spinner>
+    </div>
     <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
       <mat-icon style="width: 200px;
     height: 200px;

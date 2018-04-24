@@ -22,15 +22,13 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   @HostBinding('class') classes = 'content factor-content text-center';
 
   @Input() isExport = false;
+  @Input() secretValue = '';
   value: BehaviorSubject<string> = null;
 
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
-  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
 
   text = 'Touch an NFC tag';
   enableNFCmessage = 'Turn on NFC to proceed';
-  isActive = false;
   isCreatedListener = false;
   disabledNFC = true;
   classNfcContainer = '';
@@ -45,7 +43,6 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.isActive = true;
     this.checkState();
 
     document.addEventListener('resume', this.checkState.bind(this), false);
@@ -122,7 +119,15 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   writeTag(success, error) {
-    const payload = Array.from(this.value.getValue());
+    let payload = null;
+    if (this.isExport) {
+      payload = Array.from(this.secretValue);
+    } else {
+      payload = Array.from(this.value.getValue());
+    }
+
+    console.log(payload);
+
     const mimeType = 'text/pg';
 
     const record = ndef.mimeMediaRecord(mimeType, payload);

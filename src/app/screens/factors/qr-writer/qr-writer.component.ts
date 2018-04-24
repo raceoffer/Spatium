@@ -19,6 +19,7 @@ export class QrWriterComponent implements OnInit {
 
   @Input() isExport = false;
   @Input() isAuth = false;
+  @Input() secretValue = '';
   value: BehaviorSubject<string> = null;
 
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();

@@ -1,7 +1,10 @@
 import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../../services/navigation.service';
+import { AuthService } from "../../../services/auth.service";
 
+declare const Buffer: any;
+declare const CryptoCore: any;
 declare const nfc: any;
 
 enum Content {
@@ -23,6 +26,8 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
+  title = 'Export secret';
+
   contentType = Content;
   content = Content.QR;
 
@@ -40,8 +45,12 @@ export class SecretExportComponent implements OnInit, OnDestroy {
 
   isNfcAvailable = true;
 
+  secretValue = '';
+  packSeed = null;
+
   constructor(private readonly ngZone: NgZone,
               private readonly router: Router,
+              private readonly authService: AuthService,
               private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
@@ -58,6 +67,8 @@ export class SecretExportComponent implements OnInit, OnDestroy {
         });
       }
     }.bind(this));
+
+    this.writeSecret();
   }
 
   ngOnDestroy() {
@@ -70,31 +81,34 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   }
 
   toggleContent(content) {
+    this.secretValue = null;
     this.buttonState = State.Empty;
     this.content = content;
     this.incorrectSecret = 'hide';
+
+    this.switchSecretValue();
   }
 
-  async setEmpty() {
-    this.buttonState = State.Empty;
-    this.incorrectSecret = 'hide';
+  async writeSecret() {
+    const encryptedSeed = this.authService.encryptedSeed;
+    const buffesSeed = Buffer.from(encryptedSeed, 'hex');
+    this.packSeed = await CryptoCore.Utils.packSeed(buffesSeed);
+    this.switchSecretValue();
+
+    console.log(this.secretValue);
   }
 
-  async setInput(input: string) {
-    console.log(input);
-    this.input = input;
-    await this.checkInput(this.input);
-  }
-
-  async checkInput(input: string) {
-    if (input !== '' && input !== null) {
-      this.incorrectSecret = 'hide';
-      this.buttonState = State.Import;
-    } else {
-      this.incorrectSecret = '';
-      this.buttonState = State.Empty;
+  switchSecretValue() {
+    switch (this.content) {
+      case this.contentType.QR: {
+        this.secretValue = this.packSeed.toString('hex');
+        break;
+      }
+      case this.contentType.NFC: {
+        this.secretValue = this.packSeed;
+        break;
+      }
     }
-
   }
 
 }
