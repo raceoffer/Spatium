@@ -6,7 +6,8 @@
     <mat-spinner
       color="accent"
       class="outer-spinner"
-      [diameter]="outerDiameter - 10">
+      [diameter]="outerDiameter - 10"
+    [strokeWidth] = "5">
     </mat-spinner>
   </div>
 
@@ -17,14 +18,15 @@
         mode="determinate"
         [value]="value"
         class="inner-spinner"
-        [diameter]="innerDiameter - 10">
+        [diameter]="innerDiameter - 10"
+        [strokeWidth] = "3">
       </mat-progress-spinner>
     </div>
   </div>
 
   <div class="overlay-item">
     <div class="label-wrapper">
-      <span class="label">{{ value }}%</span>
+      <span  class="start-tagline">{{ value }}%</span>
     </div>
   </div>
 </div>
