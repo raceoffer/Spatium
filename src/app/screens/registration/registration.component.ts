@@ -57,6 +57,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   uploading = false;
 
   cancel = new Subject<boolean>();
+  dialogFactorRef = null;
 
   constructor(
     public dialog: MatDialog,
@@ -106,17 +107,18 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   addNewFactor() {
     this.authService.password = this.password;
-    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isColored: false, isShadowed: false }
     });
 
-    dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
       this.openFactorOverlay(result);
     });
 
-    dialogFactorRef.afterClosed().subscribe(() => {
+    this.dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
     });
   }
 
@@ -132,6 +134,11 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       this.child.onAddFactor.subscribe((result) => {
         this.addFactor(result);
         this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
       });
     }
   }
@@ -158,7 +165,16 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     this.cancel.next(true);
-    await this.router.navigate(['/login']);
+
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/login']);
+    }
   }
 
   isWindows(): boolean {

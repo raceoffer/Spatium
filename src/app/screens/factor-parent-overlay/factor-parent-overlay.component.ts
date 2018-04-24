@@ -4,7 +4,6 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {NavigationService} from '../../services/navigation.service';
 import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
 import {FactorParentOverlayRef} from './factor-parent-overlay-ref';
 import {QrWriterComponent} from '../factors/qr-writer/qr-writer.component';
@@ -23,24 +22,15 @@ export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
 
   private componentRef: ComponentRef<{}>;
 
-  private subscriptions = [];
-
   isColored = false;
   isShadowed = false;
   label = '';
 
   constructor(public dialogRef: FactorParentOverlayRef,
               @Inject(FACTOR_PARENT_DIALOG_DATA) public config: any,
-              private componentFactoryResolver: ComponentFactoryResolver,
-              private navigationService: NavigationService) { }
+              private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
     if (this.config.isColored) {
       this.isColored = this.config.isColored;
     }
@@ -71,13 +61,10 @@ export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
   }
 
   async onBackClicked() {
-    this.dialogRef.close();
+    this.dialogRef.onBackClicked.emit();
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null;

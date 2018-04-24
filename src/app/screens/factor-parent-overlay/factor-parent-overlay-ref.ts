@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export class FactorParentOverlayRef<T = any> {
   public onAddFactor = new EventEmitter();
+  public onBackClicked = new EventEmitter();
   public value: BehaviorSubject<string> = null;
 
   constructor(private overlayRef: OverlayRef) {  }

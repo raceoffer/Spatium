@@ -51,6 +51,8 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   icon_qr = '';
 
+  dialogFactorRef = null;
+
   constructor(
     public dialog: MatDialog,
     public factorParentDialog: FactorParentOverlayService,
@@ -102,17 +104,18 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addNewFactor(): void {
-    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isColored: false, isShadowed: false }
     });
 
-    dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
       this.openFactorOverlay(result);
     });
 
-    dialogFactorRef.afterClosed().subscribe(() => {
+    this.dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
     });
   }
 
@@ -128,6 +131,11 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       this.child.onAddFactor.subscribe((result) => {
         this.addFactor(result);
         this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
       });
     }
   }
@@ -166,7 +174,15 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/login']);
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/login']);
+    }
   }
 }
 

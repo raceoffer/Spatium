@@ -44,17 +44,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('dialogButton') dialogButton;
 
   public value: BehaviorSubject<string> = new BehaviorSubject<string>('');
-
   private subscriptions = [];
 
   title = 'Adding authorization path';
   factors = [];
-
   uploading = false;
-
   cancel = new Subject<boolean>();
-
   isAuth = false;
+  dialogFactorRef = null;
 
   constructor(
     public dialog: MatDialog,
@@ -120,17 +117,18 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isAuth) {
       label = 'Identification factor';
     }
-    const dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: { isAuth: this.isAuth, label: label, isColored: true, isShadowed: true },
     });
 
-    dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
       this.openFactorOverlay(label, result);
     });
 
-    dialogFactorRef.afterClosed().subscribe(() => {
+    this.dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
     });
   }
 
@@ -152,6 +150,11 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.child.onAddFactor.subscribe((result) => {
         this.addFactor(result);
         this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
       });
 
       this.child.value = this.value;
@@ -245,6 +248,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     this.cancel.next(true);
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['settings']}}]);
+    }
   }
 }
