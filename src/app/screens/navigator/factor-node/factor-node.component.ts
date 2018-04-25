@@ -182,6 +182,11 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           break;
         }
+        case FactorType.LOGIN: {
+          console.log(result.factor, result.value);
+          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
+          break;
+        }
         default: {
           await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
         }

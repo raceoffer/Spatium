@@ -79,6 +79,7 @@ import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.comp
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
+import { LoginComponent as LoginComponentFactor } from './screens/factors/login/login.component';
 
 
 @NgModule({
@@ -121,7 +122,8 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    LoginComponentFactor
   ],
   imports: [
     OverlayModule,
@@ -181,7 +183,8 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    LoginComponentFactor
   ]
 })
 
