@@ -16,6 +16,7 @@ export class BitcoreWallet extends CurrencyWallet {
   constructor(
     private Transaction: any,
     private Wallet: any,
+    private endpoint: string,
     network: string,
     keychain: KeyChainService,
     coin: Coin,
@@ -55,7 +56,8 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.wallet = await this.Wallet.fromOptions({
       key: this.publicKey,
-      network: this.network
+      network: this.network,
+      endpoint: this.endpoint,
     });
 
     this.address.next(this.wallet.address);

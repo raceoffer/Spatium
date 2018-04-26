@@ -107,6 +107,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     cordova.plugins.clipboard.copy(this.walletAddress.value);
   }
 
+  async onSettingsClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency, 'settings'] } }]);
+  }
+
   async onBackClicked() {
     await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
   }

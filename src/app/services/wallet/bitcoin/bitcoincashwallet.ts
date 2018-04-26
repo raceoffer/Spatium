@@ -7,6 +7,7 @@ declare const CryptoCore: any;
 
 export class BitcoinCashWallet extends BitcoreWallet {
   constructor(
+    endpoint: string,
     network: string,
     keychain: KeyChainService,
     account: number,
@@ -17,6 +18,7 @@ export class BitcoinCashWallet extends BitcoreWallet {
     super(
       CryptoCore.BitcoinCashTransaction,
       CryptoCore.BitcoinCashWallet,
+      endpoint,
       network,
       keychain,
       Coin.BCH,

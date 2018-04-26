@@ -71,6 +71,7 @@ import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
+import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
@@ -79,7 +80,6 @@ import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.comp
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
-
 
 @NgModule({
   declarations: [
@@ -115,6 +115,7 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     SettingsComponent,
     LogoBlockComponent,
     NumericSpinnerComponent,
+    CurrencySettingsComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
     FactorParentOverlayComponent,
