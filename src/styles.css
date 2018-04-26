@@ -470,6 +470,18 @@ app-root {
   background: url(assets/images/drawable/currency/loomNetwork.svg);
 }
 
+.taas {
+  background: url(assets/images/drawable/currency/taas.svg);
+}
+
+.wings {
+  background: url(assets/images/drawable/currency/wings.svg);
+}
+
+.сonsensus {
+  background: url(assets/images/drawable/currency/consensus.svg);
+}
+
 .currency-component {
   max-width: 700px !important;
   display: block;

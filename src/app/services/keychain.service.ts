@@ -112,7 +112,10 @@ export enum Token {
   TELCOIN = 56242,
   VIBE = 56243,
   SONM = 56244,
-  LOOM_NETWORK = 56245
+  LOOM_NETWORK = 56245,
+  TAAS = 56246,
+  WINGS = 56247,
+  CONSENSUS = 56248
 }
 
 export class TokenEntry {
@@ -241,7 +244,10 @@ export class KeyChainService {
     new TokenEntry(Token.TELCOIN, 'Telcoin', 'TEL', '0x85e076361cc813a908ff672f9bad1541474402b2', 'telcoin'),
     new TokenEntry(Token.VIBE, 'VIBE', 'VIBE', '0xe8ff5c9c75deb346acac493c463c8950be03dfba', 'vibe'),
     new TokenEntry(Token.SONM, 'SONM', 'SNM', '0x983f6d60db79ea8ca4eb9968c6aff8cfa04b3c63', 'sonm'),
-    new TokenEntry(Token.LOOM_NETWORK, 'Loom Network', 'LOOM', '0xa4e8c3ec456107ea67d3075bf9e3df3a75823db0', 'loomNetwork')
+    new TokenEntry(Token.LOOM_NETWORK, 'Loom Network', 'LOOM', '0xa4e8c3ec456107ea67d3075bf9e3df3a75823db0', 'loomNetwork'),
+    new TokenEntry(Token.TAAS, 'TaaS', 'TAAS', '0xe7775a6e9bcf904eb39da2b68c5efb4f9360e08c', 'taas'),
+    new TokenEntry(Token.WINGS, 'Wings', 'WINGS', '0x667088b212ce3d06a1b553a7221E1fD19000d9aF', 'wings'),
+    new TokenEntry(Token.CONSENSUS, 'Consensus', 'SEN', '0xd53370acf66044910bb49cbcfe8f3cd020337f60', 'сonsensus')
   ];
 
   getSeed() {
