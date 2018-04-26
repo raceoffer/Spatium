@@ -35,13 +35,17 @@ Issue link: https://issues.apache.org/jira/browse/CB-13503
 # Run the app
 ```bash
 cd cordova
-cordova run android [--production] [--nocore]
+cordova run android [--production] [--nocore] [--noprepare] [--nobuild]
 ```
 ## Options
 ### --production
 Enables production mode and minification.
 ### --nocore
 Disables rebuild of crypto-core-async.
+### --noprepare
+Disables building angular application.
+### --nobuild
+Disables application compilation (just installs the app).
 
 # Troubleshooting
 ## Error: Current working directory is not a Cordova-based project.
