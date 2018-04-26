@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, HostBinding } from '@angular/core';
-import { BluetoothService } from '../../services/bluetooth.service';
-import { WalletService } from '../../services/wallet.service';
+import { BluetoothService } from '../../../services/bluetooth.service';
+import { WalletService } from '../../../services/wallet.service';
 import { Router } from '@angular/router';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 @Component({
   selector: 'app-verify-waiting',
@@ -108,7 +108,7 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/start']);
+    await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
   }
 
   async cancelConnect() {

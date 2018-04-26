@@ -97,6 +97,14 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+    if (this.dialogFactorRef) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    }
+    if (this.child) {
+      this.child.close();
+      this.child = null;
+    }
   }
 
   goBottom() {

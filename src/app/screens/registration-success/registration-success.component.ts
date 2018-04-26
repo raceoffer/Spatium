@@ -34,7 +34,7 @@ export class RegistrationSuccessComponent implements OnInit, OnDestroy {
   }
 
   async goWaiting() {
-    await this.router.navigate(['/waiting']);
+    await this.router.navigate(['/navigator', { outlets: { navigator: ['waiting'] } }]);
   }
 
   async onBackClicked() {

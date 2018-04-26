@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Info, CurrencyService } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 enum State {
   None,
@@ -19,6 +20,7 @@ enum State {
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  public ready: BehaviorSubject<boolean> = null;
   isOpened = false;
 
   address = '';
@@ -56,6 +58,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   public currentCoin: Coin | Token = null;
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
+  synchronizing = this.wallet.synchronizing;
 
   private subscriptions = [];
 
@@ -67,7 +70,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService
-  ) { }
+  ) {
+    this.ready = this.wallet.ready;
+  }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -153,5 +158,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     if (this.isOpened) {
       this.sidenav.toggle();
     }
+  }
+
+  async goToSync() {
+    await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-waiting'] } }]);
   }
 }

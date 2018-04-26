@@ -31,7 +31,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { ConnectComponent } from './screens/connect/connect.component';
-import { WaitingComponent } from './screens/waiting/waiting.component';
+import { WaitingComponent } from './screens/navigator/waiting/waiting.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
 import { WalletService } from './services/wallet.service';
@@ -62,7 +62,7 @@ import { SettingsComponent } from './screens/navigator/settings/settings.compone
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
-import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
+import { VerifyWaitingComponent } from './screens/navigator-verifier/verify-waiting/verify-waiting.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
@@ -79,6 +79,7 @@ import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.comp
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
+import { DialogConfirmationComponent } from './modals/dialog-confirmation/dialog-confirmation.component';
 
 
 @NgModule({
@@ -121,7 +122,8 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    DialogConfirmationComponent
   ],
   imports: [
     OverlayModule,
@@ -173,6 +175,7 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
   ],
   entryComponents: [
     DialogFactorsComponent,
+    DialogConfirmationComponent,
     FactorParentOverlayComponent,
     PincodeComponent,
     PasswordComponent,

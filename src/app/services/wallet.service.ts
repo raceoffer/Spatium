@@ -34,6 +34,8 @@ export class WalletService {
 
   public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
   public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
+  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Cancelled), false);
+  public failed: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Failed), false);
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();

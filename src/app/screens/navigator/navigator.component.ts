@@ -17,12 +17,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly bt: BluetoothService
   ) {}
 
-  public ngOnInit() {
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        await this.router.navigate(['/waiting']);
-      }));
-  }
+  public ngOnInit() { }
 
   public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());

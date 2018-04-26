@@ -18,10 +18,7 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   ) {}
 
   public ngOnInit() {
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        await this.router.navigate(['/verify-waiting']);
-      }));
+
   }
 
   public async ngOnDestroy() {

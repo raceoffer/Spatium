@@ -1,0 +1,19 @@
+.mat-dialog-content {
+  display: block;
+  padding: 0 10px;
+  margin: 0px;
+  max-height: 65vh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mat-dialog-actions {
+  padding: 12px 10px 10px 0px;
+  display: flex;
+  flex-wrap: wrap;
+  float: right;
+}
+
+.mat-button {
+  font-family: 'Roboto-Regular';
+}

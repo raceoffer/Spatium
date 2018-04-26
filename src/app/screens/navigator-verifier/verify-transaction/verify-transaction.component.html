@@ -3,6 +3,15 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button (click)="goToSync()" *ngIf="!(ready | async)">
+    <mat-icon>sync_disabled</mat-icon>
+  </button>
+  <button mat-icon-button (click)="goToSync()" *ngIf="(ready | async)">
+    <mat-icon>sync</mat-icon>
+  </button>
 </mat-toolbar>
 
 
@@ -11,83 +20,113 @@
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
                      (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <div class="verify-transaction-text" *ngIf="state === stateType.None">
-      <span>This device is linked. All transactions will be confirmed by you.</span>
+    <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%" class="content">
+      <app-logo-block></app-logo-block>
+
+      <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center"
+           *ngIf="!(enabled | async)">
+        <div class="connect-text">
+          <span>{{enableBTmessage}}</span>
+        </div>
+
+        <button mat-fab class="width-button">
+          <mat-icon (click)="enableBluetooth()">bluetooth_disabled
+          </mat-icon>
+        </button>
+      </div>
+
+      <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center" *ngIf="(enabled | async)">
+        <div class="verify-transaction-text" *ngIf="!(ready | async)">
+          <span>Awaiting connection from the main device.</span>
+        </div>
+
+        <button *ngIf="!(discoverable | async) && !(ready | async)" mat-button color="accent"
+                (click)="enableDiscoverable()">Enable device discovery
+        </button>
+      </div>
     </div>
 
-    <div class="width-button-container" style="margin-top:25px;"
-         fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
-      <mat-spinner mode="indeterminate" color="accent"></mat-spinner>
-    </div>
+    <div *ngIf="(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%" class="content">
+      <div class="verify-transaction-text" *ngIf="state === stateType.None">
+        <span>This device is linked. All transactions will be confirmed by you.</span>
+      </div>
 
-    <div class="transaction-container currency-component" *ngIf="state === stateType.Verifying">
-      <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
-        <tr>
-          <td colspan="2">
-            <span class="label" style="margin-left: 5px;">Recipient address</span>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            <mat-form-field class="field disable" color="accent" style="margin-bottom: 13px;">
-              <input matInput [(ngModel)]="address" disabled>
-            </mat-form-field>
-          </td>
-        </tr>
-        <tr>
-          <td class="right">
-            <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
-          </td>
-          <td class="left">
-            <span class="label" style="margin-left: 5px;">USD</span>
-          </td>
-        </tr>
-        <tr>
-          <td class="right">
-            <div class="field disable">
+      <div class="width-button-container" style="margin-top:25px;"
+           fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
+        <mat-spinner mode="indeterminate" color="accent"></mat-spinner>
+      </div>
+
+      <div class="transaction-container currency-component" *ngIf="state === stateType.Verifying">
+        <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
+          <tr>
+            <td colspan="2">
+              <span class="label" style="margin-left: 5px;">Recipient address</span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <mat-form-field class="field disable" color="accent" style="margin-bottom: 13px;">
+                <input matInput [(ngModel)]="address" disabled>
+              </mat-form-field>
+            </td>
+          </tr>
+          <tr>
+            <td class="right">
+              <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+            </td>
+            <td class="left">
+              <span class="label" style="margin-left: 5px;">USD</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="right">
+              <div class="field disable">
                 <span>
                   {{ btc }}
                 </span>
-            </div>
-          </td>
-          <td class="left">
-            <div class="field right disable">
+              </div>
+            </td>
+            <td class="left">
+              <div class="field right disable">
                 <span>
                   {{ usd }}
                 </span>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="right">
-            <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
-          </td>
-          <td class="left">
-            <span class="label" style="margin-left: 5px;">USD</span>
-          </td>
-        </tr>
-        <tr>
-          <td class="right">
-            <div class="field disable">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="right">
+              <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+            </td>
+            <td class="left">
+              <span class="label" style="margin-left: 5px;">USD</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="right">
+              <div class="field disable">
                 <span>
                   {{ fee }}
                 </span>
-            </div>
-          </td>
-          <td class="left">
-            <div class="field right disable">
+              </div>
+            </td>
+            <td class="left">
+              <div class="field right disable">
                 <span>
                   {{ feeUsd }}
                 </span>
-            </div>
-          </td>
-        </tr>
-      </table>
+              </div>
+            </td>
+          </tr>
+        </table>
 
-      <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
-        <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
-        <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+        <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
+          <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
+          <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+        </div>
       </div>
     </div>
+
+
   </mat-sidenav-container>
 </div>

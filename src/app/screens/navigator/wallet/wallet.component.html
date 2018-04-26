@@ -13,6 +13,15 @@
   <button mat-icon-button (click)="toggleSearch(true)">
     <mat-icon>search</mat-icon>
   </button>
+  <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(cancelled | async) && !(failed | async)">
+    <mat-icon>sync</mat-icon>
+  </button>
+  <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && ((cancelled | async) || (failed | async))">
+    <mat-icon>sync_problem</mat-icon>
+  </button>
+  <button mat-icon-button (click)="cancelSync()" *ngIf="(synchronizing | async)">
+    <mat-icon class="sync">sync</mat-icon>
+  </button>
 
 </mat-toolbar>
 

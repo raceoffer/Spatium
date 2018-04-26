@@ -1,0 +1,49 @@
+<div *ngIf="connected" class="overlay"></div>
+
+<mat-toolbar color="primary" class="header-toolbar shadow">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span style="overflow: hidden; text-overflow: ellipsis;">{{Label}}</span>
+    <span class="spacer"></span>
+    <button mat-icon-button (click)="cancelConnect()" *ngIf="(ready | async)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
+  <mat-progress-bar mode="indeterminate" color="accent"
+                    style="width: 100%; position: fixed; z-index: 2;"
+                    *ngIf="connected" ></mat-progress-bar>
+  <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center"
+       *ngIf="!(enabled | async)">
+    <div class="connect-text">
+      <span>{{enableBTmessage}}</span>
+    </div>
+
+    <button mat-fab class="width-button">
+      <mat-icon (click)="enableBluetooth()">bluetooth_disabled
+      </mat-icon>
+    </button>
+  </div>
+
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="enabled | async">
+    <mat-nav-list style="width: 100%;">
+      <mat-list-item *ngFor="let device of devices" (click)="connectTo(device.name, device.address)">
+        <p class="list-name" mat-line>{{device.name}}</p>
+        <p class="list-info" mat-line>{{device.address}}</p>
+        <mat-icon class="list-icon" *ngIf="device.paired" matSuffix>link</mat-icon>
+      </mat-list-item>
+    </mat-nav-list>
+    <div style="width: 100%; text-align: center; padding: 5px 0px;">
+      <button mat-icon-button (click)="startDiscovery()">
+        <mat-icon class="button-imitator-large" *ngIf="!(discovering | async)">sync</mat-icon>
+        <mat-icon class="button-imitator-large sync" *ngIf="discovering | async">sync</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
+
+
