@@ -2,14 +2,9 @@
 
 <div *ngIf="!(synchronizing | async)" [class]="overlayClass"></div>
 
-<mat-toolbar color="primary" class="header-toolbar" *ngIf="!(synchronizing | async)">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>{{Label}}</span>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar *ngIf="!(synchronizing | async)"
+  [label] = "Label"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
   <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center" *ngIf="!(enabled | async)">
@@ -31,7 +26,7 @@
         <mat-icon class="list-icon" *ngIf="device.paired" matSuffix>link</mat-icon>
       </mat-list-item>
     </mat-nav-list>
-    <div style="width: 100%" fxLayout="row" fxLayoutAlign="center center" >
+    <div style="width: 100%; text-align: center">
       <button mat-icon-button (click)="startDiscovery()">
         <mat-icon class="button-imitator-large" *ngIf="!(discovering | async)">sync</mat-icon>
         <mat-icon class="button-imitator-large sync" *ngIf="discovering | async">sync</mat-icon>

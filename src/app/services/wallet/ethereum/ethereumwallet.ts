@@ -11,6 +11,7 @@ export class EthereumWallet extends CurrencyWallet {
   private routineTimerSub: any = null;
 
   constructor(
+    private endpoint: string,
     network: string,
     keychain: KeyChainService,
     account: number,
@@ -50,7 +51,8 @@ export class EthereumWallet extends CurrencyWallet {
     this.wallet = await CryptoCore.EthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
-      network: this.network
+      network: this.network,
+      endpoint: this.endpoint,
     });
 
     this.address.next(this.wallet.address);

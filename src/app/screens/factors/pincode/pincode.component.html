@@ -88,19 +88,19 @@
   </div>
 </div>
 
-<div class="footer text-center" style="bottom: 0px;" *ngIf="state === stateType.Create || state === stateType.Unlock">
+<div class="footer text-center" style="bottom: 0px;" *ngIf="!isFactor">
   <div class="width-button-width" style="display: inline-block;">
     <button mat-icon-button [matMenuTriggerFor]="menu" style="float: right;" [disabled]="busy">
       <mat-icon style="opacity: 0.5;">settings</mat-icon>
     </button>
 
     <mat-menu #menu="matMenu">
-      <button mat-menu-item *ngIf="state === stateType.Create" (click)="onImportClicked()" [disabled]="busy">
+      <button mat-menu-item *ngIf="isCreate" (click)="onImportClicked()" [disabled]="busy">
         <mat-icon>import_export</mat-icon>
         <span>Import secret</span>
       </button>
 
-      <button mat-menu-item *ngIf="state === stateType.Unlock" (click)="onDeleteClicked()" [disabled]="busy">
+      <button mat-menu-item *ngIf="!isCreate" (click)="onDeleteClicked()" [disabled]="busy">
         <mat-icon>delete_forever</mat-icon>
         <span>Delete</span>
       </button>

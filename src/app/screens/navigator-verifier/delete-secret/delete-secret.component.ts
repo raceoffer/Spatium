@@ -1,12 +1,11 @@
-import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FileService } from '../../../services/file.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
-import {NavigationService} from '../../../services/navigation.service';
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const window: any;
-declare const device: any;
 
 @Component({
   selector: 'app-delete-secret',
@@ -73,16 +72,12 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
   async onBackClicked() {
     switch (this.back) {
       case 'pincode':
-        await this.router.navigate(['/factor', { back: 'start' }, { outlets: {'factor': ['pincode', { next: 'waiting' }]}}]);
+        await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
         break;
       case 'verify-transaction':
         await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
         break;
     }
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
   }
 
   async delete() {

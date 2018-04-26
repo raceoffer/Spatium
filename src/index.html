@@ -81,29 +81,27 @@
       background-color: rgb(245, 245, 245);
     }
 
-    .start-logo-text {
-      height: 23px !important;
-      min-height: 23px!important;
+    .loading > .start-logo-text {
       width: 100%;
+      margin-left: 14px;
+    }
+
+    .start-logo-text {
+      width: auto;
+      height: 35px !important;
+      min-height: 35px !important;
+      margin-left: 10px;
       background-image: url(./assets/images/drawable/logo.svg);
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-    }
-
-    .beta-logo-text {
-      text-align: right;
-      position: relative;
-      margin-right: 65px;
-      bottom: 13px;
-      color: rgb(155, 160, 160);
-      font-size: 12px;
-      font-family: 'Circe Bold';
+      margin-left: 15px;
     }
 
     .nav-logo-text{
       height: 100%;
       width: 100%;
+      margin-bottom: 11px;
       background-image: url(./assets/images/drawable/logo.svg);
       background-size: contain;
       background-repeat: no-repeat;
@@ -213,11 +211,7 @@
 <body>
   <app-root>
     <div class="loading">
-      <div class="margin86 start-logo-text">
-        <div class="beta-logo-text">
-          Beta
-        </div>
-      </div>
+      <div class="margin86 start-logo-text"></div>
 
       <div class="start-tagline-padding">
         <span class="start-tagline">Secure your funds</span>

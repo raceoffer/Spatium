@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -47,8 +48,6 @@ import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.
 import { PasswordComponent } from './screens/factors/password/password.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
-import { QrCodeComponent } from './screens/factors/qr-code/qr-code.component';
-import { NfcComponent } from './screens/factors/nfc/nfc.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
@@ -72,6 +71,15 @@ import { NavigationService } from './services/navigation.service';
 import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
+import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
+import { ToolbarComponent } from './elements/toolbar/toolbar.component';
+import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
+import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
+import { FactorParentOverlayService } from './screens/factor-parent-overlay/factor-parent-overlay.service';
+import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
+import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
+import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
+import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
 
 @NgModule({
   declarations: [
@@ -89,8 +97,6 @@ import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spin
     PasswordComponent,
     FileUploadComponent,
     GraphicKeyComponent,
-    QrCodeComponent,
-    NfcComponent,
     FactorParentComponent,
     LoginParentComponent,
     RegistrationComponent,
@@ -108,9 +114,18 @@ import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spin
     SecretImportComponent,
     SettingsComponent,
     LogoBlockComponent,
-    NumericSpinnerComponent
+    NumericSpinnerComponent,
+    CurrencySettingsComponent,
+    ToolbarComponent,
+    ConfirmationEntryComponent,
+    FactorParentOverlayComponent,
+    NfcReaderComponent,
+    NfcWriterComponent,
+    QrReaderComponent,
+    QrWriterComponent
   ],
   imports: [
+    OverlayModule,
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -151,13 +166,23 @@ import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spin
     DDSService,
     KeyChainService,
     CurrencyService,
-    NavigationService
+    NavigationService,
+    FactorParentOverlayService
   ],
   bootstrap: [
     AppComponent
   ],
   entryComponents: [
-    DialogFactorsComponent
+    DialogFactorsComponent,
+    FactorParentOverlayComponent,
+    PincodeComponent,
+    PasswordComponent,
+    FileUploadComponent,
+    GraphicKeyComponent,
+    NfcReaderComponent,
+    NfcWriterComponent,
+    QrReaderComponent,
+    QrWriterComponent
   ]
 })
 

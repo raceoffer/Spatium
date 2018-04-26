@@ -13,6 +13,8 @@ import { NotificationService } from '../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
 import { NavigationService } from '../../services/navigation.service';
+import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
+import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -35,6 +37,10 @@ declare const device: any;
 })
 export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  @ViewChild(FactorParentOverlayRef) child;
+  @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
+
   private subscriptions = [];
 
   stPassword = 'Password';
@@ -51,18 +57,17 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   uploading = false;
 
   cancel = new Subject<boolean>();
-
-  @ViewChild('factorContainer') factorContainer: ElementRef;
-  @ViewChild('dialogButton') dialogButton;
+  dialogFactorRef = null;
 
   constructor(
-    public  dialog: MatDialog,
+    public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
-    private readonly authSevice: AuthService,
+    private readonly authService: AuthService,
     private readonly navigationService: NavigationService
   ) {
     this.changeDetectorRef = changeDetectorRef;
@@ -75,54 +80,23 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
 
-    this.username = this.authSevice.login;
-    this.password = this.authSevice.password;
-    this.factors = this.authSevice.factors;
+    this.username = this.authService.login;
+    this.password = this.authService.password;
+    this.factors = this.authService.factors;
     this.advancedMode = this.factors.length > 0;
 
     if (this.advancedMode) {
       this.factorContainer.nativeElement.classList.add('content');
     }
-
-    $('#factor-container').scroll(function () {
-
-      if ($(this).scrollTop() > 0) {
-        $('#top-scroller').fadeIn();
-      } else {
-        $('#top-scroller').fadeOut();
-      }
-
-      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
-        $('#bottom-scroller').fadeIn();
-      } else {
-        $('#bottom-scroller').fadeOut();
-      }
-    });
   }
 
   ngAfterViewInit() {
-    this.checkOverflow(this.factorContainer);
-    this.goBottom();
-
     this.changeDetectorRef.detectChanges();
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-  }
-
-  checkOverflow (element) {
-    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
-      $('#bottom-scroller').fadeIn();
-    } else {
-      $('#bottom-scroller').fadeOut();
-    }
-  }
-
-  goTop() {
-    const container = $('#factor-container');
-    container.animate({scrollTop: 0}, 500, 'swing');
   }
 
   goBottom() {
@@ -132,25 +106,56 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addNewFactor() {
-    this.authSevice.password = this.password;
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
+    this.authService.password = this.password;
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { back: 'registration', next: 'registration' }
+      data: { isColored: false, isShadowed: false }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+      this.openFactorOverlay(result);
+    });
+
+    this.dialogFactorRef.afterClosed().subscribe(() => {
       this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
     });
   }
 
-  removeFactor(factor): void {
-    this.authSevice.rmFactor(factor);
-    this.factors = this.authSevice.factors;
-    this.changeDetectorRef.detectChanges();
+  async openFactorOverlay(component) {
+    if (typeof component !== 'undefined') {
+      this.child = this.factorParentDialog.open({
+        label: '',
+        isColored: false,
+        isShadowed: false,
+        content: component
+      });
 
-    this.sleep(650).then(() => {
-      this.checkOverflow(this.factorContainer);
-    });
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
+      });
+    }
+  }
+
+  removeFactor(factor): void {
+    this.authService.rmFactor(factor);
+    this.factors = this.authService.factors;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  async addFactor(result) {
+    try {
+      await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      this.goBottom();
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   openAdvanced() {
@@ -160,7 +165,16 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     this.cancel.next(true);
-    await this.router.navigate(['/login']);
+
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/login']);
+    }
   }
 
   isWindows(): boolean {
@@ -178,7 +192,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
       factors = factors.reverse();
 
-      factors.push(await this.authSevice.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+      factors.push(await this.authService.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
 
       const tree = factors.reduce((rest, factor) => {
         const node = {
@@ -190,7 +204,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = await AuthService.toId(this.authSevice.login);
+      const id = await AuthService.toId(this.authService.login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
 
       try {
@@ -199,8 +213,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        this.authSevice.clearFactors();
-        this.authSevice.password = '';
+        this.authService.clearFactors();
+        this.authService.password = '';
         this.factors = [];
         this.password = '';
 
@@ -211,14 +225,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     } finally {
       this.uploading = false;
     }
-  }
-
-  async sleep(ms: number) {
-    await this._sleep(ms);
-  }
-
-  _sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   onFocusOut() {

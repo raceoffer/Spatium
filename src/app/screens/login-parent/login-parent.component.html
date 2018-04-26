@@ -1,10 +1,8 @@
-<mat-toolbar color="primary" class="header-toolbar" *ngIf="!isWindows()">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon class="color-custom-dark">arrow_back</mat-icon>
-    </button>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar
+  [label]=""
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
@@ -16,14 +14,14 @@
           <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
         </button>
       </div>
-      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;"  *ngIf="!isWindows()">
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="!isWindows()">
         <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center"
                 (click)="toggleContent(contentType.QR)">
           <div fxLayoutAlign="center center" *ngIf="content === contentType.QR">
-              <span class="icon-qr_code_blue"></span>
+              <span class="icon-custom-qr_code_blue"></span>
           </div>
           <div fxLayoutAlign="center center" *ngIf="content !== contentType.QR">
-              <span class="icon-qr_code_black optical-4"></span>
+              <span class="icon-custom-qr_code_black optical-4"></span>
           </div>
         </button>
       </div>
@@ -36,20 +34,25 @@
     </div>
   </div>
 
-  <app-login class="header text-center" *ngIf="content === contentType.Login"
+  <app-login class="header text-center"
+             *ngIf="content === contentType.Login"
              (buisyEvent)="setBusy()"
              (clearEvent)="setEmpty()"
              (inputEvent)="setInput($event)"
              [genericLogin]="loginGenerate"
   ></app-login>
-  <app-qr-code class="content text-center" style="position: relative;" *ngIf="content === contentType.QR"
-               (clearEvent)="setEmpty()"
-               (inputEvent)="setInput($event)"
-  ></app-qr-code>
-  <app-nfc class="content text-center" style="position: relative;" *ngIf="content === contentType.NFC && isNfcAvailable"
-           (clearEvent)="setEmpty()"
-           (inputEvent)="setInput($event)"
-  ></app-nfc>
+  <app-qr-reader class="content text-center" style="position: relative;"
+                 *ngIf="content === contentType.QR"
+                 [isRepeatable]="true"
+                 (clearEvent)="setEmpty()"
+                 (inputEvent)="setInput($event)"
+  ></app-qr-reader>
+  <app-nfc-reader class="content text-center" style="position: relative;"
+                   *ngIf="content === contentType.NFC && isNfcAvailable"
+                   [isRepeatable]="true"
+                   (clearEvent)="setEmpty()"
+                   (inputEvent)="setInput($event)"
+  ></app-nfc-reader>
 
   <span style="margin: 5px 0px;" [class]="notRecognized" (clearEvent)="setEmpty()">Not recognized login</span>
   <div class="footer text-center">

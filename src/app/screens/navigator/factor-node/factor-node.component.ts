@@ -6,17 +6,21 @@ import {
 import { MatDialog } from '@angular/material';
 import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
 import { KeyChainService } from '../../../services/keychain.service';
-import { AuthService } from '../../../services/auth.service';
+import {AuthService, FactorType} from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import { NavigationService } from '../../../services/navigation.service';
+import {FactorParentOverlayService} from '../../factor-parent-overlay/factor-parent-overlay.service';
+import {QrWriterComponent} from '../../factors/qr-writer/qr-writer.component';
+import {FactorParentOverlayRef} from '../../factor-parent-overlay/factor-parent-overlay-ref';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {NfcWriterComponent} from "../../factors/nfc-writer/nfc-writer.component";
 
 declare const CryptoCore: any;
 declare const Buffer: any;
-declare const device: any;
 
 @Component({
   selector: 'app-factor-node',
@@ -35,26 +39,29 @@ declare const device: any;
 })
 export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
-  title = 'Adding authentication path';
-  factors = [];
-
-  uploading = false;
-
-  cancel = new Subject<boolean>();
-
+  @ViewChild(FactorParentOverlayRef) child;
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
 
+  public value: BehaviorSubject<string> = new BehaviorSubject<string>('');
+  private subscriptions = [];
+
+  title = 'Adding authorization path';
+  factors = [];
+  uploading = false;
+  cancel = new Subject<boolean>();
+  isAuth = false;
+  dialogFactorRef = null;
+
   constructor(
-    public  dialog: MatDialog,
+    public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
     private readonly notification: NotificationService,
     private readonly keychain: KeyChainService,
     private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly authSevice: AuthService,
+    private readonly authService: AuthService,
     private readonly navigationService: NavigationService
   ) {  }
 
@@ -65,28 +72,10 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
 
-    this.factors = this.authSevice.factors;
-
-    $('#factorContainer').scroll(function () {
-
-      if ($(this).scrollTop() > 0) {
-        $('#top-scroller').fadeIn();
-      } else {
-        $('#top-scroller').fadeOut();
-      }
-
-      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
-        $('#bottom-scroller').fadeIn();
-      } else {
-        $('#bottom-scroller').fadeOut();
-      }
-    });
+    this.factors = this.authService.factors;
   }
 
   ngAfterViewInit() {
-    this.checkOverflow(this.factorContainer);
-    this.goBottom();
-
     this.changeDetectorRef.detectChanges();
   }
 
@@ -95,53 +84,118 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  checkOverflow (element) {
-    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
-      $('#bottom-scroller').fadeIn();
-    } else {
-      $('#bottom-scroller').fadeOut();
-    }
-  }
-
-  goTop() {
-    const container = $('#factor-container');
-    container.animate({scrollTop: 0}, 500, 'swing');
-  }
-
   goBottom() {
     const container = $('#factor-container');
     const height = document.getElementById('factor-container').scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
+  async generateLogin(isQr) {
+    try {
+      do {
+        const login = this.authService.makeNewLogin(10);
+        const exists = await this.dds.exists(await AuthService.toId(login));
+        if (!exists) {
+          const packedLogin = await CryptoCore.Utils.packLogin(login);
+          if (isQr) {
+            this.value.next(await packedLogin.toString('hex'));
+          } else {
+            this.value.next(packedLogin);
+          }
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+      console.log(ignored);
+      this.notification.show('No network connection');
+    }
+  }
+
   addNewFactor() {
-    const isFirst = this.factors.length === 0;
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
+    this.isAuth = this.factors.length === 0;
+    let label = 'Authorization factor';
+    if (this.isAuth) {
+      label = 'Identification factor';
+    }
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { back: 'factornode', next: 'factornode', isFirst: isFirst }
+      data: { isAuth: this.isAuth, label: label, isColored: true, isShadowed: true },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+      this.openFactorOverlay(label, result);
     });
+
+    this.dialogFactorRef.afterClosed().subscribe(() => {
+      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
+    });
+  }
+
+  async openFactorOverlay(label, component) {
+    if (typeof component !== 'undefined') {
+      if (component === QrWriterComponent) {
+        this.generateLogin(true).catch(() => {});
+      } else if (component === NfcWriterComponent) {
+        this.generateLogin(false).catch(() => {});
+      }
+
+      this.child = this.factorParentDialog.open({
+        label: label,
+        isColored: true,
+        isShadowed: true,
+        content: component
+      });
+
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
+      });
+
+      this.child.value = this.value;
+
+      console.log(this.child);
+    }
+  }
+
+  async addFactor(result) {
+    try {
+      switch (result.factor) {
+        case FactorType.QR: {
+          if (this.isAuth) {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
+          } else {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+          }
+          break;
+        }
+        case FactorType.NFC: {
+          if (this.isAuth) {
+            await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
+          } else {
+            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+          }
+          break;
+        }
+        default: {
+          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+        }
+      }
+      this.goBottom();
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async removeFactor(factor) {
-    this.authSevice.rmFactorWithChildren(factor);
-    this.factors = this.authSevice.factors;
+    this.authService.rmFactorWithChildren(factor);
+    this.factors = this.authService.factors;
     this.changeDetectorRef.detectChanges();
-
-    this.sleep(650).then(function() {
-      this.checkOverflow(this.factorContainer);
-    }.bind(this));
-  }
-
-  async sleep(ms: number) {
-    await this._sleep(ms);
-  }
-
-  _sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   async onSaveClicked() {
@@ -178,8 +232,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        this.authSevice.clearFactors();
-        this.authSevice.password = '';
+        this.authService.clearFactors();
+        this.authService.password = '';
         this.factors = [];
 
         this.notification.show('Successfully uploaded the secret');
@@ -194,10 +248,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     this.cancel.next(true);
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['settings'] } }]);
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['settings']}}]);
+    }
   }
 }

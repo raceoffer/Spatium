@@ -11,8 +11,6 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-declare const device: any;
-
 declare const cordova: any;
 
 @Component({
@@ -109,11 +107,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     cordova.plugins.clipboard.copy(this.walletAddress.value);
   }
 
-  async onBackClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
+  async onSettingsClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency, 'settings'] } }]);
   }
 
-  isWindows(): boolean {
-    return device.platform === 'windows';
+  async onBackClicked() {
+    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
   }
 }

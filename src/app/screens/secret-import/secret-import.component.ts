@@ -1,4 +1,4 @@
-import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
@@ -6,7 +6,6 @@ import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
 declare const nfc: any;
-declare const device: any;
 
 enum Content {
   QR = 'QR',
@@ -62,7 +61,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     );
 
     nfc.enabled(() => {}, e => {
-      if (e === 'NO_NFC'  || (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED')) {
+      if (e === 'NO_NFC'  || e === 'NO_NFC_OR_NFC_DISABLED') {
         this.ngZone.run(() => {
           this.isNfcAvailable = false;
         });
@@ -76,11 +75,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/factor', { back: 'start' }, { outlets: { 'factor': ['pincode', { next: 'waiting' }] } }]);
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
+    await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
   }
 
   toggleContent(content) {

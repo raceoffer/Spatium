@@ -10,8 +10,10 @@ import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
+import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
+import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
 
-declare const device: any;
+declare const Buffer: any;
 
 @Component({
   selector: 'app-auth',
@@ -30,6 +32,12 @@ declare const device: any;
 })
 export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  @ViewChild(FactorParentOverlayRef) child;
+  @ViewChild('factorContainer') factorContainer: ElementRef;
+  @ViewChild('dialogButton') dialogButton;
+
+  busy = false;
+
   private subscriptions = [];
 
   username = '';
@@ -43,11 +51,11 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   icon_qr = '';
 
-  @ViewChild('factorContainer') factorContainer: ElementRef;
-  @ViewChild('dialogButton') dialogButton;
+  dialogFactorRef = null;
 
   constructor(
     public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -62,20 +70,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.onBackClicked();
       })
     );
-
-    $('#factor-container').scroll(function () {
-      if ($(this).scrollTop() > 0) {
-        $('#top-scroller').fadeIn();
-      } else {
-        $('#top-scroller').fadeOut();
-      }
-
-      if ($(this).scrollTop() <  ($(this)[0].scrollHeight - $(this).height()) ) {
-        $('#bottom-scroller').fadeIn();
-      } else {
-          $('#bottom-scroller').fadeOut();
-        }
-    });
 
     this.loginType = this.authService.loginType;
     this.isPasswordFirst = this.authService.isPasswordFirst;
@@ -92,11 +86,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ready = this.authService.decryptedSeed !== null;
   }
 
-  goTop() {
-    const container = $('#factor-container');
-    container.animate({scrollTop: 0}, 500, 'swing');
-  }
-
   goBottom() {
     const container = $('#factor-container');
     const height = document.getElementById('factor-container').scrollHeight;
@@ -108,31 +97,47 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.factors = this.authService.factors;
     this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
-    this.checkOverflow(this.factorContainer);
-    this.goBottom();
 
     if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
       this.addNewFactor();
     }
   }
 
-  checkOverflow (element) {
-    if (element.nativeElement.offsetHeight < element.nativeElement.scrollHeight) {
-      $('#bottom-scroller').fadeIn();
-    } else {
-      $('#bottom-scroller').fadeOut();
-    }
+  addNewFactor(): void {
+    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
+      width: '250px',
+      data: { isColored: false, isShadowed: false }
+    });
+
+    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
+      this.openFactorOverlay(result);
+    });
+
+    this.dialogFactorRef.afterClosed().subscribe(() => {
+      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
+      this.dialogFactorRef = null;
+    });
   }
 
-  addNewFactor(): void {
-    const dialogRef = this.dialog.open(DialogFactorsComponent, {
-      width: '250px',
-      data: { back: 'auth', next: 'auth' }
-    });
+  async openFactorOverlay(component) {
+    if (typeof component !== 'undefined') {
+      this.child = this.factorParentDialog.open({
+        label: '',
+        isColored: false,
+        isShadowed: false,
+        content: component
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-    });
+      this.child.onAddFactor.subscribe((result) => {
+        this.addFactor(result);
+        this.child.close();
+        this.child = null;
+      });
+
+      this.child.onBackClicked.subscribe(() => {
+        this.onBackClicked();
+      });
+    }
   }
 
   removeFactor(factor): void {
@@ -140,10 +145,20 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.factors = this.authService.factors;
     this.ready = this.authService.decryptedSeed !== null;
     this.changeDetectorRef.detectChanges();
+  }
 
-    this.sleep(650).then(() => {
-      this.checkOverflow(this.factorContainer);
-    });
+  async addFactor(result) {
+    try {
+      this.goBottom();
+      this.busy = true;
+      this.isPasswordFirst = true;
+      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      this.ready = this.authService.decryptedSeed !== null;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.busy = false;
+    }
   }
 
   async letLogin() {
@@ -158,20 +173,16 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.router.navigate(['/waiting']);
   }
 
-  async sleep(ms: number) {
-    await this._sleep(ms);
-  }
-
-  _sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   async onBackClicked() {
-    await this.router.navigate(['/login']);
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
+    if (this.dialogFactorRef != null) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    } else if (this.child != null) {
+      this.child.close();
+      this.child = null;
+    } else {
+      await this.router.navigate(['/login']);
+    }
   }
 }
 

@@ -1,6 +1,5 @@
 import {OnInit, Component, Output, EventEmitter, HostBinding} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../../services/auth.service';
+import { FactorType } from '../../../services/auth.service';
 
 declare const Buffer: any;
 
@@ -11,40 +10,24 @@ declare const Buffer: any;
 })
 export class PasswordComponent implements OnInit {
   @HostBinding('class') classes = 'content factor-content text-center';
+
   @Output() isPasswordChanged: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
 
   stContinue = 'Continue';
   stPassword = 'Password';
 
   password = '';
 
-  next: string = null;
-  back: string = null;
-
-  busy = false;
-
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly authService: AuthService
-  ) {
-    this.route.params.subscribe(params => {
-      if (params['next']) {
-        this.next = params['next'];
-      }
-      if (params['back']) {
-        this.back = params['back'];
-      }
-    });
-  }
+  constructor( ) { }
 
   ngOnInit() {
     this.password = '';
   }
 
   async goNext() {
-    try {
-      this.busy = true;
+    this.onSuccess.emit({factor: FactorType.PASSWORD, value: this.password});
+      /*this.busy = true;
       if (this.password !== '') {
         switch (this.next) {
           case null:
@@ -64,10 +47,7 @@ export class PasswordComponent implements OnInit {
             await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
             break;
         }
-      }
-    } finally {
-      this.busy = false;
-    }
+      }*/
   }
 
   onFocusOut() {

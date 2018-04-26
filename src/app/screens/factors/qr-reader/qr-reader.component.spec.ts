@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NfcComponent } from './nfc.component';
+import { QrReaderComponent } from './qr-reader.component';
 
-describe('NfcComponent', () => {
-  let component: NfcComponent;
-  let fixture: ComponentFixture<NfcComponent>;
+describe('QrReaderComponent', () => {
+  let component: QrReaderComponent;
+  let fixture: ComponentFixture<QrReaderComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NfcComponent ]
+      declarations: [ QrReaderComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NfcComponent);
+    fixture = TestBed.createComponent(QrReaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

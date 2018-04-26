@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
 import { NotificationService } from './notification.service';
+import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
+import { PasswordComponent } from '../screens/factors/password/password.component';
+import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
+import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
+import { NfcWriterComponent } from '../screens/factors/nfc-writer/nfc-writer.component';
+import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
+import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
+import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -31,29 +39,33 @@ export class AuthService {
 
   constructor(private readonly notification: NotificationService) {
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
-      FactorIconAsset.PIN, FactorLink.PIN));
+      FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
-      FactorIconAsset.PASSWORD, FactorLink.PASSWORD));
+      FactorIconAsset.PASSWORD, FactorLink.PASSWORD, PasswordComponent));
     this.available.push(new AvailableFactor(FactorType.FILE, AvailableFactorName.FILE, FactorIcon.FILE,
-      FactorIconAsset.FILE, FactorLink.FILE));
+      FactorIconAsset.FILE, FactorLink.FILE, FileUploadComponent));
     this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, AvailableFactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY,
-      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY));
+      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, GraphicKeyComponent));
     this.available.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR));
+      FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR));
+      FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
 
     const addNFCFactor = () => {
       this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC));
+        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
       this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC));
+        FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
     };
 
-    nfc.enabled(addNFCFactor,  (e) => {
-        if (e === 'NO_NFC') { return; }
-        if (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED') { return; }
-        addNFCFactor();
+    nfc.enabled(addNFCFactor, (e) => {
+      if (e === 'NO_NFC') {
+        return;
+      }
+      if (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED') {
+        return;
+      }
+      addNFCFactor();
     });
   }
 
@@ -241,8 +253,8 @@ export class AuthService {
     PIN = '',
     PASSWORD = '',
     FILE = '',
-    GRAPHIC_KEY = 'icon-graphic_key',
-    QR = 'icon-qr_code',
+    GRAPHIC_KEY = 'icon-custom-graphic_key',
+    QR = 'icon-custom-qr_code',
     NFC = ''
   }
 
@@ -261,13 +273,15 @@ export class AuthService {
     icon: string;
     icon_asset: string;
     link: string;
+    component: any;
 
-    constructor(type, name, icon, icon_asset, link) {
+    constructor(type, name, icon, icon_asset, link, component) {
       this.type = type;
       this.name = name;
       this.icon = icon;
       this.icon_asset = icon_asset;
       this.link = link;
+      this.component = component;
     }
   }
 

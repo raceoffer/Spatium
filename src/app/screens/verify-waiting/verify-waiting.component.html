@@ -1,12 +1,7 @@
 <app-connect *ngIf="(synchronizing | async)" (cancel)="cancelConnect()"></app-connect>
 
-<mat-toolbar color="primary" class="header-toolbar" *ngIf="!(synchronizing | async) && !isWindows()">
-  <mat-toolbar-row>
-    <button mat-icon-button (click)="onBackClicked()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-  </mat-toolbar-row>
-</mat-toolbar>
+<app-toolbar *ngIf="!(synchronizing | async)"
+  (backClicked)="onBackClicked()"></app-toolbar>
 
 <div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%" class="box">
   <app-logo-block></app-logo-block>

@@ -1,0 +1,20 @@
+<app-toolbar
+  [label] = "label"
+  [isColored] = "false"
+  [isShadowed] = "false"
+  (backClicked)="onBackClicked()"></app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-pincode
+    [busy]="busy"
+    [isCreate]="isCreate"
+    [isFactor]="false"
+    (hasTouchId)="setHasTouchId($event)"
+    (onSuccess)="onSuccess($event)"
+  ></app-pincode>
+
+</div>

@@ -1,6 +1,8 @@
-import {AfterContentInit, AfterViewInit, Component, ElementRef, HostBinding, NgZone, ViewChild} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, FactorType } from '../../../services/auth.service';
+import {
+  AfterContentInit, AfterViewInit, Component, ElementRef, EventEmitter, HostBinding, NgZone, Output,
+  ViewChild
+} from '@angular/core';
+import { FactorType } from '../../../services/auth.service';
 import * as PatternLock from 'PatternLock';
 
 declare const Buffer: any;
@@ -13,31 +15,16 @@ declare const Buffer: any;
 
 export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   @HostBinding('class') classes = 'content factor-content text-center';
+
   @ViewChild('patternContainer') el: ElementRef;
 
-  next: string = null;
-  back: string = null;
+  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+
   graphKey: string = null;
 
   lock: any = null;
 
-  busy = false;
-
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly ngZone: NgZone,
-    private readonly authService: AuthService
-  ) {
-    this.route.params.subscribe(params => {
-      if (params['next']) {
-        this.next = params['next'];
-      }
-      if (params['back']) {
-        this.back = params['back'];
-      }
-    });
-  }
+  constructor(private readonly ngZone: NgZone) { }
 
   ngAfterViewInit() {
     this.graphKey = '';
@@ -53,25 +40,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   async goNext() {
-    try {
-      this.busy = true;
-      switch (this.next) {
-        case 'auth':
-          await this.authService.addAuthFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-          await this.router.navigate(['/auth']);
-          break;
-        case 'registration':
-          await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-          await this.router.navigate(['/registration']);
-          break;
-        case 'factornode':
-          await this.authService.addFactor(FactorType.GRAPHIC_KEY, Buffer.from(this.graphKey, 'utf-8'));
-          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
-          break;
-      }
-    } finally {
-      this.busy = false;
-    }
+    this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: this.graphKey});
   }
 
 }

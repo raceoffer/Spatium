@@ -73,6 +73,11 @@ $green: rgb(24, 154, 57);//#189a39
 
 .mat-drawer-container {
   height: calc(100% - 56px) !important;
+  z-index: inherit !important;
+}
+
+.mat-drawer-content {
+  z-index: inherit !important;
 }
 
 .entry-margin {
@@ -202,7 +207,7 @@ mat-icon.color-custom{
 }
 
 .color-custom-dark{
-  color: $charcoal_grey;
+  color: $charcoal_grey !important;
 }
 
 mat-icon.color-cool_grey{
@@ -647,7 +652,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   width: 34px !important;
 }
 
-[class^="icon-"], [class*=" icon-"] {
+[class^="icon-custom-"], [class*=" icon-custom-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'SVG Icons' !important;
   font-style: normal;
@@ -661,51 +666,51 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-graphic_key:before {
+.icon-custom-graphic_key:before {
   content: "\e900";
   color: white;
   font-size: 20px !important;
 }
 
-.icon-graphic_key-mask:before {
+.icon-custom-graphic_key-mask:before {
   content: "\e900";
   color: $bluish;
-  font-size: 35px !important;
+  font-size: 40px !important;
 }
 
-.icon-qr_code:before {
+.icon-custom-qr_code:before {
   content: "\e901";
   color: white;
   font-size: 20px !important;
 }
 
-.icon-qr_code_blue:before {
+.icon-custom-qr_code_blue:before {
   content: "\e901";
   color: $bluish;
   font-size: 30px !important;
 }
 
-.icon-qr_code_black:before {
+.icon-custom-qr_code_black:before {
   content: "\e901";
   color: $dark;
   font-size: 30px !important;
 }
 
-.icon-qr_code_large:before {
+.icon-custom-qr_code_large:before {
   content: "\e901";
   color: $dark;
   font-size: 180px !important;
 }
 
-.icon-qr_code_sizeless:before {
+.icon-custom-qr_code_sizeless:before {
   content: "\e901";
   color: $dark;
 }
 
-.icon-qr_code-mask:before {
+.icon-custom-qr_code-mask:before {
   content: "\e901";
   color: $bluish;
-  font-size: 35px !important;
+  font-size: 40px !important;
 }
 
 .glass{
@@ -814,7 +819,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 5;
+  z-index: 2;
 }
 
 //классы для заполнения всего экрана
@@ -849,8 +854,6 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .box .content-flex{
   flex: 0 1 auto;
   width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
 }
 
 .box .factor-content{
@@ -1060,4 +1063,8 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   left: 0;
   right: 0;
   overflow: auto;
+}
+
+.spacer {
+  flex: 1 1 auto;
 }
