@@ -71,19 +71,13 @@ export class LoginComponent implements AfterViewInit {
   ) { }
 
   ngAfterViewInit() {
-    if (this.genericLogin !== null) {
-      this.userName = this.genericLogin;
-      this.genericLogin = null;
-    } else {
-      this.userName = '';
-    }
+    this.userName = '';
   }
 
   async generateNewLogin() {
     this.usernameState = State.Updating;
     try {
       do {
-        console.log("BEFORE GENERATE");
         this.userName = this.authSevice.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(this._userName));
         if (!exists) {
@@ -96,7 +90,6 @@ export class LoginComponent implements AfterViewInit {
       this.notification.show('No network connection');
       this.usernameState = State.Error;
     }
-    console.log("GENERATED NEW LOGIN");
   }
 
   onFocusOut() {
@@ -108,7 +101,10 @@ export class LoginComponent implements AfterViewInit {
   }
 
   async onNext() {
-    console.log('ON NEXT CALLED');
-    this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
+    if (this.userName.length >= 6) {
+      this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
+    } else {
+      this.notification.show("Login must be 6 or more symbols");
+    }
   }
 }
