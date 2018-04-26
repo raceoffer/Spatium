@@ -5,3 +5,7 @@
   right: 0;
   z-index: 5;
 }
+
+.spacer {
+  flex: 1 1 auto;
+}

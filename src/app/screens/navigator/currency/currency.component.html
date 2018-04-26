@@ -2,7 +2,9 @@
   [label] = "currencyInfo?.name"
   [isColored] = "true"
   [isShadowed] = "true"
-  (backClicked)="onBackClicked()"></app-toolbar>
+  [hasSettings] = "true"
+  (backClicked) = "onBackClicked()"
+  (settingsClicked) = "onSettingsClicked()"></app-toolbar>
 
 <div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">

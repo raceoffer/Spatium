@@ -3,7 +3,14 @@
     <button mat-icon-button (click)="onBackClicked()" *ngIf="!isWindows()">
       <mat-icon>arrow_back</mat-icon>
     </button>
+
     <span>{{label}}</span>
+
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="onSettingsClicked()" *ngIf="hasSettings">
+      <mat-icon>settings</mat-icon>
+    </button>
   </mat-toolbar-row>
 </mat-toolbar>
 

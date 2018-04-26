@@ -15,7 +15,9 @@ export class ToolbarComponent implements OnInit {
   @Input() isColored: false;
   @Input() isShadowed: false;
   @Input() label: string;
+  @Input() hasSettings: false;
 
+  @Output() settingsClicked: EventEmitter<any> = new EventEmitter<any>();
   @Output() backClicked: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() { }
@@ -29,12 +31,15 @@ export class ToolbarComponent implements OnInit {
     }
   }
 
-  async onBackClicked() {
+  onBackClicked() {
     this.backClicked.emit();
+  }
+
+  onSettingsClicked() {
+    this.settingsClicked.emit();
   }
 
   isWindows(): boolean {
     return device.platform === 'windows';
   }
-
 }
