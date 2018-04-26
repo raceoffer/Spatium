@@ -184,7 +184,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         case FactorType.LOGIN: {
           console.log(result.factor, result.value);
-          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+          await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
           break;
         }
         default: {
@@ -207,6 +207,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.uploading = true;
 
+      console.log(this.factors);
       const idFactor = this.factors[0].value;
 
       let factors = [];
@@ -225,6 +226,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         return node;
       }, null);
+
+      console.log(await CryptoCore.Utils.tryUnpackLogin(idFactor));
 
       const login = (await CryptoCore.Utils.tryUnpackLogin(idFactor)).toString('utf-8');
 

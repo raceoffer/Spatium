@@ -1,6 +1,7 @@
 import {Component, Output, EventEmitter, Input, HostBinding, AfterViewInit} from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { FactorType } from '../../../services/auth.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -25,6 +26,7 @@ export class LoginComponent implements AfterViewInit {
   private _userName = '';
 
   stLogin = 'Login';
+  uploading = false;
 
   stateType = State;
   usernameState = State.Ready;
@@ -66,7 +68,7 @@ export class LoginComponent implements AfterViewInit {
 
   constructor(
     private readonly dds: DDSService,
-    private readonly authSevice: AuthService,
+    private readonly authService: AuthService,
     private readonly notification: NotificationService
   ) { }
 
@@ -78,7 +80,7 @@ export class LoginComponent implements AfterViewInit {
     this.usernameState = State.Updating;
     try {
       do {
-        this.userName = this.authSevice.makeNewLogin(10);
+        this.userName = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(this._userName));
         if (!exists) {
           this.notification.show('Unique login was generated');
@@ -102,9 +104,10 @@ export class LoginComponent implements AfterViewInit {
 
   async onNext() {
     if (this.userName.length >= 6) {
-      this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
+      console.log(this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName}));
     } else {
       this.notification.show("Login must be 6 or more symbols");
+      return;
     }
   }
 }
