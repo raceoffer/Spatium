@@ -1,19 +1,19 @@
-import {OnInit, Component, OnDestroy, NgZone, HostBinding} from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { WalletService } from '../../../services/wallet.service';
-import { NotificationService } from '../../../services/notification.service';
-import { CurrencyWallet } from '../../../services/wallet/currencywallet';
-import { Coin, Token } from '../../../services/keychain.service';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { toBehaviourSubject } from '../../../utils/transformers';
-import { roundFloat } from '../../../utils/numeric';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import 'rxjs/add/operator/mergeMap';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { CurrencyService, Info } from '../../../services/currency.service';
+import { Coin, Token } from '../../../services/keychain.service';
+import { NavigationService } from '../../../services/navigation.service';
+import { NotificationService } from '../../../services/notification.service';
+import { WalletService } from '../../../services/wallet.service';
+import { CurrencyWallet } from '../../../services/wallet/currencywallet';
+import { roundFloat } from '../../../utils/numeric';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
@@ -90,15 +90,13 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly walletService: WalletService,
-    private readonly notification: NotificationService,
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly ngZone: NgZone,
+              private readonly walletService: WalletService,
+              private readonly notification: NotificationService,
+              private readonly route: ActivatedRoute,
+              private readonly router: Router,
+              private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -204,66 +202,66 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
             this.amountUsd.setValue(
               roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
             this.amount.setValue(
               roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
             this.feeUsd.setValue(
               roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePrice.setValue(
               roundFloat(value / this.estimatedSize.getValue()),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePriceUsd.setValue(
               roundFloat(value / this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(
               roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePrice.setValue(
               roundFloat(value / this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePriceUsd.setValue(
               roundFloat(value / this.estimatedSize.getValue()),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.feePrice.valueChanges.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(
               roundFloat(value * this.estimatedSize.getValue()),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feeUsd.setValue(
               roundFloat(value * this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePriceUsd.setValue(
               roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.feePriceUsd.valueChanges.distinctUntilChanged().subscribe(value => {
             this.fee.setValue(
               roundFloat(value * this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feeUsd.setValue(
               roundFloat(value * this.estimatedSize.getValue()),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePrice.setValue(
               roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
@@ -276,17 +274,17 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.currencyInfo.rate.distinctUntilChanged().subscribe(value => {
             this.amountUsd.setValue(
               roundFloat(value * this.amount.value),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
         this.subscriptions.push(
           this.currencyInfo.gasRate.distinctUntilChanged().subscribe(value => {
             this.feeUsd.setValue(
               roundFloat(value * this.fee.value),
-              { emitEvent: false });
+              {emitEvent: false});
             this.feePriceUsd.setValue(
               roundFloat(value * this.feePrice.value),
-              { emitEvent: false });
+              {emitEvent: false});
           })
         );
 
@@ -340,7 +338,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     if (this.phase.getValue() === Phase.Confirmation) {
       await this.currencyWallet.rejectTransaction();
     }
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+    await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', this.currency]}}]);
   }
 
   // Pressed start signature
@@ -387,7 +385,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Sending);
   }
 
-  paste () {
+  paste() {
     cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
       console.log('text to be pasted: ' + text);
       if (text !== '') {
@@ -396,7 +394,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     }), e => console.log(e));
   }
 
-  copy () {
+  copy() {
     console.log(this.walletAddress.value);
     cordova.plugins.clipboard.copy(this.walletAddress.value);
   }

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const CryptoCore: any;
 declare const cordova: any;
@@ -26,10 +26,8 @@ export class QrWriterComponent implements OnInit {
 
   permissionCStorage = false;
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly notification: NotificationService
-  ) { }
+  constructor(private readonly ngZone: NgZone,
+              private readonly notification: NotificationService) { }
 
   async ngOnInit() {}
 
@@ -40,7 +38,7 @@ export class QrWriterComponent implements OnInit {
   requestStorage() {
     const permissions = cordova.plugins.permissions;
     permissions.hasPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => this.ngZone.run(() => {
-      if ( status.hasPermission ) {
+      if (status.hasPermission) {
         this.permissionCStorage = true;
         this.saveToStorage();
       } else {
@@ -74,11 +72,11 @@ export class QrWriterComponent implements OnInit {
     if (this.permissionCStorage) {
       const canvas = document.getElementsByTagName('canvas')[0];
       window.canvas2ImagePlugin.saveImageDataToLibrary(
-        function(msg) {
+        function (msg) {
           console.log(msg);
           this.notification.show('Secret has been saved as QR image');
         }.bind(this),
-        function(err) {
+        function (err) {
           console.log(err);
         },
         canvas

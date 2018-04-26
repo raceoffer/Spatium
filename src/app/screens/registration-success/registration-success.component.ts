@@ -1,4 +1,4 @@
-import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 
@@ -9,16 +9,13 @@ import { NavigationService } from '../../services/navigation.service';
 })
 export class RegistrationSuccessComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   stSuccess0 = 'You have successfully created a secure,';
   stSuccess1 = 'personal SPATIUM account!';
   stOpenWallet = 'Open wallet';
+  private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly router: Router,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -34,7 +31,7 @@ export class RegistrationSuccessComponent implements OnInit, OnDestroy {
   }
 
   async goWaiting() {
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['waiting'] } }]);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
   }
 
   async onBackClicked() {

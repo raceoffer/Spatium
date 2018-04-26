@@ -1,9 +1,9 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NotificationService } from '../../services/notification.service';
-import { FileService } from '../../services/file.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -30,8 +30,7 @@ export class ConfirmationEntryComponent implements OnInit {
               private readonly authService: AuthService,
               private readonly fs: FileService,
               private readonly notification: NotificationService,
-              private readonly keyChain: KeyChainService
-  ) {
+              private readonly keyChain: KeyChainService) {
     this.route.params.subscribe(params => {
       if (params['back']) {
         this.back = params['back'];
@@ -65,7 +64,7 @@ export class ConfirmationEntryComponent implements OnInit {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
         this.keyChain.setSeed(await CryptoCore.Utils.decrypt(ciphertext, aesKey));
 
-        await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-waiting'] } }]);
+        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
       } else {
         if (this.hasTouchId) {
           try {
@@ -94,7 +93,7 @@ export class ConfirmationEntryComponent implements OnInit {
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 
-    await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-waiting'] } }]);
+    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
   }
 
   async saveTouchPassword(pincode) {

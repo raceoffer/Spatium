@@ -15,17 +15,14 @@ import { NfcWriterComponent } from '../../screens/factors/nfc-writer/nfc-writer.
   templateUrl: './factor-parent-overlay.component.html',
   styleUrls: ['./factor-parent-overlay.component.css'],
 })
-export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
+export class FactorParentOverlayComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-
-  @ViewChild('container', { read: ViewContainerRef })
-  viewContainerRef: ViewContainerRef;
-
-  private componentRef: ComponentRef<{}>;
-
   isColored = false;
   isShadowed = false;
   label = '';
+  @ViewChild('container', {read: ViewContainerRef})
+  private viewContainerRef: ViewContainerRef;
+  private componentRef: ComponentRef<{}>;
 
   constructor(public dialogRef: FactorParentOverlayRef,
               @Inject(FACTOR_PARENT_DIALOG_DATA) public config: any,
@@ -53,7 +50,7 @@ export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
       });
 
       if (this.config.content === QrWriterComponent || this.config.content === NfcWriterComponent) {
-          instance['value'] = this.dialogRef.value;
+        instance['value'] = this.dialogRef.value;
       }
 
       console.log(instance);

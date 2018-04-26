@@ -1,12 +1,12 @@
-import {Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { Router } from '@angular/router';
-import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
-import { NotificationService } from '../../../services/notification.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { CurrencyService } from '../../../services/currency.service';
-import { WalletService } from '../../../services/wallet.service';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { BluetoothService } from '../../../services/bluetooth.service';
+import { CurrencyService } from '../../../services/currency.service';
+import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
+import { NavigationService } from '../../../services/navigation.service';
+import { NotificationService } from '../../../services/notification.service';
+import { WalletService } from '../../../services/wallet.service';
 
 declare const navigator: any;
 
@@ -21,54 +21,48 @@ export class WalletComponent implements OnInit, OnDestroy {
   ready = this.wallet.ready;
   cancelled = this.wallet.cancelled;
   failed = this.wallet.failed;
-
-  private subscriptions = [];
-
   cols: any = 2;
-
   public isOpened = false;
   public title = 'Wallet';
   public isExitTap = false;
   public isSearch = false;
-  public _filterValue = '';
   public filtredTitles = [];
   public navLinks = [{
-      name: 'Wallet',
-      link: ['/navigator', { outlets: { navigator: ['wallet'] } }],
-      isSelected: true,
-      isActive: true
-    }, {
-      name: 'Exchange',
-      link: '',
-      isSelected: false,
-      isActive: false
-    }, {
-      name: 'ICO',
-      link: '',
-      isSelected: false,
-      isActive: false
-    }, {
-      name: 'Portfolio Investment',
-      link: '',
-      isSelected: false,
-      isActive: false
-    }, {
-      name: 'Verification',
-      link: '',
-      isSelected: false,
-      isActive: false
-    }, {
-      name: 'Settings',
-      link: ['/navigator', { outlets: { navigator: ['settings'] } }],
-      isSelected: false,
-      isActive: true
-    }, {
-      name: 'Exit',
-      link: ['/start'],
-      isSelected: false,
-      isActive: true
-    }];
-
+    name: 'Wallet',
+    link: ['/navigator', {outlets: {navigator: ['wallet']}}],
+    isSelected: true,
+    isActive: true
+  }, {
+    name: 'Exchange',
+    link: '',
+    isSelected: false,
+    isActive: false
+  }, {
+    name: 'ICO',
+    link: '',
+    isSelected: false,
+    isActive: false
+  }, {
+    name: 'Portfolio Investment',
+    link: '',
+    isSelected: false,
+    isActive: false
+  }, {
+    name: 'Verification',
+    link: '',
+    isSelected: false,
+    isActive: false
+  }, {
+    name: 'Settings',
+    link: ['/navigator', {outlets: {navigator: ['settings']}}],
+    isSelected: false,
+    isActive: true
+  }, {
+    name: 'Exit',
+    link: ['/start'],
+    isSelected: false,
+    isActive: true
+  }];
   public titles = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
@@ -81,25 +75,25 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
-
   @ViewChild('sidenav') sidenav;
+  private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    private readonly bt: BluetoothService,
-    private readonly ngZone: NgZone,
-    private readonly router: Router,
-    private readonly keychain: KeyChainService,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService,
-    private readonly currency: CurrencyService,
-    private readonly wallet: WalletService
-  ) {
+  constructor(public dialog: MatDialog,
+              private readonly bt: BluetoothService,
+              private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly keychain: KeyChainService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService,
+              private readonly currency: CurrencyService,
+              private readonly wallet: WalletService) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.titles.push(this.tokenEntry(tokenInfo));
     });
     this.filtredTitles = this.titles;
   }
+
+  public _filterValue = '';
 
   get filterValue() {
     return this._filterValue;
@@ -163,7 +157,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onTileClicked(coin: Coin) {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', coin] } }]);
+    await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', coin]}}]);
   }
 
   async toggleSearch(value) {
@@ -171,7 +165,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-     if (this.isSearch) {
+    if (this.isSearch) {
       this.filterValue = '';
       this.isSearch = false;
     } else if (this.isOpened) {
@@ -196,7 +190,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async goToSync() {
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['waiting'] } }]);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
   }
 
   async cancelSync() {

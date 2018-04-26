@@ -1,21 +1,31 @@
 import {
-  Component, OnInit, ElementRef,
-  ViewChild, AfterViewInit, ChangeDetectorRef, trigger, transition, sequence, animate, style, OnDestroy, HostBinding
+  AfterViewInit,
+  animate,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostBinding,
+  OnDestroy,
+  OnInit,
+  sequence,
+  style,
+  transition,
+  trigger,
+  ViewChild
 } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService, FactorType } from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { KeyChainService } from '../../services/keychain.service';
+import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import { DDSService } from '../../services/dds.service';
-import { NotificationService } from '../../services/notification.service';
-import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
+import { Subject } from 'rxjs/Subject';
+import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
+import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
+import { AuthService, FactorType } from '../../services/auth.service';
+import { DDSService } from '../../services/dds.service';
+import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
-import {FactorParentOverlayRef} from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
-import {FactorParentOverlayService} from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
-
+import { NotificationService } from '../../services/notification.service';
 
 
 declare const CryptoCore: any;
@@ -27,10 +37,10 @@ declare const device: any;
   animations: [
     trigger('anim', [
       transition('* => void', [
-        style({ height: '*', opacity: '1', transform: 'translateX(0)'} ),
+        style({height: '*', opacity: '1', transform: 'translateX(0)'}),
         sequence([
-          animate('.5s ease', style({ height: '*', opacity: '.2', transform: 'translateX(60px)' })),
-          animate('.1s ease', style({ height: '*', opacity: 0, transform: 'translateX(60px)' }))
+          animate('.5s ease', style({height: '*', opacity: '.2', transform: 'translateX(60px)'})),
+          animate('.1s ease', style({height: '*', opacity: 0, transform: 'translateX(60px)'}))
         ])
       ]),
     ])],
@@ -42,9 +52,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(FactorParentOverlayRef) child;
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
-
-  private subscriptions = [];
-
   stPassword = 'Password';
   stRegistration = 'Sign up';
   username: string = null;
@@ -53,25 +60,21 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     'Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
   password = '';
   advancedMode = false;
-
   factors = [];
-
   uploading = false;
-
   cancel = new Subject<boolean>();
   dialogFactorRef = null;
+  private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
-    private readonly router: Router,
-    private readonly dds: DDSService,
-    private readonly keychain: KeyChainService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly notification: NotificationService,
-    private readonly authService: AuthService,
-    private readonly navigationService: NavigationService
-  ) {
+  constructor(public dialog: MatDialog,
+              public factorParentDialog: FactorParentOverlayService,
+              private readonly router: Router,
+              private readonly dds: DDSService,
+              private readonly keychain: KeyChainService,
+              private readonly changeDetectorRef: ChangeDetectorRef,
+              private readonly notification: NotificationService,
+              private readonly authService: AuthService,
+              private readonly navigationService: NavigationService) {
     this.changeDetectorRef = changeDetectorRef;
   }
 
@@ -119,7 +122,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.password = this.password;
     this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { isColored: false, isShadowed: false }
+      data: {isColored: false, isShadowed: false}
     });
 
     this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {

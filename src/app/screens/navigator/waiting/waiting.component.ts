@@ -1,10 +1,10 @@
-import {AfterViewInit, Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
-import { Router } from '@angular/router';
-import { BluetoothService, Device } from '../../../services/bluetooth.service';
-import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { NavigationService } from '../../../services/navigation.service';
+import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BluetoothService, Device } from '../../../services/bluetooth.service';
+import { NavigationService } from '../../../services/navigation.service';
+import { WalletService } from '../../../services/wallet.service';
 
 declare const navigator: any;
 
@@ -24,20 +24,15 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   connected = false;
   ready = this.wallet.ready;
   connectedDevice = this.bt.connectedDevice;
-
-  private subscriptions = [];
-
   devices = [];
   nextConnected = false;
+  private subscriptions = [];
 
-
-  constructor(
-    public dialog: MatDialog,
-    private bt: BluetoothService,
-    private wallet: WalletService,
-    private router: Router,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(public dialog: MatDialog,
+              private bt: BluetoothService,
+              private wallet: WalletService,
+              private router: Router,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
 
@@ -66,7 +61,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
         this.wallet.startSync();
-        await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
+        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 
     this.subscriptions.push(
@@ -137,7 +132,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
   }
 
   async cancelConnect() {

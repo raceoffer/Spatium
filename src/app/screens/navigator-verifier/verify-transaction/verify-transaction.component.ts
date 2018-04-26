@@ -1,11 +1,11 @@
-import {Component, OnInit, OnDestroy, ViewChild, HostBinding} from '@angular/core';
-import { WalletService } from '../../../services/wallet.service';
-import { Coin, Token } from '../../../services/keychain.service';
+import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Info, CurrencyService } from '../../../services/currency.service';
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
+import { CurrencyService, Info } from '../../../services/currency.service';
+import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import { WalletService } from '../../../services/wallet.service';
 
 enum State {
   None,
@@ -32,7 +32,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   public title = 'Confirmations mode';
   public navLinks = [{
     name: 'Export secret',
-    link: ['/navigator-verifier', { outlets: { 'navigator': ['secret-export'] } }],
+    link: ['/navigator-verifier', {outlets: {'navigator': ['secret-export']}}],
     isSelected: false,
     isActive: true
   }, {
@@ -42,7 +42,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     isActive: false
   }, {
     name: 'Delete secret',
-    link: ['/navigator-verifier', { outlets: { 'navigator': ['delete-secret', 'verify-transaction'] } }],
+    link: ['/navigator-verifier', {outlets: {'navigator': ['delete-secret', 'verify-transaction']}}],
     isSelected: false,
     isActive: true
   }, {
@@ -59,18 +59,14 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
   synchronizing = this.wallet.synchronizing;
-
+  @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
-  @ViewChild('sidenav') sidenav;
-
-  constructor(
-    private readonly wallet: WalletService,
-    private readonly router: Router,
-    private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService
-  ) {
+  constructor(private readonly wallet: WalletService,
+              private readonly router: Router,
+              private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService,
+              private readonly notification: NotificationService) {
     this.ready = this.wallet.ready;
   }
 
@@ -161,6 +157,6 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   }
 
   async goToSync() {
-    await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-waiting'] } }]);
+    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
   }
 }

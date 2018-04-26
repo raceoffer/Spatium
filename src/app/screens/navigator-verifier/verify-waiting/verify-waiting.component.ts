@@ -1,15 +1,15 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, HostBinding } from '@angular/core';
-import { BluetoothService } from '../../../services/bluetooth.service';
-import { WalletService } from '../../../services/wallet.service';
+import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { BluetoothService } from '../../../services/bluetooth.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { WalletService } from '../../../services/wallet.service';
 
 @Component({
   selector: 'app-verify-waiting',
   templateUrl: './verify-waiting.component.html',
   styleUrls: ['./verify-waiting.component.css']
 })
-export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy {
+export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   enableBTmessage = 'Enable Bluetooth to proceed';
 
@@ -22,12 +22,10 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
 
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly bt: BluetoothService,
-    private readonly wallet: WalletService,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly router: Router,
+              private readonly bt: BluetoothService,
+              private readonly wallet: WalletService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
 
@@ -48,8 +46,8 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
     );
 
     this.subscriptions.push(
-      this.wallet.readyEvent.subscribe(async () =>  {
-        await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+      this.wallet.readyEvent.subscribe(async () => {
+        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-transaction']}}]);
       }));
 
     this.subscriptions.push(
@@ -108,7 +106,7 @@ export class VerifyWaitingComponent  implements OnInit, AfterViewInit, OnDestroy
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-transaction']}}]);
   }
 
   async cancelConnect() {

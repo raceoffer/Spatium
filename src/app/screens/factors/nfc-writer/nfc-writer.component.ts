@@ -1,11 +1,17 @@
 import {
-  AfterViewInit, Component, EventEmitter, HostBinding, Input, NgZone, OnDestroy, OnInit,
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
   Output
 } from '@angular/core';
-import {AuthService, FactorType} from "../../../services/auth.service";
-import {DDSService} from "../../../services/dds.service";
-import {NotificationService} from "../../../services/notification.service";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { FactorType } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
 
 declare const nfc: any;
 declare const ndef: any;
@@ -36,7 +42,7 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   timer: any;
 
   constructor(private ngZone: NgZone,
-              private readonly notification: NotificationService) {  }
+              private readonly notification: NotificationService) { }
 
   ngOnInit() {
     this.classNfcContainer = '';

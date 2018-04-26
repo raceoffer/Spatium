@@ -1,9 +1,9 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { FileService } from '../../../services/file.service';
-import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
+import { FileService } from '../../../services/file.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { NotificationService } from '../../../services/notification.service';
 
 declare const window: any;
 
@@ -14,26 +14,21 @@ declare const window: any;
 })
 export class DeleteSecretComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   title = 'Deleting secret';
   description = 'Please confirm that you want to delete the secret from this device. Type the following word with respect to the register.';
   checkPhrase = 'delete';
   checkInput;
   confirmButton = 'Confirm';
-
   back = 'verify';
-
   hasTouch = false;
+  private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly fs: FileService,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
-  ) {
+  constructor(private readonly router: Router,
+              private readonly route: ActivatedRoute,
+              private readonly fs: FileService,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService) {
     this.checkPhrase = this.сapitalizeRandomChars(this.checkPhrase);
   }
 
@@ -72,17 +67,17 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
   async onBackClicked() {
     switch (this.back) {
       case 'pincode':
-        await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
+        await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
         break;
       case 'verify-transaction':
-        await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+        await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-transaction']}}]);
         break;
     }
   }
 
   async delete() {
     if (this.hasTouch) {
-      window.plugins.touchid.delete('spatium', async() => {
+      window.plugins.touchid.delete('spatium', async () => {
         console.log('Password key deleted');
         await this.deleteFileSecret();
       });

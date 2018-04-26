@@ -23,13 +23,13 @@ const DEFAULT_CONFIG: FactorParentOverlayConfig = {
 @Injectable()
 export class FactorParentOverlayService {
 
-  constructor (private injector: Injector,
-               private overlay: Overlay) { }
+  constructor(private injector: Injector,
+              private overlay: Overlay) { }
 
   open(config: FactorParentOverlayConfig = {}) {
 
     // Override default configuration
-    const dialogConfig = { ...DEFAULT_CONFIG, ...config };
+    const dialogConfig = {...DEFAULT_CONFIG, ...config};
 
     // Returns an OverlayRef which is a PortalHost
     const overlayRef = this.createOverlay(dialogConfig);

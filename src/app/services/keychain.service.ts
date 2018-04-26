@@ -137,9 +137,6 @@ export class TokenEntry {
 
 @Injectable()
 export class KeyChainService {
-  private _seed: any = null;
-  private keyChain: any = null;
-
   public readonly topTokens = [
     new TokenEntry(Token.EDC, 'Edicoin', 'EDC', '0x507f6f5C6e0034c368d73Ef45bFc3d2f4aD29E19', 'edc', 8, 'testnet'),
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos'),
@@ -243,6 +240,10 @@ export class KeyChainService {
     new TokenEntry(Token.SONM, 'SONM', 'SNM', '0x983f6d60db79ea8ca4eb9968c6aff8cfa04b3c63', 'sonm'),
     new TokenEntry(Token.LOOM_NETWORK, 'Loom Network', 'LOOM', '0xa4e8c3ec456107ea67d3075bf9e3df3a75823db0', 'loomNetwork')
   ];
+  private _seed: any = null;
+  private keyChain: any = null;
+
+  constructor() { }
 
   getSeed() {
     return Buffer.from(this._seed);
@@ -264,6 +265,4 @@ export class KeyChainService {
   getCoinSecret(coin: Coin, account: number) {
     return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
   }
-
-  constructor() { }
 }

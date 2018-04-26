@@ -12,5 +12,5 @@ export class NumericSpinnerComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 }

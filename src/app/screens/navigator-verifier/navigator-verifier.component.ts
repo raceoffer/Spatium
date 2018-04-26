@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
 import { BluetoothService } from '../../services/bluetooth.service';
+import { WalletService } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-navigator-verifier',
@@ -11,11 +10,8 @@ import { BluetoothService } from '../../services/bluetooth.service';
 export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly wallet: WalletService,
-    private readonly bt: BluetoothService
-  ) {}
+  constructor(private readonly wallet: WalletService,
+              private readonly bt: BluetoothService) {}
 
   public ngOnInit() {
 

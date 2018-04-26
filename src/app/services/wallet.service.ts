@@ -1,55 +1,47 @@
 import { Injectable, NgZone } from '@angular/core';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { Observable } from 'rxjs/Observable';
 
 import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/takeUntil';
-
-import { BluetoothService } from './bluetooth.service';
-import { Coin, Token, KeyChainService } from './keychain.service';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { toBehaviourSubject } from '../utils/transformers';
 
-import { CurrencyWallet, Status } from './wallet/currencywallet';
-import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
+import { BluetoothService } from './bluetooth.service';
+import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
+import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
-import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
+
+import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 
 declare const CryptoCore: any;
 
 @Injectable()
 export class WalletService {
-  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
-
   public coinWallets = new Map<Coin, CurrencyWallet>();
   public tokenWallets = new Map<Token, ERC20Wallet>();
-
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
-
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-
   public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
   public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
   public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Cancelled), false);
   public failed: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Failed), false);
-  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-
   public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
-
   public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
   public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
   public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
   public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
+  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
-  constructor(
-    private readonly bt: BluetoothService,
-    private readonly keychain: KeyChainService,
-    private readonly ngZone: NgZone
-  ) {
+  constructor(private readonly bt: BluetoothService,
+              private readonly keychain: KeyChainService,
+              private readonly ngZone: NgZone) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -174,7 +166,7 @@ export class WalletService {
         }
 
         const sub = wallet.syncProgress.subscribe(num => {
-          this.setProgress(0.1 + 0.8 * (coinIndex  + num / 100) / this.coinWallets.size);
+          this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
         });
 
         await wallet.sync(paillierKeys);
@@ -227,7 +219,8 @@ export class WalletService {
         type: 'cancel',
         content: {}
       }));
-    } catch (ignored) {}
+    } catch (ignored) {
+    }
 
     this.status.next(Status.Cancelled);
 
@@ -236,7 +229,7 @@ export class WalletService {
     }
   }
 
-  createTokenWallet (token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
+  createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
     this.tokenWallets.set(
       token,
       new ERC20Wallet(
