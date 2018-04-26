@@ -1,9 +1,9 @@
-import {ComponentRef, EventEmitter, Injectable, Injector} from '@angular/core';
-import {Overlay, OverlayConfig, OverlayRef} from '@angular/cdk/overlay';
-import {FactorParentOverlayRef} from './factor-parent-overlay-ref';
-import {ComponentPortal, PortalInjector} from '@angular/cdk/portal';
-import {FactorParentOverlayComponent} from './factor-parent-overlay.component';
-import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
+import { ComponentRef, Injectable, Injector } from '@angular/core';
+import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
+import { FactorParentOverlayRef } from './factor-parent-overlay-ref';
+import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
+import { FactorParentOverlayComponent } from './factor-parent-overlay.component';
+import { FACTOR_PARENT_DIALOG_DATA } from './factor-parent-overlay.tokens';
 
 
 interface FactorParentOverlayConfig {

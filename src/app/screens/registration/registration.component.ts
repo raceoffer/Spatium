@@ -5,7 +5,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
+import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
 import { DDSService } from '../../services/dds.service';
@@ -13,8 +13,10 @@ import { NotificationService } from '../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/take';
 import { NavigationService } from '../../services/navigation.service';
-import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
-import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
+import {FactorParentOverlayRef} from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import {FactorParentOverlayService} from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
+
+
 
 declare const CryptoCore: any;
 declare const Buffer: any;

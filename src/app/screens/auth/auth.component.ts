@@ -3,15 +3,15 @@ import {
   ViewChild, trigger, transition, style, animate, sequence, OnDestroy, HostBinding
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
+import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { KeyChainService } from '../../services/keychain.service';
 import * as $ from 'jquery';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
-import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
-import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
+import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
 
 declare const Buffer: any;
 

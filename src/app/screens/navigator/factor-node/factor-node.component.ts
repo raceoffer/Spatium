@@ -4,7 +4,7 @@ import {
   trigger, ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
+import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
 import { KeyChainService } from '../../../services/keychain.service';
 import {AuthService, FactorType} from '../../../services/auth.service';
 import { Router } from '@angular/router';
@@ -13,11 +13,11 @@ import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { Subject } from 'rxjs/Subject';
 import { NavigationService } from '../../../services/navigation.service';
-import {FactorParentOverlayService} from '../../factor-parent-overlay/factor-parent-overlay.service';
-import {QrWriterComponent} from '../../factors/qr-writer/qr-writer.component';
-import {FactorParentOverlayRef} from '../../factor-parent-overlay/factor-parent-overlay-ref';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {NfcWriterComponent} from "../../factors/nfc-writer/nfc-writer.component";
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
+import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
+import { FactorParentOverlayRef } from '../../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import { FactorParentOverlayService } from '../../../modals/factor-parent-overlay/factor-parent-overlay.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;

@@ -4,10 +4,11 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
-import {FactorParentOverlayRef} from './factor-parent-overlay-ref';
-import {QrWriterComponent} from '../factors/qr-writer/qr-writer.component';
-import {NfcWriterComponent} from '../factors/nfc-writer/nfc-writer.component';
+import { FACTOR_PARENT_DIALOG_DATA } from './factor-parent-overlay.tokens';
+import { FactorParentOverlayRef } from './factor-parent-overlay-ref';
+import { QrWriterComponent } from '../../screens/factors/qr-writer/qr-writer.component';
+import { NfcWriterComponent } from '../../screens/factors/nfc-writer/nfc-writer.component';
+
 
 @Component({
   selector: 'app-dynamic-content',

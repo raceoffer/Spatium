@@ -4,7 +4,6 @@ import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { StartComponent } from './screens/start/start.component';
 import { WaitingComponent } from './screens/navigator/waiting/waiting.component';
 import { AuthComponent } from './screens/auth/auth.component';
-import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
@@ -32,17 +31,13 @@ const appRoutes: Routes = [
   { path: 'reg-success', component: RegistrationSuccessComponent},
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-import', component: SecretImportComponent},
-  { path: 'factor', component: FactorParentComponent, children: [
-  ]},
   { path: 'navigator', component: NavigatorComponent, children: [
     { path: 'waiting', component: WaitingComponent, outlet: 'navigator' },
     { path: 'wallet', component: WalletComponent, outlet: 'navigator' },
     { path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator' },
     { path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator' },
     { path: 'settings', component: SettingsComponent, outlet: 'navigator' },
-    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' },
-    { path: 'factor', component: FactorParentComponent, outlet: 'navigator', children: [
-    ]}
+    { path: 'factornode', component: FactorNodeComponent, outlet: 'navigator' }
   ]},
   { path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     { path: 'verify-waiting', component: VerifyWaitingComponent, outlet: 'navigator' },

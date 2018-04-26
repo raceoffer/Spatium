@@ -44,12 +44,11 @@ import { DDSService } from './services/dds.service';
 import { PincodeComponent } from './screens/factors/pincode/pincode.component';
 import { LoginComponent } from './screens/login/login.component';
 import { AuthComponent } from './screens/auth/auth.component';
-import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
+import { DialogFactorsComponent } from './modals/dialog-factors/dialog-factors.component';
 import { PasswordComponent } from './screens/factors/password/password.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { NgInitDirective } from './directives/ng-init.directive';
 import { RegistrationComponent } from './screens/registration/registration.component';
@@ -73,8 +72,8 @@ import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
-import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
-import { FactorParentOverlayService } from './screens/factor-parent-overlay/factor-parent-overlay.service';
+import { FactorParentOverlayComponent } from './modals/factor-parent-overlay/factor-parent-overlay.component';
+import { FactorParentOverlayService } from './modals/factor-parent-overlay/factor-parent-overlay.service';
 import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
@@ -97,7 +96,6 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     PasswordComponent,
     FileUploadComponent,
     GraphicKeyComponent,
-    FactorParentComponent,
     LoginParentComponent,
     RegistrationComponent,
     NgInitDirective,
