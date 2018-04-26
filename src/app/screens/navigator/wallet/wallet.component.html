@@ -26,7 +26,7 @@
 </mat-toolbar>
 
 <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
-  <button mat-icon-button (click)="toggleSearch(false)" *ngIf="!isWindows()">
+  <button mat-icon-button (click)="toggleSearch(false)">
     <mat-icon>arrow_back</mat-icon>
   </button>
   <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
@@ -54,13 +54,13 @@
               <div class="logo {{tile.logo}}"></div>
               <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
                 white-space: normal;text-align: left;">
-                <span class="sym">{{tile.symbols}}</span>
-                <span class="title">{{tile.title}}</span>
+                <span class="sym">{{ tile.symbols }}</span>
+                <span class="title">{{ tile.title }}</span>
               </div>
             </div>
             <div class="half-height" fxLayout="column" fxLayoutAlign="center center" style="display:none!important">
-              <span class="balance" *ngIf="tile.balance">{{tile.balance}} {{tile.symbols}}</span>
-              <span class="balanceUSD" *ngIf="tile.balanceUsd">{{tile.balanceUsd}} USD</span>
+              <span class="balance" *ngIf="tile.balance">{{ tile.balance }} {{ tile.symbols }}</span>
+              <span class="balanceUSD" *ngIf="tile.balanceUsd">{{ tile.balanceUsd }} USD</span>
             </div>
 
           </button>

@@ -4,13 +4,11 @@ import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.se
 import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { CurrencyService } from '../../../services/currency.service';
-import { WalletService } from "../../../services/wallet.service";
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {MatDialog} from "@angular/material";
-import {DialogConfirmationComponent} from "../../../modals/dialog-confirmation/dialog-confirmation.component";
-import {BluetoothService} from "../../../services/bluetooth.service";
+import { WalletService } from '../../../services/wallet.service';
+import { MatDialog } from '@angular/material';
+import { BluetoothService } from '../../../services/bluetooth.service';
 
-declare const device: any;
+declare const navigator: any;
 
 @Component({
   selector: 'app-wallet',
@@ -85,7 +83,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   ];
 
   @ViewChild('sidenav') sidenav;
-  dialogConfirmRef = null;
 
   constructor(
     public dialog: MatDialog,
@@ -142,16 +139,19 @@ export class WalletComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(async () => {
+        console.log('Disconnected');
+        await this.wallet.cancelSync();
+        await this.wallet.reset();
+      }));
+
     this.onResize();
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    if (this.dialogConfirmRef) {
-      this.dialogConfirmRef.close();
-      this.dialogConfirmRef = null;
-    }
   }
 
   public async onNav(navLink) {
@@ -171,10 +171,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    if (this.dialogConfirmRef != null) {
-      this.dialogConfirmRef.close();
-      this.dialogConfirmRef = null;
-    } else if (this.isSearch) {
+     if (this.isSearch) {
       this.filterValue = '';
       this.isSearch = false;
     } else if (this.isOpened) {
@@ -194,10 +191,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }
 
-  isWindows(): boolean {
-    return device.platform === 'windows';
-  }
-
   onResize(): void {
     this.cols = Math.ceil(window.innerWidth / 350);
   }
@@ -211,19 +204,15 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async openDialog() {
-    this.dialogConfirmRef = this.dialog.open(DialogConfirmationComponent, {
-      width: '250px',
-      data: { title: 'Cancel synchronization', message: 'You want to cancel the synchronization with device '
-      + this.bt.connectedDevice.getValue().name + '. Are you sure?', warning: true }
-    });
-
-    this.dialogConfirmRef.afterClosed().subscribe(async (result) => {
-      if (result) {
-        this.dialogConfirmRef = null;
-        await this.wallet.cancelSync();
-        await this.wallet.reset();
-        await this.bt.disconnect();
-      }
-    });
+    navigator.notification.confirm(
+      'Cancel synchronization',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+          await this.bt.disconnect();
+        }
+      },
+      '',
+      ['YES', 'NO']
+    );
   }
 }

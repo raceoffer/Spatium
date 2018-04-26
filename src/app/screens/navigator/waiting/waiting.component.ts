@@ -4,8 +4,9 @@ import { BluetoothService, Device } from '../../../services/bluetooth.service';
 import { WalletService } from '../../../services/wallet.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { NavigationService } from '../../../services/navigation.service';
-import {DialogConfirmationComponent} from "../../../modals/dialog-confirmation/dialog-confirmation.component";
-import {MatDialog} from "@angular/material";
+import { MatDialog } from '@angular/material';
+
+declare const navigator: any;
 
 @Component({
   selector: 'app-waiting',
@@ -27,7 +28,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = [];
 
   devices = [];
-  dialogConfirmRef = null;
   nextConnected = false;
 
 
@@ -104,10 +104,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('');
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    if (this.dialogConfirmRef) {
-      this.dialogConfirmRef.close();
-      this.dialogConfirmRef = null;
-    }
   }
 
   async ngAfterViewInit() {
@@ -141,45 +137,36 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBackClicked() {
-    console.log('qwe');
-    if (this.dialogConfirmRef != null) {
-      this.dialogConfirmRef.close();
-      this.dialogConfirmRef = null;
-    } else {
-      await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
-    }
+    await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
   }
 
   async cancelConnect() {
     this.openDialog(null);
   }
 
-  openDialog(device: Device) {
-    this.dialogConfirmRef = this.dialog.open(DialogConfirmationComponent, {
-      width: '250px',
-      data: { title: 'Cancel synchronization', message: 'You want to cancel the synchronization with device '
-      + this.bt.connectedDevice.getValue().name + '. Are you sure?', warning: true }
-    });
+  async openDialog(device: Device) {
+    navigator.notification.confirm(
+      'Cancel synchronization',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+          await this.bt.disconnect();
 
-    this.dialogConfirmRef.afterClosed().subscribe(async (result) => {
-      this.dialogConfirmRef = null;
-      if (result) {
-        await this.wallet.cancelSync();
-        await this.bt.disconnect();
-        if (device != null) {
-          this.nextConnected = true;
-          console.log('connect' + device.name + device.address);
-          this.Label = 'Connecting to ' + device.name;
-          this.connected = true;
-          await this.bt.cancelDiscovery();
-          if (!await this.bt.connect(device)) {
-            this.connected = false;
-            this.Label = this.stLabel;
+          if (device != null) {
+            this.nextConnected = true;
+            console.log('connect' + device.name + device.address);
+            this.Label = 'Connecting to ' + device.name;
+            this.connected = true;
+            await this.bt.cancelDiscovery();
+            if (!await this.bt.connect(device)) {
+              this.connected = false;
+              this.Label = this.stLabel;
+            }
+            this.nextConnected = false;
           }
-          this.nextConnected = false;
         }
-      }
-    });
-
+      },
+      '',
+      ['YES', 'NO']
+    );
   }
 }

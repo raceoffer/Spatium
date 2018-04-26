@@ -79,7 +79,6 @@ import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.comp
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
-import { DialogConfirmationComponent } from './modals/dialog-confirmation/dialog-confirmation.component';
 
 
 @NgModule({
@@ -122,8 +121,7 @@ import { DialogConfirmationComponent } from './modals/dialog-confirmation/dialog
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent,
-    DialogConfirmationComponent
+    QrWriterComponent
   ],
   imports: [
     OverlayModule,
@@ -175,7 +173,6 @@ import { DialogConfirmationComponent } from './modals/dialog-confirmation/dialog
   ],
   entryComponents: [
     DialogFactorsComponent,
-    DialogConfirmationComponent,
     FactorParentOverlayComponent,
     PincodeComponent,
     PasswordComponent,
