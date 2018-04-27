@@ -158,31 +158,37 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           ),
           0);
 
-        this.validatorObserver = combineLatest(
-          this.balanceBtcUnconfirmed,
-          toBehaviourSubject(this.subtractFee.valueChanges, false),
-          toBehaviourSubject(this.amount.valueChanges, 0),
-          toBehaviourSubject(this.receiver.valueChanges, ''),
-          toBehaviourSubject(this.fee.valueChanges, 0),
-          (balance, substractFee, amount, receiver, fee) => {
+        this.validatorObserver = combineLatest([
+            this.balanceBtcUnconfirmed,
+            toBehaviourSubject(this.subtractFee.valueChanges, false),
+            toBehaviourSubject(this.receiver.valueChanges, ''),
+            toBehaviourSubject(this.amount.valueChanges, 0),
+            toBehaviourSubject(this.amountUsd.valueChanges, 0),
+            toBehaviourSubject(this.fee.valueChanges, 0),
+            toBehaviourSubject(this.feeUsd.valueChanges, 0)
+          ],
+          (balance, substractFee, receiver) => {
             if (!substractFee) {
-              return balance > (amount + fee) && amount > 0 && receiver && receiver.length > 0;
+              return balance > (this.amount.value + this.fee.value) && this.amount.value > 0 && receiver && receiver.length > 0;
             } else {
-              return balance > (amount) && amount > 0 && receiver && receiver.length > 0;
+              return balance > (this.amount.value) && this.amount.value > 0 && receiver && receiver.length > 0;
             }
           });
 
-        this.enougthCashObserver = combineLatest(
-          this.balanceBtcUnconfirmed,
-          toBehaviourSubject(this.subtractFee.valueChanges, false),
-          toBehaviourSubject(this.amount.valueChanges, 0),
-          toBehaviourSubject(this.fee.valueChanges, 0),
-          (balance, substractFee, amount, fee) => {
-            if (amount > 0) {
+        this.enougthCashObserver = combineLatest([
+            this.balanceBtcUnconfirmed,
+            toBehaviourSubject(this.subtractFee.valueChanges, false),
+            toBehaviourSubject(this.amount.valueChanges, 0),
+            toBehaviourSubject(this.amountUsd.valueChanges, 0),
+            toBehaviourSubject(this.fee.valueChanges, 0),
+            toBehaviourSubject(this.feeUsd.valueChanges, 0)
+          ],
+          (balance, substractFee) => {
+            if (this.amount.value > 0) {
               if (!substractFee) {
-                return balance > (amount + fee);
+                return balance > (this.amount.value + this.fee.value);
               } else {
-                return balance > (amount);
+                return balance > (this.amount.value);
               }
             } else {
               return true;
@@ -304,7 +310,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             } else {
               this.receiver.disable();
               this.amount.disable();
-              this.amountUsd.enable();
+              this.amountUsd.disable();
               this.feeTypeControl.disable();
               this.fee.disable();
               this.feeUsd.disable();
