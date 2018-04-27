@@ -57,6 +57,9 @@ export class LoginComponent implements AfterViewInit {
     }
   }
 
+  // Hide the keyboard after pressing the submit button on the keyboard
+  removeFocus(el) { el.target.blur(); }
+
   constructor(
     private readonly dds: DDSService,
     private readonly authSevice: AuthService,
