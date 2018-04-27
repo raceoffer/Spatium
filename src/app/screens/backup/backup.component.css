@@ -1,0 +1,28 @@
+.content {
+    padding-top: 60px;
+}
+
+.small.progress {
+    position: initial;
+}
+
+.mat-list {
+    width: 100%;
+}
+
+.mat-list .mat-list-item.qrcode-list-item {
+    height: 150px;
+}
+
+.qrcode {
+    margin: 0 auto;
+}
+
+.comission-spinner {
+    position: absolute;
+    margin-top: 16px;
+}
+
+::ng-deep .mat-progress-spinner.mat-progress-spinner-indeterminate-animation[mode=indeterminate] circle {
+    stroke: #735e5e;
+}

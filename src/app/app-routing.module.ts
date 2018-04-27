@@ -10,6 +10,7 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
+import { BackupComponent } from './screens/backup/backup.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
@@ -33,6 +34,7 @@ const appRoutes: Routes = [
   { path: 'login', component: LoginParentComponent},
   { path: 'registration', component: RegistrationComponent},
   { path: 'reg-success', component: RegistrationSuccessComponent},
+  { path: 'backup', component: BackupComponent},
   { path: 'factornode', component: FactorNodeComponent},
   { path: 'secret-import', component: SecretImportComponent},
   { path: 'factor', component: FactorParentComponent, children: [

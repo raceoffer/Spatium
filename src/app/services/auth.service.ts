@@ -31,6 +31,8 @@ export class AuthService {
 
   remoteEncryptedTrees: Array<Array<any>> = [];
 
+  currentTree: any = null;
+
   stFactorError = 'Incorrect factor ';
 
   static async toId(name: string) {

@@ -72,6 +72,7 @@ import { CurrencyPriceService } from './services/price.service';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
+import { BackupComponent } from './screens/backup/backup.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
@@ -116,6 +117,7 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     LogoBlockComponent,
     NumericSpinnerComponent,
     CurrencySettingsComponent,
+    BackupComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
     FactorParentOverlayComponent,

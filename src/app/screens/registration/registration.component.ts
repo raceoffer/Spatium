@@ -206,21 +206,24 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const id = await AuthService.toId(this.authService.login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
+      this.authService.currentTree = data;
 
       try {
         const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();
         if (!success) {
+          await this.router.navigate(['/backup', { back: 'registration'}]);
           return;
         }
 
         this.authService.clearFactors();
         this.authService.password = '';
+        this.authService.currentTree = null;
         this.factors = [];
         this.password = '';
 
         await this.router.navigate(['/reg-success']);
       } catch (ignored) {
-        this.notification.show('Failed to upload the secret');
+        await this.router.navigate(['/backup', { back: 'registration'}]);
       }
     } finally {
       this.uploading = false;
