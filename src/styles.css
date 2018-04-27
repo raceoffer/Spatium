@@ -30,10 +30,6 @@ app-root {
 
 /* Currencies */
 
-.edc {
-  background: url(assets/images/drawable/currency/edc.svg);
-}
-
 .bitcoin {
   background: url(assets/images/drawable/currency/bitcoin.svg);
 }
@@ -468,6 +464,18 @@ app-root {
 
 .loomNetwork {
   background: url(assets/images/drawable/currency/loomNetwork.svg);
+}
+
+.taas {
+  background: url(assets/images/drawable/currency/taas.svg);
+}
+
+.wings {
+  background: url(assets/images/drawable/currency/wings.svg);
+}
+
+.сonsensus {
+  background: url(assets/images/drawable/currency/consensus.svg);
 }
 
 .currency-component {
