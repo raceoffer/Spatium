@@ -1,12 +1,4 @@
-<app-connect *ngIf="(synchronizing | async)" (cancel)="cancelConnect()"></app-connect>
-
-<app-toolbar *ngIf="!(synchronizing | async)"
-             [isColored]="true"
-             [isShadowed]="true"
-             (backClicked)="onBackClicked()"></app-toolbar>
-
-<div *ngIf="!(synchronizing | async)" fxLayout="column" fxLayoutAlign="start center" style="width:100%" class="box">
-  <app-logo-block></app-logo-block>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
 
   <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center"
        *ngIf="!(enabled | async)">

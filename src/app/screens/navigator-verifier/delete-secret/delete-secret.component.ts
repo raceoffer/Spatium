@@ -69,8 +69,8 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
       case 'pincode':
         await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
         break;
-      case 'verify-transaction':
-        await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-transaction']}}]);
+      case 'main':
+        await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
         break;
     }
   }

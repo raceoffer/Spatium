@@ -69,7 +69,7 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-transaction']}}]);
+    await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
   }
 
   toggleContent(content) {

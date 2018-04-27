@@ -50,12 +50,13 @@ import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.compone
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { LoginComponent } from './screens/login/login.component';
-import { ConnectComponent } from './screens/navigator-verifier/connect/connect.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import { ConnectComponent } from './screens/navigator-verifier/main-contents/connect/connect.component';
+import { VerifyTransactionComponent } from './screens/navigator-verifier/main-contents/verify-transaction/verify-transaction.component';
+import { VerifyWaitingComponent } from './screens/navigator-verifier/main-contents/verify-waiting/verify-waiting.component';
+import { MainComponent } from './screens/navigator-verifier/main/main.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
-import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
-import { VerifyWaitingComponent } from './screens/navigator-verifier/verify-waiting/verify-waiting.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
@@ -119,7 +120,8 @@ import { WalletService } from './services/wallet.service';
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    MainComponent
   ],
   imports: [
     OverlayModule,

@@ -21,6 +21,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   ready = this.wallet.ready;
   cancelled = this.wallet.cancelled;
   failed = this.wallet.failed;
+  status = this.wallet.status;
   cols: any = 2;
   public isOpened = false;
   public title = 'Wallet';
@@ -132,13 +133,6 @@ export class WalletComponent implements OnInit, OnDestroy {
         await this.onBackClicked();
       })
     );
-
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected');
-        await this.wallet.cancelSync();
-        await this.wallet.reset();
-      }));
 
     this.onResize();
   }

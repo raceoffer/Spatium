@@ -48,13 +48,11 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.push(
       this.wallet.cancelledEvent.subscribe(async () => {
-        await this.bt.disconnect();
         this.Label = this.stLabel;
       }));
 
     this.subscriptions.push(
       this.wallet.failedEvent.subscribe(async () => {
-        await this.bt.disconnect();
         this.Label = this.stLabel;
       }));
 
@@ -67,8 +65,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
-        await this.wallet.cancelSync();
-        await this.wallet.reset();
         if (!this.nextConnected) {
           this.Label = this.stLabel;
         }

@@ -64,7 +64,7 @@ export class ConfirmationEntryComponent implements OnInit {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
         this.keyChain.setSeed(await CryptoCore.Utils.decrypt(ciphertext, aesKey));
 
-        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
+        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
       } else {
         if (this.hasTouchId) {
           try {
@@ -93,7 +93,7 @@ export class ConfirmationEntryComponent implements OnInit {
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 
-    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
+    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
   }
 
   async saveTouchPassword(pincode) {

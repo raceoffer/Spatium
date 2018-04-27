@@ -1,11 +1,8 @@
 import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { BehaviorSubject } from "rxjs/BehaviorSubject";
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { Coin, Token } from '../../../services/keychain.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { NotificationService } from '../../../services/notification.service';
-import { WalletService } from '../../../services/wallet.service';
+import { CurrencyService, Info } from '../../../../services/currency.service';
+import { Coin, Token } from '../../../../services/keychain.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { WalletService } from '../../../../services/wallet.service';
 
 enum State {
   None,
@@ -20,8 +17,6 @@ enum State {
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  public ready: BehaviorSubject<boolean> = null;
-  isOpened = false;
 
   address = '';
   btc;
@@ -29,53 +24,19 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   fee;
   feeUsd;
 
-  public title = 'Confirmations mode';
-  public navLinks = [{
-    name: 'Export secret',
-    link: ['/navigator-verifier', {outlets: {'navigator': ['secret-export']}}],
-    isSelected: false,
-    isActive: true
-  }, {
-    name: 'Change PIN',
-    link: null,
-    isSelected: false,
-    isActive: false
-  }, {
-    name: 'Delete secret',
-    link: ['/navigator-verifier', {outlets: {'navigator': ['delete-secret', 'verify-transaction']}}],
-    isSelected: false,
-    isActive: true
-  }, {
-    name: 'Exit',
-    link: ['/start'],
-    isSelected: false,
-    isActive: true
-  }];
-
   public stateType: any = State;
   public state: State = State.None;
-
   public currentCoin: Coin | Token = null;
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
-  synchronizing = this.wallet.synchronizing;
   @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
   constructor(private readonly wallet: WalletService,
-              private readonly router: Router,
               private readonly currencyService: CurrencyService,
-              private readonly navigationService: NavigationService,
-              private readonly notification: NotificationService) {
-    this.ready = this.wallet.ready;
-  }
+              private readonly notification: NotificationService) { }
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
 
     this.subscriptions.push(this.notification.confirm.subscribe(async () => {
       await this.confirm();
@@ -132,14 +93,6 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async onNav(navLink) {
-    await this.router.navigate(navLink.link);
-  }
-
-  public toggle() {
-    this.isOpened = !this.isOpened;
-  }
-
   async confirm() {
     this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).acceptTransaction();
@@ -150,13 +103,4 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     await this.currencyWallets.get(this.currentCoin).rejectTransaction();
   }
 
-  async onBackClicked() {
-    if (this.isOpened) {
-      this.sidenav.toggle();
-    }
-  }
-
-  async goToSync() {
-    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['verify-waiting']}}]);
-  }
 }

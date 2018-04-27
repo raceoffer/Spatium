@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
-import { NavigationService } from '../../../services/navigation.service';
-import { WalletService } from '../../../services/wallet.service';
+import { NavigationService } from '../../../../services/navigation.service';
+import { WalletService } from '../../../../services/wallet.service';
 
 @Component({
   selector: 'app-connect',

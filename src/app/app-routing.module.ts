@@ -4,10 +4,9 @@ import { AuthComponent } from './screens/auth/auth.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import { MainComponent } from './screens/navigator-verifier/main/main.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
 import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
-import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
-import { VerifyWaitingComponent } from './screens/navigator-verifier/verify-waiting/verify-waiting.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
@@ -43,8 +42,7 @@ const appRoutes: Routes = [
   },
   {
     path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
-    {path: 'verify-waiting', component: VerifyWaitingComponent, outlet: 'navigator'},
-    {path: 'verify-transaction', component: VerifyTransactionComponent, outlet: 'navigator'},
+    {path: 'main', component: MainComponent, outlet: 'navigator'},
     {path: 'secret-export', component: SecretExportComponent, outlet: 'navigator'},
     {path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator'}
   ]
