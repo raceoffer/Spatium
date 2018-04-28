@@ -39,6 +39,7 @@ import { DialogFactorsComponent } from './modals/dialog-factors/dialog-factors.c
 import { FactorParentOverlayComponent } from './modals/factor-parent-overlay/factor-parent-overlay.component';
 import { FactorParentOverlayService } from './modals/factor-parent-overlay/factor-parent-overlay.service';
 import { AuthComponent } from './screens/auth/auth.component';
+import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
@@ -115,6 +116,7 @@ import { WalletService } from './services/wallet.service';
     LogoBlockComponent,
     NumericSpinnerComponent,
     CurrencySettingsComponent,
+    BackupComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
     FactorParentOverlayComponent,

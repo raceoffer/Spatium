@@ -1,0 +1,61 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <mat-toolbar-row>
+    <button mat-icon-button (click)="onBackClicked()">
+      <mat-icon class="color-custom-dark">arrow_back</mat-icon>
+    </button>
+    <span>{{ backupLabel }}</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div fxLayout="column" fxLayoutAlign="start center" class="content box">
+  <div class="small progress" *ngIf="!address">
+    <div>Loading…</div>
+  </div>
+  <mat-list role="list" style = "margin-bottom: 23px !important;" *ngIf="address">
+    <mat-list-item>
+        <span>Please top up this address in order to save your secret into decentralized storage.</span>
+    </mat-list-item>
+    <mat-list-item>
+      <p class="list-info" mat-line>{{ ethAddressLabel }}</p>
+      <p class="list-name" mat-line>{{ address }}</p>
+      <button mat-icon-button matSuffix (click)="copy()">
+        <mat-icon matSuffix>content_copy</mat-icon>
+      </button>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-info" mat-line>{{ ethBalanceLabel }}</p>
+      <p class="list-name" mat-line>{{ balance }}</p>
+
+      <button matSuffix mat-icon-button (click)="updateBalance()">
+        <mat-icon *ngIf="syncState==syncStateType.Ready">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="syncState==syncStateType.Syncing">sync</mat-icon>
+        <mat-icon *ngIf="syncState==syncStateType.Error">sync_problem</mat-icon>
+      </button>
+    </mat-list-item>
+
+    <mat-list-item>
+      <p class="list-info" mat-line>{{ backupCostLabel }}</p>
+      <mat-spinner diameter="18" class="comission-spinner" *ngIf="comission === null"></mat-spinner>
+      <p class="list-name" mat-line *ngIf="comission !== null">{{ comission }}</p>
+    </mat-list-item>
+
+    <mat-list-item class="qrcode-list-item">
+      <div class="qrcode">
+        <qr-code [value]="getQrCodeText()" [size]="150" [background]="'#f5f5f5'"></qr-code>
+      </div>
+    </mat-list-item>
+  </mat-list>
+
+  <div fxLayout="column" fxLayoutAlign="start center" class="full-width" *ngIf="address">
+    <span *ngIf="!enough">{{ notEnoughLabel }}</span>
+
+    <button mat-raised-button color="accent" class="width-button"
+            (click)="save()"
+            *ngIf="enough && !saving"
+            [disabled]="saving">{{ saveLabel }}</button>
+    <button mat-raised-button color="accent" class="width-button color" disabled *ngIf="enough && saving">
+        <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+      </button>
+  </div>
+</div>

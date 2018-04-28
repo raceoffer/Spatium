@@ -94,6 +94,10 @@ export class DDSService {
     return this.dds.toWei(value, coin);
   }
 
+  public getStoreAccount(id) {
+    return new DDSAccount(this.dds, this.dds.getAddress(id, 1));
+  }
+
   public async accountFromSecret(secret: any) {
     return new DDSAccount(this.dds, this.dds.accountFromSecret(secret));
   }

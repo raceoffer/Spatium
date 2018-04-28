@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './screens/auth/auth.component';
+import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
@@ -29,6 +30,7 @@ const appRoutes: Routes = [
   {path: 'login', component: LoginParentComponent},
   {path: 'registration', component: RegistrationComponent},
   {path: 'reg-success', component: RegistrationSuccessComponent},
+  {path: 'backup', component: BackupComponent},
   {path: 'factornode', component: FactorNodeComponent},
   {path: 'secret-import', component: SecretImportComponent},
   {
