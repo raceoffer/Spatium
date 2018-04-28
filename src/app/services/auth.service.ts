@@ -8,6 +8,7 @@ import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
 import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
 import { NotificationService } from './notification.service';
+import { LoginComponent } from '../screens/factors/login/login.component';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -48,6 +49,8 @@ export class AuthService {
       FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
+    this.authFactors.push(new AvailableFactor(FactorType.LOGIN, AvailableFactorName.LOGIN, FactorIcon.LOGIN,
+      FactorIconAsset.LOGIN, FactorLink.LOGIN, LoginComponent));
 
     const addNFCFactor = () => {
       this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
@@ -98,6 +101,9 @@ export class AuthService {
       }
       case FactorType.NFC: {
         return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
+      }
+      case FactorType.LOGIN: {
+        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value);
       }
     }
   }
@@ -221,7 +227,8 @@ export enum FactorType {
   FILE,
   GRAPHIC_KEY,
   QR,
-  NFC
+  NFC,
+  LOGIN
 }
 
 export enum AvailableFactorName {
@@ -230,7 +237,8 @@ export enum AvailableFactorName {
   FILE = 'File',
   GRAPHIC_KEY = 'Graphic key',
   QR = 'QR',
-  NFC = 'NFC'
+  NFC = 'NFC',
+  LOGIN = 'Login',
 }
 
 export enum FactorName {
@@ -239,7 +247,8 @@ export enum FactorName {
   FILE = 'file',
   GRAPHIC_KEY = 'graphic key',
   QR = 'QR code',
-  NFC = 'NFC tag'
+  NFC = 'NFC tag',
+  LOGIN = 'login',
 }
 
 export enum FactorIcon {
@@ -248,7 +257,8 @@ export enum FactorIcon {
   FILE = 'insert_drive_file',
   GRAPHIC_KEY = '',
   QR = '',
-  NFC = 'nfc'
+  NFC = 'nfc',
+  LOGIN = 'text_fields'
 }
 
 export enum FactorIconAsset {
@@ -257,7 +267,8 @@ export enum FactorIconAsset {
   FILE = '',
   GRAPHIC_KEY = 'icon-custom-graphic_key',
   QR = 'icon-custom-qr_code',
-  NFC = ''
+  NFC = '',
+  LOGIN = ''
 }
 
 export enum FactorLink {
@@ -266,7 +277,8 @@ export enum FactorLink {
   FILE = 'file-upload',
   GRAPHIC_KEY = 'graphic-key',
   QR = 'qr-code',
-  NFC = 'nfc'
+  NFC = 'nfc',
+  LOGIN = 'login-factor'
 }
 
 export class AvailableFactor {

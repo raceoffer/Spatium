@@ -81,6 +81,7 @@ import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
+import { LoginComponent as LoginComponentFactor } from './screens/factors/login/login.component';
 
 @NgModule({
   declarations: [
@@ -123,8 +124,10 @@ import { WalletService } from './services/wallet.service';
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
+    QrWriterComponent
+    MainComponent,
     QrWriterComponent,
-    MainComponent
+    LoginComponentFactor
   ],
   imports: [
     OverlayModule,
@@ -184,7 +187,8 @@ import { WalletService } from './services/wallet.service';
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    LoginComponentFactor
   ]
 })
 
