@@ -1,22 +1,32 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import {
+  animate, transition, trigger, style, query,
+  stagger, animateChild } from '@angular/animations';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { fromPromise } from 'rxjs/observable/fromPromise';
+import { CurrencyService, Info } from '../../../services/currency.service';
+import { Coin, Token } from '../../../services/keychain.service';
+import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
-import { Coin, Token } from '../../../services/keychain.service';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { toBehaviourSubject, toReplaySubject } from '../../../utils/transformers';
-import { fromPromise } from 'rxjs/observable/fromPromise';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
 @Component({
   selector: 'app-currency',
   templateUrl: './currency.component.html',
-  styleUrls: ['./currency.component.css']
+  styleUrls: ['./currency.component.css'],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: '0' }),
+        animate('1s ease-out', style({ opacity: '1' })),
+      ]),
+    ])
+  ]
 })
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
@@ -42,13 +52,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(private readonly router: Router,
+              private readonly route: ActivatedRoute,
+              private readonly wallet: WalletService,
+              private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -61,36 +69,46 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
         this.currencyInfo = await this.currencyService.getInfo(this.currency);
+        console.log(this.currencyInfo);
 
         this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceCurrencyUnconfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.unconfirmed), 0);
-        this.balanceCurrencyConfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.confirmed), 0);
+        this.balanceCurrencyUnconfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.unconfirmed), null);
+        this.balanceCurrencyConfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.confirmed), null);
 
         this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest(
           this.balanceCurrencyUnconfirmed,
           this.currencyInfo.rate,
           (balance, rate) => {
-            if (rate === null) {
+            if (rate === null || balance === null) {
               return null;
             }
             return balance * rate;
-          }), 0);
+          }), null);
 
         this.balanceUsdConfirmed = toBehaviourSubject(combineLatest(
           this.balanceCurrencyConfirmed,
           this.currencyInfo.rate,
           (balance, rate) => {
-            if (rate === null) {
+            if (rate === null || balance === null) {
               return null;
             }
             return balance * rate;
-          }), 0);
+          }), null);
 
         this.transactions = toBehaviourSubject(
           fromPromise(this.currencyWallet.listTransactionHistory()),
           []);
+
+        this.subscriptions.push(
+          this.currencyWallet.readyEvent.subscribe(() => {
+            this.transactions = toBehaviourSubject(
+              fromPromise(this.currencyWallet.listTransactionHistory()),
+              []);
+          })
+        );
+
       }));
   }
 
@@ -100,7 +118,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async send() {
-    await this.router.navigate(['/navigator', { outlets: { navigator: ['send-transaction', this.currency] } }]);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['send-transaction', this.currency]}}]);
   }
 
   copy() {
@@ -112,6 +130,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['wallet'] } }]);
+    await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
   }
 }

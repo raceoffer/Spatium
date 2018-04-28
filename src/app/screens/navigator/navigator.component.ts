@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { WalletService } from '../../services/wallet.service';
 import { BluetoothService } from '../../services/bluetooth.service';
+import { WalletService } from '../../services/wallet.service';
 
 @Component({
   selector: 'app-navigator',
@@ -11,16 +11,31 @@ import { BluetoothService } from '../../services/bluetooth.service';
 export class NavigatorComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly wallet: WalletService,
-    private readonly bt: BluetoothService
-  ) {}
+  constructor(private readonly wallet: WalletService,
+              private readonly bt: BluetoothService) {}
 
   public ngOnInit() {
+
+    this.subscriptions.push(
+      this.bt.disabledEvent.subscribe(async () => {
+        await this.wallet.reset();
+      }));
+
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
-        await this.router.navigate(['/waiting']);
+        console.log('Disconnected');
+        await this.wallet.cancelSync();
+        await this.wallet.reset();
+      }));
+
+    this.subscriptions.push(
+      this.wallet.cancelledEvent.subscribe(async () => {
+        await this.bt.disconnect();
+      }));
+
+    this.subscriptions.push(
+      this.wallet.failedEvent.subscribe(async () => {
+        await this.bt.disconnect();
       }));
   }
 

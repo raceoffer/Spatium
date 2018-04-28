@@ -1,17 +1,28 @@
 import {
-  Component, AfterViewInit, ChangeDetectorRef, OnInit, ElementRef,
-  ViewChild, trigger, transition, style, animate, sequence, OnDestroy, HostBinding
+  AfterViewInit,
+  animate,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostBinding,
+  OnDestroy,
+  OnInit,
+  sequence,
+  style,
+  transition,
+  trigger,
+  ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../dialog-factors/dialog-factors.component';
-import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { KeyChainService } from '../../services/keychain.service';
-import * as $ from 'jquery';
 import { Router } from '@angular/router';
+import * as $ from 'jquery';
+import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
+import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
+import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
+import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
-import {FactorParentOverlayRef} from "../factor-parent-overlay/factor-parent-overlay-ref";
-import {FactorParentOverlayService} from "../factor-parent-overlay/factor-parent-overlay.service";
+import { NotificationService } from '../../services/notification.service';
 
 declare const Buffer: any;
 
@@ -20,10 +31,10 @@ declare const Buffer: any;
   animations: [
     trigger('anim', [
       transition('* => void', [
-        style({ height: '*', opacity: '1', transform: 'translateX(0)'} ),
+        style({height: '*', opacity: '1', transform: 'translateX(0)'}),
         sequence([
-          animate('.5s ease', style({ height: '*', opacity: '.2', transform: 'translateX(60px)' })),
-          animate('.1s ease', style({ height: '*', opacity: 0, transform: 'translateX(60px)' }))
+          animate('.5s ease', style({height: '*', opacity: '.2', transform: 'translateX(60px)'})),
+          animate('.1s ease', style({height: '*', opacity: 0, transform: 'translateX(60px)'}))
         ])
       ]),
     ])],
@@ -37,32 +48,24 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('dialogButton') dialogButton;
 
   busy = false;
-
-  private subscriptions = [];
-
   username = '';
   login = 'Sign in';
-
   factors = [];
-
   ready = false;
   loginType = LoginType.LOGIN;
   isPasswordFirst = false;
-
   icon_qr = '';
-
   dialogFactorRef = null;
+  private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly notification: NotificationService,
-    private readonly keyChain: KeyChainService,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(public dialog: MatDialog,
+              public factorParentDialog: FactorParentOverlayService,
+              private readonly router: Router,
+              private readonly authService: AuthService,
+              private readonly changeDetectorRef: ChangeDetectorRef,
+              private readonly notification: NotificationService,
+              private readonly keyChain: KeyChainService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -79,6 +82,14 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+    if (this.dialogFactorRef) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    }
+    if (this.child) {
+      this.child.close();
+      this.child = null;
+    }
   }
 
   isPasswordChanged(val) {
@@ -106,7 +117,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   addNewFactor(): void {
     this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { isColored: false, isShadowed: false }
+      data: {isColored: false, isShadowed: false}
     });
 
     this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
@@ -170,7 +181,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.keyChain.setSeed(this.authService.decryptedSeed);
     this.authService.reset();
 
-    await this.router.navigate(['/waiting']);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
   }
 
   async onBackClicked() {

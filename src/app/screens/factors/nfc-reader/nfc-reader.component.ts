@@ -1,8 +1,15 @@
 import {
-  AfterViewInit, Component, EventEmitter, HostBinding, Input, NgZone, OnDestroy, OnInit,
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
   Output
 } from '@angular/core';
-import {FactorType} from '../../../services/auth.service';
+import { FactorType } from '../../../services/auth.service';
 
 declare const nfc: any;
 declare const ndef: any;

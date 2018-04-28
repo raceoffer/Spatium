@@ -1,7 +1,7 @@
-import {Component, AfterViewInit, Output, EventEmitter, Input, HostBinding} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const CryptoCore: any;
 declare const nfc: any;
@@ -20,20 +20,20 @@ enum State {
 })
 export class LoginComponent implements AfterViewInit {
   @HostBinding('class') classes = 'full-width_nopadding';
-  private _userName = '';
-
   stLogin = 'Username';
-
   stateType = State;
   usernameState = State.Ready;
-
   @Input() genericLogin: string;
-
   timer;
-
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+
+  constructor(private readonly dds: DDSService,
+              private readonly authSevice: AuthService,
+              private readonly notification: NotificationService) { }
+
+  private _userName = '';
 
   get userName() {
     return this._userName;
@@ -59,12 +59,6 @@ export class LoginComponent implements AfterViewInit {
 
   // Hide the keyboard after pressing the submit button on the keyboard
   removeFocus(el) { el.target.blur(); }
-
-  constructor(
-    private readonly dds: DDSService,
-    private readonly authSevice: AuthService,
-    private readonly notification: NotificationService
-  ) { }
 
   ngAfterViewInit() {
     if (this.genericLogin !== null) {

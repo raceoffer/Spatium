@@ -1,10 +1,10 @@
-import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, LoginType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
@@ -31,36 +31,28 @@ declare const nfc: any;
   templateUrl: './login-parent.component.html',
   styleUrls: ['./login-parent.component.css']
 })
-export class LoginParentComponent  implements OnInit, OnDestroy {
+export class LoginParentComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   contentType = Content;
   content = Content.Login;
-
   stateType = State;
   buttonState = State.Empty;
-
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
-
   notRecognized = 'hide';
   loginGenerate = null;
-
   input = '';
-
   isNfcAvailable = true;
+  private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly ngZone: NgZone,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService,
-    private readonly keychain: KeyChainService,
-    private readonly dds: DDSService,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(private readonly router: Router,
+              private readonly ngZone: NgZone,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService,
+              private readonly keychain: KeyChainService,
+              private readonly dds: DDSService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -134,7 +126,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     }
   }
 
-  async generate () {
+  async generate() {
     this.notRecognized = '';
     this.buttonState = State.Empty;
     do {

@@ -4,27 +4,25 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
-import {FactorParentOverlayRef} from './factor-parent-overlay-ref';
-import {QrWriterComponent} from '../factors/qr-writer/qr-writer.component';
-import {NfcWriterComponent} from '../factors/nfc-writer/nfc-writer.component';
+import { FACTOR_PARENT_DIALOG_DATA } from './factor-parent-overlay.tokens';
+import { FactorParentOverlayRef } from './factor-parent-overlay-ref';
+import { QrWriterComponent } from '../../screens/factors/qr-writer/qr-writer.component';
+import { NfcWriterComponent } from '../../screens/factors/nfc-writer/nfc-writer.component';
+
 
 @Component({
   selector: 'app-dynamic-content',
   templateUrl: './factor-parent-overlay.component.html',
   styleUrls: ['./factor-parent-overlay.component.css'],
 })
-export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
+export class FactorParentOverlayComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-
-  @ViewChild('container', { read: ViewContainerRef })
-  viewContainerRef: ViewContainerRef;
-
-  private componentRef: ComponentRef<{}>;
-
   isColored = false;
   isShadowed = false;
   label = '';
+  @ViewChild('container', {read: ViewContainerRef})
+  private viewContainerRef: ViewContainerRef;
+  private componentRef: ComponentRef<{}>;
 
   constructor(public dialogRef: FactorParentOverlayRef,
               @Inject(FACTOR_PARENT_DIALOG_DATA) public config: any,
@@ -52,7 +50,7 @@ export class FactorParentOverlayComponent implements OnInit, OnDestroy  {
       });
 
       if (this.config.content === QrWriterComponent || this.config.content === NfcWriterComponent) {
-          instance['value'] = this.dialogRef.value;
+        instance['value'] = this.dialogRef.value;
       }
 
       console.log(instance);

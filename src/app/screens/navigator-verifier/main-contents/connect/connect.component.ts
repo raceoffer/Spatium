@@ -1,6 +1,6 @@
-import {Component, EventEmitter, HostBinding, OnInit, Output} from '@angular/core';
-import {WalletService} from '../../services/wallet.service';
-import {NavigationService} from '../../services/navigation.service';
+import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
+import { NavigationService } from '../../../../services/navigation.service';
+import { WalletService } from '../../../../services/wallet.service';
 
 @Component({
   selector: 'app-connect',
@@ -10,13 +10,10 @@ import {NavigationService} from '../../services/navigation.service';
 export class ConnectComponent implements OnInit {
   @HostBinding('class') classes = 'box';
   stConnect = 'Synchronizing an account';
-  cancelLabel = 'Cancel';
 
   progress = this.wallet.syncProgress;
-
-  private subscriptions = [];
-
   @Output() cancel: EventEmitter<any> = new EventEmitter<any>();
+  private subscriptions = [];
 
   constructor(private wallet: WalletService,
               private readonly navigationService: NavigationService) {}

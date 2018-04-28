@@ -1,9 +1,9 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FileService } from '../../services/file.service';
-import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { FileService } from '../../services/file.service';
 import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const nfc: any;
 
@@ -44,14 +44,12 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly ngZone: NgZone,
-    private readonly fs: FileService,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly router: Router,
+              private readonly ngZone: NgZone,
+              private readonly fs: FileService,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -61,7 +59,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     );
 
     nfc.enabled(() => {}, e => {
-      if (e === 'NO_NFC'  || e === 'NO_NFC_OR_NFC_DISABLED') {
+      if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
         this.ngZone.run(() => {
           this.isNfcAvailable = false;
         });
@@ -75,7 +73,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
+    await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
   }
 
   toggleContent(content) {

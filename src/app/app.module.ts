@@ -1,85 +1,85 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { NoopAnimationsModule, BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatButtonModule,
   MatButtonToggleModule,
   MatCheckboxModule,
+  MatDialogModule,
+  MatFormFieldModule,
+  MatGridListModule,
   MatIconModule,
+  MatInputModule,
   MatListModule,
   MatMenuModule,
-  MatSidenavModule,
-  MatSlideToggleModule,
   MatProgressBarModule,
   MatProgressSpinnerModule,
   MatRadioModule,
-  MatToolbarModule,
-  MatInputModule,
-  MatDialogModule,
   MatSelectModule,
+  MatSidenavModule,
+  MatSlideToggleModule,
   MatSnackBarModule,
-  MatFormFieldModule,
-  MatGridListModule
+  MatToolbarModule
 } from '@angular/material';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { QRCodeModule } from 'angular2-qrcode';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { NavigatorComponent } from './screens/navigator/navigator.component';
-import { StartComponent } from './screens/start/start.component';
-import { ConnectComponent } from './screens/connect/connect.component';
-import { WaitingComponent } from './screens/waiting/waiting.component';
-import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
-import { VerifyTransactionComponent } from './screens/navigator-verifier/verify-transaction/verify-transaction.component';
-import { WalletService } from './services/wallet.service';
-import { LoggerService } from './services/logger.service';
-import { BluetoothService } from './services/bluetooth.service';
-import { AuthService } from './services/auth.service';
-import { FileService } from './services/file.service';
-import { NotificationService } from './services/notification.service';
-import { DDSService } from './services/dds.service';
-import { PincodeComponent } from './screens/factors/pincode/pincode.component';
-import { LoginComponent } from './screens/login/login.component';
+import { AppComponent } from './app.component';
+import { AutofocusDirective } from './directives/autofocus.directive';
+import { NgInitDirective } from './directives/ng-init.directive';
+import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
+import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
+import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
+import { ToolbarComponent } from './elements/toolbar/toolbar.component';
+import { DialogFactorsComponent } from './modals/dialog-factors/dialog-factors.component';
+import { FactorParentOverlayComponent } from './modals/factor-parent-overlay/factor-parent-overlay.component';
+import { FactorParentOverlayService } from './modals/factor-parent-overlay/factor-parent-overlay.service';
 import { AuthComponent } from './screens/auth/auth.component';
-import { DialogFactorsComponent } from './screens/dialog-factors/dialog-factors.component';
-import { PasswordComponent } from './screens/factors/password/password.component';
+import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { FactorParentComponent } from './screens/factor-parent/factor-parent.component';
-import { LoginParentComponent } from './screens/login-parent/login-parent.component';
-import { NgInitDirective } from './directives/ng-init.directive';
-import { RegistrationComponent } from './screens/registration/registration.component';
-import { KeyChainService } from './services/keychain.service';
-import { WalletComponent } from './screens/navigator/wallet/wallet.component';
-import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
-import { AutofocusDirective } from './directives/autofocus.directive';
-import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
-import { SettingsComponent } from './screens/navigator/settings/settings.component';
-import { CurrencyComponent } from './screens/navigator/currency/currency.component';
-import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
-import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
-import { VerifyWaitingComponent } from './screens/verify-waiting/verify-waiting.component';
-import { SecretImportComponent } from './screens/secret-import/secret-import.component';
-import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
-import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
-import { CurrencyService } from './services/currency.service';
-import { NavigationService } from './services/navigation.service';
-import { CurrencyPriceService } from './services/price.service';
-import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
-import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
-import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
-import { ToolbarComponent } from './elements/toolbar/toolbar.component';
-import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
-import { FactorParentOverlayComponent } from './screens/factor-parent-overlay/factor-parent-overlay.component';
-import { FactorParentOverlayService } from './screens/factor-parent-overlay/factor-parent-overlay.service';
 import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
+import { PasswordComponent } from './screens/factors/password/password.component';
+import { PincodeComponent } from './screens/factors/pincode/pincode.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
+import { LoginParentComponent } from './screens/login-parent/login-parent.component';
+import { LoginComponent } from './screens/login/login.component';
+import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
+import { ConnectComponent } from './screens/navigator-verifier/main-contents/connect/connect.component';
+import { VerifyTransactionComponent } from './screens/navigator-verifier/main-contents/verify-transaction/verify-transaction.component';
+import { VerifyWaitingComponent } from './screens/navigator-verifier/main-contents/verify-waiting/verify-waiting.component';
+import { MainComponent } from './screens/navigator-verifier/main/main.component';
+import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
+import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
+import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
+import { CurrencyComponent } from './screens/navigator/currency/currency.component';
+import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
+import { NavigatorComponent } from './screens/navigator/navigator.component';
+import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
+import { SettingsComponent } from './screens/navigator/settings/settings.component';
+import { WaitingComponent } from './screens/navigator/waiting/waiting.component';
+import { WalletComponent } from './screens/navigator/wallet/wallet.component';
+import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
+import { RegistrationComponent } from './screens/registration/registration.component';
+import { SecretImportComponent } from './screens/secret-import/secret-import.component';
+import { StartComponent } from './screens/start/start.component';
+import { AuthService } from './services/auth.service';
+import { BluetoothService } from './services/bluetooth.service';
+import { CurrencyService } from './services/currency.service';
+import { DDSService } from './services/dds.service';
+import { FileService } from './services/file.service';
+import { KeyChainService } from './services/keychain.service';
+import { LoggerService } from './services/logger.service';
+import { NavigationService } from './services/navigation.service';
+import { NotificationService } from './services/notification.service';
+import { CurrencyPriceService } from './services/price.service';
+import { WalletService } from './services/wallet.service';
 
 @NgModule({
   declarations: [
@@ -97,7 +97,6 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     PasswordComponent,
     FileUploadComponent,
     GraphicKeyComponent,
-    FactorParentComponent,
     LoginParentComponent,
     RegistrationComponent,
     NgInitDirective,
@@ -122,7 +121,8 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    MainComponent
   ],
   imports: [
     OverlayModule,
@@ -186,4 +186,5 @@ import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.compone
   ]
 })
 
-export class AppModule {}
+export class AppModule {
+}
