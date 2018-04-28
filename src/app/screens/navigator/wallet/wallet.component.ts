@@ -151,6 +151,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onTileClicked(coin: Coin) {
+    console.log(coin);
     await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', coin]}}]);
   }
 

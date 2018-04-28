@@ -72,10 +72,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(
-      this.fromInternal('0'),
-      this.fromInternal('0')
-    ));
+    this.balance.next(new Balance(null, null));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
@@ -103,10 +100,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(
-      this.fromInternal('0'),
-      this.fromInternal('0')
-    ));
+    this.balance.next(new Balance(null, null));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {

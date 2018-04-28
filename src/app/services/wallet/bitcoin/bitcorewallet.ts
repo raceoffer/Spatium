@@ -60,10 +60,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(
-      this.fromInternal('0'),
-      this.fromInternal('0')
-    ));
+    this.balance.next(new Balance(null, null));
 
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
@@ -79,6 +76,10 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
+    if (this.wallet === null) {
+      return [];
+    }
+
     const txs = await this.wallet.getTransactions();
     return txs.map(tx => HistoryEntry.fromJSON(tx));
   }
