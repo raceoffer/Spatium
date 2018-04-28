@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
 import 'rxjs/add/observable/timer';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 
 interface CoinMarketCupResponse {
   id: string;
@@ -26,7 +26,7 @@ export class CurrencyPriceService {
 
   public availableCurrencies: BehaviorSubject<Map<string, number>> = new BehaviorSubject<Map<string, number>>(new Map<string, number>());
 
-  constructor(private http: HttpClient) {  }
+  constructor(private http: HttpClient) { }
 
   getPrices() {
     const timer = Observable.timer(2000, 5 * 60 * 1000);

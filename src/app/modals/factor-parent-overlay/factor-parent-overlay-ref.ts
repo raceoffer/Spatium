@@ -7,7 +7,7 @@ export class FactorParentOverlayRef<T = any> {
   public onBackClicked = new EventEmitter();
   public value: BehaviorSubject<string> = null;
 
-  constructor(private overlayRef: OverlayRef) {  }
+  constructor(private overlayRef: OverlayRef) { }
 
   close(): void {
     this.overlayRef.dispose();

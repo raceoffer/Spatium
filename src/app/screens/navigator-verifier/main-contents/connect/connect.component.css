@@ -1,0 +1,15 @@
+:host {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  position: relative;
+}
+
+.connect-text{
+  padding: 16px 8px 16px 14px;
+  font-size: 14px;
+  font-family: 'Roboto-Light';
+}

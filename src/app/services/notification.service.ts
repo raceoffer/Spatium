@@ -26,8 +26,8 @@ export class NotificationService {
       smallIcon: 'res://ic_stat_res',
       foreground: true,
       actions: [
-        { id: 'confirm', title: 'Confirm' },
-        { id: 'decline', title: 'Decline' }
+        {id: 'confirm', title: 'Confirm'},
+        {id: 'decline', title: 'Decline'}
       ]
     });
   }

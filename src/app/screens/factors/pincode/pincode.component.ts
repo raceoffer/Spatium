@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, HostBinding, Output, EventEmitter, Input } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { FactorType } from '../../../services/auth.service';
 
@@ -25,10 +25,8 @@ export class PincodeComponent implements OnInit {
   pincode = '';
   hasTouch = false;
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly router: Router
-  ) { }
+  constructor(private readonly ngZone: NgZone,
+              private readonly router: Router) { }
 
   ngOnInit() {
     this.pincode = '';
@@ -73,7 +71,7 @@ export class PincodeComponent implements OnInit {
     if (window.plugins) {
       window.plugins.touchid.verify('spatium', 'Unlock Spatium secret', async (password) => {
         console.log('Tocuh ' + password);
-        this.ngZone.run( async () => {
+        this.ngZone.run(async () => {
           this.pincode = password;
           await this.onNext();
         });
@@ -87,23 +85,23 @@ export class PincodeComponent implements OnInit {
 
   async onNext() {
     this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
-      /*switch (this.next) {
-        case 'waiting':
-          await this.onNext.emit(this.pincode);
-          break;
-        case 'auth':
-          await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-          await this.router.navigate(['/auth']);
-          break;
-        case 'registration':
-          await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-          await this.router.navigate(['/registration']);
-          break;
-        case 'factornode':
-          await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-          await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
-          break;
-      }*/
+    /*switch (this.next) {
+      case 'waiting':
+        await this.onNext.emit(this.pincode);
+        break;
+      case 'auth':
+        await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+        await this.router.navigate(['/auth']);
+        break;
+      case 'registration':
+        await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+        await this.router.navigate(['/registration']);
+        break;
+      case 'factornode':
+        await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
+        await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
+        break;
+    }*/
   }
 
   isWindows(): boolean {

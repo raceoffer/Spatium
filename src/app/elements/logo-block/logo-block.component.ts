@@ -9,7 +9,6 @@ export class LogoBlockComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
 }

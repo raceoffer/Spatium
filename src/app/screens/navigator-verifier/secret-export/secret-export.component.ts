@@ -1,7 +1,7 @@
-import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { NavigationService } from '../../../services/navigation.service';
 import { AuthService } from "../../../services/auth.service";
+import { NavigationService } from '../../../services/navigation.service';
 
 declare const Buffer: any;
 declare const CryptoCore: any;
@@ -24,29 +24,21 @@ enum State {
 })
 export class SecretExportComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   title = 'Export secret';
-
   contentType = Content;
   content = Content.QR;
-
   stateType = State;
   buttonState = State.Empty;
-
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
-
   incorrectSecret = 'hide';
   qrGenerate = null;
-
   input = '';
-
   isNfcAvailable = true;
-
   secretValue = '';
   packSeed = null;
+  private subscriptions = [];
 
   constructor(private readonly ngZone: NgZone,
               private readonly router: Router,
@@ -77,7 +69,7 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    await  this.router.navigate(['/navigator-verifier', { outlets: { 'navigator': ['verify-transaction'] } }]);
+    await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
   }
 
   toggleContent(content) {

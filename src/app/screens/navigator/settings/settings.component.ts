@@ -1,4 +1,4 @@
-import {Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -15,11 +15,8 @@ enum State {
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   title = 'Settings';
   state = State.nav;
-
   navLinks = [{
     name: ' Add authentication path',
     link: 'factornode'
@@ -27,17 +24,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
     name: 'Language',
     link: 'lang',
   }];
-
   languages = [{
     name: 'English',
     value: 'en'
   }];
+  private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly router: Router,
+              private readonly authService: AuthService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -55,7 +50,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   async onBackClicked() {
     switch (this.state) {
       case State.nav: {
-        await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
+        await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
         break;
       }
       case State.lang: {
@@ -68,7 +63,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   async onSettingsClick(navLink) {
     if (navLink.link === 'factornode') {
       this.authService.clearFactors();
-      await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
     } else if (navLink.link === 'lang') {
       this.state = State.lang;
     }

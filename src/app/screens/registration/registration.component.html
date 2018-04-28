@@ -61,8 +61,7 @@
       </div>
 
       <button type="submit" mat-raised-button color="accent" (click)="signUp()"
-              [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{
-        stRegistration }}
+              [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{ stRegistration }}
       </button>
       <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading">
         <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>

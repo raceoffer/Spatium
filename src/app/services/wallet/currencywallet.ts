@@ -79,8 +79,8 @@ export class CurrencyWallet {
 
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-  public address: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(new Balance(0, 0));
+  public address: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(new Balance(null, null));
   public transactions: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
 
   constructor(
@@ -165,8 +165,8 @@ export class CurrencyWallet {
       this.signSession = null;
     }
 
-    this.address.next('');
-    this.balance.next(new Balance(0, 0));
+    this.address.next(null);
+    this.balance.next(new Balance(null, null));
     this.transactions.next([]);
     this.syncProgress.next(0);
   }

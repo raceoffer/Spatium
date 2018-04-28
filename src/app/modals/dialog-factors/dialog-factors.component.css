@@ -1,0 +1,11 @@
+.mat-dialog-content {
+  display: block;
+  margin: 0 !important;
+  padding: 0px !important;
+
+  max-height: 65vh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}

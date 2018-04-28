@@ -139,5 +139,4 @@ export class QrReaderComponent implements OnInit {
   }
 
 
-
 }

@@ -71,4 +71,5 @@
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="cordova-plugin-clipboard" spec="file:../cordova-plugin-clipboard" />
+    <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
 </widget>

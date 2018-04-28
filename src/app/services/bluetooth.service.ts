@@ -1,21 +1,21 @@
 import { Injectable, NgZone } from '@angular/core';
+import 'rxjs/add/operator/distinctUntilChanged';
 
-import { LoggerService } from './logger.service';
-import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/mapTo';
+import 'rxjs/add/operator/skip';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Subject } from 'rxjs/Subject';
 
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/skip';
+import { LoggerService } from './logger.service';
 
 declare const cordova: any;
 
 enum State {
-  OFF         = 0x0000000a,
-  TURNING_ON  = 0x0000000b,
-  ON          = 0x0000000c,
+  OFF = 0x0000000a,
+  TURNING_ON = 0x0000000b,
+  ON = 0x0000000c,
   TURNING_OFF = 0x0000000d
 }
 
@@ -27,7 +27,7 @@ export class Device {
   }
 
   toJSON(): any {
-    return { name: this.name, address: this.address };
+    return {name: this.name, address: this.address};
   }
 }
 
@@ -36,51 +36,40 @@ export class BluetoothService {
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.OFF);
 
   public enabled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public connected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public discovering: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public discoverable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
-  public connectedDevice: BehaviorSubject<Device> = new BehaviorSubject<Device>(null);
-  public pairedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
-  public discoveredDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
-
   public enabledChanged: Observable<boolean> = this.enabled.skip(1).distinctUntilChanged();
-  public connectedChanged: Observable<boolean> = this.connected.skip(1).distinctUntilChanged();
-  public discoveringChanged: Observable<boolean> = this.discovering.skip(1).distinctUntilChanged();
-  public discoverableChanged: Observable<boolean> = this.discoverable.skip(1).distinctUntilChanged();
-
-  public connectedDeviceChanged: Observable<Device> = this.connectedDevice.skip(1)
-    .distinctUntilChanged((x, y) => x.name === y.name && x.address === y.address);
-
-  public discoveredDevicesChanged: Observable<Array<Device>> = this.discoveredDevices.skip(1)
-    .distinctUntilChanged((x, y) =>
-      x.length === y.length &&
-      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
-
-  public pairedDevicesChanged: Observable<Array<Device>> = this.pairedDevices.skip(1)
-    .distinctUntilChanged((x, y) =>
-      x.length === y.length &&
-      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
-
   public enabledEvent: Observable<any> = this.enabledChanged.filter(enabled => enabled).mapTo(null);
   public disabledEvent: Observable<any> = this.enabledChanged.filter(enabled => !enabled).mapTo(null);
-
+  public connected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public connectedChanged: Observable<boolean> = this.connected.skip(1).distinctUntilChanged();
   public connectedEvent: Observable<any> = this.connectedChanged.filter(connected => connected).mapTo(null);
   public disconnectedEvent: Observable<any> = this.connectedChanged.filter(connected => !connected).mapTo(null);
-
+  public discovering: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public discoveringChanged: Observable<boolean> = this.discovering.skip(1).distinctUntilChanged();
   public discoveryStartedEvent: Observable<any> = this.discoveringChanged.filter(discovering => discovering).mapTo(null);
   public discoveryFinishedEvent: Observable<any> = this.discoveringChanged.filter(discovering => !discovering).mapTo(null);
-
-  public discoverableStartedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => discoverable).mapTo(null);
-  public discoverableFinishedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => !discoverable).mapTo(null);
-
-  public message: Subject<string> = new Subject<string>();
-
   private deviceRelatedChange = combineLatest(
     this.enabled.filter(enabled => enabled),
     this.connected,
     this.discovering
   );
+  public discoverable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public discoverableChanged: Observable<boolean> = this.discoverable.skip(1).distinctUntilChanged();
+  public discoverableStartedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => discoverable).mapTo(null);
+  public discoverableFinishedEvent: Observable<any> = this.discoverableChanged.filter(discoverable => !discoverable).mapTo(null);
+  public connectedDevice: BehaviorSubject<Device> = new BehaviorSubject<Device>(null);
+  public connectedDeviceChanged: Observable<Device> = this.connectedDevice.skip(1)
+    .distinctUntilChanged((x, y) => x.name === y.name && x.address === y.address);
+  public pairedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
+  public pairedDevicesChanged: Observable<Array<Device>> = this.pairedDevices.skip(1)
+    .distinctUntilChanged((x, y) =>
+      x.length === y.length &&
+      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
+  public discoveredDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>([]);
+  public discoveredDevicesChanged: Observable<Array<Device>> = this.discoveredDevices.skip(1)
+    .distinctUntilChanged((x, y) =>
+      x.length === y.length &&
+      x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true));
+  public message: Subject<string> = new Subject<string>();
 
   constructor(private ngZone: NgZone) {
     this.state.subscribe(state => this.enabled.next(state === State.ON));

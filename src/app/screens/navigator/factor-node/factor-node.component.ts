@@ -1,23 +1,33 @@
 import {
-  AfterViewInit, animate, ChangeDetectorRef, Component, ElementRef, HostBinding, OnDestroy, OnInit, sequence, style,
+  AfterViewInit,
+  animate,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostBinding,
+  OnDestroy,
+  OnInit,
+  sequence,
+  style,
   transition,
-  trigger, ViewChild
+  trigger,
+  ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { DialogFactorsComponent } from '../../dialog-factors/dialog-factors.component';
-import { KeyChainService } from '../../../services/keychain.service';
-import {AuthService, FactorType} from '../../../services/auth.service';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import { DDSService } from '../../../services/dds.service';
-import { NotificationService } from '../../../services/notification.service';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
+import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
+import { FactorParentOverlayRef } from '../../../modals/factor-parent-overlay/factor-parent-overlay-ref';
+import { FactorParentOverlayService } from '../../../modals/factor-parent-overlay/factor-parent-overlay.service';
+import { AuthService, FactorType } from '../../../services/auth.service';
+import { DDSService } from '../../../services/dds.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
-import {FactorParentOverlayService} from '../../factor-parent-overlay/factor-parent-overlay.service';
-import {QrWriterComponent} from '../../factors/qr-writer/qr-writer.component';
-import {FactorParentOverlayRef} from '../../factor-parent-overlay/factor-parent-overlay-ref';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {NfcWriterComponent} from "../../factors/nfc-writer/nfc-writer.component";
+import { NotificationService } from '../../../services/notification.service';
+import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
+import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -27,10 +37,10 @@ declare const Buffer: any;
   animations: [
     trigger('anim', [
       transition('* => void', [
-        style({ height: '*', opacity: '1', transform: 'translateX(0)'} ),
+        style({height: '*', opacity: '1', transform: 'translateX(0)'}),
         sequence([
-          animate('.5s ease', style({ height: '*', opacity: '.2', transform: 'translateX(60px)' })),
-          animate('.1s ease', style({ height: '*', opacity: 0, transform: 'translateX(60px)' }))
+          animate('.5s ease', style({height: '*', opacity: '.2', transform: 'translateX(60px)'})),
+          animate('.1s ease', style({height: '*', opacity: 0, transform: 'translateX(60px)'}))
         ])
       ]),
     ])],
@@ -44,26 +54,23 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('dialogButton') dialogButton;
 
   public value: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  private subscriptions = [];
-
   title = 'Adding authorization path';
   factors = [];
   uploading = false;
   cancel = new Subject<boolean>();
   isAuth = false;
   dialogFactorRef = null;
+  private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
-    private readonly router: Router,
-    private readonly dds: DDSService,
-    private readonly notification: NotificationService,
-    private readonly keychain: KeyChainService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-    private readonly authService: AuthService,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(public dialog: MatDialog,
+              public factorParentDialog: FactorParentOverlayService,
+              private readonly router: Router,
+              private readonly dds: DDSService,
+              private readonly notification: NotificationService,
+              private readonly keychain: KeyChainService,
+              private readonly changeDetectorRef: ChangeDetectorRef,
+              private readonly authService: AuthService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -82,6 +89,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+    if (this.dialogFactorRef) {
+      this.dialogFactorRef.close();
+      this.dialogFactorRef = null;
+    }
+    if (this.child) {
+      this.child.close();
+      this.child = null;
+    }
   }
 
   goBottom() {
@@ -119,7 +134,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
-      data: { isAuth: this.isAuth, label: label, isColored: true, isShadowed: true },
+      data: {isAuth: this.isAuth, label: label, isColored: true, isShadowed: true},
     });
 
     this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {

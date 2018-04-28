@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Inject} from '@angular/core';
+import { Component, EventEmitter, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 import { AuthService } from '../../services/auth.service';
 
@@ -15,11 +15,9 @@ export class DialogFactorsComponent {
   isAuth: false;
   label: '';
 
-  constructor(
-    public dialogRef: MatDialogRef<DialogFactorsComponent>,
-    private authSevice: AuthService,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
+  constructor(public dialogRef: MatDialogRef<DialogFactorsComponent>,
+              private authSevice: AuthService,
+              @Inject(MAT_DIALOG_DATA) public data: any) {
     this.isAuth = data.isAuth;
 
     if (data.label) {
