@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import {
-  animate, transition, trigger, style, query,
-  stagger, animateChild } from '@angular/animations';
+  animate, transition, trigger, style
+} from '@angular/animations';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { combineLatest } from 'rxjs/observable/combineLatest';
@@ -22,8 +22,8 @@ declare const cordova: any;
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
-        style({ opacity: '0' }),
-        animate('1s ease-out', style({ opacity: '1' })),
+        style({opacity: '0'}),
+        animate('1s ease-out', style({opacity: '1'})),
       ]),
     ])
   ]
@@ -126,7 +126,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async onSettingsClicked() {
-    await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency, 'settings'] } }]);
+    await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', this.currency, 'settings']}}]);
   }
 
   async onBackClicked() {

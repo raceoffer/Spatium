@@ -54,7 +54,7 @@
                    (inputEvent)="setInput($event)"
   ></app-nfc-reader>
 
-  <span style="margin: 5px 0px;" [class]="notRecognized" (clearEvent)="setEmpty()">Not recognized login</span>
+  <span style="margin: 5px 0px;" (clearEvent)="setEmpty()">{{recognitionMsg}}</span>
   <div class="footer text-center">
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()"
             [disabled]="buttonState === stateType.Empty"

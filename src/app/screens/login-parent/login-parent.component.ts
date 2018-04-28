@@ -40,7 +40,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
-  notRecognized = 'hide';
+  recognitionMsg = '';
   loginGenerate = null;
   input = '';
   isNfcAvailable = true;
@@ -78,7 +78,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   toggleContent(content) {
     this.buttonState = State.Empty;
     this.content = content;
-    this.notRecognized = 'hide';
+    this.recognitionMsg = '';
     if (this.loginGenerate && content === this.contentType.Login) {
       console.log(this.loginGenerate);
     } else {
@@ -92,7 +92,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   async setEmpty() {
     this.buttonState = State.Empty;
-    this.notRecognized = 'hide';
+    this.recognitionMsg = '';
   }
 
   async setInput(input: string) {
@@ -101,6 +101,11 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async checkInput(input: string) {
+    if (!input || input == '') {
+      this.recognitionMsg = 'Incorrect login format.';
+      return;
+    }
+
     try {
       this.buttonState = State.Updating;
       const exists = await this.dds.exists(await AuthService.toId(input));
@@ -111,23 +116,19 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         this.buttonState = State.Exists;
       } else {
         if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+          this.recognitionMsg = 'Login does not exist. Please register.';
           await this.generate();
         } else {
           this.buttonState = State.New;
         }
       }
     } catch (ignored) {
-      if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-        await this.generate();
-      } else {
         this.notification.show('No network connection');
         this.buttonState = State.Error;
       }
     }
-  }
 
   async generate() {
-    this.notRecognized = '';
     this.buttonState = State.Empty;
     do {
       this.loginGenerate = this.authService.makeNewLogin(10);
