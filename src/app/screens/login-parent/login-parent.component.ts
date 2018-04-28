@@ -157,9 +157,11 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.authService.reset();
+    this.authService.clearFactors();
+
     if (this.buttonState === State.Exists) {
       this.authService.login = this.input;
-      this.authService.clearFactors();
 
       try {
         this.authService.remoteEncryptedTrees = [];
@@ -172,7 +174,6 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
       this.authService.password = '';
-      this.authService.clearFactors();
       this.keychain.setSeed(await CryptoCore.Utils.randomBytes(64));
 
       await this.router.navigate(['/registration']);

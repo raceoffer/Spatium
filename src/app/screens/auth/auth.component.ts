@@ -54,17 +54,19 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   ready = false;
   loginType = LoginType.LOGIN;
   isPasswordFirst = false;
+  isAdvanced = false;
+
   icon_qr = '';
   dialogFactorRef = null;
   private subscriptions = [];
 
   constructor(public dialog: MatDialog,
-              public factorParentDialog: FactorParentOverlayService,
-              private readonly router: Router,
-              private readonly authService: AuthService,
-              private readonly changeDetectorRef: ChangeDetectorRef,
-              private readonly notification: NotificationService,
-              private readonly keyChain: KeyChainService,
+    public factorParentDialog: FactorParentOverlayService,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly notification: NotificationService,
+    private readonly keyChain: KeyChainService,
               private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
@@ -85,7 +87,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.dialogFactorRef) {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
-    }
+  }
     if (this.child) {
       this.child.close();
       this.child = null;
@@ -182,6 +184,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.reset();
 
     await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+  }
+
+  openAdvanced() {
+    this.isAdvanced = true;
   }
 
   async onBackClicked() {
