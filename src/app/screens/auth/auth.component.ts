@@ -48,6 +48,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   ready = false;
   loginType = LoginType.LOGIN;
   isPasswordFirst = false;
+  isAdvanced = false;
 
   icon_qr = '';
 
@@ -171,6 +172,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.reset();
 
     await this.router.navigate(['/waiting']);
+  }
+
+  openAdvanced() {
+    this.isAdvanced = true;
   }
 
   async onBackClicked() {
