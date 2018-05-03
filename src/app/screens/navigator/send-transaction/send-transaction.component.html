@@ -27,9 +27,9 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2" style="margin-bottom: 13px;">
-        <mat-form-field class="field" color="accent">
-          <textarea matInput [formControl]="receiver"></textarea>
+      <td colspan="2">
+        <mat-form-field class="field" style="margin-bottom: 13px;" color="accent">
+          <input matInput [formControl]="receiver">
           <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
             <mat-icon>content_paste</mat-icon>
           </button>
@@ -191,8 +191,12 @@
     <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       {{ stSend }}
     </button>
+    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
+      {{ stContinue }}
+    </button>
   </div>
-</div>
+
+  </div>
 
 
 
