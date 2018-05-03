@@ -43,6 +43,7 @@ import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
+import { LoginComponent as LoginComponentFactor } from './screens/factors/login/login.component';
 import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
 import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
 import { PasswordComponent } from './screens/factors/password/password.component';
@@ -81,7 +82,6 @@ import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
-import { LoginComponent as LoginComponentFactor } from './screens/factors/login/login.component';
 
 @NgModule({
   declarations: [
@@ -124,9 +124,8 @@ import { LoginComponent as LoginComponentFactor } from './screens/factors/login/
     NfcReaderComponent,
     NfcWriterComponent,
     QrReaderComponent,
-    QrWriterComponent
-    MainComponent,
     QrWriterComponent,
+    MainComponent,
     LoginComponentFactor
   ],
   imports: [
