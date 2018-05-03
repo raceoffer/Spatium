@@ -17,9 +17,14 @@
       </div>
 
       <div class="spatium-textfield entry bottom10">
-        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password" [autofocus]
+        <input type="password" placeholder="{{stPassword}}" [(ngModel)]="password" name="Password"
                [disabled]="uploading" (focus)="onFocus()" (focusout)="onFocusOut()">
       </div>
+
+      <div class="spatium-textfield entry password-confirm">
+        <input type="password" placeholder="{{stPasswordConfirm}}" [(ngModel)]="password_confirm" name="PasswordConfirm"
+               [disabled]="uploading" (focus)="onFocusConfirm()" (focusout)="onFocusOutConfirm()">
+    </div>
     </div>
 
     <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
@@ -61,7 +66,8 @@
       </div>
 
       <button type="submit" mat-raised-button color="accent" (click)="signUp()"
-              [disabled]="password.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{ stRegistration }}
+              [disabled]="password.length < 1 || password_confirm.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{
+        stRegistration }}
       </button>
       <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading">
         <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
