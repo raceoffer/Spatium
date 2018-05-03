@@ -16,8 +16,6 @@ enum State {
   styleUrls: ['./verify-transaction.component.css']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
-
   address = '';
   btc;
   usd;
