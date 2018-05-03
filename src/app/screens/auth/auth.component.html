@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <app-password *ngIf="loginType == 0 && !isPasswordFirst"
+  <app-password *ngIf="loginType == 0 && !isPasswordFirst && !isAdvanced"
                 (isPasswordChanged)="isPasswordChanged($event)"
                 (onSuccess)="addFactor($event)"></app-password>
 
@@ -43,16 +43,19 @@
     </div>
 
     <div class="margin-top-18" style="padding-bottom: 10px;"
-         *ngIf="(loginType == 0) ? (!ready && isPasswordFirst) : !ready ">
+         *ngIf="(loginType == 0) ? (!ready && (isPasswordFirst || isAdvanced)) : !ready ">
       <button #dialogButton color="accent" mat-mini-fab (click)="addNewFactor()" type="button" [disabled]="busy" class="color">
         <mat-icon>add</mat-icon>
       </button>
     </div>
   </div>
 
-  <div class="footer text-center" style="bottom: 0px;" *ngIf="isPasswordFirst">
-    <button mat-raised-button color="accent" disabled class="width-button color" *ngIf="!ready">{{ login }}</button>
-    <button mat-raised-button color="accent" class="width-button color" *ngIf="ready" (click)="letLogin()">{{ login }}
+  <div class="footer text-center" style="bottom: 0px;" >
+    <div class="width-button-width" style="display: inline-block" *ngIf="!isAdvanced && !isPasswordFirst">
+      <label style="opacity: 0.5; font-size: 12px; float: right; margin: 5px;" (click)="openAdvanced()">Advanced security</label>
+    </div>
+    <button mat-raised-button color="accent" disabled class="width-button color" *ngIf="!ready && (isPasswordFirst || isAdvanced)">{{ login }}</button>
+    <button mat-raised-button color="accent" class="width-button color" *ngIf="ready && (isPasswordFirst || isAdvanced)" (click)="letLogin()">{{ login }}
     </button>
   </div>
 </div>

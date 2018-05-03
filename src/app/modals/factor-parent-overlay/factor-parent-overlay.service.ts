@@ -1,9 +1,9 @@
-import {ComponentRef, EventEmitter, Injectable, Injector} from '@angular/core';
-import {Overlay, OverlayConfig, OverlayRef} from '@angular/cdk/overlay';
-import {FactorParentOverlayRef} from './factor-parent-overlay-ref';
-import {ComponentPortal, PortalInjector} from '@angular/cdk/portal';
-import {FactorParentOverlayComponent} from './factor-parent-overlay.component';
-import {FACTOR_PARENT_DIALOG_DATA} from './factor-parent-overlay.tokens';
+import { ComponentRef, Injectable, Injector } from '@angular/core';
+import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
+import { FactorParentOverlayRef } from './factor-parent-overlay-ref';
+import { ComponentPortal, PortalInjector } from '@angular/cdk/portal';
+import { FactorParentOverlayComponent } from './factor-parent-overlay.component';
+import { FACTOR_PARENT_DIALOG_DATA } from './factor-parent-overlay.tokens';
 
 
 interface FactorParentOverlayConfig {
@@ -23,13 +23,13 @@ const DEFAULT_CONFIG: FactorParentOverlayConfig = {
 @Injectable()
 export class FactorParentOverlayService {
 
-  constructor (private injector: Injector,
-               private overlay: Overlay) { }
+  constructor(private injector: Injector,
+              private overlay: Overlay) { }
 
   open(config: FactorParentOverlayConfig = {}) {
 
     // Override default configuration
-    const dialogConfig = { ...DEFAULT_CONFIG, ...config };
+    const dialogConfig = {...DEFAULT_CONFIG, ...config};
 
     // Returns an OverlayRef which is a PortalHost
     const overlayRef = this.createOverlay(dialogConfig);

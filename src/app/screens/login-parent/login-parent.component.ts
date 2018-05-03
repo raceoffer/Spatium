@@ -1,10 +1,10 @@
-import {Component, HostBinding, NgZone, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, LoginType } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
@@ -31,37 +31,29 @@ declare const nfc: any;
   templateUrl: './login-parent.component.html',
   styleUrls: ['./login-parent.component.css']
 })
-export class LoginParentComponent  implements OnInit, OnDestroy {
+export class LoginParentComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  private subscriptions = [];
-
   isScanInProgress = false;
   contentType = Content;
   content = Content.Login;
-
   stateType = State;
   buttonState = State.Empty;
-
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
-
-  notRecognized = 'hide';
+  recognitionMsg = '';
   loginGenerate = null;
-
   input = '';
-
   isNfcAvailable = true;
+  private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly ngZone: NgZone,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService,
-    private readonly keychain: KeyChainService,
-    private readonly dds: DDSService,
-    private readonly navigationService: NavigationService
-  ) {  }
+  constructor(private readonly router: Router,
+              private readonly ngZone: NgZone,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService,
+              private readonly keychain: KeyChainService,
+              private readonly dds: DDSService,
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -87,7 +79,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   toggleContent(content) {
     this.buttonState = State.Empty;
     this.content = content;
-    this.notRecognized = 'hide';
+    this.recognitionMsg = '';
     if (this.loginGenerate && content === this.contentType.Login) {
       console.log(this.loginGenerate);
     } else {
@@ -102,9 +94,8 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   async setEmpty() {
     this.ngZone.run(async () => {
       this.buttonState = State.Empty;
-      this.notRecognized = 'hide';
-    });
-  }
+      this.recognitionMsg = '';
+    });  }
 
   async setInput(input: string) {
     this.input = input;
@@ -116,6 +107,11 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async checkInput(input: string) {
+    if (!input || input == '') {
+      this.recognitionMsg = 'Incorrect login format.';
+      return;
+    }
+
     try {
       this.ngZone.run(async () => {
         this.buttonState = State.Updating;
@@ -130,23 +126,19 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
         });
       } else {
         if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+          this.recognitionMsg = 'Login does not exist. Please register.';
           await this.generate();
         } else {
           this.buttonState = State.New;
         }
       }
     } catch (ignored) {
-      if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-        await this.generate();
-      } else {
         this.notification.show('No network connection');
         this.buttonState = State.Error;
       }
     }
-  }
 
-  async generate () {
-    this.notRecognized = '';
+  async generate() {
     this.buttonState = State.Empty;
     do {
       this.loginGenerate = this.authService.makeNewLogin(10);
@@ -175,9 +167,11 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
       }
     }
 
+    this.authService.reset();
+    this.authService.clearFactors();
+
     if (this.buttonState === State.Exists) {
       this.authService.login = this.input;
-      this.authService.clearFactors();
 
       try {
         this.authService.remoteEncryptedTrees = [];
@@ -190,7 +184,6 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
       this.authService.password = '';
-      this.authService.clearFactors();
       this.keychain.setSeed(await CryptoCore.Utils.randomBytes(64));
 
       await this.router.navigate(['/registration']);

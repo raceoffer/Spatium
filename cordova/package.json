@@ -20,6 +20,7 @@
     "cordova-plugin-canvas2image": "git+https://github.com/devgeeks/Canvas2ImagePlugin.git",
     "cordova-plugin-clipboard": "file:../cordova-plugin-clipboard",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
+    "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-keychain-touch-id": "^3.2.1",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
@@ -52,7 +53,7 @@
       "cordova-plugin-keychain-touch-id": {},
       "phonegap-plugin-mobile-accessibility": {},
       "cordova-plugin-local-notification": {},
-      "cordova-plugin-clipboard": {},
+      "cordova-plugin-dialogs": {}
       "phonegap-plugin-barcodescanner": {}
     },
     "platforms": [

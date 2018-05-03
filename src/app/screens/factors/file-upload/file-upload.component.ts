@@ -30,7 +30,7 @@ export class FileUploadComponent implements AfterViewInit {
     this.readFile(event.srcElement.files[0]);
   }
 
-  readFile (file) {
+  readFile(file) {
     this.reader = new FileReader();
 
     this.reader.onloadend = () => this.ngZone.run(async () => {

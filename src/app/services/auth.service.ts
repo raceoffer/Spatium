@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { NotificationService } from './notification.service';
-import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
-import { PasswordComponent } from '../screens/factors/password/password.component';
 import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
-import { NfcWriterComponent } from '../screens/factors/nfc-writer/nfc-writer.component';
-import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
-import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
 import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
+import { NfcWriterComponent } from '../screens/factors/nfc-writer/nfc-writer.component';
+import { PasswordComponent } from '../screens/factors/password/password.component';
+import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
+import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
+import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
+import { NotificationService } from './notification.service';
+import { LoginComponent } from '../screens/factors/login/login.component';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -31,11 +32,9 @@ export class AuthService {
 
   remoteEncryptedTrees: Array<Array<any>> = [];
 
-  stFactorError = 'Incorrect factor ';
+  currentTree: any = null;
 
-  static async toId(name: string) {
-    return (await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8'))).toString('hex');
-  }
+  stFactorError = 'Incorrect factor ';
 
   constructor(private readonly notification: NotificationService) {
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
@@ -50,6 +49,8 @@ export class AuthService {
       FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
+    this.authFactors.push(new AvailableFactor(FactorType.LOGIN, AvailableFactorName.LOGIN, FactorIcon.LOGIN,
+      FactorIconAsset.LOGIN, FactorLink.LOGIN, LoginComponent));
 
     const addNFCFactor = () => {
       this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
@@ -67,6 +68,10 @@ export class AuthService {
       }
       addNFCFactor();
     });
+  }
+
+  static async toId(name: string) {
+    return (await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8'))).toString('hex');
   }
 
   getAllAvailableFactors() {
@@ -96,6 +101,9 @@ export class AuthService {
       }
       case FactorType.NFC: {
         return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
+      }
+      case FactorType.LOGIN: {
+        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value);
       }
     }
   }
@@ -207,106 +215,112 @@ export class AuthService {
   }
 }
 
-  export enum LoginType {
-    LOGIN = 0,
-    QR = 1,
-    NFC = 2
+export enum LoginType {
+  LOGIN = 0,
+  QR = 1,
+  NFC = 2
+}
+
+export enum FactorType {
+  PIN,
+  PASSWORD,
+  FILE,
+  GRAPHIC_KEY,
+  QR,
+  NFC,
+  LOGIN
+}
+
+export enum AvailableFactorName {
+  PIN = 'PIN',
+  PASSWORD = 'Password',
+  FILE = 'File',
+  GRAPHIC_KEY = 'Graphic key',
+  QR = 'QR',
+  NFC = 'NFC',
+  LOGIN = 'Login',
+}
+
+export enum FactorName {
+  PIN = 'PIN code',
+  PASSWORD = 'password',
+  FILE = 'file',
+  GRAPHIC_KEY = 'graphic key',
+  QR = 'QR code',
+  NFC = 'NFC tag',
+  LOGIN = 'login',
+}
+
+export enum FactorIcon {
+  PIN = 'dialpad',
+  PASSWORD = 'keyboard',
+  FILE = 'insert_drive_file',
+  GRAPHIC_KEY = '',
+  QR = '',
+  NFC = 'nfc',
+  LOGIN = 'text_fields'
+}
+
+export enum FactorIconAsset {
+  PIN = '',
+  PASSWORD = '',
+  FILE = '',
+  GRAPHIC_KEY = 'icon-custom-graphic_key',
+  QR = 'icon-custom-qr_code',
+  NFC = '',
+  LOGIN = ''
+}
+
+export enum FactorLink {
+  PIN = 'pincode',
+  PASSWORD = 'password',
+  FILE = 'file-upload',
+  GRAPHIC_KEY = 'graphic-key',
+  QR = 'qr-code',
+  NFC = 'nfc',
+  LOGIN = 'login-factor'
+}
+
+export class AvailableFactor {
+  type: FactorType;
+  name: AvailableFactorName;
+  icon: string;
+  icon_asset: string;
+  link: string;
+  component: any;
+
+  constructor(type, name, icon, icon_asset, link, component) {
+    this.type = type;
+    this.name = name;
+    this.icon = icon;
+    this.icon_asset = icon_asset;
+    this.link = link;
+    this.component = component;
+  }
+}
+
+export class Factor {
+  type: FactorType;
+  name: FactorName;
+  icon: string;
+  icon_asset: string;
+  value: any;
+  state: string;
+
+  constructor(type, name, icon, asset, value) {
+    this.type = type;
+    this.name = name;
+    this.icon = icon;
+    this.icon_asset = asset;
+    this.value = value;
+    this.state = 'active';
   }
 
-  export enum FactorType {
-    PIN,
-    PASSWORD,
-    FILE,
-    GRAPHIC_KEY,
-    QR,
-    NFC
+  public async toBuffer() {
+    const prefix = Buffer.alloc(4);
+    prefix.writeUInt32BE(this.type, 0);
+
+    return await CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
   }
-
-  export enum AvailableFactorName {
-    PIN = 'PIN',
-    PASSWORD = 'Password',
-    FILE = 'File',
-    GRAPHIC_KEY = 'Graphic key',
-    QR = 'QR',
-    NFC = 'NFC'
-  }
-
-  export enum FactorName {
-    PIN = 'PIN code',
-    PASSWORD = 'password',
-    FILE = 'file',
-    GRAPHIC_KEY = 'graphic key',
-    QR = 'QR code',
-    NFC = 'NFC tag'
-  }
-
-  export enum FactorIcon {
-    PIN = 'dialpad',
-    PASSWORD = 'keyboard',
-    FILE = 'insert_drive_file',
-    GRAPHIC_KEY = '',
-    QR = '',
-    NFC = 'nfc'
-  }
-
-  export enum FactorIconAsset {
-    PIN = '',
-    PASSWORD = '',
-    FILE = '',
-    GRAPHIC_KEY = 'icon-custom-graphic_key',
-    QR = 'icon-custom-qr_code',
-    NFC = ''
-  }
-
-  export enum FactorLink {
-    PIN = 'pincode',
-    PASSWORD = 'password',
-    FILE = 'file-upload',
-    GRAPHIC_KEY = 'graphic-key',
-    QR = 'qr-code',
-    NFC = 'nfc'
-  }
-
-  export class AvailableFactor {
-    type: FactorType;
-    name: AvailableFactorName;
-    icon: string;
-    icon_asset: string;
-    link: string;
-    component: any;
-
-    constructor(type, name, icon, icon_asset, link, component) {
-      this.type = type;
-      this.name = name;
-      this.icon = icon;
-      this.icon_asset = icon_asset;
-      this.link = link;
-      this.component = component;
-    }
-  }
-
-  export class Factor {
-    type: FactorType;
-    name: FactorName;
-    icon: string;
-    icon_asset: string;
-    value: any;
-    state: string;
-
-    constructor(type, name, icon, asset, value) {
-      this.type = type;
-      this.name = name;
-      this.icon = icon;
-      this.icon_asset = asset;
-      this.value = value;
-      this.state = 'active';
-    }
-
-    public async toBuffer() {
-      const prefix = Buffer.alloc(4);
-      prefix.writeUInt32BE(this.type, 0);
-
-      return await CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
-    }
-  }
+}
 

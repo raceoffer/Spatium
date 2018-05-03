@@ -1,17 +1,15 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+import { catchError } from 'rxjs/operators';
 
 declare const CryptoCore: any;
 
 export class DDSAccount {
   public address: string = this.account.address;
 
-  constructor(
-    private dds: any,
-    private account: any
-  ) { }
+  constructor(private dds: any,
+              private account: any) { }
 
   public async getBalance() {
     return this.dds.getBalance(this.account);
@@ -94,6 +92,10 @@ export class DDSService {
 
   public toWei(value: any, coin: string) {
     return this.dds.toWei(value, coin);
+  }
+
+  public getStoreAccount(id) {
+    return new DDSAccount(this.dds, this.dds.getAddress(id, 1));
   }
 
   public async accountFromSecret(secret: any) {

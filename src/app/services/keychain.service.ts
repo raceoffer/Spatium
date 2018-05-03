@@ -140,9 +140,6 @@ export class TokenEntry {
 
 @Injectable()
 export class KeyChainService {
-  private _seed: any = null;
-  private keyChain: any = null;
-
   public readonly topTokens = [
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos', 18),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron', 6),
@@ -248,6 +245,10 @@ export class KeyChainService {
     new TokenEntry(Token.WINGS, 'Wings', 'WINGS', '0x667088b212ce3d06a1b553a7221E1fD19000d9aF', 'wings', 18),
     new TokenEntry(Token.CONSENSUS, 'Consensus', 'SEN', '0xd53370acf66044910bb49cbcfe8f3cd020337f60', 'сonsensus', 18)
   ];
+  private _seed: any = null;
+  private keyChain: any = null;
+
+  constructor() { }
 
   getSeed() {
     return Buffer.from(this._seed);
@@ -269,6 +270,4 @@ export class KeyChainService {
   getCoinSecret(coin: Coin, account: number) {
     return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
   }
-
-  constructor() { }
 }

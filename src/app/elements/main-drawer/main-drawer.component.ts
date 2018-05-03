@@ -12,9 +12,9 @@ export class MainDrawerComponent implements OnInit {
 
   @ViewChild('sidenav') sidenav;
 
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   public toggle() {
     this.sidenav.toggle();

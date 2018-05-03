@@ -587,18 +587,6 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   padding: 0px!important;
 }
 
-.mat-dialog-content {
-  display: block;
-  margin: 0 !important;
-  padding: 10px 0px !important;
-
-  max-height: 65vh;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
 .mat-dialog-actions:last-child {
   margin-bottom: 0px !important;
 }

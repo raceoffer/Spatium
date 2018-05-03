@@ -1,9 +1,16 @@
 import {
-  AfterContentInit, AfterViewInit, Component, ElementRef, EventEmitter, HostBinding, NgZone, Output,
+  AfterContentInit,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostBinding,
+  NgZone,
+  Output,
   ViewChild
 } from '@angular/core';
-import { FactorType } from '../../../services/auth.service';
 import * as PatternLock from 'PatternLock';
+import { FactorType } from '../../../services/auth.service';
 
 declare const Buffer: any;
 
@@ -31,7 +38,7 @@ export class GraphicKeyComponent implements AfterViewInit, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.lock =  new PatternLock(this.el.nativeElement, {
+    this.lock = new PatternLock(this.el.nativeElement, {
       onDraw: (pattern) => this.ngZone.run(async () => {
         this.graphKey = pattern;
         await this.goNext();

@@ -4,8 +4,11 @@
   [isShadowed] = "true"
   (backClicked)="onBackClicked()"></app-toolbar>
 
-<div class="currency-component" fxLayout="column" fxLayoutAlign="start center">
-  <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
+<div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
+  <mat-progress-bar mode="indeterminate" color="accent"
+                    style="width: 100%; position: fixed; z-index: 2;"
+                    *ngIf="(walletAddress | async) === null"></mat-progress-bar>
+  <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
         <span class="label full-width-label">{{ accountPh }}</span>
@@ -14,7 +17,8 @@
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <mat-form-field class="wallet-address-field field" color="accent">
-          <textarea readonly matInput [value]="walletAddress | async"></textarea>
+          <textarea readonly matInput [value]="walletAddress | async" *ngIf="(walletAddress | async) !== null"></textarea>
+          <textarea readonly matInput value="Loading&hellip;" *ngIf="(walletAddress | async) === null"></textarea>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
