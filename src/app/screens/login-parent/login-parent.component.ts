@@ -35,6 +35,7 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   private subscriptions = [];
 
+  isScanInProgress = false;
   contentType = Content;
   content = Content.Login;
 
@@ -99,8 +100,10 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async setEmpty() {
-    this.buttonState = State.Empty;
-    this.notRecognized = 'hide';
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+      this.notRecognized = 'hide';
+    });
   }
 
   async setInput(input: string) {
@@ -108,15 +111,23 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
     await this.checkInput(this.input);
   }
 
+  async setIsScanInProgress() {
+    this.isScanInProgress = true;
+  }
+
   async checkInput(input: string) {
     try {
-      this.buttonState = State.Updating;
+      this.ngZone.run(async () => {
+        this.buttonState = State.Updating;
+      });
       const exists = await this.dds.exists(await AuthService.toId(input));
       if (input !== this.input) { // in case of updates to userName during lookup
         return;
       }
       if (exists) {
-        this.buttonState = State.Exists;
+        this.ngZone.run(async () => {
+          this.buttonState = State.Exists;
+        });
       } else {
         if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
           await this.generate();
@@ -189,6 +200,12 @@ export class LoginParentComponent  implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
+    if (this.isScanInProgress) {
+      this.isScanInProgress = false;
+      this.setEmpty();
+      return;
+    }
+
     await this.router.navigate(['/start']);
   }
 

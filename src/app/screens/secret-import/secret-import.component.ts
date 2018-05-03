@@ -25,6 +25,7 @@ enum State {
 export class SecretImportComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
+  isScanInProgress = false;
   contentType = Content;
   content = Content.QR;
 
@@ -75,6 +76,15 @@ export class SecretImportComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
+    console.log('onBackClicked in secret-import');
+    console.log('isScanInProgress');
+    console.log(this.isScanInProgress);
+    if (this.isScanInProgress) {
+      this.isScanInProgress = false;
+      this.setEmpty();
+      return;
+    }
+
     await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
   }
 
@@ -95,13 +105,21 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     await this.checkInput();
   }
 
+  async setIsScanInProgress() {
+    this.isScanInProgress = true;
+  }
+
   async checkInput() {
     if (this.input !== '' && this.input !== null) {
       this.incorrectSecret = 'hide';
-      this.buttonState = State.Import;
+      this.ngZone.run(async () => {
+        this.buttonState = State.Import;
+      });
     } else {
       this.incorrectSecret = '';
-      this.buttonState = State.Empty;
+      this.ngZone.run(async () => {
+        this.buttonState = State.Empty;
+      });
     }
   }
 
@@ -110,6 +128,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
     this.authService.encryptedSeed = this.input;
     this.notification.show('Secret is imported successfully');
+    this.isScanInProgress = false;
     await this.onBackClicked();
   }
 }

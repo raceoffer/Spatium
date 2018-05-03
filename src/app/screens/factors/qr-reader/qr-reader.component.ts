@@ -15,6 +15,7 @@ declare const Buffer: any;
 export class QrReaderComponent implements OnInit {
 
   @HostBinding('class') classes = 'content factor-content text-center';
+  private subscriptions = [];
 
   @Input() isImport = false;
   @Input() isRepeatable = false;
@@ -22,9 +23,10 @@ export class QrReaderComponent implements OnInit {
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+  @Output() startScanEvent: EventEmitter<any> = new EventEmitter<any>();
 
   qrcode: string = null;
-  canScanAgain = false;
+  canScanAgain = true;
   classVideoContainer = '';
   classVideo = '';
 
@@ -84,10 +86,27 @@ export class QrReaderComponent implements OnInit {
   }
 
   scanAgain() {
+    this.startScanEvent.emit();
     this.canScanAgain = false;
-    this.classVideoContainer = '';
+    // this.classVideoContainer = '';
     this.camStarted = true;
     this.clearEvent.emit();
+    cordova.plugins.barcodeScanner.scan((result) => this.handleQrCodeResult(result),
+      (error) => console.log('qr scan error: ' + JSON.stringify(error)),
+      {
+        preferFrontCamera : false, // iOS and Android
+        showFlipCameraButton : true, // iOS and Android
+        showTorchButton : true, // iOS and Android
+        torchOn: false, // Android, launch with the torch switched on (if available)
+        saveHistory: false, // Android, save scan history (default false)
+        prompt : 'Place a barcode inside the scan area', // Android
+        resultDisplayDuration: 0, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+        // formats : 'QR_CODE,PDF_417', // default: all but PDF_417 and RSS_EXPANDED
+        // orientation : 'landscape', // Android only (portrait|landscape), default unset so it rotates with the device
+        disableAnimations : true, // iOS
+        disableSuccessBeep: false // iOS and Android
+    }
+  );
   }
 
   displayCameras(cams: any[]) {
@@ -102,11 +121,40 @@ export class QrReaderComponent implements OnInit {
     }
   }
 
-  async handleQrCodeResult(event) {
+  // async handleQrCodeResult(event) {
+  //   if (!this.isRepeatable) {
+  //     this.qrcode = event.toString();
+  //   } else {
+  //     const buffer = Buffer.from(event.toString(), 'hex');
+  //     if (this.isImport) {
+  //       try {
+  //         console.log(buffer);
+  //         const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
+  //         this.qrcode = value.toString('hex');
+  //         console.log(this.qrcode);
+  //       } catch (exc) {
+  //         console.log(exc);
+  //         this.qrcode = null;
+  //       }
+  //     } else {
+  //       this.qrcode = await CryptoCore.Utils.tryUnpackLogin(buffer);
+  //     }
+  //   }
+  //   await this.onNext();
+  // }
+
+  async handleQrCodeResult(result) {
+    console.log('inside handleQrCodeResult');
+    if (result.text === null) {
+      console.log('result.text is null');
+      console.log('this.isRepeatable: ' + this.isRepeatable);
+      this.canScanAgain = true;
+      return;
+    }
     if (!this.isRepeatable) {
-      this.qrcode = event.toString();
+      this.qrcode = result.text;
     } else {
-      const buffer = Buffer.from(event.toString(), 'hex');
+      const buffer = Buffer.from(result.text, 'hex');
       if (this.isImport) {
         try {
           console.log(buffer);
@@ -137,7 +185,4 @@ export class QrReaderComponent implements OnInit {
       this.onSuccess.emit({factor: FactorType.QR, value: this.qrcode});
     }
   }
-
-
-
 }
