@@ -191,12 +191,8 @@
     <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
       {{ stSend }}
     </button>
-    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="skipSending()">
-      {{ stContinue }}
-    </button>
   </div>
-
-  </div>
+</div>
 
 
 
