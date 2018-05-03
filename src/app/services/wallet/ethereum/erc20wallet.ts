@@ -74,8 +74,6 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(null, null));
-
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
@@ -103,8 +101,6 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(null, null));
-
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
@@ -128,6 +124,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
+    await Observable.timer(1000).toPromise();
     return [];
   }
 

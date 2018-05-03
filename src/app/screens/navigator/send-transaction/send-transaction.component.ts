@@ -125,18 +125,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
 
         this.balanceBtcUnconfirmed = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance.unconfirmed),
-          0);
+          this.currencyWallet.balance.map(balance => balance ? balance.unconfirmed : null),
+          null);
         this.balanceBtcConfirmed = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance.confirmed),
-          0);
+          this.currencyWallet.balance.map(balance => balance ? balance.confirmed : null),
+          null);
 
         this.balanceUsdUnconfirmed = toBehaviourSubject(
           combineLatest(
             this.balanceBtcUnconfirmed,
             this.currencyInfo.rate,
             (balance, rate) => {
-              if (rate === null) {
+              if (rate === null || balance === null) {
                 return null;
               }
               return balance * rate;
@@ -148,7 +148,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.balanceBtcConfirmed,
             this.currencyInfo.rate,
             (balance, rate) => {
-              if (rate === null) {
+              if (rate === null || balance === null) {
                 return null;
               }
               return balance * rate;
@@ -166,6 +166,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             toBehaviourSubject(this.feeUsd.valueChanges, 0)
           ],
           (balance, substractFee, receiver) => {
+            if (balance === null || balance === 0) {
+              return false;
+            }
             if (!substractFee) {
               return balance > (this.amount.value + this.fee.value) && this.amount.value > 0 && receiver && receiver.length > 0;
             } else {
@@ -182,6 +185,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             toBehaviourSubject(this.feeUsd.valueChanges, 0)
           ],
           (balance, substractFee) => {
+            if (balance === null || balance === 0) {
+              return false;
+            }
             if (this.amount.value > 0) {
               if (!substractFee) {
                 return balance > (this.amount.value + this.fee.value);
@@ -196,6 +202,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.estimatedSize = toBehaviourSubject(
           this.balanceBtcUnconfirmed.flatMap(async balance => {
+            if (balance === null || balance === 0) {
+              return 0;
+            }
+
             const testTx = await this.currencyWallet.createTransaction(
               this.walletAddress.getValue(),
               balance / 2);

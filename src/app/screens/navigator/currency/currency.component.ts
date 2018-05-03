@@ -69,13 +69,19 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
         this.currencyInfo = await this.currencyService.getInfo(this.currency);
+
         console.log(this.currencyInfo);
 
         this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
 
         this.walletAddress = this.currencyWallet.address;
-        this.balanceCurrencyUnconfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.unconfirmed), null);
-        this.balanceCurrencyConfirmed = toBehaviourSubject(this.currencyWallet.balance.map(balance => balance.confirmed), null);
+
+        this.balanceCurrencyUnconfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance ? balance.unconfirmed : null),
+          null);
+        this.balanceCurrencyConfirmed = toBehaviourSubject(
+          this.currencyWallet.balance.map(balance => balance ? balance.confirmed : null),
+          null);
 
         this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest(
           this.balanceCurrencyUnconfirmed,
@@ -99,16 +105,15 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
         this.transactions = toBehaviourSubject(
           fromPromise(this.currencyWallet.listTransactionHistory()),
-          []);
+          null);
 
         this.subscriptions.push(
           this.currencyWallet.readyEvent.subscribe(() => {
             this.transactions = toBehaviourSubject(
               fromPromise(this.currencyWallet.listTransactionHistory()),
-              []);
+              null);
           })
         );
-
       }));
   }
 
