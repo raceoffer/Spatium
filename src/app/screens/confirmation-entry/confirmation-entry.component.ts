@@ -73,6 +73,9 @@ export class ConfirmationEntryComponent implements OnInit {
               await this.savePin(aesKey);
             }
           } catch (e) {
+            if (e == 'Cancelled') {
+              await this.savePin(aesKey);
+            }
             console.log(e);
           }
         } else {
@@ -97,7 +100,6 @@ export class ConfirmationEntryComponent implements OnInit {
   }
 
   async saveTouchPassword(pincode) {
-    console.log('qwe');
     return new Promise(async (success, error) => {
       window.plugins.touchid.save('spatium', pincode, success, error);
     });

@@ -107,7 +107,7 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
 
   getRandomNumber(min: number, max: number, exclude: number) {
     const n = Math.floor(Math.random() * (max - min) + min);
-    if (!exclude || n !== exclude) {
+    if (!exclude || n != exclude) {
       return n;
     } else {
       return this.getRandomNumber(min, max, exclude);
