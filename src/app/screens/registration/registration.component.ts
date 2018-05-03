@@ -44,12 +44,14 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = [];
 
   stPassword = 'Password';
+  stPasswordConfirm = 'Confirm password';
   stRegistration = 'Sign up';
   username: string = null;
   stWarning =
     'Your funds safety depends on the strongness of the authentication factors. ' +
     'Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
   password = '';
+  password_confirm = '';
   advancedMode = false;
 
   factors = [];
@@ -185,6 +187,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.uploading = true;
 
+      if (!this.passwordsIsMatching()) {
+        throw {
+          message: 'Passwords do not match. Please try again.',
+          name: 'PassNotMatch'
+        };
+      }
+
       let factors = [];
       for (let i = 0; i < this.factors.length; ++i) {
         factors.push(await this.factors[i].toBuffer());
@@ -222,9 +231,15 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       } catch (ignored) {
         this.notification.show('Failed to upload the secret');
       }
+    } catch (e) {
+      this.notification.show(e.message);
     } finally {
       this.uploading = false;
     }
+  }
+
+  passwordsIsMatching() {
+    return (this.password === this.password_confirm);
   }
 
   onFocusOut() {
@@ -233,5 +248,13 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onFocus() {
     this.stPassword = '';
+  }
+
+  onFocusOutConfirm() {
+    this.stPasswordConfirm = 'Confirm password';
+  }
+
+  onFocusConfirm() {
+    this.stPasswordConfirm = '';
   }
 }
