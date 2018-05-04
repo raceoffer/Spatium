@@ -1,6 +1,8 @@
-import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { CurrencyService, Info } from '../../../../services/currency.service';
 import { Coin, Token } from '../../../../services/keychain.service';
+import { NavigationService } from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { WalletService } from '../../../../services/wallet.service';
 
@@ -28,13 +30,22 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
   @ViewChild('sidenav') sidenav;
+  public isExitTap = false;
   private subscriptions = [];
 
   constructor(private readonly wallet: WalletService,
               private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService,
+              private readonly ngZone: NgZone,
+              private readonly router: Router,
               private readonly notification: NotificationService) { }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
 
     this.subscriptions.push(this.notification.confirm.subscribe(async () => {
       await this.confirm();
@@ -99,6 +110,21 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   async decline() {
     this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).rejectTransaction();
+  }
+
+  async onBackClicked() {
+    if (this.isExitTap) {
+      console.log('isExitTap');
+      this.notification.hide();
+      await this.router.navigate(['/start']);
+    } else {
+      console.log('await');
+      this.notification.show('Tap again to exit');
+      this.isExitTap = true;
+      setTimeout(() => this.ngZone.run(() => {
+        this.isExitTap = false;
+      }), 3000);
+    }
   }
 
 }
