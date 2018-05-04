@@ -96,11 +96,13 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   async confirm() {
     this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).acceptTransaction();
+    await this.notification.cancelConfirmation();
   }
 
   async decline() {
     this.state = State.None;
     await this.currencyWallets.get(this.currentCoin).rejectTransaction();
+    await this.notification.cancelConfirmation();
   }
 
 }
