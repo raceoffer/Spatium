@@ -105,7 +105,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     this.input = input;
     await this.checkInput(this.input);
   }
-  
+
   async setIsScanInProgress() {
     this.isScanInProgress = true;
   }
@@ -211,10 +211,14 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       this.authService.login = this.input;
 
       try {
+        // Let it spin a bit more
+        this.buttonState = State.Updating;
         this.authService.remoteEncryptedTrees = [];
         this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
       } catch (e) {
         this.notification.show('No backup found');
+      } finally {
+        this.buttonState = State.Exists;
       }
 
       await this.router.navigate(['/auth']);
