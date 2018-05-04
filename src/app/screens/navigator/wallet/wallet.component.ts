@@ -199,10 +199,11 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   async openDialog() {
     navigator.notification.confirm(
-      'Cancel synchronization',
+      'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
           await this.bt.disconnect();
+          await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
         }
       },
       '',
