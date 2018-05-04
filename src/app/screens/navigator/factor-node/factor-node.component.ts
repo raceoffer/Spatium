@@ -108,6 +108,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   async generateLogin(isQr) {
     try {
       do {
+        this.value.next('');
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
