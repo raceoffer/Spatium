@@ -129,17 +129,23 @@ export class LoginParentComponent implements OnInit, OnDestroy {
           this.recognitionMsg = 'Login does not exist. Please register.';
           await this.generate();
         } else {
-          this.buttonState = State.New;
+          this.ngZone.run(async () => {
+            this.buttonState = State.New;
+          });
         }
       }
     } catch (ignored) {
         this.notification.show('No network connection');
-        this.buttonState = State.Error;
+        this.ngZone.run(async () => {
+          this.buttonState = State.Error;
+        });
       }
     }
 
   async generate() {
-    this.buttonState = State.Empty;
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+    });
     do {
       this.loginGenerate = this.authService.makeNewLogin(10);
       if (!await this.dds.exists(await AuthService.toId(this.loginGenerate))) {
