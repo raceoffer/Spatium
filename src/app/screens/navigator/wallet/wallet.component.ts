@@ -7,6 +7,8 @@ import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.se
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const navigator: any;
 
@@ -64,7 +66,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     isSelected: false,
     isActive: true
   }];
-  public titles = [
+  public titles : any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
@@ -76,6 +78,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
+
+  private tileBalanceInfo = {};
+
   @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
@@ -203,5 +208,31 @@ export class WalletComponent implements OnInit, OnDestroy {
       '',
       ['YES', 'NO']
     );
+  }
+
+  public getTileBalanceInfo(coin : any) {
+    if(!coin)
+      return undefined;
+
+    if(this.tileBalanceInfo[coin] !== undefined)
+      return this.tileBalanceInfo[coin];
+
+    const currencyInfo = this.currency.getInfo(coin);
+    const currencyWallet = this.wallet.currencyWallets.get(coin);
+    var balanceConfirmed = toBehaviourSubject(currencyWallet.balance.map(balance => balance.confirmed), null)
+    this.tileBalanceInfo[coin] = {
+      balance: balanceConfirmed,
+      balanceUSD: toBehaviourSubject(combineLatest(
+        balanceConfirmed,
+        currencyInfo.rate,
+        (balance, rate) => {
+          if (rate === null || balance === null) {
+            return null;
+          }
+          return balance * rate;
+        }), null)
+    }
+
+    return this.tileBalanceInfo[coin];
   }
 }
