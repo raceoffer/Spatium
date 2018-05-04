@@ -66,7 +66,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     isSelected: false,
     isActive: true
   }];
-  public titles : any = [
+  public titles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
@@ -211,16 +211,20 @@ export class WalletComponent implements OnInit, OnDestroy {
     );
   }
 
-  public getTileBalanceInfo(coin : any) {
-    if(!coin)
+  public getTileBalanceInfo(coin: any) {
+    if (!coin) {
       return undefined;
+    }
 
-    if(this.tileBalanceInfo[coin] !== undefined)
+    if (this.tileBalanceInfo[coin] !== undefined) {
       return this.tileBalanceInfo[coin];
+    }
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
-    var balanceConfirmed = toBehaviourSubject(currencyWallet.balance.map(balance => balance.confirmed), null)
+    const balanceConfirmed = toBehaviourSubject(
+      currencyWallet.balance.map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null),
+      null);
     this.tileBalanceInfo[coin] = {
       balance: balanceConfirmed,
       balanceUSD: toBehaviourSubject(combineLatest(
@@ -232,7 +236,7 @@ export class WalletComponent implements OnInit, OnDestroy {
           }
           return balance * rate;
         }), null)
-    }
+    };
 
     return this.tileBalanceInfo[coin];
   }
