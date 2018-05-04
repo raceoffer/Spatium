@@ -72,9 +72,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stAwaitConfirm = 'Confirm on the second device';
   stSigningResult = 'Transaction is signed';
 
-  stContinue = 'Continue';
-  stTransfer = 'Transfer';
-  stSend = 'Send';
+  stTransfer = 'Sign transaction';
+  stSend = 'Send transaction';
 
   stFee = 'Transaction fee';
   stManual = 'Manual';
@@ -398,6 +397,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Creation);
 
     try {
+      await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+
       await this.currencyWallet.verifySignature();
       await this.currencyWallet.pushTransaction();
 

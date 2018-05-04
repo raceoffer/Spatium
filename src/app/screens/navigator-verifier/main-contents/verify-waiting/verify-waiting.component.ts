@@ -1,5 +1,8 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { BluetoothService } from '../../../../services/bluetooth.service';
+import { NavigationService } from '../../../../services/navigation.service';
+import { NotificationService } from '../../../../services/notification.service';
 import { WalletService } from '../../../../services/wallet.service';
 
 @Component({
@@ -14,12 +17,22 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
   discoverable = this.bt.discoverable;
   ready = this.wallet.ready;
 
+  public isExitTap = false;
   private subscriptions = [];
 
   constructor(private readonly bt: BluetoothService,
+              private readonly navigationService: NavigationService,
+              private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly notification: NotificationService,
               private readonly wallet: WalletService) { }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
 
     this.subscriptions.push(
       this.bt.enabledEvent.subscribe(async () => {
@@ -59,6 +72,21 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
 
   async enableDiscoverable() {
     await this.bt.enableDiscovery();
+  }
+
+  async onBackClicked() {
+    if (this.isExitTap) {
+      console.log('isExitTap');
+      this.notification.hide();
+      await this.router.navigate(['/start']);
+    } else {
+      console.log('await');
+      this.notification.show('Tap again to exit');
+      this.isExitTap = true;
+      setTimeout(() => this.ngZone.run(() => {
+        this.isExitTap = false;
+      }), 3000);
+    }
   }
 
 }

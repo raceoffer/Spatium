@@ -38,7 +38,7 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   isCreatedListener = false;
   disabledNFC = true;
   classNfcContainer = '';
-
+  isActive = false;
   timer: any;
 
   constructor(private ngZone: NgZone,
@@ -49,6 +49,7 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.isActive = true;
     this.checkState();
 
     document.addEventListener('resume', this.checkState.bind(this), false);
@@ -86,6 +87,32 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.isActive = false;
+    nfc.removeNdefListener(
+      (event) => this.ngZone.run(async () => await this.onNdef(event)),
+      function () {
+        console.log('Listening for NDEF tags rm.');
+      },
+      this.failure
+    );
+
+    nfc.removeTagDiscoveredListener(
+      (event) => this.ngZone.run(async () => await this.onNfc(event)),
+      function () {
+        console.log('Listening for non-NDEF tags rm.');
+      },
+      this.failure
+    );
+
+    nfc.removeMimeTypeListener(
+      'text/pg',
+      (event) => this.ngZone.run(async () => await this.onNdef(event)),
+      function () {
+        console.log('Listening for NDEF mime tags with type text/pg rm.');
+      },
+      this.failure
+    );
+
     clearTimeout(this.timer);
   }
 
@@ -115,13 +142,18 @@ export class NfcWriterComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async onNfc(nfcEvent) {
-    await this.writeTag('Success write NFC tag', 'Error write NFC tag');
-    navigator.vibrate(100);
+    if (this.isActive) {
+      await this.writeTag('Success write NFC tag', 'Error write NFC tag');
+      navigator.vibrate(100);
+    }
+
   }
 
   async onNdef(nfcEvent) {
-    await this.writeTag('Success write NFC tag', 'Error write NFC tag');
-    navigator.vibrate(100);
+    if (this.isActive) {
+      await this.writeTag('Success write NFC tag', 'Error write NFC tag');
+      navigator.vibrate(100);
+    }
   }
 
   writeTag(success, error) {

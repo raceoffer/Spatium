@@ -10,7 +10,8 @@ declare const CryptoCore: any;
 declare const cordova: any;
 declare const device: any;
 
-enum State {
+export enum State {
+  Ready,
   Empty,
   Exists,
   New,
@@ -38,6 +39,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   content = Content.Login;
   stateType = State;
   buttonState = State.Empty;
+  usernameState = State.Ready;
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
@@ -45,6 +47,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   loginGenerate = null;
   input = '';
   isNfcAvailable = true;
+  isGeneric = false;
   private subscriptions = [];
 
   constructor(private readonly router: Router,
@@ -95,63 +98,91 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     this.ngZone.run(async () => {
       this.buttonState = State.Empty;
       this.recognitionMsg = '';
-    });  }
+    });
+  }
 
   async setInput(input: string) {
     this.input = input;
     await this.checkInput(this.input);
   }
-
+  
   async setIsScanInProgress() {
     this.isScanInProgress = true;
   }
 
   async checkInput(input: string) {
-    if (!input || input == '') {
-      this.recognitionMsg = 'Incorrect login format.';
-      return;
-    }
-
-    try {
-      this.ngZone.run(async () => {
-        this.buttonState = State.Updating;
-      });
-      const exists = await this.dds.exists(await AuthService.toId(input));
-      if (input !== this.input) { // in case of updates to userName during lookup
+    if (!this.isGeneric) {
+      if (!input || input === '') {
+        this.recognitionMsg = 'Incorrect login format.';
         return;
       }
-      if (exists) {
+
+      try {
         this.ngZone.run(async () => {
-          this.buttonState = State.Exists;
-        });
-      } else {
-        if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-          this.recognitionMsg = 'Login does not exist. Please register.';
-          await this.generate();
-        } else {
-          this.ngZone.run(async () => {
-            this.buttonState = State.New;
-          });
+		  this.buttonState = State.Updating;
+	    });
+
+        const exists = await this.dds.exists(await AuthService.toId(input));
+        console.log(exists);
+        if (input !== this.input) { // in case of updates to userName during lookup
+          return;
         }
-      }
-    } catch (ignored) {
+        if (exists) {
+          this.ngZone.run(async () => {
+            this.buttonState = State.Exists;
+          });
+
+        } else {
+          if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+            this.recognitionMsg = 'Login does not exist. Please register.';
+            await this.generateNewLogin();
+          } else {
+            this.ngZone.run(async () => {
+              this.buttonState = State.New;
+            });
+          }
+        }
+      } catch (ignored) {
         this.notification.show('No network connection');
         this.ngZone.run(async () => {
           this.buttonState = State.Error;
         });
-      }
-    }
 
-  async generate() {
-    this.ngZone.run(async () => {
-      this.buttonState = State.Empty;
-    });
-    do {
-      this.loginGenerate = this.authService.makeNewLogin(10);
-      if (!await this.dds.exists(await AuthService.toId(this.loginGenerate))) {
-        break;
       }
-    } while (true);
+    } else {
+      console.log('generic');
+    }
+  }
+
+  async generateNewLogin() {
+    this.isGeneric = true;
+	this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+	  this.usernameState = State.Updating;
+    });
+	
+    try {
+      do {
+        this.loginGenerate = this.authService.makeNewLogin(10);
+        const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
+        if (!exists) {
+          this.notification.show('Unique login was generated');
+		  this.ngZone.run(async () => {
+            this.usernameState = State.Ready;
+            this.buttonState = State.New;
+          });
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+      console.log(ignored);
+      this.notification.show('No network connection');
+      this.ngZone.run(async () => {
+        this.usernameState = State.Error;
+        this.buttonState = State.Error;
+      });
+    }
+    this.isGeneric = false;
   }
 
   async letLogin() {
@@ -199,7 +230,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    if (this.isScanInProgress) {
+	if (this.isScanInProgress) {
       this.isScanInProgress = false;
       this.setEmpty();
       return;
@@ -212,3 +243,4 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     return device.platform === 'windows';
   }
 }
+
