@@ -39,7 +39,9 @@
              (buisyEvent)="setBusy()"
              (clearEvent)="setEmpty()"
              (inputEvent)="setInput($event)"
+             (generateEvent)="generateNewLogin()"
              [genericLogin]="loginGenerate"
+             [usernameState]="usernameState"
   ></app-login>
   <app-qr-reader class="content text-center" style="position: relative;"
                  *ngIf="content === contentType.QR"

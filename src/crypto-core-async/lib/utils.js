@@ -102,4 +102,9 @@ Utils.reverse = async data => Utils.invokeStatic({
   arguments: [data]
 });
 
+Utils.getAccountSecret = async (userId, accountId) => Utils.invokeStatic({
+  method: 'getAccountSecret',
+  arguments: [userId, accountId]
+});
+
 module.exports = Utils;
