@@ -14,7 +14,7 @@
           <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
         </button>
       </div>
-      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="!isWindows()">
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" >
         <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center"
                 (click)="toggleContent(contentType.QR)">
           <div fxLayoutAlign="center center" *ngIf="content === contentType.QR">
@@ -48,6 +48,7 @@
                  [isRepeatable]="true"
                  (clearEvent)="setEmpty()"
                  (inputEvent)="setInput($event)"
+                 (startScanEvent)="setIsScanInProgress()"
   ></app-qr-reader>
   <app-nfc-reader class="content text-center" style="position: relative;"
                    *ngIf="content === contentType.NFC && isNfcAvailable"

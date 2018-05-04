@@ -34,6 +34,7 @@ declare const nfc: any;
 })
 export class LoginParentComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  isScanInProgress = false;
   contentType = Content;
   content = Content.Login;
   stateType = State;
@@ -94,13 +95,19 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async setEmpty() {
-    this.buttonState = State.Empty;
-    this.recognitionMsg = '';
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+      this.recognitionMsg = '';
+    });
   }
 
   async setInput(input: string) {
     this.input = input;
     await this.checkInput(this.input);
+  }
+  
+  async setIsScanInProgress() {
+    this.isScanInProgress = true;
   }
 
   async checkInput(input: string) {
@@ -111,25 +118,36 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       }
 
       try {
-        this.buttonState = State.Updating;
+        this.ngZone.run(async () => {
+          this.buttonState = State.Updating;
+        });
+
         const exists = await this.dds.exists(await AuthService.toId(input));
         console.log(exists);
         if (input !== this.input) { // in case of updates to userName during lookup
           return;
         }
         if (exists) {
-          this.buttonState = State.Exists;
+          this.ngZone.run(async () => {
+            this.buttonState = State.Exists;
+          });
+
         } else {
           if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
             this.recognitionMsg = 'Login does not exist. Please register.';
             await this.generateNewLogin();
           } else {
-            this.buttonState = State.New;
+            this.ngZone.run(async () => {
+              this.buttonState = State.New;
+            });
           }
         }
       } catch (ignored) {
         this.notification.show('No network connection');
-        this.buttonState = State.Error;
+        this.ngZone.run(async () => {
+          this.buttonState = State.Error;
+        });
+
       }
     } else {
       console.log('generic');
@@ -138,24 +156,31 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   async generateNewLogin() {
     this.isGeneric = true;
-    this.buttonState = State.Empty;
-    this.usernameState = State.Updating;
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+      this.usernameState = State.Updating;
+    });
+
     try {
       do {
         this.loginGenerate = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
         if (!exists) {
           this.notification.show('Unique login was generated');
-          this.usernameState = State.Ready;
-          this.buttonState = State.New;
+          this.ngZone.run(async () => {
+            this.usernameState = State.Ready;
+            this.buttonState = State.New;
+          });
           break;
         }
       } while (true);
     } catch (ignored) {
       console.log(ignored);
       this.notification.show('No network connection');
-      this.usernameState = State.Error;
-      this.buttonState = State.Error;
+      this.ngZone.run(async () => {
+        this.usernameState = State.Error;
+        this.buttonState = State.Error;
+      });
     }
     this.isGeneric = false;
   }
@@ -205,6 +230,12 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
+    if (this.isScanInProgress) {
+      this.isScanInProgress = false;
+      this.setEmpty();
+      return;
+    }
+
     await this.router.navigate(['/start']);
   }
 
@@ -212,3 +243,4 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     return device.platform === 'windows';
   }
 }
+
