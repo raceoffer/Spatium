@@ -39,12 +39,12 @@ export class BitcoreWallet extends CurrencyWallet {
     this.wallet = null;
   }
 
-  public toInternal(amount: number): string {
+  public toInternal(amount: number): number {
     return this.wallet.toInternal(amount);
   }
 
-  public fromInternal(amount: string): number {
-    return Number(this.wallet.fromInternal(Number(amount)));
+  public fromInternal(amount: number): number {
+    return this.wallet.fromInternal(amount);
   }
 
   public fromJSON(tx) {
@@ -66,8 +66,8 @@ export class BitcoreWallet extends CurrencyWallet {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
-          this.fromInternal(balance.confirmed),
-          this.fromInternal(balance.unconfirmed)
+          balance.confirmed,
+          balance.unconfirmed
         ));
       } catch (ignored) {}
     });
@@ -93,8 +93,8 @@ export class BitcoreWallet extends CurrencyWallet {
       return await this.wallet.prepareTransaction(
         new this.Transaction(),
         address,
-        Number(this.toInternal(value)),
-        fee ? Number(this.toInternal(fee)) : undefined
+        value,
+        fee ? fee : undefined
       );
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to prepare transaction', e);

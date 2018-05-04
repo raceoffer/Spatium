@@ -106,11 +106,11 @@ export class CurrencyWallet {
       });
   }
 
-  public toInternal(amount: number): string {
-    return '';
+  public toInternal(amount: number): number {
+    return 0;
   }
 
-  public fromInternal(amount: string): number {
+  public fromInternal(amount: number): number {
     return 0;
   }
 
