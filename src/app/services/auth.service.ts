@@ -54,9 +54,9 @@ export class AuthService {
 
     const addNFCFactor = () => {
       this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
-      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
         FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
+      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
     };
 
     nfc.enabled(addNFCFactor, (e) => {
