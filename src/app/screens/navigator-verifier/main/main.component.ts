@@ -19,7 +19,7 @@ enum State {
   styleUrls: ['./main.component.css']
 })
 export class MainComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component box';
+  @HostBinding('class') classes = 'toolbars-component content';
   isOpened = false;
 
   address = '';

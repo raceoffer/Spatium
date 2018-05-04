@@ -33,12 +33,12 @@ export class EthereumWallet extends CurrencyWallet {
     }
   }
 
-  public toInternal(amount: number): string {
-    return this.wallet.toInternal(amount.toString());
+  public toInternal(amount: number): number {
+    return this.wallet.toInternal(amount);
   }
 
-  public fromInternal(amount: string): number {
-    return Number(this.wallet.fromInternal(amount));
+  public fromInternal(amount: number): number {
+    return this.wallet.fromInternal(amount);
   }
 
   public async fromJSON(tx) {
@@ -57,14 +57,12 @@ export class EthereumWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(null, null));
-
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
-          this.fromInternal(balance.confirmed),
-          this.fromInternal(balance.unconfirmed)
+          balance.confirmed,
+          balance.unconfirmed
         ));
       } catch (ignored) {}
     });
@@ -76,12 +74,13 @@ export class EthereumWallet extends CurrencyWallet {
     return await this.wallet.prepareTransaction(
       new CryptoCore.EthereumTransaction(),
       address,
-      this.toInternal(value),
-      fee ? this.toInternal(fee.toString()) : undefined
+      value,
+      fee ? fee : undefined
     );
   }
 
   public async listTransactionHistory() {
+    await Observable.timer(1000).toPromise();
     return [];
   }
 

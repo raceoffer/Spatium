@@ -80,8 +80,7 @@ export class CurrencyWallet {
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   public address: BehaviorSubject<string> = new BehaviorSubject<string>(null);
-  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(new Balance(null, null));
-  public transactions: BehaviorSubject<Array<HistoryEntry>> = new BehaviorSubject<Array<HistoryEntry>>([]);
+  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(null);
 
   constructor(
     protected network: string,
@@ -107,11 +106,11 @@ export class CurrencyWallet {
       });
   }
 
-  public toInternal(amount: number): string {
-    return '';
+  public toInternal(amount: number): number {
+    return 0;
   }
 
-  public fromInternal(amount: string): number {
+  public fromInternal(amount: number): number {
     return 0;
   }
 
@@ -166,8 +165,7 @@ export class CurrencyWallet {
     }
 
     this.address.next(null);
-    this.balance.next(new Balance(null, null));
-    this.transactions.next([]);
+    this.balance.next(null);
     this.syncProgress.next(0);
   }
 

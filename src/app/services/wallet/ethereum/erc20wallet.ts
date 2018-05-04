@@ -44,12 +44,12 @@ export class ERC20Wallet extends CurrencyWallet {
     }
   }
 
-  public toInternal(amount: number): string {
-    return this.wallet.toInternal(amount).toString();
+  public toInternal(amount: number): number {
+    return this.wallet.toInternal(amount);
   }
 
-  public fromInternal(amount: string): number {
-    return this.wallet.fromInternal(Number(amount));
+  public fromInternal(amount: number): number {
+    return this.wallet.fromInternal(amount);
   }
 
   public async fromJSON(tx) {
@@ -74,14 +74,12 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(null, null));
-
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
-          this.fromInternal(balance.confirmed),
-          this.fromInternal(balance.unconfirmed)
+          balance.confirmed,
+          balance.unconfirmed
         ));
       } catch (ignored) {}
     });
@@ -103,14 +101,12 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.balance.next(new Balance(null, null));
-
     this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
-          this.fromInternal(balance.confirmed),
-          this.fromInternal(balance.unconfirmed)
+          balance.confirmed,
+          balance.unconfirmed
         ));
       } catch (ignored) {}
     });
@@ -128,6 +124,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
+    await Observable.timer(1000).toPromise();
     return [];
   }
 

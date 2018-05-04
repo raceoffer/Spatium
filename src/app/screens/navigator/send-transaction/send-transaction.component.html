@@ -2,12 +2,12 @@
   [label] = "titile +' '+currencyInfo?.name"
   [isColored] = "true"
   [isShadowed] = "true"
-  (backClicked)="onBackClicked()"></app-toolbar>
+  (backClicked) = "onBackClicked()"></app-toolbar>
 
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
   <mat-progress-bar mode="indeterminate" color="accent"
                     style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(walletAddress | async) === null"></mat-progress-bar>
+                    *ngIf="(address | async) === null"></mat-progress-bar>
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
@@ -17,8 +17,8 @@
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <mat-form-field class="wallet-address-field field" color="accent">
-          <textarea readonly matInput [value]="walletAddress | async" *ngIf="(walletAddress | async) !== null"></textarea>
-          <textarea readonly matInput value="Loading&hellip;" *ngIf="(walletAddress | async) === null"></textarea>
+          <textarea readonly matInput [value]="address | async" *ngIf="(address | async) !== null"></textarea>
+          <textarea readonly matInput value="Loading&hellip;" *ngIf="(address | async) === null"></textarea>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
@@ -33,7 +33,12 @@
     <tr>
       <td colspan="2">
         <mat-form-field class="field" style="margin-bottom: 13px;" color="accent">
-          <input matInput [formControl]="receiver">
+          <textarea
+            matInput
+            [formControl]="receiverField"
+            (blur)="setReceiverFocused(false)"
+            (focus)="setReceiverFocused(true)">
+          </textarea>
           <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
             <mat-icon>content_paste</mat-icon>
           </button>
@@ -52,11 +57,14 @@
       <td class="right">
         <div class="field" style="margin-bottom: 13px;">
           <span>
-            <input matInput
-                   [formControl]="amount"
-                   type="number"
-                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01">
+            <input
+              matInput
+              [formControl]="amountField"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setAmountFocused(false)"
+              (focus)="setAmountFocused(true)">
           </span>
         </div>
       </td>
@@ -64,10 +72,12 @@
         <div class="field" style="margin-bottom: 13px;">
           <span>
             <input matInput
-                   [formControl]="amountUsd"
+                   [formControl]="amountUsdField"
                    type="number"
                    ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01">
+                   step="0.01"
+                   (blur)="setAmountUsdFocused(false)"
+                   (focus)="setAmountUsdFocused(true)">
           </span>
         </div>
       </td>
@@ -80,7 +90,7 @@
     <tr>
       <td colspan="2">
         <div class="field" style="margin-bottom: 13px;">
-          <mat-select [formControl]="feeTypeControl">
+          <mat-select [formControl]="feeTypeField">
             <mat-option [value]="feeType.Manual">
               {{ stManual }}
             </mat-option>
@@ -104,31 +114,37 @@
     </tr>
     <tr>
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeControl.value !== feeType.Manual">
+        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
-            <input matInput
-                   [formControl]="fee"
-                     [readonly]="feeTypeControl.value !== feeType.Manual"
-                     type="number"
-                     ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                     step="0.01">
+            <input
+              matInput
+              [formControl]="feeField"
+              [readonly]="feeTypeField.value !== feeType.Manual"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setFeeFocused(false)"
+              (focus)="setFeeFocused(true)">
           </span>
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeControl.value !== feeType.Manual">
+        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
-            <input matInput
-                   [formControl]="feeUsd"
-                   [readonly]="feeTypeControl.value !== feeType.Manual"
-                   type="number"
-                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01">
+            <input
+              matInput
+              [formControl]="feeUsdField"
+              [readonly]="feeTypeField.value !== feeType.Manual"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setFeeUsdFocused(false)"
+              (focus)="setFeeUsdFocused(true)">
           </span>
         </div>
       </td>
     </tr>
-    <tr *ngIf="feeTypeControl.value === feeType.Manual">
+    <tr *ngIf="feeTypeField.value === feeType.Manual">
       <td class="right">
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
       </td>
@@ -136,28 +152,34 @@
         <span class="label" style="margin-left: 5px;">USD</span>
       </td>
     </tr>
-    <tr *ngIf="feeTypeControl.value === feeType.Manual">
+    <tr *ngIf="feeTypeField.value === feeType.Manual">
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeControl.value !== feeType.Manual">
+        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
-            <input matInput
-                   [formControl]="feePrice"
-                   [readonly]="feeTypeControl.value !== feeType.Manual"
-                   type="number"
-                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01">
+            <input
+              matInput
+              [formControl]="feePriceField"
+              [readonly]="feeTypeField.value !== feeType.Manual"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setFeePriceFocused(false)"
+              (focus)="setFeePriceFocused(true)">
           </span>
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeControl.value !== feeType.Manual">
+        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
-            <input matInput
-                   [formControl]="feePriceUsd"
-                   [readonly]="feeTypeControl.value !== feeType.Manual"
-                   type="number"
-                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01">
+            <input
+              matInput
+              [formControl]="feePriceUsdField"
+              [readonly]="feeTypeField.value !== feeType.Manual"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setFeePriceUsdFocused(false)"
+              (focus)="setFeePriceUsdFocused(true)">
           </span>
         </div>
       </td>
@@ -165,7 +187,7 @@
     <tr>
       <td colspan="2">
         <div style="padding-bottom: 13px;">
-          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFee">{{stFeeOriginRecipient}}</mat-checkbox>
+          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFeeField">{{stFeeOriginRecipient}}</mat-checkbox>
         </div>
       </td>
     </tr>
@@ -183,13 +205,16 @@
     <span *ngIf="(phase | async) === phaseType.Sending"
           style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
     </span>
-    <span *ngIf="!(enougthCashObserver | async)"
+    <span *ngIf="!(sufficientBalance | async)"
           style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
+    </span>
+    <span *ngIf="(sufficientBalance | async) && !(sufficientValue | async)"
+          style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient amount
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                         *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
 
-    <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(validatorObserver | async)">
+    <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(valid | async)">
       {{ stTransfer }}
     </button>
     <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">

@@ -200,8 +200,6 @@ export class WalletService {
         this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
         await Observable.timer(100).toPromise();
 
-        console.log(tokenIndex);
-
         tokenIndex++;
       }
 
