@@ -66,3 +66,20 @@ input.mat-input-element{
   padding: 10px 0 30px 0;
   background-color: #f5f5f5;
 }
+
+.field.auto-height {
+  height: auto;
+  min-height: 40px;
+  padding: 10px 15px;
+  padding-right: 50px;
+  word-break: break-all;
+  box-sizing: border-box;
+  position: relative;
+}
+
+button.wallet-address-button {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+}

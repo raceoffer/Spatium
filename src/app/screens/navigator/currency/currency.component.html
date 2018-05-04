@@ -20,13 +20,13 @@
     </tr>
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
-        <mat-form-field class="field" color="accent">
-          <textarea readonly matInput [value]="walletAddress | async" *ngIf="(walletAddress | async) !== null"></textarea>
-          <textarea readonly matInput value="Loading&hellip;" *ngIf="(walletAddress | async) === null"></textarea>
+        <div class="field auto-height">
+          <div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>
+          <div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
-        </mat-form-field>
+        </div>
       </td>
     </tr>
     <tr>
