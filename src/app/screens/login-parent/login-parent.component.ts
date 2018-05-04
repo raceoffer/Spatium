@@ -119,8 +119,8 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
       try {
         this.ngZone.run(async () => {
-		  this.buttonState = State.Updating;
-	    });
+          this.buttonState = State.Updating;
+        });
 
         const exists = await this.dds.exists(await AuthService.toId(input));
         console.log(exists);
@@ -156,18 +156,18 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   async generateNewLogin() {
     this.isGeneric = true;
-	this.ngZone.run(async () => {
+    this.ngZone.run(async () => {
       this.buttonState = State.Empty;
-	  this.usernameState = State.Updating;
+      this.usernameState = State.Updating;
     });
-	
+
     try {
       do {
         this.loginGenerate = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
         if (!exists) {
           this.notification.show('Unique login was generated');
-		  this.ngZone.run(async () => {
+          this.ngZone.run(async () => {
             this.usernameState = State.Ready;
             this.buttonState = State.New;
           });
@@ -230,7 +230,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-	if (this.isScanInProgress) {
+    if (this.isScanInProgress) {
       this.isScanInProgress = false;
       this.setEmpty();
       return;
