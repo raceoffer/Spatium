@@ -1,37 +1,31 @@
-import { AfterViewInit, Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
-import { DDSService } from '../../services/dds.service';
-import { NotificationService } from '../../services/notification.service';
+import {
+  AfterViewInit, Component, EventEmitter, HostBinding, Input, OnChanges, Output, SimpleChange,
+  SimpleChanges
+} from '@angular/core';
+import { State } from '../login-parent/login-parent.component';
 
 declare const CryptoCore: any;
 declare const nfc: any;
 
-enum State {
-  Ready,
-  Updating,
-  Exists,
-  Error
-}
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements AfterViewInit, OnChanges {
   @HostBinding('class') classes = 'full-width_nopadding';
   stLogin = 'Username';
   stateType = State;
-  usernameState = State.Ready;
   @Input() genericLogin: string;
+  @Input() usernameState: State;
   timer;
   @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
+  @Output() generateEvent: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private readonly dds: DDSService,
-              private readonly authSevice: AuthService,
-              private readonly notification: NotificationService) { }
+  constructor() { }
 
   private _userName = '';
 
@@ -60,6 +54,13 @@ export class LoginComponent implements AfterViewInit {
   // Hide the keyboard after pressing the submit button on the keyboard
   removeFocus(el) { el.target.blur(); }
 
+  ngOnChanges(changes: SimpleChanges) {
+    const genericLogin: SimpleChange = changes.genericLogin;
+    if (genericLogin.currentValue !== null) {
+      this.userName = genericLogin.currentValue;
+    }
+  }
+
   ngAfterViewInit() {
     if (this.genericLogin !== null) {
       this.userName = this.genericLogin;
@@ -70,21 +71,7 @@ export class LoginComponent implements AfterViewInit {
   }
 
   async generateNewLogin() {
-    this.usernameState = State.Updating;
-    try {
-      do {
-        this.userName = this.authSevice.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(this._userName));
-        if (!exists) {
-          this.notification.show('Unique login was generated');
-          this.usernameState = State.Ready;
-          break;
-        }
-      } while (true);
-    } catch (ignored) {
-      this.notification.show('No network connection');
-      this.usernameState = State.Error;
-    }
+    this.generateEvent.emit();
   }
 
   onFocusOut() {
