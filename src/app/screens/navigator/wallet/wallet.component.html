@@ -42,7 +42,7 @@
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()" (linkClicked)="onNav($event)"></app-main-drawer>
 
-    <mat-grid-list cols="{{cols}}" rowHeight="2:1">
+    <mat-grid-list cols="{{cols}}" rowHeight="4:3">
       <mat-grid-tile
         *ngFor="let tile of filtredTitles"
         [colspan]="tile.cols"
@@ -58,11 +58,17 @@
                 <span class="title">{{ tile.title }}</span>
               </div>
             </div>
-            <div class="half-height" fxLayout="column" fxLayoutAlign="center center" style="display:none!important">
-              <span class="balance" *ngIf="tile.balance">{{ tile.balance }} {{ tile.symbols }}</span>
-              <span class="balanceUSD" *ngIf="tile.balanceUsd">{{ tile.balanceUsd }} USD</span>
-            </div>
+            <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
+              <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
+                {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
+              </span>
 
+              <span class="balanceUSD" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
+                {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
+              </span>
+
+                <span class="sync-in-progress" *ngIf="getTileBalanceInfo(tile.coin) !== undefined && (getTileBalanceInfo(tile.coin).balance | async) === null">Loading...</span>
+            </div>
           </button>
         </div>
       </mat-grid-tile>

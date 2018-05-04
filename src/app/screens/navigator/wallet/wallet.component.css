@@ -37,12 +37,10 @@
 
 .sym {
   font-family: 'Roboto-Medium';
-  line-height: 20px;
 }
 
 .balance {
   font-family: 'Roboto-Medium';
-  line-height: 20px;
   color: #2277ba;
 }
 
@@ -56,11 +54,14 @@
 }
 
 .half-height {
-  height: 50%;
-  max-height: 50%;
-  min-height: 50%;
+  height: 40%;
+  border-top: 1px solid #f1f2f4;
+  font-size: 12px;
+  line-height: 16px;
+  padding-top: 5px;
 }
 
 .div-height {
   height: 99.9%;
+  max-height: 60% !important;
 }
