@@ -33,7 +33,6 @@ export class Info {
   }
 }
 
-
 export enum CurrencyServerName {
   Spatium = 'Spatium',
   Custom = 'Custom',
@@ -56,7 +55,7 @@ export class CurrencySettings {
 @Injectable()
 export class CurrencyService {
   private readonly spatiumBaseUrl = 'http://185.219.80.169:8080';
-  private readonly currencyApiServers = new Map<Coin | Token, Map<string,string>>([
+  private readonly currencyApiServers = new Map<Coin | Token, Map<string, string>>([
     [Coin.BTC, new Map<string, string>([
       [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/bitcoin/mainnet/insights`],
       [CurrencyServerName.BitPay, 'https://insight.bitpay.com/api']
@@ -83,8 +82,8 @@ export class CurrencyService {
     [Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
-      0.001,
-      0.0002,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
@@ -93,8 +92,8 @@ export class CurrencyService {
     [Coin.BTC_test, new Info(
       'Bitcoin Test',
       'BTC',
-      0.001,
-      0.0002,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
@@ -103,8 +102,8 @@ export class CurrencyService {
     [Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',
-      0.001,
-      0.0002,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH') || null).distinctUntilChanged(),
@@ -113,8 +112,8 @@ export class CurrencyService {
     [Coin.ETH, new Info(
       'Ethereum',
       'ETH',
-      0.000000005,
-      0.000000002,
+      5000000000,
+      2000000000,
       'ETH/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
@@ -123,8 +122,8 @@ export class CurrencyService {
     [Coin.LTC, new Info(
       'Litecoin',
       'LTC',
-      0.001,
-      0.0002,
+      100,
+      20,
       'LTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('LTC') || null).distinctUntilChanged(),
@@ -137,7 +136,7 @@ export class CurrencyService {
               private readonly currencyPriceService: CurrencyPriceService) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
-    })
+    });
 
     this.currencyPriceService.getPrices();
   }
@@ -154,8 +153,8 @@ export class CurrencyService {
     return new Info(
       tokenEntry.name,
       tokenEntry.ico,
-      0.000000005,
-      0.000000002,
+      5000000000,
+      2000000000,
       'ETH/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get(tokenEntry.ico) || null).distinctUntilChanged(),
@@ -164,46 +163,48 @@ export class CurrencyService {
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
         null),
       tokenEntry.className
-    )
+    );
   }
 
-  public getAvailableApiServers(currency: Coin | Token) : Map<string, string> {
+  public getAvailableApiServers(currency: Coin | Token): Map<string, string> {
     let servers = this.currencyApiServers.get(currency as Coin);
-    if(!servers)
+    if (!servers) {
       servers = this.currencyApiServers.get(Coin.ETH);
+    }
 
     return servers;
   }
 
-  public getApiServer(currency: Coin | Token) : string {
-    let settings = this.getSettings(currency);
+  public getApiServer(currency: Coin | Token): string {
+    const settings = this.getSettings(currency);
 
-    if(settings && settings.serverName == CurrencyServerName.Custom && settings.serverUrl) {
+    if (settings && settings.serverName === CurrencyServerName.Custom && settings.serverUrl) {
       return settings.serverUrl;
     }
 
     return this.getAvailableApiServers(currency).get(settings ? settings.serverName : CurrencyServerName.Spatium);
   }
 
-  public getSettings(currency: Coin | Token) : CurrencySettings {
-    let jsonSettings : any;
-    let settings : CurrencySettings = new CurrencySettings();
+  public getSettings(currency: Coin | Token): CurrencySettings {
+    let jsonSettings: any;
+    const settings: CurrencySettings = new CurrencySettings();
 
     jsonSettings = localStorage.getItem('settings.currency');
-    if(jsonSettings) {
+    if (jsonSettings) {
       jsonSettings = JSON.parse(jsonSettings)[currency];
     }
 
-    if(!jsonSettings)
+    if (!jsonSettings) {
       return settings;
+    }
 
-    settings.serverName = jsonSettings.serverName
+    settings.serverName = jsonSettings.serverName;
     settings.serverUrl = jsonSettings.serverUrl;
     return settings;
   }
 
   public saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items :any = localStorage.getItem('settings.currency');
+    let items: any = localStorage.getItem('settings.currency');
     items = items ? JSON.parse(items) : {};
     items[currency] = settings;
     localStorage.setItem('settings.currency', JSON.stringify(items));

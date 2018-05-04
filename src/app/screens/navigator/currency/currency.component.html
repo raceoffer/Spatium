@@ -72,7 +72,7 @@
         <span matLine class="transaction-amount"
               [class.input]="transaction.type==txType.In"
               [class.output]="transaction.type==txType.Out">
-          {{ transaction.amount }} {{ currencyInfo?.symbol }}
+          {{ currencyWallet.fromInternal(transaction.amount) }} {{ currencyInfo?.symbol }}
         </span>
         <span matLine class="transaction-time"
               *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>

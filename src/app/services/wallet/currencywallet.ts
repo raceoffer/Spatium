@@ -48,8 +48,8 @@ export class HistoryEntry {
 
 export class Balance {
   constructor(
-    public confirmed: number,
-    public unconfirmed: number
+    public confirmed: any,
+    public unconfirmed: any
   ) {}
 }
 
@@ -106,11 +106,11 @@ export class CurrencyWallet {
       });
   }
 
-  public toInternal(amount: number): string {
-    return '';
+  public toInternal(amount: number): any {
+    return 0;
   }
 
-  public fromInternal(amount: string): number {
+  public fromInternal(amount: any): number {
     return 0;
   }
 
@@ -294,8 +294,8 @@ export class CurrencyWallet {
 
   public async createTransaction(
     address: string,
-    value: number,
-    fee?: number
+    value: any,
+    fee?: any
   ) {
     return null;
   }

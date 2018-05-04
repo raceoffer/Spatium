@@ -4,7 +4,6 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import 'rxjs/add/operator/mergeMap';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
@@ -12,10 +11,12 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
-import { roundFloat } from '../../../utils/numeric';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
+declare const CryptoCore: any;
+
+const BN = CryptoCore.BN;
 
 enum Phase {
   Creation,
@@ -38,19 +39,33 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   public phaseType = Phase; // for template
 
-  public receiver = new FormControl();
-  public amount = new FormControl();
-  public amountUsd = new FormControl();
+  public receiverField = new FormControl();
+
+  public amountField = new FormControl();
+  public amountUsdField = new FormControl();
 
   public feeType: any = Fee;
 
-  public feeTypeControl = new FormControl();
-  public fee = new FormControl();
-  public feeUsd = new FormControl();
-  public feePrice = new FormControl();
-  public feePriceUsd = new FormControl();
+  public feeTypeField = new FormControl();
 
-  public subtractFee = new FormControl();
+  public feeField = new FormControl();
+  public feeUsdField = new FormControl();
+  public feePriceField = new FormControl();
+  public feePriceUsdField = new FormControl();
+
+  public subtractFeeField = new FormControl();
+
+  // Well, that's stupid, but it seems that there's no way
+  // to get if the input is focused out of FormControl
+  // So, he's some boilerplate stuff:
+
+  public receiverFocused = false;
+  public amountFocused = false;
+  public amountUsdFocused = false;
+  public feeFocused = false;
+  public feeUsdFocused = false;
+  public feePriceFocused = false;
+  public feePriceUsdFocused = false;
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -75,15 +90,20 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public currencyWallet: CurrencyWallet = null;
 
-  public walletAddress: BehaviorSubject<string> = null;
-  public balanceBtcConfirmed: BehaviorSubject<number> = null;
-  public balanceBtcUnconfirmed: BehaviorSubject<number> = null;
-  public balanceUsdConfirmed: BehaviorSubject<number> = null;
-  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
-  public validatorObserver: Observable<boolean> = null;
-  public enougthCashObserver: Observable<boolean> = null;
-
+  public address: BehaviorSubject<string> = null;
+  public balance: BehaviorSubject<any> = null;
+  public receiver: BehaviorSubject<string> = null;
+  public amount: BehaviorSubject<any> = null;
+  public fee: BehaviorSubject<any> = null;
+  public feePrice: BehaviorSubject<any> = null;
   public estimatedSize: BehaviorSubject<number> = null;
+
+  public subtractFee: BehaviorSubject<boolean> = null;
+
+  public sufficientBalance: BehaviorSubject<boolean> = null;
+  public sufficientValue: BehaviorSubject<boolean> = null;
+  public validReceiver: BehaviorSubject<boolean> = null;
+  public valid: BehaviorSubject<boolean> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
@@ -121,226 +141,230 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             await this.finalaized();
           }));
 
-        this.walletAddress = this.currencyWallet.address;
-
-        this.balanceBtcUnconfirmed = toBehaviourSubject(
+        this.address = this.currencyWallet.address;
+        this.balance = toBehaviourSubject(
           this.currencyWallet.balance.map(balance => balance ? balance.unconfirmed : null),
           null);
-        this.balanceBtcConfirmed = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance ? balance.confirmed : null),
-          null);
 
-        this.balanceUsdUnconfirmed = toBehaviourSubject(
-          combineLatest(
-            this.balanceBtcUnconfirmed,
-            this.currencyInfo.rate,
-            (balance, rate) => {
-              if (rate === null || balance === null) {
-                return null;
-              }
-              return balance * rate;
+        this.estimatedSize = toBehaviourSubject(
+          this.balance.distinctUntilChanged().flatMap(async balance => {
+            if (balance === null || balance.eq(new BN())) {
+              return 1;
             }
-          ),
-          0);
-        this.balanceUsdConfirmed = toBehaviourSubject(
-          combineLatest(
-            this.balanceBtcConfirmed,
-            this.currencyInfo.rate,
-            (balance, rate) => {
-              if (rate === null || balance === null) {
-                return null;
-              }
-              return balance * rate;
-            }
-          ),
-          0);
 
-        this.validatorObserver = combineLatest([
-            this.balanceBtcUnconfirmed,
-            toBehaviourSubject(this.subtractFee.valueChanges, false),
-            toBehaviourSubject(this.receiver.valueChanges, ''),
-            toBehaviourSubject(this.amount.valueChanges, 0),
-            toBehaviourSubject(this.amountUsd.valueChanges, 0),
-            toBehaviourSubject(this.fee.valueChanges, 0),
-            toBehaviourSubject(this.feeUsd.valueChanges, 0)
+            const testTx = await this.currencyWallet.createTransaction(
+              this.address.getValue(),
+              balance.div(new BN(2)));
+
+            return await testTx.estimateSize();
+          }),
+          1);
+
+        this.receiver = new BehaviorSubject<string>('');
+        this.amount = new BehaviorSubject<any>(new BN());
+        this.feePrice = new BehaviorSubject<any>(new BN(this.currencyInfo.gasPrice));
+        this.fee = new BehaviorSubject<any>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
+        this.subtractFee = new BehaviorSubject<boolean>(false);
+
+        this.sufficientBalance = toBehaviourSubject(combineLatest([
+            this.balance,
+            this.amount,
+            this.fee,
+            this.subtractFee
           ],
-          (balance, substractFee, receiver) => {
-            if (balance === null || balance === 0) {
+          (balance, amount, fee, substractFee) => {
+            if (balance === null || balance.eq(new BN())) {
               return false;
             }
-            if (!substractFee) {
-              return balance > (this.amount.value + this.fee.value) && this.amount.value > 0 && receiver && receiver.length > 0;
-            } else {
-              return balance > (this.amount.value) && this.amount.value > 0 && receiver && receiver.length > 0;
-            }
-          });
-
-        this.enougthCashObserver = combineLatest([
-            this.balanceBtcUnconfirmed,
-            toBehaviourSubject(this.subtractFee.valueChanges, false),
-            toBehaviourSubject(this.amount.valueChanges, 0),
-            toBehaviourSubject(this.amountUsd.valueChanges, 0),
-            toBehaviourSubject(this.fee.valueChanges, 0),
-            toBehaviourSubject(this.feeUsd.valueChanges, 0)
-          ],
-          (balance, substractFee) => {
-            if (balance === null || balance === 0) {
-              return false;
-            }
-            if (this.amount.value > 0) {
+            if (amount.gt(new BN())) {
               if (!substractFee) {
-                return balance > (this.amount.value + this.fee.value);
+                return balance.gte(amount.add(fee));
               } else {
-                return balance > (this.amount.value);
+                return balance.gte(amount);
               }
             } else {
               return true;
             }
           }
-        );
+        ), false);
 
-        this.estimatedSize = toBehaviourSubject(
-          this.balanceBtcUnconfirmed.flatMap(async balance => {
-            if (balance === null || balance === 0) {
-              return 0;
+        this.sufficientValue = toBehaviourSubject(combineLatest([
+            this.amount,
+            this.fee,
+            this.subtractFee
+          ],
+          (amount, fee, subtractFee) => {
+            if (amount.gt(new BN())) {
+              if (subtractFee) {
+                return amount.gte(fee);
+              } else {
+                return true;
+              }
+            } else {
+              return false;
             }
+          }
+        ), false);
 
-            const testTx = await this.currencyWallet.createTransaction(
-              this.walletAddress.getValue(),
-              balance / 2);
+        this.validReceiver = toBehaviourSubject(this.receiver.map(address => address && address.length > 0), false);
 
-            return await testTx.estimateSize();
-          }),
-          0);
+        this.valid = toBehaviourSubject(combineLatest([
+            this.sufficientBalance,
+            this.sufficientValue,
+            this.validReceiver
+          ],
+          (sufficientBalance, sufficientValue, validReceiver) => {
+            return sufficientBalance && sufficientValue && validReceiver;
+          }), false);
 
         this.subscriptions.push(
-          this.amount.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amountUsd.setValue(
-              roundFloat(value * (this.currencyInfo.rate.getValue() || 1)),
-              {emitEvent: false});
+          this.amount.distinctUntilChanged().subscribe(value => {
+            if (!this.amountFocused) {
+              this.amountField.setValue(
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
+            if (!this.amountUsdFocused) {
+              this.amountUsdField.setValue(
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.rate.getValue() || 1),
+                {emitEvent: false});
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.receiver.distinctUntilChanged().subscribe(value => {
+            if (!this.receiverFocused) {
+              this.receiverField.setValue(value, {emitEvent: false});
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.receiverField.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.receiver.next(value);
+          })
+        );
+
+        this.subscriptions.push(
+          this.fee.distinctUntilChanged().subscribe(value => {
+            if (!this.feeFocused) {
+              this.feeField.setValue(
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
+            if (!this.feeUsdFocused) {
+              this.feeUsdField.setValue(
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.feePrice.distinctUntilChanged().subscribe(value => {
+            if (!this.feePriceFocused) {
+              this.feePriceField.setValue(
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
+            if (!this.feePriceUsdFocused) {
+              this.feePriceUsdField.setValue(
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
+          })
+        );
+
+        this.subscriptions.push(
+          this.amountField.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amount.next(this.currencyWallet.toInternal(value));
           })
         );
         this.subscriptions.push(
-          this.amountUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.amount.setValue(
-              roundFloat(value / (this.currencyInfo.rate.getValue() || 1)),
-              {emitEvent: false});
+          this.amountUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.amount.next(this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1)));
           })
         );
         this.subscriptions.push(
-          this.fee.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.feeUsd.setValue(
-              roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
-            this.feePrice.setValue(
-              roundFloat(value / this.estimatedSize.getValue()),
-              {emitEvent: false});
-            this.feePriceUsd.setValue(
-              roundFloat(value / this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
+          this.feeField.valueChanges.distinctUntilChanged().subscribe(value => {
+            const fee = this.currencyWallet.toInternal(value);
+            this.fee.next(fee);
+            this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feeUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(
-              roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
-            this.feePrice.setValue(
-              roundFloat(value / this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
-            this.feePriceUsd.setValue(
-              roundFloat(value / this.estimatedSize.getValue()),
-              {emitEvent: false});
+          this.feeUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
+            const fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            this.fee.next(fee);
+            this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePrice.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(
-              roundFloat(value * this.estimatedSize.getValue()),
-              {emitEvent: false});
-            this.feeUsd.setValue(
-              roundFloat(value * this.estimatedSize.getValue() * (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
-            this.feePriceUsd.setValue(
-              roundFloat(value * (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
+          this.feePriceField.valueChanges.distinctUntilChanged().subscribe(value => {
+            const feePrice = this.currencyWallet.toInternal(value);
+            this.feePrice.next(feePrice);
+            this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceUsd.valueChanges.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(
-              roundFloat(value * this.estimatedSize.getValue() / (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
-            this.feeUsd.setValue(
-              roundFloat(value * this.estimatedSize.getValue()),
-              {emitEvent: false});
-            this.feePrice.setValue(
-              roundFloat(value / (this.currencyInfo.gasRate.getValue() || 1)),
-              {emitEvent: false});
+          this.feePriceUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
+            const feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            this.feePrice.next(feePrice);
+            this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
           this.estimatedSize.distinctUntilChanged().subscribe(value => {
-            this.fee.setValue(roundFloat(value * this.feePrice.value));
-            this.feeUsd.setValue(roundFloat(value * this.feePrice.value * (this.currencyInfo.gasRate.getValue() || 1)));
+            this.fee.next(new BN(value).mul(this.feePrice.getValue()));
           })
         );
         this.subscriptions.push(
-          this.currencyInfo.rate.distinctUntilChanged().subscribe(value => {
-            this.amountUsd.setValue(
-              roundFloat(value * this.amount.value),
-              {emitEvent: false});
-          })
-        );
-        this.subscriptions.push(
-          this.currencyInfo.gasRate.distinctUntilChanged().subscribe(value => {
-            this.feeUsd.setValue(
-              roundFloat(value * this.fee.value),
-              {emitEvent: false});
-            this.feePriceUsd.setValue(
-              roundFloat(value * this.feePrice.value),
-              {emitEvent: false});
+          this.subtractFeeField.valueChanges.distinctUntilChanged().subscribe(value => {
+            this.subtractFee.next(value);
           })
         );
 
         this.subscriptions.push(
           this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
             if (creation) {
-              this.receiver.enable();
-              this.amount.enable();
-              this.amountUsd.enable();
-              this.feeTypeControl.enable();
-              this.fee.enable();
-              this.feeUsd.enable();
-              this.feePrice.enable();
-              this.feePriceUsd.enable();
+              this.receiverField.enable();
+              this.amountField.enable();
+              this.amountUsdField.enable();
+              this.feeTypeField.enable();
+              this.feeField.enable();
+              this.feeUsdField.enable();
+              this.feePriceField.enable();
+              this.feePriceUsdField.enable();
             } else {
-              this.receiver.disable();
-              this.amount.disable();
-              this.amountUsd.disable();
-              this.feeTypeControl.disable();
-              this.fee.disable();
-              this.feeUsd.disable();
-              this.feePrice.disable();
-              this.feePriceUsd.disable();
+              this.receiverField.disable();
+              this.amountField.disable();
+              this.amountUsdField.disable();
+              this.feeTypeField.disable();
+              this.feeField.disable();
+              this.feeUsdField.disable();
+              this.feePriceField.disable();
+              this.feePriceUsdField.disable();
             }
           })
         );
 
         this.subscriptions.push(
-          this.feeTypeControl.valueChanges.subscribe(value => {
+          this.feeTypeField.valueChanges.subscribe(value => {
             switch (value) {
               case Fee.Normal:
-                this.feePrice.setValue(this.currencyInfo.gasPrice);
+                this.feePrice.next(new BN(this.currencyInfo.gasPrice));
+                this.fee.next(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
                 break;
               case Fee.Economy:
-                this.feePrice.setValue(this.currencyInfo.gasPriceLow);
+                this.feePrice.next(new BN(this.currencyInfo.gasPriceLow));
+                this.fee.next(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
                 break;
             }
           })
         );
 
-        this.feeTypeControl.setValue(Fee.Normal);
+        this.feeTypeField.setValue(Fee.Normal);
       }));
   }
 
@@ -358,8 +382,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const value = this.subtractFee.value ? this.amount.value - this.fee.value : this.amount.value;
-    const tx = await this.currencyWallet.createTransaction(this.receiver.value, value, this.fee.value);
+    const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
+    const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
       await this.currencyWallet.requestTransactionVerify(tx);
@@ -404,16 +428,38 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   paste() {
     cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
-      console.log('text to be pasted: ' + text);
       if (text !== '') {
-        this.receiver.setValue(text);
+        this.receiver.next(text);
       }
     }), e => console.log(e));
   }
 
   copy() {
-    console.log(this.walletAddress.value);
-    cordova.plugins.clipboard.copy(this.walletAddress.value);
+    cordova.plugins.clipboard.copy(this.address.getValue());
+  }
+
+  // more boilerplate stuff for focus tracking
+
+  setReceiverFocused(focused: boolean): void {
+    this.receiverFocused = focused;
+  }
+  setAmountFocused(focused: boolean): void {
+    this.amountFocused = focused;
+  }
+  setAmountUsdFocused(focused: boolean): void {
+    this.amountUsdFocused = focused;
+  }
+  setFeeFocused(focused: boolean): void {
+    this.feeFocused = focused;
+  }
+  setFeeUsdFocused(focused: boolean): void {
+    this.feeUsdFocused = focused;
+  }
+  setFeePriceFocused(focused: boolean): void {
+    this.feePriceFocused = focused;
+  }
+  setFeePriceUsdFocused(focused: boolean): void {
+    this.feePriceUsdFocused = focused;
   }
 }
 
