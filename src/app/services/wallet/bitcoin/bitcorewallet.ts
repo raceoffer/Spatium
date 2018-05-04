@@ -39,11 +39,11 @@ export class BitcoreWallet extends CurrencyWallet {
     this.wallet = null;
   }
 
-  public toInternal(amount: number): number {
+  public toInternal(amount: number): any {
     return this.wallet.toInternal(amount);
   }
 
-  public fromInternal(amount: number): number {
+  public fromInternal(amount: any): number {
     return this.wallet.fromInternal(amount);
   }
 
@@ -86,8 +86,8 @@ export class BitcoreWallet extends CurrencyWallet {
 
   public async createTransaction(
     address: string,
-    value: number,
-    fee?: number
+    value: any,
+    fee?: any
   ) {
     try {
       return await this.wallet.prepareTransaction(

@@ -33,11 +33,11 @@ export class EthereumWallet extends CurrencyWallet {
     }
   }
 
-  public toInternal(amount: number): number {
+  public toInternal(amount: number): any {
     return this.wallet.toInternal(amount);
   }
 
-  public fromInternal(amount: number): number {
+  public fromInternal(amount: any): number {
     return this.wallet.fromInternal(amount);
   }
 
@@ -70,7 +70,7 @@ export class EthereumWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public async createTransaction(address, value, fee?) {
+  public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
       new CryptoCore.EthereumTransaction(),
       address,

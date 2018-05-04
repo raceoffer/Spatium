@@ -82,8 +82,8 @@ export class CurrencyService {
     [Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
-      100000,
-      20000,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
@@ -92,8 +92,8 @@ export class CurrencyService {
     [Coin.BTC_test, new Info(
       'Bitcoin Test',
       'BTC',
-      100000,
-      20000,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
@@ -102,8 +102,8 @@ export class CurrencyService {
     [Coin.BCH, new Info(
       'Bitcoin Cash',
       'BCH',
-      100000,
-      20000,
+      100,
+      20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH') || null).distinctUntilChanged(),
@@ -122,8 +122,8 @@ export class CurrencyService {
     [Coin.LTC, new Info(
       'Litecoin',
       'LTC',
-      5000000000,
-      2000000000,
+      100,
+      20,
       'LTC/kb',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.map(ac => ac.get('LTC') || null).distinctUntilChanged(),
