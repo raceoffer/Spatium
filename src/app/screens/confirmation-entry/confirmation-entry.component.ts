@@ -1,9 +1,10 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NotificationService } from '../../services/notification.service';
+import { NavigationService } from '../../services/navigation.service';
 
 declare const CryptoCore: any;
 declare const Buffer: any;
@@ -14,9 +15,10 @@ declare const window: any;
   templateUrl: './confirmation-entry.component.html',
   styleUrls: ['./confirmation-entry.component.css']
 })
-export class ConfirmationEntryComponent implements OnInit {
+export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
+  private subscriptions = [];
   hasTouchId: boolean;
   isCreate = true;
   busy = false;
@@ -30,7 +32,8 @@ export class ConfirmationEntryComponent implements OnInit {
               private readonly authService: AuthService,
               private readonly fs: FileService,
               private readonly notification: NotificationService,
-              private readonly keyChain: KeyChainService) {
+              private readonly keyChain: KeyChainService,
+              private readonly navigationService: NavigationService) {
     this.route.params.subscribe(params => {
       if (params['back']) {
         this.back = params['back'];
@@ -47,6 +50,16 @@ export class ConfirmationEntryComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        this.onBackClicked();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   async setHasTouchId(value: boolean) {

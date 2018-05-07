@@ -20,6 +20,10 @@ $green: rgb(24, 154, 57);//#189a39
   height: 56px!important;
 }
 
+.mat-toolbar-multiple-rows {
+  min-height: 56px!important;
+}
+
 .child {
   width: 100%;
 }
@@ -932,7 +936,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .currency-component .field {
   width: 100%;
-  height: 40px;
+  height: 44px;
   background-color: white;// #e2e3e3;
   border-radius: 2px;
   //margin-top: 18px;
@@ -994,7 +998,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .currency-component .mat-form-field-infix {
   border: 0;
-  padding: 0 20px;
+  padding: 4px 20px;
 }
 
 .currency-component input {
@@ -1010,11 +1014,12 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 }
 
 .currency-component .mat-form-field-flex {
-  align-items: normal!important;
+  align-items: center;
 }
 
 .currency-component .mat-form-field-prefix, .mat-form-field-suffix{
-  margin-top: 8px;
+  display: flex;
+  align-items: center;
   padding-left: 19.5px;
   padding-right: 19.5px;
 }

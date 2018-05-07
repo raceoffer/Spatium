@@ -10,7 +10,8 @@ declare const CryptoCore: any;
 declare const cordova: any;
 declare const device: any;
 
-enum State {
+export enum State {
+  Ready,
   Empty,
   Exists,
   New,
@@ -33,10 +34,12 @@ declare const nfc: any;
 })
 export class LoginParentComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+  isScanInProgress = false;
   contentType = Content;
   content = Content.Login;
   stateType = State;
   buttonState = State.Empty;
+  usernameState = State.Ready;
   stSignUp = 'Sign up';
   stLogIn = 'Sign in';
   stError = 'Retry';
@@ -44,6 +47,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   loginGenerate = null;
   input = '';
   isNfcAvailable = true;
+  isGeneric = false;
   private subscriptions = [];
 
   constructor(private readonly router: Router,
@@ -91,8 +95,10 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async setEmpty() {
-    this.buttonState = State.Empty;
-    this.recognitionMsg = '';
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+      this.recognitionMsg = '';
+    });
   }
 
   async setInput(input: string) {
@@ -100,42 +106,83 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     await this.checkInput(this.input);
   }
 
-  async checkInput(input: string) {
-    if (!input || input == '') {
-      this.recognitionMsg = 'Incorrect login format.';
-      return;
-    }
+  async setIsScanInProgress() {
+    this.isScanInProgress = true;
+  }
 
-    try {
-      this.buttonState = State.Updating;
-      const exists = await this.dds.exists(await AuthService.toId(input));
-      if (input !== this.input) { // in case of updates to userName during lookup
+  async checkInput(input: string) {
+    if (!this.isGeneric) {
+      if (!input || input === '') {
+        this.recognitionMsg = 'Incorrect login format.';
         return;
       }
-      if (exists) {
-        this.buttonState = State.Exists;
-      } else {
-        if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
-          this.recognitionMsg = 'Login does not exist. Please register.';
-          await this.generate();
-        } else {
-          this.buttonState = State.New;
-        }
-      }
-    } catch (ignored) {
-        this.notification.show('No network connection');
-        this.buttonState = State.Error;
-      }
-    }
 
-  async generate() {
-    this.buttonState = State.Empty;
-    do {
-      this.loginGenerate = this.authService.makeNewLogin(10);
-      if (!await this.dds.exists(await AuthService.toId(this.loginGenerate))) {
-        break;
+      try {
+        this.ngZone.run(async () => {
+          this.buttonState = State.Updating;
+        });
+
+        const exists = await this.dds.exists(await AuthService.toId(input));
+        console.log(exists);
+        if (input !== this.input) { // in case of updates to userName during lookup
+          return;
+        }
+        if (exists) {
+          this.ngZone.run(async () => {
+            this.buttonState = State.Exists;
+          });
+
+        } else {
+          if (this.content === this.contentType.QR || this.content === this.contentType.NFC) {
+            this.recognitionMsg = 'Login does not exist. Please register.';
+            await this.generateNewLogin();
+          } else {
+            this.ngZone.run(async () => {
+              this.buttonState = State.New;
+            });
+          }
+        }
+      } catch (ignored) {
+        this.notification.show('No network connection');
+        this.ngZone.run(async () => {
+          this.buttonState = State.Error;
+        });
+
       }
-    } while (true);
+    } else {
+      console.log('generic');
+    }
+  }
+
+  async generateNewLogin() {
+    this.isGeneric = true;
+    this.ngZone.run(async () => {
+      this.buttonState = State.Empty;
+      this.usernameState = State.Updating;
+    });
+
+    try {
+      do {
+        this.loginGenerate = this.authService.makeNewLogin(10);
+        const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
+        if (!exists) {
+          this.notification.show('Unique login was generated');
+          this.ngZone.run(async () => {
+            this.usernameState = State.Ready;
+            this.buttonState = State.New;
+          });
+          break;
+        }
+      } while (true);
+    } catch (ignored) {
+      console.log(ignored);
+      this.notification.show('No network connection');
+      this.ngZone.run(async () => {
+        this.usernameState = State.Error;
+        this.buttonState = State.Error;
+      });
+    }
+    this.isGeneric = false;
   }
 
   async letLogin() {
@@ -164,10 +211,14 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       this.authService.login = this.input;
 
       try {
+        // Let it spin a bit more
+        this.buttonState = State.Updating;
         this.authService.remoteEncryptedTrees = [];
         this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
       } catch (e) {
         this.notification.show('No backup found');
+      } finally {
+        this.buttonState = State.Exists;
       }
 
       await this.router.navigate(['/auth']);
@@ -183,6 +234,12 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
+    if (this.isScanInProgress) {
+      this.isScanInProgress = false;
+      this.setEmpty();
+      return;
+    }
+
     await this.router.navigate(['/start']);
   }
 
@@ -190,3 +247,4 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     return device.platform === 'windows';
   }
 }
+

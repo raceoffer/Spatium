@@ -18,32 +18,13 @@
       <tr>
         <td colspan="2">
           <mat-form-field class="field disable" color="accent" style="margin-bottom: 13px;">
-            <input matInput [(ngModel)]="address" disabled>
+            <textarea matInput [(ngModel)]="address" disabled></textarea>
           </mat-form-field>
         </td>
       </tr>
       <tr>
         <td class="right">
-          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
-        </td>
-        <td class="left">
-          <span class="label" style="margin-left: 5px;">USD</span>
-        </td>
-      </tr>
-      <tr>
-        <td class="right">
-          <div class="field disable">
-                <span>
-                  {{ btc }}
-                </span>
-          </div>
-        </td>
-        <td class="left">
-          <div class="field right disable">
-                <span>
-                  {{ usd }}
-                </span>
-          </div>
+          <span class="label" style="margin-left: 5px;">Transaction amount</span>
         </td>
       </tr>
       <tr>
@@ -57,16 +38,45 @@
       <tr>
         <td class="right">
           <div class="field disable">
-                <span>
-                  {{ fee }}
-                </span>
+            <span>
+              {{ btc }}
+            </span>
           </div>
         </td>
         <td class="left">
           <div class="field right disable">
-                <span>
-                  {{ feeUsd }}
-                </span>
+            <span>
+              {{ usd }}
+            </span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">Transaction fee</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+        </td>
+        <td class="left">
+          <span class="label" style="margin-left: 5px;">USD</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <div class="field disable">
+            <span>
+              {{ fee }}
+            </span>
+          </div>
+        </td>
+        <td class="left">
+          <div class="field right disable">
+            <span>
+              {{ feeUsd }}
+            </span>
           </div>
         </td>
       </tr>

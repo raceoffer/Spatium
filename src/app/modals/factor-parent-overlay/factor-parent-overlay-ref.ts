@@ -11,5 +11,6 @@ export class FactorParentOverlayRef<T = any> {
 
   close(): void {
     this.overlayRef.dispose();
+    this.overlayRef.detach();
   }
 }

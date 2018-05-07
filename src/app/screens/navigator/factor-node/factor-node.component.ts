@@ -108,6 +108,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   async generateLogin(isQr) {
     try {
       do {
+        this.value.next('');
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await AuthService.toId(login));
         if (!exists) {
@@ -191,14 +192,14 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         case FactorType.NFC: {
           if (this.isAuth) {
-            await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
+            await this.authService.addFactor(result.factor, result.value);
           } else {
             await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
           }
           break;
         }
         case FactorType.LOGIN: {
-          console.log(result.factor, result.value);
+          console.log(result.value);
           await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
           break;
         }
@@ -242,10 +243,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      console.log(await CryptoCore.Utils.tryUnpackLogin(idFactor));
-
       const login = (await CryptoCore.Utils.tryUnpackLogin(idFactor)).toString('utf-8');
-
+      console.log(login);
       const id = await AuthService.toId(login);
       const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
       this.authService.currentTree = data;

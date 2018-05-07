@@ -1,7 +1,6 @@
 import {Component, Output, EventEmitter, Input, HostBinding, AfterViewInit} from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { FactorType } from '../../../services/auth.service';
-import { KeyChainService } from '../../../services/keychain.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -103,11 +102,6 @@ export class LoginComponent implements AfterViewInit {
   }
 
   async onNext() {
-    if (this.userName.length >= 6) {
-      console.log(this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName}));
-    } else {
-      this.notification.show("Login must be 6 or more symbols");
-      return;
-    }
+    this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
   }
 }
