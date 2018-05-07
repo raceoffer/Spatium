@@ -32,6 +32,10 @@ export class NotificationService {
     });
   }
 
+  public cancelConfirmation() {
+    cordova.plugins.notification.local.cancel(0);
+  }
+
   public show(message: string) {
     window.plugins.toast.showLongBottom(message, 3000, message, console.log(message));
   }

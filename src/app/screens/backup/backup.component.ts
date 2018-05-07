@@ -3,6 +3,7 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromPromise';
@@ -61,7 +62,8 @@ export class BackupComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly dds: DDSService,
     private readonly notification: NotificationService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly navigationService: NavigationService
   ) {
     this.route.params.subscribe((params: Params) => {
       if (params['back']) {
@@ -75,6 +77,12 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+
     this.id = await AuthService.toId(this.authService.login);
     this.account = await this.dds.getStoreAccount(this.id);
     this.data = this.authService.currentTree;

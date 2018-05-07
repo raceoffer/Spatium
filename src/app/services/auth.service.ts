@@ -45,18 +45,18 @@ export class AuthService {
       FactorIconAsset.FILE, FactorLink.FILE, FileUploadComponent));*/
     this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, AvailableFactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY,
       FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, GraphicKeyComponent));
+    this.authFactors.push(new AvailableFactor(FactorType.LOGIN, AvailableFactorName.LOGIN, FactorIcon.LOGIN,
+      FactorIconAsset.LOGIN, FactorLink.LOGIN, LoginComponent));
     this.available.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
     this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
       FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
-    this.authFactors.push(new AvailableFactor(FactorType.LOGIN, AvailableFactorName.LOGIN, FactorIcon.LOGIN,
-      FactorIconAsset.LOGIN, FactorLink.LOGIN, LoginComponent));
 
     const addNFCFactor = () => {
       this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
-      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
         FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
+      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
+        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
     };
 
     nfc.enabled(addNFCFactor, (e) => {

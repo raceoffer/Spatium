@@ -14,6 +14,9 @@ import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
+declare const CryptoCore: any;
+
+const BN = CryptoCore.BN;
 
 enum Phase {
   Creation,
@@ -72,9 +75,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   stAwaitConfirm = 'Confirm on the second device';
   stSigningResult = 'Transaction is signed';
 
-  stContinue = 'Continue';
-  stTransfer = 'Transfer';
-  stSend = 'Send';
+  stTransfer = 'Sign transaction';
+  stSend = 'Send transaction';
 
   stFee = 'Transaction fee';
   stManual = 'Manual';
@@ -89,11 +91,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public currencyWallet: CurrencyWallet = null;
 
   public address: BehaviorSubject<string> = null;
-  public balance: BehaviorSubject<number> = null;
+  public balance: BehaviorSubject<any> = null;
   public receiver: BehaviorSubject<string> = null;
-  public amount: BehaviorSubject<number> = null;
-  public fee: BehaviorSubject<number> = null;
-  public feePrice: BehaviorSubject<number> = null;
+  public amount: BehaviorSubject<any> = null;
+  public fee: BehaviorSubject<any> = null;
+  public feePrice: BehaviorSubject<any> = null;
   public estimatedSize: BehaviorSubject<number> = null;
 
   public subtractFee: BehaviorSubject<boolean> = null;
@@ -146,22 +148,22 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.estimatedSize = toBehaviourSubject(
           this.balance.distinctUntilChanged().flatMap(async balance => {
-            if (balance === null || balance === 0) {
-              return 0;
+            if (balance === null || balance.eq(new BN())) {
+              return 1;
             }
 
             const testTx = await this.currencyWallet.createTransaction(
               this.address.getValue(),
-              Math.floor(balance / 2));
+              balance.div(new BN(2)));
 
             return await testTx.estimateSize();
           }),
-          0);
+          1);
 
         this.receiver = new BehaviorSubject<string>('');
-        this.amount = new BehaviorSubject<number>(0);
-        this.feePrice = new BehaviorSubject<number>(this.currencyInfo.gasPrice);
-        this.fee = new BehaviorSubject<number>(this.currencyInfo.gasPrice * this.estimatedSize.getValue());
+        this.amount = new BehaviorSubject<any>(new BN());
+        this.feePrice = new BehaviorSubject<any>(new BN(this.currencyInfo.gasPrice));
+        this.fee = new BehaviorSubject<any>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
         this.subtractFee = new BehaviorSubject<boolean>(false);
 
         this.sufficientBalance = toBehaviourSubject(combineLatest([
@@ -171,14 +173,14 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.subtractFee
           ],
           (balance, amount, fee, substractFee) => {
-            if (balance === null || balance === 0) {
+            if (balance === null || balance.eq(new BN())) {
               return false;
             }
-            if (amount > 0) {
+            if (amount.gt(new BN())) {
               if (!substractFee) {
-                return balance >= (amount + fee);
+                return balance.gte(amount.add(fee));
               } else {
-                return balance >= amount;
+                return balance.gte(amount);
               }
             } else {
               return true;
@@ -192,9 +194,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.subtractFee
           ],
           (amount, fee, subtractFee) => {
-            if (amount > 0) {
+            if (amount.gt(new BN())) {
               if (subtractFee) {
-                return amount >= fee;
+                return amount.gte(fee);
               } else {
                 return true;
               }
@@ -288,33 +290,33 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feeField.valueChanges.distinctUntilChanged().subscribe(value => {
             const fee = this.currencyWallet.toInternal(value);
             this.fee.next(fee);
-            this.feePrice.next(fee / this.estimatedSize.getValue());
+            this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
           this.feeUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
             const fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.fee.next(fee);
-            this.feePrice.next(fee / this.estimatedSize.getValue());
+            this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
           this.feePriceField.valueChanges.distinctUntilChanged().subscribe(value => {
             const feePrice = this.currencyWallet.toInternal(value);
             this.feePrice.next(feePrice);
-            this.fee.next(feePrice * this.estimatedSize.getValue());
+            this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
           this.feePriceUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
             const feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.feePrice.next(feePrice);
-            this.fee.next(feePrice * this.estimatedSize.getValue());
+            this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
           this.estimatedSize.distinctUntilChanged().subscribe(value => {
-            this.fee.next(value * this.feePrice.getValue());
+            this.fee.next(new BN(value).mul(this.feePrice.getValue()));
           })
         );
         this.subscriptions.push(
@@ -351,12 +353,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feeTypeField.valueChanges.subscribe(value => {
             switch (value) {
               case Fee.Normal:
-                this.feePrice.next(this.currencyInfo.gasPrice);
-                this.fee.next(this.currencyInfo.gasPrice * this.estimatedSize.getValue());
+                this.feePrice.next(new BN(this.currencyInfo.gasPrice));
+                this.fee.next(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
                 break;
               case Fee.Economy:
-                this.feePrice.next(this.currencyInfo.gasPriceLow);
-                this.fee.next(this.currencyInfo.gasPriceLow * this.estimatedSize.getValue());
+                this.feePrice.next(new BN(this.currencyInfo.gasPriceLow));
+                this.fee.next(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
                 break;
             }
           })
@@ -380,7 +382,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   // Pressed start signature
   async startSigning() {
-    const value = this.subtractFee.getValue() ? this.amount.getValue() - this.fee.getValue() : this.amount.getValue();
+    const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
     const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
@@ -398,6 +400,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Creation);
 
     try {
+      await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+
       await this.currencyWallet.verifySignature();
       await this.currencyWallet.pushTransaction();
 

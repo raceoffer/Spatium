@@ -16,8 +16,9 @@ export class DDSAccount {
   }
 
   public async store(id: string, data: any, gasPrice: number) {
+    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
     return await this.dds.store({
-      id: id,
+      secret: accountSecret,
       data: data,
       account: this.account,
       gasPrice: gasPrice
@@ -25,8 +26,9 @@ export class DDSAccount {
   }
 
   public async estimateGas(id: string, data: any) {
+    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
     return this.dds.estimateStoreGas({
-      id: id,
+      secret: accountSecret,
       data: data,
       account: this.account
     });
@@ -47,14 +49,16 @@ export class DDSService {
   }
 
   public async exists(id: string) {
-    return await this.dds.exists(id);
+    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    return await this.dds.exists(accountSecret);
   }
 
   public async read(id: string) {
-    const count = await this.dds.count(id);
+    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const count = await this.dds.count(accountSecret);
     const data = [];
     for (let i = 0; i < count; ++i) {
-      data.push(await this.dds.read(id, i));
+      data.push(await this.dds.read(accountSecret, i));
     }
 
     return data;
@@ -94,8 +98,9 @@ export class DDSService {
     return this.dds.toWei(value, coin);
   }
 
-  public getStoreAccount(id) {
-    return new DDSAccount(this.dds, this.dds.getAddress(id, 1));
+  public async getStoreAccount(id) {
+    const accountSecret = await CryptoCore.Utils.getAccountSecret(id, 1);
+    return new DDSAccount(this.dds, this.dds.getAddress(accountSecret));
   }
 
   public async accountFromSecret(secret: any) {

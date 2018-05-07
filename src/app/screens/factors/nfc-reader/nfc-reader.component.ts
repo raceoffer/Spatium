@@ -41,7 +41,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   disabledNFC = true;
   canScanAgain = false;
   classNfcContainer = '';
-
+  isActive = false;
   timer: any;
 
   constructor(private ngZone: NgZone) {
@@ -53,8 +53,8 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.isActive = true;
     this.nfc = '';
-
     this.checkState();
 
     document.addEventListener('resume', this.checkState.bind(this), false);
@@ -63,7 +63,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       nfc.addNdefListener(
         (event) => this.ngZone.run(async () => await this.onNdef(event)),
         function () {
-          console.log('Listening for NDEF tags.');
+          console.log('Listening for NDEF tags reader.');
         },
         this.failure
       );
@@ -71,7 +71,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       nfc.addTagDiscoveredListener(
         (event) => this.ngZone.run(async () => await this.onNfc(event)),
         function () {
-          console.log('Listening for non-NDEF tags.');
+          console.log('Listening for non-NDEF tags reader.');
         },
         this.failure
       );
@@ -80,7 +80,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         'text/pg',
         (event) => this.ngZone.run(async () => await this.onNdef(event)),
         function () {
-          console.log('Listening for NDEF mime tags with type text/pg.');
+          console.log('Listening for NDEF mime tags with type text/pg reader.');
         },
         this.failure
       );
@@ -92,6 +92,33 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.isActive = false;
+
+    nfc.removeNdefListener(
+      (event) => this.ngZone.run(async () => await this.onNdef(event)),
+      function () {
+        console.log('Listening for NDEF tags reader rm.');
+      },
+      this.failure
+    );
+
+    nfc.removeTagDiscoveredListener(
+      (event) => this.ngZone.run(async () => await this.onNfc(event)),
+      function () {
+        console.log('Listening for non-NDEF tags reader rm.');
+      },
+      this.failure
+    );
+
+    nfc.removeMimeTypeListener(
+      'text/pg',
+      (event) => this.ngZone.run(async () => await this.onNdef(event)),
+      function () {
+        console.log('Listening for NDEF mime tags with type text/pg reader rm.');
+      },
+      this.failure
+    );
+
     clearTimeout(this.timer);
   }
 
@@ -121,61 +148,64 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onNfc(nfcEvent) {
+    if (this.isActive) {
+      if (this.isImport) {
+        this.nfc = null;
+        navigator.vibrate(100);
+        await this.onNext();
+      } else {
+        console.log('onNfc');
+        console.log(JSON.stringify(nfcEvent));
 
-    if (this.isImport) {
-      this.nfc = null;
-      navigator.vibrate(100);
-      await this.onNext();
-    } else {
-      console.log('onNfc');
-      console.log(JSON.stringify(nfcEvent));
+        this.nfc = nfcEvent.tag.id;
 
-      this.nfc = nfcEvent.tag.id;
+        navigator.vibrate(100);
 
-      navigator.vibrate(100);
-
-      await this.onNext();
+        await this.onNext();
+      }
     }
   }
 
   async onNdef(nfcEvent) {
-    console.log('onNdef');
-    console.log(JSON.stringify(nfcEvent));
+    if (this.isActive) {
+      console.log('onNdef');
+      console.log(JSON.stringify(nfcEvent));
 
-    const tag = nfcEvent.tag;
+      const tag = nfcEvent.tag;
 
-    // BB7 has different names, copy to Android names
-    if (tag.serialNumber) {
-      tag.id = tag.serialNumber;
-      tag.isWritable = !tag.isLocked;
-      tag.canMakeReadOnly = tag.isLockable;
-    }
-
-    if (!this.isRepeatable) {
-      this.nfc = tag.id;
-
-      navigator.vibrate(100);
-
-      await this.onNext();
-    } else {
-      const payload = Buffer.from(tag.ndefMessage[0].payload);
-      console.log(payload);
-
-      if (this.isImport) {
-        try {
-          const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
-          this.nfc = value.toString('hex');
-        } catch (exc) {
-          console.log(exc);
-          this.nfc = null;
-        }
-      } else {
-        this.nfc = await CryptoCore.Utils.tryUnpackLogin(payload);
+      // BB7 has different names, copy to Android names
+      if (tag.serialNumber) {
+        tag.id = tag.serialNumber;
+        tag.isWritable = !tag.isLocked;
+        tag.canMakeReadOnly = tag.isLockable;
       }
 
-      navigator.vibrate(100);
+      if (!this.isRepeatable) {
+        this.nfc = tag.id;
 
-      await this.onNext();
+        navigator.vibrate(100);
+
+        await this.onNext();
+      } else {
+        const payload = Buffer.from(tag.ndefMessage[0].payload);
+        console.log(payload);
+
+        if (this.isImport) {
+          try {
+            const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
+            this.nfc = value.toString('hex');
+          } catch (exc) {
+            console.log(exc);
+            this.nfc = null;
+          }
+        } else {
+          this.nfc = await CryptoCore.Utils.tryUnpackLogin(payload);
+        }
+
+        navigator.vibrate(100);
+
+        await this.onNext();
+      }
     }
   }
 

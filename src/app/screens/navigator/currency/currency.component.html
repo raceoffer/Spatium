@@ -9,7 +9,7 @@
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
   <mat-progress-bar mode="indeterminate" color="accent"
                     style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(((walletAddress | async)) === null ||
+                    *ngIf="(((walletAddress | async) === null) ||
                     ((balanceCurrencyUnconfirmed | async) === null) ||
                     ((balanceUsdUnconfirmed | async) === null))"></mat-progress-bar>
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
@@ -20,13 +20,13 @@
     </tr>
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
-        <mat-form-field class="field" color="accent">
-          <textarea readonly matInput [value]="walletAddress | async" *ngIf="(walletAddress | async) !== null"></textarea>
-          <textarea readonly matInput value="Loading&hellip;" *ngIf="(walletAddress | async) === null"></textarea>
+        <div class="field auto-height">
+          <div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>
+          <div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
-        </mat-form-field>
+        </div>
       </td>
     </tr>
     <tr>
@@ -62,12 +62,7 @@
   <div class="content text-center" fxLayout="column" fxLayoutAlign="start center">
     <div class="qrcode">
       <qr-code [value]="walletAddress | async" [size]="150" [background]="'#f5f5f5'" *ngIf="(walletAddress | async) !== null" ></qr-code>
-      <mat-spinner
-        color="accent"
-        [diameter]="150"
-        [strokeWidth] = "5"
-        *ngIf="(walletAddress | async) === null">
-      </mat-spinner>
+      <div style="height: 150px" *ngIf="(walletAddress | async) === null"></div>
     </div>
 
     <mat-list class="text-center transaction-list">
@@ -86,12 +81,17 @@
         <mat-divider></mat-divider>
       </mat-list-item>
     </mat-list>
-    <mat-spinner
-      color="accent"
-      [diameter]="50"
-      [strokeWidth] = "5"
-      *ngIf="(transactions | async) === null">
-    </mat-spinner>
+    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
+         *ngIf="((transactions | async) === null) &&
+          ((walletAddress | async) !== null) &&
+          ((balanceCurrencyUnconfirmed | async) !== null) &&
+          ((balanceUsdUnconfirmed | async) !== null)">
+      <mat-spinner
+        color="accent"
+        [diameter]="50"
+        [strokeWidth] = "5">
+      </mat-spinner>
+    </div>
   </div>
 
   <div class="footer text-center">

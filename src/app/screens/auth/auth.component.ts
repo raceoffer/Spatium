@@ -7,6 +7,7 @@ import {
   HostBinding,
   OnDestroy,
   OnInit,
+  NgZone,
   sequence,
   style,
   transition,
@@ -62,6 +63,7 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(public dialog: MatDialog,
     public factorParentDialog: FactorParentOverlayService,
+    private readonly ngZone: NgZone,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -165,8 +167,10 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goBottom();
       this.busy = true;
       this.isPasswordFirst = true;
-      this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-      this.ready = this.authService.decryptedSeed !== null;
+      this.ngZone.run(async () => {
+        this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+        this.ready = this.authService.decryptedSeed !== null;
+      });
     } catch (e) {
       console.log(e);
     } finally {
