@@ -212,7 +212,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public getTileBalanceInfo(coin: any) {
-    if (!coin) {
+    if (coin === undefined || coin === null) {
       return undefined;
     }
 
