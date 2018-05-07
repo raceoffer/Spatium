@@ -1,4 +1,4 @@
-<form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
+<form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center" (ngSubmit)="onNext()">
 
   <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
     <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName" [autofocus] (focus)="onFocus()"
