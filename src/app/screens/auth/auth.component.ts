@@ -170,11 +170,11 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ngZone.run(async () => {
         this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
         this.ready = this.authService.decryptedSeed !== null;
+        this.busy = false;
       });
     } catch (e) {
       console.log(e);
     } finally {
-      this.busy = false;
     }
   }
 
