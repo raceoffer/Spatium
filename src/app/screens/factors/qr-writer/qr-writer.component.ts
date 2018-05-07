@@ -5,6 +5,7 @@ import { NotificationService } from '../../../services/notification.service';
 
 declare const CryptoCore: any;
 declare const cordova: any;
+declare const device: any;
 declare const window: any;
 declare const Buffer: any;
 
@@ -32,7 +33,12 @@ export class QrWriterComponent implements OnInit {
   async ngOnInit() {}
 
   async saveQr() {
-    this.requestStorage();
+    if (this.isWindows()) {
+      this.permissionCStorage = true;
+      this.saveToStorage();
+    } else {
+      this.requestStorage();
+    }
   }
 
   requestStorage() {
@@ -86,5 +92,9 @@ export class QrWriterComponent implements OnInit {
 
   async onNext() {
     this.onSuccess.emit({factor: FactorType.QR, value: this.value.getValue()});
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 }
