@@ -31,7 +31,8 @@
     "cordova-windows": "^6.0.0",
     "org.devgeeks.Canvas2ImagePlugin": "https://github.com/devgeeks/Canvas2ImagePlugin.git",
     "phonegap-nfc": "^0.7.1",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5",
+    "phonegap-plugin-barcodescanner": "~7.1.1"
   },
   "cordova": {
     "plugins": {
@@ -54,7 +55,8 @@
       "phonegap-plugin-mobile-accessibility": {},
       "cordova-plugin-local-notification": {},
       "cordova-plugin-dialogs": {},
-      "phonegap-plugin-barcodescanner": {}
+      "phonegap-plugin-barcodescanner": {},
+      "cordova-plugin-clipboard": {}
     },
     "platforms": [
       "browser",
