@@ -210,6 +210,10 @@ export class CurrencyWallet {
     return this.currency;
   }
 
+  public verifyAddress (address : string) : boolean {
+    return address && address.length > 0;
+  }
+
   public async requestTransactionVerify(transaction) {
     await this.bt.send(JSON.stringify({
       type: 'verifyTransaction',

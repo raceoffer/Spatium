@@ -113,6 +113,10 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
+  
+  public verifyAddress(address: string) : boolean {
+    return this.wallet.verifyAddress(address);
+  }
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
