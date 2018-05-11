@@ -42,7 +42,8 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
         console.log('Connected to', this.bt.connectedDevice.getValue());
-        await this.wallet.startSync();
+        this.wallet.startSync();
+        this.ready.next(true);
       }));
 
     this.subscriptions.push(
