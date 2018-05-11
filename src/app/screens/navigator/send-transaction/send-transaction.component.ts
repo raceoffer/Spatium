@@ -103,6 +103,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public sufficientBalance: BehaviorSubject<boolean> = null;
   public sufficientValue: BehaviorSubject<boolean> = null;
   public validReceiver: BehaviorSubject<boolean> = null;
+  public requiredFilled: BehaviorSubject<boolean> = null;
   public valid: BehaviorSubject<boolean> = null;
 
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
@@ -206,15 +207,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }
         ), false);
 
-        this.validReceiver = toBehaviourSubject(this.receiver.map(address => address && address.length > 0), false);
+        this.validReceiver = new BehaviorSubject<boolean>(true);
+
+        this.requiredFilled = toBehaviourSubject(combineLatest([
+            this.receiver,
+            this.amount
+          ],
+          (receiver, amount) => {
+            return receiver && receiver.length > 0 && amount > 0;
+          }
+        ), false);
 
         this.valid = toBehaviourSubject(combineLatest([
             this.sufficientBalance,
             this.sufficientValue,
-            this.validReceiver
+            this.validReceiver,
+            this.requiredFilled
           ],
-          (sufficientBalance, sufficientValue, validReceiver) => {
-            return sufficientBalance && sufficientValue && validReceiver;
+          (sufficientBalance, sufficientValue, validReceiver, requiredFilled) => {
+            return sufficientBalance && sufficientValue && validReceiver && requiredFilled;
           }), false);
 
         this.subscriptions.push(

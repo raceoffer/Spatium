@@ -30,7 +30,8 @@
     "cordova-windows": "^6.0.0",
     "phonegap-nfc": "^0.7.1",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
-    "phonegap-plugin-barcodescanner": "~7.1.1"
+    "phonegap-plugin-barcodescanner": "~7.1.1",
+    "org.devgeeks.Canvas2ImagePlugin": "file:../org.devgeeks.Canvas2ImagePlugin"
   },
   "cordova": {
     "plugins": {

@@ -205,11 +205,14 @@
     <span *ngIf="(phase | async) === phaseType.Sending"
           style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
     </span>
-    <span *ngIf="!(sufficientBalance | async)"
+    <span *ngIf="(requiredFilled | async) && !(sufficientBalance | async)"
           style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
     </span>
-    <span *ngIf="(sufficientBalance | async) && !(sufficientValue | async)"
+    <span *ngIf="(requiredFilled | async) && (sufficientBalance | async) && !(sufficientValue | async)"
           style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient amount
+    </span>
+    <span *ngIf="(requiredFilled | async) && (sufficientBalance | async) && (sufficientValue | async) && !(validReceiver | async)"
+          style="font-size: 15px; display: inline-flex; align-items: center;">Invalid receiver
     </span>
     <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
                         *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
