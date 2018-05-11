@@ -156,6 +156,7 @@ import { WalletService } from './services/wallet.service';
     MatSnackBarModule,
     MatFormFieldModule,
     MatGridListModule,
+    MatSnackBarModule,
     QRCodeModule,
     ZXingScannerModule.forRoot()
   ],
