@@ -207,7 +207,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }
         ), false);
 
-        this.validReceiver = new BehaviorSubject<boolean>(true);
+        this.validReceiver = toBehaviourSubject(this.receiver.map(address => this.currencyWallet.verifyAddress(address)), false);
 
         this.requiredFilled = toBehaviourSubject(combineLatest([
             this.receiver,
