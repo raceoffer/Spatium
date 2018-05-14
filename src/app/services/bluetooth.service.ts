@@ -190,4 +190,8 @@ export class BluetoothService {
   async enableDiscovery() {
     await cordova.plugins.bluetooth.enableDiscovery();
   }
+
+  async stopListening() {
+    await cordova.plugins.bluetooth.stopListening();
+  }
 }
