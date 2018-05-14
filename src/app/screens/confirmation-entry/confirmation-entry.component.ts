@@ -86,8 +86,12 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
               await this.savePin(aesKey);
             }
           } catch (e) {
-            if (e == 'Cancelled') {
+            if (e === 'Cancelled') {
               await this.savePin(aesKey);
+            } else if (e === 'KeyPermanentlyInvalidatedException') {
+              this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
+            } else {
+              this.notification.show('Fingerprint authorization error');
             }
             console.log(e);
           }
@@ -114,7 +118,7 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
 
   async saveTouchPassword(pincode) {
     return new Promise(async (success, error) => {
-      window.plugins.touchid.save('spatium', pincode, success, error);
+      window.plugins.touchid.save('spatium', pincode, true, success, error);
     });
   }
 
