@@ -8,7 +8,7 @@
 </mat-toolbar>
 
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box">
+<div fxLayout="column" fxLayoutAlign="start center" class="box" *ngIf="!(synchronizing | async)">
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
                      (linkClicked)="onNav($event)"></app-main-drawer>
