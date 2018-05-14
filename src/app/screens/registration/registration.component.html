@@ -32,6 +32,9 @@
       <div class="reg-warning">
         <span>{{ stWarning }}</span>
       </div>
+      <div class="width-button-width" style="display: inline-block">
+        <button mat-button style="opacity: 0.5; text-decoration: underline;" (click)="openAdvanced()">Advanced security</button>
+      </div>
     </div>
 
     <div class="content text-center" style="min-height: fit-content;"
@@ -61,10 +64,6 @@
     </div>
 
     <div class="footer text-center" style="bottom: 0px;">
-      <div class="width-button-width" style="display: inline-block" *ngIf="!advancedMode">
-        <label style="opacity: 0.5; font-size: 12px; float: right; margin: 5px;" (click)="openAdvanced()">Advanced security</label>
-      </div>
-
       <button type="submit" mat-raised-button color="accent" (click)="signUp()"
               [disabled]="password.length < 1 || password_confirm.length < 1 || username.length < 1" class="width-button color" *ngIf="!uploading">{{
         stRegistration }}

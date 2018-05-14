@@ -166,6 +166,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   async toggleSearch(value) {
     this.isSearch = value;
+    this.clearFilterValue();
   }
 
   async onBackClicked() {
