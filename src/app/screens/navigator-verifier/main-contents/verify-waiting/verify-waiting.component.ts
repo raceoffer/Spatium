@@ -48,7 +48,7 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected and ensure');
+        await this.bt.stopListening();
         await this.wallet.reset();
         await this.bt.ensureListening();
       }));
