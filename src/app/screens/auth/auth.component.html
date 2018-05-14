@@ -44,7 +44,7 @@
 
     <div class="margin-top-18" style="padding-bottom: 10px;"
          *ngIf="(loginType == 0) ? (!ready && (isPasswordFirst || isAdvanced)) : !ready ">
-      <button #dialogButton color="accent" mat-mini-fab (click)="addNewFactor()" type="button" [disabled]="busy" class="color">
+      <button #dialogButton color="accent" mat-mini-fab (click)="addNewFactor()" type="button" *ngIf="!busy" class="color">
         <mat-icon>add</mat-icon>
       </button>
     </div>

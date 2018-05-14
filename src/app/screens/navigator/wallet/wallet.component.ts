@@ -68,7 +68,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   }];
   public titles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
-    {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
     {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC},
@@ -96,6 +95,11 @@ export class WalletComponent implements OnInit, OnDestroy {
     keychain.topTokens.forEach((tokenInfo) => {
       this.titles.push(this.tokenEntry(tokenInfo));
     });
+
+    this.titles.push(
+      {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test}
+    );
+
     this.filtredTitles = this.titles;
   }
 
@@ -162,6 +166,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   async toggleSearch(value) {
     this.isSearch = value;
+    this.clearFilterValue();
   }
 
   async onBackClicked() {
@@ -212,7 +217,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public getTileBalanceInfo(coin: any) {
-    if (!coin) {
+    if (coin === undefined || coin === null) {
       return undefined;
     }
 

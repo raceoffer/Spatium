@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
+import {MatSnackBar, MatSnackBarRef} from '@angular/material';
 
 declare const window: any;
 declare const cordova: any;
@@ -8,8 +9,9 @@ declare const cordova: any;
 export class NotificationService {
   public confirm: Subject<any> = new Subject<any>();
   public decline: Subject<any> = new Subject<any>();
+  snackBarRef: MatSnackBarRef<any>;
 
-  constructor(private readonly ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone, private snackBar: MatSnackBar) {
     cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
       this.confirm.next();
     }));
@@ -37,10 +39,14 @@ export class NotificationService {
   }
 
   public show(message: string) {
-    window.plugins.toast.showLongBottom(message, 3000, message, console.log(message));
+    this.snackBarRef = this.snackBar.open(message, 'Dismiss', {duration: 3000});
+
+    this.snackBarRef.onAction().subscribe(() => {
+      this.snackBarRef.dismiss();
+    });
   }
 
   public hide() {
-    window.plugins.toast.hide();
+    this.snackBar.dismiss();
   }
 }

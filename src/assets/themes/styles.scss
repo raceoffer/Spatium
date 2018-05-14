@@ -1061,3 +1061,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .spacer {
   flex: 1 1 auto;
 }
+
+.error {
+  color: #f44336 !important;
+}
