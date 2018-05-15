@@ -16,6 +16,15 @@ module.exports = {
     modules: ['node_modules'],
     extensions: ['-browser.js', '.js', '.json']
   },
+  module: {
+    rules: [{
+      test: /\.js$/,
+      exclude: /node_modules/,
+      use: {
+        loader: "babel-loader"
+      }
+    }]
+  },
   plugins: [],
   node: {
     fs: 'empty',

@@ -1,8 +1,8 @@
 'use strict';
 
-const config = require('./webpack.config');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const merge = require('webpack-merge');
+const common = require('./webpack.config');
 
-config.plugins.push(new UglifyJsPlugin());
-
-module.exports = config;
+module.exports = merge(common, {
+  mode: 'production'
+})
