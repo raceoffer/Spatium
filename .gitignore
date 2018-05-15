@@ -14,7 +14,6 @@
 *.bundle.js
 /src/bcoinlib/test/*.key
 /src/bcoinlib/test/*.seed
-package-lock.json
 /cordova/platforms
 /cordova/plugins
 dist
