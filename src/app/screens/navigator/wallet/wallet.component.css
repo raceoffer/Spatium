@@ -1,3 +1,13 @@
+input::-webkit-input-placeholder { color: rgb(155, 160, 160); }
+input:-moz-placeholder { color: rgb(155, 160, 160); } /* FF 4-18 */
+input::-moz-placeholder { color: rgb(155, 160, 160); } /* FF 19+ */
+input:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
+
+input:focus::-webkit-input-placeholder { color: rgb(155, 160, 160); }
+input:focus:-moz-placeholder { color: rgb(155, 160, 160); } /* FF 4-18 */
+input:focus::-moz-placeholder { color: rgb(155, 160, 160); } /* FF 19+ */
+input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
+
 .grid-item {
   height: 100%;
   width: 100%;
