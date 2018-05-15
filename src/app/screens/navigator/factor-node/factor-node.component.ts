@@ -123,7 +123,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       } while (true);
     } catch (ignored) {
       console.log(ignored);
-      this.notification.show('No network connection');
+      this.notification.show('DDS is unavailable');
     }
   }
 
