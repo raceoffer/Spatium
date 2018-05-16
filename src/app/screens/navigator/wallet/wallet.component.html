@@ -30,7 +30,7 @@
     <mat-icon>arrow_back</mat-icon>
   </button>
   <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
-    <input placeholder="Search" name="UserName" [(ngModel)]="filterValue">
+    <input type="text" placeholder="Search" name="UserName" [(ngModel)]="filterValue" [autofocus]>
   </div>
 
   <button mat-button mat-icon-button (click)="clearFilterValue()">
