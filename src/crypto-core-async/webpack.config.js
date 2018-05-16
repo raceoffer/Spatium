@@ -3,18 +3,13 @@
 const path = require('path');
 
 module.exports = {
-  target: 'web',
-  entry: {
-    'index': './index.js',
-	  'webworker': './lib/webworker.js'
-  },
+  entry: './lib/webworker.js',
   output: {
     path: __dirname,
-    filename: '[name].bundle.js'
+    filename: 'webworker.bundle.js'
   },
   resolve: {
-    modules: ['node_modules'],
-    extensions: ['-browser.js', '.js', '.json']
+    modules: ['node_modules']
   },
   module: {
     rules: [{
@@ -25,7 +20,6 @@ module.exports = {
       }
     }]
   },
-  plugins: [],
   node: {
     fs: 'empty',
     net: 'empty',

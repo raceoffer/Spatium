@@ -1,46 +1,64 @@
-const registerPromiseWorker = require('promise-worker/register');
-const assert = require('assert');
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import registerPromiseWorker from 'promise-worker/register';
+import assert from 'assert';
+
+import isString from 'lodash/isString';
+import isFunction from 'lodash/isFunction';
+import includes from 'lodash/includes';
+import keys from 'lodash/keys';
+import get from 'lodash/get';
+import invoke from 'lodash/invoke';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
+
+import * as Utils from 'crypto-core/lib/utils';
+import { CompoundKey } from 'crypto-core/lib/primitives/compoundkey';
+import { PaillierProver } from 'crypto-core/lib/primitives/paillierprover';
+import { PaillierVerifier } from 'crypto-core/lib/primitives/paillierverifier';
+import { Signer } from 'crypto-core/lib/primitives/signer';
+import { BitcoinTransaction } from 'crypto-core/lib/transaction/bitcore/bitcointransaction';
+import { BitcoinCashTransaction } from 'crypto-core/lib/transaction/bitcore/bitcoincashtransaction';
+import { LitecoinTransaction } from 'crypto-core/lib/transaction/bitcore/litecointransaction';
+import { EthereumTransaction } from 'crypto-core/lib/transaction/ethereum/ethereumtransaction';
 
 const CryptoCore = {
-  Utils: require('crypto-core/lib/utils'),
-  CompoundKey: require('crypto-core/lib/primitives/compoundkey'),
-  PaillierProver: require('crypto-core/lib/primitives/paillierprover'),
-  PaillierVerifier: require('crypto-core/lib/primitives/paillierverifier'),
-  Signer: require('crypto-core/lib/primitives/signer'),
-  BitcoinTransaction: require('crypto-core/lib/transaction/bitcore/bitcointransaction'),
-  BitcoinCashTransaction: require('crypto-core/lib/transaction/bitcore/bitcoincashtransaction'),
-  LitecoinTransaction: require('crypto-core/lib/transaction/bitcore/litecointransaction'),
-  EthereumTransaction: require('crypto-core/lib/transaction/ethereum/ethereumtransaction')
+  Utils,
+  CompoundKey,
+  PaillierProver,
+  PaillierVerifier,
+  Signer,
+  BitcoinTransaction,
+  BitcoinCashTransaction,
+  LitecoinTransaction,
+  EthereumTransaction
 };
 
 registerPromiseWorker(async message => {
   assert(
-    _.isString(message.action) && _.includes(['invoke', 'invokeStatic'], message.action),
+    isString(message.action) && includes(['invoke', 'invokeStatic'], message.action),
     'message.action should be one of [\'invoke\', \'invokeStatic\']'
   );
   assert(
-    _.isString(message.class) && _.has(CryptoCore, message.class),
-    'message.class should be one of ' + _.keys(CryptoCore)
+    isString(message.class) && has(CryptoCore, message.class),
+    'message.class should be one of ' + keys(CryptoCore)
   );
 
-  const objectClass = _.get(CryptoCore, message.class);
+  const objectClass = get(CryptoCore, message.class);
 
   switch(message.action) {
     case 'invoke':
       const self = Marshal.unwrap(message.self);
 
       assert(
-        _.isString(message.method) && _.isFunction(_.get(self, message.method)),
+        isString(message.method) && isFunction(get(self, message.method)),
         'message.method should be an instance method of ' + message.class
       );
 
-      const result = await _.invoke(
+      const result = await invoke(
         self,
         message.method,
-        ... _.map(_.defaultTo(message.arguments, []), Marshal.unwrap)
+        ... map(defaultTo(message.arguments, []), Marshal.unwrap)
       );
 
       return {
@@ -49,14 +67,14 @@ registerPromiseWorker(async message => {
       };
     case 'invokeStatic':
       assert(
-        _.isString(message.method) && _.isFunction(_.get(objectClass, message.method)),
-        'message.method should be one of ' + _.keys(CryptoCore)
+        isString(message.method) && isFunction(get(objectClass, message.method)),
+        'message.method should be one of ' + keys(CryptoCore)
       );
 
-      return Marshal.wrap(await _.invoke(
+      return Marshal.wrap(await invoke(
         objectClass,
         message.method,
-        ... _.map(_.defaultTo(message.arguments, []), Marshal.unwrap)
+        ... map(defaultTo(message.arguments, []), Marshal.unwrap)
       ));
   }
 });
