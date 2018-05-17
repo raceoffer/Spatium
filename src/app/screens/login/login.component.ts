@@ -4,9 +4,7 @@ import {
 } from '@angular/core';
 import { State } from '../login-parent/login-parent.component';
 
-declare const CryptoCore: any;
 declare const nfc: any;
-
 
 @Component({
   selector: 'app-login',

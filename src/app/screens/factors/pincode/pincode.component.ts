@@ -2,7 +2,6 @@ import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } f
 import { Router } from '@angular/router';
 import { FactorType } from '../../../services/auth.service';
 
-declare const CryptoCore: any;
 declare const Buffer: any;
 declare const window: any;
 declare const device: any;

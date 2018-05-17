@@ -8,9 +8,12 @@ import isFunction from 'lodash/isFunction';
 import includes from 'lodash/includes';
 import keys from 'lodash/keys';
 import get from 'lodash/get';
+import has from 'lodash/has';
 import invoke from 'lodash/invoke';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
+
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 import * as Utils from 'crypto-core/lib/utils';
 import { CompoundKey } from 'crypto-core/lib/primitives/compoundkey';
@@ -48,22 +51,26 @@ registerPromiseWorker(async message => {
 
   switch(message.action) {
     case 'invoke':
-      const self = Marshal.unwrap(message.self);
+      const self = unwrap(message.self);
 
       assert(
         isString(message.method) && isFunction(get(self, message.method)),
         'message.method should be an instance method of ' + message.class
       );
 
+      console.log(message.action, message.method, objectClass, message.arguments);
+
       const result = await invoke(
         self,
         message.method,
-        ... map(defaultTo(message.arguments, []), Marshal.unwrap)
+        ... map(defaultTo(message.arguments, []), unwrap)
       );
 
+      console.log(result);
+
       return {
-        result: Marshal.wrap(result),
-        self: Marshal.wrap(self)
+        result: wrap(result),
+        self: wrap(self)
       };
     case 'invokeStatic':
       assert(
@@ -71,10 +78,16 @@ registerPromiseWorker(async message => {
         'message.method should be one of ' + keys(CryptoCore)
       );
 
-      return Marshal.wrap(await invoke(
+      console.log(message.action, message.method, objectClass, message.arguments);
+
+      const rr = wrap(await invoke(
         objectClass,
         message.method,
-        ... map(defaultTo(message.arguments, []), Marshal.unwrap)
+        ... map(defaultTo(message.arguments, []), unwrap)
       ));
+
+      console.log(rr);
+
+      return rr;
   }
 });

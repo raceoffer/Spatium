@@ -7,7 +7,6 @@ import { NgZone } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 declare const Buffer: any;
-declare const CryptoCore: any;
 
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -75,7 +74,7 @@ export class BitcoreWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public verifyAddress(address: string) : boolean {
+  public verifyAddress(address: string): boolean {
     return address &&
            /^[13m][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
   }

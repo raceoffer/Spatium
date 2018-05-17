@@ -14,9 +14,8 @@ import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
-declare const CryptoCore: any;
 
-const BN = CryptoCore.BN;
+import { BN } from 'crypto-core-async';
 
 enum Phase {
   Creation,
@@ -473,4 +472,3 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.feePriceUsdFocused = focused;
   }
 }
-

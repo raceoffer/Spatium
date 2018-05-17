@@ -11,8 +11,8 @@ export class Signer {
     this.state = state || { type: 'Signer' };
   }
 
-  static useWorker(_worker) {
-    Signer.worker = _worker;
+  static useWorker(worker) {
+    Signer.worker = worker;
   }
 
   async invoke(message, wrapped) {

@@ -13,8 +13,8 @@ export class PaillierProver {
     this.state = state || { type: 'PaillierProver' };
   }
 
-  static useWorker(_worker) {
-    PaillierProver.worker = _worker;
+  static useWorker(worker) {
+    PaillierProver.worker = worker;
     PaillierVerifier.useWorker(worker);
   }
 

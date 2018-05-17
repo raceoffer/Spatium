@@ -9,7 +9,7 @@ import { NgZone } from '@angular/core';
 
 import { toBehaviourSubject } from '../../utils/transformers';
 
-declare const CryptoCore: any;
+import { CompoundKey } from 'crypto-core-async';
 
 export enum Status {
   None = 0,
@@ -119,8 +119,8 @@ export class CurrencyWallet {
   }
 
   public async sync(paillierKeys: any) {
-    this.compoundKey = await CryptoCore.CompoundKey.fromOptions({
-      localPrivateKey: await CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+    this.compoundKey = await CompoundKey.fromOptions({
+      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
       localPaillierKeys: paillierKeys
     });
 
@@ -210,7 +210,7 @@ export class CurrencyWallet {
     return this.currency;
   }
 
-  public verifyAddress (address : string) : boolean {
+  public verifyAddress (address: string): boolean {
     return address && address.length > 0;
   }
 

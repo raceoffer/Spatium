@@ -9,11 +9,13 @@ import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.compon
 import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
 import { NotificationService } from './notification.service';
 import { LoginComponent } from '../screens/factors/login/login.component';
+import { WorkerService } from './worker.service';
 
-declare const CryptoCore: any;
 declare const Buffer: any;
 declare const nfc: any;
 declare const device: any;
+
+import { sha256, matchPassphrase, useWorker } from 'crypto-core-async/lib/utils';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +38,12 @@ export class AuthService {
 
   stFactorError = 'Incorrect factor ';
 
-  constructor(private readonly notification: NotificationService) {
+  constructor(
+    private readonly notification: NotificationService,
+    private readonly workerService: WorkerService
+  ) {
+    useWorker(workerService.worker);
+
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
       FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
@@ -71,7 +78,7 @@ export class AuthService {
   }
 
   static async toId(name: string) {
-    return (await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8'))).toString('hex');
+    return (await sha256(Buffer.from(name, 'utf-8'))).toString('hex');
   }
 
   getAllAvailableFactors() {
@@ -111,7 +118,7 @@ export class AuthService {
   async tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = await CryptoCore.Utils.matchPassphrase(currentData, await factor.toBuffer());
+    const matchResult = await matchPassphrase(currentData, await factor.toBuffer());
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
@@ -320,7 +327,6 @@ export class Factor {
     const prefix = Buffer.alloc(4);
     prefix.writeUInt32BE(this.type, 0);
 
-    return await CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
+    return await sha256(Buffer.concat([prefix, this.value]));
   }
 }
-

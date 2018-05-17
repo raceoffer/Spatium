@@ -82,6 +82,7 @@ import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
+import { WorkerService } from './services/worker.service';
 
 @NgModule({
   declarations: [
@@ -161,6 +162,7 @@ import { WalletService } from './services/wallet.service';
     ZXingScannerModule.forRoot()
   ],
   providers: [
+    WorkerService,
     WalletService,
     CurrencyPriceService,
     BluetoothService,

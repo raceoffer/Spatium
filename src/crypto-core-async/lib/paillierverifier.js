@@ -11,8 +11,8 @@ export class PaillierVerifier {
     this.state = state || { type: 'PaillierVerifier' };
   }
 
-  static useWorker(_worker) {
-    PaillierVerifier.worker = _worker;
+  static useWorker(worker) {
+    PaillierVerifier.worker = worker;
   }
 
   async invoke(message, wrapped) {

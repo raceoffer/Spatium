@@ -11,6 +11,7 @@ import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
+import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
@@ -20,7 +21,13 @@ import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 
-declare const CryptoCore: any;
+import {
+  CompoundKey,
+  BitcoinTransaction,
+  BitcoinCashTransaction,
+  LitecoinTransaction,
+  EthereumTransaction
+} from 'crypto-core-async';
 
 @Injectable()
 export class WalletService {
@@ -40,10 +47,19 @@ export class WalletService {
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
-  constructor(private readonly bt: BluetoothService,
-              private readonly currencyService: CurrencyService,
-              private readonly keychain: KeyChainService,
-              private readonly ngZone: NgZone) {
+  constructor(
+    private readonly bt: BluetoothService,
+    private readonly currencyService: CurrencyService,
+    private readonly keychain: KeyChainService,
+    private readonly ngZone: NgZone,
+    private readonly workerService: WorkerService
+  ) {
+    CompoundKey.useWorker(workerService);
+    BitcoinTransaction.useWorker(workerService);
+    BitcoinCashTransaction.useWorker(workerService);
+    LitecoinTransaction.useWorker(workerService);
+    EthereumTransaction.useWorker(workerService);
+
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -162,7 +178,7 @@ export class WalletService {
       this.setProgress(0);
       this.status.next(Status.Synchronizing);
 
-      const paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
+      const paillierKeys = await CompoundKey.generatePaillierKeys();
 
       this.setProgress(0.1);
 
@@ -251,4 +267,3 @@ export class WalletService {
       ));
   }
 }
-

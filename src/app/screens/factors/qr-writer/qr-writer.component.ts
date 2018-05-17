@@ -3,7 +3,6 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 
-declare const CryptoCore: any;
 declare const cordova: any;
 declare const device: any;
 declare const window: any;

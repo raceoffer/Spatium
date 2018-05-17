@@ -1,20 +1,8 @@
 import PromiseWorker from 'promise-worker';
 
-import * as Utils from './lib/utils';
-import { CompoundKey } from './lib/compoundkey';
-import { BitcoinTransaction } from './lib/bitcointransaction';
-import { BitcoinCashTransaction } from './lib/bitcoincashtransaction';
-import { LitecoinTransaction } from './lib/litecointransaction';
-import { EthereumTransaction } from './lib/ethereumtransaction';
-
-const worker = new PromiseWorker(new Worker('webworker.bundle.js'));
-
-Utils.useWorker(worker);
-CompoundKey.useWorker(worker);
-BitcoinTransaction.useWorker(worker);
-BitcoinCashTransaction.useWorker(worker);
-LitecoinTransaction.useWorker(worker);
-EthereumTransaction.useWorker(worker);
+export function createWorker() {
+  return new PromiseWorker(new Worker('webworker.bundle.js'));
+}
 
 export { default as BN } from 'bn.js';
 
@@ -33,11 +21,11 @@ export { PedersenScheme } from 'crypto-core/lib/primitives/pedersenscheme';
 export { Signer } from 'crypto-core/lib/primitives/signer';
 export { DDS } from 'crypto-core/lib/primitives/dds';
 
-export {
-  Utils,
-  CompoundKey,
-  BitcoinTransaction,
-  BitcoinCashTransaction,
-  LitecoinTransaction,
-  EthereumTransaction
-};
+export { CompoundKey } from './lib/compoundkey';
+export { BitcoinTransaction } from './lib/bitcointransaction';
+export { BitcoinCashTransaction } from './lib/bitcoincashtransaction';
+export { LitecoinTransaction } from './lib/litecointransaction';
+export { EthereumTransaction } from './lib/ethereumtransaction';
+
+import * as Utils from './lib/utils';
+export { Utils };

@@ -26,11 +26,12 @@ import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
+import { WorkerService } from '../../services/worker.service';
 
-
-declare const CryptoCore: any;
 declare const Buffer: any;
 declare const device: any;
+
+import { packTree, useWorker } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-registration',
@@ -68,15 +69,19 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   dialogFactorRef = null;
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-              public factorParentDialog: FactorParentOverlayService,
-              private readonly router: Router,
-              private readonly dds: DDSService,
-              private readonly keychain: KeyChainService,
-              private readonly changeDetectorRef: ChangeDetectorRef,
-              private readonly notification: NotificationService,
-              private readonly authService: AuthService,
-              private readonly navigationService: NavigationService) {
+  constructor(
+    public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
+    private readonly router: Router,
+    private readonly dds: DDSService,
+    private readonly keychain: KeyChainService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) {
+    useWorker(workerService.worker);
     this.changeDetectorRef = changeDetectorRef;
   }
 
@@ -227,7 +232,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       }, null);
 
       const id = await AuthService.toId(this.authService.login);
-      const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
+      const data = await packTree(tree, this.keychain.getSeed());
       this.authService.currentTree = data;
 
       try {

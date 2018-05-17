@@ -5,8 +5,6 @@ import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-declare const CryptoCore: any;
-
 enum State {
   Ready,
   Updating,

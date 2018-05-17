@@ -16,7 +16,6 @@ import { NotificationService } from '../../../services/notification.service';
 declare const nfc: any;
 declare const ndef: any;
 declare const navigator: any;
-declare const CryptoCore: any;
 declare const Buffer: any;
 
 @Component({

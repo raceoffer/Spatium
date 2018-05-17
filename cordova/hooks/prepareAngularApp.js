@@ -11,7 +11,7 @@ module.exports = function(context) {
   if (!noCore) {
     console.log('Building core bundle.');
 
-    const webpackCommand = 'npm run webpack' + (prod ? '-min' : '');
+    const webpackCommand = 'npm run webpack' + (prod ? '-prod' : '-dev');
     console.log('Command:', webpackCommand);
 
     console.log(execSync(

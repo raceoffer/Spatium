@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
-declare const CryptoCore: any;
+import { KeyChain } from 'crypto-core-async';
+
 declare const Buffer: any;
 
 export enum Coin {
@@ -235,7 +236,7 @@ export class KeyChainService {
     new TokenEntry(Token.LEADCOIN, 'Leadcoin', 'LDC', '0x5102791ca02fc3595398400bfe0e33d7b6c82267', 'leadcoin', 18),
     new TokenEntry(Token.EIDOO, 'Eidoo', 'EDO', '0xced4e93198734ddaff8492d525bd258d49eb388e', 'eidoo', 18),
     new TokenEntry(Token.BLOCKV, 'BLOCKv', 'VEE', '0x340d2bde5eb28c1eed91b2f790723e3b160613b7', 'blockv', 18),
-    new TokenEntry(Token.CYBERMILES, 'CyberMiles', 'CMT', '0xf85feea2fdd81d51177f6b8f35f0e6734ce45f5f', 'cyberMiles',18),
+    new TokenEntry(Token.CYBERMILES, 'CyberMiles', 'CMT', '0xf85feea2fdd81d51177f6b8f35f0e6734ce45f5f', 'cyberMiles', 18),
     new TokenEntry(Token.RIPIO_CREDIT_NETWORK, 'Ripio Credit Network', 'RCN', '0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6', 'ripioCreditNetwork', 18),
     new TokenEntry(Token.TELCOIN, 'Telcoin', 'TEL', '0x85e076361cc813a908ff672f9bad1541474402b2', 'telcoin', 2),
     new TokenEntry(Token.VIBE, 'VIBE', 'VIBE', '0xe8ff5c9c75deb346acac493c463c8950be03dfba', 'vibe', 18),
@@ -256,7 +257,7 @@ export class KeyChainService {
 
   setSeed(seed) {
     this._seed = Buffer.from(seed);
-    this.keyChain = this._seed ? CryptoCore.KeyChain.fromSeed(Buffer.from(seed)) : null;
+    this.keyChain = this._seed ? KeyChain.fromSeed(Buffer.from(seed)) : null;
   }
 
   reset() {
