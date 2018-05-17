@@ -15,7 +15,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
-import { BN } from 'crypto-core-async';
+import BN from 'bn.js';
 
 enum Phase {
   Creation,
@@ -90,11 +90,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public currencyWallet: CurrencyWallet = null;
 
   public address: BehaviorSubject<string> = null;
-  public balance: BehaviorSubject<any> = null;
+  public balance: BehaviorSubject<BN> = null;
   public receiver: BehaviorSubject<string> = null;
-  public amount: BehaviorSubject<any> = null;
-  public fee: BehaviorSubject<any> = null;
-  public feePrice: BehaviorSubject<any> = null;
+  public amount: BehaviorSubject<BN> = null;
+  public fee: BehaviorSubject<BN> = null;
+  public feePrice: BehaviorSubject<BN> = null;
   public estimatedSize: BehaviorSubject<number> = null;
 
   public subtractFee: BehaviorSubject<boolean> = null;
@@ -161,9 +161,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           1);
 
         this.receiver = new BehaviorSubject<string>('');
-        this.amount = new BehaviorSubject<any>(new BN());
-        this.feePrice = new BehaviorSubject<any>(new BN(this.currencyInfo.gasPrice));
-        this.fee = new BehaviorSubject<any>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
+        this.amount = new BehaviorSubject<BN>(new BN());
+        this.feePrice = new BehaviorSubject<BN>(new BN(this.currencyInfo.gasPrice));
+        this.fee = new BehaviorSubject<BN>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
         this.subtractFee = new BehaviorSubject<boolean>(false);
 
         this.sufficientBalance = toBehaviourSubject(combineLatest([
