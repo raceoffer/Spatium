@@ -88,7 +88,7 @@ export class LoginComponent implements AfterViewInit {
         }
       } while (true);
     } catch (ignored) {
-      this.notification.show('No network connection');
+      this.notification.show('DDS is unavailable');
       this.usernameState = State.Error;
     }
   }
