@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest } from 'rxjs';
 import { BluetoothService, Device } from '../../../services/bluetooth.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';

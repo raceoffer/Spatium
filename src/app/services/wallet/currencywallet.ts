@@ -1,9 +1,7 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject ,  Observable ,  Subject } from 'rxjs';
 import { BluetoothService } from '../bluetooth.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
-import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 

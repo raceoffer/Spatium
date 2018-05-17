@@ -1,12 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
-import 'rxjs/add/operator/distinctUntilChanged';
 
-import 'rxjs/add/operator/mapTo';
-import 'rxjs/add/operator/skip';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { Subject } from 'rxjs/Subject';
+
+
+
+import { BehaviorSubject ,  Observable ,  combineLatest ,  Subject } from 'rxjs';
 
 import { LoggerService } from './logger.service';
 

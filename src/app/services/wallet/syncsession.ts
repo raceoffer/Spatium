@@ -1,7 +1,5 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
 import { BluetoothService } from '../bluetooth.service';
 import { LoggerService } from '../logger.service';
 

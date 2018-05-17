@@ -16,8 +16,8 @@ import {
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import 'rxjs/add/operator/take';
-import { Subject } from 'rxjs/Subject';
+
+import { Subject } from 'rxjs';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
 import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';

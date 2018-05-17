@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';

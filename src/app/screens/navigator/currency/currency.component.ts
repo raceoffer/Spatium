@@ -3,9 +3,7 @@ import {
   animate, transition, trigger, style
 } from '@angular/animations';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { fromPromise } from 'rxjs/observable/fromPromise';
+import { BehaviorSubject ,  combineLatest ,  from as fromPromise } from 'rxjs';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';

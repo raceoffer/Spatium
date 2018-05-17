@@ -2,7 +2,7 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 

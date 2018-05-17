@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';

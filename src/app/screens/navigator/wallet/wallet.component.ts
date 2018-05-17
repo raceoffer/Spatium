@@ -7,7 +7,7 @@ import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.se
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest } from 'rxjs';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const navigator: any;

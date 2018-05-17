@@ -4,7 +4,7 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 declare const Buffer: any;
 

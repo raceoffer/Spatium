@@ -5,10 +5,10 @@ import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/of';
+import { Observable } from 'rxjs';
+
+
+
 
 declare const Utils: any;
 declare const cordova: any;

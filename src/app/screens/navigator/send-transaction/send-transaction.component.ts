@@ -2,9 +2,8 @@ import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
-import 'rxjs/add/operator/mergeMap';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+
+import { BehaviorSubject ,  combineLatest } from 'rxjs';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';

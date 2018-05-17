@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import 'rxjs/add/observable/timer';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+
+import { BehaviorSubject ,  Observable } from 'rxjs';
 
 interface CoinMarketCupResponse {
   id: string;

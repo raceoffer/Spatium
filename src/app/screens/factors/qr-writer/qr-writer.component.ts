@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import { FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 

@@ -1,12 +1,10 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/takeUntil';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+
+
+
+
+import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
