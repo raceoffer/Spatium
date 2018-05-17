@@ -2,7 +2,7 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs';
+import { timer  } from 'rxjs';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
@@ -74,7 +74,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -101,7 +101,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -128,7 +128,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    await Observable.timer(1000).toPromise();
+    await timer(1000).toPromise();
     return [];
   }
 

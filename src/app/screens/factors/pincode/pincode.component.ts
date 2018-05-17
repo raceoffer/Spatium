@@ -2,7 +2,6 @@ import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } f
 import { Router } from '@angular/router';
 import { FactorType } from '../../../services/auth.service';
 
-declare const Buffer: any;
 declare const window: any;
 declare const device: any;
 
@@ -84,23 +83,6 @@ export class PincodeComponent implements OnInit {
 
   async onNext() {
     this.onSuccess.emit({factor: FactorType.PIN, value: this.pincode});
-    /*switch (this.next) {
-      case 'waiting':
-        await this.onNext.emit(this.pincode);
-        break;
-      case 'auth':
-        await this.authService.addAuthFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-        await this.router.navigate(['/auth']);
-        break;
-      case 'registration':
-        await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-        await this.router.navigate(['/registration']);
-        break;
-      case 'factornode':
-        await this.authService.addFactor(FactorType.PIN, Buffer.from(this.pincode, 'utf-8'));
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
-        break;
-    }*/
   }
 
   isWindows(): boolean {

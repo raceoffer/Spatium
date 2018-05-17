@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import { catchError } from 'rxjs/operators';
+import { catchError, mapTo } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
@@ -91,9 +91,10 @@ export class DDSService {
     ).pipe(
       catchError(error => {
         console.log(error);
-        return new ErrorObservable('Something bad happened; please try again later.');
-      })
-    ).mapTo(true);
+        return of('Something bad happened; please try again later.');
+      }),
+      mapTo(true)
+    );
   }
 
   public fromWei(wei: any, coin: string) {

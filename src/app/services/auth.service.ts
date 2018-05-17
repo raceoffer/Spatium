@@ -11,7 +11,6 @@ import { NotificationService } from './notification.service';
 import { LoginComponent } from '../screens/factors/login/login.component';
 import { WorkerService } from './worker.service';
 
-declare const Buffer: any;
 declare const nfc: any;
 declare const device: any;
 

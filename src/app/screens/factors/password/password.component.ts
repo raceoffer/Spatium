@@ -1,8 +1,6 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { FactorType } from '../../../services/auth.service';
 
-declare const Buffer: any;
-
 @Component({
   selector: 'app-password',
   templateUrl: './password.component.html',

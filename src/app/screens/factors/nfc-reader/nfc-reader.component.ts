@@ -15,7 +15,6 @@ import { WorkerService } from '../../../services/worker.service';
 declare const nfc: any;
 declare const ndef: any;
 declare const navigator: any;
-declare const Buffer: any;
 
 import {
   tryUnpackLogin,

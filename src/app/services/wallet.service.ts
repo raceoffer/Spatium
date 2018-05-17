@@ -1,10 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 
-
-
-
-
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
+import { BehaviorSubject,  Observable,  ReplaySubject, timer } from 'rxjs';
+import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
@@ -33,15 +30,19 @@ export class WalletService {
   public tokenWallets = new Map<Token, ERC20Wallet>();
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
-  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Cancelled), false);
-  public failed: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Failed), false);
-  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
-  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
-  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
-  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
-  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Synchronizing)), false);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Ready)), false);
+  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Cancelled)), false);
+  public failed: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Failed)), false);
+  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
+  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
+  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
+  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
+  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
@@ -129,17 +130,17 @@ export class WalletService {
       this.messageSubject.next(JSON.parse(message));
     });
 
-    this.messageSubject
-      .filter(object => object.type === 'verifyTransaction')
-      .map(object => object.content)
-      .subscribe(async content => {
+    this.messageSubject.pipe(
+      filter(object => object.type === 'verifyTransaction'),
+      map(object => object.content),
+    ).subscribe(async content => {
         const wallet = this.currencyWallets.get(content.coin);
         return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
       });
 
-    this.messageSubject
-      .filter(object => object.type === 'cancel')
-      .subscribe(async () => {
+    this.messageSubject.pipe(
+      filter(object => object.type === 'cancel')
+    ).subscribe(async () => {
         // pop the queue
         this.messageSubject.next({});
 
@@ -212,7 +213,7 @@ export class WalletService {
         await wallet.syncDuplicate(ethWallet);
 
         this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
-        await Observable.timer(100).toPromise();
+        await timer(100).toPromise();
 
         tokenIndex++;
       }

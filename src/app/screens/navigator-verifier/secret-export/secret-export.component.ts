@@ -4,7 +4,6 @@ import { AuthService } from '../../../services/auth.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WorkerService } from '../../../services/worker.service';
 
-declare const Buffer: any;
 declare const nfc: any;
 
 import { packSeed } from 'crypto-core-async/lib/utils';

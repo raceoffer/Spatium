@@ -1,23 +1,26 @@
 import {
   AfterViewInit,
-  animate,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
   OnDestroy,
   OnInit,
+  ViewChild
+} from '@angular/core';
+import {
+  animate,
   sequence,
   style,
   transition,
   trigger,
-  ViewChild
-} from '@angular/core';
+} from '@angular/animations';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
 
 import { Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
 import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
@@ -28,7 +31,6 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 
-declare const Buffer: any;
 declare const device: any;
 
 import { packTree, useWorker } from 'crypto-core-async/lib/utils';
@@ -236,7 +238,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       this.authService.currentTree = data;
 
       try {
-        const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();
+        const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
         if (!success) {
           await this.router.navigate(['/backup', { back: 'registration'}]);
           return;

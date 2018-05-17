@@ -6,7 +6,6 @@ import { NotificationService } from '../../../services/notification.service';
 declare const cordova: any;
 declare const device: any;
 declare const window: any;
-declare const Buffer: any;
 
 @Component({
   selector: 'app-qr-writer',

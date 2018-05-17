@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  animate,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -8,12 +7,15 @@ import {
   OnDestroy,
   OnInit,
   NgZone,
+  ViewChild
+} from '@angular/core';
+import {
+  animate,
   sequence,
   style,
   transition,
   trigger,
-  ViewChild
-} from '@angular/core';
+} from '@angular/animations';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
@@ -206,5 +208,3 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 }
-
-

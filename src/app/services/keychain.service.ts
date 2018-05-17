@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 
 import { KeyChain } from 'crypto-core-async';
 
-declare const Buffer: any;
 
 export enum Coin {
   BTC = 0,

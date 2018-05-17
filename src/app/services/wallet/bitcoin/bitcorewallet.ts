@@ -4,9 +4,8 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { timer } from 'rxjs';
 
-declare const Buffer: any;
 
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -61,7 +60,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
