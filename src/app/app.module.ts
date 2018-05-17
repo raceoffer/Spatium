@@ -25,7 +25,6 @@ import {
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -158,8 +157,7 @@ import { WorkerService } from './services/worker.service';
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule,
-    ZXingScannerModule.forRoot()
+    QRCodeModule
   ],
   providers: [
     WorkerService,
