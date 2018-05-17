@@ -94,7 +94,6 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
         if (this.hasTouchId) {
           try {
             if (await this.saveTouchPassword(pincode)) {
-              console.log('Password saved ' + pincode);
               await this.savePin(aesKey);
             }
           } catch (e) {

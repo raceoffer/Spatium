@@ -3,7 +3,8 @@
 const path = require('path');
 
 module.exports = {
-  entry: './lib/webworker.js',
+  entry: './webworker.js',
+  devtool: 'source-map',
   output: {
     path: __dirname,
     filename: 'webworker.bundle.js'

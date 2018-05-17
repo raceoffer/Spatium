@@ -1,9 +1,3 @@
-import PromiseWorker from 'promise-worker';
-
-export function createWorker() {
-  return new PromiseWorker(new Worker('webworker.bundle.js'));
-}
-
 export { default as BN } from 'bn.js';
 
 export { KeyChain } from 'crypto-core/lib/primitives/keychain';
@@ -29,3 +23,5 @@ export { EthereumTransaction } from './lib/ethereumtransaction';
 
 import * as Utils from './lib/utils';
 export { Utils };
+
+export { createWorker } from './lib/createworker';

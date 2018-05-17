@@ -58,15 +58,11 @@ registerPromiseWorker(async message => {
         'message.method should be an instance method of ' + message.class
       );
 
-      console.log(message.action, message.method, objectClass, message.arguments);
-
       const result = await invoke(
         self,
         message.method,
         ... map(defaultTo(message.arguments, []), unwrap)
       );
-
-      console.log(result);
 
       return {
         result: wrap(result),
@@ -78,16 +74,10 @@ registerPromiseWorker(async message => {
         'message.method should be one of ' + keys(CryptoCore)
       );
 
-      console.log(message.action, message.method, objectClass, message.arguments);
-
-      const rr = wrap(await invoke(
+      return wrap(await invoke(
         objectClass,
         message.method,
         ... map(defaultTo(message.arguments, []), unwrap)
       ));
-
-      console.log(rr);
-
-      return rr;
   }
 });
