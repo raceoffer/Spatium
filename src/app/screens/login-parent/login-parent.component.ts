@@ -149,7 +149,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
           }
         }
       } catch (ignored) {
-        this.notification.show('No network connection');
+        this.notification.show('DDS is unavailable');
         this.ngZone.run(async () => {
           this.buttonState = State.Error;
         });
@@ -182,7 +182,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       } while (true);
     } catch (ignored) {
       console.log(ignored);
-      this.notification.show('No network connection');
+      this.notification.show('DDS is unavailable');
       this.ngZone.run(async () => {
         this.usernameState = State.Error;
         this.buttonState = State.Error;

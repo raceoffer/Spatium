@@ -13,7 +13,7 @@
   <button mat-icon-button (click)="toggleSearch(true)">
     <mat-icon>search</mat-icon>
   </button>
-  <button mat-icon-button (click)="cancelSync()" *ngIf="!(synchronizing | async) && !(cancelled | async) && !(failed | async)">
+  <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(cancelled | async) && !(failed | async)">
     <mat-icon>sync</mat-icon>
   </button>
   <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && ((cancelled | async) || (failed | async))">
@@ -30,7 +30,7 @@
     <mat-icon>arrow_back</mat-icon>
   </button>
   <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
-    <input placeholder="Search" name="UserName" [(ngModel)]="filterValue">
+    <input type="text" placeholder="Search" name="UserName" [(ngModel)]="filterValue" [autofocus]>
   </div>
 
   <button mat-button mat-icon-button (click)="clearFilterValue()">
