@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, OnInit } from '@angular/core';
 
 import { BehaviorSubject ,  Observable ,  combineLatest ,  Subject } from 'rxjs';
 import { skip, filter, distinctUntilChanged, mapTo, map } from 'rxjs/operators';
@@ -6,6 +6,7 @@ import { skip, filter, distinctUntilChanged, mapTo, map } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
 
 declare const cordova: any;
+declare const window: any;
 
 enum State {
   OFF = 0x0000000a,
@@ -27,7 +28,7 @@ export class Device {
 }
 
 @Injectable()
-export class BluetoothService {
+export class BluetoothService implements OnInit {
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.OFF);
 
   public enabled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -69,7 +70,11 @@ export class BluetoothService {
       x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true)));
   public message: Subject<string> = new Subject<string>();
 
-  constructor(private ngZone: NgZone) {
+  constructor(private readonly ngZone: NgZone) {}
+
+  async ngOnInit() {
+    await window.deviceReady;
+
     this.state.subscribe(state => this.enabled.next(state === State.ON));
     this.connectedDevice.subscribe(device => this.connected.next(device !== null));
 

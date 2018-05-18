@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
 import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
@@ -13,11 +13,12 @@ import { WorkerService } from './worker.service';
 
 declare const nfc: any;
 declare const device: any;
+declare const window: any;
 
 import { sha256, matchPassphrase, useWorker } from 'crypto-core-async/lib/utils';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnInit {
   login: string;
   password: string;
   loginType: LoginType;
@@ -37,12 +38,18 @@ export class AuthService {
 
   stFactorError = 'Incorrect factor ';
 
+  static async toId(name: string) {
+    return (await sha256(Buffer.from(name, 'utf-8'))).toString('hex');
+  }
+
   constructor(
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
   ) {
     useWorker(workerService.worker);
+  }
 
+  async ngOnInit() {
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
       FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
@@ -65,6 +72,8 @@ export class AuthService {
         FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
     };
 
+    await window.deviceReady;
+
     nfc.enabled(addNFCFactor, (e) => {
       if (e === 'NO_NFC') {
         return;
@@ -74,10 +83,6 @@ export class AuthService {
       }
       addNFCFactor();
     });
-  }
-
-  static async toId(name: string) {
-    return (await sha256(Buffer.from(name, 'utf-8'))).toString('hex');
   }
 
   getAllAvailableFactors() {
