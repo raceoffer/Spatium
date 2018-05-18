@@ -59,6 +59,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public currencyWallets = this.wallet.currencyWallets;
   synchronizing = this.wallet.synchronizing;
   ready = this.wallet.ready;
+  progress = this.wallet.syncProgress;
   @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
