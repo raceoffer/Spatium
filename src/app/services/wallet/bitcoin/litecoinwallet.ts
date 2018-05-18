@@ -30,6 +30,6 @@ export class LitecoinWallet extends BitcoreWallet {
 
   public verifyAddress(address: string) : boolean {
     return address &&
-           /^[Lm][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+           /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
   }
 }
