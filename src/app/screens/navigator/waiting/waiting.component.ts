@@ -92,7 +92,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('');
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

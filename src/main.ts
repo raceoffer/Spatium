@@ -22,7 +22,3 @@ document.addEventListener('deviceready', () => {
     window.MobileAccessibility.usePreferredTextZoom(false);
   }
 }, false);
-
-console.log(window.MobileAccessibility);
-
-

@@ -43,7 +43,7 @@ export class PincodeComponent implements OnInit {
           }
         }, () => {
           this.hasTouchId.emit(false);
-          console.log('no touch id');
+          console.log('Touch ID is not supported');
         });
       }
     }

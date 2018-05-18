@@ -130,7 +130,6 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         });
 
         const exists = await this.dds.exists(await AuthService.toId(input));
-        console.log(exists);
         if (input !== this.input) { // in case of updates to userName during lookup
           return;
         }
