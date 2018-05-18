@@ -150,6 +150,24 @@ export class WalletService {
           await wallet.cancelSync();
         }
       });
+
+    this.messageSubject
+      .filter(object => object.type === 'syncStarted')
+      .map(object => object.content)
+      .subscribe(async content => {
+        console.log("Sync started for: " + content.coin);
+        const wallet = this.currencyWallets.get(content.coin);
+        return wallet.status.next(Status.Synchronizing);
+      });
+
+    this.messageSubject
+      .filter(object => object.type === 'syncFinished')
+      .map(object => object.content)
+      .subscribe(async content => {
+        console.log("Sync finished for: " + content.coin);
+        const wallet = this.currencyWallets.get(content.coin);
+        return wallet.status.next(Status.Ready);
+      });
   }
 
   public async reset() {
@@ -187,13 +205,13 @@ export class WalletService {
           return;
         }
 
+        this.startSyncCurrency(coinIndex);
         const sub = wallet.syncProgress.subscribe(num => {
           this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
         });
-
         await wallet.sync(paillierKeys);
-
         sub.unsubscribe();
+        this.finishSyncCurrency(coinIndex);
 
         coinIndex++;
       }
@@ -246,6 +264,38 @@ export class WalletService {
 
     for (const wallet of Array.from(this.coinWallets.values())) {
       await wallet.cancelSync();
+    }
+  }
+
+  public async startSyncCurrency(coin) {
+    if (this.status.getValue() !== Status.Synchronizing) {
+      return;
+    }
+
+    try {
+      await this.bt.send(JSON.stringify({
+        type: 'startSync',
+        content: {
+          coin: coin
+        }
+      }));
+    } catch (ignored) {
+    }
+  }
+
+  public async finishSyncCurrency(coin) {
+    if (this.status.getValue() !== Status.Synchronizing) {
+      return;
+    }
+
+    try {
+      await this.bt.send(JSON.stringify({
+        type: 'finishSync',
+        content: {
+          coin: coin
+        }
+      }));
+    } catch (ignored) {
     }
   }
 
