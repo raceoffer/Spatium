@@ -3,9 +3,8 @@ import {
   animate, transition, trigger, style
 } from '@angular/animations';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { fromPromise } from 'rxjs/observable/fromPromise';
+import { BehaviorSubject, combineLatest, from } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -75,10 +74,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
         this.walletAddress = this.currencyWallet.address;
 
         this.balanceCurrencyUnconfirmed = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance ? this.currencyWallet.fromInternal(balance.unconfirmed) : null),
+          this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.unconfirmed) : null)),
           null);
         this.balanceCurrencyConfirmed = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance ? this.currencyWallet.fromInternal(balance.confirmed) : null),
+          this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.confirmed) : null)),
           null);
 
         this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest(
@@ -102,13 +101,13 @@ export class CurrencyComponent implements OnInit, OnDestroy {
           }), null);
 
         this.transactions = toBehaviourSubject(
-          fromPromise(this.currencyWallet.listTransactionHistory()),
+          from(this.currencyWallet.listTransactionHistory()),
           null);
 
         this.subscriptions.push(
           this.currencyWallet.readyEvent.subscribe(() => {
             this.transactions = toBehaviourSubject(
-              fromPromise(this.currencyWallet.listTransactionHistory()),
+              from(this.currencyWallet.listTransactionHistory()),
               null);
           })
         );

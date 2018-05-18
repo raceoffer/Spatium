@@ -3,7 +3,7 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
-declare const CryptoCore: any;
+import { LitecoinTransaction, LitecoinWallet as CoreLitecoinWallet } from 'crypto-core-async';
 
 export class LitecoinWallet extends BitcoreWallet {
   constructor(
@@ -16,8 +16,8 @@ export class LitecoinWallet extends BitcoreWallet {
     ngZone: NgZone
   ) {
     super(
-      CryptoCore.LitecoinTransaction,
-      CryptoCore.LitecoinWallet,
+      LitecoinTransaction,
+      CoreLitecoinWallet,
       endpoint,
       network,
       keychain,
@@ -28,7 +28,7 @@ export class LitecoinWallet extends BitcoreWallet {
       ngZone);
   }
 
-  public verifyAddress(address: string) : boolean {
+  public verifyAddress(address: string): boolean {
     return address &&
            /^[Lm][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
   }

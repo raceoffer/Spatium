@@ -19,4 +19,11 @@ module.exports = function(context) {
         cwd: basePath
       }).toString('utf8')
     );
+  console.log(execSync(
+      "copy /b/v/y " + sourceFile + ".map" + " " + targetDirectory,
+      {
+        maxBuffer: 1024*1024,
+        cwd: basePath
+      }).toString('utf8')
+    );
 };

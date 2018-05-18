@@ -3,9 +3,7 @@ import { AuthService } from '../../../services/auth.service';
 import { FactorType } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-declare const CryptoCore: any;
+import { BehaviorSubject } from 'rxjs';
 
 enum State {
   Ready,
@@ -88,7 +86,7 @@ export class LoginComponent implements AfterViewInit {
         }
       } while (true);
     } catch (ignored) {
-      this.notification.show('No network connection');
+      this.notification.show('DDS is unavailable');
       this.usernameState = State.Error;
     }
   }

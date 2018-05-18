@@ -1,6 +1,4 @@
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { Observable ,  BehaviorSubject ,  ReplaySubject } from 'rxjs';
 
 export function toBehaviourSubject<T>(observable: Observable<T>, def: T): BehaviorSubject<T> {
   const subject = new BehaviorSubject<T>(def);

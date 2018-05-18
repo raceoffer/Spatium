@@ -5,10 +5,11 @@ import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/of';
+import { Observable, from, of } from 'rxjs';
+import { mapTo, catchError } from 'rxjs/operators';
+
+
+
 
 declare const Utils: any;
 declare const cordova: any;
@@ -136,10 +137,10 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   async save() {
     this.saving = true;
-    Observable.fromPromise(this.account.store(this.id, this.data, this.gasPrice))
-    .mapTo(true)
-    .catch(ignored => { console.log(ignored); return Observable.of(false); })
-    .subscribe(async (success) => {
+    from(this.account.store(this.id, this.data, this.gasPrice)).pipe(
+      mapTo(true),
+      catchError(ignored => { console.log(ignored); return of(false); })
+    ).subscribe(async (success) => {
         if (!success) {
           this.saving = false;
           this.notification.show('Failed to upload the secret');
@@ -149,7 +150,7 @@ export class BackupComponent implements OnInit, OnDestroy {
         this.notification.show('Successfully uploaded the secret');
 
         switch (this.next) {
-            case "reg-success":
+            case 'reg-success':
                 await this.router.navigate(['/reg-success']);
                 break;
             case 'wallet':

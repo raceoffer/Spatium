@@ -5,24 +5,23 @@ import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 declare const window: any;
-const cordovaScript = document.createElement('script');
 
+const cordovaScript = document.createElement('script');
 cordovaScript.setAttribute('src', 'cordova.js');
 document.body.appendChild(cordovaScript);
 
-document.addEventListener('deviceready', () => {
-  if (environment.production) {
-    enableProdMode();
-  }
+window.deviceReady = new Promise((resolve, reject) => {
+  document.addEventListener('deviceready', () => {
+    resolve();
+  }, false);
+});
 
-  platformBrowserDynamic().bootstrapModule(AppModule)
-    .catch(err => console.log(err));
+if (environment.production) {
+  enableProdMode();
+}
 
-  if (window.MobileAccessibility) {
-    window.MobileAccessibility.usePreferredTextZoom(false);
-  }
-}, false);
+platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.log(err));
 
-console.log(window.MobileAccessibility);
-
-
+if (window.MobileAccessibility) {
+  window.MobileAccessibility.usePreferredTextZoom(false);
+}

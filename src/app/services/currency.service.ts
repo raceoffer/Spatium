@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
+
+import { map, distinctUntilChanged } from 'rxjs/operators';
 
 export class Info {
   name: string;
@@ -86,7 +88,10 @@ export class CurrencyService {
       20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('BTC') || null),
+          distinctUntilChanged()
+        ),
         null)
     )],
     [Coin.BTC_test, new Info(
@@ -96,7 +101,10 @@ export class CurrencyService {
       20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BTC') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('BTC') || null),
+          distinctUntilChanged()
+        ),
         null)
     )],
     [Coin.BCH, new Info(
@@ -106,7 +114,10 @@ export class CurrencyService {
       20,
       'BTC/kb',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('BCH') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('BCH') || null),
+          distinctUntilChanged()
+        ),
         null)
     )],
     [Coin.ETH, new Info(
@@ -116,7 +127,10 @@ export class CurrencyService {
       2000000000,
       'ETH/gas',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('ETH') || null),
+          distinctUntilChanged()
+        ),
         null)
     )],
     [Coin.LTC, new Info(
@@ -126,7 +140,10 @@ export class CurrencyService {
       20,
       'LTC/kb',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('LTC') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('LTC') || null),
+          distinctUntilChanged()
+        ),
         null)
     )],
   ]);
@@ -157,10 +174,16 @@ export class CurrencyService {
       2000000000,
       'ETH/gas',
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get(tokenEntry.ico) || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get(tokenEntry.ico) || null),
+          distinctUntilChanged()
+        ),
         null),
       bsHelper.toBehaviourSubject(
-        this.currencyPriceService.availableCurrencies.map(ac => ac.get('ETH') || null).distinctUntilChanged(),
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('ETH') || null),
+          distinctUntilChanged()
+        ),
         null),
       tokenEntry.className
     );
