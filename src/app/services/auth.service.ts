@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
 import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
 import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
@@ -10,15 +10,15 @@ import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.compon
 import { NotificationService } from './notification.service';
 import { LoginComponent } from '../screens/factors/login/login.component';
 import { WorkerService } from './worker.service';
+import { DeviceService } from './device.service';
 
 declare const nfc: any;
 declare const device: any;
-declare const window: any;
 
 import { sha256, matchPassphrase, useWorker } from 'crypto-core-async/lib/utils';
 
 @Injectable()
-export class AuthService implements OnInit {
+export class AuthService {
   login: string;
   password: string;
   loginType: LoginType;
@@ -43,13 +43,17 @@ export class AuthService implements OnInit {
   }
 
   constructor(
+    private readonly deviceService: DeviceService,
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
   ) {
     useWorker(workerService.worker);
+    this.init();
   }
 
-  async ngOnInit() {
+  private async init() {
+    await this.deviceService.deviceReady();
+
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
       FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
@@ -71,8 +75,6 @@ export class AuthService implements OnInit {
       this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
         FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
     };
-
-    await window.deviceReady;
 
     nfc.enabled(addNFCFactor, (e) => {
       if (e === 'NO_NFC') {

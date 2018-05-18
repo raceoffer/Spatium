@@ -1,20 +1,27 @@
-import { Injectable, NgZone, OnInit } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material';
+import { DeviceService } from './device.service';
 
-declare const window: any;
 declare const cordova: any;
 
 @Injectable()
-export class NotificationService implements OnInit {
+export class NotificationService {
   public confirm: Subject<any> = new Subject<any>();
   public decline: Subject<any> = new Subject<any>();
   snackBarRef: MatSnackBarRef<any>;
 
-  constructor(private readonly ngZone: NgZone, private snackBar: MatSnackBar) {}
+  constructor(
+    private readonly deviceService: DeviceService,
+    private readonly ngZone: NgZone,
+    private snackBar: MatSnackBar
+  ) {
+    this.init();
+  }
 
-  async ngOnInit() {
-    await window.deviceReady;
+  private async init() {
+    await this.deviceService.deviceReady();
+
     cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
       this.confirm.next();
     }));

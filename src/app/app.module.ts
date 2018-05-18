@@ -82,6 +82,7 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
+import { DeviceService } from './services/device.service';
 
 @NgModule({
   declarations: [
@@ -160,6 +161,7 @@ import { WorkerService } from './services/worker.service';
     QRCodeModule
   ],
   providers: [
+    DeviceService,
     WorkerService,
     WalletService,
     CurrencyPriceService,

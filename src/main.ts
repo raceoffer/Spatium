@@ -10,12 +10,6 @@ const cordovaScript = document.createElement('script');
 cordovaScript.setAttribute('src', 'cordova.js');
 document.body.appendChild(cordovaScript);
 
-window.deviceReady = new Promise((resolve, reject) => {
-  document.addEventListener('deviceready', () => {
-    resolve();
-  }, false);
-});
-
 if (environment.production) {
   enableProdMode();
 }

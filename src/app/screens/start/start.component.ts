@@ -3,11 +3,11 @@ import { NavigationStart, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NavigationService } from '../../services/navigation.service';
+import { DeviceService } from '../../services/device.service';
 
 declare const navigator: any;
 declare const device: any;
 declare const Windows: any;
-declare const window: any;
 
 @Component({
   selector: 'app-start',
@@ -21,13 +21,14 @@ export class StartComponent implements OnInit, OnDestroy {
   public isWindows = null;
 
   constructor(
+    private readonly deviceService: DeviceService,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly fs: FileService,
     private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
-    await window.deviceReady;
+    await this.deviceService.deviceReady();
 
     this.ready = true;
     this.isWindows = device.platform === 'windows';
