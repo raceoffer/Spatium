@@ -34,11 +34,19 @@ export class ConnectComponent implements OnInit {
     for (const coin of Array.from(this.wallet.coinWallets.keys())) {
       const info = this.currencyService.getInfo(coin);
       const wallet = this.wallet.coinWallets.get(coin);
-      this.coins.push({
-        title: info.symbol,
-        synchronizing: toBehaviourSubject(wallet.status.map(status => status === Status.Synchronizing || status === Status.Ready), false),
-        ready: toBehaviourSubject(wallet.status.map(status => status === Status.Ready), false)
-      });
+
+      this.subscriptions.push(
+        wallet.status
+          .take(1)
+          .subscribe(async () => {
+          this.coins.push({
+            title: info.symbol,
+            synchronizing: toBehaviourSubject(wallet.status.map(status => status === Status.Synchronizing || status === Status.Ready), false),
+            ready: toBehaviourSubject(wallet.status.map(status => status === Status.Ready), false)
+          })
+        })
+      );
+
     }
 
   }
