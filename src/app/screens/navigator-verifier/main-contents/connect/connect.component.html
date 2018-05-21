@@ -5,9 +5,9 @@
   (backClicked)="onBackClicked()"></app-toolbar>
 
 <div fxLayout="column" class="box">
-  <mat-list>
+  <mat-list class="list">
     <mat-list-item *ngFor="let coin of coins">
-      <span *ngIf="coin.synchronizing | async">
+      <span>
         Syncing {{ coin.title }}...&nbsp;
       </span>
       <span *ngIf="coin.ready | async">

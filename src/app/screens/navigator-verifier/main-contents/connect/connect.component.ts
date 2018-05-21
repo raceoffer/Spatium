@@ -6,7 +6,7 @@ import { NavigationService } from '../../../../services/navigation.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { CurrencyWallet, Status } from '../../../../services/wallet/currencywallet';
 
-import { take, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-connect',
@@ -41,11 +41,12 @@ export class ConnectComponent implements OnInit {
 
       this.subscriptions.push(
         wallet.status.pipe(
+          filter(status => status === Status.Synchronizing || status === Status.Ready),
           take(1)
-        ).subscribe(async () => {
+        )
+        .subscribe(async () => {
           this.coins.push({
             title: info.symbol,
-            synchronizing: toBehaviourSubject(wallet.status.pipe(map(status => status === Status.Synchronizing || status === Status.Ready)), false),
             ready: toBehaviourSubject(wallet.status.pipe(map(status => status === Status.Ready)), false)
           })
         })
