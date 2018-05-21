@@ -17,8 +17,7 @@ module.exports = function(context) {
     console.log(execSync(
       webpackCommand,
       {
-        maxBuffer: 1024 * 1024,
-        cwd: basePath + '/../src/crypto-core-async'
+        maxBuffer: 1024 * 1024
       }).toString('utf8')
     );
   }
