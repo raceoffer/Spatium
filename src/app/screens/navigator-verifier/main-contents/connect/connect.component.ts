@@ -43,10 +43,9 @@ export class ConnectComponent implements OnInit {
         wallet.status.pipe(
           filter(status => status === Status.Synchronizing || status === Status.Ready),
           take(1)
-        )
-        .subscribe(async () => {
+        ).subscribe(async () => {
           this.coins.push({
-            title: info.symbol,
+            name: info.name,
             ready: toBehaviourSubject(wallet.status.pipe(map(status => status === Status.Ready)), false)
           })
         })
