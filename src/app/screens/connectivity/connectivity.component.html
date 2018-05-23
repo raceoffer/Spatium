@@ -1,0 +1,77 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <mat-nav-list style="width: 100%;">
+    <mat-list-item *ngFor="let device of (connectivityService.devices | async).values()">
+      <p class="list-name" mat-line>Spatium v{{ device.version }} at {{ device.name }}</p>
+      <p class="list-info" mat-line>{{ device.ipv6 }} : {{ device.port }}</p>
+    </mat-list-item>
+  </mat-nav-list>
+
+  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.discovering | async) === stateType.Stopped"
+      (click)="startDiscovery()">
+      Start discovery
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.discovering | async) === stateType.Starting"
+      disabled>
+      Starting...
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.discovering | async) === stateType.Started"
+      (click)="stopDiscovery()">
+      Stop discovery
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.discovering | async) === stateType.Stopping"
+      disabled>
+      Stopping...
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.advertising | async) === stateType.Stopped"
+      (click)="startAdvertising()">
+      Start advertising
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.advertising | async) === stateType.Starting"
+      disabled>
+      Starting...
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.advertising | async) === stateType.Started"
+      (click)="stopAdvertising()">
+      Stop advertising
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="(connectivityService.advertising | async) === stateType.Stopping"
+      disabled>
+      Stopping...
+    </button>
+  </div>
+</div>
+
