@@ -82,8 +82,10 @@ import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
-import { ConnectivityService } from './services/connectivity.service';
+import { SocketServerService } from './services/socketserver.service';
+import { SocketClientService } from './services/socketclient.service';
 import { ConnectivityComponent } from './screens/connectivity/connectivity.component';
+import { DiscoveryService } from './services/discovery.service';
 
 @NgModule({
   declarations: [
@@ -176,7 +178,9 @@ import { ConnectivityComponent } from './screens/connectivity/connectivity.compo
     CurrencyService,
     NavigationService,
     FactorParentOverlayService,
-    ConnectivityService
+    DiscoveryService,
+    SocketServerService,
+    SocketClientService
   ],
   bootstrap: [
     AppComponent

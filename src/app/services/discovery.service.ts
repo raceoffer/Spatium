@@ -3,6 +3,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const cordova: any;
+declare const window: any;
 
 export enum State {
   Starting,
@@ -12,7 +13,7 @@ export enum State {
 }
 
 @Injectable()
-export class ConnectivityService {
+export class DiscoveryService {
   public advertising: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
   public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
   public devices: BehaviorSubject<Map<string, object>> = new BehaviorSubject<Map<string, object>>(new Map<string, object>());
@@ -38,9 +39,11 @@ export class ConnectivityService {
     this.advertising.next(State.Starting);
 
     const hostname = await this.getHostName();
+    const ip: any = await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject));
     return await new Promise((resolve, reject) => {
       cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
-        version: '0.0001'
+        version: '0.0001',
+        ip: ip.ip
       }, () => this.ngZone.run(() => {
         this.advertising.next(State.Started);
         resolve();
@@ -91,6 +94,7 @@ export class ConnectivityService {
               name: service.name,
               ipv4: service.ipv4Addresses,
               ipv6: service.ipv6Addresses,
+              ip: service.txtRecord.ip,
               port: service.port,
               version: service.txtRecord.version
             });
