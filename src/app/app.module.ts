@@ -86,6 +86,7 @@ import { SocketServerService } from './services/socketserver.service';
 import { SocketClientService } from './services/socketclient.service';
 import { ConnectivityComponent } from './screens/connectivity/connectivity.component';
 import { DiscoveryService } from './services/discovery.service';
+import { ConnectivityService } from './services/connectivity.service';
 
 @NgModule({
   declarations: [
@@ -180,7 +181,8 @@ import { DiscoveryService } from './services/discovery.service';
     FactorParentOverlayService,
     DiscoveryService,
     SocketServerService,
-    SocketClientService
+    SocketClientService,
+    ConnectivityService
   ],
   bootstrap: [
     AppComponent
