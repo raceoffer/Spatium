@@ -7,12 +7,8 @@ import { Observable } from 'rxjs/Observable';
 
 declare const cordova: any;
 
-export enum State {
-  Starting,
-  Started,
-  Stopping,
-  Stopped
-}
+import { State } from './discovery.service';
+export { State } from './discovery.service';
 
 @Injectable()
 export class SocketServerService {
@@ -26,7 +22,7 @@ export class SocketServerService {
   public connectedEvent: Observable<any> = this.connectedChanged.filter(connected => connected).mapTo(null);
   public disconnectedEvent: Observable<any> = this.connectedChanged.filter(connected => !connected).mapTo(null);
 
-  constructor(private ngZone: NgZone) { }
+  constructor(private ngZone: NgZone) {}
 
   public async start() {
     if (this.state.getValue() !== State.Stopped) {

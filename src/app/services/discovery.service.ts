@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 
 declare const cordova: any;
 declare const window: any;
@@ -75,49 +76,41 @@ export class DiscoveryService {
     });
   }
 
-  async startDiscovery() {
+  async searchDevices(duration: number) {
     if (this.discovering.getValue() !== State.Stopped) {
       return;
     }
 
     this.devices.next(new Map<string, object>());
+    this.discovering.next(State.Starting);
+
+    cordova.plugins.zeroconf.watch('_spatium._tcp.', 'local.',
+      result => this.ngZone.run(() => {
+        const action = result.action;
+        const service = result.service;
+        if (action === 'resolved') {
+          const devices = this.devices.getValue();
+
+          devices.set(service.name, {
+            name: service.name,
+            ipv4: service.ipv4Addresses,
+            ipv6: service.ipv6Addresses,
+            ip: service.txtRecord.ip,
+            port: service.port,
+            version: service.txtRecord.version
+          });
+
+          this.devices.next(devices);
+        }
+      }));
+
     this.discovering.next(State.Started);
 
-    return await new Promise((resolve, reject) => {
-      cordova.plugins.zeroconf.watch('_spatium._tcp.', 'local.',
-        result => this.ngZone.run(() => {
-          const action = result.action;
-          const service = result.service;
-          if (action === 'added') {
-          } else if (action === 'resolved') {
-            this.setDevice(service.name, {
-              name: service.name,
-              ipv4: service.ipv4Addresses,
-              ipv6: service.ipv6Addresses,
-              ip: service.txtRecord.ip,
-              port: service.port,
-              version: service.txtRecord.version
-            });
-          } else {
-            this.removeDevice(service.name);
-          }
-          resolve();
-        }), error => this.ngZone.run(() => {
-          this.discovering.next(State.Stopped);
-          console.log(error);
-          reject(error);
-        }));
-    });
-  }
-
-  async stopDiscovery() {
-    if (this.discovering.getValue() !== State.Started) {
-      return;
-    }
+    await Observable.timer(duration).toPromise();
 
     this.discovering.next(State.Stopping);
 
-    return await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       cordova.plugins.zeroconf.close(
         () => this.ngZone.run(() => {
           this.discovering.next(State.Stopped);
@@ -128,21 +121,5 @@ export class DiscoveryService {
           reject(error);
         }));
     });
-  }
-
-  private setDevice(key: string, value: object): void {
-    const devices = this.devices.getValue();
-
-    devices.set(key, value);
-
-    this.devices.next(devices);
-  }
-
-  private removeDevice(key): void {
-    const devices = this.devices.getValue();
-
-    devices.delete(key);
-
-    this.devices.next(devices);
   }
 }

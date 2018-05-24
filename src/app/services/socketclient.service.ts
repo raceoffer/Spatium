@@ -23,7 +23,7 @@ export class SocketClientService {
   public connectedEvent: Observable<any> = this.connectedChanged.filter(connected => connected).mapTo(null);
   public disconnectedEvent: Observable<any> = this.connectedChanged.filter(connected => !connected).mapTo(null);
 
-  constructor(private ngZone: NgZone) { }
+  constructor(private ngZone: NgZone) {}
 
   public connect(ip: string) {
     if (this.state.getValue() !== State.None) {

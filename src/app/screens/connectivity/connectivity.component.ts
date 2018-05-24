@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DiscoveryService, State } from '../../services/discovery.service';
-import { SocketServerService } from '../../services/socketserver.service';
-import { Subject } from 'rxjs/Subject';
-import { SocketClientService, State as SocketState } from '../../services/socketclient.service';
+import { ConnectivityService, ServerState, ConnectionState } from '../../services/connectivity.service';
 
 @Component({
   selector: 'app-connectivity',
@@ -10,50 +7,38 @@ import { SocketClientService, State as SocketState } from '../../services/socket
   styleUrls: ['./connectivity.component.css']
 })
 export class ConnectivityComponent implements OnInit {
-  public stateType: any = State;
-  public socketState: any = SocketState;
-  public socket: WebSocket = null;
-
-  public message = new Subject<any>();
+  public stateType: any = ServerState;
+  public socketState: any = ConnectionState;
 
   constructor(
-    public readonly discoveryService: DiscoveryService,
-    public readonly socketserverService: SocketServerService,
-    public readonly socketclientService: SocketClientService
+    public readonly connectivityService: ConnectivityService
   ) {
-    this.socketserverService.message.subscribe(console.log);
-    this.socketclientService.message.subscribe(console.log);
+    this.connectivityService.message.subscribe(console.log);
 
-    this.socketserverService.connectedEvent.subscribe(() => {
-      this.socketserverService.send({ text: 'hello from server' });
-    });
-
-    this.socketclientService.connectedEvent.subscribe(() => {
-      this.socketclientService.send({ text: 'hello from client' });
+    this.connectivityService.connectedEvent.subscribe(() => {
+      console.log('Fuckin\' connected');
     });
   }
 
   ngOnInit() {}
 
   async startAdvertising() {
-    await this.discoveryService.startAdvertising();
-    await this.socketserverService.start();
+    await this.connectivityService.startListening();
   }
 
   async stopAdvertising() {
-    await this.discoveryService.stopAdvertising();
-    await this.socketserverService.stop();
+    await this.connectivityService.stopListening();
   }
 
-  async startDiscovery() {
-    await this.discoveryService.startDiscovery();
-  }
-
-  async stopDiscovery() {
-    await this.discoveryService.stopDiscovery();
+  async searchDevices() {
+    await this.connectivityService.searchDevices(5 * 1000);
   }
 
   async connectTo(ip, ignored) {
-    await this.socketclientService.connect(ip);
+    await this.connectivityService.connect(ip);
+  }
+
+  sendHello() {
+    this.connectivityService.send({ text: 'hello you' });
   }
 }
