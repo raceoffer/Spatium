@@ -17,7 +17,7 @@ export enum State {
 export class DiscoveryService {
   public advertising: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
   public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-  public devices: BehaviorSubject<Map<string, object>> = new BehaviorSubject<Map<string, object>>(new Map<string, object>());
+  public devices: BehaviorSubject<Map<string, any>> = new BehaviorSubject<Map<string, any>>(new Map<string, any>());
 
   constructor(private ngZone: NgZone) {}
 

@@ -6,8 +6,9 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { merge } from 'rxjs/observable/merge';
 import { SocketServerService, State as ServerState } from './socketserver.service';
 import { Observable } from 'rxjs/Observable';
-import { DiscoveryService } from './discovery.service';
+import { DiscoveryService, State as DiscoveryState } from './discovery.service';
 
+export { DiscoveryState };
 export { ServerState };
 export { ConnectionState };
 
@@ -41,7 +42,7 @@ export class ConnectivityService {
     ServerState.Stopped
   );
 
-  public discoveryState: BehaviorSubject<ServerState> = this.discoveryService.discovering;
+  public discoveryState: BehaviorSubject<DiscoveryState> = this.discoveryService.discovering;
 
   public connected: BehaviorSubject<boolean> = toBehaviourSubject(
     this.connectionState.map(state => state === ConnectionState.Connected),
@@ -52,7 +53,7 @@ export class ConnectivityService {
     false);
 
   public discovering: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.discoveryState.map(state => state === ServerState.Started),
+    this.discoveryState.map(state => state === DiscoveryState.Started),
     false);
 
   public message = toReplaySubject(merge(

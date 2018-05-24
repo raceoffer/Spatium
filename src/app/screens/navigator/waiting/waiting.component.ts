@@ -1,9 +1,10 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { ConnectivityService } from '../../../services/connectivity.service';
+import { ConnectivityService, DiscoveryState } from '../../../services/connectivity.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const navigator: any;
 
@@ -17,20 +18,22 @@ export class WaitingComponent implements OnInit, OnDestroy {
 
   public stLabel = 'Connect to a device';
 
-  public discovering = this.connectivityService.discovering;
+  public discovering = this.connectivityService.discoveryState.map(state => state !== DiscoveryState.Stopped);
   public connected = this.connectivityService.connected;
-  public devices = this.connectivityService.devices.map(devices => devices.values());
+  public devices = toBehaviourSubject(this.connectivityService.devices.map(devices => Array.from<any>(devices.values())), []);
   public ready = this.wallet.ready;
 
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-              private connectivityService: ConnectivityService,
-              private wallet: WalletService,
-              private router: Router,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    public dialog: MatDialog,
+    private connectivityService: ConnectivityService,
+    private wallet: WalletService,
+    private router: Router,
+    private readonly navigationService: NavigationService
+  ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
@@ -42,6 +45,8 @@ export class WaitingComponent implements OnInit, OnDestroy {
         this.wallet.startSync();
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
+
+    await this.connectivityService.searchDevices(5 * 1000);
   }
 
   ngOnDestroy() {
