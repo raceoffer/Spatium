@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SocketClientService, State as ConnectionState } from './socketclient.service';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { toBehaviourSubject } from '../utils/transformers';
+import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { merge } from 'rxjs/observable/merge';
 import { SocketServerService, State as ServerState } from './socketserver.service';
@@ -55,11 +55,11 @@ export class ConnectivityService {
     this.discoveryState.map(state => state === ServerState.Started),
     false);
 
-  public message = merge(
+  public message = toReplaySubject(merge(
     this.socketClientService.message,
     // in order to prevent a mess we ignore messages to the server while the client is connected
     this.socketServerService.message.filter(_ => !this.socketClientService.connected.getValue())
-  );
+  ), 1);
 
   public devices = this.discoveryService.devices;
 
@@ -103,7 +103,7 @@ export class ConnectivityService {
     await this.discoveryService.searchDevices(duration);
   }
 
-  public connect(ip: string) {
+  public connect(ip: string): void {
     this.socketClientService.connect(ip);
   }
 
@@ -115,7 +115,7 @@ export class ConnectivityService {
     this.socketServerService.disconnect();
   }
 
-  public send(message: object): void {
+  public send(message: any): void {
     // in order to prevent a mess we always send messages to the server if it's connected
     if (this.socketServerService.connected.getValue()) {
       this.socketServerService.send(message);

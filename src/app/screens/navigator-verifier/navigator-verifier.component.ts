@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { BluetoothService } from '../../services/bluetooth.service';
+import { ConnectivityService } from '../../services/connectivity.service';
 import { WalletService } from '../../services/wallet.service';
 
 @Component({
@@ -11,32 +11,26 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(private readonly wallet: WalletService,
-              private readonly bt: BluetoothService) {}
+              private readonly connectivityService: ConnectivityService) {}
 
-  public ngOnInit() {
-
+  public async ngOnInit() {
     this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.reset();
-      }));
-
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected');
+      this.connectivityService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
         await this.wallet.reset();
       }));
 
     this.subscriptions.push(
       this.wallet.cancelledEvent.subscribe(async () => {
-        await this.bt.disconnect();
+        await this.connectivityService.disconnect();
       }));
 
     this.subscriptions.push(
       this.wallet.failedEvent.subscribe(async () => {
-        await this.bt.disconnect();
+        await this.connectivityService.disconnect();
       }));
 
+    await this.connectivityService.startListening();
   }
 
   public async ngOnDestroy() {
@@ -44,6 +38,7 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
-    await this.bt.disconnect();
+    await this.connectivityService.disconnect();
+    await this.connectivityService.stopListening();
   }
 }

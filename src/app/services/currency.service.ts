@@ -4,6 +4,8 @@ import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
 
+import 'rxjs/add/operator/distinctUntilChanged';
+
 export class Info {
   name: string;
   symbol: string;

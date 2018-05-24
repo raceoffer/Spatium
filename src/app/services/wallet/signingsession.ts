@@ -1,8 +1,7 @@
 import { OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { BluetoothService } from '../bluetooth.service';
+import { ConnectivityService } from '../connectivity.service';
 import { LoggerService } from '../logger.service';
 import { Subject } from 'rxjs/Subject';
 
@@ -39,21 +38,20 @@ export class SignSession implements OnDestroy {
   constructor(
     private tx: any,
     private compoundKey: any,
-    private messageSubject: ReplaySubject<any>,
-    private bt: BluetoothService
+    private connectivityService: ConnectivityService
   ) {
     this.entropyCommitmentsObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'entropyCommitments')
         .map(object => object.content);
 
     this.entropyDecommitmentsObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'entropyDecommitments')
         .map(object => object.content);
 
     this.chiphertextsObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'chiphertexts')
         .map(object => object.content);
   }
@@ -110,11 +108,13 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'entropyCommitments',
         content: entropyCommitments
-      }))) {
-      return this.handleFailure('Failed to send entropyCommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send entropyCommitment', e);
     }
 
     const remoteEntropyCommitments =
@@ -135,11 +135,13 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'entropyDecommitments',
         content: entropyDecommitments
-      }))) {
-      return this.handleFailure('Failed to send entropyDecommitments', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send entropyDecommitments', e);
     }
 
     const remoteEntropyDecommitments =
@@ -180,11 +182,13 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'chiphertexts',
         content: chiphertexts
-      }))) {
-      return this.handleFailure('Failed to send chiphertexts', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send chiphertexts', e);
     }
   }
 

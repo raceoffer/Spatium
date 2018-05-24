@@ -17,7 +17,7 @@ export class SocketClientService {
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.None);
 
   public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.state.map(state => state === State.Connected), false);
-  public message: ReplaySubject<object> = new ReplaySubject<object>(1);
+  public message: ReplaySubject<any> = new ReplaySubject<any>(1);
 
   public connectedChanged: Observable<any> = this.connected.skip(1).distinctUntilChanged();
   public connectedEvent: Observable<any> = this.connectedChanged.filter(connected => connected).mapTo(null);
@@ -50,7 +50,7 @@ export class SocketClientService {
     this.socket.getValue().close();
   }
 
-  public send(message: object): void {
+  public send(message: any): void {
     if (!this.connected.getValue()) {
       return;
     }

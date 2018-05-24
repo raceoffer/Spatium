@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { BluetoothService } from '../../../../services/bluetooth.service';
+import { ConnectivityService } from '../../../../services/connectivity.service';
 import { NavigationService } from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { WalletService } from '../../../../services/wallet.service';
@@ -10,17 +10,13 @@ import { WalletService } from '../../../../services/wallet.service';
   templateUrl: './verify-waiting.component.html',
   styleUrls: ['./verify-waiting.component.css']
 })
-export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy {
-  enableBTmessage = 'Enable Bluetooth to proceed';
-
-  enabled = this.bt.enabled;
-  discoverable = this.bt.discoverable;
-  ready = this.wallet.ready;
+export class VerifyWaitingComponent implements OnInit, OnDestroy {
+  public ready = this.connectivityService.listening;
 
   public isExitTap = false;
   private subscriptions = [];
 
-  constructor(private readonly bt: BluetoothService,
+  constructor(private readonly connectivityService: ConnectivityService,
               private readonly navigationService: NavigationService,
               private readonly ngZone: NgZone,
               private readonly router: Router,
@@ -35,31 +31,14 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
     );
 
     this.subscriptions.push(
-      this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
+      this.connectivityService.connectedEvent.subscribe(async () => {
+        await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(async () => {
-        console.log('Connected to', this.bt.connectedDevice.getValue());
-        this.wallet.startSync();
-        this.ready.next(true);
+      this.connectivityService.disconnectedEvent.subscribe(async () => {
+        await this.wallet.cancelSync();
       }));
-
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        await this.bt.stopListening();
-        await this.wallet.reset();
-        await this.bt.ensureListening();
-      }));
-  }
-
-  async ngAfterViewInit() {
-    if (!this.bt.enabled.getValue()) {
-      await this.bt.requestEnable();
-    } else {
-      await this.bt.ensureListening();
-    }
   }
 
   ngOnDestroy() {
@@ -67,21 +46,11 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
     this.subscriptions = [];
   }
 
-  async enableBluetooth() {
-    await this.bt.requestEnable();
-  }
-
-  async enableDiscoverable() {
-    await this.bt.enableDiscovery();
-  }
-
   async onBackClicked() {
     if (this.isExitTap) {
-      console.log('isExitTap');
       this.notification.hide();
       await this.router.navigate(['/start']);
     } else {
-      console.log('await');
       this.notification.show('Tap again to exit');
       this.isExitTap = true;
       setTimeout(() => this.ngZone.run(() => {
@@ -89,5 +58,4 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
       }), 3000);
     }
   }
-
 }

@@ -1,8 +1,7 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { BluetoothService } from '../bluetooth.service';
+import { ConnectivityService } from '../connectivity.service';
 import { LoggerService } from '../logger.service';
 
 export enum SynchronizationStatus {
@@ -37,36 +36,35 @@ export class SyncSession implements OnDestroy {
 
   constructor(
     private prover: any,
-    private messageSubject: ReplaySubject<any>,
-    private bt: BluetoothService
+    private connectivityService: ConnectivityService
   ) {
     this.initialCommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'initialCommitment')
         .map(object => object.content);
 
     this.initialDecommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'initialDecommitment')
         .map(object => object.content);
 
     this.verifierCommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'verifierCommitment')
         .map(object => object.content);
 
     this.proverCommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'proverCommitment')
         .map(object => object.content);
 
     this.verifierDecommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'verifierDecommitment')
         .map(object => object.content);
 
     this.proverDecommitmentObserver =
-      this.messageSubject
+      this.connectivityService.message
         .filter(object => object.type === 'proverDecommitment')
         .map(object => object.content);
   }
@@ -107,11 +105,13 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'initialCommitment',
         content: initialCommitment
-      }))) {
-      return this.handleFailure('Failed to send initialCommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send initialCommitment', e);
     }
 
     const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
@@ -131,11 +131,13 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'initialDecommitment',
         content: initialDecommitment
-      }))) {
-      return this.handleFailure('Failed to send initialDecommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send initialDecommitment', e);
     }
 
     const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
@@ -157,11 +159,13 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'verifierCommitment',
         content: verifierCommitment
-      }))) {
-      return this.handleFailure('Failed to send verifierCommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send verifierCommitment', e);
     }
 
     const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
@@ -181,11 +185,13 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'proverCommitment',
         content: proverCommitment
-      }))) {
-      return this.handleFailure('Failed to send proverCommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send proverCommitment', e);
     }
 
     const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
@@ -205,11 +211,13 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'verifierDecommitment',
         content: verifierDecommitment
-      }))) {
-      return this.handleFailure('Failed to send verifierDecommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send verifierDecommitment', e);
     }
 
     const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
@@ -225,13 +233,13 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
 
-
-
-    if (!await this.bt.send(JSON.stringify({
+    try {
+      await this.connectivityService.send({
         type: 'proverDecommitment',
         content: proverDecommitment
-      }))) {
-      return this.handleFailure('Failed to send proverDecommitment', null);
+      });
+    } catch (e) {
+      return this.handleFailure('Failed to send proverDecommitment', e);
     }
 
     const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();

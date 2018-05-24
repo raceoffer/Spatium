@@ -1,8 +1,8 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { ConnectivityService } from '../../connectivity.service';
 
 declare const CryptoCore: any;
 
@@ -19,14 +19,13 @@ export class ERC20Wallet extends CurrencyWallet {
     network: string,
     keychain: KeyChainService,
     account: number,
-    messageSubject: any,
-    bt: BluetoothService,
+    connectivityService: ConnectivityService,
     ngZone: NgZone,
     token: Token,
     address: string,
     decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, connectivityService, ngZone);
 
     this.contractAddress = address;
     this.token = token;
@@ -113,8 +112,8 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
-  
-  public verifyAddress(address: string) : boolean {
+
+  public verifyAddress(address: string): boolean {
     return this.wallet.verifyAddress(address);
   }
 

@@ -1,7 +1,7 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { BluetoothService } from '../../../services/bluetooth.service';
+import { ConnectivityService } from '../../../services/connectivity.service';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -83,15 +83,17 @@ export class WalletComponent implements OnInit, OnDestroy {
   @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-              private readonly bt: BluetoothService,
-              private readonly ngZone: NgZone,
-              private readonly router: Router,
-              private readonly keychain: KeyChainService,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly wallet: WalletService) {
+  constructor(
+    public dialog: MatDialog,
+    private readonly connectivityService: ConnectivityService,
+    private readonly ngZone: NgZone,
+    private readonly router: Router,
+    private readonly keychain: KeyChainService,
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService,
+    private readonly currency: CurrencyService,
+    private readonly wallet: WalletService
+  ) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.titles.push(this.tokenEntry(tokenInfo));
     });
@@ -207,7 +209,7 @@ export class WalletComponent implements OnInit, OnDestroy {
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.bt.disconnect();
+          await this.connectivityService.disconnect();
           await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
         }
       },

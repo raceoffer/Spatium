@@ -1,8 +1,8 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { ConnectivityService } from '../../connectivity.service';
 
 declare const CryptoCore: any;
 
@@ -15,11 +15,10 @@ export class EthereumWallet extends CurrencyWallet {
     network: string,
     keychain: KeyChainService,
     account: number,
-    messageSubject: any,
-    bt: BluetoothService,
+    connectivityService: ConnectivityService,
     ngZone: NgZone
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, connectivityService, ngZone);
   }
 
   public async reset() {
@@ -70,7 +69,7 @@ export class EthereumWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public verifyAddress(address: string) : boolean {
+  public verifyAddress(address: string): boolean {
     return this.wallet.verifyAddress(address);
   }
 

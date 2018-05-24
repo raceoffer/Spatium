@@ -1,7 +1,7 @@
 import { BitcoreWallet } from './bitcorewallet';
 import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
+import { ConnectivityService } from '../../connectivity.service';
 
 declare const CryptoCore: any;
 
@@ -11,8 +11,7 @@ export class BitcoinCashWallet extends BitcoreWallet {
     network: string,
     keychain: KeyChainService,
     account: number,
-    messageSubject: any,
-    bt: BluetoothService,
+    connectivityService: ConnectivityService,
     ngZone: NgZone
   ) {
     super(
@@ -23,12 +22,11 @@ export class BitcoinCashWallet extends BitcoreWallet {
       keychain,
       Coin.BCH,
       account,
-      messageSubject,
-      bt,
+      connectivityService,
       ngZone);
   }
 
-  public verifyAddress(address: string) : boolean {
+  public verifyAddress(address: string): boolean {
     return address &&
            (super.verifyAddress(address) ||
             /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );

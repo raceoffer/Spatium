@@ -72,7 +72,6 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { StartComponent } from './screens/start/start.component';
 import { AuthService } from './services/auth.service';
-import { BluetoothService } from './services/bluetooth.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
 import { FileService } from './services/file.service';
@@ -167,7 +166,6 @@ import { ConnectivityService } from './services/connectivity.service';
   providers: [
     WalletService,
     CurrencyPriceService,
-    BluetoothService,
     LoggerService,
     AuthService,
     FileService,

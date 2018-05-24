@@ -1,10 +1,10 @@
 import { Balance, CurrencyWallet, HistoryEntry, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
+import { ConnectivityService } from '../../connectivity.service';
 
 declare const Buffer: any;
 declare const CryptoCore: any;
@@ -21,11 +21,10 @@ export class BitcoreWallet extends CurrencyWallet {
     keychain: KeyChainService,
     coin: Coin,
     account: number,
-    messageSubject: any,
-    bt: BluetoothService,
+    connectivityService: ConnectivityService,
     ngZone: NgZone
   ) {
-    super(network, keychain, coin, account, messageSubject, bt, ngZone);
+    super(network, keychain, coin, account, connectivityService, ngZone);
   }
 
   public async reset() {
@@ -74,8 +73,8 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
-  
-  public verifyAddress(address: string) : boolean {
+
+  public verifyAddress(address: string): boolean {
     return address &&
            /^([135KLm29с]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
   }

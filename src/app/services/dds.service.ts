@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { catchError } from 'rxjs/operators';
 
+import 'rxjs/add/operator/mapTo';
+
 declare const CryptoCore: any;
 
 export class DDSAccount {

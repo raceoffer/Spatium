@@ -61,7 +61,8 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
   dialogFactorRef = null;
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
+  constructor(
+    public dialog: MatDialog,
     public factorParentDialog: FactorParentOverlayService,
     private readonly ngZone: NgZone,
     private readonly router: Router,
@@ -69,7 +70,8 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService,
-              private readonly navigationService: NavigationService) { }
+    private readonly navigationService: NavigationService
+  ) { }
 
   ngOnInit() {
     this.subscriptions.push(

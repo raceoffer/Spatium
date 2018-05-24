@@ -5,6 +5,8 @@ import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { toBehaviourSubject } from '../utils/transformers';
 import { Observable } from 'rxjs/Observable';
 
+import 'rxjs/add/operator/skip';
+
 declare const cordova: any;
 
 import { State } from './discovery.service';
@@ -16,7 +18,7 @@ export class SocketServerService {
 
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
   public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.currentPeer.map(peer => peer !== null), false);
-  public message: ReplaySubject<object> = new ReplaySubject<object>(1);
+  public message: ReplaySubject<any> = new ReplaySubject<any>(1);
 
   public connectedChanged: Observable<any> = this.connected.skip(1).distinctUntilChanged();
   public connectedEvent: Observable<any> = this.connectedChanged.filter(connected => connected).mapTo(null);
@@ -84,7 +86,7 @@ export class SocketServerService {
     cordova.plugins.wsserver.close({ uuid: this.currentPeer.getValue() });
   }
 
-  public send(message: object): void {
+  public send(message: any): void {
     if (!this.connected.getValue()) {
       return;
     }

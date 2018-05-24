@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { BluetoothService } from '../bluetooth.service';
+import { ConnectivityService } from '../connectivity.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
 import { Subject } from 'rxjs/Subject';
@@ -87,17 +87,16 @@ export class CurrencyWallet {
     private keychain: KeyChainService,
     private currency: Coin,
     private account: number,
-    private messageSubject: any,
-    private bt: BluetoothService,
+    private connectivityService: ConnectivityService,
     protected ngZone: NgZone
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
-    this.messageSubject
+    this.connectivityService.message
       .filter(object => object.type === 'cancelTransaction')
       .subscribe(async () => {
         // pop the queue
-        this.messageSubject.next({});
+        this.connectivityService.message.next({});
 
         if (this.signSession) {
           await this.signSession.cancel();
@@ -127,7 +126,7 @@ export class CurrencyWallet {
     const prover = await this.compoundKey.startInitialCommitment();
 
     this.status.next(Status.Synchronizing);
-    this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
+    this.syncSession = new SyncSession(prover, this.connectivityService);
     this.syncSession.status.subscribe(state => {
       this.syncProgress.next(
         Math.max(Math.min(Math.round(state * 100 / (SynchronizationStatus.Finished - SynchronizationStatus.None + 1)), 100), 0)
@@ -178,10 +177,10 @@ export class CurrencyWallet {
 
   public async rejectTransaction() {
     try {
-      await this.bt.send(JSON.stringify({
+      await this.connectivityService.send({
         type: 'cancelTransaction',
         content: {}
-      }));
+      });
     } catch (ignored) { }
 
     if (this.signSession) {
@@ -210,24 +209,23 @@ export class CurrencyWallet {
     return this.currency;
   }
 
-  public verifyAddress (address : string) : boolean {
+  public verifyAddress (address: string): boolean {
     return address && address.length > 0;
   }
 
   public async requestTransactionVerify(transaction) {
-    await this.bt.send(JSON.stringify({
+    await this.connectivityService.send({
       type: 'verifyTransaction',
       content: {
         tx: await transaction.toJSON(),
         coin: this.currencyCode()
       }
-    }));
+    });
 
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
-      this.messageSubject,
-      this.bt
+      this.connectivityService
     );
 
     this.signSession.ready.subscribe(async () => {
@@ -235,19 +233,19 @@ export class CurrencyWallet {
     });
     this.signSession.canceled.subscribe(async () => {
       console.log('canceled');
-      this.messageSubject.next({});
+      this.connectivityService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(async () => {
       console.log('failed');
-      this.messageSubject.next({});
+      this.connectivityService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.signed.subscribe(async () => {
       console.log('signed');
-      this.messageSubject.next({});
+      this.connectivityService.message.next({});
       this.acceptedEvent.next();
       this.signedEvent.next();
     });
@@ -259,8 +257,7 @@ export class CurrencyWallet {
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
-      this.messageSubject,
-      this.bt
+      this.connectivityService
     );
 
     this.startVerifyEvent.next();
@@ -269,12 +266,12 @@ export class CurrencyWallet {
       this.verifyEvent.next(transaction);
     });
     this.signSession.canceled.subscribe(() => {
-      this.messageSubject.next({});
+      this.connectivityService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(() => {
-      this.messageSubject.next({});
+      this.connectivityService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });

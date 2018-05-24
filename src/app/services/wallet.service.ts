@@ -6,10 +6,9 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/takeUntil';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { toBehaviourSubject } from '../utils/transformers';
 
-import { BluetoothService } from './bluetooth.service';
+import { ConnectivityService } from './connectivity.service';
 import { CurrencyService } from './currency.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
@@ -38,9 +37,8 @@ export class WalletService {
   public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
   public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-  private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
-  constructor(private readonly bt: BluetoothService,
+  constructor(private readonly connectivityService: ConnectivityService,
               private readonly currencyService: CurrencyService,
               private readonly keychain: KeyChainService,
               private readonly ngZone: NgZone) {
@@ -51,8 +49,7 @@ export class WalletService {
         'testnet',
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone
       ));
     this.coinWallets.set(
@@ -62,8 +59,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone
       ));
     this.coinWallets.set(
@@ -73,8 +69,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone
       ));
     this.coinWallets.set(
@@ -84,8 +79,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone
       ));
     this.coinWallets.set(
@@ -95,8 +89,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone
       ));
 
@@ -111,11 +104,7 @@ export class WalletService {
       this.currencyWallets.set(token, this.tokenWallets.get(token));
     }
 
-    this.bt.message.subscribe((message) => {
-      this.messageSubject.next(JSON.parse(message));
-    });
-
-    this.messageSubject
+    this.connectivityService.message
       .filter(object => object.type === 'verifyTransaction')
       .map(object => object.content)
       .subscribe(async content => {
@@ -123,11 +112,11 @@ export class WalletService {
         return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
       });
 
-    this.messageSubject
+    this.connectivityService.message
       .filter(object => object.type === 'cancel')
       .subscribe(async () => {
         // pop the queue
-        this.messageSubject.next({});
+        this.connectivityService.message.next({});
 
         this.status.next(Status.Cancelled);
 
@@ -220,10 +209,10 @@ export class WalletService {
     }
 
     try {
-      await this.bt.send(JSON.stringify({
+      await this.connectivityService.send({
         type: 'cancel',
         content: {}
-      }));
+      });
     } catch (ignored) {
     }
 
@@ -242,8 +231,7 @@ export class WalletService {
         network,
         this.keychain,
         1,
-        this.messageSubject,
-        this.bt,
+        this.connectivityService,
         this.ngZone,
         token,
         contractAddress,
