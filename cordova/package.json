@@ -63,7 +63,6 @@
       "cordova-plugin-clipboard": {},
       "cordova-plugin-zeroconf": {},
       "cordova-plugin-websocket-server": {},
-      "cordova-plugin-advanced-websocket": {},
       "cordova-plugin-networkinterface": {}
     },
     "platforms": [

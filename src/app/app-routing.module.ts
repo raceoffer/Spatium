@@ -20,13 +20,11 @@ import { RegistrationSuccessComponent } from './screens/registration-success/reg
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { StartComponent } from './screens/start/start.component';
-import { ConnectivityComponent } from './screens/connectivity/connectivity.component';
 
 
 const appRoutes: Routes = [
   {path: '', redirectTo: 'start', pathMatch: 'full'},
   {path: 'start', component: StartComponent},
-  {path: 'connectivity', component: ConnectivityComponent},
   {path: 'confirmation-entry', component: ConfirmationEntryComponent},
   {path: 'auth', component: AuthComponent},
   {path: 'login', component: LoginParentComponent},

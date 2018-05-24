@@ -84,7 +84,6 @@ import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
 import { SocketServerService } from './services/socketserver.service';
 import { SocketClientService } from './services/socketclient.service';
-import { ConnectivityComponent } from './screens/connectivity/connectivity.component';
 import { DiscoveryService } from './services/discovery.service';
 import { ConnectivityService } from './services/connectivity.service';
 
@@ -131,8 +130,7 @@ import { ConnectivityService } from './services/connectivity.service';
     QrReaderComponent,
     QrWriterComponent,
     MainComponent,
-    LoginComponentFactor,
-    ConnectivityComponent
+    LoginComponentFactor
   ],
   imports: [
     OverlayModule,
