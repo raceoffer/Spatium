@@ -117,8 +117,14 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   }
 
   async saveTouchPassword(pincode) {
-    return new Promise(async (success, error) => {
-      window.plugins.touchid.save('spatium', pincode, true, success, error);
+    return new Promise(async (resolve, fail) => { 
+      window.plugins.touchid.save('spatium', pincode, true,  
+        function() {  
+          resolve(true);  
+        },  
+        function(errorMessage) { 
+          fail(errorMessage); 
+        }); 
     });
   }
 
