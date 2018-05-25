@@ -12,9 +12,8 @@
   <mat-sidenav-container class="content">
     <app-main-drawer #sidenav [navLinks]="navLinks" (closeClicked)="toggle()"
                      (linkClicked)="onNav($event)"></app-main-drawer>
+    <app-verify-waiting *ngIf="!(ready | async)" ></app-verify-waiting>
+
+    <app-verify-transaction *ngIf="(ready | async)"></app-verify-transaction>
   </mat-sidenav-container>
-
-  <app-verify-waiting *ngIf="!(ready | async)" ></app-verify-waiting>
-
-  <app-verify-transaction *ngIf="(ready | async)"></app-verify-transaction>
 </div>
