@@ -33,7 +33,7 @@ export class QrWriterComponent implements OnInit {
   async ngOnInit() {}
 
   async saveQr() {
-    if (this.isWindows()) {
+    if (this.isAndroid()) {
       this.permissionCStorage = true;
       this.saveToStorage();
     } else {
@@ -94,7 +94,7 @@ export class QrWriterComponent implements OnInit {
     this.onSuccess.emit({factor: FactorType.QR, value: this.value.getValue()});
   }
 
-  isWindows(): boolean {
-    return device.platform === 'windows';
-  }
+  isAndroid(): boolean { 
+    return device.platform === 'android'; 
+  } 
 }

@@ -27,7 +27,10 @@ module.exports = function(context) {
 
   let baseHref = "/android_asset/www/";
   if (context.opts.cordova.platforms.length === 1) {
-    baseHref = context.opts.cordova.platforms[0] === 'windows' ? "/www/" : baseHref;
+    switch (context.opts.cordova.platforms[0]) {
+      case 'windows': baseHref = '/www/'; break;
+      case 'ios': baseHref = './'; break;
+    }
   }
   const command = 'ng build --aot ' + (prod ? '--prod ' : '') + '--output-path cordova/www/ --base-href ' + baseHref;
   console.log('Command:', command);
