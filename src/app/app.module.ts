@@ -49,6 +49,7 @@ import { PasswordComponent } from './screens/factors/password/password.component
 import { PincodeComponent } from './screens/factors/pincode/pincode.component';
 import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
 import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
+import { FeedbackComponent } from './screens/feedback/feedback.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { LoginComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
@@ -74,6 +75,7 @@ import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
+import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
@@ -82,7 +84,6 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
-import { DeviceService } from './services/device.service';
 
 @NgModule({
   declarations: [
@@ -127,7 +128,8 @@ import { DeviceService } from './services/device.service';
     QrReaderComponent,
     QrWriterComponent,
     MainComponent,
-    LoginComponentFactor
+    LoginComponentFactor,
+    FeedbackComponent
   ],
   imports: [
     OverlayModule,

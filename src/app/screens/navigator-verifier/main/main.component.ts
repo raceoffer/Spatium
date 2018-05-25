@@ -45,6 +45,11 @@ export class MainComponent implements OnInit, OnDestroy {
     isSelected: false,
     isActive: true
   }, {
+    name: 'Feedback',
+    link: ['/navigator', {outlets: {'navigator': ['feedback', 'second']}}],
+    isSelected: false,
+    isActive: true
+  }, {
     name: 'Exit',
     link: ['/start'],
     isSelected: false,

@@ -1,0 +1,79 @@
+<app-toolbar
+  [label]="title"
+  [isColored]="true"
+  [isShadowed]="true"
+  [hasSend]="true"
+  (backClicked)="onBackClicked()"
+  (sendClicked)="onSendClicked()"></app-toolbar>
+
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <table class="full-width" style="text-align: left; table-layout: fixed; margin-top: 5px;">
+    <tr>
+      <td colspan="2">
+        <span class="label" style="margin-bottom: 13px;">{{stContact}}</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <mat-form-field style="margin-bottom: 13px;" color="accent">
+          <input matInput [(ngModel)]="email">
+        </mat-form-field>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <span class="label" style="margin-bottom: 13px;">{{stProblem}}</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <mat-form-field style="margin-bottom: 13px;" color="accent">
+          <textarea matInput matTextareaAutosize matAutosizeMinRows=4 [(ngModel)]="description"></textarea>
+        </mat-form-field>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div style="margin-bottom: 13px;">
+          <mat-checkbox [disabled]="true" checked = '{{sendLogs}}'>{{stAppLogs}}</mat-checkbox>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <span class="label" style="margin-bottom: 13px;">{{stScreenshots}}</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+          <mat-grid-tile *ngFor="let screenshot of screenshotsPreview">
+            <div class="grid-item" fxLayout="row" fxLayoutAlign="center center">
+                <img id="blah" src="{{screenshot.src}}"
+                     style="max-width: 100%;"/>
+                <div class="img-gradient"></div>
+              <button mat-icon-button class="img-remove" (click)="removeScreenshot(screenshot)">
+                <mat-icon role="img">close</mat-icon>
+              </button>
+            </div>
+
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div class="grid-item" fxLayout="row" fxLayoutAlign="center center">
+              <button mat-button style="height: 100%; width: 100%; padding: 0px;">
+                <mat-icon class="color-cool_grey icon-50">add</mat-icon>
+                <input type='file' accept="image/*" id='fileInput'
+                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;"
+                       (change)="onUploadFileClick($event)">
+              </button>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+
+
+      </td>
+    </tr>
+  </table>
+
+</div>

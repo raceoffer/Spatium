@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './screens/auth/auth.component';
 import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
+import { FeedbackComponent } from "./screens/feedback/feedback.component";
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { MainComponent } from './screens/navigator-verifier/main/main.component';
@@ -41,14 +42,16 @@ const appRoutes: Routes = [
     {path: 'currency/:coin/settings', component: CurrencySettingsComponent, outlet: 'navigator'},
     {path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator'},
     {path: 'settings', component: SettingsComponent, outlet: 'navigator'},
-    {path: 'factornode', component: FactorNodeComponent, outlet: 'navigator'}
+    {path: 'factornode', component: FactorNodeComponent, outlet: 'navigator'},
+    {path: 'feedback/:back', component: FeedbackComponent, outlet: 'navigator'}
   ]
   },
   {
     path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
     {path: 'main', component: MainComponent, outlet: 'navigator'},
     {path: 'secret-export', component: SecretExportComponent, outlet: 'navigator'},
-    {path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator'}
+    {path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator'},
+    {path: 'feedback/:back', component: FeedbackComponent, outlet: 'navigator'}
   ]
   },
   {path: 'delete-secret/:back', component: DeleteSecretComponent}

@@ -62,6 +62,11 @@ export class WalletComponent implements OnInit, OnDestroy {
     isSelected: false,
     isActive: true
   }, {
+    name: 'Feedback',
+    link: ['/navigator', {outlets: {'navigator': ['feedback', 'main']}}],
+    isSelected: false,
+    isActive: true
+  }, {
     name: 'Exit',
     link: ['/start'],
     isSelected: false,
