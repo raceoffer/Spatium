@@ -24,27 +24,29 @@ import {
   EthereumTransaction
 } from 'crypto-core-async';
 
+export enum WalletStatus {
+  None = 0,
+  Partially,
+  Fully
+}
+
 @Injectable()
 export class WalletService {
   public coinWallets = new Map<Coin, CurrencyWallet>();
   public tokenWallets = new Map<Token, ERC20Wallet>();
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
-  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Synchronizing)), false);
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Ready)), false);
-  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Cancelled)), false);
-  public failed: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Failed)), false);
-  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
-  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
-  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
-  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
-  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
+  public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public status: BehaviorSubject<WalletStatus> = new BehaviorSubject<WalletStatus>(WalletStatus.None);
+  public partiallySync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.Partially)), false);
+  public fullySync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.Fully)), false);
+
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
+
+  private coinIndex = 0;
+  private tokenIndex = 0;
 
   constructor(
     private readonly bt: BluetoothService,
@@ -144,7 +146,7 @@ export class WalletService {
         // pop the queue
         this.messageSubject.next({});
 
-        this.status.next(Status.Cancelled);
+        this.changeStatus();
 
         for (const wallet of Array.from(this.coinWallets.values())) {
           await wallet.cancelSync();
@@ -152,12 +154,15 @@ export class WalletService {
       });
   }
 
+  // при пересинхронизации с другим устройством/выходе
   public async reset() {
-    if (this.status.getValue() === Status.None) {
+    if (this.status.getValue() === WalletStatus.None) {
       return;
     }
 
-    this.status.next(Status.None);
+    this.coinIndex = 0;
+    this.tokenIndex = 0;
+    this.changeStatus();
     this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
@@ -169,68 +174,91 @@ export class WalletService {
   }
 
   public async startSync() {
-    if (this.status.getValue() === Status.Synchronizing) {
+    console.log(this.synchronizing.value);
+    if (this.synchronizing.value) {
       throw new Error('Sync in progress');
     }
 
     try {
+      // если ключ не совпадет (другое устройство для сопряжения)
+      this.reset();
+
       this.setProgress(0);
-      this.status.next(Status.Synchronizing);
+      this.synchronizing.next(true);
 
       const paillierKeys = await CompoundKey.generatePaillierKeys();
 
       this.setProgress(0.1);
 
-      let coinIndex = 0;
+      this.coinIndex = 0;
       for (const wallet of Array.from(this.coinWallets.values())) {
-        if (this.status.getValue() !== Status.Synchronizing) {
+        if (!this.synchronizing.value) {
           return;
         }
 
         const sub = wallet.syncProgress.subscribe(num => {
-          this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
+          this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
         });
+        this.changeStatus();
 
         await wallet.sync(paillierKeys);
 
         sub.unsubscribe();
 
-        coinIndex++;
+        this.coinIndex++;
       }
 
-      if (this.status.getValue() !== Status.Synchronizing) {
+      if (!this.synchronizing.value) {
         return;
       }
 
       const ethWallet = this.coinWallets.get(Coin.ETH);
 
-      let tokenIndex = 0;
+      this.tokenIndex = 0;
       for (const wallet of Array.from(this.tokenWallets.values())) {
-        if (this.status.getValue() !== Status.Synchronizing) {
+        if (!this.synchronizing.value) {
           return;
         }
 
         await wallet.syncDuplicate(ethWallet);
 
-        this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
+        this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
+        this.changeStatus();
         await timer(100).toPromise();
 
-        tokenIndex++;
+        this.tokenIndex++;
       }
 
       this.setProgress(1);
 
-      if (this.status.getValue() === Status.Synchronizing) {
-        this.status.next(Status.Ready);
+      if (this.synchronizing.value) {
+        this.synchronizing.next(false);
+        this.changeStatus();
+        this.bt.disconnect();
       }
+
     } catch (e) {
       console.log(e);
-      this.status.next(Status.Failed);
+      this.synchronizing.next(false);
+      this.changeStatus();
+      this.bt.disconnect();
+    }
+  }
+
+  public changeStatus() {
+    if (this.coinIndex === this.coinWallets.size && this.tokenIndex === this.tokenWallets.size) {
+      this.status.next(WalletStatus.Fully);
+    } else {
+      if (this.coinIndex !== 0 || this.tokenIndex !== 0) {
+        this.status.next(WalletStatus.Partially);
+      } else {
+        this.status.next(WalletStatus.None);
+      }
     }
   }
 
   public async cancelSync() {
-    if (this.status.getValue() !== Status.Synchronizing) {
+    if (!this.synchronizing.value) {
       return;
     }
 
@@ -242,11 +270,12 @@ export class WalletService {
     } catch (ignored) {
     }
 
-    this.status.next(Status.Cancelled);
-
     for (const wallet of Array.from(this.coinWallets.values())) {
       await wallet.cancelSync();
     }
+
+    this.synchronizing.next(false);
+    this.changeStatus();
   }
 
   createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {

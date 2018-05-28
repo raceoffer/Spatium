@@ -18,7 +18,7 @@
                      (linkClicked)="onNav($event)"></app-main-drawer>
   </mat-sidenav-container>
 
-  <app-verify-waiting *ngIf="!(ready | async)" ></app-verify-waiting>
+  <app-verify-waiting *ngIf="!(partiallySync | async) && !(fullySync | async)" ></app-verify-waiting>
 
-  <app-verify-transaction *ngIf="(ready | async)"></app-verify-transaction>
+  <app-verify-transaction *ngIf="(partiallySync | async) || (fullySync | async)"></app-verify-transaction>
 </div>

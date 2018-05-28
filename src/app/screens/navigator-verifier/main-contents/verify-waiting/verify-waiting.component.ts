@@ -15,7 +15,6 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
 
   enabled = this.bt.enabled;
   discoverable = this.bt.discoverable;
-  ready = this.wallet.ready;
 
   public isExitTap = false;
   private subscriptions = [];
@@ -43,13 +42,12 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
       this.bt.connectedEvent.subscribe(async () => {
         console.log('Connected to', this.bt.connectedDevice.getValue());
         this.wallet.startSync();
-        this.ready.next(true);
       }));
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         await this.bt.stopListening();
-        await this.wallet.reset();
+        // await this.wallet.reset();
         await this.bt.ensureListening();
       }));
   }
