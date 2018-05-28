@@ -16,7 +16,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     this.subscriptions.push(
       this.connectivityService.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected');
         await this.wallet.cancelSync();
         await this.wallet.reset();
       }));

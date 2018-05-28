@@ -2,7 +2,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { ConnectivityService, DiscoveryState } from '../../../services/connectivity.service';
-import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
@@ -19,9 +19,9 @@ export class WaitingComponent implements OnInit, OnDestroy {
 
   public stLabel = 'Connect to a device';
 
-  public discovering = this.connectivityService.discoveryState.map(state => state !== DiscoveryState.Stopped);
+  public discovering = this.connectivityService.discoveryState.pipe(map(state => state !== DiscoveryState.Stopped));
   public connected = this.connectivityService.connected;
-  public devices = toBehaviourSubject(this.connectivityService.devices.map(devices => Array.from<any>(devices.values())), []);
+  public devices = toBehaviourSubject(this.connectivityService.devices.pipe(map(devices => Array.from<any>(devices.values()))), []);
   public ready = this.wallet.ready;
 
   private subscriptions = [];

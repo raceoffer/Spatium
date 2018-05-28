@@ -1,7 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, timer } from 'rxjs';
 
 declare const cordova: any;
 declare const window: any;
@@ -106,7 +105,7 @@ export class DiscoveryService {
 
     this.discovering.next(State.Started);
 
-    await Observable.timer(duration).toPromise();
+    await timer(duration).toPromise();
 
     this.discovering.next(State.Stopping);
 
