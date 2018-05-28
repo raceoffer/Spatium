@@ -9,7 +9,7 @@ import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
+import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/primitives/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;

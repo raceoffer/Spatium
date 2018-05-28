@@ -1,11 +1,11 @@
 import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
-import { ConnectivityService } from '../connectivity.service';
+import { ConnectivityService } from '../../connectivity.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
-import { Coin, KeyChainService, Token } from '../keychain.service';
+import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { NgZone } from '@angular/core';
 
-import { toBehaviourSubject } from '../../utils/transformers';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 import { CompoundKey } from 'crypto-core-async';
 import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';

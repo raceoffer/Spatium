@@ -1,22 +1,17 @@
 import { Injectable, NgZone } from '@angular/core';
 import { toBehaviourSubject } from '../utils/transformers';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { skip, filter, distinctUntilChanged, map, mapTo } from "rxjs/operators";
-
-export enum State {
-  None,
-  Connecting,
-  Connected
-}
+import { ConnectionState } from "./primitives/state";
 
 @Injectable()
 export class SocketClientService {
   private socket: BehaviorSubject<WebSocket> = new BehaviorSubject<WebSocket>(null);
 
-  public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.None);
+  public state: BehaviorSubject<ConnectionState> = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
-  public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Connected)), false);
-  public message: ReplaySubject<any> = new ReplaySubject<any>(1);
+  public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === ConnectionState.Connected)), false);
+  public message: Subject<any> = new Subject<any>();
 
   public connectedChanged: Observable<any> = this.connected.pipe(skip(1), distinctUntilChanged());
   public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
@@ -25,24 +20,24 @@ export class SocketClientService {
   constructor(private ngZone: NgZone) {}
 
   public connect(ip: string) {
-    if (this.state.getValue() !== State.None) {
+    if (this.state.getValue() !== ConnectionState.None) {
       return;
     }
 
     const socket = new WebSocket('ws://' + ip + ':3445');
-    socket.onopen = () => this.ngZone.run(() => this.state.next(State.Connected));
+    socket.onopen = () => this.ngZone.run(() => this.state.next(ConnectionState.Connected));
     socket.onmessage = (event) => this.ngZone.run(() => this.message.next(JSON.parse(event.data)));
-    socket.onclose = () => this.ngZone.run(() => this.state.next(State.None));
+    socket.onclose = () => this.ngZone.run(() => this.state.next(ConnectionState.None));
     socket.onerror = (event) => this.ngZone.run(() => {
-      this.state.next(State.None);
+      this.state.next(ConnectionState.None);
       console.log(event);
     });
     this.socket.next(socket);
-    this.state.next(State.Connecting);
+    this.state.next(ConnectionState.Connecting);
   }
 
   public disconnect(): void {
-    if (!this.connected.getValue()) {
+    if (this.state.getValue() !== ConnectionState.Connected) {
       return;
     }
 

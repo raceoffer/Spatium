@@ -1,34 +1,35 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject, timer } from 'rxjs';
+import { BehaviorSubject, Observable, timer } from 'rxjs';
+import { distinctUntilChanged, skip } from "rxjs/internal/operators";
+import { Device, equals } from "./primitives/device";
+import { State } from "./primitives/state";
 
 declare const cordova: any;
 declare const window: any;
-
-export enum State {
-  Starting,
-  Started,
-  Stopping,
-  Stopped
-}
 
 @Injectable()
 export class DiscoveryService {
   public advertising: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
   public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-  public devices: BehaviorSubject<Map<string, any>> = new BehaviorSubject<Map<string, any>>(new Map<string, any>());
+
+  public devices: BehaviorSubject<Map<string, Device>> = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
+  public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
+    distinctUntilChanged(equals),
+    skip(1));
 
   constructor(private ngZone: NgZone) {}
 
   async getHostName() {
-    return await new Promise((resolve, reject) => {
-      cordova.plugins.zeroconf.getHostname(
-        host => {
-          resolve(host);
-        }, error => {
-          reject(error);
-        });
-    });
+    return await new Promise((resolve, reject) => cordova.plugins.zeroconf.getHostname(resolve, reject));
+  }
+
+  async getDeviceName() {
+    return await new Promise((resolve, reject) => cordova.plugins.deviceName.get(resolve, reject));
+  }
+
+  async getDeviceIp() {
+    return (await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject)) as any).ip;
   }
 
   async startAdvertising() {
@@ -38,12 +39,15 @@ export class DiscoveryService {
 
     this.advertising.next(State.Starting);
 
-    const hostname = await this.getHostName();
-    const ip: any = await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject));
+    const [hostname, name, ip] = await Promise.all([
+      this.getHostName(),
+      this.getDeviceName(),
+      this.getDeviceIp()
+    ]);
     return await new Promise((resolve, reject) => {
       cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
-        version: '0.0001',
-        ip: ip.ip
+        name: name,
+        ip: ip
       }, () => this.ngZone.run(() => {
         this.advertising.next(State.Started);
         resolve();
@@ -80,7 +84,7 @@ export class DiscoveryService {
       return;
     }
 
-    this.devices.next(new Map<string, object>());
+    this.devices.next(new Map<string, Device>());
     this.discovering.next(State.Starting);
 
     cordova.plugins.zeroconf.watch('_spatium._tcp.', 'local.',
@@ -90,14 +94,11 @@ export class DiscoveryService {
         if (action === 'resolved') {
           const devices = this.devices.getValue();
 
-          devices.set(service.name, {
-            name: service.name,
-            ipv4: service.ipv4Addresses,
-            ipv6: service.ipv6Addresses,
-            ip: service.txtRecord.ip,
-            port: service.port,
-            version: service.txtRecord.version
-          });
+          devices.set(service.txtRecord.name, new Device(
+            service.txtRecord.name,
+            null,
+            service.txtRecord.ip
+          ));
 
           this.devices.next(devices);
         }

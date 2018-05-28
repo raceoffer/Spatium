@@ -4,7 +4,7 @@ import { CurrencyService, Info } from '../../../../services/currency.service';
 import { Coin } from '../../../../services/keychain.service';
 import { NavigationService } from '../../../../services/navigation.service';
 import { WalletService } from '../../../../services/wallet.service';
-import { CurrencyWallet, Status } from '../../../../services/wallet/currencywallet';
+import { CurrencyWallet, Status } from '../../../../services/primitives/wallet/currencywallet';
 
 import { take, filter, map } from 'rxjs/operators';
 

@@ -1,24 +1,24 @@
 import { Injectable, NgZone } from '@angular/core';
 import { toBehaviourSubject } from '../utils/transformers';
-import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { skip, filter, distinctUntilChanged, map, mapTo } from "rxjs/operators";
+import { ConnectionState, State } from "./primitives/state";
 
 declare const cordova: any;
 
-import { State } from './discovery.service';
-export { State } from './discovery.service';
-
 @Injectable()
 export class SocketServerService {
-  private currentPeer: BehaviorSubject<string> = new BehaviorSubject<string>(null);
-
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-  public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.currentPeer.pipe(map(peer => peer !== null)), false);
-  public message: ReplaySubject<any> = new ReplaySubject<any>(1);
+  public message: Subject<any> = new Subject<any>();
 
+  public connectionState: BehaviorSubject<ConnectionState> = new BehaviorSubject<ConnectionState>(ConnectionState.None);
+
+  public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.connectionState.pipe(map(state => state === ConnectionState.Connected)), false);
   public connectedChanged: Observable<any> = this.connected.pipe(skip(1), distinctUntilChanged());
   public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
   public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
+
+  private currentPeer: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
   constructor(private ngZone: NgZone) {}
 
@@ -35,16 +35,18 @@ export class SocketServerService {
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
-          if (this.connected.getValue()) {
+          if (this.connectionState.getValue() !== ConnectionState.None) {
             cordova.plugins.wsserver.close(conn);
           } else {
             this.currentPeer.next(conn.uuid);
+            this.connectionState.next(ConnectionState.Connected);
           }
         }),
         onMessage: (conn, msg) => this.ngZone.run(() => {
           this.message.next(JSON.parse(msg));
         }),
         onClose: () => this.ngZone.run(() => {
+          this.connectionState.next(ConnectionState.None);
           this.currentPeer.next(null);
         }),
         tcpNoDelay: true

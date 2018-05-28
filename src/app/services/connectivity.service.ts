@@ -1,57 +1,60 @@
 import { Injectable } from '@angular/core';
-import { SocketClientService, State as ConnectionState } from './socketclient.service';
+import { SocketClientService } from './socketclient.service';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
-import { SocketServerService, State as ServerState } from './socketserver.service';
-import { DiscoveryService, State as DiscoveryState } from './discovery.service';
+import { SocketServerService } from './socketserver.service';
+import { DiscoveryService } from './discovery.service';
 import { BehaviorSubject, Observable, combineLatest, merge } from 'rxjs';
 import { skip, filter, distinctUntilChanged, map, mapTo } from "rxjs/operators";
-
-export { DiscoveryState };
-export { ServerState };
-export { ConnectionState };
+import { ConnectionState, State } from "./primitives/state";
 
 @Injectable()
 export class ConnectivityService {
   public connectionState: BehaviorSubject<ConnectionState> = toBehaviourSubject(
     combineLatest([
       this.socketClientService.state,
-      this.socketServerService.connected
-    ], (clientState, serverConnected) => {
-      return serverConnected ? ConnectionState.Connected : clientState;
+      this.socketServerService.connectionState
+    ], (clientState, serverState) => {
+      if ([clientState, serverState].some(v => v === ConnectionState.Connected)) {
+        return ConnectionState.Connected;
+      } else if ([clientState, serverState].some(v => v === ConnectionState.Connecting)) {
+        return ConnectionState.Connecting;
+      } else {
+        return ConnectionState.None;
+      }
     }),
     ConnectionState.None
   );
 
-  public serverState: BehaviorSubject<ServerState> = toBehaviourSubject(
+  public serverState: BehaviorSubject<State> = toBehaviourSubject(
     combineLatest([
       this.discoveryService.advertising,
       this.socketServerService.state
     ], (discoveryState, serverState) => {
       if (discoveryState === serverState) {
         return serverState;
-      } else if ([discoveryState, serverState].some(v => v === ServerState.Starting)) {
-        return ServerState.Starting;
-      } else if ([discoveryState, serverState].some(v => v === ServerState.Stopping)) {
-        return ServerState.Stopping;
+      } else if ([discoveryState, serverState].some(v => v === State.Starting)) {
+        return State.Starting;
+      } else if ([discoveryState, serverState].some(v => v === State.Stopping)) {
+        return State.Stopping;
       } else {
-        return ServerState.Starting;
+        return State.Starting;
       }
     }),
-    ServerState.Stopped
+    State.Stopped
   );
 
-  public discoveryState: BehaviorSubject<DiscoveryState> = this.discoveryService.discovering;
+  public discoveryState: BehaviorSubject<State> = this.discoveryService.discovering;
 
   public connected: BehaviorSubject<boolean> = toBehaviourSubject(
     this.connectionState.pipe(map(state => state === ConnectionState.Connected)),
     false);
 
   public listening: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.serverState.pipe(map(state => state === ServerState.Started)),
+    this.serverState.pipe(map(state => state === State.Started)),
     false);
 
   public discovering: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.discoveryState.pipe(map(state => state === DiscoveryState.Started)),
+    this.discoveryState.pipe(map(state => state === State.Started)),
     false);
 
   public message = toReplaySubject(merge(

@@ -1,7 +1,7 @@
 import { OnDestroy } from '@angular/core';
 import { BehaviorSubject,  Observable,  ReplaySubject,  Subject } from 'rxjs';
-import { ConnectivityService } from '../connectivity.service';
-import { LoggerService } from '../logger.service';
+import { ConnectivityService } from '../../connectivity.service';
+import { LoggerService } from '../../logger.service';
 
 import { filter, take, map, takeUntil } from 'rxjs/operators';
 

@@ -8,13 +8,13 @@ import { ConnectivityService } from './connectivity.service';
 import { CurrencyService } from './currency.service';
 import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
-import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
-import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
-import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
+import { BitcoinCashWallet } from './primitives/wallet/bitcoin/bitcoincashwallet';
+import { BitcoinWallet } from './primitives/wallet/bitcoin/bitcoinwallet';
+import { LitecoinWallet } from './primitives/wallet/bitcoin/litecoinwallet';
 
-import { CurrencyWallet, Status } from './wallet/currencywallet';
-import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
-import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
+import { CurrencyWallet, Status } from './primitives/wallet/currencywallet';
+import { ERC20Wallet } from './primitives/wallet/ethereum/erc20wallet';
+import { EthereumWallet } from './primitives/wallet/ethereum/ethereumwallet';
 
 import {
   CompoundKey,

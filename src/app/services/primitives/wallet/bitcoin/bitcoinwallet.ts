@@ -1,7 +1,7 @@
 import { BitcoreWallet } from './bitcorewallet';
-import { Coin, KeyChainService } from '../../keychain.service';
+import { Coin, KeyChainService } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
-import { ConnectivityService } from '../../connectivity.service';
+import { ConnectivityService } from '../../../connectivity.service';
 
 import { BitcoinTransaction, BitcoinWallet as CoreBitcoinWallet } from 'crypto-core-async';
 

@@ -1,17 +1,13 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
-import { Coin, KeyChainService, Token } from '../../keychain.service';
+import { Coin, KeyChainService } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
 import { timer  } from 'rxjs';
-import { ConnectivityService } from '../../connectivity.service';
+import { ConnectivityService } from '../../../connectivity.service';
 
-import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
+import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
 
-export class ERC20Wallet extends CurrencyWallet {
+export class EthereumWallet extends CurrencyWallet {
   private wallet: any = null;
-  private contractAddress: string = null;
-  private token: Token = null;
-  private decimals = 18;
-
   private routineTimerSub: any = null;
 
   constructor(
@@ -20,16 +16,9 @@ export class ERC20Wallet extends CurrencyWallet {
     keychain: KeyChainService,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone,
-    token: Token,
-    address: string,
-    decimals: number = 18
+    ngZone: NgZone
   ) {
     super(network, keychain, Coin.ETH, account, connectivityService, ngZone);
-
-    this.contractAddress = address;
-    this.token = token;
-    this.decimals = decimals;
   }
 
   public async reset() {
@@ -55,46 +44,13 @@ export class ERC20Wallet extends CurrencyWallet {
     return await EthereumTransaction.fromJSON(tx);
   }
 
-  public currencyCode(): Coin | Token {
-    return this.token;
-  }
-
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.wallet = await CoreERC20Wallet.fromOptions({
+    this.wallet = await CoreEthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       network: this.network,
-      contractAddress: this.contractAddress,
-      decimals: this.decimals,
-      endpoint: this.endpoint,
-    });
-
-    this.address.next(this.wallet.address);
-
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
-
-    this.status.next(Status.Ready);
-  }
-
-  public async syncDuplicate(other: CurrencyWallet) {
-    await super.syncDuplicate(other);
-
-    this.wallet = await CoreERC20Wallet.fromOptions({
-      infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      key: this.publicKey,
-      contractAddress: this.contractAddress,
-      network: this.network,
-      decimals: this.decimals,
       endpoint: this.endpoint,
     });
 

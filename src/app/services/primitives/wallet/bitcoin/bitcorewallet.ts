@@ -1,10 +1,10 @@
 import { Balance, CurrencyWallet, HistoryEntry, Status } from '../currencywallet';
-import { Coin, KeyChainService } from '../../keychain.service';
-import { LoggerService } from '../../logger.service';
+import { Coin, KeyChainService } from '../../../keychain.service';
+import { LoggerService } from '../../../logger.service';
 import { NgZone } from '@angular/core';
 
 import { timer } from 'rxjs';
-import { ConnectivityService } from '../../connectivity.service';
+import { ConnectivityService } from '../../../connectivity.service';
 
 
 export class BitcoreWallet extends CurrencyWallet {
@@ -74,7 +74,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
   public verifyAddress(address: string): boolean {
     return address &&
-           /^([135KLmn29ñ]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
+           /^([135KLmn29ï¿½]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
   }
 
   public async listTransactionHistory() {
