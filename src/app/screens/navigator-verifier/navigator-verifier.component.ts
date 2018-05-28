@@ -16,6 +16,18 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
   public ngOnInit() {
 
     this.subscriptions.push(
+      this.bt.enabledEvent.subscribe(async () => {
+        await this.bt.ensureListening();
+      }));
+
+    this.subscriptions.push(
+      this.bt.connectedEvent.subscribe(async () => {
+        console.log('Connected to', this.bt.connectedDevice.getValue());
+        await this.bt.stopListening();
+        await this.wallet.startSync();
+      }));
+
+    this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
         await this.wallet.changeStatus();
       }));
@@ -24,6 +36,7 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
         await this.wallet.cancelSync();
+        await this.bt.ensureListening();
       }));
 
   }

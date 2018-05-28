@@ -37,6 +37,8 @@ export class WalletService {
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
   public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public status: BehaviorSubject<WalletStatus> = new BehaviorSubject<WalletStatus>(WalletStatus.None);
+  public noneSync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.None)), false);
   public partiallySync: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(map(status => status === WalletStatus.Partially)), false);
   public fullySync: BehaviorSubject<boolean> = toBehaviourSubject(

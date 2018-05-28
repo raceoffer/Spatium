@@ -5,6 +5,12 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
+
+  <span class="spacer"></span>
+
+  <mat-icon *ngIf="!(synchronizing | async) && (noneSync | async)">sync_disabled</mat-icon>
+  <mat-icon *ngIf="!(synchronizing | async) && (fullySync | async)">sync</mat-icon>
+  <mat-icon *ngIf="!(synchronizing | async) && (partiallySync | async)">sync_problem</mat-icon>
 </mat-toolbar>
 
 <mat-progress-bar mode="determinate" color="accent" [value]="(progress | async)" *ngIf="(synchronizing | async)"

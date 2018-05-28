@@ -58,6 +58,7 @@ export class MainComponent implements OnInit, OnDestroy {
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
   synchronizing = this.wallet.synchronizing;
+  noneSync = this.wallet.noneSync;
   partiallySync = this.wallet.partiallySync;
   fullySync = this.wallet.fullySync;
   progress = this.wallet.syncProgress;
