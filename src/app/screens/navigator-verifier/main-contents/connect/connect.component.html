@@ -4,11 +4,16 @@
   [isShadowed]="true"
   (backClicked)="onBackClicked()"></app-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="center center" class="box">
-  <app-numeric-spinner
-    [value]="progress | async"
-    [outerDiameter]="200"
-    [innerDiameter]="170">
-  </app-numeric-spinner>
+<div fxLayout="column" class="box">
+  <mat-list class="list">
+    <mat-list-item *ngFor="let coin of coins">
+      <span>
+        Syncing {{ coin.name }}...&nbsp;
+      </span>
+      <span *ngIf="coin.ready | async">
+        done
+      </span>
+    </mat-list-item>
+  </mat-list>
 </div>
 

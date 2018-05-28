@@ -1,10 +1,10 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { timer  } from 'rxjs';
 import { ConnectivityService } from '../../connectivity.service';
 
-declare const CryptoCore: any;
+import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
 export class ERC20Wallet extends CurrencyWallet {
   private wallet: any = null;
@@ -52,7 +52,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await CryptoCore.EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx);
   }
 
   public currencyCode(): Coin | Token {
@@ -62,7 +62,7 @@ export class ERC20Wallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
+    this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       network: this.network,
@@ -73,7 +73,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -89,7 +89,7 @@ export class ERC20Wallet extends CurrencyWallet {
   public async syncDuplicate(other: CurrencyWallet) {
     await super.syncDuplicate(other);
 
-    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
+    this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       contractAddress: this.contractAddress,
@@ -100,7 +100,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -119,7 +119,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new CryptoCore.EthereumTransaction(),
+      new EthereumTransaction(),
       address,
       value,
       fee ? fee : undefined
@@ -127,7 +127,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    await Observable.timer(1000).toPromise();
+    await timer(1000).toPromise();
     return [];
   }
 

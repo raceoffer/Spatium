@@ -1,40 +1,45 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-const BitcoreTransaction = require('./bitcoretransaction');
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
-function BitcoinTransaction(state) {
-  BitcoreTransaction.call(this, 'BitcoinTransaction', state);
+import { BitcoreTransaction } from './bitcoretransaction';
+
+export class BitcoinTransaction extends BitcoreTransaction {
+  constructor(state) {
+    super('BitcoinTransaction', state);
+  }
+
+  static useWorker(worker) {
+    BitcoinTransaction.worker = worker;
+    BitcoreTransaction.useWorker(worker);
+  }
+
+  static async invokeStatic(message, wrapped) {
+    assert(BitcoinTransaction.worker);
+    const result = await BitcoinTransaction.worker.postMessage({
+      action: 'invokeStatic',
+      class: 'BitcoinTransaction',
+      method: message.method,
+      arguments: map(defaultTo(message.arguments, []), wrap)
+    });
+    return wrapped ? result : unwrap(result);
+  }
+
+  static async fromOptions(options) {
+    return new BitcoinTransaction(await BitcoinTransaction.invokeStatic({
+      method: 'fromOptions',
+      arguments: [options]
+    }, true));
+  }
+
+  static async fromJSON(json) {
+    return new BitcoinTransaction(await BitcoinTransaction.invokeStatic({
+      method: 'fromJSON',
+      arguments: [json]
+    }, true));
+  }
 }
-
-BitcoinTransaction.prototype = Object.create(BitcoreTransaction.prototype);
-BitcoinTransaction.prototype.constructor = BitcoinTransaction;
-
-BitcoinTransaction.set = function(worker) {
-  BitcoinTransaction.worker = worker;
-  BitcoreTransaction.set(worker);
-  return BitcoinTransaction;
-};
-
-BitcoinTransaction.invokeStatic = async function(message, wrapped) {
-  const result = await BitcoreTransaction.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'BitcoinTransaction',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-  return wrapped ? result : Marshal.unwrap(result);
-};
-
-BitcoinTransaction.fromOptions = async options => new BitcoinTransaction(await BitcoinTransaction.invokeStatic({
-  method: 'fromOptions',
-  arguments: [options]
-}, true));
-
-BitcoinTransaction.fromJSON = async json => new BitcoinTransaction(await BitcoinTransaction.invokeStatic({
-  method: 'fromJSON',
-  arguments: [json]
-}, true));
-
-module.exports = BitcoinTransaction;

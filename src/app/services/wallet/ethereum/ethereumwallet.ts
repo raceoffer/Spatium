@@ -1,10 +1,10 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { timer  } from 'rxjs';
 import { ConnectivityService } from '../../connectivity.service';
 
-declare const CryptoCore: any;
+import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
 
 export class EthereumWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -41,13 +41,13 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await CryptoCore.EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx);
   }
 
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.wallet = await CryptoCore.EthereumWallet.fromOptions({
+    this.wallet = await CoreEthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       network: this.network,
@@ -56,7 +56,7 @@ export class EthereumWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -75,7 +75,7 @@ export class EthereumWallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new CryptoCore.EthereumTransaction(),
+      new EthereumTransaction(),
       address,
       value,
       fee ? fee : undefined
@@ -83,7 +83,7 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    await Observable.timer(1000).toPromise();
+    await timer(1000).toPromise();
     return [];
   }
 

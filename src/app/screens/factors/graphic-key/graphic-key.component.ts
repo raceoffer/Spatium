@@ -12,8 +12,6 @@ import {
 import * as PatternLock from 'PatternLock';
 import { FactorType } from '../../../services/auth.service';
 
-declare const Buffer: any;
-
 @Component({
   selector: 'app-graphic-key',
   templateUrl: './graphic-key.component.html',

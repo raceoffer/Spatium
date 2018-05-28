@@ -3,11 +3,9 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-import { Observable } from 'rxjs/Observable';
+import { timer } from 'rxjs';
 import { ConnectivityService } from '../../connectivity.service';
 
-declare const Buffer: any;
-declare const CryptoCore: any;
 
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -61,7 +59,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -76,7 +74,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
   public verifyAddress(address: string): boolean {
     return address &&
-           /^([135KLmn29—Å]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
+           /^([135KLmn29Ò]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
   }
 
   public async listTransactionHistory() {

@@ -1,11 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import { catchError } from 'rxjs/operators';
+import { catchError, mapTo } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { WorkerService } from './worker.service';
 
-import 'rxjs/add/operator/mapTo';
-
-declare const CryptoCore: any;
+import { DDS } from 'crypto-core-async';
+import { getAccountSecret, useWorker } from 'crypto-core-async/lib/utils';
 
 export class DDSAccount {
   public address: string = this.account.address;
@@ -18,7 +18,7 @@ export class DDSAccount {
   }
 
   public async store(id: string, data: any, gasPrice: number) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id);
     return await this.dds.store({
       secret: accountSecret,
       data: data,
@@ -28,7 +28,7 @@ export class DDSAccount {
   }
 
   public async estimateGas(id: string, data: any) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id);
     return this.dds.estimateStoreGas({
       secret: accountSecret,
       data: data,
@@ -43,20 +43,24 @@ export class DDSService {
   private network = 'testnet'; // 'main'; | 'testnet';
   private sponsor = 'http://185.219.80.169:8080/sponsor';
 
-  constructor(private readonly http: HttpClient) {
-    this.dds = CryptoCore.DDS.fromOptions({
+  constructor(
+    private readonly http: HttpClient,
+    private readonly workerService: WorkerService
+  ) {
+    useWorker(workerService.worker);
+    this.dds = DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network
     });
   }
 
   public async exists(id: string) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id);
     return await this.dds.exists(accountSecret);
   }
 
   public async read(id: string) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id);
     const count = await this.dds.count(accountSecret);
     const data = [];
     for (let i = 0; i < count; ++i) {
@@ -87,9 +91,10 @@ export class DDSService {
     ).pipe(
       catchError(error => {
         console.log(error);
-        return new ErrorObservable('Something bad happened; please try again later.');
-      })
-    ).mapTo(true);
+        return of('Something bad happened; please try again later.');
+      }),
+      mapTo(true)
+    );
   }
 
   public fromWei(wei: any, coin: string) {
@@ -101,7 +106,7 @@ export class DDSService {
   }
 
   public async getStoreAccount(id) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id, 1);
+    const accountSecret = await getAccountSecret(id, 1);
     return new DDSAccount(this.dds, this.dds.getAddress(accountSecret));
   }
 

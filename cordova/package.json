@@ -5,6 +5,8 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
+    "webpack-dev": "webpack --config ../src/crypto-core-async/webpack.config.js --mode development",
+    "webpack-prod": "webpack --config ../src/crypto-core-async/webpack.config.js --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Apache Cordova Team",
@@ -72,6 +74,7 @@
     ]
   },
   "devDependencies": {
-    "webpack": "^3.10.0"
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.3"
   }
 }

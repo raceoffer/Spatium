@@ -1,11 +1,12 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from "../../../services/auth.service";
+import { AuthService } from '../../../services/auth.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { WorkerService } from '../../../services/worker.service';
 
-declare const Buffer: any;
-declare const CryptoCore: any;
 declare const nfc: any;
+
+import { packSeed } from 'crypto-core-async/lib/utils';
 
 enum Content {
   QR = 'QR',
@@ -84,7 +85,7 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   async writeSecret() {
     const encryptedSeed = this.authService.encryptedSeed;
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    this.packSeed = await CryptoCore.Utils.packSeed(buffesSeed);
+    this.packSeed = await packSeed(buffesSeed);
     this.switchSecretValue();
 
     console.log(this.secretValue);

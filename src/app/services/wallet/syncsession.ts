@@ -1,8 +1,9 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
 import { ConnectivityService } from '../connectivity.service';
 import { LoggerService } from '../logger.service';
+
+import { filter, take, map, takeUntil } from 'rxjs/operators';
 
 export enum SynchronizationStatus {
   None = 0,
@@ -39,34 +40,40 @@ export class SyncSession implements OnDestroy {
     private connectivityService: ConnectivityService
   ) {
     this.initialCommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'initialCommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'initialCommitment'),
+        map(object => object.content)
+      );
 
     this.initialDecommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'initialDecommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'initialDecommitment'),
+        map(object => object.content)
+      );
 
     this.verifierCommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'verifierCommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'verifierCommitment'),
+        map(object => object.content)
+      );
 
     this.proverCommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'proverCommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'proverCommitment'),
+        map(object => object.content)
+      );
 
     this.verifierDecommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'verifierDecommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'verifierDecommitment'),
+        map(object => object.content)
+      );
 
     this.proverDecommitmentObserver =
-      this.connectivityService.message
-        .filter(object => object.type === 'proverDecommitment')
-        .map(object => object.content);
+      this.connectivityService.message.pipe(
+        filter(object => object.type === 'proverDecommitment'),
+        map(object => object.content)
+      );
   }
 
   ngOnDestroy() {
@@ -114,7 +121,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send initialCommitment', e);
     }
 
-    const remoteInitialCommitment = await this.initialCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteInitialCommitment = await this.initialCommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }
@@ -140,7 +150,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send initialDecommitment', e);
     }
 
-    const remoteInitialDecommitment = await this.initialDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteInitialDecommitment = await this.initialDecommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }
@@ -168,7 +181,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send verifierCommitment', e);
     }
 
-    const remoteVerifierCommitment = await this.verifierCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteVerifierCommitment = await this.verifierCommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }
@@ -194,7 +210,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send proverCommitment', e);
     }
 
-    const remoteProverCommitment = await this.proverCommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteProverCommitment = await this.proverCommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }
@@ -220,7 +239,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send verifierDecommitment', e);
     }
 
-    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteVerifierDecommitment = await this.verifierDecommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }
@@ -242,7 +264,10 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to send proverDecommitment', e);
     }
 
-    const remoteProverDecommitment = await this.proverDecommitmentObserver.take(1).takeUntil(this.cancelled.filter(b => b)).toPromise();
+    const remoteProverDecommitment = await this.proverDecommitmentObserver.pipe(
+      take(1),
+      takeUntil(this.cancelled.pipe(filter(b => b)))
+    ).toPromise();
     if (this.cancelled.getValue()) {
       return this.handleCancel();
     }

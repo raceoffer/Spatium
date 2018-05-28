@@ -2,6 +2,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { ConnectivityService, DiscoveryState } from '../../../services/connectivity.service';
+import { combineLatest } from 'rxjs';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { toBehaviourSubject } from '../../../utils/transformers';

@@ -1,15 +1,14 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
 import { ConnectivityService } from '../connectivity.service';
 import { SynchronizationStatus, SyncSession } from './syncsession';
 import { SignSession } from './signingsession';
-import { Subject } from 'rxjs/Subject';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 import { NgZone } from '@angular/core';
 
 import { toBehaviourSubject } from '../../utils/transformers';
 
-declare const CryptoCore: any;
+import { CompoundKey } from 'crypto-core-async';
+import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';
 
 export enum Status {
   None = 0,
@@ -61,15 +60,23 @@ export class CurrencyWallet {
   protected signSession: SignSession = null;
 
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
 
-  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(
+      map(status => status === Status.Synchronizing)
+    ), false);
 
-  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
-  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
-  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
-  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(
+      map(status => status === Status.Ready)
+    ), false);
+
+  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
+
+  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
+  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
+  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
+  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
 
   public startVerifyEvent: Subject<any> = new Subject<any>();
   public verifyEvent: Subject<any> = new Subject<any>();
@@ -92,9 +99,9 @@ export class CurrencyWallet {
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
-    this.connectivityService.message
-      .filter(object => object.type === 'cancelTransaction')
-      .subscribe(async () => {
+    this.connectivityService.message.pipe(
+      filter((obj: any) => obj.type === 'cancelTransaction')
+    ).subscribe(async () => {
         // pop the queue
         this.connectivityService.message.next({});
 
@@ -118,8 +125,8 @@ export class CurrencyWallet {
   }
 
   public async sync(paillierKeys: any) {
-    this.compoundKey = await CryptoCore.CompoundKey.fromOptions({
-      localPrivateKey: await CryptoCore.CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+    this.compoundKey = await CompoundKey.fromOptions({
+      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
       localPaillierKeys: paillierKeys
     });
 
@@ -209,7 +216,7 @@ export class CurrencyWallet {
     return this.currency;
   }
 
-  public verifyAddress (address: string): boolean {
+  public verifyAddress(address: string): boolean {
     return address && address.length > 0;
   }
 

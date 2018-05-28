@@ -3,9 +3,7 @@ import { AuthService } from '../../../services/auth.service';
 import { FactorType } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-declare const CryptoCore: any;
+import { BehaviorSubject } from 'rxjs';
 
 enum State {
   Ready,

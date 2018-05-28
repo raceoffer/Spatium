@@ -3,7 +3,7 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { NgZone } from '@angular/core';
 import { ConnectivityService } from '../../connectivity.service';
 
-declare const CryptoCore: any;
+import { BitcoinCashTransaction, BitcoinCashWallet as CoreBitcoinCashWallet } from 'crypto-core-async';
 
 export class BitcoinCashWallet extends BitcoreWallet {
   constructor(
@@ -15,8 +15,8 @@ export class BitcoinCashWallet extends BitcoreWallet {
     ngZone: NgZone
   ) {
     super(
-      CryptoCore.BitcoinCashTransaction,
-      CryptoCore.BitcoinCashWallet,
+      BitcoinCashTransaction,
+      CoreBitcoinCashWallet,
       endpoint,
       network,
       keychain,

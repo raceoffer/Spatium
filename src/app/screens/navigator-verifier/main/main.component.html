@@ -7,6 +7,10 @@
   <span>{{ title }}</span>
 </mat-toolbar>
 
+<mat-progress-bar mode="determinate" color="accent" [value]="(progress | async)" *ngIf="(synchronizing | async)"
+      style="width: 100%; position: fixed; z-index: 2;">
+</mat-progress-bar>
+
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box" *ngIf="!(synchronizing | async)">
   <mat-sidenav-container class="content">

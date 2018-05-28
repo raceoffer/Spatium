@@ -57,24 +57,22 @@
                    (inputEvent)="setInput($event)"
   ></app-nfc-reader>
 
-  <span style="margin: 5px 0px;" (clearEvent)="setEmpty()">{{recognitionMsg}}</span>
+  <span style="margin: 5px 0px;" (clearEvent)="setEmpty()">{{ recognitionMsg }}</span>
   <div class="footer text-center">
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()"
             [disabled]="buttonState === stateType.Empty"
-            *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{stLogIn}}
+            *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty">{{ stLogIn }}
     </button>
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="letLogin()"
-            *ngIf="buttonState === stateType.New">{{stSignUp}}
+            *ngIf="buttonState === stateType.New">{{ stSignUp }}
     </button>
     <button type="button" mat-raised-button color="accent" class="width-button color" disabled
             *ngIf="buttonState === stateType.Updating">
       <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
     </button>
     <button type="button" mat-raised-button color="accent" class="width-button color" (click)="checkInput(input)"
-            *ngIf="buttonState === stateType.Error">{{stError}}
+            *ngIf="buttonState === stateType.Error">{{ stError }}
     </button>
   </div>
 
 </div>
-
-

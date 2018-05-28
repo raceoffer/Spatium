@@ -5,10 +5,12 @@ import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
+import { WorkerService } from '../../services/worker.service';
 
-declare const CryptoCore: any;
 declare const cordova: any;
 declare const device: any;
+
+import { randomBytes, useWorker } from 'crypto-core-async/lib/utils';
 
 export enum State {
   Ready,
@@ -50,13 +52,18 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   isGeneric = false;
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly authService: AuthService,
-              private readonly notification: NotificationService,
-              private readonly keychain: KeyChainService,
-              private readonly dds: DDSService,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly authService: AuthService,
+    private readonly notification: NotificationService,
+    private readonly keychain: KeyChainService,
+    private readonly dds: DDSService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) {
+    useWorker(workerService.worker);
+  }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -123,7 +130,6 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         });
 
         const exists = await this.dds.exists(await AuthService.toId(input));
-        console.log(exists);
         if (input !== this.input) { // in case of updates to userName during lookup
           return;
         }
@@ -225,7 +231,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
       this.authService.password = '';
-      this.keychain.setSeed(await CryptoCore.Utils.randomBytes(64));
+      this.keychain.setSeed(await randomBytes(64));
 
       await this.router.navigate(['/registration']);
     } else {
@@ -247,4 +253,3 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     return device.platform === 'windows';
   }
 }
-

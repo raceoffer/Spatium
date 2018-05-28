@@ -2,19 +2,14 @@
 *node_modules
 /bower_components
 
-/cordova/node_modules
-/cordova/www
-
 .tmp
 .sass-cache
 *.swp
 *.swo
 *.log
 *.DS_Store
-*.bundle.js
-/src/bcoinlib/test/*.key
-/src/bcoinlib/test/*.seed
-package-lock.json
+
+/cordova/node_modules
+/cordova/www
 /cordova/platforms
 /cordova/plugins
-dist
