@@ -10,7 +10,7 @@ import { WorkerService } from '../../services/worker.service';
 declare const cordova: any;
 declare const device: any;
 
-import { randomBytes, useWorker } from 'crypto-core-async/lib/utils';
+import { randomBytes } from 'crypto-core-async/lib/utils';
 
 export enum State {
   Ready,
@@ -61,9 +61,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     private readonly dds: DDSService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(

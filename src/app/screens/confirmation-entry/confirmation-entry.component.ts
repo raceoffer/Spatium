@@ -11,8 +11,7 @@ import {
   deriveAesKey,
   encrypt,
   decrypt,
-  randomBytes,
-  useWorker
+  randomBytes
 } from 'crypto-core-async/lib/utils';
 
 declare const Buffer: any;
@@ -45,7 +44,6 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.route.params.subscribe(params => {
       if (params['back']) {
         this.back = params['back'];

@@ -53,12 +53,6 @@ export class WalletService {
     private readonly ngZone: NgZone,
     private readonly workerService: WorkerService
   ) {
-    CompoundKey.useWorker(workerService.worker);
-    BitcoinTransaction.useWorker(workerService.worker);
-    BitcoinCashTransaction.useWorker(workerService.worker);
-    LitecoinTransaction.useWorker(workerService.worker);
-    EthereumTransaction.useWorker(workerService.worker);
-
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(

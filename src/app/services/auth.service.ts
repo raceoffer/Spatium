@@ -15,7 +15,7 @@ import { DeviceService } from './device.service';
 declare const nfc: any;
 declare const device: any;
 
-import { sha256, matchPassphrase, useWorker } from 'crypto-core-async/lib/utils';
+import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
 @Injectable()
 export class AuthService {
@@ -47,7 +47,6 @@ export class AuthService {
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.init();
   }
 

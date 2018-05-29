@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
-import { getAccountSecret, useWorker } from 'crypto-core-async/lib/utils';
+import { getAccountSecret } from 'crypto-core-async/lib/utils';
 
 export class DDSAccount {
   public address: string = this.account.address;
@@ -47,7 +47,6 @@ export class DDSService {
     private readonly http: HttpClient,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.dds = DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network

@@ -18,8 +18,7 @@ declare const navigator: any;
 
 import {
   tryUnpackLogin,
-  tryUnpackEncryptedSeed,
-  useWorker
+  tryUnpackEncryptedSeed
 } from 'crypto-core-async/lib/utils';
 
 @Component({
@@ -52,9 +51,7 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private readonly ngZone: NgZone,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.canScanAgain = false;

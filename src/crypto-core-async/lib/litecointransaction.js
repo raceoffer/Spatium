@@ -4,42 +4,47 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { LitecoinTransaction as CoreLitecoinTransaction } from 'crypto-core/lib/transaction/bitcore/litecointransaction';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 import { BitcoreTransaction } from './bitcoretransaction';
 
 export class LitecoinTransaction extends BitcoreTransaction {
-  constructor(state) {
-    super('LitecoinTransaction', state);
+  constructor(state, worker) {
+    super('LitecoinTransaction', state, worker);
   }
 
-  static useWorker(worker) {
-    LitecoinTransaction.worker = worker;
-    BitcoreTransaction.useWorker(worker);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await LitecoinTransaction.worker.postMessage({
+        action: 'invokeStatic',
+        class: 'LitecoinTransaction',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreLitecoinTransaction, message.method, ... message.arguments);
+    }
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(LitecoinTransaction.worker);
-    const result = await LitecoinTransaction.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'LitecoinTransaction',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
-  }
-
-  static async fromOptions(options) {
-    return new LitecoinTransaction(await LitecoinTransaction.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await LitecoinTransaction.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
   }
 
-  static async fromJSON(json) {
-    return new LitecoinTransaction(await LitecoinTransaction.invokeStatic({
+  static async fromJSON(json, worker) {
+    const state = await LitecoinTransaction.invokeStatic({
       method: 'fromJSON',
       arguments: [json]
-    }, true));
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
   }
 }

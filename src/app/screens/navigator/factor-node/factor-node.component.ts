@@ -33,7 +33,7 @@ import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 import { WorkerService } from '../../../services/worker.service';
 
 
-import { packLogin, tryUnpackLogin, packTree, useWorker } from 'crypto-core-async/lib/utils';
+import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-factor-node',
@@ -76,9 +76,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(

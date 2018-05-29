@@ -33,7 +33,7 @@ import { WorkerService } from '../../services/worker.service';
 
 declare const device: any;
 
-import { packTree, useWorker } from 'crypto-core-async/lib/utils';
+import { packTree } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-registration',
@@ -83,7 +83,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.changeDetectorRef = changeDetectorRef;
   }
 

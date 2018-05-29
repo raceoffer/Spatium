@@ -4,20 +4,20 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { EthereumTransaction as CoreEthereumTransaction } from 'crypto-core/lib/transaction/ethereumtransaction';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 export class EthereumTransaction {
-  constructor(state) {
+  constructor(state, worker) {
     this.state = state || { type: 'EthereumTransaction' };
-  }
-
-  static useWorker(worker) {
-    EthereumTransaction.worker = worker;
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(EthereumTransaction.worker);
-    const result = await EthereumTransaction.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: 'EthereumTransaction',
       self: this.state,
@@ -30,30 +30,35 @@ export class EthereumTransaction {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(EthereumTransaction.worker);
-    const result = await EthereumTransaction.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'EthereumTransaction',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await EthereumTransaction.worker.postMessage({
+        action: 'invokeStatic',
+        class: 'EthereumTransaction',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreEthereumTransaction, message.method, ... message.arguments);
+    }
   }
 
-  async fromOptions(options) {
+  async fromOptions(tx, data) {
     await this.invoke({
       method: 'fromOptions',
-      arguments: [options]
+      arguments: [tx, data]
     }, true);
     return this;
   }
 
-  static async fromOptions(tx, data) {
-    return EthereumTransaction(await EthereumTransaction.invokeStatic({
+  static async fromOptions(tx, data, worker) {
+    const state = await EthereumTransaction.invokeStatic({
       method: 'fromOptions',
       arguments: [tx, data]
-    }, true));
+    }, worker, true);
+
+    return worker ? new EthereumTransaction(state, worker) : state;
   }
 
   async estimateSize() {
@@ -99,11 +104,13 @@ export class EthereumTransaction {
     return this;
   }
 
-  static async fromJSON(json) {
-    return new EthereumTransaction(await EthereumTransaction.invokeStatic({
+  static async fromJSON(json, worker) {
+    const state = await EthereumTransaction.invokeStatic({
       method: 'fromJSON',
       arguments: [json]
-    }, true));
+    }, worker, true);
+
+    return worker ? new EthereumTransaction(state, worker) : state;
   }
 
   async mapInputs(compoundKey) {

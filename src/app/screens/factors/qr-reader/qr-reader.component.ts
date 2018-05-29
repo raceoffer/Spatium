@@ -8,8 +8,7 @@ declare const window: any;
 
 import {
   tryUnpackLogin,
-  tryUnpackEncryptedSeed,
-  useWorker
+  tryUnpackEncryptedSeed
 } from 'crypto-core-async/lib/utils';
 
 @Component({
@@ -40,9 +39,7 @@ export class QrReaderComponent implements OnInit {
     private readonly ngZone: NgZone,
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   async ngOnInit() {
     this.canScanAgain = true;
