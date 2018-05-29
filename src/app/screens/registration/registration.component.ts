@@ -232,8 +232,8 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = await AuthService.toId(this.authService.login);
-      const data = await packTree(tree, this.keychain.getSeed());
+      const id = await this.authService.toId(this.authService.login);
+      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
       this.authService.currentTree = data;
 
       try {

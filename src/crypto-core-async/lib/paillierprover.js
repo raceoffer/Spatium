@@ -81,7 +81,7 @@ export class PaillierProver {
     return new PaillierVerifier(await this.invoke({
       method: 'processInitialDecommitment',
       arguments: [decommitment]
-    }, true));
+    }, true), this.worker);
   }
 
   async processCommitment(commitment) {

@@ -127,7 +127,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
           this.buttonState = State.Updating;
         });
 
-        const exists = await this.dds.exists(await AuthService.toId(input));
+        const exists = await this.dds.exists(await this.authService.toId(input));
         if (input !== this.input) { // in case of updates to userName during lookup
           return;
         }
@@ -168,7 +168,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     try {
       do {
         this.loginGenerate = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
+        const exists = await this.dds.exists(await this.authService.toId(this.loginGenerate));
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.ngZone.run(async () => {
@@ -218,7 +218,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         // Let it spin a bit more
         this.buttonState = State.Updating;
         this.authService.remoteEncryptedTrees = [];
-        this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
+        this.authService.remoteEncryptedTrees.push(await this.dds.read(await this.authService.toId(this.input)));
       } catch (e) {
         this.notification.show('No backup found');
       } finally {
@@ -229,7 +229,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
       this.authService.password = '';
-      this.keychain.setSeed(await randomBytes(64));
+      this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
 
       await this.router.navigate(['/registration']);
     } else {

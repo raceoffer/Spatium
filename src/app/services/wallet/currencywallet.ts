@@ -96,7 +96,8 @@ export class CurrencyWallet {
     private account: number,
     private messageSubject: any,
     private bt: BluetoothService,
-    protected ngZone: NgZone
+    protected ngZone: NgZone,
+    protected worker: any
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
@@ -127,9 +128,9 @@ export class CurrencyWallet {
 
   public async sync(paillierKeys: any) {
     this.compoundKey = await CompoundKey.fromOptions({
-      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account), this.worker),
       localPaillierKeys: paillierKeys
-    });
+    }, this.worker);
 
     const prover = await this.compoundKey.startInitialCommitment();
 

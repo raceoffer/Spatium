@@ -13,7 +13,8 @@ export class LitecoinWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       LitecoinTransaction,
@@ -25,7 +26,9 @@ export class LitecoinWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 
   public verifyAddress(address: string): boolean {

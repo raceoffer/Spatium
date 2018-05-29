@@ -22,11 +22,12 @@ export class ERC20Wallet extends CurrencyWallet {
     messageSubject: any,
     bt: BluetoothService,
     ngZone: NgZone,
+    worker: any,
     token: Token,
     address: string,
     decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
 
     this.contractAddress = address;
     this.token = token;
@@ -53,7 +54,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx, this.worker);
   }
 
   public currencyCode(): Coin | Token {
@@ -120,7 +121,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      await EthereumTransaction.create(),
+      await EthereumTransaction.create(this.worker),
       address,
       value,
       fee ? fee : undefined

@@ -35,7 +35,7 @@ export class CompoundKey {
 
   static async invokeStatic(message, worker, wrapped) {
     if (worker) {
-      const result = await CompoundKey.worker.postMessage({
+      const result = await worker.postMessage({
         action: 'invokeStatic',
         class: 'CompoundKey',
         method: message.method,
@@ -128,7 +128,7 @@ export class CompoundKey {
     return new PaillierProver(await this.invoke({
       method: 'startInitialCommitment',
       arguments: []
-    }, true));
+    }, true), this.worker);
   }
 
   async finishInitialSync(syncData) {
@@ -149,6 +149,6 @@ export class CompoundKey {
     return new Signer(await this.invoke({
       method: 'startSign',
       arguments: [message]
-    }, true));
+    }, true), this.worker);
   }
 }
