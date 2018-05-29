@@ -1,4 +1,5 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Http, Headers, RequestOptionsArgs } from '@angular/http';
+import { HttpWrapper } from "ionic-native-http-angular-wrapper";
 import { Injectable } from '@angular/core';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { catchError } from 'rxjs/operators';
@@ -30,6 +31,7 @@ export class DDSAccount {
   public async estimateGas(id: string, data: any) {
     const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
     return this.dds.estimateStoreGas({
+      id: id,
       secret: accountSecret,
       data: data,
       account: this.account
@@ -43,7 +45,7 @@ export class DDSService {
   private network = 'testnet'; // 'main'; | 'testnet';
   private sponsor = 'http://185.219.80.169:8080/sponsor';
 
-  constructor(private readonly http: HttpClient) {
+  constructor(private readonly  http: HttpWrapper) {
     this.dds = CryptoCore.DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network
@@ -67,19 +69,16 @@ export class DDSService {
   }
 
   public sponsorStore(id: string, data: any) {
-    const httpOptions = {
-      headers: new HttpHeaders({
+    const url = this.sponsor + '/storage/' + id;
+    const body = {'data': '0x' + data.toString('hex')}
+
+    let httpOptions: RequestOptionsArgs = {
+      headers: new Headers({
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Auth-Key': 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs',
         'Access-Control-Allow-Origin': '*',
       })
-    };
-
-    const body = new HttpParams()
-      .set('data', '0x' + data.toString('hex'));
-
-    const url = this.sponsor + '/storage/' + id;
-
+    }
     return this.http.post(
       url,
       body,

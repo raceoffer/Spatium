@@ -29,7 +29,7 @@ module.exports = function(context) {
   if (context.opts.cordova.platforms.length === 1) {
     switch (context.opts.cordova.platforms[0]) {
       case 'windows': baseHref = '/www/'; break;
-      case 'ios': baseHref = './'; break;
+      case 'ios': baseHref = '#'; break;
     }
   }
   const command = 'ng build --aot ' + (prod ? '--prod ' : '') + '--output-path cordova/www/ --base-href ' + baseHref;

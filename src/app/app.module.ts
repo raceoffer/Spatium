@@ -1,5 +1,7 @@
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClientModule } from '@angular/common/http';
+import { HttpModule } from '@angular/http';
+import {NativeHttpWrapper} from 'ionic-native-http-angular-wrapper';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -135,8 +137,9 @@ import { ConnectivityService } from './services/connectivity.service';
     OverlayModule,
     FormsModule,
     HttpClientModule,
+    HttpModule,
+    NativeHttpWrapper,
     ReactiveFormsModule,
-    AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,
     BrowserAnimationsModule,
@@ -161,7 +164,8 @@ import { ConnectivityService } from './services/connectivity.service';
     MatGridListModule,
     MatSnackBarModule,
     QRCodeModule,
-    ZXingScannerModule.forRoot()
+    ZXingScannerModule.forRoot(),
+    AppRoutingModule
   ],
   providers: [
     WalletService,
