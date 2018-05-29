@@ -39,7 +39,7 @@ export class AuthService {
   stFactorError = 'Incorrect factor ';
 
   static async toId(name: string) {
-    return (await sha256(Buffer.from(name, 'utf-8'))).toString('hex');
+    return (await sha256(Buffer.from(name.toLowerCase(), 'utf-8'))).toString('hex');
   }
 
   constructor(
