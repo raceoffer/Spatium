@@ -89,6 +89,12 @@ export class BluetoothService {
 
     cordova.plugins.bluetooth.setDiscoveredCallback(device => this.ngZone.run(() => {
       const devices = this.devices.getValue();
+      if (devices.has(device.name)) {
+        if (devices.get(device.name).macAddress === device.address) {
+          return;
+        }
+      }
+
       devices.set(device.name, new Device(device.name, device.address));
       this.devices.next(devices);
     }));
@@ -209,6 +215,16 @@ export class BluetoothService {
     }
 
     this.discoveryState.next(State.Starting);
+
+    const paired = await cordova.plugins.bluetooth.getPairedDevices();
+    const map = new Map<string, Device>();
+    for (const device of paired) {
+      if (device.hasOwnProperty('name')) {
+        map.set(device.name, new Device(device.name, device.address, null, true));
+      }
+    }
+
+    this.devices.next(map);
 
     try {
       await cordova.plugins.bluetooth.startDiscovery();
