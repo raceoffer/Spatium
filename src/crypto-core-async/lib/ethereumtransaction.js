@@ -5,7 +5,7 @@ import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
 import { default as _invoke } from 'lodash/invoke';
-import { EthereumTransaction as CoreEthereumTransaction } from 'crypto-core/lib/transaction/ethereumtransaction';
+import { EthereumTransaction as CoreEthereumTransaction } from 'crypto-core/lib/transaction/ethereum/ethereumtransaction';
 
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
@@ -32,7 +32,7 @@ export class EthereumTransaction {
 
   static async invokeStatic(message, worker, wrapped) {
     if (worker) {
-      const result = await EthereumTransaction.worker.postMessage({
+      const result = await worker.postMessage({
         action: 'invokeStatic',
         class: 'EthereumTransaction',
         method: message.method,
@@ -42,6 +42,15 @@ export class EthereumTransaction {
     } else {
       return _invoke(CoreEthereumTransaction, message.method, ... message.arguments);
     }
+  }
+
+  static async create(worker) {
+    const state = await EthereumTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new EthereumTransaction(state, worker) : state;
   }
 
   async fromOptions(tx, data) {

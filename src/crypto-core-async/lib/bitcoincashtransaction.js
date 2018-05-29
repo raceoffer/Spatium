@@ -30,6 +30,15 @@ export class BitcoinCashTransaction extends BitcoreTransaction {
     }
   }
 
+  static async create(worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
+  }
+
   static async fromOptions(options, worker) {
     const state = await BitcoinCashTransaction.invokeStatic({
       method: 'fromOptions',

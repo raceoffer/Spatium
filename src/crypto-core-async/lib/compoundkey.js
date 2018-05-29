@@ -77,7 +77,7 @@ export class CompoundKey {
     }, worker);
   }
 
-  static async fromSecret(secret) {
+  static async fromSecret(secret, worker) {
     const state = await CompoundKey.invokeStatic({
       method: 'fromSecret',
       arguments: [secret]
@@ -94,7 +94,7 @@ export class CompoundKey {
     return this;
   }
 
-  static async fromOptions(options) {
+  static async fromOptions(options, worker) {
     const state = await CompoundKey.invokeStatic({
       method: 'fromOptions',
       arguments: [options]

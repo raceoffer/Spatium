@@ -120,7 +120,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new EthereumTransaction(),
+      await EthereumTransaction.create(),
       address,
       value,
       fee ? fee : undefined

@@ -18,7 +18,7 @@ export class LitecoinTransaction extends BitcoreTransaction {
 
   static async invokeStatic(message, worker, wrapped) {
     if (worker) {
-      const result = await LitecoinTransaction.worker.postMessage({
+      const result = await worker.postMessage({
         action: 'invokeStatic',
         class: 'LitecoinTransaction',
         method: message.method,
@@ -28,6 +28,15 @@ export class LitecoinTransaction extends BitcoreTransaction {
     } else {
       return _invoke(CoreLitecoinTransaction, message.method, ... message.arguments);
     }
+  }
+
+  static async create(worker) {
+    const state = await LitecoinTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
   }
 
   static async fromOptions(options, worker) {

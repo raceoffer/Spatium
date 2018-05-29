@@ -19,7 +19,7 @@ async function invokeStatic(message, worker) {
         arguments: map(defaultTo(message.arguments, []), wrap)
       }));
   } else {
-    return _invoke(CoreUtils, message.method, ... message.argumants);
+    return _invoke(CoreUtils, message.method, ... message.arguments);
   }
 }
 

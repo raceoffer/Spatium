@@ -18,7 +18,7 @@ export class BitcoinTransaction extends BitcoreTransaction {
 
   static async invokeStatic(message, worker, wrapped) {
     if (worker) {
-      const result = await BitcoinTransaction.worker.postMessage({
+      const result = await worker.postMessage({
         action: 'invokeStatic',
         class: 'BitcoinTransaction',
         method: message.method,
@@ -28,6 +28,15 @@ export class BitcoinTransaction extends BitcoreTransaction {
     } else {
       return _invoke(CoreBitcoinTransaction, message.method, ... message.arguments);
     }
+  }
+
+  static async create(worker) {
+    const state = await BitcoinTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new BitcoinTransaction(state, worker) : state;
   }
 
   static async fromOptions(options, worker) {

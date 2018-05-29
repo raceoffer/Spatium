@@ -94,7 +94,7 @@ export class BitcoreWallet extends CurrencyWallet {
   ) {
     try {
       return await this.wallet.prepareTransaction(
-        new this.Transaction(),
+        await this.Transaction.create(),
         address,
         value,
         fee ? fee : undefined
