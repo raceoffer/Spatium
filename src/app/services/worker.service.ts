@@ -1,23 +1,21 @@
 import { Injectable } from '@angular/core';
-import { DeviceService } from './device.service';
-
 import { createWorker } from 'crypto-core-async/lib/createworker';
 
 declare const device: any;
 
 @Injectable()
 export class WorkerService {
-  public worker = null;
+  private _worker = createWorker();
 
-  constructor(private readonly deviceService: DeviceService) {
-    this.init();
+  public get worker() {
+    if (device.platform !== 'windows') {
+      return this._worker;
+    } else {
+      return null;
+    }
   }
 
-  async init() {
-    await this.deviceService.deviceReady();
-    
-    if (!device.isWindows) {
-      this.worker = createWorker();
-    }
+  public get workerUnsafe() {
+    return this._worker;
   }
 }
