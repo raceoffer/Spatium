@@ -30,4 +30,10 @@ export class BitcoinCashWallet extends BitcoreWallet {
       worker
     );
   }
+
+  public verifyAddress(address: string) : boolean {
+    return address &&
+           (super.verifyAddress(address) ||
+            /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );
+  }
 }
