@@ -22,7 +22,7 @@ export class BitcoreWallet extends CurrencyWallet {
     ngZone: NgZone,
     worker: any
   ) {
-    super(network, keychain, coin, account, messageSubject, connectivityService, ngZone, worker);
+    super(network, keychain, coin, account, connectivityService, ngZone, worker);
   }
 
   public async reset() {

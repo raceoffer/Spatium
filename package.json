@@ -25,6 +25,7 @@
     "@angular/platform-browser": "^6.0.2",
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/router": "^6.0.2",
+    "@ionic-native/http": "^4.7.0",
     "angular2-qrcode": "^2.0.1",
     "core-js": "^2.4.1",
     "crypto-core-async": "file:src/crypto-core-async",
@@ -33,6 +34,7 @@
     "jquery": "^3.2.1",
     "patternlock": "file:patternlock",
     "rxjs": "^6.1.0",
+    "rxjs-compat": "^6.2.0",
     "text-encoding": "^0.6.4",
     "zone.js": "^0.8.26"
   },

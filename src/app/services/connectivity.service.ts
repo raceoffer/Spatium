@@ -4,11 +4,19 @@ import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { SocketServerService } from './socketserver.service';
 import { DiscoveryService } from './discovery.service';
 import { BehaviorSubject, Observable, combineLatest, merge } from 'rxjs';
-import { skip, filter, distinctUntilChanged, map, mapTo } from "rxjs/operators";
-import { ConnectionState, State } from "./primitives/state";
+import { skip, filter, distinctUntilChanged, map, mapTo } from 'rxjs/operators';
+import { ConnectionState, State } from './primitives/state';
+import { DeviceService } from './device.service';
 
 @Injectable()
 export class ConnectivityService {
+  public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
+
+  public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
+  public enabledChanged: Observable<boolean> = this.enabled.pipe(distinctUntilChanged(), skip(1));
+  public enabledEvent: Observable<any> = this.enabledChanged.pipe(filter(enabled => enabled), mapTo(null));
+  public disabledEvent: Observable<any> = this.enabledChanged.pipe(filter(enabled => !enabled), mapTo(null));
+
   public connectionState: BehaviorSubject<ConnectionState> = toBehaviourSubject(
     combineLatest([
       this.socketClientService.state,
@@ -80,8 +88,9 @@ export class ConnectivityService {
   constructor(
     private readonly socketClientService: SocketClientService,
     private readonly socketServerService: SocketServerService,
-    private readonly discoveryService: DiscoveryService
-  ) { }
+    private readonly discoveryService: DiscoveryService,
+    private readonly deviceService: DeviceService
+  ) {}
 
   // Server interface
 

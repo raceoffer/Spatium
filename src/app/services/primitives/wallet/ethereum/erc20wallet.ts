@@ -26,7 +26,7 @@ export class ERC20Wallet extends CurrencyWallet {
     address: string,
     decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, connectivityService, ngZone, worker);
+    super(network, keychain, Coin.ETH, account, connectivityService, ngZone, worker);
 
     this.contractAddress = address;
     this.token = token;

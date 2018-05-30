@@ -19,7 +19,7 @@ export class EthereumWallet extends CurrencyWallet {
     ngZone: NgZone,
     worker: any
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, connectivityService, ngZone, worker);
+    super(network, keychain, Coin.ETH, account, connectivityService, ngZone, worker);
   }
 
   public async reset() {

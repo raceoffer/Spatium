@@ -3,10 +3,9 @@ import { NavigationStart, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NavigationService } from '../../services/navigation.service';
-import { DeviceService } from '../../services/device.service';
+import { DeviceService, Platform } from '../../services/device.service';
 
 declare const navigator: any;
-declare const device: any;
 declare const Windows: any;
 
 @Component({
@@ -31,7 +30,7 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.deviceService.deviceReady();
 
     this.ready = true;
-    this.isWindows = device.platform === 'windows';
+    this.isWindows = this.deviceService.platform === Platform.Windows;
 
     if (this.isWindows) {
       this.router.events

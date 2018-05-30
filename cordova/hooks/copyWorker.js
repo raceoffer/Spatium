@@ -5,8 +5,8 @@ module.exports = function(context) {
   const basePath = context.opts.projectRoot;
 
   const prod = context.opts.options && context.opts.options['production'];
-  const sourceFile = basePath + "/../src/crypto-core-async/webworker.bundle.js";
-  const targetDirectory = basePath + "/www";
+  let sourceFile = basePath + "/../src/crypto-core-async/webworker.bundle.js";
+  let targetDirectory = basePath + "/www";
 
   if (!fs.existsSync(targetDirectory)) {
     return;
@@ -14,7 +14,12 @@ module.exports = function(context) {
   
   console.log('Copy worker');
 
-  let copyCommand = process.platform === 'win32' ? "copy /b/v/y " : "cp ";
+  const copyCommand = process.platform === 'win32' ? "copy /b/v/y " : "cp ";
+  
+  if (process.platform === 'win32') {
+	  sourceFile = sourceFile.replace(/\//g, '\\');
+	  targetDirectory = targetDirectory.replace(/\//g, '\\');
+  }
   
   console.log(execSync(
       copyCommand + sourceFile + " " + targetDirectory, {
