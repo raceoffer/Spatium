@@ -12,7 +12,8 @@ export class LitecoinWallet extends BitcoreWallet {
     keychain: KeyChainService,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       LitecoinTransaction,
@@ -23,7 +24,9 @@ export class LitecoinWallet extends BitcoreWallet {
       Coin.LTC,
       account,
       connectivityService,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 
   public verifyAddress(address: string): boolean {

@@ -4,24 +4,23 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { CompoundKey as CoreCompoundKey } from 'crypto-core/lib/primitives/compoundkey';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 import { PaillierProver } from './paillierprover';
 import { Signer } from './signer';
 
 export class CompoundKey {
-  constructor(state) {
+  constructor(state, worker) {
     this.state = state || { type: 'CompoundKey' };
-  }
-
-  static useWorker(worker) {
-    CompoundKey.worker = worker;
-    PaillierProver.useWorker(worker);
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(CompoundKey.worker);
-    const result = await CompoundKey.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: 'CompoundKey',
       self: this.state,
@@ -34,50 +33,57 @@ export class CompoundKey {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(CompoundKey.worker);
-    const result = await CompoundKey.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'CompoundKey',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'CompoundKey',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreCompoundKey, message.method, ... message.arguments);
+    }
   };
 
-  static async generatePaillierKeys() {
+  static async generatePaillierKeys(worker) {
     return CompoundKey.invokeStatic({
       method: 'generatePaillierKeys',
       arguments: []
-    });
+    }, worker);
   }
 
-  static async generateKey() {
+  static async generateKey(worker) {
     return CompoundKey.invokeStatic({
       method: 'generateKey',
       arguments: []
-    });
+    }, worker);
   }
 
-  static async generate() {
-    return new CompoundKey(await CompoundKey.invokeStatic({
+  static async generate(worker) {
+    const state = await CompoundKey.invokeStatic({
       method: 'generate',
       arguments: []
-    }, true));
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
   }
 
-  static async keyFromSecret(secret) {
+  static async keyFromSecret(secret, worker) {
     return CompoundKey.invokeStatic({
       method: 'keyFromSecret',
       arguments: [secret]
-    });
+    }, worker);
   }
 
-  static async fromSecret(secret) {
-    return new CompoundKey(await CompoundKey.invokeStatic({
+  static async fromSecret(secret, worker) {
+    const state = await CompoundKey.invokeStatic({
       method: 'fromSecret',
       arguments: [secret]
-    }, true));
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
   }
 
   async fromOptions(options) {
@@ -88,11 +94,13 @@ export class CompoundKey {
     return this;
   }
 
-  static async fromOptions(options) {
-    return new CompoundKey(await CompoundKey.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await CompoundKey.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
   }
 
   async getPrivateKey(enc) {
@@ -120,7 +128,7 @@ export class CompoundKey {
     return new PaillierProver(await this.invoke({
       method: 'startInitialCommitment',
       arguments: []
-    }, true));
+    }, true), this.worker);
   }
 
   async finishInitialSync(syncData) {
@@ -141,6 +149,6 @@ export class CompoundKey {
     return new Signer(await this.invoke({
       method: 'startSign',
       arguments: [message]
-    }, true));
+    }, true), this.worker);
   }
 }

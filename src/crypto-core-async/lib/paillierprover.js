@@ -4,23 +4,22 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { PaillierProver as CorePaillierProver } from 'crypto-core/lib/primitives/paillierprover';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 import { PaillierVerifier } from './paillierverifier';
 
 export class PaillierProver {
-  constructor(state) {
+  constructor(state, worker) {
     this.state = state || { type: 'PaillierProver' };
-  }
-
-  static useWorker(worker) {
-    PaillierProver.worker = worker;
-    PaillierVerifier.useWorker(worker);
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(PaillierProver.worker);
-    const result = await PaillierProver.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: 'PaillierProver',
       self: this.state,
@@ -33,15 +32,18 @@ export class PaillierProver {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(PaillierProver.worker);
-    const result = await PaillierProver.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'PaillierProver',
-      method: message.method,
-      arguments:map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'PaillierProver',
+        method: message.method,
+        arguments:map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CorePaillierProver, message.method, ... message.arguments);
+    }
   }
 
   async fromOptions(options) {
@@ -52,11 +54,13 @@ export class PaillierProver {
     return this;
   }
 
-  static async fromOptions(options) {
-    return new PaillierProver(await PaillierProver.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await PaillierProver.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worker, true);
+
+    return worker ? new PaillierProver(state, worker) : state;
   }
 
   async getInitialCommitment() {
@@ -77,7 +81,7 @@ export class PaillierProver {
     return new PaillierVerifier(await this.invoke({
       method: 'processInitialDecommitment',
       arguments: [decommitment]
-    }, true));
+    }, true), this.worker);
   }
 
   async processCommitment(commitment) {

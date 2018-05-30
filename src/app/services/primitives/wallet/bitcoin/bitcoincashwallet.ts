@@ -12,7 +12,8 @@ export class BitcoinCashWallet extends BitcoreWallet {
     keychain: KeyChainService,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       BitcoinCashTransaction,
@@ -23,7 +24,9 @@ export class BitcoinCashWallet extends BitcoreWallet {
       Coin.BCH,
       account,
       connectivityService,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 
   public verifyAddress(address: string): boolean {

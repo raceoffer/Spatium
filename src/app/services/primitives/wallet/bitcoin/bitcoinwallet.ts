@@ -12,7 +12,8 @@ export class BitcoinWallet extends BitcoreWallet {
     keychain: KeyChainService,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       BitcoinTransaction,
@@ -23,6 +24,8 @@ export class BitcoinWallet extends BitcoreWallet {
       network === 'main' ? Coin.BTC : Coin.BTC_test,
       account,
       connectivityService,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 }

@@ -8,18 +8,15 @@ import isArray from 'lodash/isArray';
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 export class BitcoreTransaction {
-  constructor(subclass, state) {
+  constructor(subclass, state, worker) {
     this.subclass = subclass;
     this.state = state || { type: this.subclass };
-  }
-
-  static useWorker(worker) {
-    BitcoreTransaction.worker = worker;
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(BitcoreTransaction.worker);
-    const result = await BitcoreTransaction.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: this.subclass,
       self: this.state,
@@ -32,30 +29,12 @@ export class BitcoreTransaction {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(BitcoreTransaction.worker);
-    const result = await BitcoreTransaction.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'BitcoreTransaction',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
-  }
-
   async fromOptions(options) {
     await this.invoke({
       method: 'fromOptions',
       arguments: [options]
     }, true);
     return this;
-  }
-
-  static async fromOptions(options) {
-    return new BitcoreTransaction(await BitcoreTransaction.invokeStatic({
-      method: 'fromOptions',
-      arguments: [options]
-    }, true));
   }
 
   async estimateSize() {
@@ -106,13 +85,6 @@ export class BitcoreTransaction {
       arguments: [json]
     }, true);
     return this;
-  }
-
-  static async fromJSON(json) {
-    return new BitcoreTransaction(await BitcoreTransaction.invokeStatic({
-      method: 'fromJSON',
-      arguments: [json]
-    }, true));
   }
 
   async mapInputs(compoundKeys) {

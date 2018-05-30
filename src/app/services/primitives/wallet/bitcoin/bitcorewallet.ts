@@ -6,7 +6,6 @@ import { NgZone } from '@angular/core';
 import { timer } from 'rxjs';
 import { ConnectivityService } from '../../../connectivity.service';
 
-
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
@@ -20,9 +19,10 @@ export class BitcoreWallet extends CurrencyWallet {
     coin: Coin,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
-    super(network, keychain, coin, account, connectivityService, ngZone);
+    super(network, keychain, coin, account, messageSubject, connectivityService, ngZone, worker);
   }
 
   public async reset() {
@@ -45,7 +45,7 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return this.Transaction.fromJSON(tx);
+    return this.Transaction.fromJSON(tx, this.worker);
   }
 
   public async finishSync(data) {
@@ -93,7 +93,7 @@ export class BitcoreWallet extends CurrencyWallet {
   ) {
     try {
       return await this.wallet.prepareTransaction(
-        new this.Transaction(),
+        await this.Transaction.create(this.worker),
         address,
         value,
         fee ? fee : undefined

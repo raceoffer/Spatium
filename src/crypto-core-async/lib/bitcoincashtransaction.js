@@ -4,42 +4,56 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { BitcoinCashTransaction as CoreBitcoinCashTransaction } from 'crypto-core/lib/transaction/bitcore/bitcoincashtransaction';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 import { BitcoreTransaction } from './bitcoretransaction';
 
 export class BitcoinCashTransaction extends BitcoreTransaction {
-  constructor(state) {
-    super('BitcoinCashTransaction', state);
+  constructor(state, woker) {
+    super('BitcoinCashTransaction', state, worker);
   }
 
-  static useWorker(worker) {
-    BitcoinCashTransaction.worker = worker;
-    BitcoreTransaction.useWorker(worker);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'BitcoinCashTransaction',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreBitcoinCashTransaction, message.method, ... message.arguments);
+    }
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(BitcoinCashTransaction.worker);
-    const result = await BitcoinCashTransaction.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'BitcoinCashTransaction',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async create(worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
   }
 
-  static async fromOptions(options) {
-    return new BitcoinCashTransaction(await BitcoinCashTransaction.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worer, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
   }
 
-  static async fromJSON(json) {
-    return new BitcoinCashTransaction(await BitcoinCashTransaction.invokeStatic({
+  static async fromJSON(json, worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
       method: 'fromJSON',
       arguments: [json]
-    }, true));
+    }, worker, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
   }
 }

@@ -4,20 +4,20 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { Signer as CoreSigner } from 'crypto-core/lib/primitives/signer';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 export class Signer {
-  constructor(state) {
+  constructor(state, worker) {
     this.state = state || { type: 'Signer' };
-  }
-
-  static useWorker(worker) {
-    Signer.worker = worker;
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(Signer.worker);
-    const result = await Signer.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: 'Signer',
       self: this.state,
@@ -30,15 +30,18 @@ export class Signer {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(Signer.worker);
-    const result = await Signer.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'Signer',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'Signer',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreSigner, message.method, ... message.arguments);
+    }
   }
 
   async fromOptions(options) {
@@ -49,11 +52,13 @@ export class Signer {
     return this;
   }
 
-  static async fromOptions(options) {
-    return new Signer(await Signer.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await Signer.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worker, true);
+
+    return worker ? new Signer(state, worker) : state;
   }
 
   async createEntropyCommitment() {

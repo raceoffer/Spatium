@@ -16,9 +16,10 @@ export class EthereumWallet extends CurrencyWallet {
     keychain: KeyChainService,
     account: number,
     connectivityService: ConnectivityService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
-    super(network, keychain, Coin.ETH, account, connectivityService, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, connectivityService, ngZone, worker);
   }
 
   public async reset() {
@@ -41,7 +42,7 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx, this.worker);
   }
 
   public async finishSync(data) {
@@ -75,7 +76,7 @@ export class EthereumWallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new EthereumTransaction(),
+      await EthereumTransaction.create(this.worker),
       address,
       value,
       fee ? fee : undefined

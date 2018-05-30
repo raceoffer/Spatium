@@ -84,7 +84,7 @@ export class BackupComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.id = await AuthService.toId(this.authService.login);
+    this.id = await this.authService.toId(this.authService.login);
     this.account = await this.dds.getStoreAccount(this.id);
     this.data = this.authService.currentTree;
     this.address = this.account.address;
