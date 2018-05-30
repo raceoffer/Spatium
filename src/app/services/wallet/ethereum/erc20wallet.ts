@@ -102,7 +102,8 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
+    // We randomize a starting delay in order to reduce a one-time load on the UI thread
+    this.routineTimerSub = timer(500 + 2000 * Math.random(), 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
