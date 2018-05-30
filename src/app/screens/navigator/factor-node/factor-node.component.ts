@@ -117,6 +117,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.value.next('');
         const login = this.authService.makeNewLogin(10);
         const exists = await this.dds.exists(await this.authService.toId(login));
+        console.log(`FactorNodeComponent.generateLogin: login=${login}, isQr=${isQr}, exists=${exists}`);
         if (!exists) {
           const packedLogin = await packLogin(login, this.workerService.worker);
           if (isQr) {
@@ -205,8 +206,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
         }
         case FactorType.LOGIN: {
-          console.log(result.value);
-          await this.authService.addFactor(result.factor, await packLogin(result.value, this.workerService.worker));
+          console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
+          await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
           break;
         }
         default: {
@@ -252,6 +253,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       const login = (await tryUnpackLogin(idFactor, this.workerService.worker)).toString('utf-8');
       console.log(login);
       const id = await this.authService.toId(login);
+      console.log(`FactorNodeComponent.onSaveClicked: login=${login}`);
       const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
       this.authService.currentTree = data;
 
