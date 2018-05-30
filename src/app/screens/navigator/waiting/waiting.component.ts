@@ -40,10 +40,10 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.onBackClicked();
       })
     );
-    
+
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
-        this.wallet.startSync();
+        this.wallet.trySync(false);
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 

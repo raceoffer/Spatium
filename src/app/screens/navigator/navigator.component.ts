@@ -24,7 +24,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
-        await this.wallet.cancelSync();
       }));
 
   }

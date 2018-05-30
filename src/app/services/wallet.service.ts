@@ -1,28 +1,30 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject,  Observable,  ReplaySubject, timer } from 'rxjs';
-import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
+import {
+  BitcoinCashTransaction,
+  BitcoinTransaction,
+  CompoundKey,
+  EthereumTransaction,
+  LitecoinTransaction
+} from 'crypto-core-async';
+
+import { BehaviorSubject, ReplaySubject, timer } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
-import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
 
-import { CurrencyWallet, Status } from './wallet/currencywallet';
+import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
+import { WorkerService } from './worker.service';
 
-import {
-  CompoundKey,
-  BitcoinTransaction,
-  BitcoinCashTransaction,
-  LitecoinTransaction,
-  EthereumTransaction
-} from 'crypto-core-async';
+declare const navigator: any;
 
 export enum WalletStatus {
   None = 0,
@@ -46,17 +48,17 @@ export class WalletService {
 
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
+  private sessionKey = Buffer.from('');
+  private sessionPartnerKey = Buffer.from('');
 
   private coinIndex = 0;
   private tokenIndex = 0;
 
-  constructor(
-    private readonly bt: BluetoothService,
-    private readonly currencyService: CurrencyService,
-    private readonly keychain: KeyChainService,
-    private readonly ngZone: NgZone,
-    private readonly workerService: WorkerService
-  ) {
+  constructor(private readonly bt: BluetoothService,
+              private readonly currencyService: CurrencyService,
+              private readonly keychain: KeyChainService,
+              private readonly ngZone: NgZone,
+              private readonly workerService: WorkerService) {
     CompoundKey.useWorker(workerService.worker);
     BitcoinTransaction.useWorker(workerService.worker);
     BitcoinCashTransaction.useWorker(workerService.worker);
@@ -135,25 +137,104 @@ export class WalletService {
     });
 
     this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyVerifyer'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log(this.sessionPartnerKey);
+      const data = Buffer.from(content.data);
+      console.log(data);
+      console.log(!this.sessionPartnerKey.equals(data));
+      if (!this.sessionPartnerKey.equals(data) &&
+        this.status.value !== WalletStatus.None) {
+        console.log('sessionKeyVerifyer other key');
+        await this.openDialog();
+      } else {
+        console.log('sessionKeyVerifyer ok key or none status');
+        this.sessionPartnerKey = data;
+        await this.bt.send(JSON.stringify({
+          type: 'startSync',
+          content: {}
+        }));
+        this.startSync();
+      }
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyVerifyerUpd'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log('sessionKeyVerifyerUpd');
+      const data = Buffer.from(content.data);
+      this.sessionPartnerKey = data;
+      await this.reset();
+      this.startSync();
+      await this.bt.send(JSON.stringify({
+        type: 'startSync',
+        content: {}
+      }));
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKey'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log(this.sessionPartnerKey);
+      const data = Buffer.from(content.data);
+      console.log(data);
+      console.log(!this.sessionPartnerKey.equals(data));
+      if (!this.sessionPartnerKey.equals(data)) {
+        console.log('sessionKey other key');
+      } else {
+        console.log('sessionKey ok key');
+      }
+      this.sessionPartnerKey = data;
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyUpd'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log('sessionKeyUpd');
+      const data = Buffer.from(content.data);
+      this.sessionPartnerKey = data;
+      console.log('generate sessionKey verif');
+      this.sessionKey = Buffer.from(new Date().toString());
+
+      await this.bt.send(JSON.stringify({
+        type: 'sessionKeyVerifyerUpd',
+        content: this.sessionKey
+      }));
+
+    });
+
+    this.messageSubject.pipe(
       filter(object => object.type === 'verifyTransaction'),
       map(object => object.content),
     ).subscribe(async content => {
-        const wallet = this.currencyWallets.get(content.coin);
-        return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
-      });
+      const wallet = this.currencyWallets.get(content.coin);
+      return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
+    });
 
     this.messageSubject.pipe(
       filter(object => object.type === 'cancel')
     ).subscribe(async () => {
-        // pop the queue
-        this.messageSubject.next({});
+      // pop the queue
+      this.messageSubject.next({});
 
-        this.changeStatus();
+      this.changeStatus();
 
-        for (const wallet of Array.from(this.coinWallets.values())) {
-          await wallet.cancelSync();
-        }
-      });
+      for (const wallet of Array.from(this.coinWallets.values())) {
+        await wallet.cancelSync();
+      }
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'startSync')
+    ).subscribe(async () => {
+      console.log('start sync');
+      this.reset();
+      this.startSync();
+    });
   }
 
   // при пересинхронизации с другим устройством/выходе
@@ -175,20 +256,43 @@ export class WalletService {
     this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
   }
 
-  public async startSync() {
+  public async trySync(isVerifyer: boolean) {
     console.log(this.synchronizing.value);
     if (this.synchronizing.value) {
       throw new Error('Sync in progress');
     }
 
     try {
-      // если ключ не совпадет (другое устройство для сопряжения)
-      this.reset();
+      if (this.sessionKey.equals(Buffer.from(''))) {
+        console.log('first generate sessionKey');
+        this.sessionKey = Buffer.from(new Date().toString());
+      }
+
+      if (await this.bt.send(JSON.stringify({
+          type: isVerifyer ? 'sessionKeyVerifyer' : 'sessionKey',
+          content: this.sessionKey
+        }))) {
+      } else {
+        console.log('error sessionKey');
+      }
+    } catch (e) {
+      console.log(e);
+      this.synchronizing.next(false);
+      this.changeStatus();
+      this.bt.disconnect();
+    }
+  }
+
+  public async startSync() {
+    try {
+
+      console.log('sended');
 
       this.setProgress(0);
       this.synchronizing.next(true);
 
-      const paillierKeys = await CompoundKey.generatePaillierKeys();
+      const paillierKeys = await
+        CompoundKey.generatePaillierKeys();
 
       this.setProgress(0.1);
 
@@ -236,14 +340,17 @@ export class WalletService {
       if (this.synchronizing.value) {
         this.synchronizing.next(false);
         this.changeStatus();
-        this.bt.disconnect();
+        if (this.bt.connected) {
+          this.bt.disconnect();
+        }
       }
-
     } catch (e) {
       console.log(e);
       this.synchronizing.next(false);
       this.changeStatus();
-      this.bt.disconnect();
+      if (this.bt.connected) {
+        this.bt.disconnect();
+      }
     }
   }
 
@@ -295,5 +402,27 @@ export class WalletService {
         contractAddress,
         decimals,
       ));
+  }
+
+  async openDialog() {
+    navigator.notification.confirm(
+      'You are about to connect with another device. This will undo current synchronization progress. Are you sure?',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+
+          console.log('sessionKey update');
+          this.sessionKey = Buffer.from(new Date().toString());
+          await this.bt.send(JSON.stringify({
+            type: 'sessionKeyUpd',
+            content: this.sessionKey
+          }));
+
+        } else {
+          await this.cancelSync();
+        }
+      },
+      '',
+      ['YES', 'NO']
+    );
   }
 }

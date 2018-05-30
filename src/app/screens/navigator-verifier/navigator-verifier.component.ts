@@ -24,7 +24,8 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
       this.bt.connectedEvent.subscribe(async () => {
         console.log('Connected to', this.bt.connectedDevice.getValue());
         await this.bt.stopListening();
-        await this.wallet.startSync();
+        await this.wallet.cancelSync();
+        await this.wallet.trySync(true);
       }));
 
     this.subscriptions.push(
@@ -35,7 +36,6 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
-        await this.wallet.cancelSync();
         await this.bt.ensureListening();
       }));
 

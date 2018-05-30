@@ -200,6 +200,8 @@ export class BluetoothService {
   }
 
   async stopListening() {
-    await cordova.plugins.bluetooth.stopListening();
+    if (await cordova.plugins.bluetooth.getListening()) {
+      await cordova.plugins.bluetooth.stopListening();
+    }
   }
 }
