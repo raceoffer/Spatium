@@ -144,18 +144,21 @@ export class WalletService {
       const data = Buffer.from(content.data);
       console.log(data);
       console.log(!this.sessionPartnerKey.equals(data));
-      if (!this.sessionPartnerKey.equals(data) &&
-        this.status.value !== WalletStatus.None) {
+      const isOlder = this.sessionPartnerKey.equals(data);
+      if (!isOlder && this.status.value !== WalletStatus.None) {
         console.log('sessionKeyVerifyer other key');
         await this.openDialog();
       } else {
         console.log('sessionKeyVerifyer ok key or none status');
         this.sessionPartnerKey = data;
+        if (!isOlder) {
+          await this.reset();
+        }
+        this.startSync();
         await this.bt.send(JSON.stringify({
           type: 'startSync',
-          content: {}
+          content: isOlder
         }));
-        this.startSync();
       }
     });
 
@@ -170,7 +173,7 @@ export class WalletService {
       this.startSync();
       await this.bt.send(JSON.stringify({
         type: 'startSync',
-        content: {}
+        content: false
       }));
     });
 
@@ -229,10 +232,13 @@ export class WalletService {
     });
 
     this.messageSubject.pipe(
-      filter(object => object.type === 'startSync')
-    ).subscribe(async () => {
+      filter(object => object.type === 'startSync'),
+      map(object => object.content),
+    ).subscribe(async content => {
       console.log('start sync');
-      this.reset();
+      if (!content) { // other partner
+        this.reset();
+      }
       this.startSync();
     });
   }
@@ -302,14 +308,18 @@ export class WalletService {
           return;
         }
 
-        const sub = wallet.syncProgress.subscribe(num => {
-          this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
-        });
-        this.changeStatus();
-
-        await wallet.sync(paillierKeys);
-
-        sub.unsubscribe();
+        if (!wallet.ready.value) {
+          const sub = wallet.syncProgress.subscribe(num => {
+            this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
+          });
+          this.changeStatus();
+          await wallet.sync(paillierKeys);
+          sub.unsubscribe();
+        } else {
+          console.log('skip');
+          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.coinWallets.size);
+        }
+        await timer(100).toPromise();
 
         this.coinIndex++;
       }
@@ -326,10 +336,14 @@ export class WalletService {
           return;
         }
 
-        await wallet.syncDuplicate(ethWallet);
-
-        this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
-        this.changeStatus();
+        if (!wallet.ready.value) {
+          await wallet.syncDuplicate(ethWallet);
+          this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
+          this.changeStatus();
+        } else {
+          console.log('skip');
+          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.tokenWallets.size);
+        }
         await timer(100).toPromise();
 
         this.tokenIndex++;
