@@ -17,6 +17,7 @@
     "cordova-custom-config": "^5.0.2",
     "cordova-fabric-plugin": "^1.1.10",
     "cordova-plugin-add-swift-support": "^1.7.2",
+    "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
@@ -33,8 +34,10 @@
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-websocket-server": "^1.4.10",
     "cordova-plugin-whitelist": "^1.3.3",
+    "cordova-plugin-wkwebview-engine": "^1.1.4",
     "cordova-plugin-zeroconf": "^1.3.3",
     "cordova-windows": "^6.0.0",
+    "ionic-native-http-angular-wrapper": "^3.0.1",
     "org.devgeeks.Canvas2ImagePlugin": "file:../org.devgeeks.Canvas2ImagePlugin",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
@@ -67,6 +70,8 @@
       "cordova-plugin-zeroconf": {},
       "cordova-plugin-websocket-server": {},
       "cordova-plugin-networkinterface": {},
+      "cordova-plugin-wkwebview-engine": {},
+      "cordova-plugin-advanced-http": {}
       "cordova-plugin-device-name": {}
     },
     "platforms": [
