@@ -83,7 +83,7 @@ export class AuthService {
   }
 
   public async toId(name: string) {
-    return (await sha256(Buffer.from(name, 'utf-8'), this.workerService.worker)).toString('hex');
+    return (await sha256(Buffer.from(name.toLowerCase(), 'utf-8'), this.workerService.worker)).toString('hex');
   }
 
   getAllAvailableFactors() {
