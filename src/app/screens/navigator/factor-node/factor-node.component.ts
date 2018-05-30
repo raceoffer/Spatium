@@ -33,7 +33,7 @@ import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 import { WorkerService } from '../../../services/worker.service';
 
 
-import { packLogin, tryUnpackLogin, packTree, useWorker } from 'crypto-core-async/lib/utils';
+import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-factor-node',
@@ -76,9 +76,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -118,9 +116,9 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       do {
         this.value.next('');
         const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(login));
+        const exists = await this.dds.exists(await this.authService.toId(login));
         if (!exists) {
-          const packedLogin = await packLogin(login);
+          const packedLogin = await packLogin(login, this.workerService.worker);
           if (isQr) {
             this.value.next(await packedLogin.toString('hex'));
           } else {
@@ -208,7 +206,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         case FactorType.LOGIN: {
           console.log(result.value);
-          await this.authService.addFactor(result.factor, await packLogin(result.value));
+          await this.authService.addFactor(result.factor, await packLogin(result.value, this.workerService.worker));
           break;
         }
         default: {
@@ -251,10 +249,10 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const login = (await tryUnpackLogin(idFactor)).toString('utf-8');
+      const login = (await tryUnpackLogin(idFactor, this.workerService.worker)).toString('utf-8');
       console.log(login);
-      const id = await AuthService.toId(login);
-      const data = await packTree(tree, this.keychain.getSeed());
+      const id = await this.authService.toId(login);
+      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
       this.authService.currentTree = data;
 
       try {

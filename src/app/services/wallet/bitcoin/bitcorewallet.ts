@@ -6,7 +6,6 @@ import { NgZone } from '@angular/core';
 
 import { timer } from 'rxjs';
 
-
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
@@ -21,9 +20,10 @@ export class BitcoreWallet extends CurrencyWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
-    super(network, keychain, coin, account, messageSubject, bt, ngZone);
+    super(network, keychain, coin, account, messageSubject, bt, ngZone, worker);
   }
 
   public async reset() {
@@ -46,7 +46,7 @@ export class BitcoreWallet extends CurrencyWallet {
   }
 
   public fromJSON(tx) {
-    return this.Transaction.fromJSON(tx);
+    return this.Transaction.fromJSON(tx, this.worker);
   }
 
   public async finishSync(data) {
@@ -75,7 +75,7 @@ export class BitcoreWallet extends CurrencyWallet {
 
   public verifyAddress(address: string): boolean {
     return address &&
-           /^[13m][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+           /^([135KLmn29с]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
   }
 
   public async listTransactionHistory() {
@@ -94,7 +94,7 @@ export class BitcoreWallet extends CurrencyWallet {
   ) {
     try {
       return await this.wallet.prepareTransaction(
-        new this.Transaction(),
+        await this.Transaction.create(this.worker),
         address,
         value,
         fee ? fee : undefined

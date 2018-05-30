@@ -16,13 +16,7 @@ import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 
-import {
-  CompoundKey,
-  BitcoinTransaction,
-  BitcoinCashTransaction,
-  LitecoinTransaction,
-  EthereumTransaction
-} from 'crypto-core-async';
+import { CompoundKey } from 'crypto-core-async';
 
 @Injectable()
 export class WalletService {
@@ -53,12 +47,6 @@ export class WalletService {
     private readonly ngZone: NgZone,
     private readonly workerService: WorkerService
   ) {
-    CompoundKey.useWorker(workerService.worker);
-    BitcoinTransaction.useWorker(workerService.worker);
-    BitcoinCashTransaction.useWorker(workerService.worker);
-    LitecoinTransaction.useWorker(workerService.worker);
-    EthereumTransaction.useWorker(workerService.worker);
-
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -68,7 +56,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BTC,
@@ -79,7 +68,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BCH,
@@ -90,7 +80,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.LTC,
@@ -101,7 +92,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.ETH,
@@ -112,7 +104,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
 
     keychain.topTokens.forEach((tokenInfo) => {
@@ -177,7 +170,7 @@ export class WalletService {
       this.setProgress(0);
       this.status.next(Status.Synchronizing);
 
-      const paillierKeys = await CompoundKey.generatePaillierKeys();
+      const paillierKeys = await CompoundKey.generatePaillierKeys(this.workerService.worker);
 
       this.setProgress(0.1);
 
@@ -260,6 +253,7 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone,
+        this.workerService.worker,
         token,
         contractAddress,
         decimals,

@@ -11,8 +11,7 @@ import {
   deriveAesKey,
   encrypt,
   decrypt,
-  randomBytes,
-  useWorker
+  randomBytes
 } from 'crypto-core-async/lib/utils';
 
 declare const Buffer: any;
@@ -45,7 +44,6 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.route.params.subscribe(params => {
       if (params['back']) {
         this.back = params['back'];
@@ -83,11 +81,11 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
       const pincode = result.value;
       this.busy = true;
 
-      const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'));
+      const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
 
       if (this.authService.encryptedSeed) {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-        this.keyChain.setSeed(await decrypt(ciphertext, aesKey));
+        this.keyChain.setSeed(await decrypt(ciphertext, aesKey, this.workerService.worker));
 
         await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
       } else {
@@ -119,8 +117,8 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(await randomBytes(64));
-    this.authService.encryptedSeed = (await encrypt(this.keyChain.getSeed(), aesKey)).toString('hex');
+    this.keyChain.setSeed(await randomBytes(64, this.workerService.worker));
+    this.authService.encryptedSeed = (await encrypt(this.keyChain.getSeed(), aesKey, this.workerService.worker)).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 

@@ -41,10 +41,13 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   packSeed = null;
   private subscriptions = [];
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly router: Router,
-              private readonly authService: AuthService,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -85,7 +88,7 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   async writeSecret() {
     const encryptedSeed = this.authService.encryptedSeed;
     const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    this.packSeed = await packSeed(buffesSeed);
+    this.packSeed = await packSeed(buffesSeed, this.workerService.worker);
     this.switchSecretValue();
 
     console.log(this.secretValue);

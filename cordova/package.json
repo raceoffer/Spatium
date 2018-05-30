@@ -21,7 +21,7 @@
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
     "cordova-plugin-canvas2image": "file:../org.devgeeks.Canvas2ImagePlugin",
     "cordova-plugin-clipboard": "file:../cordova-plugin-clipboard",
-    "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
+    "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-keychain-touch-id": "file:../cordova-plugin-keychain-touch-id",
@@ -44,10 +44,6 @@
         "FABRIC_API_KEY": "752fc70596e44939199e6f2f35f9275dc6bae22c",
         "FABRIC_API_SECRET": "e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267"
       },
-      "cordova-plugin-bluetooth": {},
-      "phonegap-nfc": {
-        "NFC_USAGE_DESCRIPTION": "Read NFC Tags"
-      },
       "cordova-plugin-vibration": {},
       "cordova-plugin-android-permissions": {},
       "org.devgeeks.Canvas2ImagePlugin": {},
@@ -58,12 +54,15 @@
       "phonegap-plugin-barcodescanner": {
         "ANDROID_SUPPORT_V4_VERSION": "27.+"
       },
-      "cordova-plugin-clipboard": {}
+      "cordova-plugin-clipboard": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-bluetooth": {},
+      "phonegap-nfc": {}
     },
     "platforms": [
       "browser",
-      "android",
-      "windows"
+      "windows",
+      "android"
     ]
   },
   "devDependencies": {
