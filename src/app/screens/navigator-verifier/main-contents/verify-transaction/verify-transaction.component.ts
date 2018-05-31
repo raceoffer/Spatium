@@ -24,6 +24,8 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   fee;
   feeUsd;
 
+  public ethWallet = this.wallet.currencyWallets.get(Coin.ETH);
+
   public stateType: any = State;
   public state: State = State.None;
   public currentCoin: Coin | Token = null;
@@ -85,7 +87,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
           this.address = outputs.outputs[0].address;
           this.btc = currencyWallet.fromInternal(outputs.outputs[0].value);
           this.usd = this.btc * this.currentInfo.rate.getValue();
-          this.fee = currencyWallet.fromInternal(fee);
+          this.fee = this.ethWallet.fromInternal(fee);
           this.feeUsd = this.fee * this.currentInfo.gasRate.getValue();
           this.state = State.Verifying;
 
