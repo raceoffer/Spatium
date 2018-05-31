@@ -99,7 +99,7 @@ export class WalletService {
       Coin.ETH,
       new EthereumWallet(
         currencyService.getApiServer(Coin.ETH),
-        'main',
+        'testnet',
         this.keychain,
         1,
         this.messageSubject,
