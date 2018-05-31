@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import 'rxjs/add/observable/timer';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+
+import { BehaviorSubject,  Observable, timer } from 'rxjs';
 
 interface CoinMarketCupResponse {
   id: string;
@@ -29,8 +28,8 @@ export class CurrencyPriceService {
   constructor(private http: HttpClient) { }
 
   getPrices() {
-    const timer = Observable.timer(2000, 5 * 60 * 1000);
-    timer.subscribe(() => {
+    const _timer = timer(2000, 5 * 60 * 1000);
+    _timer.subscribe(() => {
       this.hasPrices = false;
       this.getCryptowat();
       this.getCoinmarketcap();
@@ -102,6 +101,3 @@ export class CurrencyPriceService {
   }
 
 }
-
-
-

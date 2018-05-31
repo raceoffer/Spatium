@@ -25,7 +25,6 @@ import {
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -82,6 +81,8 @@ import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
+import { WorkerService } from './services/worker.service';
+import { DeviceService } from './services/device.service';
 
 @NgModule({
   declarations: [
@@ -157,10 +158,11 @@ import { WalletService } from './services/wallet.service';
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule,
-    ZXingScannerModule.forRoot()
+    QRCodeModule
   ],
   providers: [
+    DeviceService,
+    WorkerService,
     WalletService,
     CurrencyPriceService,
     BluetoothService,

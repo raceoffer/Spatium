@@ -1,16 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/takeUntil';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { BehaviorSubject,  Observable,  ReplaySubject } from 'rxjs';
+import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
+import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
@@ -20,7 +16,7 @@ import { CurrencyWallet, Status } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 
-declare const CryptoCore: any;
+import { CompoundKey } from 'crypto-core-async';
 
 @Injectable()
 export class WalletService {
@@ -28,22 +24,29 @@ export class WalletService {
   public tokenWallets = new Map<Token, ERC20Wallet>();
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Synchronizing), false);
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Ready), false);
-  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Cancelled), false);
-  public failed: BehaviorSubject<boolean> = toBehaviourSubject(this.status.map(status => status === Status.Failed), false);
-  public statusChanged: Observable<Status> = this.status.skip(1).distinctUntilChanged();
-  public synchronizingEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Synchronizing).mapTo(null);
-  public cancelledEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Cancelled).mapTo(null);
-  public failedEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Failed).mapTo(null);
-  public readyEvent: Observable<any> = this.statusChanged.filter(status => status === Status.Ready).mapTo(null);
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Synchronizing)), false);
+  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Ready)), false);
+  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Cancelled)), false);
+  public failed: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === Status.Failed)), false);
+  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
+  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
+  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
+  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
+  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
 
-  constructor(private readonly bt: BluetoothService,
-              private readonly currencyService: CurrencyService,
-              private readonly keychain: KeyChainService,
-              private readonly ngZone: NgZone) {
+  constructor(
+    private readonly bt: BluetoothService,
+    private readonly currencyService: CurrencyService,
+    private readonly keychain: KeyChainService,
+    private readonly ngZone: NgZone,
+    private readonly workerService: WorkerService
+  ) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -53,7 +56,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BTC,
@@ -64,7 +68,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BCH,
@@ -75,7 +80,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.LTC,
@@ -86,7 +92,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.ETH,
@@ -97,7 +104,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
 
     keychain.topTokens.forEach((tokenInfo) => {
@@ -115,17 +123,17 @@ export class WalletService {
       this.messageSubject.next(JSON.parse(message));
     });
 
-    this.messageSubject
-      .filter(object => object.type === 'verifyTransaction')
-      .map(object => object.content)
-      .subscribe(async content => {
+    this.messageSubject.pipe(
+      filter(object => object.type === 'verifyTransaction'),
+      map(object => object.content),
+    ).subscribe(async content => {
         const wallet = this.currencyWallets.get(content.coin);
         return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
       });
 
-    this.messageSubject
-      .filter(object => object.type === 'cancel')
-      .subscribe(async () => {
+    this.messageSubject.pipe(
+      filter(object => object.type === 'cancel')
+    ).subscribe(async () => {
         // pop the queue
         this.messageSubject.next({});
 
@@ -162,7 +170,7 @@ export class WalletService {
       this.setProgress(0);
       this.status.next(Status.Synchronizing);
 
-      const paillierKeys = await CryptoCore.CompoundKey.generatePaillierKeys();
+      const paillierKeys = await CompoundKey.generatePaillierKeys(this.workerService.worker);
 
       this.setProgress(0.1);
 
@@ -198,7 +206,6 @@ export class WalletService {
         await wallet.syncDuplicate(ethWallet);
 
         this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
-        await Observable.timer(100).toPromise();
 
         tokenIndex++;
       }
@@ -245,10 +252,10 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone,
+        this.workerService.worker,
         token,
         contractAddress,
         decimals,
       ));
   }
 }
-

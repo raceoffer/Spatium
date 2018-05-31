@@ -2,9 +2,9 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { timer  } from 'rxjs';
 
-declare const CryptoCore: any;
+import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
 export class ERC20Wallet extends CurrencyWallet {
   private wallet: any = null;
@@ -22,11 +22,12 @@ export class ERC20Wallet extends CurrencyWallet {
     messageSubject: any,
     bt: BluetoothService,
     ngZone: NgZone,
+    worker: any,
     token: Token,
     address: string,
     decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
 
     this.contractAddress = address;
     this.token = token;
@@ -53,7 +54,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await CryptoCore.EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx, this.worker);
   }
 
   public currencyCode(): Coin | Token {
@@ -63,7 +64,7 @@ export class ERC20Wallet extends CurrencyWallet {
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
+    this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       network: this.network,
@@ -74,7 +75,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -90,7 +91,7 @@ export class ERC20Wallet extends CurrencyWallet {
   public async syncDuplicate(other: CurrencyWallet) {
     await super.syncDuplicate(other);
 
-    this.wallet = await CryptoCore.ERC20Wallet.fromOptions({
+    this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       contractAddress: this.contractAddress,
@@ -101,7 +102,8 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.address.next(this.wallet.address);
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
+    // We randomize a starting delay in order to reduce a one-time load on the UI thread
+    this.routineTimerSub = timer(500 + 2000 * Math.random(), 20000).subscribe(async () => {
       try {
         const balance = await this.wallet.getBalance();
         this.balance.next(new Balance(
@@ -113,14 +115,14 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
-  
-  public verifyAddress(address: string) : boolean {
+
+  public verifyAddress(address: string): boolean {
     return this.wallet.verifyAddress(address);
   }
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new CryptoCore.EthereumTransaction(),
+      await EthereumTransaction.create(this.worker),
       address,
       value,
       fee ? fee : undefined
@@ -128,7 +130,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    await Observable.timer(1000).toPromise();
+    await timer(1000).toPromise();
     return [];
   }
 

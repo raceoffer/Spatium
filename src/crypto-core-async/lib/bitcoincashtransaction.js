@@ -1,40 +1,59 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-const BitcoreTransaction = require('./bitcoretransaction');
+import { default as _invoke } from 'lodash/invoke';
+import { BitcoinCashTransaction as CoreBitcoinCashTransaction } from 'crypto-core/lib/transaction/bitcore/bitcoincashtransaction';
 
-function BitcoinCashTransaction(state) {
-  BitcoreTransaction.call(this, 'BitcoinCashTransaction', state);
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
+
+import { BitcoreTransaction } from './bitcoretransaction';
+
+export class BitcoinCashTransaction extends BitcoreTransaction {
+  constructor(state, woker) {
+    super('BitcoinCashTransaction', state, worker);
+  }
+
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'BitcoinCashTransaction',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreBitcoinCashTransaction, message.method, ... message.arguments);
+    }
+  }
+
+  static async create(worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
+  }
+
+  static async fromOptions(options, worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
+      method: 'fromOptions',
+      arguments: [options]
+    }, worer, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
+  }
+
+  static async fromJSON(json, worker) {
+    const state = await BitcoinCashTransaction.invokeStatic({
+      method: 'fromJSON',
+      arguments: [json]
+    }, worker, true);
+
+    return worker ? new BitcoinCashTransaction(state, worker) : state;
+  }
 }
-
-BitcoinCashTransaction.prototype = Object.create(BitcoreTransaction.prototype);
-BitcoinCashTransaction.prototype.constructor = BitcoinCashTransaction;
-
-BitcoinCashTransaction.set = function(worker) {
-  BitcoinCashTransaction.worker = worker;
-  BitcoreTransaction.set(worker);
-  return BitcoinCashTransaction;
-};
-
-BitcoinCashTransaction.invokeStatic = async function(message, wrapped) {
-  const result = await BitcoinCashTransaction.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'BitcoinCashTransaction',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []),Marshal.wrap)
-  });
-  return wrapped ? result : Marshal.unwrap(result);
-};
-
-BitcoinCashTransaction.fromOptions = async options => new BitcoinCashTransaction(await BitcoinCashTransaction.invokeStatic({
-  method: 'fromOptions',
-  arguments: [options]
-}, true));
-
-BitcoinCashTransaction.fromJSON = async json => new BitcoinCashTransaction(await BitcoinCashTransaction.invokeStatic({
-  method: 'fromJSON',
-  arguments: [json]
-}, true));
-
-module.exports = BitcoinCashTransaction;

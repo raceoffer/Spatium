@@ -5,8 +5,15 @@ import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NotificationService } from '../../services/notification.service';
 import { NavigationService } from '../../services/navigation.service';
+import { WorkerService } from '../../services/worker.service';
 
-declare const CryptoCore: any;
+import {
+  deriveAesKey,
+  encrypt,
+  decrypt,
+  randomBytes
+} from 'crypto-core-async/lib/utils';
+
 declare const Buffer: any;
 declare const window: any;
 
@@ -27,13 +34,16 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   stCreate = 'Create secret';
   stUnlock = 'Unlock secret';
 
-  constructor(private readonly route: ActivatedRoute,
-              private readonly router: Router,
-              private readonly authService: AuthService,
-              private readonly fs: FileService,
-              private readonly notification: NotificationService,
-              private readonly keyChain: KeyChainService,
-              private readonly navigationService: NavigationService) {
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService,
+    private readonly keyChain: KeyChainService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) {
     this.route.params.subscribe(params => {
       if (params['back']) {
         this.back = params['back'];
@@ -71,18 +81,17 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
       const pincode = result.value;
       this.busy = true;
 
-      const aesKey = await CryptoCore.Utils.deriveAesKey(Buffer.from(pincode, 'utf-8'));
+      const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
 
       if (this.authService.encryptedSeed) {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-        this.keyChain.setSeed(await CryptoCore.Utils.decrypt(ciphertext, aesKey));
+        this.keyChain.setSeed(await decrypt(ciphertext, aesKey, this.workerService.worker));
 
         await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
       } else {
         if (this.hasTouchId) {
           try {
             if (await this.saveTouchPassword(pincode)) {
-              console.log('Password saved ' + pincode);
               await this.savePin(aesKey);
             }
           } catch (e) {
@@ -108,8 +117,8 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(await CryptoCore.Utils.randomBytes(64));
-    this.authService.encryptedSeed = (await CryptoCore.Utils.encrypt(this.keyChain.getSeed(), aesKey)).toString('hex');
+    this.keyChain.setSeed(await randomBytes(64, this.workerService.worker));
+    this.authService.encryptedSeed = (await encrypt(this.keyChain.getSeed(), aesKey, this.workerService.worker)).toString('hex');
 
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
 

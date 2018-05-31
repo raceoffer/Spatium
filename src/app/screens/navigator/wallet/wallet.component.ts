@@ -7,7 +7,8 @@ import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.se
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const navigator: any;
@@ -228,7 +229,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
     const balanceConfirmed = toBehaviourSubject(
-      currencyWallet.balance.map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null),
+      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null)),
       null);
     this.tileBalanceInfo[coin] = {
       balance: balanceConfirmed,

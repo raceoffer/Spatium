@@ -1,110 +1,143 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-function Utils() {}
+import { default as _invoke } from 'lodash/invoke';
+import * as CoreUtils from 'crypto-core/lib/utils';
 
-Utils.set = function(worker) {
-  Utils.worker = worker;
-  return Utils;
-};
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
-Utils.invokeStatic = async message => Marshal.unwrap(
-  await Utils.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'Utils',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  }));
+async function invokeStatic(message, worker) {
+  if (worker) {
+    return unwrap(
+      await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'Utils',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      }));
+  } else {
+    return _invoke(CoreUtils, message.method, ... message.arguments);
+  }
+}
 
-Utils.deriveAesKey = async passwd => Utils.invokeStatic({
-  method: 'deriveAesKey',
-  arguments: [passwd]
-});
+export async function deriveAesKey(passwd, worker) {
+  return await invokeStatic({
+    method: 'deriveAesKey',
+    arguments: [passwd]
+  }, worker);
+}
 
-Utils.randomBytes = async n => Utils.invokeStatic({
-  method: 'randomBytes',
-  arguments: [n]
-});
+export async function randomBytes(n, worker) {
+  return await invokeStatic({
+    method: 'randomBytes',
+    arguments: [n]
+  }, worker);
+}
 
-Utils.decrypt = async (ciphertext, key) => Utils.invokeStatic({
-  method: 'decrypt',
-  arguments: [ciphertext, key]
-});
+export async function decrypt(ciphertext, key, worker) {
+  return await invokeStatic({
+    method: 'decrypt',
+    arguments: [ciphertext, key]
+  }, worker);
+}
 
-Utils.encrypt = async (buffer, key) => Utils.invokeStatic({
-  method: 'encrypt',
-  arguments: [buffer, key]
-});
+export async function encrypt(buffer, key, worker) {
+  return await invokeStatic({
+    method: 'encrypt',
+    arguments: [buffer, key]
+  }, worker);
+}
 
-Utils.sha256 = async buffer => Utils.invokeStatic({
-  method: 'sha256',
-  arguments: [buffer]
-});
+export async function sha256(buffer, worker) {
+  return await invokeStatic({
+    method: 'sha256',
+    arguments: [buffer]
+  }, worker);
+}
 
-Utils.checksum = async buffer => Utils.invokeStatic({
-  method: 'checksum',
-  arguments: [buffer]
-});
+export async function checksum(buffer, worker) {
+  return await invokeStatic({
+    method: 'checksum',
+    arguments: [buffer]
+  }, worker);
+}
 
-Utils.packSeed = async seed => Utils.invokeStatic({
-  method: 'packSeed',
-  arguments: [seed]
-});
+export async function packSeed(seed, worker) {
+  return await invokeStatic({
+    method: 'packSeed',
+    arguments: [seed]
+  }, worker);
+}
 
-Utils.tryUnpackSeed = async seed => Utils.invokeStatic({
-  method: 'tryUnpackSeed',
-  arguments: [seed]
-});
+export async function tryUnpackSeed(seed, worker) {
+  return await invokeStatic({
+    method: 'tryUnpackSeed',
+    arguments: [seed]
+  }, worker);
+}
 
-Utils.tryUnpackEncryptedSeed = async seed => Utils.invokeStatic({
-  method: 'tryUnpackEncryptedSeed',
-  arguments: [seed]
-});
+export async function tryUnpackEncryptedSeed(seed, worker) {
+  return await invokeStatic({
+    method: 'tryUnpackEncryptedSeed',
+    arguments: [seed]
+  }, worker);
+}
 
-Utils.packMultiple = async array => Utils.invokeStatic({
-  method: 'packMultiple',
-  arguments: [array]
-});
+export async function packMultiple(array, worker) {
+  return await invokeStatic({
+    method: 'packMultiple',
+    arguments: [array]
+  }, worker);
+}
 
-Utils.tryUnpackMultiple = async buffer => Utils.invokeStatic({
-  method: 'tryUnpackMultiple',
-  arguments: [buffer]
-});
+export async function tryUnpackMultiple(buffer, worker) {
+  return await invokeStatic({
+    method: 'tryUnpackMultiple',
+    arguments: [buffer]
+  }, worker);
+}
 
-Utils.packTree = async (tree, seed) => Utils.invokeStatic({
-  method: 'packTree',
-  arguments: [tree, seed]
-});
+export async function packTree(tree, seed, worker) {
+  return await invokeStatic({
+    method: 'packTree',
+    arguments: [tree, seed]
+  }, worker);
+}
 
-Utils.matchPassphrase = async (chiphertexts, passphase) => Utils.invokeStatic({
-  method: 'matchPassphrase',
-  arguments: [chiphertexts, passphase]
-});
+export async function matchPassphrase(chiphertexts, passphase, worker) {
+  return await invokeStatic({
+    method: 'matchPassphrase',
+    arguments: [chiphertexts, passphase]
+  }, worker);
+}
 
-Utils.packLogin = async login => Utils.invokeStatic({
-  method: 'packLogin',
-  arguments: [login]
-});
+export async function packLogin(login, worker) {
+  return await invokeStatic({
+    method: 'packLogin',
+    arguments: [login]
+  }, worker);
+}
 
-Utils.tryUnpackLogin = async chiphertext => Utils.invokeStatic({
-  method: 'tryUnpackLogin',
-  arguments: [chiphertext]
-});
+export async function tryUnpackLogin(chiphertext, worker) {
+  return await invokeStatic({
+    method: 'tryUnpackLogin',
+    arguments: [chiphertext]
+  }, worker);
+}
 
-Utils.testNetwork = async () => Utils.invokeStatic({
-  method: 'testNetwork',
-  arguments: []
-});
+export async function reverse(data, worker) {
+  return await invokeStatic({
+    method: 'reverse',
+    arguments: [data]
+  }, worker);
+}
 
-Utils.reverse = async data => Utils.invokeStatic({
-  method: 'reverse',
-  arguments: [data]
-});
-
-Utils.getAccountSecret = async (userId, accountId) => Utils.invokeStatic({
-  method: 'getAccountSecret',
-  arguments: [userId, accountId]
-});
-
-module.exports = Utils;
+export async function getAccountSecret(userId, accountId, worker) {
+  return await invokeStatic({
+    method: 'getAccountSecret',
+    arguments: [userId, accountId]
+  }, worker);
+}

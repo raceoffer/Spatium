@@ -1,13 +1,11 @@
 import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 import { FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 
-declare const CryptoCore: any;
 declare const cordova: any;
 declare const device: any;
 declare const window: any;
-declare const Buffer: any;
 
 @Component({
   selector: 'app-qr-writer',

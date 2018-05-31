@@ -1,10 +1,9 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-
-import 'rxjs/add/operator/mergeMap';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject ,  combineLatest } from 'rxjs';
+import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
+import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -14,9 +13,8 @@ import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
-declare const CryptoCore: any;
 
-const BN = CryptoCore.BN;
+import BN from 'bn.js';
 
 enum Phase {
   Creation,
@@ -87,15 +85,21 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
+  public isToken = false;
 
   public currencyWallet: CurrencyWallet = null;
 
+  public ethWallet = this.walletService.currencyWallets.get(Coin.ETH);
+  public ethBalance = toBehaviourSubject(
+    this.ethWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
+    null);
+
   public address: BehaviorSubject<string> = null;
-  public balance: BehaviorSubject<any> = null;
+  public balance: BehaviorSubject<BN> = null;
   public receiver: BehaviorSubject<string> = null;
-  public amount: BehaviorSubject<any> = null;
-  public fee: BehaviorSubject<any> = null;
-  public feePrice: BehaviorSubject<any> = null;
+  public amount: BehaviorSubject<BN> = null;
+  public fee: BehaviorSubject<BN> = null;
+  public feePrice: BehaviorSubject<BN> = null;
   public estimatedSize: BehaviorSubject<number> = null;
 
   public subtractFee: BehaviorSubject<boolean> = null;
@@ -129,6 +133,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
         this.currencyInfo = await this.currencyService.getInfo(this.currency);
+        this.isToken = this.currency in Token;
 
         this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
 
@@ -144,11 +149,13 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.address = this.currencyWallet.address;
         this.balance = toBehaviourSubject(
-          this.currencyWallet.balance.map(balance => balance ? balance.unconfirmed : null),
+          this.currencyWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
           null);
 
         this.estimatedSize = toBehaviourSubject(
-          this.balance.distinctUntilChanged().flatMap(async balance => {
+          this.balance.pipe(
+            distinctUntilChanged(),
+            flatMap(async balance => {
             if (balance === null || balance.eq(new BN())) {
               return 1;
             }
@@ -158,30 +165,35 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               balance.div(new BN(2)));
 
             return await testTx.estimateSize();
-          }),
-          1);
+            })
+          ), 1);
 
         this.receiver = new BehaviorSubject<string>('');
-        this.amount = new BehaviorSubject<any>(new BN());
-        this.feePrice = new BehaviorSubject<any>(new BN(this.currencyInfo.gasPrice));
-        this.fee = new BehaviorSubject<any>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
+        this.amount = new BehaviorSubject<BN>(new BN());
+        this.feePrice = new BehaviorSubject<BN>(new BN(this.currencyInfo.gasPrice));
+        this.fee = new BehaviorSubject<BN>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
         this.subtractFee = new BehaviorSubject<boolean>(false);
 
         this.sufficientBalance = toBehaviourSubject(combineLatest([
             this.balance,
+            this.ethBalance,
             this.amount,
             this.fee,
             this.subtractFee
           ],
-          (balance, amount, fee, substractFee) => {
+          (balance, ethBalance, amount, fee, substractFee) => {
             if (balance === null || balance.eq(new BN())) {
               return false;
             }
             if (amount.gt(new BN())) {
-              if (!substractFee) {
-                return balance.gte(amount.add(fee));
+              if (this.currency in Coin) {
+                if (!substractFee) {
+                  return balance.gte(amount.add(fee));
+                } else {
+                  return balance.gte(amount);
+                }
               } else {
-                return balance.gte(amount);
+                return balance.gte(amount) && ethBalance.gte(fee);
               }
             } else {
               return true;
@@ -196,8 +208,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           ],
           (amount, fee, subtractFee) => {
             if (amount.gt(new BN())) {
-              if (subtractFee) {
-                return amount.gte(fee);
+              if (this.currency in Coin) {
+                if (subtractFee) {
+                  return amount.gte(fee);
+                } else {
+                  return true;
+                }
               } else {
                 return true;
               }
@@ -207,7 +223,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }
         ), false);
 
-        this.validReceiver = toBehaviourSubject(this.receiver.map(address => this.currencyWallet.verifyAddress(address)), false);
+        this.validReceiver = toBehaviourSubject(this.receiver.pipe(map(address => this.currencyWallet.verifyAddress(address))), false);
 
         this.requiredFilled = toBehaviourSubject(combineLatest([
             this.receiver,
@@ -229,7 +245,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           }), false);
 
         this.subscriptions.push(
-          this.amount.distinctUntilChanged().subscribe(value => {
+          this.amount.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.amountFocused) {
               this.amountField.setValue(
                 this.currencyWallet.fromInternal(value),
@@ -244,7 +260,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.receiver.distinctUntilChanged().subscribe(value => {
+          this.receiver.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.receiverFocused) {
               this.receiverField.setValue(value, {emitEvent: false});
             }
@@ -252,92 +268,112 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.receiverField.valueChanges.distinctUntilChanged().subscribe(value => {
+          this.receiverField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: string) => {
             this.receiver.next(value);
           })
         );
 
         this.subscriptions.push(
-          this.fee.distinctUntilChanged().subscribe(value => {
+          this.fee.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feeFocused) {
               this.feeField.setValue(
-                this.currencyWallet.fromInternal(value),
+                this.ethWallet.fromInternal(value),
                 {emitEvent: false});
             }
             if (!this.feeUsdFocused) {
               this.feeUsdField.setValue(
-                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
             }
           })
         );
 
         this.subscriptions.push(
-          this.feePrice.distinctUntilChanged().subscribe(value => {
+          this.feePrice.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feePriceFocused) {
               this.feePriceField.setValue(
-                this.currencyWallet.fromInternal(value),
+                this.ethWallet.fromInternal(value),
                 {emitEvent: false});
             }
             if (!this.feePriceUsdFocused) {
               this.feePriceUsdField.setValue(
-                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
             }
           })
         );
 
         this.subscriptions.push(
-          this.amountField.valueChanges.distinctUntilChanged().subscribe(value => {
+          this.amountField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value));
           })
         );
         this.subscriptions.push(
-          this.amountUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
+          this.amountUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1)));
           })
         );
         this.subscriptions.push(
-          this.feeField.valueChanges.distinctUntilChanged().subscribe(value => {
-            const fee = this.currencyWallet.toInternal(value);
+          this.feeField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            const fee = this.ethWallet.toInternal(value);
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feeUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
-            const fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+          this.feeUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            const fee = this.ethWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceField.valueChanges.distinctUntilChanged().subscribe(value => {
-            const feePrice = this.currencyWallet.toInternal(value);
+          this.feePriceField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            const feePrice = this.ethWallet.toInternal(value);
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceUsdField.valueChanges.distinctUntilChanged().subscribe(value => {
-            const feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+          this.feePriceUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            const feePrice = this.ethWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.estimatedSize.distinctUntilChanged().subscribe(value => {
+          this.estimatedSize.pipe(distinctUntilChanged()).subscribe(value => {
             this.fee.next(new BN(value).mul(this.feePrice.getValue()));
           })
         );
         this.subscriptions.push(
-          this.subtractFeeField.valueChanges.distinctUntilChanged().subscribe(value => {
+          this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: boolean) => {
             this.subtractFee.next(value);
           })
         );
 
         this.subscriptions.push(
-          this.phase.map(phase => phase === Phase.Creation).subscribe((creation) => {
+          this.phase.pipe(
+            map(phase => phase === Phase.Creation)
+          ).subscribe((creation) => {
             if (creation) {
               this.receiverField.enable();
               this.amountField.enable();
@@ -376,6 +412,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.feeTypeField.setValue(Fee.Normal);
+        if (this.isToken) {
+          this.subtractFeeField.disable();
+        } else {
+          this.subtractFeeField.enable();
+        }
       }));
   }
 
@@ -473,4 +514,3 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.feePriceUsdFocused = focused;
   }
 }
-

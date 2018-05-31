@@ -1,129 +1,154 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-const PaillierProver = require('./paillierprover');
-const Signer = require('./signer');
+import { default as _invoke } from 'lodash/invoke';
+import { CompoundKey as CoreCompoundKey } from 'crypto-core/lib/primitives/compoundkey';
 
-function CompoundKey(state) {
-  this.state = state || { type: 'CompoundKey' }
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
+
+import { PaillierProver } from './paillierprover';
+import { Signer } from './signer';
+
+export class CompoundKey {
+  constructor(state, worker) {
+    this.state = state || { type: 'CompoundKey' };
+    this.worker = worker || null;
+  }
+
+  async invoke(message, wrapped) {
+    assert(this.worker);
+    const result = await this.worker.postMessage({
+      action: 'invoke',
+      class: 'CompoundKey',
+      self: this.state,
+      method: message.method,
+      arguments: map(defaultTo(message.arguments, []), wrap)
+    });
+
+    this.state = result.self;
+
+    return wrapped ? result.result : unwrap(result.result);
+  }
+
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'CompoundKey',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreCompoundKey, message.method, ... message.arguments);
+    }
+  };
+
+  static async generatePaillierKeys(worker) {
+    return CompoundKey.invokeStatic({
+      method: 'generatePaillierKeys',
+      arguments: []
+    }, worker);
+  }
+
+  static async generateKey(worker) {
+    return CompoundKey.invokeStatic({
+      method: 'generateKey',
+      arguments: []
+    }, worker);
+  }
+
+  static async generate(worker) {
+    const state = await CompoundKey.invokeStatic({
+      method: 'generate',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
+  }
+
+  static async keyFromSecret(secret, worker) {
+    return CompoundKey.invokeStatic({
+      method: 'keyFromSecret',
+      arguments: [secret]
+    }, worker);
+  }
+
+  static async fromSecret(secret, worker) {
+    const state = await CompoundKey.invokeStatic({
+      method: 'fromSecret',
+      arguments: [secret]
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
+  }
+
+  async fromOptions(options) {
+    await this.invoke({
+      method: 'fromOptions',
+      arguments: [options]
+    }, true);
+    return this;
+  }
+
+  static async fromOptions(options, worker) {
+    const state = await CompoundKey.invokeStatic({
+      method: 'fromOptions',
+      arguments: [options]
+    }, worker, true);
+
+    return worker ? new CompoundKey(state, worker) : state;
+  }
+
+  async getPrivateKey(enc) {
+    return await this.invoke({
+      method: 'getPrivateKey',
+      arguments: [enc]
+    });
+  }
+
+  async getPublicKey(compress, enc) {
+    return await this.invoke({
+      method: 'getPublicKey',
+      arguments: [compress, enc]
+    });
+  }
+
+  async getCompoundPublicKey(compress, enc) {
+    return await this.invoke({
+      method: 'getCompoundPublicKey',
+      arguments: [compress, enc]
+    });
+  }
+
+  async startInitialCommitment() {
+    return new PaillierProver(await this.invoke({
+      method: 'startInitialCommitment',
+      arguments: []
+    }, true), this.worker);
+  }
+
+  async finishInitialSync(syncData) {
+    return await this.invoke({
+      method: 'finishInitialSync',
+      arguments: [syncData]
+    });
+  }
+
+  async extractSyncData() {
+    return await this.invoke({
+      method: 'extractSyncData',
+      arguments: []
+    });
+  }
+
+  async startSign(message) {
+    return new Signer(await this.invoke({
+      method: 'startSign',
+      arguments: [message]
+    }, true), this.worker);
+  }
 }
-
-CompoundKey.set = function(worker) {
-  CompoundKey.worker = worker;
-  PaillierProver.set(worker);
-  return CompoundKey;
-};
-
-CompoundKey.prototype.invoke = async function(message, wrapped) {
-  const result = await CompoundKey.worker.postMessage({
-    action: 'invoke',
-    class: 'CompoundKey',
-    self: this.state,
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-
-  this.state = result.self;
-
-  return wrapped ? result.result : Marshal.unwrap(result.result);
-};
-
-CompoundKey.invokeStatic = async function(message, wrapped) {
-  const result = await CompoundKey.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'CompoundKey',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-  return wrapped ? result : Marshal.unwrap(result);
-};
-
-CompoundKey.generatePaillierKeys = async () => CompoundKey.invokeStatic({
-  method: 'generatePaillierKeys',
-  arguments: []
-});
-
-CompoundKey.generateKey = async () => CompoundKey.invokeStatic({
-  method: 'generateKey',
-  arguments: []
-});
-
-CompoundKey.generate = async () => new CompoundKey(await CompoundKey.invokeStatic({
-  method: 'generate',
-  arguments: []
-}, true));
-
-CompoundKey.keyFromSecret = async secret => CompoundKey.invokeStatic({
-  method: 'keyFromSecret',
-  arguments: [secret]
-});
-
-CompoundKey.fromSecret = async secret => new CompoundKey(await CompoundKey.invokeStatic({
-  method: 'fromSecret',
-  arguments: [secret]
-}, true));
-
-CompoundKey.prototype.fromOptions = async function(options) {
-  await this.invoke({
-    method: 'fromOptions',
-    arguments: [options]
-  }, true);
-  return this;
-};
-
-CompoundKey.fromOptions = async options => new CompoundKey(await CompoundKey.invokeStatic({
-  method: 'fromOptions',
-  arguments: [options]
-}, true));
-
-CompoundKey.prototype.getPrivateKey = async function(enc) {
-  return await this.invoke({
-    method: 'getPrivateKey',
-    arguments: [enc]
-  });
-};
-
-CompoundKey.prototype.getPublicKey = async function(compress, enc) {
-  return await this.invoke({
-    method: 'getPublicKey',
-    arguments: [compress, enc]
-  });
-};
-
-CompoundKey.prototype.getCompoundPublicKey = async function(compress, enc) {
-  return await this.invoke({
-    method: 'getCompoundPublicKey',
-    arguments: [compress, enc]
-  });
-};
-
-CompoundKey.prototype.startInitialCommitment = async function() {
-  return new PaillierProver(await this.invoke({
-    method: 'startInitialCommitment',
-    arguments: []
-  }, true));
-};
-
-CompoundKey.prototype.finishInitialSync = async function(syncData) {
-  return await this.invoke({
-    method: 'finishInitialSync',
-    arguments: [syncData]
-  });
-};
-
-CompoundKey.prototype.extractSyncData = async function() {
-  return await this.invoke({
-    method: 'extractSyncData',
-    arguments: []
-  });
-};
-
-CompoundKey.prototype.startSign = async function(message) {
-  return new Signer(await this.invoke({
-    method: 'startSign',
-    arguments: [message]
-  }, true));
-};
-
-module.exports = CompoundKey;

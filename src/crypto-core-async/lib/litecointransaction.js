@@ -1,40 +1,59 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-const BitcoreTransaction = require('./bitcoretransaction');
+import { default as _invoke } from 'lodash/invoke';
+import { LitecoinTransaction as CoreLitecoinTransaction } from 'crypto-core/lib/transaction/bitcore/litecointransaction';
 
-function LitecoinTransaction(state) {
-  BitcoreTransaction.call(this, 'LitecoinTransaction', state);
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
+
+import { BitcoreTransaction } from './bitcoretransaction';
+
+export class LitecoinTransaction extends BitcoreTransaction {
+  constructor(state, worker) {
+    super('LitecoinTransaction', state, worker);
+  }
+
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'LitecoinTransaction',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CoreLitecoinTransaction, message.method, ... message.arguments);
+    }
+  }
+
+  static async create(worker) {
+    const state = await LitecoinTransaction.invokeStatic({
+      method: 'create',
+      arguments: []
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
+  }
+
+  static async fromOptions(options, worker) {
+    const state = await LitecoinTransaction.invokeStatic({
+      method: 'fromOptions',
+      arguments: [options]
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
+  }
+
+  static async fromJSON(json, worker) {
+    const state = await LitecoinTransaction.invokeStatic({
+      method: 'fromJSON',
+      arguments: [json]
+    }, worker, true);
+
+    return worker ? new LitecoinTransaction(state, worker) : state;
+  }
 }
-
-LitecoinTransaction.prototype = Object.create(BitcoreTransaction.prototype);
-LitecoinTransaction.prototype.constructor = LitecoinTransaction;
-
-LitecoinTransaction.set = function(worker) {
-  LitecoinTransaction.worker = worker;
-  BitcoreTransaction.set(worker);
-  return LitecoinTransaction;
-};
-
-LitecoinTransaction.invokeStatic = async function(message, wrapped) {
-  const result = await LitecoinTransaction.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'LitecoinTransaction',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-  return wrapped ? result : Marshal.unwrap(result);
-};
-
-LitecoinTransaction.fromOptions = async options => new LitecoinTransaction(await LitecoinTransaction.invokeStatic({
-  method: 'fromOptions',
-  arguments: [options]
-}, true));
-
-LitecoinTransaction.fromJSON = async json => new LitecoinTransaction(await LitecoinTransaction.invokeStatic({
-  method: 'fromJSON',
-  arguments: [json]
-}, true));
-
-module.exports = LitecoinTransaction;

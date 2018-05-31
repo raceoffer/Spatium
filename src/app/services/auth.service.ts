@@ -9,11 +9,13 @@ import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.compon
 import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
 import { NotificationService } from './notification.service';
 import { LoginComponent } from '../screens/factors/login/login.component';
+import { WorkerService } from './worker.service';
+import { DeviceService } from './device.service';
 
-declare const CryptoCore: any;
-declare const Buffer: any;
 declare const nfc: any;
 declare const device: any;
+
+import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +38,17 @@ export class AuthService {
 
   stFactorError = 'Incorrect factor ';
 
-  constructor(private readonly notification: NotificationService) {
+  constructor(
+    private readonly deviceService: DeviceService,
+    private readonly notification: NotificationService,
+    private readonly workerService: WorkerService
+  ) {
+    this.init();
+  }
+
+  private async init() {
+    await this.deviceService.deviceReady();
+
     this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
       FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
     this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
@@ -70,8 +82,8 @@ export class AuthService {
     });
   }
 
-  static async toId(name: string) {
-    return (await CryptoCore.Utils.sha256(Buffer.from(name, 'utf-8'))).toString('hex');
+  public async toId(name: string) {
+    return (await sha256(Buffer.from(name, 'utf-8'), this.workerService.worker)).toString('hex');
   }
 
   getAllAvailableFactors() {
@@ -85,25 +97,25 @@ export class AuthService {
   newFactor(type, value) {
     switch (type) {
       case FactorType.PIN: {
-        return new Factor(FactorType.PIN, FactorName.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value);
+        return new Factor(FactorType.PIN, FactorName.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value, this.workerService.worker);
       }
       case FactorType.PASSWORD: {
-        return new Factor(FactorType.PASSWORD, FactorName.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value);
+        return new Factor(FactorType.PASSWORD, FactorName.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value, this.workerService.worker);
       }
       /*case FactorType.FILE: {
-        return new Factor(FactorType.FILE, FactorName.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value);
+        return new Factor(FactorType.FILE, FactorName.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value, this.workerService.worker);
       }*/
       case FactorType.GRAPHIC_KEY: {
-        return new Factor(FactorType.GRAPHIC_KEY, FactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value);
+        return new Factor(FactorType.GRAPHIC_KEY, FactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value, this.workerService.worker);
       }
       case FactorType.QR: {
-        return new Factor(FactorType.QR, FactorName.QR, FactorIcon.QR, FactorIconAsset.QR, value);
+        return new Factor(FactorType.QR, FactorName.QR, FactorIcon.QR, FactorIconAsset.QR, value, this.workerService.worker);
       }
       case FactorType.NFC: {
-        return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
+        return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value, this.workerService.worker);
       }
       case FactorType.LOGIN: {
-        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value);
+        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value, this.workerService.worker);
       }
     }
   }
@@ -111,7 +123,7 @@ export class AuthService {
   async tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = await CryptoCore.Utils.matchPassphrase(currentData, await factor.toBuffer());
+    const matchResult = await matchPassphrase(currentData, await factor.toBuffer(), this.workerService.worker);
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
@@ -306,21 +318,22 @@ export class Factor {
   icon_asset: string;
   value: any;
   state: string;
+  worker: any;
 
-  constructor(type, name, icon, asset, value) {
+  constructor(type, name, icon, asset, value, worker) {
     this.type = type;
     this.name = name;
     this.icon = icon;
     this.icon_asset = asset;
     this.value = value;
     this.state = 'active';
+    this.worker = worker;
   }
 
   public async toBuffer() {
     const prefix = Buffer.alloc(4);
     prefix.writeUInt32BE(this.type, 0);
 
-    return await CryptoCore.Utils.sha256(Buffer.concat([prefix, this.value]));
+    return await sha256(Buffer.concat([prefix, this.value]), this.worker);
   }
 }
-

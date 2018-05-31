@@ -10,12 +10,16 @@ import {
   Output
 } from '@angular/core';
 import { FactorType } from '../../../services/auth.service';
+import { WorkerService } from '../../../services/worker.service';
 
 declare const nfc: any;
 declare const ndef: any;
 declare const navigator: any;
-declare const CryptoCore: any;
-declare const Buffer: any;
+
+import {
+  tryUnpackLogin,
+  tryUnpackEncryptedSeed
+} from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-nfc-reader',
@@ -44,8 +48,10 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isActive = false;
   timer: any;
 
-  constructor(private ngZone: NgZone) {
-  }
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly workerService: WorkerService
+  ) {}
 
   ngOnInit() {
     this.canScanAgain = false;
@@ -192,14 +198,14 @@ export class NfcReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.isImport) {
           try {
-            const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(payload);
+            const value = await tryUnpackEncryptedSeed(payload, this.workerService.worker);
             this.nfc = value.toString('hex');
           } catch (exc) {
             console.log(exc);
             this.nfc = null;
           }
         } else {
-          this.nfc = await CryptoCore.Utils.tryUnpackLogin(payload);
+          this.nfc = await tryUnpackLogin(payload, this.workerService.worker);
         }
 
         navigator.vibrate(100);
