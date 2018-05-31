@@ -2,7 +2,8 @@ import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BehaviorSubject ,  combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, flatMap } from 'rxjs/operators';
+import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
+import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -251,7 +252,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.receiverField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.receiverField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: string) => {
             this.receiver.next(value);
           })
         );
@@ -287,38 +288,56 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.amountField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.amountField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value));
           })
         );
         this.subscriptions.push(
-          this.amountUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.amountUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1)));
           })
         );
         this.subscriptions.push(
-          this.feeField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.feeField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             const fee = this.currencyWallet.toInternal(value);
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feeUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.feeUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             const fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.feePriceField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             const feePrice = this.currencyWallet.toInternal(value);
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.feePriceUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             const feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
@@ -330,7 +349,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           })
         );
         this.subscriptions.push(
-          this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: boolean) => {
             this.subtractFee.next(value);
           })
         );
