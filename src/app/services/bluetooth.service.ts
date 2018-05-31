@@ -145,9 +145,7 @@ export class BluetoothService {
     await this.disconnect();
 
     try {
-      if (!await cordova.plugins.bluetooth.getListening()) {
-        await cordova.plugins.bluetooth.startListening();
-      }
+      await cordova.plugins.bluetooth.startListening();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to ensure that bluetooth devices are listening', e);
       return false;

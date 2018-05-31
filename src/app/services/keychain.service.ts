@@ -140,7 +140,6 @@ export class TokenEntry {
 @Injectable()
 export class KeyChainService {
   public readonly topTokens = [
-    new TokenEntry(Token.EDC, 'XYZ Coin', 'XYZ', '0x33153b76BcE1aE29C9137E444b73A092874b9058', 'edc', 8, 'testnet'),
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos', 18),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron', 6),
     new TokenEntry(Token.VECHAIN, 'VeChain', 'VEN', '0xd850942ef8811f2a866692a623011bde52a462c1', 'veChain', 18),

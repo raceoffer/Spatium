@@ -71,8 +71,8 @@ export class CurrencyService {
       [CurrencyServerName.Blockdozer, 'https://bch.blockdozer.com/insight-api']
     ])],
     [Coin.ETH, new Map<string, string>([
-      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/etherium/testnet/infura`],
-      [CurrencyServerName.Infura, 'https://rinkeby.infura.io/dlYX0gLUjGGCk7IBFq2C']
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/etherium/mainnet/infura`],
+      [CurrencyServerName.Infura, 'https://mainnet.infura.io/dlYX0gLUjGGCk7IBFq2C']
     ])],
     [Coin.LTC, new Map<string, string>([
       [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/lightcoin/mainnet/insights`],
@@ -149,10 +149,8 @@ export class CurrencyService {
   ]);
 
 
-  constructor(
-    private readonly keychain: KeyChainService,
-    private readonly currencyPriceService: CurrencyPriceService
-  ) {
+  constructor(private readonly keychain: KeyChainService,
+              private readonly currencyPriceService: CurrencyPriceService) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
     });
