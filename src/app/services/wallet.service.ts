@@ -8,8 +8,8 @@ import {
   LitecoinTransaction
 } from 'crypto-core-async';
 
-import { BehaviorSubject, ReplaySubject, timer } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
+import { filter, map, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
 import { BluetoothService } from './bluetooth.service';
@@ -23,6 +23,8 @@ import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { WorkerService } from './worker.service';
+import { Device } from './bluetooth.service';
+import { distinctUntilChanged, mapTo } from "rxjs/internal/operators";
 
 declare const navigator: any;
 
@@ -45,11 +47,20 @@ export class WalletService {
     this.status.pipe(map(status => status === WalletStatus.Partially)), false);
   public fullySync: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(map(status => status === WalletStatus.Fully)), false);
-
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+
+  private mustResync: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public mustResyncChanged: Observable<boolean> = this.mustResync.pipe(skip(1), distinctUntilChanged());
+  public resyncEvent: Observable<any> = this.mustResyncChanged.pipe(filter(enabled => enabled), mapTo(null));
+  public cancelResyncEvent: Observable<any> = this.mustResyncChanged.pipe(filter(enabled => !enabled), mapTo(null));
+
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
   private sessionKey = Buffer.from('');
   private sessionPartnerKey = Buffer.from('');
+  private partnerDevice: BehaviorSubject<Device> = new BehaviorSubject<Device>(null);
+  private currencyWallet: CurrencyWallet = null;
+  private tx: any = null;
+  private isTransactionReconnect = false;
 
   private coinIndex = 0;
   private tokenIndex = 0;
@@ -145,20 +156,32 @@ export class WalletService {
       console.log(data);
       console.log(!this.sessionPartnerKey.equals(data));
       const isOlder = this.sessionPartnerKey.equals(data);
-      if (!isOlder && this.status.value !== WalletStatus.None) {
-        console.log('sessionKeyVerifyer other key');
-        await this.openDialog();
-      } else {
-        console.log('sessionKeyVerifyer ok key or none status');
-        this.sessionPartnerKey = data;
+
+      if (this.isTransactionReconnect) {
+        this.isTransactionReconnect = false;
         if (!isOlder) {
-          await this.reset();
+          console.log('poherili kluch');
+          this.openPairedDeviceChangeDialog();
+        } else {
+          console.log('vso normalno');
+          await this.currencyWallet.requestTransactionVerify(this.tx);
         }
-        this.startSync();
-        await this.bt.send(JSON.stringify({
-          type: 'startSync',
-          content: isOlder
-        }));
+      } else { // sync
+        if (!isOlder && this.status.value !== WalletStatus.None) {
+          console.log('sessionKeyVerifyer other key');
+          await this.openUpdateKeyDialog();
+        } else {
+          console.log('sessionKeyVerifyer ok key or none status');
+          this.sessionPartnerKey = data;
+          if (!isOlder) {
+            await this.reset();
+          }
+          this.startSync();
+          await this.bt.send(JSON.stringify({
+            type: 'startSync',
+            content: isOlder
+          }));
+        }
       }
     });
 
@@ -243,6 +266,22 @@ export class WalletService {
     });
   }
 
+  public async trySignTransaction(currencyWallet: CurrencyWallet, tx: any) {
+    console.log('qwewqeqweq');
+    this.currencyWallet = currencyWallet;
+    this.tx = tx;
+    if (this.partnerDevice !== null) {
+      this.isTransactionReconnect = true;
+      if (!await this.bt.connect(this.partnerDevice.value)) {
+        this.isTransactionReconnect = false;
+        this.currencyWallet = null;
+        this.tx = null;
+      }
+    }
+
+    return this.isTransactionReconnect;
+  }
+
   // при пересинхронизации с другим устройством/выходе
   public async reset() {
     if (this.status.getValue() === WalletStatus.None) {
@@ -251,6 +290,12 @@ export class WalletService {
 
     this.coinIndex = 0;
     this.tokenIndex = 0;
+    this.sessionKey = Buffer.from('');
+    this.sessionPartnerKey = Buffer.from('');
+    this.partnerDevice.next(null);
+    this.currencyWallet = null;
+    this.tx = null;
+    this.isTransactionReconnect = null;
     this.changeStatus();
     this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
@@ -262,13 +307,9 @@ export class WalletService {
     this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
   }
 
-  public async trySync(isVerifyer: boolean) {
-    console.log(this.synchronizing.value);
-    if (this.synchronizing.value) {
-      throw new Error('Sync in progress');
-    }
-
+  public async sendSessionKey(isVerifyer: boolean) {
     try {
+      console.log(this.sessionKey);
       if (this.sessionKey.equals(Buffer.from(''))) {
         console.log('first generate sessionKey');
         this.sessionKey = Buffer.from(new Date().toString());
@@ -291,8 +332,9 @@ export class WalletService {
 
   public async startSync() {
     try {
-
-      console.log('sended');
+      console.log(this.partnerDevice.value);
+      this.partnerDevice.next(this.bt.connectedDevice.value);
+      console.log(this.partnerDevice.value);
 
       this.setProgress(0);
       this.synchronizing.next(true);
@@ -418,7 +460,7 @@ export class WalletService {
       ));
   }
 
-  async openDialog() {
+  async openUpdateKeyDialog() {
     navigator.notification.confirm(
       'You are about to connect with another device. This will undo current synchronization progress. Are you sure?',
       async (buttonIndex) => {
@@ -433,6 +475,23 @@ export class WalletService {
 
         } else {
           await this.cancelSync();
+        }
+      },
+      '',
+      ['YES', 'NO']
+    );
+  }
+
+  async openPairedDeviceChangeDialog() {
+    navigator.notification.confirm(
+      'Confirmation device was changed. Please, syncronize your wallet again.',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+
+          console.log('go to connect');
+          this.mustResync.next(true);
+        } else {
+          this.mustResync.next(false);
         }
       },
       '',

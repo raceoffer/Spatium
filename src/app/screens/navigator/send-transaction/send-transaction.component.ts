@@ -1,8 +1,10 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject ,  combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, flatMap } from 'rxjs/operators';
+import BN from 'bn.js';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, flatMap, map } from 'rxjs/operators';
+import { BluetoothService } from '../../../services/bluetooth.service';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -13,7 +15,6 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
-import BN from 'bn.js';
 
 enum Phase {
   Creation,
@@ -113,7 +114,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               private readonly route: ActivatedRoute,
               private readonly router: Router,
               private readonly currencyService: CurrencyService,
-              private readonly navigationService: NavigationService) { }
+              private readonly navigationService: NavigationService,
+              private readonly bt: BluetoothService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -148,15 +150,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.balance.pipe(
             distinctUntilChanged(),
             flatMap(async balance => {
-            if (balance === null || balance.eq(new BN())) {
-              return 1;
-            }
+              if (balance === null || balance.eq(new BN())) {
+                return 1;
+              }
 
-            const testTx = await this.currencyWallet.createTransaction(
-              this.address.getValue(),
-              balance.div(new BN(2)));
+              const testTx = await this.currencyWallet.createTransaction(
+                this.address.getValue(),
+                balance.div(new BN(2)));
 
-            return await testTx.estimateSize();
+              return await testTx.estimateSize();
             })
           ), 1);
 
@@ -376,6 +378,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           })
         );
 
+        this.subscriptions.push(
+          this.walletService.resyncEvent.subscribe(async () => {
+            await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+          }));
+
+        this.subscriptions.push(
+          this.walletService.cancelResyncEvent.subscribe(async () => {
+            this.bt.disconnect();
+            this.phase.next(Phase.Creation);
+          }));
+
+
         this.feeTypeField.setValue(Fee.Normal);
       }));
   }
@@ -398,7 +412,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
-      await this.currencyWallet.requestTransactionVerify(tx);
+      if (!await this.walletService.trySignTransaction(this.currencyWallet, tx)) {
+        this.phase.next(Phase.Creation);
+      }
     }
   }
 
@@ -412,7 +428,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Creation);
 
     try {
-      await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+      await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', this.currency]}}]);
 
       await this.currencyWallet.verifySignature();
       await this.currencyWallet.pushTransaction();
@@ -455,21 +471,27 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   setReceiverFocused(focused: boolean): void {
     this.receiverFocused = focused;
   }
+
   setAmountFocused(focused: boolean): void {
     this.amountFocused = focused;
   }
+
   setAmountUsdFocused(focused: boolean): void {
     this.amountUsdFocused = focused;
   }
+
   setFeeFocused(focused: boolean): void {
     this.feeFocused = focused;
   }
+
   setFeeUsdFocused(focused: boolean): void {
     this.feeUsdFocused = focused;
   }
+
   setFeePriceFocused(focused: boolean): void {
     this.feePriceFocused = focused;
   }
+
   setFeePriceUsdFocused(focused: boolean): void {
     this.feePriceUsdFocused = focused;
   }

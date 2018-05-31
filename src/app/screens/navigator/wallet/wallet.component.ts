@@ -206,7 +206,6 @@ export class WalletComponent implements OnInit, OnDestroy {
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.bt.disconnect();
           await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
         }
       },

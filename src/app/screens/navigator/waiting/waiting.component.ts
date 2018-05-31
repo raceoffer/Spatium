@@ -43,7 +43,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
-        this.wallet.trySync(false);
+        this.wallet.sendSessionKey(false);
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 
@@ -92,6 +92,7 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async connectTo(name, address) {
+    this.bt.disconnect();
     console.log('connect' + name + address);
     this.Label = 'Connecting to ' + name;
     this.connected = true;
@@ -108,35 +109,5 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-  }
-
-  async cancelConnect() {
-    this.openDialog(null);
-  }
-
-  async openDialog(device: Device) {
-    navigator.notification.confirm(
-      'Cancel synchronization',
-      async (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          // await this.bt.disconnect();
-
-          if (device != null) {
-            this.nextConnected = true;
-            console.log('connect' + device.name + device.address);
-            this.Label = 'Connecting to ' + device.name;
-            this.connected = true;
-            await this.bt.cancelDiscovery();
-            /*if (!await this.bt.connect(device)) {
-              this.connected = false;
-              this.Label = this.stLabel;
-            }*/
-            this.nextConnected = false;
-          }
-        }
-      },
-      '',
-      ['YES', 'NO']
-    );
   }
 }

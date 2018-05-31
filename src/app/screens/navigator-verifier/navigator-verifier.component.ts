@@ -25,7 +25,7 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
         console.log('Connected to', this.bt.connectedDevice.getValue());
         await this.bt.stopListening();
         await this.wallet.cancelSync();
-        await this.wallet.trySync(true);
+        await this.wallet.sendSessionKey(true);
       }));
 
     this.subscriptions.push(
