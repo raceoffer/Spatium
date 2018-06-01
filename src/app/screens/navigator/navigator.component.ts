@@ -18,12 +18,13 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
-         await this.wallet.changeStatus();
+        await this.wallet.cancelSync();
       }));
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
+        await this.wallet.cancelSync();
       }));
 
   }
@@ -33,6 +34,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
+    await this.wallet.resetSession();
     await this.bt.disconnect();
   }
 }

@@ -247,11 +247,7 @@ export class WalletService {
       // pop the queue
       this.messageSubject.next({});
 
-      this.changeStatus();
-
-      for (const wallet of Array.from(this.coinWallets.values())) {
-        await wallet.cancelSync();
-      }
+      this.cancelSync();
     });
 
     this.messageSubject.pipe(
@@ -284,15 +280,13 @@ export class WalletService {
 
   // при пересинхронизации с другим устройством/выходе
   public async reset() {
+    console.log('reset');
     if (this.status.getValue() === WalletStatus.None) {
       return;
     }
 
     this.coinIndex = 0;
     this.tokenIndex = 0;
-    this.sessionKey = Buffer.from('');
-    this.sessionPartnerKey = Buffer.from('');
-    this.partnerDevice.next(null);
     this.currencyWallet = null;
     this.tx = null;
     this.isTransactionReconnect = null;
@@ -301,6 +295,13 @@ export class WalletService {
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
     }
+  }
+
+  public async resetSession() {
+    console.log('resetSession');
+    this.sessionKey = Buffer.from('');
+    this.sessionPartnerKey = Buffer.from('');
+    this.partnerDevice.next(null);
   }
 
   public setProgress(value: number): void {
@@ -350,6 +351,8 @@ export class WalletService {
           return;
         }
 
+        console.log(wallet);
+
         if (!wallet.ready.value) {
           const sub = wallet.syncProgress.subscribe(num => {
             this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
@@ -377,6 +380,8 @@ export class WalletService {
         if (!this.synchronizing.value) {
           return;
         }
+
+        console.log(wallet);
 
         if (!wallet.ready.value) {
           await wallet.syncDuplicate(ethWallet);
@@ -436,7 +441,9 @@ export class WalletService {
     }
 
     for (const wallet of Array.from(this.coinWallets.values())) {
-      await wallet.cancelSync();
+      if (!wallet.ready) {
+        await wallet.reset();
+      }
     }
 
     this.synchronizing.next(false);

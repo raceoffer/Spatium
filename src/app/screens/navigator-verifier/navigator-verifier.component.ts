@@ -30,22 +30,26 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.changeStatus();
+        await this.wallet.cancelSync();
       }));
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
+        await this.wallet.cancelSync();
         await this.bt.ensureListening();
       }));
 
   }
 
   public async ngOnDestroy() {
+    console.log('ondestroy nav-verifyer');
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
 
     await this.wallet.reset();
+    await this.wallet.resetSession();
     await this.bt.disconnect();
+    await this.bt.stopListening();
   }
 }
