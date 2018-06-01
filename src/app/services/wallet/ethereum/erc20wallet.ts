@@ -2,7 +2,9 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { timer  } from 'rxjs';
+
+import { from, of, timer } from 'rxjs';
+import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
@@ -73,17 +75,26 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    this.address.next(this.wallet.address);
+    const request = () => from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
 
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.address.next(this.wallet.address);
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        request().pipe(
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => request())
+            )
+          )
+        )
+      ),
+      filter(r => r),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }
@@ -100,18 +111,26 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    this.address.next(this.wallet.address);
+    const request = () => from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
 
-    // We randomize a starting delay in order to reduce a one-time load on the UI thread
-    this.routineTimerSub = timer(500 + 2000 * Math.random(), 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.address.next(this.wallet.address);
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        request().pipe(
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => request())
+            )
+          )
+        )
+      ),
+      filter(r => r),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }

@@ -43,7 +43,7 @@ export class DDSAccount {
 @Injectable()
 export class DDSService {
   private dds: any = null;
-  private network = 'testnet'; // 'main'; | 'testnet';
+  private network = 'main'; // 'main'; | 'testnet';
   private sponsor = 'http://185.219.80.169:8080/sponsor';
 
   constructor(
