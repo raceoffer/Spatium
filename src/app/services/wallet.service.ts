@@ -1,23 +1,17 @@
 import { Injectable, NgZone } from '@angular/core';
-
 import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
-import { distinctUntilChanged, mapTo } from 'rxjs/internal/operators';
-
 import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
-
 import { BluetoothService, Device } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
-
 import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { WorkerService } from './worker.service';
-import { Device } from './bluetooth.service';
 
 declare const navigator: any;
 import { CompoundKey } from 'crypto-core-async';
