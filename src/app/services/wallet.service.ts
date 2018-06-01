@@ -255,16 +255,18 @@ export class WalletService {
   }
 
   public async trySignTransaction(currencyWallet: CurrencyWallet, tx: any) {
-    console.log('qwewqeqweq');
     this.currencyWallet = currencyWallet;
     this.tx = tx;
     if (this.partnerDevice !== null) {
       this.isTransactionReconnect = true;
-      if (!await this.bt.connect(this.partnerDevice.value)) {
-        this.isTransactionReconnect = false;
-        this.currencyWallet = null;
-        this.tx = null;
+      if (!this.bt.connected.getValue()) {
+        if (!await this.bt.connect(this.partnerDevice.value)) {
+          this.isTransactionReconnect = false;
+          this.currencyWallet = null;
+          this.tx = null;
+        }
       }
+
     }
 
     return this.isTransactionReconnect;

@@ -178,7 +178,7 @@ export class BluetoothService {
 
   async disconnect() {
     try {
-      if (this.connected.value) {
+      if (this.connected.getValue()) {
         await cordova.plugins.bluetooth.disconnect();
       }
     } catch (e) {
@@ -191,7 +191,7 @@ export class BluetoothService {
 
   async send(message) {
     try {
-      if (this.connected.value) {
+      if (this.connected.getValue()) {
         await cordova.plugins.bluetooth.write(message);
       }
     } catch (e) {
