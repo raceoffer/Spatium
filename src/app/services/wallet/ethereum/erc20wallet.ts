@@ -3,8 +3,8 @@ import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
-import { from, timer } from 'rxjs';
-import { expand, map, mergeMap, catchError } from 'rxjs/operators';
+import { from, of, timer } from 'rxjs';
+import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
@@ -75,20 +75,21 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
+    const request = from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
+
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(1000).pipe(
       mergeMap(() =>
-        from(this.wallet.getBalance()).pipe(
-          catchError((e, state) => state),
+        request.pipe(
           expand(() =>
             timer(20000).pipe(
-              mergeMap(() => from(this.wallet.getBalance()).pipe(
-                catchError((e, state) => state)
-              ))
+              mergeMap(() => request)
             )
           )
         )
       ),
+      filter(r => r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed
@@ -110,20 +111,21 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
+    const request = from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
+
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(1000).pipe(
       mergeMap(() =>
-        from(this.wallet.getBalance()).pipe(
-          catchError((e, state) => state),
+        request.pipe(
           expand(() =>
             timer(20000).pipe(
-              mergeMap(() => from(this.wallet.getBalance()).pipe(
-                catchError((e, state) => state)
-              ))
+              mergeMap(() => request)
             )
           )
         )
       ),
+      filter(r => r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed

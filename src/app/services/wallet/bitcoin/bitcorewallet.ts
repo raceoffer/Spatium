@@ -4,8 +4,8 @@ import { BluetoothService } from '../../bluetooth.service';
 import { LoggerService } from '../../logger.service';
 import { NgZone } from '@angular/core';
 
-import { from, timer } from 'rxjs';
-import { expand, map, mergeMap, catchError } from 'rxjs/operators';
+import { from, of, timer } from 'rxjs';
+import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -59,20 +59,21 @@ export class BitcoreWallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
+    const request = from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
+
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(1000).pipe(
       mergeMap(() =>
-        from(this.wallet.getBalance()).pipe(
-          catchError((e, state) => state),
+        request.pipe(
           expand(() =>
             timer(20000).pipe(
-              mergeMap(() => from(this.wallet.getBalance()).pipe(
-                catchError((e, state) => state)
-              ))
+              mergeMap(() => request)
             )
           )
         )
       ),
+      filter(r => r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed
