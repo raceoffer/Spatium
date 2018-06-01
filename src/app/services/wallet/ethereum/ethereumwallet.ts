@@ -2,7 +2,9 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { timer  } from 'rxjs';
+
+import { from, timer } from 'rxjs';
+import { expand, map, mergeMap, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
 
@@ -57,16 +59,24 @@ export class EthereumWallet extends CurrencyWallet {
     });
 
     this.address.next(this.wallet.address);
-
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        from(this.wallet.getBalance()).pipe(
+          catchError((e, state) => state),
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => from(this.wallet.getBalance()).pipe(
+                catchError((e, state) => state)
+              ))
+            )
+          )
+        )
+      ),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }
