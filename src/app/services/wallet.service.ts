@@ -1,10 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 
 import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
+import { distinctUntilChanged, mapTo } from 'rxjs/internal/operators';
+
 import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
-import { BluetoothService } from './bluetooth.service';
+import { BluetoothService, Device } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
@@ -53,6 +55,7 @@ export class WalletService {
   private currencyWallet: CurrencyWallet = null;
   private tx: any = null;
   private isTransactionReconnect = false;
+  private isPartnerFully = false;
 
   private coinIndex = 0;
   private tokenIndex = 0;
@@ -242,6 +245,12 @@ export class WalletService {
     });
 
     this.messageSubject.pipe(
+      filter(object => object.type === 'fullySynced')
+    ).subscribe(async () => {
+      this.isPartnerFully = true;
+    });
+
+    this.messageSubject.pipe(
       filter(object => object.type === 'startSync'),
       map(object => object.content),
     ).subscribe(async content => {
@@ -324,9 +333,8 @@ export class WalletService {
 
   public async startSync() {
     try {
-      console.log(this.partnerDevice.value);
+      this.isPartnerFully = false;
       this.partnerDevice.next(this.bt.connectedDevice.value);
-      console.log(this.partnerDevice.value);
 
       this.setProgress(0);
       this.synchronizing.next(true);
@@ -388,6 +396,11 @@ export class WalletService {
       this.setProgress(1);
 
       if (this.synchronizing.value) {
+        await this.bt.send(JSON.stringify({
+          type: 'fullySynced',
+          content: {}
+        }));
+
         this.synchronizing.next(false);
         this.changeStatus();
         if (this.bt.connected) {
@@ -417,25 +430,28 @@ export class WalletService {
   }
 
   public async cancelSync() {
-    if (!this.synchronizing.value) {
+    console.log('cancel sync ' + this.isPartnerFully);
+    if (!this.synchronizing.value || this.isPartnerFully) {
       return;
     }
 
     try {
-      await this.bt.send(JSON.stringify({
-        type: 'cancel',
-        content: {}
-      }));
+      for (const wallet of Array.from(this.coinWallets.values())) {
+        if (!wallet.ready.value && !wallet.none.value) {
+          await wallet.reset();
+        }
+      }
+
+      for (const wallet of Array.from(this.tokenWallets.values())) {
+        if (!wallet.ready.value && !wallet.none.value) {
+          await wallet.reset();
+        }
+      }
     } catch (ignored) {
     }
 
-    for (const wallet of Array.from(this.coinWallets.values())) {
-      if (!wallet.ready) {
-        await wallet.reset();
-      }
-    }
-
     this.synchronizing.next(false);
+    await this.bt.disconnect();
     this.changeStatus();
   }
 

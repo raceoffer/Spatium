@@ -4,7 +4,6 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import BN from 'bn.js';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
-import { BluetoothService } from '../../../services/bluetooth.service';
 import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
@@ -121,8 +120,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               private readonly route: ActivatedRoute,
               private readonly router: Router,
               private readonly currencyService: CurrencyService,
-              private readonly navigationService: NavigationService,
-              private readonly bt: BluetoothService) { }
+              private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -279,25 +277,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.fee.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feeFocused) {
               if (this.currency in Token) {
-                this.feeField.setValue(
+              this.feeField.setValue(
                   this.ethWallet.fromInternal(value),
                   {emitEvent: false});
               } else {
                 this.feeField.setValue(
-                  this.currencyWallet.fromInternal(value),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
             }
             if (!this.feeUsdFocused) {
               if (this.currency in Token) {
-                this.feeUsdField.setValue(
+              this.feeUsdField.setValue(
                   this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                   {emitEvent: false});
               } else {
                 this.feeUsdField.setValue(
-                  this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
             }
           })
         );
@@ -306,25 +304,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feePrice.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feePriceFocused) {
               if (this.currency in Token) {
-                this.feePriceField.setValue(
+              this.feePriceField.setValue(
                   this.ethWallet.fromInternal(value),
                   {emitEvent: false});
               } else {
                 this.feePriceField.setValue(
-                  this.currencyWallet.fromInternal(value),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
             }
             if (!this.feePriceUsdFocused) {
               if (this.currency in Token) {
-                this.feePriceUsdField.setValue(
+              this.feePriceUsdField.setValue(
                 this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
               } else {
                 this.feePriceUsdField.setValue(
-                  this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
             }
           })
         );
@@ -458,13 +456,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.walletService.resyncEvent.subscribe(async () => {
-            await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
-          }));
-
-        this.subscriptions.push(
           this.walletService.cancelResyncEvent.subscribe(async () => {
-            this.bt.disconnect();
             this.phase.next(Phase.Creation);
           }));
 
