@@ -1,7 +1,8 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject ,  combineLatest } from 'rxjs';
+import BN from 'bn.js';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
 import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
@@ -14,7 +15,6 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
-import BN from 'bn.js';
 
 enum Phase {
   Creation,
@@ -156,15 +156,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.balance.pipe(
             distinctUntilChanged(),
             flatMap(async balance => {
-            if (balance === null || balance.eq(new BN())) {
-              return 1;
-            }
+              if (balance === null || balance.eq(new BN())) {
+                return 1;
+              }
 
-            const testTx = await this.currencyWallet.createTransaction(
-              this.address.getValue(),
-              balance.div(new BN(2)));
+              const testTx = await this.currencyWallet.createTransaction(
+                this.address.getValue(),
+                balance.div(new BN(2)));
 
-            return await testTx.estimateSize();
+              return await testTx.estimateSize();
             })
           ), 1);
 
@@ -187,12 +187,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             }
             if (amount.gt(new BN())) {
               if (this.currency in Coin) {
-                if (!substractFee) {
-                  return balance.gte(amount.add(fee));
-                } else {
-                  return balance.gte(amount);
-                }
+              if (!substractFee) {
+                return balance.gte(amount.add(fee));
               } else {
+                return balance.gte(amount);
+              }
+            } else {
                 return balance.gte(amount) && ethBalance.gte(fee);
               }
             } else {
@@ -209,12 +209,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           (amount, fee, subtractFee) => {
             if (amount.gt(new BN())) {
               if (this.currency in Coin) {
-                if (subtractFee) {
-                  return amount.gte(fee);
-                } else {
-                  return true;
-                }
+              if (subtractFee) {
+                return amount.gte(fee);
               } else {
+                return true;
+              }
+            } else {
                 return true;
               }
             } else {
@@ -277,25 +277,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.fee.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feeFocused) {
               if (this.currency in Token) {
-                this.feeField.setValue(
+              this.feeField.setValue(
                   this.ethWallet.fromInternal(value),
                   {emitEvent: false});
               } else {
                 this.feeField.setValue(
-                  this.currencyWallet.fromInternal(value),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
             }
             if (!this.feeUsdFocused) {
               if (this.currency in Token) {
-                this.feeUsdField.setValue(
+              this.feeUsdField.setValue(
                   this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                   {emitEvent: false});
               } else {
                 this.feeUsdField.setValue(
-                  this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
             }
           })
         );
@@ -304,25 +304,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feePrice.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feePriceFocused) {
               if (this.currency in Token) {
-                this.feePriceField.setValue(
+              this.feePriceField.setValue(
                   this.ethWallet.fromInternal(value),
                   {emitEvent: false});
               } else {
                 this.feePriceField.setValue(
-                  this.currencyWallet.fromInternal(value),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value),
+                {emitEvent: false});
+            }
             }
             if (!this.feePriceUsdFocused) {
               if (this.currency in Token) {
-                this.feePriceUsdField.setValue(
+              this.feePriceUsdField.setValue(
                 this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
               } else {
                 this.feePriceUsdField.setValue(
-                  this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-                  {emitEvent: false});
-              }
+                this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+            }
             }
           })
         );
@@ -455,6 +455,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           })
         );
 
+        this.subscriptions.push(
+          this.walletService.cancelResyncEvent.subscribe(async () => {
+            this.phase.next(Phase.Creation);
+          }));
+
+
         this.feeTypeField.setValue(Fee.Normal);
         if (this.isToken) {
           this.subtractFeeField.disable();
@@ -482,7 +488,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
-      await this.currencyWallet.requestTransactionVerify(tx);
+      if (!await this.walletService.trySignTransaction(this.currencyWallet, tx)) {
+        this.phase.next(Phase.Creation);
+      }
     }
   }
 
@@ -496,7 +504,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Creation);
 
     try {
-      await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+      await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', this.currency]}}]);
 
       await this.currencyWallet.verifySignature();
       await this.currencyWallet.pushTransaction();
@@ -539,21 +547,27 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   setReceiverFocused(focused: boolean): void {
     this.receiverFocused = focused;
   }
+
   setAmountFocused(focused: boolean): void {
     this.amountFocused = focused;
   }
+
   setAmountUsdFocused(focused: boolean): void {
     this.amountUsdFocused = focused;
   }
+
   setFeeFocused(focused: boolean): void {
     this.feeFocused = focused;
   }
+
   setFeeUsdFocused(focused: boolean): void {
     this.feeUsdFocused = focused;
   }
+
   setFeePriceFocused(focused: boolean): void {
     this.feePriceFocused = focused;
   }
+
   setFeePriceUsdFocused(focused: boolean): void {
     this.feePriceUsdFocused = focused;
   }

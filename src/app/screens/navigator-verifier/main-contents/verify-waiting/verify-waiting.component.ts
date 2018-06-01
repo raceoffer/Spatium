@@ -15,7 +15,6 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
 
   enabled = this.bt.enabled;
   discoverable = this.bt.discoverable;
-  ready = this.wallet.ready;
 
   public isExitTap = false;
   private subscriptions = [];
@@ -24,8 +23,7 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
               private readonly navigationService: NavigationService,
               private readonly ngZone: NgZone,
               private readonly router: Router,
-              private readonly notification: NotificationService,
-              private readonly wallet: WalletService) { }
+              private readonly notification: NotificationService) { }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -33,25 +31,6 @@ export class VerifyWaitingComponent implements OnInit, AfterViewInit, OnDestroy 
         await this.onBackClicked();
       })
     );
-
-    this.subscriptions.push(
-      this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
-      }));
-
-    this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(async () => {
-        console.log('Connected to', this.bt.connectedDevice.getValue());
-        this.wallet.startSync();
-        this.ready.next(true);
-      }));
-
-    this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        await this.bt.stopListening();
-        await this.wallet.reset();
-        await this.bt.ensureListening();
-      }));
   }
 
   async ngAfterViewInit() {

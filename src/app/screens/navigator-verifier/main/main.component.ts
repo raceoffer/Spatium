@@ -1,11 +1,11 @@
-import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { CurrencyService, Info } from '../../../services/currency.service';
+import { Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
+import { BluetoothService } from "../../../services/bluetooth.service";
+import { NotificationService } from "../../../services/notification.service";
+import { NavigationService } from "../../../services/navigation.service";
 
 enum State {
   None,
@@ -57,16 +57,29 @@ export class MainComponent implements OnInit, OnDestroy {
   public currentCoin: Coin | Token = null;
   public currentInfo: Info = null;
   public currencyWallets = this.wallet.currencyWallets;
+  public isExitTap = false;
+  enabledBT = this.bt.enabled;
   synchronizing = this.wallet.synchronizing;
-  ready = this.wallet.ready;
+  partiallySync = this.wallet.partiallySync;
+  fullySync = this.wallet.fullySync;
   progress = this.wallet.syncProgress;
   @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
+  constructor(private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly bt: BluetoothService,
+              private readonly navigationService: NavigationService,
+              private readonly notification: NotificationService,
               private readonly wallet: WalletService) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBackClicked();
+      })
+    );
+  }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
@@ -93,12 +106,20 @@ export class MainComponent implements OnInit, OnDestroy {
 
   async onBackClicked() {
     if (this.isOpened) {
+      console.log('isOpened');
       this.sidenav.toggle();
+    } else if (this.isExitTap) {
+      console.log('isExitTap');
+      this.notification.hide();
+      await this.router.navigate(['/start']);
+    } else {
+      console.log('await');
+      this.notification.show('Tap again to exit');
+      this.isExitTap = true;
+      setTimeout(() => this.ngZone.run(() => {
+        this.isExitTap = false;
+      }), 3000);
     }
-  }
-
-  async goToSync() {
-    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
   }
 
   async cancelConnect() {

@@ -71,6 +71,11 @@ export class CurrencyWallet {
       map(status => status === Status.Ready)
     ), false);
 
+  public none: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(
+      map(status => status === Status.None)
+    ), false);
+
   public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
 
   public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
