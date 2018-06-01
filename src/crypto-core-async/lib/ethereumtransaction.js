@@ -125,7 +125,7 @@ export class EthereumTransaction {
   async mapInputs(compoundKey) {
     return await this.invoke({
       method: 'mapInputs',
-      arguments: [Marshal.unwrap(compoundKey.state)]
+      arguments: [unwrap(compoundKey.state)]
     });
   }
 

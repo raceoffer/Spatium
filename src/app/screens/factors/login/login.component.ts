@@ -78,7 +78,8 @@ export class LoginComponent implements AfterViewInit {
     try {
       do {
         this.userName = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await this.authService.toId(this._userName));
+        const exists = await this.dds.exists(await this.authService.toId(this._userName.toLowerCase()));
+        console.log(`LoginComponent.generateNewLogin: this.userName=${this.userName}, username to id=${this._userName.toLowerCase()}, exists=${exists}`);
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.usernameState = State.Ready;

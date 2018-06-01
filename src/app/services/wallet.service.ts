@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject,  Observable,  ReplaySubject, timer } from 'rxjs';
+import { BehaviorSubject,  Observable,  ReplaySubject } from 'rxjs';
 import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 
@@ -197,7 +197,6 @@ export class WalletService {
         await wallet.syncDuplicate(ethWallet);
 
         this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
-        await timer(100).toPromise();
 
         tokenIndex++;
       }
