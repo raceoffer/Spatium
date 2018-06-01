@@ -87,3 +87,12 @@ button.wallet-address-button {
   right: 0;
   transform: translate(0, -50%);
 }
+
+.windows.box .content {
+  max-height: none;
+}
+
+.windows.box.with-transactions .content {
+  margin-top: 130px;
+}
+

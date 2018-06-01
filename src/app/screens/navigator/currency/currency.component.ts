@@ -13,6 +13,7 @@ import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
+declare const device: any;
 
 @Component({
   selector: 'app-currency',
@@ -125,6 +126,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   copy() {
     cordova.plugins.clipboard.copy(this.walletAddress.value);
+  }
+
+  isWindows(): boolean {
+    return device.platform === 'windows';
   }
 
   async onSettingsClicked() {
