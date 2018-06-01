@@ -96,7 +96,14 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
-      this.discoveredDevices.next(this.discoveredDevices.getValue().concat([Device.fromJSON(device)]));
+      var devices = this.discoveredDevices.getValue();
+      var index = devices.map(function(item) { return item.address; }).indexOf(device.address);
+      if(index == -1)
+        devices = devices.concat(Device.fromJSON(device));
+      else {
+        devices[index].name = device.name;
+      }
+      this.discoveredDevices.next(devices);
     }));
 
     cordova.plugins.bluetooth.setDiscoveryCallback((discovery) => this.ngZone.run(() => {
@@ -138,9 +145,7 @@ export class BluetoothService {
     await this.disconnect();
 
     try {
-      if (!await cordova.plugins.bluetooth.getListening()) {
-        await cordova.plugins.bluetooth.startListening();
-      }
+      await cordova.plugins.bluetooth.startListening();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to ensure that bluetooth devices are listening', e);
       return false;

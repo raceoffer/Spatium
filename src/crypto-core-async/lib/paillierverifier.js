@@ -4,20 +4,20 @@ import assert from 'assert';
 import map from 'lodash/map';
 import defaultTo from 'lodash/defaultTo';
 
+import { default as _invoke } from 'lodash/invoke';
+import { PaillierVerifier as CorePaillierVerifier } from 'crypto-core/lib/primitives/paillierverifier';
+
 import { wrap, unwrap } from 'crypto-core/lib/marshal';
 
 export class PaillierVerifier {
-  constructor(state) {
+  constructor(state, worker) {
     this.state = state || { type: 'PaillierVerifier' };
-  }
-
-  static useWorker(worker) {
-    PaillierVerifier.worker = worker;
+    this.worker = worker || null;
   }
 
   async invoke(message, wrapped) {
-    assert(PaillierVerifier.worker);
-    const result = await PaillierVerifier.worker.postMessage({
+    assert(this.worker);
+    const result = await this.worker.postMessage({
       action: 'invoke',
       class: 'PaillierVerifier',
       self: this.state,
@@ -30,15 +30,18 @@ export class PaillierVerifier {
     return wrapped ? result.result : unwrap(result.result);
   }
 
-  static async invokeStatic(message, wrapped) {
-    assert(PaillierVerifier.worker);
-    const result = await PaillierVerifier.worker.postMessage({
-      action: 'invokeStatic',
-      class: 'PaillierVerifier',
-      method: message.method,
-      arguments: map(defaultTo(message.arguments, []), wrap)
-    });
-    return wrapped ? result : unwrap(result);
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'PaillierVerifier',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CorePaillierVerifier, message.method, ... message.arguments);
+    }
   }
 
   async fromOptions(options) {
@@ -49,11 +52,13 @@ export class PaillierVerifier {
     return this;
   }
 
-  static async fromOptions(options) {
-    return new PaillierVerifier(await PaillierVerifier.invokeStatic({
+  static async fromOptions(options, worker) {
+    const state = await PaillierVerifier.invokeStatic({
       method: 'fromOptions',
       arguments: [options]
-    }, true));
+    }, worker, true);
+
+    return worker ? new PaillierVerifier(state, worker) : state;
   }
 
   async getCommitment() {

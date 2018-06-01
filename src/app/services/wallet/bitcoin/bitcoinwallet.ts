@@ -13,7 +13,8 @@ export class BitcoinWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       BitcoinTransaction,
@@ -25,6 +26,8 @@ export class BitcoinWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 }

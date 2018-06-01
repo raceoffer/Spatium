@@ -13,7 +13,8 @@ export class BitcoinCashWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       BitcoinCashTransaction,
@@ -25,6 +26,14 @@ export class BitcoinCashWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone);
+      ngZone,
+      worker
+    );
+  }
+
+  public verifyAddress(address: string) : boolean {
+    return address &&
+           (super.verifyAddress(address) ||
+            /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );
   }
 }
