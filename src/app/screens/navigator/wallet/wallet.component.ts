@@ -228,13 +228,13 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
-    const balanceConfirmed = toBehaviourSubject(
-      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null)),
+    const balanceUnconfirmed = toBehaviourSubject(
+      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
       null);
     this.tileBalanceInfo[coin] = {
-      balance: balanceConfirmed,
+      balance: balanceUnconfirmed,
       balanceUSD: toBehaviourSubject(combineLatest(
-        balanceConfirmed,
+        balanceUnconfirmed,
         currencyInfo.rate,
         (balance, rate) => {
           if (rate === null || balance === null) {
