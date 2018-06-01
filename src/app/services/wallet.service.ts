@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
+import { CompoundKey } from 'crypto-core-async';
 import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
-import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 import { BluetoothService, Device } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
@@ -14,7 +15,6 @@ import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { WorkerService } from './worker.service';
 
 declare const navigator: any;
-import { CompoundKey } from 'crypto-core-async';
 
 export enum WalletStatus {
   None = 0,
@@ -165,6 +165,7 @@ export class WalletService {
             await this.reset();
           }
           this.startSync();
+
           await this.bt.send(JSON.stringify({
             type: 'startSync',
             content: isOlder
@@ -182,6 +183,7 @@ export class WalletService {
       this.sessionPartnerKey = data;
       await this.reset();
       this.startSync();
+
       await this.bt.send(JSON.stringify({
         type: 'startSync',
         content: false
@@ -218,7 +220,6 @@ export class WalletService {
         type: 'sessionKeyVerifyerUpd',
         content: this.sessionKey
       }));
-
     });
 
     this.messageSubject.pipe(
@@ -317,6 +318,7 @@ export class WalletService {
       } else {
         console.log('error sessionKey');
       }
+
     } catch (e) {
       console.log(e);
       this.synchronizing.next(false);
@@ -342,8 +344,6 @@ export class WalletService {
         if (!this.synchronizing.value) {
           return;
         }
-
-        console.log(wallet);
 
         if (!wallet.ready.value) {
           const sub = wallet.syncProgress.subscribe(num => {
@@ -373,8 +373,6 @@ export class WalletService {
           return;
         }
 
-        console.log(wallet);
-
         if (!wallet.ready.value) {
           await wallet.syncDuplicate(ethWallet);
           this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
@@ -390,6 +388,8 @@ export class WalletService {
       this.setProgress(1);
 
       if (this.synchronizing.value) {
+        console.log('fully sync');
+
         await this.bt.send(JSON.stringify({
           type: 'fullySynced',
           content: {}
@@ -397,17 +397,13 @@ export class WalletService {
 
         this.synchronizing.next(false);
         this.changeStatus();
-        if (this.bt.connected) {
-          this.bt.disconnect();
-        }
+        this.bt.disconnect();
       }
     } catch (e) {
       console.log(e);
       this.synchronizing.next(false);
       this.changeStatus();
-      if (this.bt.connected) {
-        this.bt.disconnect();
-      }
+      this.bt.disconnect();
     }
   }
 
@@ -479,7 +475,6 @@ export class WalletService {
             type: 'sessionKeyUpd',
             content: this.sessionKey
           }));
-
         } else {
           await this.cancelSync();
         }

@@ -169,7 +169,7 @@ export class BluetoothService {
 
   async disconnect() {
     try {
-      if (await cordova.plugins.bluetooth.getConnected()) {
+      if (this.connected.value) {
         await cordova.plugins.bluetooth.disconnect();
       }
     } catch (e) {
@@ -182,7 +182,9 @@ export class BluetoothService {
 
   async send(message) {
     try {
-      await cordova.plugins.bluetooth.write(message);
+      if (this.connected.value) {
+        await cordova.plugins.bluetooth.write(message);
+      }
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to send message to a bluetooth device', e);
       return false;
