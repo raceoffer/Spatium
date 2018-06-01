@@ -59,16 +59,16 @@ export class BitcoreWallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    const request = from(this.wallet.getBalance()).pipe(
-      catchError(e => of(null)));
+    const request = () => from(this.wallet.getBalance()).pipe(
+        catchError(e => of(null)));
 
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(1000).pipe(
       mergeMap(() =>
-        request.pipe(
+        request().pipe(
           expand(() =>
             timer(20000).pipe(
-              mergeMap(() => request)
+              mergeMap(() => request())
             )
           )
         )
