@@ -52,7 +52,7 @@
 
   <div class="footer text-center" style="bottom: 0px;" >
     <div class="width-button-width" style="display: inline-block" *ngIf="!isAdvanced && !isPasswordFirst">
-      <label style="opacity: 0.5; font-size: 12px; float: right; margin: 5px;" (click)="openAdvanced()">Advanced security</label>
+      <button mat-button style="opacity: 0.5; text-decoration: underline; float: right; margin: 5px; color: #1a0dab;" (click)="openAdvanced()">Advanced security</button>
     </div>
     <button mat-raised-button color="accent" disabled class="width-button color" *ngIf="!ready && (isPasswordFirst || isAdvanced)">{{ login }}</button>
     <button mat-raised-button color="accent" class="width-button color" *ngIf="ready && (isPasswordFirst || isAdvanced)" (click)="letLogin()">{{ login }}
