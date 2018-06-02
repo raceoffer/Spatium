@@ -56,12 +56,12 @@ export class DDSService {
     });
   }
 
-  public async exists(id: string) {
+  public async exists(id) {
     const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
     return await this.dds.exists(accountSecret);
   }
 
-  public async read(id: string) {
+  public async read(id) {
     const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
     const count = await this.dds.count(accountSecret);
     const data = [];
@@ -72,7 +72,7 @@ export class DDSService {
     return data;
   }
 
-  public sponsorStore(id: string, data: any) {
+  public sponsorStore(id, data: any) {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -84,7 +84,7 @@ export class DDSService {
     const body = new HttpParams()
       .set('data', '0x' + data.toString('hex'));
 
-    const url = this.sponsor + '/storage/' + id;
+    const url = this.sponsor + '/storage/' + id.toString('hex');
 
     return this.http.post(
       url,

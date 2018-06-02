@@ -50,7 +50,7 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   public saving = false;
 
-  public id: string = null;
+  public id: any = null;
   public data: any = null;
 
   public gasPrice: number = this.dds.toWei('5', 'gwei');
