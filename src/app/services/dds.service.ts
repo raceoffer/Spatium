@@ -2,15 +2,18 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, mapTo } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
+import { getAccountSecret } from 'crypto-core-async/lib/utils';
 
 export class DDSAccount {
   public address: string = this.account.address;
 
   constructor(
     private dds: any,
-    private account: any
+    private account: any,
+    private worker: any
   ) { }
 
   public async getBalance() {
@@ -18,8 +21,9 @@ export class DDSAccount {
   }
 
   public async store(id: string, data: any, gasPrice: number) {
+    const accountSecret = await getAccountSecret(id, 0, this.worker);
     return await this.dds.store({
-      secret: id,
+      secret: accountSecret,
       data: data,
       account: this.account,
       gasPrice: gasPrice
@@ -27,8 +31,9 @@ export class DDSAccount {
   }
 
   public async estimateGas(id: string, data: any) {
+    const accountSecret = await getAccountSecret(id, 0, this.worker);
     return this.dds.estimateStoreGas({
-      secret: id,
+      secret: accountSecret,
       data: data,
       account: this.account
     });
@@ -42,7 +47,8 @@ export class DDSService {
   private sponsor = 'http://185.219.80.169:8080/sponsor';
 
   constructor(
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
+    private readonly workerService: WorkerService
   ) {
     this.dds = DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
@@ -51,14 +57,16 @@ export class DDSService {
   }
 
   public async exists(id: string) {
-    return await this.dds.exists(id);
+    const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
+    return await this.dds.exists(accountSecret);
   }
 
   public async read(id: string) {
-    const count = await this.dds.count(id);
+    const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
+    const count = await this.dds.count(accountSecret);
     const data = [];
     for (let i = 0; i < count; ++i) {
-      data.push(await this.dds.read(id, i));
+      data.push(await this.dds.read(accountSecret, i));
     }
 
     return data;
@@ -99,7 +107,12 @@ export class DDSService {
     return this.dds.toWei(value, coin);
   }
 
+  public async getStoreAccount(id) {
+    const accountSecret = await getAccountSecret(id, 1, this.workerService.worker);
+    return new DDSAccount(this.dds, this.dds.getAddress(accountSecret), this.workerService.worker);
+  }
+
   public async accountFromSecret(secret: any) {
-    return new DDSAccount(this.dds, this.dds.accountFromSecret(secret));
+    return new DDSAccount(this.dds, this.dds.accountFromSecret(secret), this.workerService.worker);
   }
 }
