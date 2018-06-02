@@ -5,9 +5,13 @@ import { NotificationService } from '../../services/notification.service';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 
-import { from, of } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { mapTo, catchError } from 'rxjs/operators';
 
+
+
+
+declare const Utils: any;
 declare const cordova: any;
 
 enum SyncState {
@@ -24,6 +28,8 @@ enum SyncState {
 export class BackupComponent implements OnInit, OnDestroy {
   private subscriptions = [];
   private account: DDSAccount = null;
+
+  private backupWallet = null;
 
   public backupLabel = 'Saving to decentralized storage';
   public backupText = 'Please top up this address in order to save your secret into decentralized storage.';
@@ -44,7 +50,7 @@ export class BackupComponent implements OnInit, OnDestroy {
 
   public saving = false;
 
-  public id: string = null;
+  public id: any = null;
   public data: any = null;
 
   public gasPrice: number = this.dds.toWei('5', 'gwei');
@@ -79,8 +85,7 @@ export class BackupComponent implements OnInit, OnDestroy {
     );
 
     this.id = await this.authService.toId(this.authService.login);
-
-    this.account = await this.dds.accountFromSecret(this.id);
+    this.account = await this.dds.getStoreAccount(this.id);
     this.data = this.authService.currentTree;
     this.address = this.account.address;
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
