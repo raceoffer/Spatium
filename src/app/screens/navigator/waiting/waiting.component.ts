@@ -21,7 +21,6 @@ export class WaitingComponent {
   private connectionCancelled = new Subject<any>();
 
   @Output() connected = new EventEmitter<Device>();
-
   public devices = combineLatest([
       this.bt.discoveredDevices,
       this.bt.pairedDevices

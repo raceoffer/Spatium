@@ -56,7 +56,6 @@ export class NavigatorComponent implements OnDestroy {
   }];
 
   public current = 'Wallet';
-
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -80,8 +79,9 @@ export class NavigatorComponent implements OnDestroy {
     private readonly activityService: ActivityService
   ) {
     this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
+      this.bt.connectedEvent.subscribe(async () => {
+        await this.wallet.startHandshake();
+        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 
     this.subscriptions.push(
@@ -95,9 +95,15 @@ export class NavigatorComponent implements OnDestroy {
       }));
 
     this.subscriptions.push(
-      this.wallet.cancelResyncEvent.subscribe(async () => {
+      this.wallet.cancelEvent.subscribe(async () => {
         await this.bt.disconnect();
       }));
+
+    this.subscriptions.push(
+      this.bt.disconnectedEvent.subscribe(async () => {
+        await this.wallet.cancelSync();
+      })
+    );
 
     this.subscriptions.push(
       this.navigationService.navigationEvent.subscribe(() => {

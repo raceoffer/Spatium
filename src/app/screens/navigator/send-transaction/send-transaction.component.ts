@@ -457,12 +457,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subscriptions.push(
-      this.walletService.cancelResyncEvent.subscribe(async () => {
-        this.phase.next(Phase.Creation);
-      }));
-
-
     this.feeTypeField.setValue(Fee.Normal);
     if (this.isToken) {
       this.subtractFeeField.disable();

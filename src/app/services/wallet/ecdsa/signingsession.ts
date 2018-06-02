@@ -71,7 +71,6 @@ export class SignSession implements OnDestroy {
     LoggerService.nonFatalCrash(message, exception);
     this.status.next(TransactionStatus.Failed);
     this.failed.next();
-    this.bt.disconnect();
     throw new Error(message);
   }
 
@@ -79,7 +78,6 @@ export class SignSession implements OnDestroy {
     LoggerService.log('Cancelled', {});
     this.status.next(TransactionStatus.Cancelled);
     this.canceled.next();
-    this.bt.disconnect();
     throw new Error('Cancelled');
   }
 

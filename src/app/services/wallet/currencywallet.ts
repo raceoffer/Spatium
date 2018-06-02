@@ -66,7 +66,7 @@ export abstract class CurrencyWallet {
   public none: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.None)
-    ), false);
+    ), true);
 
   public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
 

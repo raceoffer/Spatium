@@ -101,7 +101,7 @@ export class VerifierComponent implements OnInit {
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
         await this.bt.stopListening();
-        await this.wallet.sendSessionKey(true);
+        await this.wallet.startHandshake();
       }));
 
     this.subscriptions.push(
@@ -188,7 +188,6 @@ export class VerifierComponent implements OnInit {
 
     await this.keychain.reset();
     await this.wallet.reset();
-    await this.wallet.resetSession();
     await this.bt.disconnect();
     await this.bt.stopListening();
   }
