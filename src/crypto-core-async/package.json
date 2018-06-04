@@ -6,6 +6,7 @@
   "scripts": {
     "webpack-dev": "webpack --config webpack.config.js --mode development",
     "webpack-prod": "webpack --config webpack.config.js --mode production",
+    "transpile": "npm explore crypto-core -- npm run transpile",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -15,6 +16,10 @@
     "promise-worker": "^1.1.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-es2015-modules-simple-commonjs": "^0.3.0",
+    "babel-preset-env": "^1.7.0",
     "webpack": "^4.8.3",
     "webpack-cli": "^2.1.3",
     "webpack-merge": "^4.1.2"
