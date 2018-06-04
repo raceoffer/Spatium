@@ -16,6 +16,7 @@ export class PincodeComponent implements OnInit, OnChanges {
   @Input() busy = false;
   @Input() isCreate = false;
   @Input() isFactor = true;
+  @Input() pincode = '';
 
   @Output() hasTouchId: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
@@ -25,7 +26,6 @@ export class PincodeComponent implements OnInit, OnChanges {
   inputStyle = this.inputStylePattern;
   inputWindowsStyle = this.inputWindowsStylePattern;
 
-  pincode = '';
   hasTouch = false;
 
   constructor(private readonly ngZone: NgZone,

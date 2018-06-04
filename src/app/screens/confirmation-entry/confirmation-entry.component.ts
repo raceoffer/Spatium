@@ -33,6 +33,7 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   label: string = null;
   stCreate = 'Create secret';
   stUnlock = 'Unlock secret';
+  pincode = '';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -78,10 +79,10 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
 
   async onSuccess(result) {
     try {
-      const pincode = result.value;
+      this.pincode = result.value;
       this.busy = true;
 
-      const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
+      const aesKey = await deriveAesKey(Buffer.from(this.pincode, 'utf-8'), this.workerService.worker);
 
       if (this.authService.encryptedSeed) {
         const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
@@ -91,7 +92,7 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
       } else {
         if (this.hasTouchId) {
           try {
-            if (await this.saveTouchPassword(pincode)) {
+            if (await this.saveTouchPassword(this.pincode)) {
               await this.savePin(aesKey);
             }
           } catch (e) {
@@ -110,6 +111,7 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
       }
     } catch (ignored) {
       this.notification.show('Authorization error');
+      this.pincode = '';
     }
     finally {
       this.busy = false;
