@@ -9,7 +9,7 @@ import { NavigationService } from '../../services/navigation.service';
 })
 export class RegistrationSuccessComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  stSuccess0 = 'You have successfully created a secure,';
+  stSuccess0 = 'You have successfully created a secure, ';
   stSuccess1 = 'personal SPATIUM account!';
   stOpenWallet = 'Open wallet';
   private subscriptions = [];
