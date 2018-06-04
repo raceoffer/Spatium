@@ -1,0 +1,3 @@
+.mat-icon-button[disabled][disabled], .spatium-textfield.busy > input {
+  color: rgb(177, 177, 177)!important
+}

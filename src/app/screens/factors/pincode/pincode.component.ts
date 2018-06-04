@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, NgZone, OnChanges, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { FactorType } from '../../../services/auth.service';
 
@@ -10,7 +10,7 @@ declare const device: any;
   templateUrl: './pincode.component.html',
   styleUrls: ['./pincode.component.css']
 })
-export class PincodeComponent implements OnInit {
+export class PincodeComponent implements OnInit, OnChanges {
   @HostBinding('class') classes = 'content factor-content text-center';
 
   @Input() busy = false;
@@ -19,6 +19,11 @@ export class PincodeComponent implements OnInit {
 
   @Output() hasTouchId: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+
+  inputStylePattern = 'spatium-textfield entry noborder';
+  inputWindowsStylePattern = 'spatium-textfield entry bottom10';
+  inputStyle = this.inputStylePattern;
+  inputWindowsStyle = this.inputWindowsStylePattern;
 
   pincode = '';
   hasTouch = false;
@@ -46,6 +51,20 @@ export class PincodeComponent implements OnInit {
           console.log('Touch ID is not supported');
         });
       }
+    }
+  }
+
+  ngOnChanges() {
+    this.updateInputStyle();
+  }
+
+  updateInputStyle() {
+    if (this.busy) {
+      this.inputStyle = this.inputStylePattern + ' busy';
+      this.inputWindowsStyle = this.inputWindowsStylePattern + ' busy';
+    } else {
+      this.inputStyle = this.inputStylePattern;
+      this.inputWindowsStyle = this.inputWindowsStylePattern;
     }
   }
 

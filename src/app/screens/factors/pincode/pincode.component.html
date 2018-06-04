@@ -1,10 +1,10 @@
 <div class="content text-center" fxLayout="column" fxLayoutAlign="center center">
 
   <div fxLayout="row" fxLayoutAlign="end center" style="width: 100%;">
-    <div class="spatium-textfield entry noborder" *ngIf="!isWindows()">
+    <div [ngClass]="inputStyle" *ngIf="!isWindows()">
         <input type="password-pin" [(ngModel)]="pincode" disabled>
       </div>
-      <div class="spatium-textfield entry bottom10" *ngIf="isWindows()">
+      <div [ngClass]="inputWindowsStyle" *ngIf="isWindows()">
         <input type="password"  [(ngModel)]="pincode" disabled>
       </div>
     <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspaceClicked()" [disabled]="busy">
@@ -69,7 +69,7 @@
   <div class="keyboard-row" fxLayout="row" fxLayoutAlign="center stretch">
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
       <button mat-icon-button class="keyboard-size" *ngIf="hasTouch" (click)="onFingerClicked()" [disabled]="busy">
-        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">fingerprint</mat-icon>
+        <mat-icon class="keyboard-ok" size="34.5px">fingerprint</mat-icon>
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
@@ -78,8 +78,8 @@
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="center center" class="keyboard-button">
-      <button mat-icon-button class="keyboard-size" (click)="onSubmitClicked()" *ngIf="!busy">
-        <mat-icon class="color-custom-dark keyboard-ok" size="34.5px">check</mat-icon>
+      <button mat-icon-button class="keyboard-size" (click)="onSubmitClicked()" *ngIf="!busy" [disabled]="pincode == ''">
+        <mat-icon class="keyboard-ok" size="34.5px">check</mat-icon>
       </button>
       <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" *ngIf="busy">
         <mat-spinner mode="indeterminate" diameter="34" color="accent"></mat-spinner>
