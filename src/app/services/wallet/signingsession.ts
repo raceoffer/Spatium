@@ -1,10 +1,9 @@
 import { OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { BehaviorSubject,  Observable,  ReplaySubject,  Subject } from 'rxjs';
 import { BluetoothService } from '../bluetooth.service';
 import { LoggerService } from '../logger.service';
-import { Subject } from 'rxjs/Subject';
+
+import { filter, take, map, takeUntil } from 'rxjs/operators';
 
 export enum TransactionStatus {
   None = 0,
@@ -43,19 +42,22 @@ export class SignSession implements OnDestroy {
     private bt: BluetoothService
   ) {
     this.entropyCommitmentsObserver =
-      this.messageSubject
-        .filter(object => object.type === 'entropyCommitments')
-        .map(object => object.content);
+      this.messageSubject.pipe(
+        filter(object => object.type === 'entropyCommitments'),
+        map(object => object.content)
+      );
 
     this.entropyDecommitmentsObserver =
-      this.messageSubject
-        .filter(object => object.type === 'entropyDecommitments')
-        .map(object => object.content);
+      this.messageSubject.pipe(
+        filter(object => object.type === 'entropyDecommitments'),
+        map(object => object.content)
+      );
 
     this.chiphertextsObserver =
-      this.messageSubject
-        .filter(object => object.type === 'chiphertexts')
-        .map(object => object.content);
+      this.messageSubject.pipe(
+        filter(object => object.type === 'chiphertexts'),
+        map(object => object.content)
+      );
   }
 
   ngOnDestroy() {
@@ -71,6 +73,7 @@ export class SignSession implements OnDestroy {
     LoggerService.nonFatalCrash(message, exception);
     this.status.next(TransactionStatus.Failed);
     this.failed.next();
+    this.bt.disconnect();
     throw new Error(message);
   }
 
@@ -78,6 +81,7 @@ export class SignSession implements OnDestroy {
     LoggerService.log('Cancelled', {});
     this.status.next(TransactionStatus.Cancelled);
     this.canceled.next();
+    this.bt.disconnect();
     throw new Error('Cancelled');
   }
 
@@ -117,8 +121,10 @@ export class SignSession implements OnDestroy {
       return this.handleFailure('Failed to send entropyCommitment', null);
     }
 
-    const remoteEntropyCommitments =
-      await this.entropyCommitmentsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
+    const remoteEntropyCommitments = await this.entropyCommitmentsObserver.pipe(
+      take(1),
+      takeUntil(this.canceledSubject.pipe(filter(b => b)))
+    ).toPromise();
     if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
@@ -142,8 +148,10 @@ export class SignSession implements OnDestroy {
       return this.handleFailure('Failed to send entropyDecommitments', null);
     }
 
-    const remoteEntropyDecommitments =
-      await this.entropyDecommitmentsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
+    const remoteEntropyDecommitments = await this.entropyDecommitmentsObserver.pipe(
+      take(1),
+      takeUntil(this.canceledSubject.pipe(filter(b => b)))
+    ).toPromise();
     if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
@@ -194,7 +202,10 @@ export class SignSession implements OnDestroy {
       return;
     }
 
-    const remoteChiphertexts = await this.chiphertextsObserver.take(1).takeUntil(this.canceledSubject.filter(b => b)).toPromise();
+    const remoteChiphertexts = await this.chiphertextsObserver.pipe(
+      take(1),
+      takeUntil(this.canceledSubject.pipe(filter(b => b)))
+    ).toPromise();
     if (!remoteChiphertexts) {
       return this.handleCancel();
     }

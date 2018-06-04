@@ -13,11 +13,11 @@
   </div>
 
   <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center" *ngIf="(enabled | async)">
-    <div class="verify-transaction-text" *ngIf="!(ready | async)">
+    <div class="verify-transaction-text">
       <span>Awaiting connection from the main device.</span>
     </div>
 
-    <button *ngIf="!(discoverable | async) && !(ready | async)" mat-button color="accent"
+    <button *ngIf="!(discoverable | async)" mat-button color="accent"
             (click)="enableDiscoverable()">Enable device discovery
     </button>
   </div>

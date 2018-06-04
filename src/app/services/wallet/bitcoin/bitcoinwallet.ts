@@ -3,7 +3,7 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
 
-declare const CryptoCore: any;
+import { BitcoinTransaction, BitcoinWallet as CoreBitcoinWallet } from 'crypto-core-async';
 
 export class BitcoinWallet extends BitcoreWallet {
   constructor(
@@ -13,11 +13,12 @@ export class BitcoinWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
-      CryptoCore.BitcoinTransaction,
-      CryptoCore.BitcoinWallet,
+      BitcoinTransaction,
+      CoreBitcoinWallet,
       endpoint,
       network,
       keychain,
@@ -25,6 +26,8 @@ export class BitcoinWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 }

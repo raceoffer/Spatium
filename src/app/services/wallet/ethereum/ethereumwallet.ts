@@ -2,9 +2,11 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
-declare const CryptoCore: any;
+import { from, of, timer } from 'rxjs';
+import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
+
+import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
 
 export class EthereumWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -17,9 +19,10 @@ export class EthereumWallet extends CurrencyWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
   }
 
   public async reset() {
@@ -42,41 +45,50 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await CryptoCore.EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx, this.worker);
   }
 
   public async finishSync(data) {
     await super.finishSync(data);
 
-    this.wallet = await CryptoCore.EthereumWallet.fromOptions({
+    this.wallet = await CoreEthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       key: this.publicKey,
       network: this.network,
       endpoint: this.endpoint,
     });
 
-    this.address.next(this.wallet.address);
+    const request = () => from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
 
-    this.routineTimerSub = Observable.timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.address.next(this.wallet.address);
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        request().pipe(
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => request())
+            )
+          )
+        )
+      ),
+      filter(r => r),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }
 
-  public verifyAddress(address: string) : boolean {
+  public verifyAddress(address: string): boolean {
     return this.wallet.verifyAddress(address);
   }
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new CryptoCore.EthereumTransaction(),
+      await EthereumTransaction.create(this.worker),
       address,
       value,
       fee ? fee : undefined
@@ -84,7 +96,7 @@ export class EthereumWallet extends CurrencyWallet {
   }
 
   public async listTransactionHistory() {
-    await Observable.timer(1000).toPromise();
+    await timer(1000).toPromise();
     return [];
   }
 

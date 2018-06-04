@@ -1,23 +1,25 @@
 import {
   AfterViewInit,
-  animate,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
   OnDestroy,
   OnInit,
+  ViewChild
+} from '@angular/core';
+import {
+  animate,
   sequence,
   style,
   transition,
   trigger,
-  ViewChild
-} from '@angular/core';
+} from '@angular/animations';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
 import { FactorParentOverlayRef } from '../../../modals/factor-parent-overlay/factor-parent-overlay-ref';
 import { FactorParentOverlayService } from '../../../modals/factor-parent-overlay/factor-parent-overlay.service';
@@ -28,9 +30,11 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
 import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
+import { WorkerService } from '../../../services/worker.service';
+import { randomBytes } from 'crypto-core-async/lib/utils';
 
-declare const CryptoCore: any;
-declare const Buffer: any;
+
+import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-factor-node',
@@ -62,15 +66,18 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   dialogFactorRef = null;
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-              public factorParentDialog: FactorParentOverlayService,
-              private readonly router: Router,
-              private readonly dds: DDSService,
-              private readonly notification: NotificationService,
-              private readonly keychain: KeyChainService,
-              private readonly changeDetectorRef: ChangeDetectorRef,
-              private readonly authService: AuthService,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    public dialog: MatDialog,
+    public factorParentDialog: FactorParentOverlayService,
+    private readonly router: Router,
+    private readonly dds: DDSService,
+    private readonly notification: NotificationService,
+    private readonly keychain: KeyChainService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+    private readonly authService: AuthService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -109,10 +116,12 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       do {
         this.value.next('');
-        const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(login));
+        const loginBytes = await randomBytes(32, this.workerService.worker);
+        const exists = await this.dds.exists(loginBytes.toString('hex'));
+        console.log(`FactorNodeComponent.generateLogin 1: loginBytes=${loginBytes}, isQr=${isQr}, exists=${exists}`);
+        console.log('FactorNodeComponent.generateLogin 2:', loginBytes);
         if (!exists) {
-          const packedLogin = await CryptoCore.Utils.packLogin(login);
+          const packedLogin = await packLogin(loginBytes, this.workerService.worker);
           if (isQr) {
             this.value.next(await packedLogin.toString('hex'));
           } else {
@@ -199,8 +208,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
         }
         case FactorType.LOGIN: {
-          console.log(result.value);
-          await this.authService.addFactor(result.factor, await CryptoCore.Utils.packLogin(result.value));
+          console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
+          await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
           break;
         }
         default: {
@@ -243,14 +252,15 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const login = (await CryptoCore.Utils.tryUnpackLogin(idFactor)).toString('utf-8');
+      const login = (await tryUnpackLogin(idFactor, this.workerService.worker)).toString('utf-8');
       console.log(login);
-      const id = await AuthService.toId(login);
-      const data = await CryptoCore.Utils.packTree(tree, this.keychain.getSeed());
+      const id = await this.authService.toId(login);
+      console.log(`FactorNodeComponent.onSaveClicked: login=${login}`);
+      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
       this.authService.currentTree = data;
 
       try {
-        const success = await this.dds.sponsorStore(id, data).take(1).takeUntil(this.cancel).toPromise();
+        const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
         if (!success) {
           await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
           return;

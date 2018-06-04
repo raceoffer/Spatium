@@ -1,72 +1,84 @@
-const _ = require('lodash');
+'use strict';
 
-const Marshal = require('crypto-core/lib/marshal');
+import assert from 'assert';
+import map from 'lodash/map';
+import defaultTo from 'lodash/defaultTo';
 
-function PaillierVerifier(state) {
-  this.state = state || { type: 'PaillierVerifier' }
+import { default as _invoke } from 'lodash/invoke';
+import { PaillierVerifier as CorePaillierVerifier } from 'crypto-core/lib/primitives/paillierverifier';
+
+import { wrap, unwrap } from 'crypto-core/lib/marshal';
+
+export class PaillierVerifier {
+  constructor(state, worker) {
+    this.state = state || { type: 'PaillierVerifier' };
+    this.worker = worker || null;
+  }
+
+  async invoke(message, wrapped) {
+    assert(this.worker);
+    const result = await this.worker.postMessage({
+      action: 'invoke',
+      class: 'PaillierVerifier',
+      self: this.state,
+      method: message.method,
+      arguments: map(defaultTo(message.arguments, []), wrap)
+    });
+
+    this.state = result.self;
+
+    return wrapped ? result.result : unwrap(result.result);
+  }
+
+  static async invokeStatic(message, worker, wrapped) {
+    if (worker) {
+      const result = await worker.postMessage({
+        action: 'invokeStatic',
+        class: 'PaillierVerifier',
+        method: message.method,
+        arguments: map(defaultTo(message.arguments, []), wrap)
+      });
+      return wrapped ? result : unwrap(result);
+    } else {
+      return _invoke(CorePaillierVerifier, message.method, ... message.arguments);
+    }
+  }
+
+  async fromOptions(options) {
+    await this.invoke({
+      method: 'fromOptions',
+      arguments: [options]
+    }, true);
+    return this;
+  }
+
+  static async fromOptions(options, worker) {
+    const state = await PaillierVerifier.invokeStatic({
+      method: 'fromOptions',
+      arguments: [options]
+    }, worker, true);
+
+    return worker ? new PaillierVerifier(state, worker) : state;
+  }
+
+  async getCommitment() {
+    return await this.invoke({
+      method: 'getCommitment',
+      arguments: []
+    });
+  }
+
+  async processCommitment(commitment) {
+    return await this.invoke({
+      method: 'processCommitment',
+      arguments: [commitment]
+    });
+  }
+
+  async processDecommitment(decommitment) {
+    return await this.invoke({
+      method: 'processDecommitment',
+      arguments: [decommitment]
+    });
+  }
 }
-
-PaillierVerifier.set = function(worker) {
-  PaillierVerifier.worker = worker;
-  return PaillierVerifier;
-};
-
-PaillierVerifier.prototype.invoke = async function(message, wrapped) {
-  const result = await PaillierVerifier.worker.postMessage({
-    action: 'invoke',
-    class: 'PaillierVerifier',
-    self: this.state,
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-
-  this.state = result.self;
-
-  return wrapped ? result.result : Marshal.unwrap(result.result);
-};
-
-PaillierVerifier.invokeStatic = async function(message, wrapped) {
-  const result = await PaillierVerifier.worker.postMessage({
-    action: 'invokeStatic',
-    class: 'PaillierVerifier',
-    method: message.method,
-    arguments: _.map(_.defaultTo(message.arguments, []), Marshal.wrap)
-  });
-  return wrapped ? result : Marshal.unwrap(result);
-};
-
-PaillierVerifier.prototype.fromOptions = async function(options) {
-  await this.invoke({
-    method: 'fromOptions',
-    arguments: [options]
-  }, true);
-  return this;
-};
-
-PaillierVerifier.fromOptions = async options => new PaillierVerifier(await PaillierVerifier.invokeStatic({
-  method: 'fromOptions',
-  arguments: [options]
-}, true));
-
-PaillierVerifier.prototype.getCommitment = async function() {
-  return await this.invoke({
-    method: 'getCommitment',
-    arguments: []
-  });
-};
-
-PaillierVerifier.prototype.processCommitment = async function(commitment) {
-  return await this.invoke({
-    method: 'processCommitment',
-    arguments: [commitment]
-  });
-};
-
-PaillierVerifier.prototype.processDecommitment = async function(decommitment) {
-  return await this.invoke({
-    method: 'processDecommitment',
-    arguments: [decommitment]
-  });
-};
-
-module.exports = PaillierVerifier;

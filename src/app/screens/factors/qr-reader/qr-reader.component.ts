@@ -1,11 +1,15 @@
 import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
 import { FactorType } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
+import { WorkerService } from '../../../services/worker.service';
 
-declare const CryptoCore: any;
 declare const cordova: any;
 declare const window: any;
-declare const Buffer: any;
+
+import {
+  tryUnpackLogin,
+  tryUnpackEncryptedSeed
+} from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-qr-reader',
@@ -31,9 +35,11 @@ export class QrReaderComponent implements OnInit {
   text = 'Scan a QR-code';
   permissionCam = false;
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly notification: NotificationService) {
-  }
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly notification: NotificationService,
+    private readonly workerService: WorkerService
+  ) {}
 
   async ngOnInit() {
     this.canScanAgain = true;
@@ -108,7 +114,7 @@ export class QrReaderComponent implements OnInit {
       if (this.isImport) {
         try {
           console.log(buffer);
-          const value = await CryptoCore.Utils.tryUnpackEncryptedSeed(buffer);
+          const value = await tryUnpackEncryptedSeed(buffer, this.workerService.worker);
           this.qrcode = value.toString('hex');
           console.log(this.qrcode);
         } catch (exc) {
@@ -116,7 +122,7 @@ export class QrReaderComponent implements OnInit {
           this.qrcode = null;
         }
       } else {
-        this.qrcode = await CryptoCore.Utils.tryUnpackLogin(buffer);
+        this.qrcode = await tryUnpackLogin(buffer, this.workerService.worker);
       }
     }
     await this.onNext();

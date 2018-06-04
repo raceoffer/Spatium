@@ -1,22 +1,27 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
-import { catchError } from 'rxjs/operators';
+import { catchError, mapTo } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { WorkerService } from './worker.service';
 
-declare const CryptoCore: any;
+import { DDS } from 'crypto-core-async';
+import { getAccountSecret } from 'crypto-core-async/lib/utils';
 
 export class DDSAccount {
   public address: string = this.account.address;
 
-  constructor(private dds: any,
-              private account: any) { }
+  constructor(
+    private dds: any,
+    private account: any,
+    private worker: any
+  ) { }
 
   public async getBalance() {
     return this.dds.getBalance(this.account);
   }
 
   public async store(id: string, data: any, gasPrice: number) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id, 0, this.worker);
     return await this.dds.store({
       secret: accountSecret,
       data: data,
@@ -26,7 +31,7 @@ export class DDSAccount {
   }
 
   public async estimateGas(id: string, data: any) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+    const accountSecret = await getAccountSecret(id, 0, this.worker);
     return this.dds.estimateStoreGas({
       secret: accountSecret,
       data: data,
@@ -38,23 +43,26 @@ export class DDSAccount {
 @Injectable()
 export class DDSService {
   private dds: any = null;
-  private network = 'testnet'; // 'main'; | 'testnet';
+  private network = 'main'; // 'main'; | 'testnet';
   private sponsor = 'http://185.219.80.169:8080/sponsor';
 
-  constructor(private readonly http: HttpClient) {
-    this.dds = CryptoCore.DDS.fromOptions({
+  constructor(
+    private readonly http: HttpClient,
+    private readonly workerService: WorkerService
+  ) {
+    this.dds = DDS.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
       network: this.network
     });
   }
 
-  public async exists(id: string) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+  public async exists(id) {
+    const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
     return await this.dds.exists(accountSecret);
   }
 
-  public async read(id: string) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id);
+  public async read(id) {
+    const accountSecret = await getAccountSecret(id, 0, this.workerService.worker);
     const count = await this.dds.count(accountSecret);
     const data = [];
     for (let i = 0; i < count; ++i) {
@@ -64,7 +72,7 @@ export class DDSService {
     return data;
   }
 
-  public sponsorStore(id: string, data: any) {
+  public sponsorStore(id, data: any) {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -76,7 +84,7 @@ export class DDSService {
     const body = new HttpParams()
       .set('data', '0x' + data.toString('hex'));
 
-    const url = this.sponsor + '/storage/' + id;
+    const url = this.sponsor + '/storage/' + id.toString('hex');
 
     return this.http.post(
       url,
@@ -85,9 +93,10 @@ export class DDSService {
     ).pipe(
       catchError(error => {
         console.log(error);
-        return new ErrorObservable('Something bad happened; please try again later.');
-      })
-    ).mapTo(true);
+        return of('Something bad happened; please try again later.');
+      }),
+      mapTo(true)
+    );
   }
 
   public fromWei(wei: any, coin: string) {
@@ -99,11 +108,11 @@ export class DDSService {
   }
 
   public async getStoreAccount(id) {
-    const accountSecret = await CryptoCore.Utils.getAccountSecret(id, 1);
-    return new DDSAccount(this.dds, this.dds.getAddress(accountSecret));
+    const accountSecret = await getAccountSecret(id, 1, this.workerService.worker);
+    return new DDSAccount(this.dds, this.dds.getAddress(accountSecret), this.workerService.worker);
   }
 
   public async accountFromSecret(secret: any) {
-    return new DDSAccount(this.dds, this.dds.accountFromSecret(secret));
+    return new DDSAccount(this.dds, this.dds.accountFromSecret(secret), this.workerService.worker);
   }
 }

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, EventEmitter, HostBinding, NgZone, Output } from '@angular/core';
 import { FactorType } from '../../../services/auth.service';
 
-declare const Buffer: any;
+declare const CryptoCore: any;
 
 @Component({
   selector: 'app-file-upload',
@@ -34,7 +34,7 @@ export class FileUploadComponent implements AfterViewInit {
     this.reader = new FileReader();
 
     this.reader.onloadend = () => this.ngZone.run(async () => {
-      this.file = new Buffer(this.reader.result);
+      this.file = new CryptoCore.Buffer(this.reader.result);
 
       await this.goNext();
     });

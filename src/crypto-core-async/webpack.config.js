@@ -3,20 +3,15 @@
 const path = require('path');
 
 module.exports = {
-  target: 'web',
-  entry: {
-    'index': './index.js',
-	  'webworker': './lib/webworker.js'
-  },
+  entry: path.resolve(__dirname, 'webworker.js'),
+  devtool: 'source-map',
   output: {
     path: __dirname,
-    filename: '[name].bundle.js'
+    filename: 'webworker.bundle.js'
   },
   resolve: {
-    modules: ['node_modules'],
-    extensions: ['-browser.js', '.js', '.json']
+    modules: ['node_modules']
   },
-  plugins: [],
   node: {
     fs: 'empty',
     net: 'empty',

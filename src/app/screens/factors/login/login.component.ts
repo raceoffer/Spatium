@@ -3,9 +3,7 @@ import { AuthService } from '../../../services/auth.service';
 import { FactorType } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-declare const CryptoCore: any;
+import { BehaviorSubject } from 'rxjs';
 
 enum State {
   Ready,
@@ -80,7 +78,8 @@ export class LoginComponent implements AfterViewInit {
     try {
       do {
         this.userName = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(this._userName));
+        const exists = await this.dds.exists(await this.authService.toId(this._userName.toLowerCase()));
+        console.log(`LoginComponent.generateNewLogin: this.userName=${this.userName}, username to id=${this._userName.toLowerCase()}, exists=${exists}`);
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.usernameState = State.Ready;
