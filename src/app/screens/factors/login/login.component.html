@@ -12,6 +12,10 @@
   </div>
 
   <div class="footer text-center" style="bottom: 0px;">
-    <button type="button" mat-raised-button color="accent" class="width-button color" (click)="onNext()">Next</button>
+    <button type="button" mat-raised-button color="accent"
+            class="width-button color"
+            (click)="onNext()"
+            [disabled]="!userName"
+    >Next</button>
   </div>
 </form>
