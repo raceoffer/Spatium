@@ -28,6 +28,20 @@ $green: rgb(24, 154, 57);//#189a39
   width: 100%;
 }
 
+.cdk-overlay-container {
+  background-color: $white;
+}
+
+.factor-component {
+  width: 100%;
+  padding-top: 60px;
+}
+
+.factor-content {
+  width: 100%;
+  margin-top: 60px;
+}
+
 .small-video-container {
   width: 200px;
   overflow: hidden;
@@ -848,7 +862,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   width: 100%;
 }
 
-.box .factor-content{
+.box {
   flex-direction: column;
   box-sizing: border-box;
   display: flex;

@@ -1,9 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ComponentRef, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { FileService } from '../../services/file.service';
 import { NavigationService } from '../../services/navigation.service';
 import { DeviceService } from '../../services/device.service';
+import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
+import { ComponentPortal } from "@angular/cdk/portal";
+import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
 
 declare const navigator: any;
 declare const device: any;
@@ -25,7 +28,8 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly fs: FileService,
-    private readonly navigationService: NavigationService) {}
+    private readonly navigationService: NavigationService,
+    private readonly overlay: Overlay) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
@@ -72,6 +76,25 @@ export class StartComponent implements OnInit, OnDestroy {
     }
 
     await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
+  }
+
+  async onTest() {
+    const config = new OverlayConfig();
+
+    config.height = '100%';
+    config.width = '100%';
+
+    const overlayRef = this.overlay.create(config);
+    const loginPortal = new ComponentPortal(PasswordAuthFactorComponent);
+    const componentRef: ComponentRef<PasswordAuthFactorComponent> = overlayRef.attach(loginPortal);
+    componentRef.instance.submit.subscribe((value) => {
+      console.log(value);
+      overlayRef.dispose();
+    });
+    componentRef.instance.back.subscribe((value) => {
+      overlayRef.dispose();
+    })
+
   }
 
   eventOnBackClicked(e) {

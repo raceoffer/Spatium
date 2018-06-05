@@ -22,37 +22,89 @@ import { SecretImportComponent } from './screens/secret-import/secret-import.com
 import { StartComponent } from './screens/start/start.component';
 
 
-const appRoutes: Routes = [
-  {path: '', redirectTo: 'start', pathMatch: 'full'},
-  {path: 'start', component: StartComponent},
-  {path: 'confirmation-entry', component: ConfirmationEntryComponent},
-  {path: 'auth', component: AuthComponent},
-  {path: 'login', component: LoginParentComponent},
-  {path: 'registration', component: RegistrationComponent},
-  {path: 'reg-success', component: RegistrationSuccessComponent},
-  {path: 'backup', component: BackupComponent},
-  {path: 'factornode', component: FactorNodeComponent},
-  {path: 'secret-import', component: SecretImportComponent},
-  {
-    path: 'navigator', component: NavigatorComponent, children: [
-    {path: 'waiting', component: WaitingComponent, outlet: 'navigator'},
-    {path: 'wallet', component: WalletComponent, outlet: 'navigator'},
-    {path: 'currency/:coin', component: CurrencyComponent, outlet: 'navigator'},
-    {path: 'currency/:coin/settings', component: CurrencySettingsComponent, outlet: 'navigator'},
-    {path: 'send-transaction/:coin', component: SendTransactionComponent, outlet: 'navigator'},
-    {path: 'settings', component: SettingsComponent, outlet: 'navigator'},
-    {path: 'factornode', component: FactorNodeComponent, outlet: 'navigator'}
-  ]
-  },
-  {
-    path: 'navigator-verifier', component: NavigatorVerifierComponent, children: [
-    {path: 'main', component: MainComponent, outlet: 'navigator'},
-    {path: 'secret-export', component: SecretExportComponent, outlet: 'navigator'},
-    {path: 'delete-secret/:back', component: DeleteSecretComponent, outlet: 'navigator'}
-  ]
-  },
-  {path: 'delete-secret/:back', component: DeleteSecretComponent}
-];
+const appRoutes: Routes = [{
+  path: '',
+  redirectTo: 'start',
+  pathMatch: 'full'
+}, {
+  path: 'start',
+  component: StartComponent
+}, {
+  path: 'confirmation-entry',
+  component: ConfirmationEntryComponent
+}, {
+  path: 'auth',
+  component: AuthComponent
+}, {
+  path: 'login',
+  component: LoginParentComponent
+}, {
+  path: 'registration',
+  component: RegistrationComponent
+}, {
+  path: 'reg-success',
+  component: RegistrationSuccessComponent
+}, {
+  path: 'backup',
+  component: BackupComponent
+}, {
+  path: 'factornode',
+  component: FactorNodeComponent
+}, {
+  path: 'secret-import',
+  component: SecretImportComponent
+}, {
+  path: 'delete-secret/:back',
+  component: DeleteSecretComponent
+}, {
+  path: 'navigator',
+  component: NavigatorComponent,
+  children: [{
+    path: 'waiting',
+    component: WaitingComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'wallet',
+    component: WalletComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'currency/:coin',
+    component: CurrencyComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'currency/:coin/settings',
+    component: CurrencySettingsComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'send-transaction/:coin',
+    component: SendTransactionComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'settings',
+    component: SettingsComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'factornode',
+    component: FactorNodeComponent,
+    outlet: 'navigator'
+  }]
+}, {
+  path: 'navigator-verifier',
+  component: NavigatorVerifierComponent,
+  children: [{
+    path: 'main',
+    component: MainComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'secret-export',
+    component: SecretExportComponent,
+    outlet: 'navigator'
+  }, {
+    path: 'delete-secret/:back',
+    component: DeleteSecretComponent,
+    outlet: 'navigator'
+  }]
+}];
 
 @NgModule({
   imports: [

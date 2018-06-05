@@ -22,8 +22,6 @@ import * as $ from 'jquery';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
-import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
 import { AuthService, FactorType } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
@@ -52,7 +50,6 @@ import { packTree } from 'crypto-core-async/lib/utils';
 })
 export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  @ViewChild(FactorParentOverlayRef) child;
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
   stPassword = 'Password';
@@ -73,7 +70,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
     private readonly keychain: KeyChainService,
@@ -114,10 +110,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
     }
-    if (this.child) {
-      this.child.close();
-      this.child = null;
-    }
   }
 
   goBottom() {
@@ -145,22 +137,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async openFactorOverlay(component) {
     if (typeof component !== 'undefined') {
-      this.child = this.factorParentDialog.open({
-        label: '',
-        isColored: false,
-        isShadowed: false,
-        content: component
-      });
-
-      this.child.onAddFactor.subscribe((result) => {
-        this.addFactor(result);
-        this.child.close();
-        this.child = null;
-      });
-
-      this.child.onBackClicked.subscribe(() => {
-        this.onBackClicked();
-      });
     }
   }
 
@@ -190,9 +166,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.dialogFactorRef != null) {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
-    } else if (this.child != null) {
-      this.child.close();
-      this.child = null;
     } else {
       await this.router.navigate(['/login']);
     }

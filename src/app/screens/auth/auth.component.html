@@ -17,10 +17,6 @@
     </div>
   </div>
 
-  <app-password *ngIf="loginType == 0 && !isPasswordFirst && !isAdvanced"
-                (isPasswordChanged)="isPasswordChanged($event)"
-                (onSuccess)="addFactor($event)"></app-password>
-
   <div class="content text-center">
     <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;"
          [@anim]="factor.state">

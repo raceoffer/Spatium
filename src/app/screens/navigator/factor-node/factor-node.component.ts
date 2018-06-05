@@ -21,15 +21,11 @@ import * as $ from 'jquery';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
-import { FactorParentOverlayRef } from '../../../modals/factor-parent-overlay/factor-parent-overlay-ref';
-import { FactorParentOverlayService } from '../../../modals/factor-parent-overlay/factor-parent-overlay.service';
 import { AuthService, FactorType } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
-import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 import { WorkerService } from '../../../services/worker.service';
 import { randomBytes } from 'crypto-core-async/lib/utils';
 
@@ -53,7 +49,6 @@ import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils
 })
 export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  @ViewChild(FactorParentOverlayRef) child;
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
 
@@ -68,7 +63,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
     private readonly router: Router,
     private readonly dds: DDSService,
     private readonly notification: NotificationService,
@@ -99,10 +93,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.dialogFactorRef) {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
-    }
-    if (this.child) {
-      this.child.close();
-      this.child = null;
     }
   }
 
@@ -159,32 +149,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async openFactorOverlay(label, component) {
     if (typeof component !== 'undefined') {
-      if (component === QrWriterComponent) {
-        this.generateLogin(true).catch(() => {});
-      } else if (component === NfcWriterComponent) {
-        this.generateLogin(false).catch(() => {});
-      }
 
-      this.child = this.factorParentDialog.open({
-        label: label,
-        isColored: true,
-        isShadowed: true,
-        content: component
-      });
-
-      this.child.onAddFactor.subscribe((result) => {
-        this.addFactor(result);
-        this.child.close();
-        this.child = null;
-      });
-
-      this.child.onBackClicked.subscribe(() => {
-        this.onBackClicked();
-      });
-
-      this.child.value = this.value;
-
-      console.log(this.child);
     }
   }
 
@@ -286,9 +251,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.dialogFactorRef != null) {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
-    } else if (this.child != null) {
-      this.child.close();
-      this.child = null;
     } else {
       await this.router.navigate(['/navigator', {outlets: {navigator: ['settings']}}]);
     }

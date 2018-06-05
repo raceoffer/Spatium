@@ -35,20 +35,14 @@ import { MainDrawerComponent } from './elements/main-drawer/main-drawer.componen
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { DialogFactorsComponent } from './modals/dialog-factors/dialog-factors.component';
-import { FactorParentOverlayComponent } from './modals/factor-parent-overlay/factor-parent-overlay.component';
-import { FactorParentOverlayService } from './modals/factor-parent-overlay/factor-parent-overlay.service';
 import { AuthComponent } from './screens/auth/auth.component';
 import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
-import { FileUploadComponent } from './screens/factors/file-upload/file-upload.component';
-import { GraphicKeyComponent } from './screens/factors/graphic-key/graphic-key.component';
-import { LoginComponent as LoginComponentFactor } from './screens/factors/login/login.component';
-import { NfcReaderComponent } from './screens/factors/nfc-reader/nfc-reader.component';
-import { NfcWriterComponent } from './screens/factors/nfc-writer/nfc-writer.component';
-import { PasswordComponent } from './screens/factors/password/password.component';
-import { PincodeComponent } from './screens/factors/pincode/pincode.component';
-import { QrReaderComponent } from './screens/factors/qr-reader/qr-reader.component';
-import { QrWriterComponent } from './screens/factors/qr-writer/qr-writer.component';
+import { LoginFactorComponent } from './screens/identification-factors/login-factor/login-factor.component';
+import { FileAuthFactorComponent } from './screens/authorization-factors/file-auth-factor/file-auth-factor.component';
+import { GraphicKeyAuthFactorComponent } from './screens/authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
+import { PasswordAuthFactorComponent } from './screens/authorization-factors/password-auth-factor/password-auth-factor.component';
+import { PincodeAuthFactorComponent } from './screens/authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
 import { LoginComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
@@ -83,6 +77,12 @@ import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { DeviceService } from './services/device.service';
+import { PasswordComponent } from './inputs/password/password.component';
+import { PincodeComponent } from './inputs/pincode/pincode.component';
+import { NfcAuthFactorComponent } from "./screens/authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
+import { QrAuthFactorComponent } from "./screens/authorization-factors/qr-auth-factor/qr-auth-factor.component";
+import { QrFactorComponent } from "./screens/identification-factors/qr-factor/qr-factor.component";
+import { NfcFactorComponent } from "./screens/identification-factors/nfc-factor/nfc-factor.component";
 
 @NgModule({
   declarations: [
@@ -93,13 +93,17 @@ import { DeviceService } from './services/device.service';
     WaitingComponent,
     SendTransactionComponent,
     VerifyTransactionComponent,
-    PincodeComponent,
+    PincodeAuthFactorComponent,
     LoginComponent,
     AuthComponent,
     DialogFactorsComponent,
-    PasswordComponent,
-    FileUploadComponent,
-    GraphicKeyComponent,
+    PasswordAuthFactorComponent,
+    FileAuthFactorComponent,
+    GraphicKeyAuthFactorComponent,
+    NfcAuthFactorComponent,
+    NfcFactorComponent,
+    QrAuthFactorComponent,
+    QrFactorComponent,
     LoginParentComponent,
     RegistrationComponent,
     NgInitDirective,
@@ -121,13 +125,10 @@ import { DeviceService } from './services/device.service';
     BackupComponent,
     ToolbarComponent,
     ConfirmationEntryComponent,
-    FactorParentOverlayComponent,
-    NfcReaderComponent,
-    NfcWriterComponent,
-    QrReaderComponent,
-    QrWriterComponent,
     MainComponent,
-    LoginComponentFactor
+    LoginFactorComponent,
+    PasswordComponent,
+    PincodeComponent
   ],
   imports: [
     OverlayModule,
@@ -173,24 +174,14 @@ import { DeviceService } from './services/device.service';
     DDSService,
     KeyChainService,
     CurrencyService,
-    NavigationService,
-    FactorParentOverlayService
+    NavigationService
   ],
   bootstrap: [
     AppComponent
   ],
   entryComponents: [
     DialogFactorsComponent,
-    FactorParentOverlayComponent,
-    PincodeComponent,
-    PasswordComponent,
-    FileUploadComponent,
-    GraphicKeyComponent,
-    NfcReaderComponent,
-    NfcWriterComponent,
-    QrReaderComponent,
-    QrWriterComponent,
-    LoginComponentFactor
+    PasswordAuthFactorComponent
   ]
 })
 
