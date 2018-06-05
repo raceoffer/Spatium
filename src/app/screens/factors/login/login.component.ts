@@ -100,6 +100,20 @@ export class LoginComponent implements AfterViewInit {
     this.stLogin = '';
   }
 
+  // Hide the keyboard after pressing the submit button on the keyboard
+  removeFocus(el) {el.target.blur(); }
+
+  // function is called on Enter button click in text field
+  async onGenerateButtonClicked(e: MouseEvent) {
+    if (e.offsetX === 0 && e.offsetY === 0) { // ignore Enter button click in text field
+      console.log('factors LoginComponent.onGenerateButtonClicked got click from keyboard - ignore');
+    }
+    else {
+      console.log('factors LoginComponent.onGenerateButtonClicked got click by button - proceed');
+      await this.generateNewLogin();
+    }
+  }
+
   async onNext() {
     this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
   }
