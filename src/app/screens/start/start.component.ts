@@ -6,7 +6,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { DeviceService } from '../../services/device.service';
 import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
-import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
+import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
 
 declare const navigator: any;
 declare const device: any;
@@ -85,8 +85,8 @@ export class StartComponent implements OnInit, OnDestroy {
     config.width = '100%';
 
     const overlayRef = this.overlay.create(config);
-    const loginPortal = new ComponentPortal(PasswordAuthFactorComponent);
-    const componentRef: ComponentRef<PasswordAuthFactorComponent> = overlayRef.attach(loginPortal);
+    const loginPortal = new ComponentPortal(GraphicKeyAuthFactorComponent);
+    const componentRef: ComponentRef<GraphicKeyAuthFactorComponent> = overlayRef.attach(loginPortal);
     componentRef.instance.submit.subscribe((value) => {
       console.log(value);
       overlayRef.dispose();

@@ -1,15 +1,4 @@
-import {
-  AfterContentInit,
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostBinding,
-  NgZone,
-  Output,
-  ViewChild
-} from '@angular/core';
-import * as PatternLock from 'PatternLock';
+import { Component, EventEmitter, HostBinding, Output } from "@angular/core";
 import { FactorType } from '../../../services/auth.service';
 
 @Component({
@@ -17,34 +6,20 @@ import { FactorType } from '../../../services/auth.service';
   templateUrl: './graphic-key-auth-factor.component.html',
   styleUrls: ['./graphic-key-auth-factor.component.css']
 })
-export class GraphicKeyAuthFactorComponent implements AfterViewInit, AfterContentInit {
-  @HostBinding('class') classes = 'content factor-content text-center';
+export class GraphicKeyAuthFactorComponent {
+  @HostBinding('class') classes = 'factor-component';
 
-  @ViewChild('patternContainer') el: ElementRef;
+  @Output() submit: EventEmitter<any> = new EventEmitter<any>();
+  @Output() back: EventEmitter<any> = new EventEmitter<any>();
 
-  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
-
-  graphKey: string = null;
-
-  lock: any = null;
-
-  constructor(private readonly ngZone: NgZone) { }
-
-  ngAfterViewInit() {
-    this.graphKey = '';
+  onBack() {
+    this.back.next();
   }
 
-  ngAfterContentInit() {
-    this.lock = new PatternLock(this.el.nativeElement, {
-      onDraw: (pattern) => this.ngZone.run(async () => {
-        this.graphKey = pattern;
-        await this.goNext();
-      })
+  onSubmit(graphicKey) {
+    this.submit.next({
+      factor: FactorType.GRAPHIC_KEY,
+      value: graphicKey
     });
   }
-
-  async goNext() {
-    this.onSuccess.emit({factor: FactorType.GRAPHIC_KEY, value: this.graphKey});
-  }
-
 }

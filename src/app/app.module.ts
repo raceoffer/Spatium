@@ -83,6 +83,7 @@ import { NfcAuthFactorComponent } from "./screens/authorization-factors/nfc-auth
 import { QrAuthFactorComponent } from "./screens/authorization-factors/qr-auth-factor/qr-auth-factor.component";
 import { QrFactorComponent } from "./screens/identification-factors/qr-factor/qr-factor.component";
 import { NfcFactorComponent } from "./screens/identification-factors/nfc-factor/nfc-factor.component";
+import { GraphicKeyComponent } from './inputs/graphic-key/graphic-key.component';
 
 @NgModule({
   declarations: [
@@ -128,7 +129,8 @@ import { NfcFactorComponent } from "./screens/identification-factors/nfc-factor/
     MainComponent,
     LoginFactorComponent,
     PasswordComponent,
-    PincodeComponent
+    PincodeComponent,
+    GraphicKeyComponent
   ],
   imports: [
     OverlayModule,
@@ -181,7 +183,9 @@ import { NfcFactorComponent } from "./screens/identification-factors/nfc-factor/
   ],
   entryComponents: [
     DialogFactorsComponent,
-    PasswordAuthFactorComponent
+    PasswordAuthFactorComponent,
+    PincodeAuthFactorComponent,
+    GraphicKeyAuthFactorComponent
   ]
 })
 
