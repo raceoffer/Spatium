@@ -129,8 +129,7 @@ import { DeviceService } from './services/device.service';
     QrReaderComponent,
     QrWriterComponent,
     MainComponent,
-    LoginComponentFactor,
-    LongPressDirective
+    LoginComponentFactor
   ],
   imports: [
     OverlayModule,
