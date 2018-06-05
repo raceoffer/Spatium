@@ -78,7 +78,7 @@ export class QrWriterComponent implements OnInit {
       window.canvas2ImagePlugin.saveImageDataToLibrary(
         function (msg) {
           console.log(msg);
-          this.notification.show('Secret has been saved as QR image');
+          this.notification.show('Login has been saved as QR image');
         }.bind(this),
         function (err) {
           console.log(err);
