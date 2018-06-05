@@ -1,19 +1,17 @@
-<div fxLayout="column" fxLayoutAlign="center center" class="content" style="height:246px;">
-  <div fxLayout="column" fxLayoutAlign="center center" class="content" style="height:250px;" *ngIf="canScanAgain">  
-    <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center">
-      <div class="glass">
-        <div class="icon-custom-qr_code_large"></div>
-      </div>
+<app-toolbar
+  label="Pincode"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
 
-      <button mat-icon-button class="gigantic-button" (click)="scanAgain()">
-        <mat-icon class="size-130">camera_alt</mat-icon>
-      </button>
-    </div>
-
-    <div style="width: 100%; text-align: center; bottom: 30px;">
-      <span >{{ text }}</span>
-    </div>
-
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
   </div>
-</div>
 
+  <app-qr-reader
+    class="factor-content"
+    (scanned)="onScanned($event)">
+  </app-qr-reader>
+</div>

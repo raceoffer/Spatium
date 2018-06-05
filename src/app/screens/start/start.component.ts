@@ -7,6 +7,7 @@ import { DeviceService } from '../../services/device.service';
 import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
+import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
 
 declare const navigator: any;
 declare const device: any;
@@ -85,8 +86,8 @@ export class StartComponent implements OnInit, OnDestroy {
     config.width = '100%';
 
     const overlayRef = this.overlay.create(config);
-    const loginPortal = new ComponentPortal(GraphicKeyAuthFactorComponent);
-    const componentRef: ComponentRef<GraphicKeyAuthFactorComponent> = overlayRef.attach(loginPortal);
+    const loginPortal = new ComponentPortal(QrAuthFactorComponent);
+    const componentRef: ComponentRef<QrAuthFactorComponent> = overlayRef.attach(loginPortal);
     componentRef.instance.submit.subscribe((value) => {
       console.log(value);
       overlayRef.dispose();
