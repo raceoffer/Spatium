@@ -41,11 +41,15 @@ export class LoginComponent implements AfterViewInit {
   @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
 
+  userNameSpacesValidationError = false;
+
   get userName() {
     return this._userName;
   }
 
   set userName(newUserName) {
+    this.userNameSpacesValidationError = this.hasSpaces(newUserName);
+
     this._userName = newUserName;
     if (this._userName.length > 0) {
       this.buisyEvent.emit();
@@ -102,6 +106,10 @@ export class LoginComponent implements AfterViewInit {
 
   // Hide the keyboard after pressing the submit button on the keyboard
   removeFocus(el) {el.target.blur(); }
+
+  hasSpaces(v: string): boolean {
+    return !!v.match(/\s/);
+  }
 
   // function is called on Enter button click in text field
   async onGenerateButtonClicked(e: MouseEvent) {
