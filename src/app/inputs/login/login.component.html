@@ -1,0 +1,20 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
+    <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
+      <input
+        type="text"
+        placeholder="Username"
+        [formControl]="loginControl"
+        name="Username"
+        [autofocus]
+        [disabled]="state === stateType.Updating"
+        (keyup.enter)="removeFocus($event)">
+
+      <span matSuffix mat-icon-button (click)="generateNewLogin()" style="position: absolute; right: 0px;">
+        <mat-icon style="opacity: 0.5;" *ngIf="state === stateType.Ready">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="state === stateType.Updating">sync</mat-icon>
+        <mat-icon *ngIf="state === stateType.Error">sync_problem</mat-icon>
+      </span>
+    </div>
+  </form>
+</div>

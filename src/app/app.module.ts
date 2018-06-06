@@ -44,7 +44,6 @@ import { GraphicKeyAuthFactorComponent } from './screens/authorization-factors/g
 import { PasswordAuthFactorComponent } from './screens/authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from './screens/authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { LoginParentComponent } from './screens/login-parent/login-parent.component';
-import { LoginComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { ConnectComponent } from './screens/navigator-verifier/main-contents/connect/connect.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/main-contents/verify-transaction/verify-transaction.component';
@@ -86,6 +85,7 @@ import { NfcFactorComponent } from "./screens/identification-factors/nfc-factor/
 import { GraphicKeyComponent } from './inputs/graphic-key/graphic-key.component';
 import { QrReaderComponent } from './inputs/qr-reader/qr-reader.component';
 import { NfcReaderComponent } from './inputs/nfc-reader/nfc-reader.component';
+import { LoginComponent } from "./inputs/login/login.component";
 
 @NgModule({
   declarations: [
