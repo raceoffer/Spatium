@@ -1,4 +1,5 @@
 import { OverlayModule } from '@angular/cdk/overlay';
+import { DatePipe } from '@angular/common'
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -74,6 +75,7 @@ import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
+import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
@@ -82,7 +84,6 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
-import { DeviceService } from './services/device.service';
 
 @NgModule({
   declarations: [
@@ -161,6 +162,7 @@ import { DeviceService } from './services/device.service';
     QRCodeModule
   ],
   providers: [
+    DatePipe,
     DeviceService,
     WorkerService,
     WalletService,

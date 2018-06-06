@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { LoggerService } from "./services/logger.service";
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ export class AppComponent implements OnInit {
   title = 'Spatium Wallet app';
   message = 'Loading...';
 
-  constructor() { }
+  constructor(private readonly logger: LoggerService) { }
 
   ngOnInit() {}
 }
