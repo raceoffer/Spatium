@@ -23,6 +23,17 @@ npm install
 cordova platform add android
 ```
 
+##### Build UWP app
+Install Visual Studio 2015
+Install SDK: https://download.microsoft.com/download/6/3/B/63BADCE0-F2E6-44BD-B2F9-60F5F073038E/standalonesdk/SDKSETUP.EXE
+
+In cordova/
+```
+cordova platform add windows
+cordova run windows -- --archs=x86
+```
+
+
 ## Warning!
 Due to the bug in cordova's local plugin system, if you notice that some local plugins fail to install you should reinstall them manually as:
 ```bash
