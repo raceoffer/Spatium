@@ -305,6 +305,21 @@ mat-icon.size-40{
   font-family: Roboto,Roboto-Regular,sans-serif;
 }
 
+.spatium-textfield.error-field {
+  input {
+    color: #ff5722;
+    caret-color: #ff5722;
+    border-color: #ff5722;
+  }
+}
+
+.spatium-textfield.bottom32 {
+  mat-error {
+    position: absolute;
+    top: 50px;
+  }
+}
+
 .noborder > input {
   border: none!important;
   border-bottom: none!important;

@@ -117,9 +117,11 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   async checkInput(input: string) {
     if (!this.isGeneric) {
-      if (!input || input === '') {
+      if (!input || input === '' || input.match(/\s/)) {
         this.recognitionMsg = 'Incorrect login format.';
         return;
+      } else {
+        this.recognitionMsg = '';
       }
 
       try {
