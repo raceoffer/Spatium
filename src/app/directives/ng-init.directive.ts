@@ -5,7 +5,6 @@ import {Directive, Input} from '@angular/core';
   exportAs: 'ngInit'
 })
 export class NgInitDirective {
-
   @Input() ngInit;
 
   constructor() { }
@@ -18,5 +17,4 @@ export class NgInitDirective {
       this.ngInit();
     }
   }
-
 }
