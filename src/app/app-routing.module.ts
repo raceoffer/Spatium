@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './screens/auth/auth.component';
 import { BackupComponent } from './screens/backup/backup.component';
 import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
-import { LoginParentComponent } from './screens/login-parent/login-parent.component';
+import { LoginComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { MainComponent } from './screens/navigator-verifier/main/main.component';
 import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
@@ -33,13 +33,13 @@ const appRoutes: Routes = [{
   path: 'confirmation-entry',
   component: ConfirmationEntryComponent
 }, {
-  path: 'auth',
+  path: 'auth/:type/:login',
   component: AuthComponent
 }, {
   path: 'login',
-  component: LoginParentComponent
+  component: LoginComponent
 }, {
-  path: 'registration',
+  path: 'registration/:login',
   component: RegistrationComponent
 }, {
   path: 'reg-success',

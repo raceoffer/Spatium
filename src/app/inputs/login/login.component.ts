@@ -1,8 +1,10 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { FormControl } from "@angular/forms";
-import { debounceTime, tap } from "rxjs/internal/operators";
 import { DDSService } from "../../services/dds.service";
 import { AuthService } from "../../services/auth.service";
+
+import { BehaviorSubject } from "rxjs";
+import { debounceTime, distinctUntilChanged, map, tap } from "rxjs/operators";
 
 export enum State {
   Updating,
@@ -17,7 +19,7 @@ export enum State {
 })
 export class LoginComponent implements OnDestroy{
   public stateType = State;
-  public state = State.Ready;
+  public state = new BehaviorSubject<State>(State.Ready);
 
   public loginControl = new FormControl();
 
@@ -32,11 +34,25 @@ export class LoginComponent implements OnDestroy{
   ) {
     this.subscriptions.push(
       this.loginControl.valueChanges.pipe(
+        map(value => value ? value : ''),
         tap(() => this.busy.next(true)),
         debounceTime(1000)
       ).subscribe(value => {
         this.busy.next(false);
         this.login.next(value)
+      })
+    );
+
+    this.subscriptions.push(
+      this.state.pipe(
+        distinctUntilChanged(),
+        map(state => state === State.Updating)
+      ).subscribe(updating => {
+        if (updating) {
+          this.loginControl.disable();
+        } else {
+          this.loginControl.enable();
+        }
       })
     );
   }
@@ -50,7 +66,7 @@ export class LoginComponent implements OnDestroy{
 
   async generateNewLogin() {
     try {
-      this.state = State.Updating;
+      this.state.next(State.Updating);
       this.busy.next(true);
 
       let login = null;
@@ -62,10 +78,10 @@ export class LoginComponent implements OnDestroy{
 
       this.loginControl.setValue(login);
 
-      this.state = State.Ready;
+      this.state.next(State.Ready);
     } catch(e) {
       this.busy.next(false);
-      this.state = State.Error;
+      this.state.next(State.Error);
     }
   }
 }

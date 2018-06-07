@@ -28,10 +28,6 @@ $green: rgb(24, 154, 57);//#189a39
   width: 100%;
 }
 
-.cdk-overlay-container {
-  background-color: $white;
-}
-
 .factor-component {
   width: 100%;
   padding-top: 60px;
@@ -263,6 +259,10 @@ mat-icon.size-40{
 
 .optical-4 {
   opacity: 0.4;
+}
+
+.optical-2 {
+  opacity: 0.2;
 }
 
 .mat-list, .mat-nav-list, .mat-selection-list {

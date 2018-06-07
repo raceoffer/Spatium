@@ -9,24 +9,31 @@
     <app-logo-block></app-logo-block>
     <div fxLayout="row" fxLayoutAlign="center center" style="width: 100%;" class="start-tagline-padding">
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;">
-        <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)">
-          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
-          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
+        <button mat-icon-button class="fab" (click)="toggleContent(contentType.LOGIN)" [disabled]="buttonState === stateType.Updating">
+          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.LOGIN">text_fields</mat-icon>
+          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.LOGIN">text_fields</mat-icon>
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" >
-        <button mat-icon-button class="fab" fxLayout="row" fxLayoutAlign="center center"
-                (click)="toggleContent(contentType.QR)">
-          <div fxLayoutAlign="center center" *ngIf="content === contentType.QR">
-              <span class="icon-custom-qr_code_blue"></span>
-          </div>
-          <div fxLayoutAlign="center center" *ngIf="content !== contentType.QR">
-              <span class="icon-custom-qr_code_black optical-4"></span>
+        <button
+          mat-icon-button
+          class="fab"
+          fxLayout="row"
+          fxLayoutAlign="center center"
+          [disabled]="buttonState === stateType.Updating"
+          (click)="toggleContent(contentType.QR)">
+          <div fxLayoutAlign="center center">
+              <span
+                [class.icon-custom-qr_code_blue]="content === contentType.QR"
+                [class.icon-custom-qr_code_black]="content !== contentType.QR"
+                [class.optical-4]="content !== contentType.QR && buttonState !== stateType.Updating"
+                [class.optical-2]="content !== contentType.QR && buttonState === stateType.Updating">
+              </span>
           </div>
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isNfcAvailable">
-        <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)">
+        <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)"  [disabled]="buttonState === stateType.Updating">
           <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
           <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.NFC">nfc</mat-icon>
         </button>
@@ -36,10 +43,22 @@
 
   <app-login
     class="header text-center"
-    *ngIf="content === contentType.Login"
-    (login)="onLogin($event)"
+    *ngIf="content === contentType.LOGIN"
+    (login)="onInput(contentType.LOGIN, $event)"
     (busy)="onBusy($event)">
   </app-login>
+
+  <app-qr-reader
+    class="header text-center"
+    *ngIf="content === contentType.QR"
+    (scanned)="onInput(contentType.QR, $event)">
+  </app-qr-reader>
+
+  <app-nfc-reader
+    class="header text-center"
+    *ngIf="content === contentType.NFC"
+    (scanned)="onInput(contentType.NFC, $event)">
+  </app-nfc-reader>
 
   <div class="footer text-center">
     <button
@@ -75,8 +94,9 @@
       mat-raised-button
       color="accent"
       class="width-button color"
-      (click)="checkInput(input)"
-      *ngIf="buttonState === stateType.Error">{{ stError }}
+      (click)="retry()"
+      *ngIf="buttonState === stateType.Error">
+      Retry
     </button>
   </div>
 

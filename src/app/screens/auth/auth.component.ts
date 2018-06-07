@@ -1,11 +1,9 @@
 import {
-  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
   OnDestroy,
-  OnInit,
   NgZone,
   ViewChild
 } from '@angular/core';
@@ -17,7 +15,7 @@ import {
   trigger,
 } from '@angular/animations';
 import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
@@ -42,14 +40,14 @@ declare const Buffer: any;
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AuthComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
 
   busy = false;
   username = '';
-  login = 'Sign in';
+  login = null;
   factors = [];
   ready = false;
   loginType = LoginType.LOGIN;
@@ -58,32 +56,44 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
 
   icon_qr = '';
   dialogFactorRef = null;
+
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
+  constructor(
+    public dialog: MatDialog,
     private readonly ngZone: NgZone,
     private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute,
     private readonly authService: AuthService,
     private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService,
-              private readonly navigationService: NavigationService) { }
+    private readonly navigationService: NavigationService
+  ) {
+    this.subscriptions.push(
+      activatedRoute.paramMap.subscribe(params => {
+        this.loginType = Number(params.get('type')) as LoginType;
+        this.login = params.get('login');
 
-  ngOnInit() {
+        if (this.loginType !== LoginType.LOGIN) {
+          this.addNewFactor();
+        }
+      })
+    );
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
       })
     );
 
-    this.loginType = this.authService.loginType;
-    this.isPasswordFirst = this.authService.isPasswordFirst;
     this.icon_qr = FactorIconAsset.QR;
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+
     if (this.dialogFactorRef) {
       this.dialogFactorRef.close();
       this.dialogFactorRef = null;
@@ -99,17 +109,6 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     const container = $('#factor-container');
     const height = document.getElementById('factor-container').scrollHeight;
     container.animate({scrollTop: height}, 500, 'swing');
-  }
-
-  ngAfterViewInit() {
-    this.username = this.authService.login;
-    this.factors = this.authService.factors;
-    this.ready = this.authService.decryptedSeed !== null;
-    this.changeDetectorRef.detectChanges();
-
-    if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
-      this.addNewFactor();
-    }
   }
 
   addNewFactor(): void {

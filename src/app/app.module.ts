@@ -43,7 +43,7 @@ import { FileAuthFactorComponent } from './screens/authorization-factors/file-au
 import { GraphicKeyAuthFactorComponent } from './screens/authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
 import { PasswordAuthFactorComponent } from './screens/authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from './screens/authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
-import { LoginParentComponent } from './screens/login-parent/login-parent.component';
+import { LoginComponent as LoginScreenComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
 import { ConnectComponent } from './screens/navigator-verifier/main-contents/connect/connect.component';
 import { VerifyTransactionComponent } from './screens/navigator-verifier/main-contents/verify-transaction/verify-transaction.component';
@@ -86,6 +86,7 @@ import { GraphicKeyComponent } from './inputs/graphic-key/graphic-key.component'
 import { QrReaderComponent } from './inputs/qr-reader/qr-reader.component';
 import { NfcReaderComponent } from './inputs/nfc-reader/nfc-reader.component';
 import { LoginComponent } from "./inputs/login/login.component";
+import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
 
 @NgModule({
   declarations: [
@@ -107,7 +108,7 @@ import { LoginComponent } from "./inputs/login/login.component";
     NfcFactorComponent,
     QrAuthFactorComponent,
     QrFactorComponent,
-    LoginParentComponent,
+    LoginScreenComponent,
     RegistrationComponent,
     NgInitDirective,
     WalletComponent,
@@ -134,7 +135,8 @@ import { LoginComponent } from "./inputs/login/login.component";
     PincodeComponent,
     GraphicKeyComponent,
     QrReaderComponent,
-    NfcReaderComponent
+    NfcReaderComponent,
+    QrWriterComponent
   ],
   imports: [
     OverlayModule,
