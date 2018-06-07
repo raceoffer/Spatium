@@ -6,5 +6,7 @@
             (click)="onOpenClicked()" *ngIf="ready">Wallet mode</button>
     <button mat-raised-button color="accent" class="width-button color"
             (click)="onConnectClicked()" *ngIf="ready && isWindows !== true">Confirmation mode</button>
+    <button mat-raised-button color="accent" class="width-button color"
+            (click)="onCrash()" *ngIf="ready && isWindows !== true">Crash it!</button>
   </div>
 </div>
