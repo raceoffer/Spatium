@@ -30,6 +30,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { NgInitDirective } from './directives/ng-init.directive';
+import { LongPressDirective } from './directives/long-press.directive';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
@@ -103,6 +104,7 @@ import { DeviceService } from './services/device.service';
     LoginParentComponent,
     RegistrationComponent,
     NgInitDirective,
+    LongPressDirective,
     WalletComponent,
     RegistrationSuccessComponent,
     AutofocusDirective,

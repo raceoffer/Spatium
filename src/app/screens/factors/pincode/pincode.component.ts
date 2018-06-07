@@ -57,6 +57,10 @@ export class PincodeComponent implements OnInit {
     this.pincode = this.pincode.substr(0, this.pincode.length - 1);
   }
 
+  clearPincode() {
+    this.pincode = '';
+  }
+
   async onDeleteClicked() {
     await this.router.navigate(['/delete-secret', 'pincode']);
   }
