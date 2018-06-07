@@ -2,9 +2,11 @@
 
   <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
 
-    <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
+    <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;"
+         [class.error-field]="userNameSpacesValidationError">
       <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName" [autofocus]
              (focus)="onFocus()" (focusout)="onFocusOut()" (keyup.enter)="removeFocus($event)">
+      <mat-error *ngIf="userNameSpacesValidationError">Spaces not allowed</mat-error>
 
       <span matSuffix mat-icon-button (click)="generateNewLogin()" style="position: absolute; right: 0px;">
         <mat-icon style="opacity: 0.5;" *ngIf="usernameState === stateType.Ready">sync</mat-icon>

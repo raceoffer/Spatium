@@ -118,9 +118,11 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   async checkInput(input: string) {
     if (!this.isGeneric) {
-      if (!input || input === '') {
+      if (!input || input === '' || (this.content === this.contentType.Login && this.hasSpaces(input))) {
         this.recognitionMsg = 'Incorrect login format.';
         return;
+      } else {
+        this.recognitionMsg = '';
       }
 
       try {
@@ -276,5 +278,9 @@ export class LoginParentComponent implements OnInit, OnDestroy {
 
   isWindows(): boolean {
     return device.platform === 'windows';
+  }
+
+  hasSpaces(v: string): boolean {
+    return !!v.match(/\s/);
   }
 }

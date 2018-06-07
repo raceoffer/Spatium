@@ -23,6 +23,8 @@ export class LoginComponent implements AfterViewInit, OnChanges {
   @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
   @Output() generateEvent: EventEmitter<any> = new EventEmitter<any>();
 
+  userNameSpacesValidationError = false;
+
   constructor() { }
 
   private _userName = '';
@@ -32,6 +34,8 @@ export class LoginComponent implements AfterViewInit, OnChanges {
   }
 
   set userName(newUserName) {
+    this.userNameSpacesValidationError = this.hasSpaces(newUserName);
+
     this._userName = newUserName;
     if (this._userName.length > 0) {
       this.buisyEvent.emit();
@@ -51,6 +55,10 @@ export class LoginComponent implements AfterViewInit, OnChanges {
 
   // Hide the keyboard after pressing the submit button on the keyboard
   removeFocus(el) { el.target.blur(); }
+
+  hasSpaces(v: string): boolean {
+    return !!v.match(/\s/);
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     const genericLogin: SimpleChange = changes.genericLogin;
