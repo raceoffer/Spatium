@@ -50,6 +50,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   input = '';
   isNfcAvailable = true;
   isGeneric = false;
+  loginGeneratedSuccessTimer: NodeJS.Timer = null;
   private subscriptions = [];
 
   constructor(
@@ -164,26 +165,31 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   }
 
   async generateNewLogin() {
+    if (this.loginGeneratedSuccessTimer) {
+      clearTimeout(this.loginGeneratedSuccessTimer);
+      this.loginGeneratedSuccessTimer = null;
+    } else {
+      this.ngZone.run(async () => {
+        this.buttonState = State.Updating;
+        this.usernameState = State.Updating;
+      });
+    }
+
     this.isGeneric = true;
-    this.ngZone.run(async () => {
-      this.buttonState = State.Empty;
-      this.usernameState = State.Updating;
-    });
 
     try {
-      do {
-        this.loginGenerate = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await this.authService.toId(this.loginGenerate.toLowerCase()));
-        console.log(`LoginParentComponent.generateNewLogin: this.loginGenerate=${this.loginGenerate.toLowerCase()}, exists=${exists}`);
-        if (!exists) {
+      this.loginGenerate = await this.generateUniqueLogin();
+      if (this.loginGeneratedSuccessTimer) {
+        return;
+      }
+
+      this.loginGeneratedSuccessTimer = setTimeout(() => {
+        this.ngZone.run(async () => {
+          this.usernameState = State.Ready;
           this.notification.show('Unique login was generated');
-          this.ngZone.run(async () => {
-            this.usernameState = State.Ready;
-            this.buttonState = State.New;
-          });
-          break;
-        }
-      } while (true);
+          this.loginGeneratedSuccessTimer = null;
+        });
+      }, 1000);
     } catch (ignored) {
       console.log(ignored);
       this.notification.show('DDS is unavailable');
@@ -193,6 +199,16 @@ export class LoginParentComponent implements OnInit, OnDestroy {
       });
     }
     this.isGeneric = false;
+  }
+
+  async generateUniqueLogin(): Promise<string> {
+    do {
+      const login: string = this.authService.makeNewLogin(10);
+      const exists: boolean = await this.dds.exists(await this.authService.toId(login.toLowerCase()));
+      if (!exists) {
+        return login;
+      }
+    } while (true);
   }
 
   async letLogin() {
