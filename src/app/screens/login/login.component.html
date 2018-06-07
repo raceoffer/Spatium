@@ -9,9 +9,9 @@
     <app-logo-block></app-logo-block>
     <div fxLayout="row" fxLayoutAlign="center center" style="width: 100%;" class="start-tagline-padding">
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;">
-        <button mat-icon-button class="fab" (click)="toggleContent(contentType.LOGIN)" [disabled]="buttonState === stateType.Updating">
-          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.LOGIN">text_fields</mat-icon>
-          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.LOGIN">text_fields</mat-icon>
+        <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)" [disabled]="buttonState === stateType.Updating">
+          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
+          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" >
@@ -43,8 +43,8 @@
 
   <app-login
     class="header text-center"
-    *ngIf="content === contentType.LOGIN"
-    (login)="onInput(contentType.LOGIN, $event)"
+    *ngIf="content === contentType.Login"
+    (login)="onInput(contentType.Login, $event)"
     (busy)="onBusy($event)">
   </app-login>
 

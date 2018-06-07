@@ -1,57 +1,82 @@
 <app-toolbar
-
-  (backClicked)="onBackClicked()"></app-toolbar>
+  (backClicked)="onBackClicked()">
+</app-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box" id="factor-container" #factorContainer>
   <div class="header text-center">
     <app-logo-block></app-logo-block>
 
-    <div class="margin-top-18 light" *ngIf="loginType == 0">
-      {{ username }}
+    <div class="margin-top-18 light" *ngIf="type === loginType.Login">
+      {{ login }}
     </div>
-    <div class="margin-top-18 light" style="display: inline-block;" *ngIf="loginType == 1">
-      <div class="{{icon_qr}}-mask"></div>
+    <div class="margin-top-18 light" style="display: inline-block;" *ngIf="type === loginType.QR">
+      <div class="icon-custom-qr_code-mask"></div>
     </div>
-    <div class="margin-top-18 light" *ngIf="loginType == 2">
+    <div class="margin-top-18 light" *ngIf="type === loginType.NFC">
       <mat-icon color="accent" matPrefix class="factor-icon-big">nfc</mat-icon>
     </div>
   </div>
 
   <div class="content text-center">
-    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;"
-         [@anim]="factor.state">
+    <div
+      style="width: 100%;"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      *ngFor="let factor of (factorItems | async); index as i"
+      [@anim]="'active'">
       <div style="margin-left: 50px;">
-        <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(factor)">
+        <button mat-icon-button style="width: 16px; height: 16px; line-height: 16px" (click)="removeFactor(i)">
           <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
         </button>
       </div>
 
-      <div *ngIf="factor.icon != ''">
+      <div *ngIf="factor.icon">
         <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
       </div>
-      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset != ''">
-        <span class="{{factor.icon_asset}}-mask"></span>
+      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset">
+        <span class="{{ factor.icon_asset }}-mask"></span>
       </div>
     </div>
 
-    <div class="spinner-div" fxLayout="column" fxLayoutAlign="center center" *ngIf="busy">
+    <div
+      class="spinner-div"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      *ngIf="state === stateType.Loading || busy">
       <mat-spinner diameter="50" color="accent"></mat-spinner>
     </div>
 
-    <div class="margin-top-18" style="padding-bottom: 10px;"
-         *ngIf="(loginType == 0) ? (!ready && (isPasswordFirst || isAdvanced)) : !ready ">
-      <button #dialogButton color="accent" mat-mini-fab (click)="addNewFactor()" type="button" *ngIf="!busy" class="color">
+    <div class="margin-top-18" style="padding-bottom: 10px;">
+      <button
+        #dialogButton
+        color="accent"
+        mat-mini-fab
+        (click)="openFactorDialog()"
+        type="button"
+        *ngIf="state === stateType.Decryption && !busy"
+        class="color">
         <mat-icon>add</mat-icon>
       </button>
     </div>
   </div>
 
   <div class="footer text-center" style="bottom: 0px;" >
-    <div class="width-button-width" style="display: inline-block" *ngIf="!isAdvanced && !isPasswordFirst">
-      <button mat-button style="opacity: 0.5; text-decoration: underline; float: right; margin: 5px; color: #1a0dab;" (click)="openAdvanced()">Advanced security</button>
-    </div>
-    <button mat-raised-button color="accent" disabled class="width-button color" *ngIf="!ready && (isPasswordFirst || isAdvanced)">Sign in</button>
-    <button mat-raised-button color="accent" class="width-button color" *ngIf="ready && (isPasswordFirst || isAdvanced)" (click)="letLogin()">{{ login }}
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="state === stateType.Ready"
+      (click)="signIn()">
+      Sign in
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="state === stateType.Error"
+      (click)="retry()">
+      Retry
     </button>
   </div>
 </div>

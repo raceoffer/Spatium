@@ -124,7 +124,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
   async overwriteSeed() {
     console.log(this.input);
     await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
-    this.authService.encryptedSeed = this.input;
+    // this.authService.encryptedSeed = this.input;
     this.notification.show('Secret is imported successfully');
     this.isScanInProgress = false;
     await this.onBackClicked();

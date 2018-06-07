@@ -86,10 +86,10 @@ export class SecretExportComponent implements OnInit, OnDestroy {
   }
 
   async writeSecret() {
-    const encryptedSeed = this.authService.encryptedSeed;
-    const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    this.packSeed = await packSeed(buffesSeed, this.workerService.worker);
-    this.switchSecretValue();
+    // const encryptedSeed = this.authService.encryptedSeed;
+    // const buffesSeed = Buffer.from(encryptedSeed, 'hex');
+    // this.packSeed = await packSeed(buffesSeed, this.workerService.worker);
+    // this.switchSecretValue();
 
     console.log(this.secretValue);
   }

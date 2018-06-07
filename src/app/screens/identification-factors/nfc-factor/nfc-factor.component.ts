@@ -10,7 +10,7 @@ import {
   Output
 } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FactorType } from '../../../services/auth.service';
+import { IdFactor } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 
 declare const nfc: any;
@@ -179,7 +179,7 @@ export class NfcFactorComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.NFC, value: this.value.getValue()});
+    this.onSuccess.emit({factor: IdFactor.NFC, value: this.value.getValue()});
   }
 
 }

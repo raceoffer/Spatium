@@ -21,7 +21,7 @@ import * as $ from 'jquery';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
-import { AuthService, FactorType } from '../../../services/auth.service';
+import { AuthService, AuthFactor } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -79,8 +79,6 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         await this.onBackClicked();
       })
     );
-
-    this.factors = this.authService.factors;
   }
 
   ngAfterViewInit() {
@@ -154,43 +152,43 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async addFactor(result) {
-    try {
-      switch (result.factor) {
-        case FactorType.QR: {
-          if (this.isAuth) {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
-          } else {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-          }
-          break;
-        }
-        case FactorType.NFC: {
-          if (this.isAuth) {
-            await this.authService.addFactor(result.factor, result.value);
-          } else {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-          }
-          break;
-        }
-        case FactorType.LOGIN: {
-          console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
-          await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
-          break;
-        }
-        default: {
-          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-        }
-      }
-      this.goBottom();
-    } catch (e) {
-      console.log(e);
-    }
+    // try {
+    //   switch (result.factor) {
+    //     case FactorType.QR: {
+    //       if (this.isAuth) {
+    //         await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
+    //       } else {
+    //         await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    //       }
+    //       break;
+    //     }
+    //     case FactorType.NFC: {
+    //       if (this.isAuth) {
+    //         await this.authService.addFactor(result.factor, result.value);
+    //       } else {
+    //         await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    //       }
+    //       break;
+    //     }
+    //     case FactorType.LOGIN: {
+    //       console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
+    //       await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
+    //       break;
+    //     }
+    //     default: {
+    //       await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+    //     }
+    //   }
+    //   this.goBottom();
+    // } catch (e) {
+    //   console.log(e);
+    // }
   }
 
   async removeFactor(factor) {
-    this.authService.rmFactorWithChildren(factor);
-    this.factors = this.authService.factors;
-    this.changeDetectorRef.detectChanges();
+    // this.authService.rmFactorWithChildren(factor);
+    // this.factors = this.authService.factors;
+    // this.changeDetectorRef.detectChanges();
   }
 
   async onSaveClicked() {
@@ -222,25 +220,25 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
       const id = await this.authService.toId(login);
       console.log(`FactorNodeComponent.onSaveClicked: login=${login}`);
       const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
-      this.authService.currentTree = data;
-
-      try {
-        const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
-        if (!success) {
-          await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
-          return;
-        }
-
-        this.authService.clearFactors();
-        this.authService.password = '';
-        this.authService.currentTree = null;
-        this.factors = [];
-
-        this.notification.show('Successfully uploaded the secret');
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-      } catch (ignored) {
-          await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
-      }
+      // this.authService.currentTree = data;
+      //
+      // try {
+      //   const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
+      //   if (!success) {
+      //     await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
+      //     return;
+      //   }
+      //
+      //   this.authService.clearFactors();
+      //   this.authService.password = '';
+      //   this.authService.currentTree = null;
+      //   this.factors = [];
+      //
+      //   this.notification.show('Successfully uploaded the secret');
+      //   await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
+      // } catch (ignored) {
+      //     await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
+      // }
     } finally {
       this.uploading = false;
     }

@@ -22,7 +22,7 @@ import * as $ from 'jquery';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { AuthService, FactorType } from '../../services/auth.service';
+import { AuthService, AuthFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -89,9 +89,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
 
-    this.username = this.authService.login;
-    this.password = this.authService.password;
-    this.factors = this.authService.factors;
     this.advancedMode = this.factors.length > 0;
 
     if (this.advancedMode) {
@@ -119,7 +116,6 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addNewFactor() {
-    this.authService.password = this.password;
     this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
       width: '250px',
       data: {isColored: false, isShadowed: false}
@@ -141,14 +137,12 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   removeFactor(factor): void {
-    this.authService.rmFactor(factor);
-    this.factors = this.authService.factors;
     this.changeDetectorRef.detectChanges();
   }
 
   async addFactor(result) {
     try {
-      await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
+      //await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
       this.goBottom();
     } catch (e) {
       console.log(e);
@@ -193,7 +187,7 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
 
       factors = factors.reverse();
 
-      factors.push(await this.authService.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
+      //factors.push(await this.authService.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
 
       const tree = factors.reduce((rest, factor) => {
         const node = {
@@ -205,28 +199,28 @@ export class RegistrationComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const id = await this.authService.toId(this.authService.login.toLowerCase());
-      console.log(`RegistrationComponent.signUp: this.authService.login=${this.authService.login.toLowerCase()}`);
-      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
-      this.authService.currentTree = data;
-
-      try {
-        const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
-        if (!success) {
-          await this.router.navigate(['/backup', { back: 'registration'}]);
-          return;
-        }
-
-        this.authService.clearFactors();
-        this.authService.password = '';
-        this.authService.currentTree = null;
-        this.factors = [];
-        this.password = '';
-
-        await this.router.navigate(['/reg-success']);
-      } catch (ignored) {
-        await this.router.navigate(['/backup', { back: 'registration'}]);
-      }
+     // const id = await this.authService.toId(this.authService.login.toLowerCase());
+      //console.log(`RegistrationComponent.signUp: this.authService.login=${this.authService.login.toLowerCase()}`);
+     // const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
+      //this.authService.currentTree = data;
+      //
+      // try {
+      //   const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
+      //   if (!success) {
+      //     await this.router.navigate(['/backup', { back: 'registration'}]);
+      //     return;
+      //   }
+      //
+      //   this.authService.clearFactors();
+      //   this.authService.password = '';
+      //   this.authService.currentTree = null;
+      //   this.factors = [];
+      //   this.password = '';
+      //
+      //   await this.router.navigate(['/reg-success']);
+      // } catch (ignored) {
+      //   await this.router.navigate(['/backup', { back: 'registration'}]);
+      // }
     } catch (e) {
       this.notification.show(e.message);
     } finally {

@@ -88,7 +88,6 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
 
   async deleteFileSecret() {
     await this.fs.deleteFile(this.fs.safeFileName('seed'));
-    this.authService.encryptedSeed = null;
     this.notification.show('The secret successfully removed');
     await this.router.navigate(['/start']);
   }

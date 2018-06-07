@@ -30,7 +30,9 @@ $green: rgb(24, 154, 57);//#189a39
 
 .factor-component {
   width: 100%;
-  padding-top: 60px;
+  min-height: 100%;
+  background-color: $white;
+  padding-top: 56px;
 }
 
 .factor-content {

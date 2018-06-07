@@ -1,8 +1,7 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, LoginType } from '../../services/auth.service';
+import { AuthService, IdFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
-import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
@@ -29,8 +28,8 @@ export enum State {
 export class LoginComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
-  public contentType = LoginType;
-  public content = LoginType.LOGIN;
+  public contentType = IdFactor;
+  public content = IdFactor.Login;
 
   public login = null;
   public loginType = null;
@@ -46,7 +45,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
-    private readonly keychain: KeyChainService,
     private readonly dds: DDSService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
@@ -83,13 +81,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.login = null;
   }
 
-  async onInput(type: LoginType, input: any) {
+  async onInput(type: IdFactor, input: any) {
     let login = null;
     switch (type) {
-      case LoginType.LOGIN:
+      case IdFactor.Login:
         login = input;
         break;
-      case LoginType.QR:
+      case IdFactor.QR:
         let bytes = null;
         try {
           bytes = Buffer.from(input, 'hex');
@@ -98,7 +96,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           login = await tryUnpackLogin(Buffer.from(input, 'hex'), this.workerService.worker);
         }
         break;
-      case LoginType.NFC:
+      case IdFactor.NFC:
         if (input && input.type === Type.MIME) {
           login = await tryUnpackLogin(input.payload, this.workerService.worker);
         }
@@ -107,7 +105,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (!login) {
       this.buttonState = State.Empty;
-      if (type !== LoginType.LOGIN) {
+      if (type !== IdFactor.Login) {
         this.notification.show('Failed to extract a Spatium identifier');
       }
       return;
@@ -123,8 +121,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     await this.checkLogin(this.loginType, this.login);
   }
 
-  async checkLogin(type: LoginType, login: string) {
-    const id = await this.authService.toId(type === LoginType.LOGIN ? login.toLowerCase() : login);
+  async checkLogin(type: IdFactor, login: string) {
+    const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
 
     try {
       this.buttonState = State.Updating;
@@ -133,7 +131,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
       if (exists) {
         this.buttonState = State.Exists;
-      } else if (type === LoginType.LOGIN){
+      } else if (type === IdFactor.Login){
         this.buttonState = State.New;
       } else {
         this.buttonState = State.Empty;
@@ -152,28 +150,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async signUp() {
-    try {
-      this.buttonState = State.Updating;
-
-      this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
-
-      await this.router.navigate(['/registration', this.login]);
-    } finally {
-      this.buttonState = State.New;
-    }
+    // this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
+    await this.router.navigate(['/registration', this.login]);
   }
 
   async signIn() {
-    try {
-      this.buttonState = State.Updating;
-
-      const id = await this.authService.toId(this.loginType === LoginType.LOGIN ? this.login.toLowerCase() : this.login);
-      this.authService.remoteEncryptedTrees = [ await this.dds.read(id) ];
-
-      await this.router.navigate(['/auth', this.loginType, this.login]);
-    } finally {
-      this.buttonState = State.New;
-    }
+    await this.router.navigate(['/auth', this.loginType, this.login]);
   }
 
   async onBack() {

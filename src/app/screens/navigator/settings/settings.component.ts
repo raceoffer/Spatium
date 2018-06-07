@@ -62,7 +62,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   async onSettingsClick(navLink) {
     if (navLink.link === 'factornode') {
-      this.authService.clearFactors();
+      // this.authService.clearFactors();
       await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
     } else if (navLink.link === 'lang') {
       this.state = State.lang;

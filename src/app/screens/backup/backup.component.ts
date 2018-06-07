@@ -84,9 +84,9 @@ export class BackupComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.id = await this.authService.toId(this.authService.login);
+    // this.id = await this.authService.toId(this.authService.login);
     this.account = await this.dds.getStoreAccount(this.id);
-    this.data = this.authService.currentTree;
+    // this.data = this.authService.currentTree;
     this.address = this.account.address;
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
     await this.updateBalance();

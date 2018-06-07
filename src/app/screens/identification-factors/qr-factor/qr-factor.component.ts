@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FactorType } from '../../../services/auth.service';
+import { IdFactor } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 
 declare const cordova: any;
@@ -89,7 +89,7 @@ export class QrFactorComponent implements OnInit {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.QR, value: this.value.getValue()});
+    this.onSuccess.emit({factor: IdFactor.QR, value: this.value.getValue()});
   }
 
   isWindows(): boolean {

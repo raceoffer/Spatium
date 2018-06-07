@@ -1,6 +1,6 @@
 import {Component, Output, EventEmitter, Input, HostBinding, AfterViewInit} from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
-import { FactorType } from '../../../services/auth.service';
+import { IdFactor } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { NotificationService } from '../../../services/notification.service';
 import { BehaviorSubject } from 'rxjs';
@@ -115,6 +115,6 @@ export class LoginFactorComponent implements AfterViewInit {
   }
 
   async onNext() {
-    this.onSuccess.emit({factor: FactorType.LOGIN, value: this.userName});
+    this.onSuccess.emit({factor: IdFactor.Login, value: this.userName});
   }
 }

@@ -1,12 +1,13 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
-import { FactorType } from '../../../services/auth.service';
+import { AuthFactor } from '../../../services/auth.service';
+import { AuthFactor as AuthFactorInterface } from "../auth-factor";
 
 @Component({
   selector: 'app-qr-auth-factor',
   templateUrl: './qr-auth-factor.component.html',
   styleUrls: ['./qr-auth-factor.component.css']
 })
-export class QrAuthFactorComponent {
+export class QrAuthFactorComponent implements AuthFactorInterface {
   @HostBinding('class') classes = 'factor-component';
 
   @Output() submit: EventEmitter<any> = new EventEmitter<any>();
@@ -18,8 +19,8 @@ export class QrAuthFactorComponent {
 
   onScanned(text) {
     this.submit.next({
-      factor: FactorType.QR,
-      value: text
+      type: AuthFactor.QR,
+      value: Buffer.from(text, 'utf-8')
     });
   }
 }

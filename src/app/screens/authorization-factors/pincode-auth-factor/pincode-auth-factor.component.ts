@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
-import { FactorType } from "../../../services/auth.service";
+import { AuthFactor } from "../../../services/auth.service";
+import { AuthFactor as AuthFactorInterface } from "../auth-factor";
 
 declare const window: any;
 declare const device: any;
@@ -9,7 +10,7 @@ declare const device: any;
   templateUrl: './pincode-auth-factor.component.html',
   styleUrls: ['./pincode-auth-factor.component.css']
 })
-export class PincodeAuthFactorComponent {
+export class PincodeAuthFactorComponent implements AuthFactorInterface {
   @HostBinding('class') classes = 'factor-component';
 
   @Output() submit: EventEmitter<any> = new EventEmitter<any>();
@@ -21,8 +22,8 @@ export class PincodeAuthFactorComponent {
 
   onSubmit(pincode) {
     this.submit.next({
-      factor: FactorType.PIN,
-      value: pincode
+      type: AuthFactor.Pincode,
+      value: Buffer.from(pincode, 'utf-8')
     });
   }
 }

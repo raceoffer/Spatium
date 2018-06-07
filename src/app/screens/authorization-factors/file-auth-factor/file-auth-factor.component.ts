@@ -1,17 +1,19 @@
 import { AfterViewInit, Component, EventEmitter, HostBinding, NgZone, Output } from '@angular/core';
-import { FactorType } from '../../../services/auth.service';
-
-declare const CryptoCore: any;
+import { AuthFactor } from '../../../services/auth.service';
+import { AuthFactor as AuthFactorInterface } from "../auth-factor";
 
 @Component({
   selector: 'app-file-auth-factor',
   templateUrl: './file-auth-factor.component.html',
   styleUrls: ['./file-auth-factor.component.css']
 })
-export class FileAuthFactorComponent implements AfterViewInit {
+export class FileAuthFactorComponent implements AfterViewInit, AuthFactorInterface {
   @HostBinding('class') classes = 'content factor-content text-center';
 
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+
+  @Output() submit = new EventEmitter<any>();
+  @Output() back = new EventEmitter<any>();
 
   uploadFile = 'Choose a file';
 
@@ -34,7 +36,7 @@ export class FileAuthFactorComponent implements AfterViewInit {
     this.reader = new FileReader();
 
     this.reader.onloadend = () => this.ngZone.run(async () => {
-      this.file = new CryptoCore.Buffer(this.reader.result);
+      this.file = new Buffer(this.reader.result);
 
       await this.goNext();
     });
@@ -43,6 +45,6 @@ export class FileAuthFactorComponent implements AfterViewInit {
   }
 
   async goNext() {
-    this.onSuccess.emit({factor: FactorType.FILE, value: this.file});
+    this.onSuccess.emit({factor: AuthFactor.File, value: this.file});
   }
 }

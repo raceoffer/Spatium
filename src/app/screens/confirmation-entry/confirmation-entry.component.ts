@@ -49,13 +49,13 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
         this.back = params['back'];
       }
 
-      if (this.authService.encryptedSeed === null) {
-        this.label = this.stCreate;
-        this.isCreate = true;
-      } else {
-        this.label = this.stUnlock;
-        this.isCreate = false;
-      }
+      // if (this.authService.encryptedSeed === null) {
+      //   this.label = this.stCreate;
+      //   this.isCreate = true;
+      // } else {
+      //   this.label = this.stUnlock;
+      //   this.isCreate = false;
+      // }
     });
   }
 
@@ -83,31 +83,31 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
 
       const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
 
-      if (this.authService.encryptedSeed) {
-        const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
-        this.keyChain.setSeed(await decrypt(ciphertext, aesKey, this.workerService.worker));
-
-        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
-      } else {
-        if (this.hasTouchId) {
-          try {
-            if (await this.saveTouchPassword(pincode)) {
-              await this.savePin(aesKey);
-            }
-          } catch (e) {
-            if (e === 'Cancelled') {
-              await this.savePin(aesKey);
-            } else if (e === 'KeyPermanentlyInvalidatedException') {
-              this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
-            } else {
-              this.notification.show('Fingerprint authorization error');
-            }
-            console.log(e);
-          }
-        } else {
-          await this.savePin(aesKey);
-        }
-      }
+      // if (this.authService.encryptedSeed) {
+      //   const ciphertext = Buffer.from(this.authService.encryptedSeed, 'hex');
+      //   this.keyChain.setSeed(await decrypt(ciphertext, aesKey, this.workerService.worker));
+      //
+      //   await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
+      // } else {
+      //   if (this.hasTouchId) {
+      //     try {
+      //       if (await this.saveTouchPassword(pincode)) {
+      //         await this.savePin(aesKey);
+      //       }
+      //     } catch (e) {
+      //       if (e === 'Cancelled') {
+      //         await this.savePin(aesKey);
+      //       } else if (e === 'KeyPermanentlyInvalidatedException') {
+      //         this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
+      //       } else {
+      //         this.notification.show('Fingerprint authorization error');
+      //       }
+      //       console.log(e);
+      //     }
+      //   } else {
+      //     await this.savePin(aesKey);
+      //   }
+      // }
     } catch (ignored) {
       this.notification.show('Authorization error');
     }
@@ -117,18 +117,18 @@ export class ConfirmationEntryComponent implements OnInit, OnDestroy {
   }
 
   async savePin(aesKey) {
-    this.keyChain.setSeed(await randomBytes(64, this.workerService.worker));
-    this.authService.encryptedSeed = (await encrypt(this.keyChain.getSeed(), aesKey, this.workerService.worker)).toString('hex');
-
-    await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
-
-    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
+    // this.keyChain.setSeed(await randomBytes(64, this.workerService.worker));
+    // this.authService.encryptedSeed = (await encrypt(this.keyChain.getSeed(), aesKey, this.workerService.worker)).toString('hex');
+    //
+    // await this.fs.writeFile(this.fs.safeFileName('seed'), this.authService.encryptedSeed);
+    //
+    // await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
   }
 
   async saveTouchPassword(pincode) {
-    return new Promise(async (success, error) => {
-      window.plugins.touchid.save('spatium', pincode, true, success, error);
-    });
+    // return new Promise(async (success, error) => {
+    //   window.plugins.touchid.save('spatium', pincode, true, success, error);
+    // });
   }
 
   async onBackClicked() {
