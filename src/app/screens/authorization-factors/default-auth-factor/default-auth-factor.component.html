@@ -1,0 +1,23 @@
+<app-toolbar
+  label="Password"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-password
+    class="factor-content"
+    style="margin-top: 70px"
+    action="Continue"
+    (submit)="onSubmit($event)">
+  </app-password>
+
+  <div class="width-button-width" style="display: inline-block; text-align: right;">
+    <button mat-button style="opacity: 0.5; text-decoration: underline; color: #1a0dab;" (click)="onBack()">Advanced security</button>
+  </div>
+</div>

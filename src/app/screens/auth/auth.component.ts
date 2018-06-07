@@ -33,6 +33,7 @@ import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor
 import { AuthFactor as AuthFactorInterfce } from "../authorization-factors/auth-factor";
 import { toBehaviourSubject } from "../../utils/transformers";
 import { map } from "rxjs/operators";
+import { DefaultAuthFactorComponent } from "../authorization-factors/default-auth-factor/default-auth-factor.component";
 
 export enum State {
   Loading,
@@ -69,6 +70,7 @@ export class AuthComponent implements OnDestroy {
   public state = State.Loading;
 
   public busy = false;
+  public advanced = false;
 
   public factors = new BehaviorSubject<Array<Factor>>([]);
   public factorItems = toBehaviourSubject(this.factors.pipe(
@@ -127,8 +129,10 @@ export class AuthComponent implements OnDestroy {
 
       this.state = State.Decryption;
 
-      if (type === IdFactor.Login) {
+      if (type !== IdFactor.Login) {
         this.openFactorDialog();
+      } else {
+        this.openFactorOverlayOfType(DefaultAuthFactorComponent);
       }
     } catch (e) {
       this.state = State.Error;
@@ -207,9 +211,12 @@ export class AuthComponent implements OnDestroy {
     this.factorOverlay = this.overlay.create(config);
     const portal = new ComponentPortal<AuthFactorInterfce>(componentType);
     const componentRef: ComponentRef<AuthFactorInterfce> = this.factorOverlay.attach(portal);
+
     componentRef.instance.back.subscribe(() => {
       this.factorOverlay.dispose();
       this.factorOverlay = null;
+
+      this.advanced = true;
     });
     componentRef.instance.submit.subscribe(async (factor) => {
       this.factorOverlay.dispose();
@@ -237,10 +244,13 @@ export class AuthComponent implements OnDestroy {
           this.state = State.Ready;
         }
       } else {
-        this.notification.show('Failed to decrypt secret with the current factor');
+        throw new Error('Unknown error');
       }
     } catch(e) {
-      this.notification.show('Failed to decrypt secret with the current factor');
+      if (this.type === IdFactor.Login && !this.advanced) {
+        this.openFactorOverlayOfType(DefaultAuthFactorComponent);
+      }
+      this.notification.show('Failed to decrypt secret with this factor');
     } finally {
       this.busy = false;
     }

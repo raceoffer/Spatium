@@ -87,6 +87,7 @@ import { QrReaderComponent } from './inputs/qr-reader/qr-reader.component';
 import { NfcReaderComponent } from './inputs/nfc-reader/nfc-reader.component';
 import { LoginComponent } from "./inputs/login/login.component";
 import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
+import { DefaultAuthFactorComponent } from './screens/authorization-factors/default-auth-factor/default-auth-factor.component';
 
 @NgModule({
   declarations: [
@@ -136,7 +137,8 @@ import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
     GraphicKeyComponent,
     QrReaderComponent,
     NfcReaderComponent,
-    QrWriterComponent
+    QrWriterComponent,
+    DefaultAuthFactorComponent
   ],
   imports: [
     OverlayModule,
@@ -189,6 +191,7 @@ import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
   ],
   entryComponents: [
     DialogFactorsComponent,
+    DefaultAuthFactorComponent,
     PasswordAuthFactorComponent,
     PincodeAuthFactorComponent,
     GraphicKeyAuthFactorComponent,
