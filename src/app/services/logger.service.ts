@@ -79,4 +79,8 @@ export class LoggerService {
 
     await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, '');
   }
+
+  async deleteOldLogFiles() {
+    await this.fs.deleteOldLogFiles();
+  }
 }

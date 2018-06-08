@@ -101,6 +101,34 @@ export class FileService {
     });
   }
 
+  async deleteOldLogFiles () {
+    const time: number = 24 * 60 *60 * 1000; // 24h
+    const date: number = new Date().getTime();
+
+    window.resolveLocalFileSystemURL(this.getExternalPath(),
+      function (fileSystem) {
+        var reader = fileSystem.createReader();
+        reader.readEntries(
+          function (entries) {
+            var i;
+            for (i=0; i<entries.length; i++) {
+              let entry = entries[i];
+              if (entry.isFile) {
+                entry.file((f) => {
+                  let diff = date - f.lastModifiedDate;
+                  if (diff > time) {
+                    entry.remove();
+                  }
+                });
+              }
+            }
+          },
+          function (e) { }
+        );
+      }, function (e) {}
+    );
+  }
+
   getExternalPath() {
     let path: string;
     switch (device.platform.toLowerCase()) {

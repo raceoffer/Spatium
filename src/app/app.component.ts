@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
     await this.deviceService.deviceReady();
 
     this.logger.createSessionLog();
+    this.logger.deleteOldLogFiles();
     hockeyapp.start(null, null, '6a66e9dc6499491187e1bb8c3bfeced9', true, hockeyapp.CHECK_MANUALLY, false, true);
   }
 }
