@@ -25,6 +25,7 @@ export class AppComponent implements OnInit {
   private async init() {
     await this.deviceService.deviceReady();
 
+    this.logger.createSessionLog();
     hockeyapp.start(null, null, '6a66e9dc6499491187e1bb8c3bfeced9', true, hockeyapp.CHECK_MANUALLY, false, true);
   }
 }
