@@ -1,1 +1,7 @@
-<router-outlet name="navigator"></router-outlet>
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" [current]="current" (closeClicked)="toggle()"></app-main-drawer>
+
+    <router-outlet name="navigator"></router-outlet>
+  </mat-sidenav-container>
+</div>

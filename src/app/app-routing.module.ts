@@ -30,64 +30,25 @@ const appRoutes: Routes = [{
   path: 'start',
   component: StartComponent
 }, {
-  path: 'confirmation-entry',
-  component: ConfirmationEntryComponent
+  path: 'login',
+  component: LoginComponent
 }, {
   path: 'auth/:type/:login',
   component: AuthComponent
 }, {
-  path: 'login',
-  component: LoginComponent
-}, {
   path: 'registration/:login',
   component: RegistrationComponent
-}, {
-  path: 'reg-success',
-  component: RegistrationSuccessComponent
-}, {
-  path: 'backup',
-  component: BackupComponent
-}, {
-  path: 'factornode',
-  component: FactorNodeComponent
-}, {
-  path: 'secret-import',
-  component: SecretImportComponent
-}, {
-  path: 'delete-secret/:back',
-  component: DeleteSecretComponent
 }, {
   path: 'navigator',
   component: NavigatorComponent,
   children: [{
-    path: 'waiting',
-    component: WaitingComponent,
-    outlet: 'navigator'
-  }, {
     path: 'wallet',
     component: WalletComponent,
     outlet: 'navigator'
-  }, {
-    path: 'currency/:coin',
-    component: CurrencyComponent,
-    outlet: 'navigator'
-  }, {
-    path: 'currency/:coin/settings',
-    component: CurrencySettingsComponent,
-    outlet: 'navigator'
-  }, {
-    path: 'send-transaction/:coin',
-    component: SendTransactionComponent,
-    outlet: 'navigator'
-  }, {
-    path: 'settings',
-    component: SettingsComponent,
-    outlet: 'navigator'
-  }, {
-    path: 'factornode',
-    component: FactorNodeComponent,
-    outlet: 'navigator'
   }]
+}, {
+  path: 'confirmation-entry',
+  component: ConfirmationEntryComponent
 }, {
   path: 'navigator-verifier',
   component: NavigatorVerifierComponent,

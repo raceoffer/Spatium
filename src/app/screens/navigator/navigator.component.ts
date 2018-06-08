@@ -1,22 +1,64 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
+import { KeyChainService } from "../../services/keychain.service";
+import { NavigationService } from "../../services/navigation.service";
+import { bufferWhen, map, debounceTime, filter } from "rxjs/operators";
+import { Subject } from "rxjs/index";
+import { NotificationService } from "../../services/notification.service";
 
 @Component({
   selector: 'app-navigator',
   templateUrl: './navigator.component.html',
   styleUrls: ['./navigator.component.css']
 })
-export class NavigatorComponent implements OnInit, OnDestroy {
+export class NavigatorComponent implements OnDestroy {
   private subscriptions = [];
 
-  constructor(private readonly wallet: WalletService,
-              private readonly router: Router,
-              private readonly bt: BluetoothService) {}
+  public navLinks = [{
+    name: 'Wallet',
+    clicked: async () => {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}])
+    }
+  }, {
+    name: 'Exchange'
+  }, {
+    name: 'ICO'
+  }, {
+    name: 'Portfolio Investment'
+  }, {
+    name: 'Verification'
+  }, {
+    name: 'Settings'
+  }, {
+    name: 'Exit',
+    clicked: async () => {
+      await this.router.navigate(['/start'])
+    }
+  }];
 
-  public ngOnInit() {
+  public current = 'Wallet';
 
+  private back = new Subject<any>();
+  public  doubleBack = this.back.pipe(
+    bufferWhen(() => this.back.pipe(
+      debounceTime(3000)
+    )),
+    map(emits => emits.length),
+    filter(emits => emits > 1)
+  );
+
+  @ViewChild('sidenav') sidenav;
+
+  constructor(
+    private readonly wallet: WalletService,
+    private readonly keychain: KeyChainService,
+    private readonly router: Router,
+    private readonly bt: BluetoothService,
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService
+  ) {
     this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
         await this.wallet.cancelSync();
@@ -24,7 +66,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
-        console.log('Disconnected');
         await this.wallet.cancelSync();
       }));
 
@@ -35,9 +76,41 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.wallet.cancelResyncEvent.subscribe(async () => {
-        this.bt.disconnect();
+        await this.bt.disconnect();
       }));
 
+    this.subscriptions.push(
+      this.navigationService.navRequest.subscribe(() => {
+        this.toggle();
+      })
+    );
+
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.back.next(true);
+      })
+    );
+
+    this.subscriptions.push(
+      this.back.subscribe(async () => {
+        this.notification.show('Tap again to exit');
+      })
+    );
+
+    this.subscriptions.push(
+      this.doubleBack.subscribe(async () => {
+        this.notification.hide();
+        await this.router.navigate(['/start']);
+      })
+    );
+  }
+
+  public toggle() {
+    this.sidenav.toggle();
+  }
+
+  public async onNav(navLink) {
+    await this.router.navigate(navLink.link);
   }
 
   public async ngOnDestroy() {
@@ -45,6 +118,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
+    await this.keychain.reset();
     await this.wallet.resetSession();
     await this.bt.disconnect();
   }

@@ -6,9 +6,12 @@
     <div class="nav-logo-text"></div>
   </mat-toolbar>
   <mat-nav-list *ngFor="let navLink of navLinks">
-    <a mat-list-item [class.disabled]="!navLink.isActive" class="main-nav-list-custom"
-       (click)="!navLink.isActive || onClicked(navLink)"
-       [ngClass]="{'selected' : navLink.isSelected, 'disabled' : !navLink.isActive}">
+    <a
+      mat-list-item
+      class="main-nav-list-custom"
+      [class.disabled]="!navLink.clicked"
+      (click)="onClicked(navLink)"
+      [ngClass]="{ 'selected' : navLink.name === current }">
       {{ navLink.name }}
     </a>
   </mat-nav-list>

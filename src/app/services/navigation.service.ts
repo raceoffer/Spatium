@@ -5,6 +5,7 @@ import { DeviceService } from './device.service';
 @Injectable()
 export class NavigationService {
   public backEvent: Subject<any> = new Subject<any>();
+  public navRequest: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private readonly ngZone: NgZone,

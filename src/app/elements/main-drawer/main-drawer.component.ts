@@ -1,28 +1,24 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-main-drawer',
   templateUrl: './main-drawer.component.html',
   styleUrls: ['./main-drawer.component.css']
 })
-export class MainDrawerComponent implements OnInit {
+export class MainDrawerComponent {
   @Input() navLinks: Array<any> = [];
-  @Output() linkClicked: EventEmitter<any> = new EventEmitter<any>();
+  @Input() current: string = null;
   @Output() closeClicked: EventEmitter<any> = new EventEmitter<any>();
 
   @ViewChild('sidenav') sidenav;
-
-  constructor() { }
-
-  ngOnInit() { }
 
   public toggle() {
     this.sidenav.toggle();
     this.closeClicked.emit();
   }
 
-  public onClicked(navLink) {
+  public async onClicked(navLink) {
     this.toggle();
-    this.linkClicked.emit(navLink);
+    await navLink.clicked();
   }
 }
