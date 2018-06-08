@@ -73,4 +73,5 @@
     <plugin name="cordova-plugin-device" spec="^2.0.2" />
     <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
     <plugin name="phonegap-nfc" spec="^0.7.3" />
+    <plugin name="cordova-plugin-camera-info" spec="../cordova-plugin-camera-info" />
 </widget>
