@@ -239,6 +239,8 @@ export class AuthComponent implements OnDestroy {
 
         this.factors.next(factors);
 
+        this.goBottom();
+
         if (result.seed) {
           this.decryptedSeed = result.seed;
           this.state = State.Ready;

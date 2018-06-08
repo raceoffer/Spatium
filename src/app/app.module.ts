@@ -29,7 +29,6 @@ import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
-import { NgInitDirective } from './directives/ng-init.directive';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
@@ -88,6 +87,7 @@ import { NfcReaderComponent } from './inputs/nfc-reader/nfc-reader.component';
 import { LoginComponent } from "./inputs/login/login.component";
 import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
 import { DefaultAuthFactorComponent } from './screens/authorization-factors/default-auth-factor/default-auth-factor.component';
+import { EqualToDirective } from './directives/equal-to.directive';
 
 @NgModule({
   declarations: [
@@ -111,7 +111,6 @@ import { DefaultAuthFactorComponent } from './screens/authorization-factors/defa
     QrFactorComponent,
     LoginScreenComponent,
     RegistrationComponent,
-    NgInitDirective,
     WalletComponent,
     RegistrationSuccessComponent,
     AutofocusDirective,
@@ -138,7 +137,8 @@ import { DefaultAuthFactorComponent } from './screens/authorization-factors/defa
     QrReaderComponent,
     NfcReaderComponent,
     QrWriterComponent,
-    DefaultAuthFactorComponent
+    DefaultAuthFactorComponent,
+    EqualToDirective
   ],
   imports: [
     OverlayModule,

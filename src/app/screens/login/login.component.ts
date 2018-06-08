@@ -37,6 +37,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   public stateType = State;
   public buttonState = State.Empty;
 
+  public generating = false;
+
   public isNfcAvailable = true;
 
   private subscriptions = [];
@@ -144,13 +146,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onBusy(busy) {
-    if (busy) {
-      this.buttonState = State.Updating;
-    }
+    this.generating = busy;
   }
 
   async signUp() {
-    // this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
     await this.router.navigate(['/registration', this.login]);
   }
 
