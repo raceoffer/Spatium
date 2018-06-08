@@ -16,7 +16,7 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { take, takeUntil, map } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthService, AuthFactor, Factor } from '../../services/auth.service';
@@ -37,6 +37,11 @@ import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-
 import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
 import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
 import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
+
+import { randomBytes } from 'crypto-core-async/lib/utils';
+import { RegistrationSuccessComponent } from "../registration-success/registration-success.component";
+import { BackupComponent } from "../backup/backup.component";
+import { catchError, mapTo } from "rxjs/internal/operators";
 
 @Component({
   selector: 'app-registration',
@@ -59,8 +64,9 @@ export class RegistrationComponent implements OnDestroy {
 
   public advanced = false;
   public login: string = null;
+  public seed: any = null;
 
-  public factors = new BehaviorSubject<Array<Factor>>([]);
+  public factors = new BehaviorSubject<Array<any>>([]);
   public factorItems = toBehaviourSubject(this.factors.pipe(
     map(factors => factors.map(factor => {
       const entry = this.authService.authFactors.get(factor.type as AuthFactor);
@@ -80,8 +86,10 @@ export class RegistrationComponent implements OnDestroy {
   uploading = false;
   cancel = new Subject<boolean>();
 
-  factorDialog = null;
-  factorOverlay = null;
+  private factorDialog = null;
+  private factorOverlay = null;
+  private backupOverlay = null;
+  private successOverlay = null;
 
   private subscriptions = [];
 
@@ -100,8 +108,6 @@ export class RegistrationComponent implements OnDestroy {
     this.subscriptions.push(
       activatedRoute.paramMap.subscribe(async params => {
         this.login = params.get('login');
-
-        // this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
       })
     );
 
@@ -124,6 +130,16 @@ export class RegistrationComponent implements OnDestroy {
     if (this.factorOverlay) {
       this.factorOverlay.dismiss();
       this.factorOverlay = null;
+    }
+
+    if (this.backupOverlay) {
+      this.backupOverlay.dismiss();
+      this.backupOverlay = null;
+    }
+
+    if (this.successOverlay) {
+      this.successOverlay.dismiss();
+      this.successOverlay = null;
     }
   }
 
@@ -194,6 +210,67 @@ export class RegistrationComponent implements OnDestroy {
     });
   }
 
+  public openBackupOverlay(id, data) {
+    if (this.backupOverlay) {
+      return;
+    }
+
+    const config = new OverlayConfig();
+
+    config.height = '100%';
+    config.width = '100%';
+
+    this.backupOverlay = this.overlay.create(config);
+    const portal = new ComponentPortal<BackupComponent>(BackupComponent);
+    const componentRef: ComponentRef<BackupComponent> = this.backupOverlay.attach(portal);
+
+    componentRef.instance.id = id;
+    componentRef.instance.data = data;
+
+    componentRef.instance.back.subscribe(() => {
+      this.backupOverlay.dispose();
+      this.backupOverlay = null;
+    });
+    componentRef.instance.success.subscribe(async () => {
+      this.backupOverlay.dispose();
+      this.backupOverlay = null;
+
+      this.openSuccessOverlay();
+
+      this.notification.show('Successfully uploaded the secret');
+    });
+  }
+
+  public openSuccessOverlay() {
+    if (this.successOverlay) {
+      return;
+    }
+
+    const config = new OverlayConfig();
+
+    config.height = '100%';
+    config.width = '100%';
+
+    this.successOverlay = this.overlay.create(config);
+    const portal = new ComponentPortal<RegistrationSuccessComponent>(RegistrationSuccessComponent);
+    const componentRef: ComponentRef<RegistrationSuccessComponent> = this.successOverlay.attach(portal);
+
+    componentRef.instance.back.subscribe(async () => {
+      this.successOverlay.dispose();
+      this.successOverlay = null;
+
+      await this.router.navigate(['/start']);
+    });
+    componentRef.instance.submit.subscribe(async () => {
+      this.successOverlay.dispose();
+      this.successOverlay = null;
+
+      this.keychain.setSeed(this.seed);
+
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+    });
+  }
+
   removeFactor(index){
     this.factors.next(this.factors.getValue().slice(0, index));
   }
@@ -212,67 +289,76 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   async onBackClicked() {
-    this.cancel.next(true);
-
-    await this.router.navigate(['/login']);
+    if (this.backupOverlay) {
+      this.backupOverlay.dispose();
+      this.backupOverlay = null;
+    } else if (this.successOverlay) {
+      this.successOverlay.dispose();
+      this.successOverlay = null;
+    } else if (this.factorOverlay) {
+      this.factorOverlay.dispose();
+      this.factorOverlay = null;
+    } else if (this.factorDialog) {
+      this.factorDialog.close();
+      this.factorDialog = null;
+    } else {
+      this.cancel.next(true);
+      await this.router.navigate(['/login']);
+    }
   }
 
   async signUp() {
-    // try {
-    //   this.uploading = true;
-    //
-    //   if (!this.passwordsIsMatching()) {
-    //     throw {
-    //       message: 'Passwords do not match. Please try again.',
-    //       name: 'PassNotMatch'
-    //     };
-    //   }
-    //
-    //   let factors = [];
-    //   for (let i = 0; i < this.factors.length; ++i) {
-    //     factors.push(await this.factors[i].toBuffer());
-    //   }
-    //
-    //   factors = factors.reverse();
-    //
-    //   //factors.push(await this.authService.newFactor(FactorType.PASSWORD, Buffer.from(this.password, 'utf-8')).toBuffer());
-    //
-    //   const tree = factors.reduce((rest, factor) => {
-    //     const node = {
-    //       factor: factor
-    //     };
-    //     if (rest) {
-    //       node['children'] = [rest];
-    //     }
-    //     return node;
-    //   }, null);
-    //
-    //  // const id = await this.authService.toId(this.authService.login.toLowerCase());
-    //   //console.log(`RegistrationComponent.signUp: this.authService.login=${this.authService.login.toLowerCase()}`);
-    //  // const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
-    //   //this.authService.currentTree = data;
-    //   //
-    //   // try {
-    //   //   const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
-    //   //   if (!success) {
-    //   //     await this.router.navigate(['/backup', { back: 'registration'}]);
-    //   //     return;
-    //   //   }
-    //   //
-    //   //   this.authService.clearFactors();
-    //   //   this.authService.password = '';
-    //   //   this.authService.currentTree = null;
-    //   //   this.factors = [];
-    //   //   this.password = '';
-    //   //
-    //   //   await this.router.navigate(['/reg-success']);
-    //   // } catch (ignored) {
-    //   //   await this.router.navigate(['/backup', { back: 'registration'}]);
-    //   // }
-    // } catch (e) {
-    //   this.notification.show(e.message);
-    // } finally {
-    //   this.uploading = false;
-    // }
+    try {
+      this.uploading = true;
+
+      this.seed = await randomBytes(64, this.workerService.worker);
+
+      const factors = [{
+        type: AuthFactor.Password,
+        value: Buffer.from(this.password, 'utf-8')
+      }].concat(this.factors.getValue());
+
+      const packed = [];
+      for (const factor of factors) {
+        packed.push(await this.authService.pack(factor.type, factor.value));
+      }
+
+      const reversed = packed.reverse();
+
+      const tree = reversed.reduce((rest, factor) => {
+        const node = {
+          factor: factor
+        };
+        if (rest) {
+          node['children'] = [rest];
+        }
+        return node;
+      }, null);
+
+      const id = await this.authService.toId(this.login.toLowerCase());
+      const data = await packTree(tree, this.seed, this.workerService.worker);
+
+      const result = await this.dds.sponsorStore(id, data).pipe(
+        take(1),
+        takeUntil(this.cancel),
+        mapTo({ success: true }),
+        catchError(error => of({ success: false }))
+      ).toPromise();
+
+      if (!result) {
+        // that means cancelled
+        return;
+      } else if (result.success === false) {
+        await this.openBackupOverlay(id, data);
+        this.notification.show('Failed to save registration data to the storage. You can perform registration manually');
+      } else if (result.success === true) {
+        await this.openSuccessOverlay();
+        this.notification.show('Successfully uploaded the secret');
+      }
+    } catch (e) {
+      this.notification.show('Registration error');
+    } finally {
+      this.uploading = false;
+    }
   }
 }

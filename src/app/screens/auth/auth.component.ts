@@ -72,7 +72,7 @@ export class AuthComponent implements OnDestroy {
   public busy = false;
   public advanced = false;
 
-  public factors = new BehaviorSubject<Array<Factor>>([]);
+  public factors = new BehaviorSubject<Array<any>>([]);
   public factorItems = toBehaviourSubject(this.factors.pipe(
     map(factors => factors.map(factor => {
       const entry = this.authService.authFactors.get(factor.type as AuthFactor);
@@ -176,8 +176,10 @@ export class AuthComponent implements OnDestroy {
     });
 
     this.factorDialog.afterClosed().subscribe(async result => {
-      await this.openFactorOverlay(result);
-      this.factorDialog = null;
+      if (result) {
+        await this.openFactorOverlay(result);
+        this.factorDialog = null;
+      }
     });
   }
 
@@ -218,7 +220,7 @@ export class AuthComponent implements OnDestroy {
 
       this.advanced = true;
     });
-    componentRef.instance.submit.subscribe(async (factor) => {
+    componentRef.instance.submit.subscribe(async factor => {
       this.factorOverlay.dispose();
       this.factorOverlay = null;
 
@@ -281,6 +283,14 @@ export class AuthComponent implements OnDestroy {
   }
 
   async onBackClicked() {
-    await this.router.navigate(['/login']);
+    if (this.factorOverlay) {
+      this.factorOverlay.dispose();
+      this.factorOverlay = null;
+    } else if (this.factorDialog) {
+      this.factorDialog.close();
+      this.factorDialog = null;
+    } else {
+      await this.router.navigate(['/login']);
+    }
   }
 }

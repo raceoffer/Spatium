@@ -27,15 +27,13 @@ export class EqualToDirective implements Validator {
   validate(c: FormControl): { [key: string]: any } {
     const e = c.root.get(this.equalTo);
 
-    console.log(this.equalTo, c.value, e);
-
     if (e && c.value !== e.value && !this.reverse) {
       return {
         equal: false
       }
     }
 
-    if (e && c.value === e.value && this.reverse) {
+    if (e && c.value === e.value && this.reverse && e.errors !== null) {
       delete e.errors['equal'];
       if (!Object.keys(e.errors).length) {
         e.setErrors(null);

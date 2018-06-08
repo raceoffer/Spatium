@@ -10,7 +10,7 @@
   <form
     class="width-button-container content text-center"
     style="margin-top: 30px; margin-bottom: 0px; overflow: unset; display: flex; flex-flow: column; display: flex; flex-flow: column;"
-    (click)="signUp()">
+    (submit)="signUp()">
     <div class="header text-center">
       <div class="entry" style="padding-bottom: 20px">
         <div class="light" style="text-align: center; overflow: hidden; text-overflow: ellipsis; display: inline-block">
@@ -43,23 +43,36 @@
       </div>
     </div>
 
-    <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
-         style="overflow: auto; max-height: 100%; min-height: fit-content;" *ngIf="!advanced">
+    <div
+      class="content text-center"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      style="overflow: auto; max-height: 100%; min-height: fit-content;"
+      *ngIf="!advanced">
       <div class="reg-warning">
         <span>{{ stWarning }}</span>
       </div>
       <div class="width-button-width" style="display: inline-block">
-        <button mat-button style="opacity: 0.5; text-decoration: underline; color: #1a0dab;" (click)="openAdvanced()">Advanced security</button>
+        <button type="button" mat-button style="opacity: 0.5; text-decoration: underline; color: #1a0dab;" (click)="openAdvanced()">Advanced security</button>
       </div>
     </div>
 
-    <div class="content text-center" style="min-height: fit-content;"
-         style="overflow: auto; max-height: 100%; min-height: fit-content;" *ngIf="advanced">
-      <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of (factorItems | async);"
-           [@anim]="'active'">
+    <div
+      class="content text-center"
+      style="min-height: fit-content; overflow: auto; max-height: 100%; min-height: fit-content;"
+      *ngIf="advanced">
+      <div
+        style="width: 100%;"
+        fxLayout="column"
+        fxLayoutAlign="center center"
+        *ngFor="let factor of (factorItems | async);"
+        [@anim]="'active'">
         <div style="margin-left: 50px;">
-          <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px"
-                  (click)="removeFactor(factor)">
+          <button
+            mat-icon-button
+            [disabled]="uploading"
+            style="width: 16px; height: 16px; line-height: 16px"
+            (click)="removeFactor(factor)">
             <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
           </button>
         </div>

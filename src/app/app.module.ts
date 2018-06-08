@@ -196,7 +196,8 @@ import { EqualToDirective } from './directives/equal-to.directive';
     PincodeAuthFactorComponent,
     GraphicKeyAuthFactorComponent,
     QrAuthFactorComponent,
-    NfcAuthFactorComponent
+    NfcAuthFactorComponent,
+    RegistrationSuccessComponent
   ]
 })
 
