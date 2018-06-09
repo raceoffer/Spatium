@@ -1,44 +1,101 @@
 <app-toolbar
-  [label]="title"
+  label="Add an authorization path"
   [isColored]="true"
   [isShadowed]="true"
-  (backClicked)="onBackClicked()"></app-toolbar>
+  (backClicked)="onBack()"></app-toolbar>
 
-<form class="width-button-container text-center box"
-      fxLayout="column" fxLayoutAlign="start center" id="factor-container" #factorContainer>
+<form
+  class="width-button-container text-center box"
+  fxLayout="column"
+  fxLayoutAlign="start center"
+  id="factor-container"
+  #factorContainer>
   <div class="text-center content" style="margin-bottom: 30px;">
     <mat-icon style="margin-top: 30px;">lock_outline</mat-icon>
-    <div style="width: 100%;" fxLayout="column" fxLayoutAlign="center center" *ngFor="let factor of factors;"
-         [@anim]="factor.state">
+    <div
+      style="width: 100%;"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      *ngIf="(idFactor | async)"
+      [@anim]="active">
       <div style="margin-left: 50px;">
-        <button mat-icon-button [disabled]="uploading" style="width: 16px; height: 16px; line-height: 16px"
-                (click)="removeFactor(factor)">
+        <button
+          mat-icon-button
+          [disabled]="uploading"
+          style="width: 16px; height: 16px; line-height: 16px"
+          (click)="setIdFactor(null)">
           <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
         </button>
       </div>
 
-      <div *ngIf="factor.icon != ''">
-        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
-      </div>
-      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset != ''">
-          <span class="{{factor.icon_asset}}-mask"></span>
+      <div *ngIf="(idFactorItem | async).icon">
+        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ (idFactorItem | async).icon }}</mat-icon>
       </div>
 
+      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="(idFactorItem | async).icon_asset">
+        <span class="{{ (idFactorItem | async).icon_asset }}-mask"></span>
+      </div>
+      <div style="margin: auto; width: 100px;">
+        <hr>
+      </div>
+    </div>
+
+    <div
+      style="width: 100%;"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      *ngFor="let factor of (factorItems | async); index as i"
+      [@anim]="active">
+      <div style="margin-left: 50px;">
+        <button
+          mat-icon-button
+          [disabled]="uploading"
+          style="width: 16px; height: 16px; line-height: 16px"
+          (click)="removeFactor(i)">
+          <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
+        </button>
+      </div>
+
+      <div *ngIf="factor.icon">
+        <mat-icon color="accent"  matPrefix class="factor-icon-big">{{ factor.icon }}</mat-icon>
+      </div>
+
+      <div fxLayoutAlign="center center" style="height: 50px; width: 50px;" *ngIf="factor.icon_asset">
+          <span class="{{ factor.icon_asset }}-mask"></span>
+      </div>
     </div>
 
     <div class="margin-top-18" style="padding-bottom: 10px;">
-      <button #dialogButton [disabled]="uploading" color="accent" mat-mini-fab (click)="addNewFactor()" type="button" class="color">
+      <button
+        #dialogButton
+        [disabled]="uploading"
+        color="accent"
+        mat-mini-fab
+        (click)="onAdd()"
+        type="button" class="color">
         <mat-icon>add</mat-icon>
       </button>
     </div>
-    <mat-icon class="margin-top-18" *ngIf="factors.length > 0">lock_open</mat-icon>
+    <mat-icon class="margin-top-18" *ngIf="(idFactor | async)">lock_open</mat-icon>
   </div>
 
   <div class="footer text-center" style="bottom: 0px;">
-    <button type="submit" mat-raised-button color="accent" class="width-button color" *ngIf="!uploading"
-            [disabled]="factors.length < 2" (click)="onSaveClicked()">Save
+    <button
+      type="submit"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      *ngIf="!uploading"
+      [disabled]="(factors | async).length < 1"
+      (click)="onSave()">Save
     </button>
-    <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading">
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      disabled
+      *ngIf="uploading">
       <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
     </button>
   </div>

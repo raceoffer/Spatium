@@ -1,52 +1,38 @@
-import { Component, EventEmitter, HostBinding, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
 import { NavigationService } from "../../../services/navigation.service";
-
-enum State {
-  nav = 0,
-  lang = 1
-}
+import { FactorNodeComponent } from "../factor-node/factor-node.component";
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
+export class SettingsComponent {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  @Output() back = new EventEmitter<any>();
+  @Output() cancelled = new EventEmitter<any>();
 
-  title = 'Settings';
-  state = State.nav;
   navLinks = [{
-    name: ' Add authentication path',
+    name: 'Add authentication path',
     link: 'factornode'
   }, {
     name: 'Language',
     link: 'lang',
   }];
-  languages = [{
-    name: 'English',
-    value: 'en'
-  }];
 
-  private subscriptions = [];
+  constructor(private readonly navigationService: NavigationService) {}
 
-  constructor(
-    private readonly navigationService: NavigationService
-  ) {}
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
+  public cancel() {
+    this.cancelled.next();
   }
 
-  async onBackClicked() {
-    this.back.next();
+  public onBack() {
     this.navigationService.back();
   }
 
-  onSettingsClick(navLink) {}
-
-  onLanguageClick(ignored) {}
+  onSelected(navLink) {
+    if (navLink.link === 'factornode') {
+      const componentRef = this.navigationService.pushOverlay(FactorNodeComponent);
+    }
+  }
 }

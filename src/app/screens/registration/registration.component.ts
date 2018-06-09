@@ -80,8 +80,8 @@ export class RegistrationComponent implements OnDestroy {
     'Your funds safety depends on the strongness of the authentication factors. ' +
     'Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
 
-  uploading = false;
-  cancel = new Subject<boolean>();
+  public uploading = false;
+  private cancel = new Subject<boolean>();
 
   private factorDialog = null;
   private factorOverlay = null;
@@ -155,9 +155,11 @@ export class RegistrationComponent implements OnDestroy {
       data: Array.from(this.authService.authFactors.values())
     });
 
-    this.factorDialog.afterClosed().subscribe(async result => {
-      await this.openFactorOverlay(result);
+    this.factorDialog.afterClosed().subscribe(result => {
       this.factorDialog = null;
+      if (typeof result !== 'undefined') {
+        this.openFactorOverlay(result);
+      }
     });
   }
 

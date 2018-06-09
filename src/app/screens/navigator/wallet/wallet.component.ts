@@ -100,7 +100,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     this.onResize();
   }
 

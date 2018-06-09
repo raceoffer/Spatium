@@ -65,14 +65,14 @@
         style="width: 100%;"
         fxLayout="column"
         fxLayoutAlign="center center"
-        *ngFor="let factor of (factorItems | async);"
+        *ngFor="let factor of (factorItems | async); index as i"
         [@anim]="'active'">
         <div style="margin-left: 50px;">
           <button
             mat-icon-button
             [disabled]="uploading"
             style="width: 16px; height: 16px; line-height: 16px"
-            (click)="removeFactor(factor)">
+            (click)="removeFactor(i)">
             <mat-icon style="height: 14px; width: 14px; font-size: 14px; line-height: 14px">close</mat-icon>
           </button>
         </div>

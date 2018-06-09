@@ -160,10 +160,10 @@ export class AuthComponent implements OnDestroy {
       data: Array.from(this.authService.authFactors.values())
     });
 
-    this.factorDialog.afterClosed().subscribe(async result => {
+    this.factorDialog.afterClosed().subscribe(result => {
       this.factorDialog = null;
       if (typeof result !== 'undefined') {
-        await this.openFactorOverlay(result);
+        this.openFactorOverlay(result);
       }
     });
   }

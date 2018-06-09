@@ -1,25 +1,39 @@
-<form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
+<app-toolbar
+  label="Password"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
 
-  <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
-    <input
-      type="text"
-      placeholder="{{stLogin}}"
-      [(ngModel)]="userName"
-      name="UserName"
-      [autofocus] (keyup.enter)="removeFocus($event)">
-
-    <button matSuffix mat-icon-button (click)="onGenerateButtonClicked($event)" style="position: absolute; right: 0px;">
-      <mat-icon style="opacity: 0.5;" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
-      <mat-icon class="sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
-      <mat-icon *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
-    </button>
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
   </div>
 
-  <div class="footer text-center" style="bottom: 0px;">
-    <button type="button" mat-raised-button color="accent"
-            class="width-button color"
-            (click)="onNext()"
-            [disabled]="!userName"
-    >Next</button>
-  </div>
-</form>
+  <app-login
+    class="factor-content"
+    style="margin-top: 70px"
+    (login)="onInput($event)"
+    (busy)="onBusy($event)">
+  </app-login>
+
+  <button
+    type="button"
+    mat-raised-button
+    color="accent"
+    class="width-button color"
+    (click)="onSubmit()"
+    [disabled]="!input"
+    *ngIf="!busy">
+    Continue
+  </button>
+  <button
+    type="button"
+    mat-raised-button
+    color="accent"
+    class="width-button color"
+    disabled
+    *ngIf="busy">
+    <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+  </button>
+</div>

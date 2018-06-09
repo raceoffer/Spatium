@@ -67,22 +67,22 @@ export class AuthService {
       'text_fields',
       null
     ));
-
-    this.idFactors.set(IdFactor.QR, new Factor(
-      IdFactor.QR,
-      'QR',
-      null,
-      'icon-custom-qr_code'
-    ));
-
-    if (nfcSupported) {
-      this.idFactors.set(IdFactor.NFC, new Factor(
-        IdFactor.NFC,
-        'NFC',
-        'nfc',
-        null
-      ));
-    }
+    //
+    // this.idFactors.set(IdFactor.QR, new Factor(
+    //   IdFactor.QR,
+    //   'QR',
+    //   null,
+    //   'icon-custom-qr_code'
+    // ));
+    //
+    // if (nfcSupported) {
+    //   this.idFactors.set(IdFactor.NFC, new Factor(
+    //     IdFactor.NFC,
+    //     'NFC',
+    //     'nfc',
+    //     null
+    //   ));
+    // }
 
     this.authFactors.set(AuthFactor.Password, new Factor(
       AuthFactor.Password,

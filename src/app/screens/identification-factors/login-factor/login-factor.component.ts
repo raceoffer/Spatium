@@ -1,120 +1,43 @@
-import {Component, Output, EventEmitter, Input, HostBinding, AfterViewInit} from '@angular/core';
-import { AuthService } from '../../../services/auth.service';
-import { IdFactor } from '../../../services/auth.service';
-import { DDSService } from '../../../services/dds.service';
-import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs';
-
-enum State {
-  Ready,
-  Updating,
-  Exists,
-  Error
-}
+import {Component, Output, EventEmitter, HostBinding } from '@angular/core';
+import { NavigationService } from "../../../services/navigation.service";
+import { IdFactor } from "../../../services/auth.service";
 
 @Component({
   selector: 'app-login-factor',
   templateUrl: './login-factor.component.html',
   styleUrls: ['./login-factor.component.css']
 })
-export class LoginFactorComponent implements AfterViewInit {
+export class LoginFactorComponent {
+  @HostBinding('class') classes = 'factor-component';
 
-  @HostBinding('class') classes = 'content factor-content text-center';
-  private _userName = '';
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
+  @Output() submit: EventEmitter<any> = new EventEmitter<any>();
 
-  stLogin = 'Login';
-  uploading = false;
+  public busy = false;
+  public input = '';
 
-  stateType = State;
-  usernameState = State.Ready;
+  constructor(private readonly navigationService: NavigationService) {}
 
-  timer;
-
-  @Input() genericLogin: string;
-  @Input() isExport = false;
-  @Input() isAuth = false;
-  @Input() secretValue = '';
-  value: BehaviorSubject<string> = null;
-
-  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
-  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
-
-  get userName() {
-    return this._userName;
+  public cancel() {
+    this.cancelled.next();
   }
 
-  set userName(newUserName) {
-    this._userName = newUserName;
-    if (this._userName.length > 0) {
-      this.buisyEvent.emit();
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
-      this.timer = setTimeout(() => {
-        this.inputEvent.emit(this._userName);
-      }, 1000);
-    } else {
-      this.clearEvent.emit();
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
-    }
+  public onBack() {
+    this.navigationService.back();
   }
 
-  constructor(
-    private readonly dds: DDSService,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService
-  ) { }
-
-  ngAfterViewInit() {
-    this.userName = '';
+  public onBusy(busy) {
+    this.busy = busy;
   }
 
-  async generateNewLogin() {
-    this.usernameState = State.Updating;
-    try {
-      do {
-        this.userName = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await this.authService.toId(this._userName.toLowerCase()));
-        console.log(`LoginComponent.generateNewLogin: this.userName=${this.userName}, username to id=${this._userName.toLowerCase()}, exists=${exists}`);
-        if (!exists) {
-          this.notification.show('Unique login was generated');
-          this.usernameState = State.Ready;
-          break;
-        }
-      } while (true);
-    } catch (ignored) {
-      this.notification.show('DDS is unavailable');
-      this.usernameState = State.Error;
-    }
+  public onInput(login) {
+    this.input = login;
   }
 
-  onFocusOut() {
-    this.stLogin = 'Login';
-  }
-
-  onFocus() {
-    this.stLogin = '';
-  }
-
-  // Hide the keyboard after pressing the submit button on the keyboard
-  removeFocus(el) {el.target.blur(); }
-
-  // function is called on Enter button click in text field
-  async onGenerateButtonClicked(e: MouseEvent) {
-    if (e.offsetX === 0 && e.offsetY === 0) { // ignore Enter button click in text field
-      console.log('factors LoginComponent.onGenerateButtonClicked got click from keyboard - ignore');
-    }
-    else {
-      console.log('factors LoginComponent.onGenerateButtonClicked got click by button - proceed');
-      await this.generateNewLogin();
-    }
-  }
-
-  async onNext() {
-    this.onSuccess.emit({factor: IdFactor.Login, value: this.userName});
+  public onSubmit() {
+    this.submit.next({
+      type: IdFactor.Login,
+      value: this.input
+    });
   }
 }
