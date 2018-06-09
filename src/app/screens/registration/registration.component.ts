@@ -1,5 +1,5 @@
 import {
-  Component, ComponentRef,
+  Component,
   ElementRef,
   HostBinding,
   OnDestroy,
@@ -19,18 +19,15 @@ import * as $ from 'jquery';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { take, takeUntil, map } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { AuthService, AuthFactor, Factor } from '../../services/auth.service';
+import { AuthService, AuthFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
-import { AuthFactor as AuthFactorInterfce } from "../authorization-factors/auth-factor";
 
 import { packTree } from 'crypto-core-async/lib/utils';
 import { toBehaviourSubject } from "../../utils/transformers";
-import { ComponentPortal } from "@angular/cdk/portal";
-import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
 import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
 import { PincodeAuthFactorComponent } from "../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
 import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
@@ -95,7 +92,6 @@ export class RegistrationComponent implements OnDestroy {
 
   constructor(
     private readonly dialog: MatDialog,
-    private readonly overlay: Overlay,
     private readonly router: Router,
     private readonly activatedRoute: ActivatedRoute,
     private readonly dds: DDSService,
@@ -183,57 +179,22 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   private openFactorOverlayOfType(componentType) {
-    if (this.factorOverlay) {
-      return;
-    }
+    const componentRef = this.navigationService.pushOverlay(componentType);
 
-    const config = new OverlayConfig();
-
-    config.height = '100%';
-    config.width = '100%';
-
-    this.factorOverlay = this.overlay.create(config);
-    const portal = new ComponentPortal<AuthFactorInterfce>(componentType);
-    const componentRef: ComponentRef<AuthFactorInterfce> = this.factorOverlay.attach(portal);
-
-    componentRef.instance.back.subscribe(() => {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-
-      this.advanced = true;
-    });
     componentRef.instance.submit.subscribe(async (factor) => {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-
+      this.navigationService.acceptOverlay();
       await this.addFactor(factor);
     });
   }
 
   public openBackupOverlay(id, data) {
-    if (this.backupOverlay) {
-      return;
-    }
-
-    const config = new OverlayConfig();
-
-    config.height = '100%';
-    config.width = '100%';
-
-    this.backupOverlay = this.overlay.create(config);
-    const portal = new ComponentPortal<BackupComponent>(BackupComponent);
-    const componentRef: ComponentRef<BackupComponent> = this.backupOverlay.attach(portal);
+    const componentRef = this.navigationService.pushOverlay(BackupComponent);
 
     componentRef.instance.id = id;
     componentRef.instance.data = data;
 
-    componentRef.instance.back.subscribe(() => {
-      this.backupOverlay.dispose();
-      this.backupOverlay = null;
-    });
     componentRef.instance.success.subscribe(async () => {
-      this.backupOverlay.dispose();
-      this.backupOverlay = null;
+      this.navigationService.acceptOverlay();
 
       this.openSuccessOverlay();
 
@@ -242,28 +203,13 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   public openSuccessOverlay() {
-    if (this.successOverlay) {
-      return;
-    }
+    const componentRef = this.navigationService.pushOverlay(RegistrationSuccessComponent);
 
-    const config = new OverlayConfig();
-
-    config.height = '100%';
-    config.width = '100%';
-
-    this.successOverlay = this.overlay.create(config);
-    const portal = new ComponentPortal<RegistrationSuccessComponent>(RegistrationSuccessComponent);
-    const componentRef: ComponentRef<RegistrationSuccessComponent> = this.successOverlay.attach(portal);
-
-    componentRef.instance.back.subscribe(async () => {
-      this.successOverlay.dispose();
-      this.successOverlay = null;
-
+    componentRef.instance.cancelled.subscribe(async () => {
       await this.router.navigate(['/start']);
     });
     componentRef.instance.submit.subscribe(async () => {
-      this.successOverlay.dispose();
-      this.successOverlay = null;
+      this.navigationService.acceptOverlay();
 
       this.keychain.setSeed(this.seed);
 
@@ -289,22 +235,8 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   async onBackClicked() {
-    if (this.backupOverlay) {
-      this.backupOverlay.dispose();
-      this.backupOverlay = null;
-    } else if (this.successOverlay) {
-      this.successOverlay.dispose();
-      this.successOverlay = null;
-    } else if (this.factorOverlay) {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-    } else if (this.factorDialog) {
-      this.factorDialog.close();
-      this.factorDialog = null;
-    } else {
-      this.cancel.next(true);
-      await this.router.navigate(['/login']);
-    }
+    this.cancel.next(true);
+    await this.router.navigate(['/login']);
   }
 
   async signUp() {
@@ -355,7 +287,7 @@ export class RegistrationComponent implements OnDestroy {
         await this.openSuccessOverlay();
         this.notification.show('Successfully uploaded the secret');
       }
-    } catch (e) {
+    } catch (ignored) {
       this.notification.show('Registration error');
     } finally {
       this.uploading = false;

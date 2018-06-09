@@ -1,7 +1,5 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { NavigationService } from '../../../services/navigation.service';
+import { Component, EventEmitter, HostBinding, OnDestroy, Output } from '@angular/core';
+import { NavigationService } from "../../../services/navigation.service";
 
 enum State {
   nav = 0,
@@ -13,8 +11,11 @@ enum State {
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements OnInit, OnDestroy {
+export class SettingsComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+
+  @Output() back = new EventEmitter<any>();
+
   title = 'Settings';
   state = State.nav;
   navLinks = [{
@@ -28,19 +29,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
     name: 'English',
     value: 'en'
   }];
+
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly authService: AuthService,
-              private readonly navigationService: NavigationService) { }
-
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-  }
+  constructor(
+    private readonly navigationService: NavigationService
+  ) {}
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
@@ -48,26 +42,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   async onBackClicked() {
-    switch (this.state) {
-      case State.nav: {
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-        break;
-      }
-      case State.lang: {
-        this.state = State.nav;
-        break;
-      }
-    }
+    this.back.next();
+    this.navigationService.back();
   }
 
-  async onSettingsClick(navLink) {
-    if (navLink.link === 'factornode') {
-      // this.authService.clearFactors();
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['factornode']}}]);
-    } else if (navLink.link === 'lang') {
-      this.state = State.lang;
-    }
-  }
+  onSettingsClick(navLink) {}
 
   onLanguageClick(ignored) {}
 }

@@ -1,13 +1,12 @@
 import { AfterViewInit, Component, EventEmitter, HostBinding, NgZone, Output } from '@angular/core';
 import { AuthFactor } from '../../../services/auth.service';
-import { AuthFactor as AuthFactorInterface } from "../auth-factor";
 
 @Component({
   selector: 'app-file-auth-factor',
   templateUrl: './file-auth-factor.component.html',
   styleUrls: ['./file-auth-factor.component.css']
 })
-export class FileAuthFactorComponent implements AfterViewInit, AuthFactorInterface {
+export class FileAuthFactorComponent implements AfterViewInit {
   @HostBinding('class') classes = 'content factor-content text-center';
 
   @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();

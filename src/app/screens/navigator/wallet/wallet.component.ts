@@ -54,7 +54,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly wallet: WalletService
   ) {
     keychain.topTokens.forEach((tokenInfo) => {
-      this.titles.push(this.tokenEntry(tokenInfo));
+      this.titles.push(WalletComponent.tokenEntry(tokenInfo));
     });
 
     this.titles.push(
@@ -81,14 +81,14 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public onNavRequest() {
-    this.navigationService.navRequest.next(true);
+    this.navigationService.toggleNavigation();
   }
 
   public clearFilterValue() {
     this.filterValue = '';
   }
 
-  public tokenEntry(tokenInfo: TokenEntry) {
+  public static tokenEntry(tokenInfo: TokenEntry) {
     return {
       title: tokenInfo.name,
       symbols: tokenInfo.ico,
@@ -110,7 +110,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onTileClicked(coin: Coin) {
-    console.log(coin);
     await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', coin]}}]);
   }
 

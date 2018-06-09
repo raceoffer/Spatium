@@ -1,5 +1,5 @@
 import {
-  Component, ComponentRef,
+  Component,
   ElementRef,
   HostBinding,
   OnDestroy,
@@ -16,21 +16,18 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { AuthFactor, AuthService, Factor, IdFactor } from '../../services/auth.service';
+import { AuthFactor, AuthService, IdFactor } from '../../services/auth.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
 import { BehaviorSubject } from "rxjs/index";
-import { Overlay, OverlayConfig } from "@angular/cdk/overlay";
-import { ComponentPortal } from "@angular/cdk/portal";
 import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
 import { PincodeAuthFactorComponent } from "../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
 import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
 import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
 import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
 import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
-import { AuthFactor as AuthFactorInterfce } from "../authorization-factors/auth-factor";
 import { toBehaviourSubject } from "../../utils/transformers";
 import { map } from "rxjs/operators";
 import { DefaultAuthFactorComponent } from "../authorization-factors/default-auth-factor/default-auth-factor.component";
@@ -88,13 +85,11 @@ export class AuthComponent implements OnDestroy {
   private remoteEncryptedTrees = [];
 
   private factorDialog = null;
-  private factorOverlay = null;
 
   private subscriptions = [];
 
   constructor(
     private readonly dialog: MatDialog,
-    private readonly overlay: Overlay,
     private readonly router: Router,
     private readonly activatedRoute: ActivatedRoute,
     private readonly authService: AuthService,
@@ -132,7 +127,7 @@ export class AuthComponent implements OnDestroy {
       if (type !== IdFactor.Login) {
         this.openFactorDialog();
       } else {
-        this.openFactorOverlayOfType(DefaultAuthFactorComponent);
+        this.opendDefaultFactorOverlay();
       }
     } catch (e) {
       this.state = State.Error;
@@ -147,16 +142,6 @@ export class AuthComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-
-    if (this.factorDialog) {
-      this.factorDialog.close();
-      this.factorDialog = null;
-    }
-
-    if (this.factorOverlay) {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-    }
   }
 
   goBottom() {
@@ -176,10 +161,25 @@ export class AuthComponent implements OnDestroy {
     });
 
     this.factorDialog.afterClosed().subscribe(async result => {
-      if (result) {
+      this.factorDialog = null;
+      if (typeof result !== 'undefined') {
         await this.openFactorOverlay(result);
-        this.factorDialog = null;
       }
+    });
+  }
+
+  public opendDefaultFactorOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DefaultAuthFactorComponent);
+
+    componentRef.instance.advanced.subscribe(() => {
+      this.advanced = true;
+    });
+    componentRef.instance.cancelled.subscribe(() => {
+      this.advanced = true;
+    });
+    componentRef.instance.submit.subscribe(async factor => {
+      this.navigationService.acceptOverlay();
+      await this.addFactor(factor);
     });
   }
 
@@ -201,29 +201,10 @@ export class AuthComponent implements OnDestroy {
   }
 
   private openFactorOverlayOfType(componentType) {
-    if (this.factorOverlay) {
-      return;
-    }
+    const componentRef = this.navigationService.pushOverlay(componentType);
 
-    const config = new OverlayConfig();
-
-    config.height = '100%';
-    config.width = '100%';
-
-    this.factorOverlay = this.overlay.create(config);
-    const portal = new ComponentPortal<AuthFactorInterfce>(componentType);
-    const componentRef: ComponentRef<AuthFactorInterfce> = this.factorOverlay.attach(portal);
-
-    componentRef.instance.back.subscribe(() => {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-
-      this.advanced = true;
-    });
     componentRef.instance.submit.subscribe(async factor => {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-
+      this.navigationService.acceptOverlay();
       await this.addFactor(factor);
     });
   }
@@ -251,8 +232,8 @@ export class AuthComponent implements OnDestroy {
         throw new Error('Unknown error');
       }
     } catch(e) {
-      if (this.type === IdFactor.Login && !this.advanced) {
-        this.openFactorOverlayOfType(DefaultAuthFactorComponent);
+      if (this.type === IdFactor.Login && !this.advanced && this.factors.getValue().length === 0) {
+        this.opendDefaultFactorOverlay();
       }
       this.notification.show('Failed to decrypt secret with this factor');
     } finally {
@@ -264,6 +245,8 @@ export class AuthComponent implements OnDestroy {
     this.factors.next(this.factors.getValue().slice(0, index));
 
     this.remoteEncryptedTrees = this.remoteEncryptedTrees.slice(0, index + 1);
+
+    this.advanced = true;
 
     if (this.decryptedSeed) {
       this.decryptedSeed = null;
@@ -283,10 +266,7 @@ export class AuthComponent implements OnDestroy {
   }
 
   async onBackClicked() {
-    if (this.factorOverlay) {
-      this.factorOverlay.dispose();
-      this.factorOverlay = null;
-    } else if (this.factorDialog) {
+    if (this.factorDialog) {
       this.factorDialog.close();
       this.factorDialog = null;
     } else {

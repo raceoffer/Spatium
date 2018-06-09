@@ -1,28 +1,28 @@
-import { Component, EventEmitter, HostBinding, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
+import { NavigationService } from "../../services/navigation.service";
 
 @Component({
   selector: 'app-registration-success',
   templateUrl: './registration-success.component.html',
   styleUrls: ['./registration-success.component.css']
 })
-export class RegistrationSuccessComponent implements OnDestroy {
+export class RegistrationSuccessComponent {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Output() submit: EventEmitter<any> = new EventEmitter<any>();
-  @Output() back: EventEmitter<any> = new EventEmitter<any>();
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
 
-  private subscriptions = [];
+  constructor(private readonly navigationService: NavigationService) {}
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
+  public cancel() {
+    this.cancelled.next();
   }
 
-  onSubmit() {
+  public onBack() {
+    this.navigationService.back();
+  }
+
+  public onSubmit() {
     this.submit.next();
-  }
-
-  onBack() {
-    this.back.next();
   }
 }

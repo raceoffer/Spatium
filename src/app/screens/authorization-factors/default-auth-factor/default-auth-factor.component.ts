@@ -1,23 +1,34 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
 import { AuthFactor } from "../../../services/auth.service";
-import { AuthFactor as AuthFactorInterface } from "../auth-factor";
+import { NavigationService } from "../../../services/navigation.service";
 
 @Component({
   selector: 'app-default-auth-factor',
   templateUrl: './default-auth-factor.component.html',
   styleUrls: ['./default-auth-factor.component.css']
 })
-export class DefaultAuthFactorComponent implements AuthFactorInterface {
+export class DefaultAuthFactorComponent {
   @HostBinding('class') classes = 'factor-component';
 
+  @Output() advanced: EventEmitter<any> = new EventEmitter<any>();
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() submit: EventEmitter<any> = new EventEmitter<any>();
-  @Output() back: EventEmitter<any> = new EventEmitter<any>();
 
-  onBack() {
-    this.back.next();
+  constructor(private readonly navigationService: NavigationService) {}
+
+  public cancel() {
+    this.cancelled.next();
   }
 
-  onSubmit(password) {
+  public onBack() {
+    this.navigationService.back();
+  }
+
+  public onAdvanced() {
+    this.advanced.next();
+  }
+
+  public onSubmit(password) {
     this.submit.next({
       type: AuthFactor.Password,
       value: Buffer.from(password, 'utf-8')

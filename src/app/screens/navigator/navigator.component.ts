@@ -7,6 +7,7 @@ import { NavigationService } from "../../services/navigation.service";
 import { bufferWhen, map, debounceTime, filter } from "rxjs/operators";
 import { Subject } from "rxjs/index";
 import { NotificationService } from "../../services/notification.service";
+import { SettingsComponent } from "./settings/settings.component";
 
 @Component({
   selector: 'app-navigator',
@@ -30,7 +31,10 @@ export class NavigatorComponent implements OnDestroy {
   }, {
     name: 'Verification'
   }, {
-    name: 'Settings'
+    name: 'Settings',
+    clicked: () => {
+      this.openSettings();
+    }
   }, {
     name: 'Exit',
     clicked: async () => {
@@ -80,20 +84,14 @@ export class NavigatorComponent implements OnDestroy {
       }));
 
     this.subscriptions.push(
-      this.navigationService.navRequest.subscribe(() => {
-        this.toggle();
+      this.navigationService.navigationEvent.subscribe(() => {
+        this.toggleNavigation();
       })
     );
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
-        await this.back.next(true);
-      })
-    );
-
-    this.subscriptions.push(
-      this.back.subscribe(async () => {
-        this.notification.show('Tap again to exit');
+        await this.back.next();
       })
     );
 
@@ -105,12 +103,12 @@ export class NavigatorComponent implements OnDestroy {
     );
   }
 
-  public toggle() {
-    this.sidenav.toggle();
+  public openSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
   }
 
-  public async onNav(navLink) {
-    await this.router.navigate(navLink.link);
+  public toggleNavigation() {
+    this.sidenav.toggle();
   }
 
   public async ngOnDestroy() {
