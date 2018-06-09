@@ -7,6 +7,8 @@ import { WalletService } from '../../../services/wallet.service';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { CurrencyComponent } from "../currency/currency.component";
+import { WaitingComponent } from "../waiting/waiting.component";
 
 declare const navigator: any;
 
@@ -109,7 +111,8 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async onTileClicked(coin: Coin) {
-    await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', coin]}}]);
+    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
+    componentRef.instance.currency = coin;
   }
 
   toggleSearch(value) {
@@ -129,7 +132,11 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async goToSync() {
-    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    componentRef.instance.connected.subscribe(device => {
+      this.navigationService.acceptOverlay();
+      console.log('Connected to', device);
+    })
   }
 
   async cancelSync() {

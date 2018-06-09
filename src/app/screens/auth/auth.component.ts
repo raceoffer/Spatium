@@ -173,6 +173,7 @@ export class AuthComponent implements OnDestroy {
 
     componentRef.instance.advanced.subscribe(() => {
       this.advanced = true;
+      this.navigationService.acceptOverlay();
     });
     componentRef.instance.cancelled.subscribe(() => {
       this.advanced = true;

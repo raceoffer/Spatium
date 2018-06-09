@@ -200,7 +200,10 @@ import { EqualToDirective } from './directives/equal-to.directive';
     RegistrationSuccessComponent,
     SettingsComponent,
     FactorNodeComponent,
-    LoginFactorComponent
+    LoginFactorComponent,
+    CurrencyComponent,
+    WaitingComponent,
+    SendTransactionComponent
   ]
 })
 
