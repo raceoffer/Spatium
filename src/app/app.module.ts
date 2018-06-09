@@ -36,7 +36,6 @@ import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { DialogFactorsComponent } from './modals/dialog-factors/dialog-factors.component';
 import { AuthComponent } from './screens/auth/auth.component';
 import { BackupComponent } from './screens/backup/backup.component';
-import { ConfirmationEntryComponent } from './screens/confirmation-entry/confirmation-entry.component';
 import { LoginFactorComponent } from './screens/identification-factors/login-factor/login-factor.component';
 import { FileAuthFactorComponent } from './screens/authorization-factors/file-auth-factor/file-auth-factor.component';
 import { GraphicKeyAuthFactorComponent } from './screens/authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
@@ -88,6 +87,7 @@ import { LoginComponent } from "./inputs/login/login.component";
 import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
 import { DefaultAuthFactorComponent } from './screens/authorization-factors/default-auth-factor/default-auth-factor.component';
 import { EqualToDirective } from './directives/equal-to.directive';
+import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 
 @NgModule({
   declarations: [
@@ -128,7 +128,6 @@ import { EqualToDirective } from './directives/equal-to.directive';
     CurrencySettingsComponent,
     BackupComponent,
     ToolbarComponent,
-    ConfirmationEntryComponent,
     MainComponent,
     LoginFactorComponent,
     PasswordComponent,
@@ -138,7 +137,8 @@ import { EqualToDirective } from './directives/equal-to.directive';
     NfcReaderComponent,
     QrWriterComponent,
     DefaultAuthFactorComponent,
-    EqualToDirective
+    EqualToDirective,
+    VerifierCrateComponent
   ],
   imports: [
     OverlayModule,
@@ -203,7 +203,10 @@ import { EqualToDirective } from './directives/equal-to.directive';
     LoginFactorComponent,
     CurrencyComponent,
     WaitingComponent,
-    SendTransactionComponent
+    SendTransactionComponent,
+    SecretImportComponent,
+    SecretExportComponent,
+    DeleteSecretComponent
   ]
 })
 

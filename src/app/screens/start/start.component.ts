@@ -61,12 +61,7 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onConnectClicked() {
-    // try {
-    //   this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
-    // } catch (e) {
-    //   this.authService.encryptedSeed = null;
-    // }
-    await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
+    await this.router.navigate(['/verifier-create']);
   }
 
   eventOnBackClicked(e) {

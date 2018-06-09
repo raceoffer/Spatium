@@ -13,7 +13,7 @@ declare const window: any;
   styleUrls: ['./delete-secret.component.css']
 })
 export class DeleteSecretComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
+  @HostBinding('class') classes = 'toolbars-component overlay-background'
   title = 'Deleting secret';
   description = 'Please confirm that you want to delete the secret from this device. Type the following word with respect to the register.';
   checkPhrase = 'delete';
@@ -26,7 +26,6 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
   constructor(private readonly router: Router,
               private readonly route: ActivatedRoute,
               private readonly fs: FileService,
-              private readonly authService: AuthService,
               private readonly notification: NotificationService,
               private readonly navigationService: NavigationService) {
     this.checkPhrase = this.сapitalizeRandomChars(this.checkPhrase);
@@ -64,15 +63,8 @@ export class DeleteSecretComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async onBackClicked() {
-    switch (this.back) {
-      case 'pincode':
-        await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
-        break;
-      case 'main':
-        await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
-        break;
-    }
+  onBackClicked() {
+    this.navigationService.back();
   }
 
   async delete() {

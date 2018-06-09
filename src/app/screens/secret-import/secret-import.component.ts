@@ -23,7 +23,7 @@ enum State {
   styleUrls: ['./secret-import.component.css']
 })
 export class SecretImportComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   isScanInProgress = false;
   contentType = Content;
@@ -73,17 +73,8 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async onBackClicked() {
-    console.log('onBackClicked in secret-import');
-    console.log('isScanInProgress');
-    console.log(this.isScanInProgress);
-    if (this.isScanInProgress) {
-      this.isScanInProgress = false;
-      this.setEmpty();
-      return;
-    }
-
-    await this.router.navigate(['/confirmation-entry', { back: 'start' }]);
+  onBackClicked() {
+    this.navigationService.back();
   }
 
   toggleContent(content) {
