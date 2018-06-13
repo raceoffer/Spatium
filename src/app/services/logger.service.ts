@@ -9,8 +9,8 @@ declare const hockeyapp: any;
 
 export enum LoggerLevels {
   ALL = 0,
-  LOG,
   DEBUG,
+  LOG,
   INFO,
   WARN,
   ERROR
@@ -19,15 +19,15 @@ export enum LoggerLevels {
 @Injectable()
 export class LoggerService {
 
+  private logLevel = LoggerLevels.LOG;
+  private sessionlogPath = '';
+  private sessionlogName = '';
+  private logBuffer = '';
 
-  logLevel = LoggerLevels.ALL;
-  sessionlogPath = '';
-  sessionlogName = '';
-  logBuffer = '';
 
   constructor(private readonly fs: FileService) {
-    console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.debug = this.proxy(console, console.debug, '[DEBUG]', LoggerLevels.DEBUG);
+    console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
     console.warn = this.proxy(console, console.warn, '[WARN]', LoggerLevels.WARN);
     console.error = this.proxy(console, console.error, '[ERROR]', LoggerLevels.ERROR);
@@ -43,7 +43,7 @@ export class LoggerService {
     console.log(message, exception);
   }
 
-  proxy(context, method, message, level) {
+  proxy(context, method, message: string, level: LoggerLevels) {
     const datePipe = new DatePipe('en-US');
     const format = 'yyyy-MM-ddTHH:mm:ss.SSS z';
 
@@ -54,16 +54,24 @@ export class LoggerService {
 
       method.apply(context, text);
 
+      let textForLogger = text[0];
+      var i;
+      for (i = 1; i < text.length; i++) {
+        textForLogger = textForLogger + ' ' + text[i];
+      }
+      textForLogger = textForLogger + '\n';
+
       try {
-        if (level.valueOf() >= this.logLevel.valueOf() && this.fs.hasLogFile) {
+        if ((level.valueOf() >= this.logLevel.valueOf()) && this.fs.hasLogFile.getValue()) {
           if (this.logBuffer != null) {
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer + text.concat(['\n']).toString());
+            this.logBuffer = this.logBuffer + textForLogger;
+            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
             this.logBuffer = null;
           } else {
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, text.concat(['\n']));
+            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, textForLogger);
           }
         } else {
-          this.logBuffer = this.logBuffer + text.concat(['\n']).toString();
+          this.logBuffer = this.logBuffer + textForLogger;
         }
       } catch (e) {
       }
@@ -78,6 +86,11 @@ export class LoggerService {
     this.sessionlogPath = this.fs.getExternalPath();
 
     await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, '');
+  }
+
+  async logBufferToLog() {
+    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
+    this.logBuffer = null;
   }
 
   async deleteOldLogFiles() {

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from "rxjs/index";
+import { distinctUntilChanged, filter, mapTo, skip } from "rxjs/internal/operators";
 
 declare const cordova: any;
 declare const device: any;
@@ -7,8 +9,9 @@ declare const Buffer: any;
 
 @Injectable()
 export class FileService {
-
-  hasLogFile = false;
+  public hasLogFile: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public hasLogFileChanged: Observable<boolean> = this.hasLogFile.pipe(skip(1), distinctUntilChanged());
+  public createLogFileEvent: Observable<any> = this.hasLogFileChanged.pipe(filter(hasLogFile => hasLogFile), mapTo(null));
 
   constructor() { }
 
@@ -42,7 +45,7 @@ export class FileService {
             const tdata = new Blob([content], {type: 'text/plain'});
             fileWriter.write(tdata);
             resolve();
-            this.hasLogFile = true;
+            this.hasLogFile.next(true);
           }, (e) => { });
         }, (e) => { });
       }, (e) => { });
@@ -101,8 +104,8 @@ export class FileService {
     });
   }
 
-  async deleteOldLogFiles () {
-    const time: number = 24 * 60 *60 * 1000; // 24h
+  async deleteOldLogFiles() {
+    const time: number = 24 * 60 * 60 * 1000; // 24h
     const date: number = new Date().getTime();
 
     window.resolveLocalFileSystemURL(this.getExternalPath(),
@@ -111,7 +114,7 @@ export class FileService {
         reader.readEntries(
           function (entries) {
             var i;
-            for (i=0; i<entries.length; i++) {
+            for (i = 0; i < entries.length; i++) {
               let entry = entries[i];
               if (entry.isFile) {
                 entry.file((f) => {
