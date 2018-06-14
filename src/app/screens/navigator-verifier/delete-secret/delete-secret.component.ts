@@ -1,9 +1,5 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { FileService } from '../../../services/file.service';
+import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
-import { NotificationService } from '../../../services/notification.service';
 
 declare const window: any;
 
@@ -12,79 +8,32 @@ declare const window: any;
   templateUrl: './delete-secret.component.html',
   styleUrls: ['./delete-secret.component.css']
 })
-export class DeleteSecretComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component overlay-background'
-  title = 'Deleting secret';
-  description = 'Please confirm that you want to delete the secret from this device. Type the following word with respect to the register.';
-  checkPhrase = 'delete';
-  checkInput;
-  confirmButton = 'Confirm';
-  back = 'verify';
-  hasTouch = false;
-  private subscriptions = [];
+export class DeleteSecretComponent {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  constructor(private readonly router: Router,
-              private readonly route: ActivatedRoute,
-              private readonly fs: FileService,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) {
-    this.checkPhrase = this.сapitalizeRandomChars(this.checkPhrase);
+  @Output() submit = new EventEmitter<any>();
+
+  public checkPhrase = 'delete';
+
+  public checkInput;
+
+  public hasTouch = false;
+
+  constructor(
+    private readonly navigationService: NavigationService
+  ) {
+    this.checkPhrase = this.capitalizeRandomChars(this.checkPhrase);
   }
 
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    this.route.params.subscribe((params: Params) => {
-      if (params['back']) {
-        this.back = params['back'];
-      }
-    });
-
-    if (window.plugins) {
-      window.plugins.touchid.isAvailable(() => {
-        window.plugins.touchid.has('spatium', () => {
-          console.log('Touch ID avaialble and Password key available');
-          this.hasTouch = true;
-        }, () => {
-          console.log('Touch ID available but no Password Key available');
-        });
-      }, () => {
-        console.log('no touch id');
-      });
-    }
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  onBackClicked() {
+  onBack() {
     this.navigationService.back();
   }
 
-  async delete() {
-    if (this.hasTouch) {
-      window.plugins.touchid.delete('spatium', async () => {
-        console.log('Password key deleted');
-        await this.deleteFileSecret();
-      });
-    } else {
-      await this.deleteFileSecret();
-    }
+  onDelete() {
+    this.submit.next();
   }
 
-  async deleteFileSecret() {
-    await this.fs.deleteFile(this.fs.safeFileName('seed'));
-    this.notification.show('The secret successfully removed');
-    await this.router.navigate(['/start']);
-  }
-
-  сapitalizeRandomChars(s: string) {
+  capitalizeRandomChars(s: string) {
     const len = s.length;
     const c1 = this.getRandomNumber(0, len, undefined);
     const c2 = this.getRandomNumber(0, len, c1);

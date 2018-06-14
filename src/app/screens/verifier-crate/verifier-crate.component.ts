@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { NavigationService } from "../../services/navigation.service";
 import { Router } from "@angular/router";
 import { KeyChainService } from "../../services/keychain.service";
@@ -25,14 +25,15 @@ import { DeleteSecretComponent } from "../navigator-verifier/delete-secret/delet
   templateUrl: './verifier-crate.component.html',
   styleUrls: ['./verifier-crate.component.css']
 })
-export class VerifierCrateComponent implements OnDestroy {
+export class VerifierCrateComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   private subscriptions = [];
 
   public busy = false;
 
-  public touchAvailable = new BehaviorSubject<any>(false);
+  public touchAvailable = false;
+
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
 
@@ -49,13 +50,23 @@ export class VerifierCrateComponent implements OnDestroy {
         await this.onBack();
       })
     );
+  }
 
-    this.fs.readFile(this.fs.safeFileName('seed'))
-      .then(data => this.fileData.next(data))
-      .catch(ignored => {});
-    this.checkAvailable()
-      .then(available => this.touchAvailable.next(available))
-      .catch(ignored => {});
+  async ngOnInit() {
+    this.fileData.next(await this.fs.readFile(this.fs.safeFileName('seed')));
+    this.touchAvailable = await this.checkAvailable() && await this.checkExisting();
+  }
+
+  async checkAvailable() {
+    return new Promise<boolean>((resolve, ignored) => {
+      window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
+    });
+  }
+
+  async checkExisting() {
+    return new Promise<boolean>((resolve, ignored) => {
+      window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
+    });
   }
 
   ngOnDestroy() {
@@ -85,12 +96,6 @@ export class VerifierCrateComponent implements OnDestroy {
     });
   }
 
-  async checkAvailable() {
-    return new Promise<boolean>((resolve, reject) => {
-      window.plugins.touchid.isAvailable(resolve, reject);
-    });
-  }
-
   async delete() {
     return new Promise((resolve, reject) => {
       window.plugins.touchid.delete('spatium', resolve, reject);
@@ -116,7 +121,7 @@ export class VerifierCrateComponent implements OnDestroy {
     componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
-      if (this.touchAvailable.getValue()) {
+      if (this.touchAvailable) {
         await this.delete();
       }
 
@@ -139,7 +144,7 @@ export class VerifierCrateComponent implements OnDestroy {
 
         await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
       } else {
-        if (this.touchAvailable.getValue()) {
+        if (this.touchAvailable) {
           try {
             if (await this.saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);
