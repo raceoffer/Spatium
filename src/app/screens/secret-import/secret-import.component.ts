@@ -1,123 +1,106 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
+import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { NavigationService } from '../../services/navigation.service';
-import { NotificationService } from '../../services/notification.service';
+import { IdFactor } from "../../services/auth.service";
+import { Type } from "../../inputs/nfc-reader/nfc-reader.component";
+import { NotificationService } from "../../services/notification.service";
+import { WorkerService } from "../../services/worker.service";
 
 declare const nfc: any;
 
-enum Content {
-  QR = 'QR',
-  NFC = 'NFC'
-}
+import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
 
 enum State {
   Empty,
-  Import
+  Importing,
+  Imported
 }
 
 @Component({
-  selector: 'app-secret-remove',
+  selector: 'app-secret-import',
   templateUrl: './secret-import.component.html',
   styleUrls: ['./secret-import.component.css']
 })
-export class SecretImportComponent implements OnInit, OnDestroy {
+export class SecretImportComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  isScanInProgress = false;
-  contentType = Content;
-  content = Content.QR;
+  @Output() imported = new EventEmitter<any>();
 
-  stateType = State;
-  buttonState = State.Empty;
+  public contentType = IdFactor;
+  public content = IdFactor.QR;
 
-  stSignUp = 'Sign up';
-  stLogIn = 'Sign in';
-  stError = 'Retry';
+  public stateType = State;
+  public buttonState = State.Empty;
 
-  incorrectSecret = 'hide';
-  qrGenerate = null;
+  public nfcAvailable = true;
 
-  input = '';
+  public secretType = null;
+  public secret = null;
 
-  isNfcAvailable = true;
+  constructor(
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) { }
 
-  private subscriptions = [];
-
-  constructor(private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly fs: FileService,
-              private readonly authService: AuthService,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) { }
-
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    nfc.enabled(() => {}, e => {
-      if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
-        this.ngZone.run(() => {
-          this.isNfcAvailable = false;
-        });
-      }
-    });
+  async ngOnInit() {
+    this.nfcAvailable = await this.checkNfc();
   }
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
+  public async checkNfc() {
+    return await new Promise<boolean>((resolve, reject) => nfc.enabled(
+      () => resolve(true),
+      e => {
+        if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }));
   }
 
-  onBackClicked() {
+  onBack() {
     this.navigationService.back();
   }
 
   toggleContent(content) {
     this.buttonState = State.Empty;
     this.content = content;
-    this.incorrectSecret = 'hide';
   }
 
-  async setEmpty() {
-    this.buttonState = State.Empty;
-    this.incorrectSecret = 'hide';
-  }
+  async onInput(type: IdFactor, input: any) {
+    this.buttonState = State.Importing;
 
-  async setInput(input: string) {
-    console.log(input);
-    this.input = input;
-    await this.checkInput();
-  }
-
-  async setIsScanInProgress() {
-    this.isScanInProgress = true;
-  }
-
-  async checkInput() {
-    if (this.input !== '' && this.input !== null) {
-      this.incorrectSecret = 'hide';
-      this.ngZone.run(async () => {
-        this.buttonState = State.Import;
-      });
-    } else {
-      this.incorrectSecret = '';
-      this.ngZone.run(async () => {
-        this.buttonState = State.Empty;
-      });
+    let secret = null;
+    switch (type) {
+      case IdFactor.QR:
+        let bytes = null;
+        try {
+          bytes = Buffer.from(input, 'hex');
+        } catch (e) {}
+        if (input && bytes) {
+          secret = await tryUnpackEncryptedSeed(bytes, this.workerService.worker);
+        }
+        break;
+      case IdFactor.NFC:
+        if (input && input.type === Type.MIME) {
+          secret = await tryUnpackEncryptedSeed(input.payload, this.workerService.worker);
+        }
+        break;
     }
+
+    if (!secret) {
+      this.buttonState = State.Empty;
+      this.notification.show('Failed to import a Spatium secret');
+      return;
+    }
+
+    this.secretType = type;
+    this.secret = secret;
+
+    this.buttonState = State.Imported
   }
 
-  async overwriteSeed() {
-    console.log(this.input);
-    await this.fs.writeFile(this.fs.safeFileName('seed'), this.input);
-    // this.authService.encryptedSeed = this.input;
-    this.notification.show('Secret is imported successfully');
-    this.isScanInProgress = false;
-    await this.onBackClicked();
+  onImport() {
+    this.imported.next(this.secret);
   }
 }

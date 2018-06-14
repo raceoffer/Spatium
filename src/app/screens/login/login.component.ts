@@ -59,7 +59,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.isNfcAvailable = await new Promise<boolean>((resolve, reject) => nfc.enabled(
+    this.isNfcAvailable = await this.checkNfc();
+  }
+
+  public async checkNfc() {
+    return await new Promise<boolean>((resolve, reject) => nfc.enabled(
       () => resolve(true),
       e => {
         if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
@@ -95,7 +99,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           bytes = Buffer.from(input, 'hex');
         } catch (e) {}
         if (input && bytes) {
-          login = await tryUnpackLogin(Buffer.from(input, 'hex'), this.workerService.worker);
+          login = await tryUnpackLogin(bytes, this.workerService.worker);
         }
         break;
       case IdFactor.NFC:

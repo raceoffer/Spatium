@@ -99,19 +99,21 @@ export class VerifierCrateComponent implements OnDestroy {
 
   public onImport() {
     const componentRef = this.navigationService.pushOverlay(SecretImportComponent);
-    componentRef.instance.imported(async encryptedSecret => {
+    componentRef.instance.imported.subscribe(async encryptedSecret => {
       this.navigationService.acceptOverlay();
 
+      this.fileData.next(encryptedSecret);
+
+      // ^This is optional^
       await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSecret);
 
-      await this.router.navigate(['/verifier-unlock']);
       this.notification.show('Secret is imported successfully');
     })
   }
 
   public onDelete() {
     const componentRef = this.navigationService.pushOverlay(DeleteSecretComponent);
-    componentRef.instance.submit(async () => {
+    componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
       if (this.touchAvailable.getValue()) {
