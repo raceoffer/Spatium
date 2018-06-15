@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { CurrencyService, Info } from '../../services/currency.service';
-import { Coin, Token } from '../../services/keychain.service';
-import { NavigationService } from '../../services/navigation.service';
-import { NotificationService } from '../../services/notification.service';
-import { WalletService } from '../../services/wallet.service';
+import { CurrencyService, Info } from '../../../services/currency.service';
+import { Coin, Token } from '../../../services/keychain.service';
+import { NavigationService } from '../../../services/navigation.service';
+import { NotificationService } from '../../../services/notification.service';
+import { WalletService } from '../../../services/wallet.service';
 
 enum State {
   None,

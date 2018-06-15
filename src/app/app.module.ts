@@ -43,7 +43,7 @@ import { PasswordAuthFactorComponent } from './screens/authorization-factors/pas
 import { PincodeAuthFactorComponent } from './screens/authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { LoginComponent as LoginScreenComponent } from './screens/login/login.component';
 import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.component';
-import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
+import { VerifyTransactionComponent } from './screens/verifier/verify-transaction/verify-transaction.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';

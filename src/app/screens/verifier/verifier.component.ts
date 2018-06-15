@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 import { SecretExportComponent } from "../secret-export/secret-export.component";
-import { VerifyTransactionComponent } from "../verify-transaction/verify-transaction.component";
+import { VerifyTransactionComponent } from "./verify-transaction/verify-transaction.component";
 import { Router } from "@angular/router";
 import { WalletService } from "../../services/wallet.service";
 import { BluetoothService } from "../../services/bluetooth.service";
