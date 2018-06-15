@@ -1,11 +1,12 @@
-import { Component, EventEmitter, HostBinding, Input, NgZone, OnInit, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { IdFactor } from '../../../services/auth.service';
-import { NotificationService } from '../../../services/notification.service';
+import { Component, Output, EventEmitter, HostBinding, OnInit } from '@angular/core';
+import { NavigationService } from "../../../services/navigation.service";
+import { AuthService, IdFactor } from "../../../services/auth.service";
+import { NotificationService } from "../../../services/notification.service";
+import { BehaviorSubject } from "rxjs/index";
+import { DDSService } from "../../../services/dds.service";
+import { WorkerService } from "../../../services/worker.service";
 
-declare const cordova: any;
-declare const device: any;
-declare const window: any;
+import { packLogin } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-qr-factor',
@@ -13,86 +14,62 @@ declare const window: any;
   styleUrls: ['./qr-factor.component.css']
 })
 export class QrFactorComponent implements OnInit {
+  @HostBinding('class') classes = 'factor-component';
 
-  @HostBinding('class') classes = 'content factor-content text-center';
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
+  @Output() submit: EventEmitter<any> = new EventEmitter<any>();
 
-  @Input() isExport = false;
-  @Input() isAuth = false;
-  @Input() secretValue = '';
-  value: BehaviorSubject<string> = null;
+  public busy = new BehaviorSubject<boolean>(false);
 
-  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+  public randomLogin: string = null;
+  public qrData: string = null;
 
-  permissionCStorage = false;
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService,
+    private readonly ddsService: DDSService,
+    private readonly workerService: WorkerService
+  ) {}
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly notification: NotificationService) { }
+  async ngOnInit() {
+    this.randomLogin = await this.generateNewLogin();
+    this.qrData = (await packLogin(this.randomLogin, this.workerService.worker)).toString('hex');
+  }
 
-  async ngOnInit() {}
+  public cancel() {
+    this.cancelled.next();
+  }
 
-  async saveQr() {
-    if (this.isWindows()) {
-      this.permissionCStorage = true;
-      this.saveToStorage();
-    } else {
-      this.requestStorage();
+  public onBack() {
+    this.navigationService.back();
+  }
+
+  public onSaved(ignored) {
+    this.notification.show('The QR image was saved to the local storage')
+  }
+
+  public onSubmit() {
+    this.submit.next({
+      type: IdFactor.QR,
+      value: this.randomLogin
+    });
+  }
+
+  async generateNewLogin() {
+    try {
+      this.busy.next(true);
+
+      let login = null;
+      do {
+        login = this.authService.makeNewLogin(10);
+      } while (await this.ddsService.exists(
+        await this.authService.toId(login)
+      ));
+
+      return login;
+    } finally {
+      this.busy.next(false);
     }
-  }
-
-  requestStorage() {
-    const permissions = cordova.plugins.permissions;
-    permissions.hasPermission(permissions.WRITE_EXTERNAL_STORAGE, (status) => this.ngZone.run(() => {
-      if (status.hasPermission) {
-        this.permissionCStorage = true;
-        this.saveToStorage();
-      } else {
-        this.permissionCStorage = false;
-
-        permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, this.successStorage.bind(this), this.errorStorage.bind(this));
-      }
-    }));
-  }
-
-  successStorage(status) {
-    if (!status.hasPermission) {
-      this.notification.show('Storage permission is not turned on');
-      this.ngZone.run(async () => {
-        this.permissionCStorage = false;
-      });
-    } else {
-      this.ngZone.run(async () => {
-        this.permissionCStorage = true;
-        this.saveToStorage();
-      });
-    }
-  }
-
-  errorStorage() {
-    this.notification.show('Storage permission is not turned on');
-  }
-
-  saveToStorage() {
-    console.log(this.permissionCStorage);
-    if (this.permissionCStorage) {
-      const canvas = document.getElementsByTagName('canvas')[0];
-      window.canvas2ImagePlugin.saveImageDataToLibrary(
-        function (msg) {
-          console.log(msg);
-          this.notification.show('Login has been saved as QR image');
-        }.bind(this),
-        function (err) {
-          console.log(err);
-        },
-        canvas
-      );
-    }
-  }
-
-  async onNext() {
-    this.onSuccess.emit({factor: IdFactor.QR, value: this.value.getValue()});
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
   }
 }

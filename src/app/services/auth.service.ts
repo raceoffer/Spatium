@@ -67,14 +67,14 @@ export class AuthService {
       'text_fields',
       null
     ));
-    //
-    // this.idFactors.set(IdFactor.QR, new Factor(
-    //   IdFactor.QR,
-    //   'QR',
-    //   null,
-    //   'icon-custom-qr_code'
-    // ));
-    //
+
+    this.idFactors.set(IdFactor.QR, new Factor(
+      IdFactor.QR,
+      'QR',
+      null,
+      'icon-custom-qr_code'
+    ));
+
     // if (nfcSupported) {
     //   this.idFactors.set(IdFactor.NFC, new Factor(
     //     IdFactor.NFC,

@@ -195,6 +195,7 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
     SettingsComponent,
     FactorNodeComponent,
     LoginFactorComponent,
+    QrFactorComponent,
     CurrencyComponent,
     WaitingComponent,
     SendTransactionComponent,

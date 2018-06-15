@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostBinding, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
@@ -17,20 +17,19 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnInit, OnDestroy {
+export class WalletComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
 
-  public cols: any = 2;
+  public cols: any = Math.ceil(window.innerWidth / 350);
 
   public title = 'Wallet';
-  public isExitTap = false;
   public isSearch = false;
   public filtredTitles = [];
 
-  public titles: any = [
+  public staticTitles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
@@ -41,6 +40,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
+
+  public titles: any = [];
 
   private _filterValue = '';
 
@@ -55,19 +56,27 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService
   ) {
+    const titles = this.staticTitles;
+
     keychain.topTokens.forEach((tokenInfo) => {
-      this.titles.push(WalletComponent.tokenEntry(tokenInfo));
+      titles.push(WalletComponent.tokenEntry(tokenInfo));
     });
 
-    this.titles.push(
+    titles.push(
       {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test}
     );
+
+    this.titles = titles;
 
     this.filtredTitles = this.titles;
   }
 
   get filterValue() {
     return this._filterValue;
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   set filterValue(newUserName) {
@@ -101,10 +110,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     };
   }
 
-  public ngOnInit() {
-    this.onResize();
-  }
-
   public ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
@@ -125,10 +130,6 @@ export class WalletComponent implements OnInit, OnDestroy {
       this.filterValue = '';
       this.isSearch = false;
     }
-  }
-
-  public onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   public async goToSync() {

@@ -1,4 +1,4 @@
-import {Component, Output, EventEmitter, HostBinding } from '@angular/core';
+import { Component, Output, EventEmitter, HostBinding } from '@angular/core';
 import { NavigationService } from "../../../services/navigation.service";
 import { IdFactor } from "../../../services/auth.service";
 
