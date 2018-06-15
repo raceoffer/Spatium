@@ -1,25 +1,24 @@
 <div class="dialog-label" fxLayout="row" fxLayoutAlign="start center" >
   <span class="spacer"></span>
-  <mat-icon class="color-custom-dark" style="padding-right: 10px;">info_outline</mat-icon>
 </div>
 
 <div mat-dialog-content>
   <mat-nav-list>
     <mat-list-item
-      style="height: 54.5px!important; border-bottom: 1px solid #e0e0e0;" *ngFor="let factor of factors; let last = last"
-      [class.last-item]="last"
-      (click)="selected(factor)">
+      style="border-top: 1px solid #eeeeee;"
+      *ngFor="let factor of factors"
+      (click)="onSelected(factor)">
 
       <h4 mat-line class="factor-text">
         <div class="factor-icon" *ngIf="factor.icon">
-          <mat-icon matPrefix class="factor-icon-padding" >{{factor.icon}}</mat-icon>
+          <mat-icon matPrefix class="factor-icon-padding" >{{ factor.icon }}</mat-icon>
         </div>
         <div class="factor-icon" fxLayoutAlign="space-around center" *ngIf="factor.icon_asset">
           <div fxLayoutAlign="center center">
-            <span class="{{factor.icon_asset}}"></span>
+            <span class="{{ factor.icon_asset }}"></span>
           </div>
         </div>
-        {{factor.name}}
+        {{ factor.name }}
       </h4>
     </mat-list-item>
   </mat-nav-list>

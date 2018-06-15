@@ -83,15 +83,9 @@ export class RegistrationComponent implements OnDestroy {
   public uploading = false;
   private cancel = new Subject<boolean>();
 
-  private factorDialog = null;
-  private factorOverlay = null;
-  private backupOverlay = null;
-  private successOverlay = null;
-
   private subscriptions = [];
 
   constructor(
-    private readonly dialog: MatDialog,
     private readonly router: Router,
     private readonly activatedRoute: ActivatedRoute,
     private readonly dds: DDSService,
@@ -117,26 +111,6 @@ export class RegistrationComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-
-    if (this.factorDialog) {
-      this.factorDialog.close();
-      this.factorDialog = null;
-    }
-
-    if (this.factorOverlay) {
-      this.factorOverlay.dismiss();
-      this.factorOverlay = null;
-    }
-
-    if (this.backupOverlay) {
-      this.backupOverlay.dismiss();
-      this.backupOverlay = null;
-    }
-
-    if (this.successOverlay) {
-      this.successOverlay.dismiss();
-      this.successOverlay = null;
-    }
   }
 
   goBottom() {
@@ -146,20 +120,13 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   openFactorDialog() {
-    if (this.factorDialog) {
-      return;
-    }
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    componentRef.instance.factors = Array.from(this.authService.authFactors.values());
 
-    this.factorDialog = this.dialog.open(DialogFactorsComponent, {
-      width: '250px',
-      data: Array.from(this.authService.authFactors.values())
-    });
+    componentRef.instance.selected.subscribe(result => {
+      this.navigationService.acceptOverlay();
 
-    this.factorDialog.afterClosed().subscribe(result => {
-      this.factorDialog = null;
-      if (typeof result !== 'undefined') {
-        this.openFactorOverlay(result);
-      }
+      this.openFactorOverlay(result);
     });
   }
 

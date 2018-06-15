@@ -1,6 +1,4 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
-import { Factor } from "../../services/auth.service";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-dialog-factors',
@@ -8,12 +6,12 @@ import { Factor } from "../../services/auth.service";
   styleUrls: ['./dialog-factors.component.css']
 })
 export class DialogFactorsComponent {
-  constructor(
-    private readonly dialogRef: MatDialogRef<DialogFactorsComponent>,
-    @Inject(MAT_DIALOG_DATA) public readonly factors: Array<Factor>
-  ) {}
+  @Input() public factors = [];
+  @Output() public selected = new EventEmitter<any>();
 
-  selected(factor) {
-    this.dialogRef.close(factor.type);
+  constructor() {}
+
+  onSelected(factor) {
+    this.selected.next(factor.type);
   }
 }

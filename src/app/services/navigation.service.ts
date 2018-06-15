@@ -47,15 +47,24 @@ export class NavigationService {
     return this.overlayStack.length;
   }
 
-  public pushOverlay(ComponentType): ComponentRef<typeof ComponentType> {
+  public pushOverlay(ComponentType, fullscreen = true): ComponentRef<typeof ComponentType> {
     const config = new OverlayConfig();
 
-    config.height = '100%';
-    config.width = '100%';
+    if (fullscreen) {
+      config.height = '100%';
+      config.width = '100%';
+    } else {
+      config.hasBackdrop = true;
+      config.positionStrategy = this.overlay.position().global().centerHorizontally().centerVertically();
+    }
 
     const overlayRef = this.overlay.create(config);
     const portal = new ComponentPortal<typeof ComponentType>(ComponentType);
     const componentRef = overlayRef.attach(portal);
+
+    overlayRef.backdropClick().subscribe(() => {
+      this.cancelOverlay();
+    });
 
     this.overlayStack.push([ overlayRef, componentRef ]);
 

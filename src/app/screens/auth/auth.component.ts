@@ -12,7 +12,6 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
@@ -84,12 +83,9 @@ export class AuthComponent implements OnDestroy {
   private decryptedSeed = null;
   private remoteEncryptedTrees = [];
 
-  private factorDialog = null;
-
   private subscriptions = [];
 
   constructor(
-    private readonly dialog: MatDialog,
     private readonly router: Router,
     private readonly activatedRoute: ActivatedRoute,
     private readonly authService: AuthService,
@@ -109,7 +105,7 @@ export class AuthComponent implements OnDestroy {
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
+        await this.onBack();
       })
     );
   }
@@ -151,20 +147,13 @@ export class AuthComponent implements OnDestroy {
   }
 
   openFactorDialog() {
-    if (this.factorDialog) {
-      return;
-    }
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    componentRef.instance.factors = Array.from(this.authService.authFactors.values());
 
-    this.factorDialog = this.dialog.open(DialogFactorsComponent, {
-      width: '250px',
-      data: Array.from(this.authService.authFactors.values())
-    });
+    componentRef.instance.selected.subscribe(result => {
+      this.navigationService.acceptOverlay();
 
-    this.factorDialog.afterClosed().subscribe(result => {
-      this.factorDialog = null;
-      if (typeof result !== 'undefined') {
-        this.openFactorOverlay(result);
-      }
+      this.openFactorOverlay(result);
     });
   }
 
@@ -266,12 +255,7 @@ export class AuthComponent implements OnDestroy {
     await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
   }
 
-  async onBackClicked() {
-    if (this.factorDialog) {
-      this.factorDialog.close();
-      this.factorDialog = null;
-    } else {
-      await this.router.navigate(['/login']);
-    }
+  async onBack() {
+    await this.router.navigate(['/login']);
   }
 }
