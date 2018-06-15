@@ -19,6 +19,7 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "file:../cordova-plugin-bluetooth",
+    "cordova-plugin-camera-info": "file:../cordova-plugin-camera-info",
     "cordova-plugin-canvas2image": "file:../org.devgeeks.Canvas2ImagePlugin",
     "cordova-plugin-clipboard": "file:../cordova-plugin-clipboard",
     "cordova-plugin-device": "^2.0.2",
@@ -57,7 +58,8 @@
       "cordova-plugin-clipboard": {},
       "cordova-plugin-device": {},
       "cordova-plugin-bluetooth": {},
-      "phonegap-nfc": {}
+      "phonegap-nfc": {},
+      "cordova-plugin-camera-info": {}
     },
     "platforms": [
       "browser",

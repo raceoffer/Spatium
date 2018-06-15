@@ -49,6 +49,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
   loginGenerate = null;
   input = '';
   isNfcAvailable = true;
+  isCameraAvailable = true;
   isGeneric = false;
   loginGeneratedSuccessTimer: NodeJS.Timer = null;
   private subscriptions = [];
@@ -64,7 +65,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     private readonly workerService: WorkerService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
@@ -78,6 +79,15 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         });
       }
     }.bind(this));
+
+    if (this.isWindows()) {
+      try {
+        this.isCameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
+        console.log('camera available:', this.isCameraAvailable);
+      } catch (e) {
+        console.warn('Failed to get camera availability info:', e);
+      }
+    }
   }
 
   ngOnDestroy() {
