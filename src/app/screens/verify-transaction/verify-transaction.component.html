@@ -1,7 +1,10 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="content">
-  <div class="verify-transaction-text" *ngIf="state === stateType.None">
-    <span>This device is linked. All transactions will be confirmed by you.</span>
-  </div>
+  <app-toolbar
+    label="Verify transaction"
+    [isColored]="true"
+    [isShadowed]="true"
+    (backClicked)="onBack()">
+  </app-toolbar>
 
   <div class="width-button-container" style="margin-top:25px;"
        fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
@@ -83,8 +86,8 @@
     </table>
 
     <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
-      <button mat-raised-button color="accent" class="width-button color" (click)="confirm()">Confirm</button>
-      <button mat-raised-button color="accent" class="width-button color" (click)="decline()">Decline</button>
+      <button mat-raised-button color="accent" class="width-button color" (click)="onConfirm()">Confirm</button>
+      <button mat-raised-button color="accent" class="width-button color" (click)="onDecline()">Decline</button>
     </div>
   </div>
 </div>

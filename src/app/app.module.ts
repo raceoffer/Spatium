@@ -42,13 +42,9 @@ import { GraphicKeyAuthFactorComponent } from './screens/authorization-factors/g
 import { PasswordAuthFactorComponent } from './screens/authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from './screens/authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { LoginComponent as LoginScreenComponent } from './screens/login/login.component';
-import { DeleteSecretComponent } from './screens/navigator-verifier/delete-secret/delete-secret.component';
-import { ConnectComponent } from './screens/navigator-verifier/main-contents/connect/connect.component';
-import { VerifyTransactionComponent } from './screens/navigator-verifier/main-contents/verify-transaction/verify-transaction.component';
-import { VerifyWaitingComponent } from './screens/navigator-verifier/main-contents/verify-waiting/verify-waiting.component';
-import { MainComponent } from './screens/navigator-verifier/main/main.component';
-import { NavigatorVerifierComponent } from './screens/navigator-verifier/navigator-verifier.component';
-import { SecretExportComponent } from './screens/navigator-verifier/secret-export/secret-export.component';
+import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.component';
+import { VerifyTransactionComponent } from './screens/verify-transaction/verify-transaction.component';
+import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
@@ -88,13 +84,13 @@ import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
 import { DefaultAuthFactorComponent } from './screens/authorization-factors/default-auth-factor/default-auth-factor.component';
 import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
+import { VerifierComponent } from './screens/verifier/verifier.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigatorComponent,
     StartComponent,
-    ConnectComponent,
     WaitingComponent,
     SendTransactionComponent,
     VerifyTransactionComponent,
@@ -118,8 +114,6 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
     CurrencyComponent,
     DeleteSecretComponent,
     MainDrawerComponent,
-    NavigatorVerifierComponent,
-    VerifyWaitingComponent,
     SecretExportComponent,
     SecretImportComponent,
     SettingsComponent,
@@ -128,7 +122,6 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
     CurrencySettingsComponent,
     BackupComponent,
     ToolbarComponent,
-    MainComponent,
     LoginFactorComponent,
     PasswordComponent,
     PincodeComponent,
@@ -138,7 +131,8 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
     QrWriterComponent,
     DefaultAuthFactorComponent,
     EqualToDirective,
-    VerifierCrateComponent
+    VerifierCrateComponent,
+    VerifierComponent
   ],
   imports: [
     OverlayModule,
@@ -206,7 +200,8 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
     SendTransactionComponent,
     SecretImportComponent,
     SecretExportComponent,
-    DeleteSecretComponent
+    DeleteSecretComponent,
+    VerifyTransactionComponent
   ]
 })
 

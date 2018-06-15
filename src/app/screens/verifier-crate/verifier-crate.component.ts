@@ -18,7 +18,7 @@ import { SecretImportComponent } from "../secret-import/secret-import.component"
 import { BehaviorSubject } from "rxjs/index";
 import { toBehaviourSubject } from "../../utils/transformers";
 import { map } from "rxjs/operators";
-import { DeleteSecretComponent } from "../navigator-verifier/delete-secret/delete-secret.component";
+import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 
 @Component({
   selector: 'app-verifier-crate',
@@ -53,7 +53,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.fileData.next(await this.fs.readFile(this.fs.safeFileName('seed')));
+    this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
     this.touchAvailable = await this.checkAvailable() && await this.checkExisting();
   }
 
@@ -87,7 +87,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
     this.keychain.setSeed(seed);
 
-    await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
+    await this.router.navigate(['/verifier']);
   }
 
   async saveTouchPassword(pincode) {
@@ -110,7 +110,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
       this.fileData.next(encryptedSecret);
 
       // ^This is optional^
-      await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSecret);
+      await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSecret.toString('hex'));
 
       this.notification.show('Secret is imported successfully');
     })
@@ -138,11 +138,11 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
       const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
       if (this.exists.getValue()) {
-        const ciphertext = Buffer.from(this.fileData.getValue(), 'hex');
+        const seed = await decrypt(this.fileData.getValue(), aesKey, this.workerService.worker);
 
-        this.keychain.setSeed(await decrypt(ciphertext, aesKey, this.workerService.worker));
+        this.keychain.setSeed(seed);
 
-        await this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
+        await this.router.navigate(['/verifier']);
       } else {
         if (this.touchAvailable) {
           try {
@@ -162,6 +162,8 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
           await this.saveSeed(aesKey);
         }
       }
+    } catch (e) {
+      this.notification.show('Authorization error');
     } finally {
       this.busy = false;
     }

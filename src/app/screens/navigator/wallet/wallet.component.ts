@@ -101,37 +101,37 @@ export class WalletComponent implements OnInit, OnDestroy {
     };
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     this.onResize();
   }
 
-  ngOnDestroy() {
+  public ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }
 
-  async onTileClicked(coin: Coin) {
+  public  async onTileClicked(coin: Coin) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
     componentRef.instance.currency = coin;
   }
 
-  toggleSearch(value) {
+  public toggleSearch(value) {
     this.isSearch = value;
     this.clearFilterValue();
   }
 
-  async onBackClicked() {
+  public async onBackClicked() {
     if (this.isSearch) {
       this.filterValue = '';
       this.isSearch = false;
     }
   }
 
-  onResize(): void {
+  public onResize(): void {
     this.cols = Math.ceil(window.innerWidth / 350);
   }
 
-  async goToSync() {
+  public async goToSync() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
     componentRef.instance.connected.subscribe(device => {
       this.navigationService.acceptOverlay();
@@ -139,11 +139,11 @@ export class WalletComponent implements OnInit, OnDestroy {
     })
   }
 
-  async cancelSync() {
+  public async cancelSync() {
     await this.openDialog();
   }
 
-  async openDialog() {
+  public async openDialog() {
     navigator.notification.confirm(
       'Syncronize with another device',
       async (buttonIndex) => {

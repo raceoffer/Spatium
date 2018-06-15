@@ -1,8 +1,8 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { WorkerService } from '../../../services/worker.service';
+import { AuthService } from '../../services/auth.service';
+import { NavigationService } from '../../services/navigation.service';
+import { WorkerService } from '../../services/worker.service';
 
 declare const nfc: any;
 
