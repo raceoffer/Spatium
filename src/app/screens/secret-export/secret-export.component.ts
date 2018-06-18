@@ -1,110 +1,61 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
+import { IdFactor } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 import { WorkerService } from '../../services/worker.service';
 
 declare const nfc: any;
 
+import { checkNfc } from "../../utils/nfc";
+
 import { packSeed } from 'crypto-core-async/lib/utils';
-
-enum Content {
-  QR = 'QR',
-  NFC = 'NFC'
-}
-
-enum State {
-  Empty,
-  Import
-}
 
 @Component({
   selector: 'app-secret-export',
   templateUrl: './secret-export.component.html',
   styleUrls: ['./secret-export.component.css']
 })
-export class SecretExportComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
-  title = 'Export secret';
-  contentType = Content;
-  content = Content.QR;
-  stateType = State;
-  buttonState = State.Empty;
-  stSignUp = 'Sign up';
-  stLogIn = 'Sign in';
-  stError = 'Retry';
-  incorrectSecret = 'hide';
-  qrGenerate = null;
-  input = '';
-  isNfcAvailable = true;
-  secretValue = '';
-  packSeed = null;
-  private subscriptions = [];
+export class SecretExportComponent implements OnInit {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
+
+  @Input() public encryptedSeed: any = null;
+  @Output() public saved = new EventEmitter<any>();
+  @Output() public continue = new EventEmitter<any>();
+
+  public contentType = IdFactor;
+  public content = IdFactor.QR;
+
+  public nfcAvailable = true;
+
+  public qrData: string = null;
+  public nfcData: any = null;
 
   constructor(
-    private readonly ngZone: NgZone,
-    private readonly router: Router,
-    private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
   ) { }
 
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
+  async ngOnInit() {
+    this.nfcAvailable = await checkNfc();
 
-    nfc.enabled(function () {}, function (e) {
-      if (e === 'NO_NFC' || (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED')) {
-        this.ngZone.run(async () => {
-          this.isNfcAvailable = false;
-        });
-      }
-    }.bind(this));
+    const packed = await packSeed(this.encryptedSeed, this.workerService.worker);
 
-    this.writeSecret();
+    this.qrData = packed.toString('hex');
+    this.nfcData = packed;
   }
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  async onBackClicked() {
-    await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
+  onBack() {
+    this.navigationService.back();
   }
 
   toggleContent(content) {
-    this.secretValue = null;
-    this.buttonState = State.Empty;
     this.content = content;
-    this.incorrectSecret = 'hide';
-
-    this.switchSecretValue();
   }
 
-  async writeSecret() {
-    // const encryptedSeed = this.authService.encryptedSeed;
-    // const buffesSeed = Buffer.from(encryptedSeed, 'hex');
-    // this.packSeed = await packSeed(buffesSeed, this.workerService.worker);
-    // this.switchSecretValue();
-
-    console.log(this.secretValue);
+  onSaved(ignored) {
+    this.saved.next();
   }
 
-  switchSecretValue() {
-    switch (this.content) {
-      case this.contentType.QR: {
-        this.secretValue = this.packSeed.toString('hex');
-        break;
-      }
-      case this.contentType.NFC: {
-        this.secretValue = this.packSeed;
-        break;
-      }
-    }
+  onContinue() {
+    this.continue.next();
   }
-
 }

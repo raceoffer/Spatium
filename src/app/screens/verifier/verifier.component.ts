@@ -29,8 +29,8 @@ export class VerifierComponent implements OnInit {
     }
   }, {
     name: 'Export secret',
-    clicked: () => {
-      this.onExport();
+    clicked: async () => {
+      await this.onExport();
     }
   }, {
     name: 'Change PIN'
@@ -219,8 +219,17 @@ export class VerifierComponent implements OnInit {
     });
   }
 
-  public onExport() {
+  public async onExport() {
+    const encryptedSeed = Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex');
+
     const componentRef = this.navigationService.pushOverlay(SecretExportComponent);
+    componentRef.instance.encryptedSeed = encryptedSeed;
+    componentRef.instance.saved.subscribe(() => {
+      this.notification.show('The secret was exported');
+    });
+    componentRef.instance.continue.subscribe(() => {
+      this.navigationService.acceptOverlay();
+    });
   }
 
   public onDelete() {

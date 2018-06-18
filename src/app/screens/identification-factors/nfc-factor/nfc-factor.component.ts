@@ -26,7 +26,7 @@ export class NfcFactorComponent implements OnInit {
   public savedOnce = false;
 
   public randomLogin: string = null;
-  public nfcData: string = null;
+  public nfcData: any = null;
 
   constructor(
     private readonly navigationService: NavigationService,

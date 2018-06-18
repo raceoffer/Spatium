@@ -18,7 +18,7 @@ declare const navigator: any;
   styleUrls: ['./nfc-writer.component.css']
 })
 export class NfcWriterComponent implements OnInit {
-  @Input() public value: string = null;
+  @Input() public value: any = null;
   @Output() public saved = new EventEmitter<any>();
 
   public enabled = new BehaviorSubject<boolean>(false);

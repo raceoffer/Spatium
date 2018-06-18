@@ -4,8 +4,6 @@ import { IdFactor } from "../../services/auth.service";
 import { NotificationService } from "../../services/notification.service";
 import { WorkerService } from "../../services/worker.service";
 
-declare const nfc: any;
-
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from "../../utils/nfc";
 

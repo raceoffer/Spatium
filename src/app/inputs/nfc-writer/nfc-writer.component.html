@@ -22,11 +22,11 @@
       </mat-icon>
     </div>
 
-    <span style="width: 100%; text-align: center;" *ngIf="value && value.length > 0">
+    <span style="width: 100%; text-align: center;" *ngIf="value">
       Touch an NFC tag
     </span>
 
-    <div *ngIf="!(value && value.length > 0)">
+    <div *ngIf="!value">
       <mat-spinner color="accent"></mat-spinner>
     </div>
   </div>
