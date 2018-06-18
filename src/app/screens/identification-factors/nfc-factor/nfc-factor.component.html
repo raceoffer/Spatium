@@ -1,34 +1,31 @@
-<div fxLayout="column" fxLayoutAlign="center center" class="content">
-  <div class="width-button-container text-center" *ngIf="disabledNFC">
+<app-toolbar
+  label="NFC"
+  [isColored]="true"
+  [isShadowed]="true"
+  (backClicked)="onBack()">
+</app-toolbar>
 
-    <div class="connect-text">
-      <span>{{ enableNFCmessage }}</span>
-    </div>
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
 
-    <button mat-fab  class="width-button">
-      <mat-icon (click)="changeNFCState()">nfc
-      </mat-icon>
+  <app-nfc-writer
+    [value]="nfcData"
+    (saved)="onSaved($event)">
+  </app-nfc-writer>
+
+  <div class="footer text-center" style="bottom: 0px;">
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      [disabled]="(busy | async) || !savedOnce"
+      (click)="onSubmit()">
+      Continue
     </button>
-
   </div>
-
-  <div [class]="classNfcContainer" *ngIf="!disabledNFC">
-    <div *ngIf="isExport ? secretValue.length == 0 : (value | async).length == 0">
-      <mat-spinner color="accent"></mat-spinner>
-    </div>
-    <div class="small-video-container" fxLayout="column" fxLayoutAlign="center center"
-         *ngIf="!(isExport ? secretValue.length == 0 : (value | async).length == 0)">
-      <mat-icon style="width: 200px;
-    height: 200px;
-    font-size: 200px;" class="pulse">nfc</mat-icon>
-    </div>
-  </div>
-
-  <div style="width: 100%; text-align: center; bottom: 30px;" *ngIf="!disabledNFC && !(isExport ? secretValue.length == 0 : (value | async).length == 0)">
-    <span >{{ text }}</span>
-  </div>
-
 </div>
-
 
 

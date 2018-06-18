@@ -1,27 +1,25 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DeviceService } from "../../services/device.service";
 import { BehaviorSubject, Subject, timer } from "rxjs";
-import { distinctUntilChanged, skip, filter, mapTo } from "rxjs/operators";
+import { distinctUntilChanged, filter, mapTo, skip } from "rxjs/operators";
 import {
-  addMimeTypeListener,
-  addNdefListener,
-  addTagDiscoveredListener, changeNFCState,
-  checkState,
-  removeMimeTypeListener,
+  addMimeTypeListener, addNdefListener, addTagDiscoveredListener, changeNFCState, checkState, removeMimeTypeListener,
   removeNdefListener,
   removeTagDiscoveredListener,
-  Type
+  Type, write
 } from "../../utils/nfc";
+import { NotificationService } from "../../services/notification.service";
 
 declare const navigator: any;
 
 @Component({
-  selector: 'app-nfc-reader',
-  templateUrl: './nfc-reader.component.html',
-  styleUrls: ['./nfc-reader.component.css']
+  selector: 'app-nfc-writer',
+  templateUrl: './nfc-writer.component.html',
+  styleUrls: ['./nfc-writer.component.css']
 })
-export class NfcReaderComponent implements OnInit, OnDestroy {
-  @Output() scanned: EventEmitter<any> = new EventEmitter<any>();
+export class NfcWriterComponent implements OnInit {
+  @Input() public value: string = null;
+  @Output() public saved = new EventEmitter<any>();
 
   public enabled = new BehaviorSubject<boolean>(false);
   public enabledChanged = this.enabled.pipe(distinctUntilChanged(), skip(1));
@@ -33,7 +31,8 @@ export class NfcReaderComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
-    private readonly deviceService: DeviceService
+    private readonly deviceService: DeviceService,
+    private readonly notification: NotificationService
   ) {}
 
   async ngOnInit() {
@@ -50,7 +49,7 @@ export class NfcReaderComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.discovered.subscribe(object => this.onDiscovered(object))
+      this.discovered.subscribe(async object => await this.onDiscovered(object))
     );
 
     this.subscriptions.push(
@@ -72,37 +71,25 @@ export class NfcReaderComponent implements OnInit, OnDestroy {
     this.enabled.next(await checkState());
   }
 
+  async onDiscovered(ignored) {
+    const payload = Array.from(this.value);
+
+    try {
+      await write(payload);
+    } catch (ignored) {
+      this.notification.show('Failed to write an NFC tag');
+    }
+
+    this.saved.next(this.value);
+
+    navigator.vibrate(100);
+  }
+
   async ngOnDestroy() {
     this.enabled.next(false);
 
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-  }
-
-  onDiscovered(event: any) {
-    navigator.vibrate(100);
-
-    const tag = event.data.tag;
-
-    // BB7 has different names, copy to Android names
-    if (tag.serialNumber) {
-      tag.id = tag.serialNumber;
-      tag.isWritable = !tag.isLocked;
-      tag.canMakeReadOnly = tag.isLockable;
-    }
-
-    let payload = null;
-    if (tag.ndefMessage && tag.ndefMessage.length > 0) {
-      payload = Buffer.from(tag.ndefMessage[0].payload)
-    }
-
-    const result = {
-      type: event.type,
-      id: tag.id,
-      payload: payload
-    };
-
-    this.scanned.emit(result)
   }
 
   public toggleNfc() {

@@ -85,6 +85,7 @@ import { DefaultAuthFactorComponent } from './screens/authorization-factors/defa
 import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
+import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 
 @NgModule({
   declarations: [
@@ -132,7 +133,8 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
     DefaultAuthFactorComponent,
     EqualToDirective,
     VerifierCrateComponent,
-    VerifierComponent
+    VerifierComponent,
+    NfcWriterComponent
   ],
   imports: [
     OverlayModule,
@@ -202,7 +204,8 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
     SecretImportComponent,
     SecretExportComponent,
     DeleteSecretComponent,
-    VerifyTransactionComponent
+    VerifyTransactionComponent,
+    NfcFactorComponent
   ]
 })
 

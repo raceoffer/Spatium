@@ -1,7 +1,7 @@
 <app-toolbar
   label="QR"
-  [isColored]="false"
-  [isShadowed]="false"
+  [isColored]="true"
+  [isShadowed]="true"
   (backClicked)="onBack()">
 </app-toolbar>
 
@@ -21,6 +21,7 @@
       mat-raised-button
       color="accent"
       class="width-button color"
+      [disabled]="(busy | async)"
       (click)="onSubmit()">
       Continue
     </button>

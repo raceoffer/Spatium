@@ -75,14 +75,14 @@ export class AuthService {
       'icon-custom-qr_code'
     ));
 
-    // if (nfcSupported) {
-    //   this.idFactors.set(IdFactor.NFC, new Factor(
-    //     IdFactor.NFC,
-    //     'NFC',
-    //     'nfc',
-    //     null
-    //   ));
-    // }
+    if (nfcSupported) {
+      this.idFactors.set(IdFactor.NFC, new Factor(
+        IdFactor.NFC,
+        'NFC',
+        'nfc',
+        null
+      ));
+    }
 
     this.authFactors.set(AuthFactor.Password, new Factor(
       AuthFactor.Password,

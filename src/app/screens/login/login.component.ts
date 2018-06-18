@@ -7,10 +7,9 @@ import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 
 declare const cordova: any;
-declare const nfc: any;
 
 import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
-import { Type } from "../../inputs/nfc-reader/nfc-reader.component";
+import { checkNfc, Type } from "../../utils/nfc";
 
 export enum State {
   Empty,
@@ -59,19 +58,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.isNfcAvailable = await this.checkNfc();
-  }
-
-  public async checkNfc() {
-    return await new Promise<boolean>((resolve, reject) => nfc.enabled(
-      () => resolve(true),
-      e => {
-        if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      }));
+    this.isNfcAvailable = await checkNfc();
   }
 
   ngOnDestroy() {

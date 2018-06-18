@@ -1,21 +1,13 @@
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  Output
-} from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { IdFactor } from '../../../services/auth.service';
-import { NotificationService } from '../../../services/notification.service';
+import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
+import { BehaviorSubject } from "rxjs/index";
+import { NavigationService } from "../../../services/navigation.service";
+import { NotificationService } from "../../../services/notification.service";
+import { AuthService, IdFactor } from "../../../services/auth.service";
+import { DDSService } from "../../../services/dds.service";
+import { WorkerService } from "../../../services/worker.service";
 
-declare const nfc: any;
-declare const ndef: any;
-declare const navigator: any;
+import { packLogin } from 'crypto-core-async/lib/utils';
+
 declare const Buffer: any;
 
 @Component({
@@ -23,163 +15,66 @@ declare const Buffer: any;
   templateUrl: './nfc-factor.component.html',
   styleUrls: ['./nfc-factor.component.css']
 })
-export class NfcFactorComponent implements AfterViewInit, OnInit, OnDestroy {
-  @HostBinding('class') classes = 'content factor-content text-center';
+export class NfcFactorComponent implements OnInit {
+  @HostBinding('class') classes = 'factor-component';
 
-  @Input() isExport = false;
-  @Input() secretValue = '';
-  value: BehaviorSubject<string> = null;
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
+  @Output() submit: EventEmitter<any> = new EventEmitter<any>();
 
-  @Output() onSuccess: EventEmitter<any> = new EventEmitter<any>();
+  public busy = new BehaviorSubject<boolean>(false);
 
-  text = 'Touch an NFC tag';
-  enableNFCmessage = 'Turn on NFC to proceed';
-  isCreatedListener = false;
-  disabledNFC = true;
-  classNfcContainer = '';
-  isActive = false;
-  timer: any;
+  public savedOnce = false;
 
-  constructor(private ngZone: NgZone,
-              private readonly notification: NotificationService) { }
+  public randomLogin: string = null;
+  public nfcData: string = null;
 
-  ngOnInit() {
-    this.classNfcContainer = '';
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService,
+    private readonly authService: AuthService,
+    private readonly ddsService: DDSService,
+    private readonly workerService: WorkerService
+  ) {}
+
+  async ngOnInit() {
+    this.randomLogin = await this.generateNewLogin();
+    this.nfcData = await packLogin(this.randomLogin, this.workerService.worker);
   }
 
-  ngAfterViewInit() {
-    this.isActive = true;
-    this.checkState();
-
-    document.addEventListener('resume', this.checkState.bind(this), false);
-
-    if (!this.isCreatedListener) {
-      nfc.addNdefListener(
-        (event) => this.ngZone.run(async () => await this.onNdef(event)),
-        function () {
-          console.log('Listening for NDEF tags.');
-        },
-        this.failure
-      );
-
-      nfc.addTagDiscoveredListener(
-        (event) => this.ngZone.run(async () => await this.onNfc(event)),
-        function () {
-          console.log('Listening for non-NDEF tags.');
-        },
-        this.failure
-      );
-
-      nfc.addMimeTypeListener(
-        'text/pg',
-        (event) => this.ngZone.run(async () => await this.onNdef(event)),
-        function () {
-          console.log('Listening for NDEF mime tags with type text/pg.');
-        },
-        this.failure
-      );
-
-      this.isCreatedListener = true;
-    }
-
-    this.timeout();
+  public cancel() {
+    this.cancelled.next();
   }
 
-  ngOnDestroy() {
-    this.isActive = false;
-    nfc.removeNdefListener(
-      (event) => this.ngZone.run(async () => await this.onNdef(event)),
-      function () {
-        console.log('Listening for NDEF tags rm.');
-      },
-      this.failure
-    );
-
-    nfc.removeTagDiscoveredListener(
-      (event) => this.ngZone.run(async () => await this.onNfc(event)),
-      function () {
-        console.log('Listening for non-NDEF tags rm.');
-      },
-      this.failure
-    );
-
-    nfc.removeMimeTypeListener(
-      'text/pg',
-      (event) => this.ngZone.run(async () => await this.onNdef(event)),
-      function () {
-        console.log('Listening for NDEF mime tags with type text/pg rm.');
-      },
-      this.failure
-    );
-
-    clearTimeout(this.timer);
+  public onBack() {
+    this.navigationService.back();
   }
 
-  timeout() {
-    this.timer = setTimeout(() => {
-      this.checkState();
-      this.timeout();
-    }, 100);
+  public onSaved(ignored) {
+    this.savedOnce = true;
+    this.notification.show('The identifier was successfully written to the NFC tag');
   }
 
-  checkState() {
-    nfc.enabled(
-      () => this.ngZone.run(() => {
-        this.disabledNFC = false;
-      }),
-      () => this.ngZone.run(() => {
-        this.disabledNFC = true;
-      }));
+  public onSubmit() {
+    this.submit.next({
+      type: IdFactor.NFC,
+      value: this.randomLogin
+    });
   }
 
-  changeNFCState() {
-    nfc.showSettings();
-  }
+  async generateNewLogin() {
+    try {
+      this.busy.next(true);
 
-  failure(reason) {
-    console.log('There was a problem ' + reason);
-  }
+      let login = null;
+      do {
+        login = this.authService.makeNewLogin(10);
+      } while (await this.ddsService.exists(
+        await this.authService.toId(login)
+      ));
 
-  async onNfc(nfcEvent) {
-    if (this.isActive) {
-      await this.writeTag('Success write NFC tag', 'Error write NFC tag');
-      navigator.vibrate(100);
-    }
-
-  }
-
-  async onNdef(nfcEvent) {
-    if (this.isActive) {
-      await this.writeTag('Success write NFC tag', 'Error write NFC tag');
-      navigator.vibrate(100);
+      return login;
+    } finally {
+      this.busy.next(false);
     }
   }
-
-  writeTag(success, error) {
-    let payload = null;
-    if (this.isExport) {
-      payload = Array.from(this.secretValue);
-    } else {
-      payload = Array.from(this.value.getValue());
-    }
-
-    console.log(payload);
-
-    const mimeType = 'text/pg';
-
-    const record = ndef.mimeMediaRecord(mimeType, payload);
-
-    nfc.write([record], () => this.ngZone.run(async () => {
-      this.notification.show(success);
-      await this.onNext();
-    }), (e) => this.ngZone.run(() => {
-      console.log('Error write ' + JSON.stringify(e));
-      this.notification.show(error);
-    }));
-  }
-
-  async onNext() {
-    this.onSuccess.emit({factor: IdFactor.NFC, value: this.value.getValue()});
-  }
-
 }

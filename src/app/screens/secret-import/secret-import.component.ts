@@ -1,13 +1,13 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { NavigationService } from '../../services/navigation.service';
 import { IdFactor } from "../../services/auth.service";
-import { Type } from "../../inputs/nfc-reader/nfc-reader.component";
 import { NotificationService } from "../../services/notification.service";
 import { WorkerService } from "../../services/worker.service";
 
 declare const nfc: any;
 
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
+import { checkNfc, Type } from "../../utils/nfc";
 
 enum State {
   Empty,
@@ -43,19 +43,7 @@ export class SecretImportComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.nfcAvailable = await this.checkNfc();
-  }
-
-  public async checkNfc() {
-    return await new Promise<boolean>((resolve, reject) => nfc.enabled(
-      () => resolve(true),
-      e => {
-        if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      }));
+    this.nfcAvailable = await checkNfc();
   }
 
   onBack() {
