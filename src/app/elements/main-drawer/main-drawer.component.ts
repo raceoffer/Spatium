@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-main-drawer',
@@ -8,13 +8,11 @@ import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core
 export class MainDrawerComponent {
   @Input() navLinks: Array<any> = [];
   @Input() current: string = null;
-  @Output() closeClicked: EventEmitter<any> = new EventEmitter<any>();
 
   @ViewChild('sidenav') sidenav;
 
   public toggle() {
     this.sidenav.toggle();
-    this.closeClicked.emit();
   }
 
   public async onClicked(navLink) {
