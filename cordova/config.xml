@@ -61,16 +61,16 @@
     </plugin>
     <plugin name="cordova-plugin-vibration" spec="^3.1.0" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
-    <plugin name="org.devgeeks.Canvas2ImagePlugin" spec="file:../org.devgeeks.Canvas2ImagePlugin" />
-    <plugin name="cordova-plugin-keychain-touch-id" spec="file:../cordova-plugin-keychain-touch-id" />
+    <plugin name="cordova-plugin-keychain-touch-id" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git" />
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
     <plugin name="phonegap-plugin-barcodescanner" spec="^7.1.2">
         <variable name="ANDROID_SUPPORT_V4_VERSION" value="27.+" />
     </plugin>
-    <plugin name="cordova-plugin-clipboard" spec="file:../cordova-plugin-clipboard" />
     <plugin name="cordova-plugin-device" spec="^2.0.2" />
-    <plugin name="cordova-plugin-bluetooth" spec="file:../cordova-plugin-bluetooth" />
+    <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git" />
     <plugin name="phonegap-nfc" spec="^0.7.3" />
+    <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
+    <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
 </widget>
