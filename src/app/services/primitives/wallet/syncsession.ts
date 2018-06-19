@@ -1,9 +1,8 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
-import { ConnectivityService } from '../../connectivity.service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
 import { LoggerService } from '../../logger.service';
-
-import { filter, take, map, takeUntil } from 'rxjs/operators';
 
 export enum SynchronizationStatus {
   None = 0,
@@ -19,58 +18,53 @@ export enum SynchronizationStatus {
 
 export class SyncSession implements OnDestroy {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
-
-  private initialCommitmentObserver:    Observable<any>;
-  private initialDecommitmentObserver:  Observable<any>;
-  private verifierCommitmentObserver:   Observable<any>;
-  private proverCommitmentObserver:     Observable<any>;
-  private verifierDecommitmentObserver: Observable<any>;
-  private proverDecommitmentObserver:   Observable<any>;
-
   public finished: EventEmitter<any> = new EventEmitter();
   public canceled: EventEmitter<any> = new EventEmitter();
-  public failed:   EventEmitter<any> = new EventEmitter();
-
+  public failed: EventEmitter<any> = new EventEmitter();
+  private initialCommitmentObserver: Observable<any>;
+  private initialDecommitmentObserver: Observable<any>;
+  private verifierCommitmentObserver: Observable<any>;
+  private proverCommitmentObserver: Observable<any>;
+  private verifierDecommitmentObserver: Observable<any>;
+  private proverDecommitmentObserver: Observable<any>;
   private cancelled: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private subscriptions = [];
 
-  constructor(
-    private prover: any,
-    private connectivityService: ConnectivityService
-  ) {
+  constructor(private prover: any,
+              private connectionProviderService: ConnectionProviderService) {
     this.initialCommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'initialCommitment'),
         map(object => object.content)
       );
 
     this.initialDecommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'initialDecommitment'),
         map(object => object.content)
       );
 
     this.verifierCommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'verifierCommitment'),
         map(object => object.content)
       );
 
     this.proverCommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'proverCommitment'),
         map(object => object.content)
       );
 
     this.verifierDecommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'verifierDecommitment'),
         map(object => object.content)
       );
 
     this.proverDecommitmentObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'proverDecommitment'),
         map(object => object.content)
       );
@@ -83,20 +77,6 @@ export class SyncSession implements OnDestroy {
 
   public async cancel() {
     this.cancelled.next(true);
-  }
-
-  private handleFailure(message, exception) {
-    LoggerService.nonFatalCrash(message, exception);
-    this.status.next(SynchronizationStatus.Finished);
-    this.failed.emit();
-    throw new Error(message);
-  }
-
-  private handleCancel() {
-    LoggerService.log('Cancelled', {});
-    this.status.next(SynchronizationStatus.Finished);
-    this.canceled.emit();
-    throw new Error('Cancelled');
   }
 
   public async sync() {
@@ -113,7 +93,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'initialCommitment',
         content: initialCommitment
       });
@@ -142,7 +122,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'initialDecommitment',
         content: initialDecommitment
       });
@@ -173,7 +153,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'verifierCommitment',
         content: verifierCommitment
       });
@@ -202,7 +182,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'proverCommitment',
         content: proverCommitment
       });
@@ -231,7 +211,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'verifierDecommitment',
         content: verifierDecommitment
       });
@@ -256,7 +236,7 @@ export class SyncSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'proverDecommitment',
         content: proverDecommitment
       });
@@ -284,5 +264,19 @@ export class SyncSession implements OnDestroy {
     this.finished.emit(verifiedData);
 
     return verifiedData;
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(SynchronizationStatus.Finished);
+    this.failed.emit();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(SynchronizationStatus.Finished);
+    this.canceled.emit();
+    throw new Error('Cancelled');
   }
 }

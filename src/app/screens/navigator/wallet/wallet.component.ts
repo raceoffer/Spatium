@@ -1,14 +1,14 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { ConnectivityService } from '../../../services/connectivity.service';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const navigator: any;
@@ -78,23 +78,19 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
-
-  private tileBalanceInfo = {};
-
   @ViewChild('sidenav') sidenav;
+  private tileBalanceInfo = {};
   private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    private readonly connectivityService: ConnectivityService,
-    private readonly ngZone: NgZone,
-    private readonly router: Router,
-    private readonly keychain: KeyChainService,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService,
-    private readonly currency: CurrencyService,
-    private readonly wallet: WalletService
-  ) {
+  constructor(public dialog: MatDialog,
+              private readonly connectionProviderService: ConnectionProviderService,
+              private readonly ngZone: NgZone,
+              private readonly router: Router,
+              private readonly keychain: KeyChainService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService,
+              private readonly currency: CurrencyService,
+              private readonly wallet: WalletService) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.titles.push(this.tokenEntry(tokenInfo));
     });
@@ -210,7 +206,7 @@ export class WalletComponent implements OnInit, OnDestroy {
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.connectivityService.disconnect();
+          await this.connectionProviderService.disconnect();
           await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
         }
       },

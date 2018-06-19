@@ -1,19 +1,19 @@
 import { Injectable, NgZone } from '@angular/core';
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { skip, filter, distinctUntilChanged, mapTo, map } from 'rxjs/operators';
-
-import { LoggerService } from './logger.service';
-import { DeviceService } from './device.service';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
-
+import { ProviderType } from './connection-provider';
+import { DeviceService } from './device.service';
+import { IConnectionProvider } from './interfaces/i-connectivity-provider';
+import { LoggerService } from './logger.service';
 import { Device, equals } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 
 declare const cordova: any;
 
 @Injectable()
-export class BluetoothService {
+export class BluetoothService implements IConnectionProvider {
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -40,7 +40,7 @@ export class BluetoothService {
     ), false);
   public listeningChanged: Observable<boolean> = this.listening.pipe(distinctUntilChanged(), skip(1));
   public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
-  public listeningSoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
+  public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
 
   public discoveryState: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
@@ -50,10 +50,9 @@ export class BluetoothService {
     ), false);
   public discoveringChanged: Observable<boolean> = this.discovering.pipe(distinctUntilChanged(), skip(1));
   public discoveryStartedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => discovering), mapTo(null));
-  public discoveryFinishedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
+  public discoveryStoppedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
 
   public discoverableState: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-
   public discoverable: BehaviorSubject<boolean> = toBehaviourSubject(
     this.discoverableState.pipe(
       map(state => state === State.Started)
@@ -69,6 +68,11 @@ export class BluetoothService {
 
   public message: Subject<any> = new Subject<any>();
 
+  constructor(private readonly deviceService: DeviceService,
+              private readonly ngZone: NgZone) {
+    this.init();
+  }
+
   static mapState(internalState: number): State {
     switch (internalState) {
       case 0x0000000a:
@@ -80,60 +84,6 @@ export class BluetoothService {
       case 0x0000000d:
         return State.Stopping;
     }
-  }
-
-  constructor(
-    private readonly deviceService: DeviceService,
-    private readonly ngZone: NgZone
-  ) {
-    this.init();
-  }
-
-  private async init() {
-    await this.deviceService.deviceReady();
-
-    cordova.plugins.bluetooth.setConnectedCallback(device => this.ngZone.run(async () => {
-      this.connectionState.next(device ? ConnectionState.Connected : ConnectionState.None);
-      if (device) {
-        await cordova.plugins.bluetooth.startReading();
-      }
-    }));
-
-    cordova.plugins.bluetooth.setDiscoveredCallback(device => this.ngZone.run(() => {
-      const devices = this.devices.getValue();
-      if (devices.has(device.name)) {
-        if (devices.get(device.name).macAddress === device.address) {
-          return;
-        }
-      }
-
-      devices.set(device.name, new Device(device.name, device.address));
-      this.devices.next(devices);
-    }));
-
-    cordova.plugins.bluetooth.setDiscoveryCallback(discovery => this.ngZone.run(() => {
-      this.discoveryState.next(discovery ? State.Started : State.Stopped);
-    }));
-
-    cordova.plugins.bluetooth.setMessageCallback(message => this.ngZone.run(() => {
-      this.message.next(JSON.parse(message));
-    }));
-
-    cordova.plugins.bluetooth.setDiscoverableCallback(discoverable => this.ngZone.run(() => {
-      this.discoverableState.next(discoverable ? State.Started : State.Stopped);
-    }));
-
-    cordova.plugins.bluetooth.setStateCallback(state => this.ngZone.run(() => {
-      this.state.next(BluetoothService.mapState(state));
-    }));
-
-    cordova.plugins.bluetooth.getState().then(state => this.ngZone.run(() => {
-      this.state.next(BluetoothService.mapState(state));
-    }));
-
-    cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
-      this.discoverableState.next(discoverable ? State.Started : State.Stopped);
-    }));
   }
 
   async requestEnable() {
@@ -221,18 +171,18 @@ export class BluetoothService {
     }
   }
 
-  async startDiscovery() {
+  async searchDevices(duration: number) {
     if (this.discoveryState.getValue() !== State.Stopped) {
       return;
     }
 
     this.discoveryState.next(State.Starting);
 
-    const paired = await cordova.plugins.bluetooth.getPairedDevices();
+    const paired = await cordova.plugins.bluetooth.listPairedDevices();
     const mapped = new Map<string, Device>();
     for (const device of paired) {
       if (device.hasOwnProperty('name')) {
-        mapped.set(device.name, new Device(device.name, device.address, null, true));
+        mapped.set(device.name, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
       }
     }
 
@@ -277,5 +227,52 @@ export class BluetoothService {
       this.discoverableState.next(State.Stopped);
       throw e;
     }
+  }
+
+  private async init() {
+    await this.deviceService.deviceReady();
+
+    cordova.plugins.bluetooth.setConnectedCallback(device => this.ngZone.run(async () => {
+      this.connectionState.next(device ? ConnectionState.Connected : ConnectionState.None);
+      if (device) {
+        await cordova.plugins.bluetooth.startReading();
+      }
+    }));
+
+    cordova.plugins.bluetooth.setDiscoveredCallback(device => this.ngZone.run(() => {
+      const devices = this.devices.getValue();
+      if (devices.has(device.name)) {
+        if (devices.get(device.name).macAddress === device.address) {
+          return;
+        }
+      }
+
+      devices.set(device.name, new Device(ProviderType.BLUETOOTH, device.name, device.address));
+      this.devices.next(devices);
+    }));
+
+    cordova.plugins.bluetooth.setDiscoveryCallback(discovery => this.ngZone.run(() => {
+      this.discoveryState.next(discovery ? State.Started : State.Stopped);
+    }));
+
+    cordova.plugins.bluetooth.setMessageCallback(message => this.ngZone.run(() => {
+      this.message.next(JSON.parse(message));
+    }));
+
+    cordova.plugins.bluetooth.setDiscoverableCallback(discoverable => this.ngZone.run(() => {
+      this.discoverableState.next(discoverable ? State.Started : State.Stopped);
+    }));
+
+    cordova.plugins.bluetooth.setStateCallback(state => this.ngZone.run(() => {
+      this.state.next(BluetoothService.mapState(state));
+    }));
+
+    cordova.plugins.bluetooth.getState().then(state => this.ngZone.run(() => {
+      this.state.next(BluetoothService.mapState(state));
+    }));
+
+    cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
+      this.discoverableState.next(discoverable ? State.Started : State.Stopped);
+    }));
   }
 }

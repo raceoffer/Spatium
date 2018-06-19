@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { SocketClientService } from './socketclient.service';
+import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
-import { SocketServerService } from './socketserver.service';
 import { DiscoveryService } from './discovery.service';
-import { BehaviorSubject, Observable, combineLatest, merge } from 'rxjs';
-import { skip, filter, distinctUntilChanged, map, mapTo } from 'rxjs/operators';
+import { IConnectionProvider } from './interfaces/i-connectivity-provider';
 import { ConnectionState, State } from './primitives/state';
-import { DeviceService } from './device.service';
+import { SocketClientService } from './socketclient.service';
+import { SocketServerService } from './socketserver.service';
 
 @Injectable()
-export class ConnectivityService {
+export class ConnectivityService implements IConnectionProvider {
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -32,7 +32,13 @@ export class ConnectivityService {
     }),
     ConnectionState.None
   );
-
+  public connected: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.connectionState.pipe(map(state => state === ConnectionState.Connected)),
+    false);
+  public connectedChanged: Observable<any> = this.connected.pipe(distinctUntilChanged(), skip(1));
+  public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
+  public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
+  public connectionStateChanged: Observable<ConnectionState> = this.connectionState.pipe(distinctUntilChanged(), skip(1));
   public serverState: BehaviorSubject<State> = toBehaviourSubject(
     combineLatest([
       this.discoveryService.advertising,
@@ -50,47 +56,29 @@ export class ConnectivityService {
     }),
     State.Stopped
   );
-
-  public discoveryState: BehaviorSubject<State> = this.discoveryService.discovering;
-
-  public connected: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.connectionState.pipe(map(state => state === ConnectionState.Connected)),
-    false);
-
   public listening: BehaviorSubject<boolean> = toBehaviourSubject(
     this.serverState.pipe(map(state => state === State.Started)),
     false);
-
+  public listeningChanged: Observable<any> = this.listening.pipe(distinctUntilChanged(), skip(1));
+  public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
+  public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
+  public discoveryState: BehaviorSubject<State> = this.discoveryService.discovering;
   public discovering: BehaviorSubject<boolean> = toBehaviourSubject(
     this.discoveryState.pipe(map(state => state === State.Started)),
     false);
-
+  public discoveringChanged: Observable<any> = this.discovering.pipe(distinctUntilChanged(), skip(1));
+  public discoveryStartedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => discovering), mapTo(null));
+  public discoveryStoppedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
   public message = toReplaySubject(merge(
     this.socketClientService.message,
     // in order to prevent a mess we ignore messages to the server while the client is connected
     this.socketServerService.message.pipe(filter(_ => !this.socketClientService.connected.getValue()))
   ), 1);
-
   public devices = this.discoveryService.devices;
 
-  public connectedChanged: Observable<any> = this.connected.pipe(distinctUntilChanged(), skip(1));
-  public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
-  public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
-
-  public listeningChanged: Observable<any> = this.listening.pipe(distinctUntilChanged(), skip(1));
-  public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
-  public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
-
-  public discoveringChanged: Observable<any> = this.discovering.pipe(distinctUntilChanged(), skip(1));
-  public discoveryStartedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => discovering), mapTo(null));
-  public discoveryStoppedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
-
-  constructor(
-    private readonly socketClientService: SocketClientService,
-    private readonly socketServerService: SocketServerService,
-    private readonly discoveryService: DiscoveryService,
-    private readonly deviceService: DeviceService
-  ) {}
+  constructor(private readonly socketClientService: SocketClientService,
+              private readonly socketServerService: SocketServerService,
+              private readonly discoveryService: DiscoveryService) {}
 
   // Server interface
 

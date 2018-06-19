@@ -1,9 +1,8 @@
 import { OnDestroy } from '@angular/core';
-import { BehaviorSubject,  Observable,  ReplaySubject,  Subject } from 'rxjs';
-import { ConnectivityService } from '../../connectivity.service';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
 import { LoggerService } from '../../logger.service';
-
-import { filter, take, map, takeUntil } from 'rxjs/operators';
 
 export enum TransactionStatus {
   None = 0,
@@ -18,68 +17,48 @@ export enum TransactionStatus {
 
 export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
-
-  private entropyCommitmentsObserver:   Observable<any>;
-  private entropyDecommitmentsObserver: Observable<any>;
-  private chiphertextsObserver:         Observable<any>;
-
   public ready: Subject<any> = new Subject<any>();
   public signed: Subject<any> = new Subject<any>();
-
   public canceled: Subject<any> = new Subject<any>();
-  public failed:   Subject<any> = new Subject<any>();
-
+  public failed: Subject<any> = new Subject<any>();
+  private entropyCommitmentsObserver: Observable<any>;
+  private entropyDecommitmentsObserver: Observable<any>;
+  private chiphertextsObserver: Observable<any>;
   private canceledSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private mapping: any = null;
 
   private subscriptions = [];
 
-  constructor(
-    private tx: any,
-    private compoundKey: any,
-    private connectivityService: ConnectivityService
-  ) {
+  constructor(private tx: any,
+              private compoundKey: any,
+              private connectionProviderService: ConnectionProviderService) {
     this.entropyCommitmentsObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'entropyCommitments'),
         map(object => object.content)
       );
 
     this.entropyDecommitmentsObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'entropyDecommitments'),
         map(object => object.content)
       );
 
     this.chiphertextsObserver =
-      this.connectivityService.message.pipe(
+      this.connectionProviderService.message.pipe(
         filter(object => object.type === 'chiphertexts'),
         map(object => object.content)
       );
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
   }
 
   public get transaction() {
     return this.tx;
   }
 
-  private handleFailure(message, exception) {
-    LoggerService.nonFatalCrash(message, exception);
-    this.status.next(TransactionStatus.Failed);
-    this.failed.next();
-    throw new Error(message);
-  }
-
-  private handleCancel() {
-    LoggerService.log('Cancelled', {});
-    this.status.next(TransactionStatus.Cancelled);
-    this.canceled.next();
-    throw new Error('Cancelled');
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public async cancel() {
@@ -112,7 +91,7 @@ export class SignSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'entropyCommitments',
         content: entropyCommitments
       });
@@ -141,7 +120,7 @@ export class SignSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'entropyDecommitments',
         content: entropyDecommitments
       });
@@ -190,7 +169,7 @@ export class SignSession implements OnDestroy {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'chiphertexts',
         content: chiphertexts
       });
@@ -226,5 +205,19 @@ export class SignSession implements OnDestroy {
 
     this.status.next(TransactionStatus.Signed);
     this.signed.next();
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(TransactionStatus.Failed);
+    this.failed.next();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(TransactionStatus.Cancelled);
+    this.canceled.next();
+    throw new Error('Cancelled');
   }
 }

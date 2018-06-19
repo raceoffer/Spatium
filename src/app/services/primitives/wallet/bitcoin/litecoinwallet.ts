@@ -1,20 +1,17 @@
-import { BitcoreWallet } from './bitcorewallet';
-import { Coin, KeyChainService } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
-import { ConnectivityService } from '../../../connectivity.service';
-
 import { LitecoinTransaction, LitecoinWallet as CoreLitecoinWallet } from 'crypto-core-async';
+import { ConnectionProviderService } from '../../../connection-provider';
+import { Coin, KeyChainService } from '../../../keychain.service';
+import { BitcoreWallet } from './bitcorewallet';
 
 export class LitecoinWallet extends BitcoreWallet {
-  constructor(
-    endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    connectivityService: ConnectivityService,
-    ngZone: NgZone,
-    worker: any
-  ) {
+  constructor(endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              connectionProviderService: ConnectionProviderService,
+              ngZone: NgZone,
+              worker: any) {
     super(
       LitecoinTransaction,
       CoreLitecoinWallet,
@@ -23,7 +20,7 @@ export class LitecoinWallet extends BitcoreWallet {
       keychain,
       Coin.LTC,
       account,
-      connectivityService,
+      connectionProviderService,
       ngZone,
       worker
     );
@@ -31,6 +28,6 @@ export class LitecoinWallet extends BitcoreWallet {
 
   public verifyAddress(address: string): boolean {
     return address &&
-           /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+      /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
   }
 }

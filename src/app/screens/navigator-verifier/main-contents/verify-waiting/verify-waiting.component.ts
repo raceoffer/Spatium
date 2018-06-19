@@ -1,6 +1,6 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConnectivityService } from '../../../../services/connectivity.service';
+import { ConnectionProviderService } from '../../../../services/connection-provider';
 import { NavigationService } from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { WalletService } from '../../../../services/wallet.service';
@@ -11,12 +11,12 @@ import { WalletService } from '../../../../services/wallet.service';
   styleUrls: ['./verify-waiting.component.css']
 })
 export class VerifyWaitingComponent implements OnInit, OnDestroy {
-  public ready = this.connectivityService.listening;
+  public ready = this.connectionProviderService.listening;
 
   public isExitTap = false;
   private subscriptions = [];
 
-  constructor(private readonly connectivityService: ConnectivityService,
+  constructor(private readonly connectionProviderService: ConnectionProviderService,
               private readonly navigationService: NavigationService,
               private readonly ngZone: NgZone,
               private readonly router: Router,
@@ -31,12 +31,12 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.connectivityService.connectedEvent.subscribe(async () => {
+      this.connectionProviderService.connectedEvent.subscribe(async () => {
         await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
-      this.connectivityService.disconnectedEvent.subscribe(async () => {
+      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
       }));
   }

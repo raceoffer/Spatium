@@ -1,9 +1,10 @@
 import { Injectable, NgZone } from '@angular/core';
 
 import { BehaviorSubject, Observable, timer } from 'rxjs';
-import { distinctUntilChanged, skip } from "rxjs/internal/operators";
-import { Device, equals } from "./primitives/device";
-import { State } from "./primitives/state";
+import { distinctUntilChanged, skip } from 'rxjs/internal/operators';
+import { Device, equals } from './primitives/device';
+import { State } from './primitives/state';
+import { ProviderType } from './connection-provider';
 
 declare const cordova: any;
 declare const window: any;
@@ -95,6 +96,7 @@ export class DiscoveryService {
           const devices = this.devices.getValue();
 
           devices.set(service.txtRecord.name, new Device(
+            ProviderType.ZEROCONF,
             service.txtRecord.name,
             null,
             service.txtRecord.ip

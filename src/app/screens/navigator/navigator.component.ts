@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ConnectivityService } from '../../services/connectivity.service';
+import { ConnectionProviderService } from '../../services/connection-provider';
 import { WalletService } from '../../services/wallet.service';
 
 @Component({
@@ -11,23 +11,23 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(private readonly wallet: WalletService,
-              private readonly connectivityService: ConnectivityService) {}
+              private readonly connectionProviderService: ConnectionProviderService) {}
 
   public ngOnInit() {
     this.subscriptions.push(
-      this.connectivityService.disconnectedEvent.subscribe(async () => {
+      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
         await this.wallet.reset();
       }));
 
     this.subscriptions.push(
       this.wallet.cancelledEvent.subscribe(async () => {
-        await this.connectivityService.disconnect();
+        await this.connectionProviderService.disconnect();
       }));
 
     this.subscriptions.push(
       this.wallet.failedEvent.subscribe(async () => {
-        await this.connectivityService.disconnect();
+        await this.connectionProviderService.disconnect();
       }));
   }
 
@@ -36,6 +36,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
-    await this.connectivityService.disconnect();
+    await this.connectionProviderService.disconnect();
   }
 }

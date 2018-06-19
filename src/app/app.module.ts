@@ -1,10 +1,9 @@
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClientModule } from '@angular/common/http';
-import { HttpModule } from '@angular/http';
-import {NativeHttpWrapper} from 'ionic-native-http-angular-wrapper';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
 import {
   MatButtonModule,
   MatButtonToggleModule,
@@ -28,6 +27,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QRCodeModule } from 'angular2-qrcode';
+import { NativeHttpWrapper } from 'ionic-native-http-angular-wrapper';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
@@ -74,21 +74,22 @@ import { SecretImportComponent } from './screens/secret-import/secret-import.com
 import { StartComponent } from './screens/start/start.component';
 import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
+import { ConnectionProviderService } from './services/connection-provider';
+import { ConnectivityService } from './services/connectivity.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
+import { DeviceService } from './services/device.service';
+import { DiscoveryService } from './services/discovery.service';
 import { FileService } from './services/file.service';
 import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
 import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
-import { WalletService } from './services/wallet.service';
-import { SocketServerService } from './services/socketserver.service';
 import { SocketClientService } from './services/socketclient.service';
-import { DiscoveryService } from './services/discovery.service';
-import { ConnectivityService } from './services/connectivity.service';
+import { SocketServerService } from './services/socketserver.service';
+import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
-import { DeviceService } from './services/device.service';
 
 @NgModule({
   declarations: [
@@ -186,7 +187,8 @@ import { DeviceService } from './services/device.service';
     DiscoveryService,
     SocketServerService,
     SocketClientService,
-    ConnectivityService
+    ConnectivityService,
+    ConnectionProviderService
   ],
   bootstrap: [
     AppComponent

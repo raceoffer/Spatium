@@ -1,10 +1,9 @@
-import { Balance, CurrencyWallet, Status } from '../currencywallet';
-import { Coin, KeyChainService, Token } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
-import { timer  } from 'rxjs';
-import { ConnectivityService } from '../../../connectivity.service';
-
-import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
+import { ERC20Wallet as CoreERC20Wallet, EthereumTransaction } from 'crypto-core-async';
+import { timer } from 'rxjs';
+import { ConnectionProviderService } from '../../../connection-provider';
+import { Coin, KeyChainService, Token } from '../../../keychain.service';
+import { Balance, CurrencyWallet, Status } from '../currencywallet';
 
 export class ERC20Wallet extends CurrencyWallet {
   private wallet: any = null;
@@ -14,19 +13,17 @@ export class ERC20Wallet extends CurrencyWallet {
 
   private routineTimerSub: any = null;
 
-  constructor(
-    private endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    connectivityService: ConnectivityService,
-    ngZone: NgZone,
-    worker: any,
-    token: Token,
-    address: string,
-    decimals: number = 18
-  ) {
-    super(network, keychain, Coin.ETH, account, connectivityService, ngZone, worker);
+  constructor(private endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              connectionProviderService: ConnectionProviderService,
+              ngZone: NgZone,
+              worker: any,
+              token: Token,
+              address: string,
+              decimals: number = 18) {
+    super(network, keychain, Coin.ETH, account, connectionProviderService, ngZone, worker);
 
     this.contractAddress = address;
     this.token = token;
@@ -81,7 +78,8 @@ export class ERC20Wallet extends CurrencyWallet {
           balance.confirmed,
           balance.unconfirmed
         ));
-      } catch (ignored) {}
+      } catch (ignored) {
+      }
     });
 
     this.status.next(Status.Ready);
@@ -109,7 +107,8 @@ export class ERC20Wallet extends CurrencyWallet {
           balance.confirmed,
           balance.unconfirmed
         ));
-      } catch (ignored) {}
+      } catch (ignored) {
+      }
     });
 
     this.status.next(Status.Ready);

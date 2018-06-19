@@ -1,14 +1,12 @@
-import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
-import { ConnectivityService } from '../../connectivity.service';
-import { SynchronizationStatus, SyncSession } from './syncsession';
-import { SignSession } from './signingsession';
-import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { NgZone } from '@angular/core';
-
-import { toBehaviourSubject } from '../../../utils/transformers';
-
 import { CompoundKey } from 'crypto-core-async';
-import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
+import { toBehaviourSubject } from '../../../utils/transformers';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService, Token } from '../../keychain.service';
+import { SignSession } from './signingsession';
+import { SynchronizationStatus, SyncSession } from './syncsession';
 
 export enum Status {
   None = 0,
@@ -24,6 +22,13 @@ export enum TransactionType {
 }
 
 export class HistoryEntry {
+  constructor(public type: TransactionType,
+              public from: string,
+              public to: string,
+              public amount: number,
+              public confirmed: boolean,
+              public time: number) {}
+
   static fromJSON(json) {
     return new HistoryEntry(
       json.type === 'Out' ? TransactionType.Out : TransactionType.In,
@@ -34,83 +39,61 @@ export class HistoryEntry {
       json.time
     );
   }
-
-  constructor(
-    public type: TransactionType,
-    public from: string,
-    public to: string,
-    public amount: number,
-    public confirmed: boolean,
-    public time: number
-  ) {}
 }
 
 export class Balance {
-  constructor(
-    public confirmed: any,
-    public unconfirmed: any
-  ) {}
+  constructor(public confirmed: any,
+              public unconfirmed: any) {}
 }
 
 export class CurrencyWallet {
   public compoundKey: any = null;
   public publicKey: any = null;
-
-  protected syncSession: SyncSession = null;
-  protected signSession: SignSession = null;
-
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-
   public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.Synchronizing)
     ), false);
-
   public ready: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.Ready)
     ), false);
-
   public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
-
   public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
   public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
   public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
   public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
-
   public startVerifyEvent: Subject<any> = new Subject<any>();
   public verifyEvent: Subject<any> = new Subject<any>();
   public signedEvent: Subject<any> = new Subject<any>();
   public acceptedEvent: Subject<any> = new Subject<any>();
   public rejectedEvent: Subject<any> = new Subject<any>();
-
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-
   public address: BehaviorSubject<string> = new BehaviorSubject<string>(null);
   public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(null);
+  protected syncSession: SyncSession = null;
+  protected signSession: SignSession = null;
 
-  constructor(
-    protected network: string,
-    private keychain: KeyChainService,
-    private currency: Coin,
-    private account: number,
-    private connectivityService: ConnectivityService,
-    protected ngZone: NgZone,
-    protected worker: any
-  ) {
+  constructor(protected network: string,
+              private keychain: KeyChainService,
+              private currency: Coin,
+              private account: number,
+              private connectionProviderService: ConnectionProviderService,
+              protected ngZone: NgZone,
+              protected worker: any) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
-    this.connectivityService.message.pipe(
+    this.connectionProviderService.message.pipe(
       filter((obj: any) => obj.type === 'cancelTransaction')
     ).subscribe(async () => {
-        // pop the queue
-        this.connectivityService.message.next({});
+      // pop the queue
+      this.connectionProviderService.message.next({});
 
-        if (this.signSession) {
-          await this.signSession.cancel();
-          this.signSession = null;
-        }
-      });
+      if (this.signSession) {
+        await this.signSession.cancel();
+        this.signSession = null;
+      }
+    });
   }
 
   public toInternal(amount: number): any {
@@ -134,7 +117,7 @@ export class CurrencyWallet {
     const prover = await this.compoundKey.startInitialCommitment();
 
     this.status.next(Status.Synchronizing);
-    this.syncSession = new SyncSession(prover, this.connectivityService);
+    this.syncSession = new SyncSession(prover, this.connectionProviderService);
     this.syncSession.status.subscribe(state => {
       this.syncProgress.next(
         Math.max(Math.min(Math.round(state * 100 / (SynchronizationStatus.Finished - SynchronizationStatus.None + 1)), 100), 0)
@@ -185,11 +168,12 @@ export class CurrencyWallet {
 
   public async rejectTransaction() {
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'cancelTransaction',
         content: {}
       });
-    } catch (ignored) { }
+    } catch (ignored) {
+    }
 
     if (this.signSession) {
       await this.signSession.cancel();
@@ -213,7 +197,7 @@ export class CurrencyWallet {
     this.publicKey = await this.compoundKey.getCompoundPublicKey();
   }
 
-  public currencyCode(): Coin | Token  {
+  public currencyCode(): Coin | Token {
     return this.currency;
   }
 
@@ -222,7 +206,7 @@ export class CurrencyWallet {
   }
 
   public async requestTransactionVerify(transaction) {
-    await this.connectivityService.send({
+    await this.connectionProviderService.send({
       type: 'verifyTransaction',
       content: {
         tx: await transaction.toJSON(),
@@ -233,7 +217,7 @@ export class CurrencyWallet {
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
-      this.connectivityService
+      this.connectionProviderService
     );
 
     this.signSession.ready.subscribe(async () => {
@@ -241,19 +225,19 @@ export class CurrencyWallet {
     });
     this.signSession.canceled.subscribe(async () => {
       console.log('canceled');
-      this.connectivityService.message.next({});
+      this.connectionProviderService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(async () => {
       console.log('failed');
-      this.connectivityService.message.next({});
+      this.connectionProviderService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.signed.subscribe(async () => {
       console.log('signed');
-      this.connectivityService.message.next({});
+      this.connectionProviderService.message.next({});
       this.acceptedEvent.next();
       this.signedEvent.next();
     });
@@ -265,7 +249,7 @@ export class CurrencyWallet {
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
-      this.connectivityService
+      this.connectionProviderService
     );
 
     this.startVerifyEvent.next();
@@ -274,12 +258,12 @@ export class CurrencyWallet {
       this.verifyEvent.next(transaction);
     });
     this.signSession.canceled.subscribe(() => {
-      this.connectivityService.message.next({});
+      this.connectionProviderService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
     this.signSession.failed.subscribe(() => {
-      this.connectivityService.message.next({});
+      this.connectionProviderService.message.next({});
       this.signSession = null;
       this.rejectedEvent.next();
     });
@@ -301,11 +285,9 @@ export class CurrencyWallet {
     return [];
   }
 
-  public async createTransaction(
-    address: string,
-    value: any,
-    fee?: any
-  ) {
+  public async createTransaction(address: string,
+                                 value: any,
+                                 fee?: any) {
     return null;
   }
 

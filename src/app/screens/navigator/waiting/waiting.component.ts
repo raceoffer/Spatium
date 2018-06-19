@@ -1,12 +1,9 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { ConnectivityService } from '../../../services/connectivity.service';
-import { map } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { toBehaviourSubject } from '../../../utils/transformers';
-import { State } from "../../../services/primitives/state";
 
 declare const navigator: any;
 
@@ -20,20 +17,19 @@ export class WaitingComponent implements OnInit, OnDestroy {
 
   public stLabel = 'Connect to a device';
 
-  public discovering = this.connectivityService.discoveryState.pipe(map(state => state !== State.Stopped));
-  public connected = this.connectivityService.connected;
-  public devices = toBehaviourSubject(this.connectivityService.devices.pipe(map(devices => Array.from<any>(devices.values()))), []);
+  public discovering = this.connectionProviderService.discovering;
+  public connected = this.connectionProviderService.connected;
+  public devices = this.connectionProviderService.combinedDevices;
+  public providers = this.connectionProviderService.providers;
   public ready = this.wallet.ready;
 
   private subscriptions = [];
 
-  constructor(
-    public dialog: MatDialog,
-    private connectivityService: ConnectivityService,
-    private wallet: WalletService,
-    private router: Router,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(public dialog: MatDialog,
+              private readonly router: Router,
+              private readonly wallet: WalletService,
+              private readonly navigationService: NavigationService,
+              private readonly connectionProviderService: ConnectionProviderService) { }
 
   async ngOnInit() {
     this.subscriptions.push(
@@ -43,12 +39,12 @@ export class WaitingComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.connectivityService.connectedEvent.subscribe(async () => {
+      this.connectionProviderService.connectedEvent.subscribe(async () => {
         this.wallet.startSync();
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 
-    await this.connectivityService.searchDevices(5 * 1000);
+    await this.connectionProviderService.searchDevices();
   }
 
   ngOnDestroy() {
@@ -56,16 +52,16 @@ export class WaitingComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async connectTo(ip) {
+  async connectTo(device) {
     if (this.ready.getValue()) {
-      await this.openDialog(ip);
+      await this.openDialog(device);
     } else {
-      await this.connectivityService.connect(ip);
+      await this.connectionProviderService.connect(device);
     }
   }
 
   async startDiscovery() {
-    await this.connectivityService.searchDevices(5 * 1000);
+    await this.connectionProviderService.searchDevices();
   }
 
   async onBackClicked() {
@@ -76,15 +72,15 @@ export class WaitingComponent implements OnInit, OnDestroy {
     await this.openDialog(null);
   }
 
-  async openDialog(ip: string) {
+  async openDialog(device) {
     navigator.notification.confirm(
       'Cancel synchronization',
       buttonIndex => {
         if (buttonIndex === 1) { // yes
-          this.connectivityService.disconnect();
+          this.connectionProviderService.disconnect();
 
-          if (ip != null) {
-            this.connectivityService.connect(ip);
+          if (device != null) {
+            this.connectionProviderService.connect(device);
           }
         }
       },

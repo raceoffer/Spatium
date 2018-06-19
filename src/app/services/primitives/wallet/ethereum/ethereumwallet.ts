@@ -1,25 +1,22 @@
-import { Balance, CurrencyWallet, Status } from '../currencywallet';
-import { Coin, KeyChainService } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
-import { timer  } from 'rxjs';
-import { ConnectivityService } from '../../../connectivity.service';
-
 import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
+import { timer } from 'rxjs';
+import { ConnectionProviderService } from '../../../connection-provider';
+import { Coin, KeyChainService } from '../../../keychain.service';
+import { Balance, CurrencyWallet, Status } from '../currencywallet';
 
 export class EthereumWallet extends CurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
 
-  constructor(
-    private endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    connectivityService: ConnectivityService,
-    ngZone: NgZone,
-    worker: any
-  ) {
-    super(network, keychain, Coin.ETH, account, connectivityService, ngZone, worker);
+  constructor(private endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              connectionProviderService: ConnectionProviderService,
+              ngZone: NgZone,
+              worker: any) {
+    super(network, keychain, Coin.ETH, account, connectionProviderService, ngZone, worker);
   }
 
   public async reset() {
@@ -64,7 +61,8 @@ export class EthereumWallet extends CurrencyWallet {
           balance.confirmed,
           balance.unconfirmed
         ));
-      } catch (ignored) {}
+      } catch (ignored) {
+      }
     });
 
     this.status.next(Status.Ready);

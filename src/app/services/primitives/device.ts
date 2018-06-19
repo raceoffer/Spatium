@@ -1,5 +1,8 @@
+import { ProviderType } from '../connection-provider';
+
 export class Device {
   constructor(
+    public provider: ProviderType,
     public name: string,
     public macAddress: string = null,
     public ip: string = null,
@@ -7,7 +10,7 @@ export class Device {
   ) { }
 
   public static equals(x: Device, y: Device): boolean {
-    return x.name === y.name && x.macAddress === y.macAddress && x.ip === y.ip && x.paired === y.paired;
+    return x.provider === y.provider && x.name === y.name && x.macAddress === y.macAddress && x.ip === y.ip && x.paired === y.paired;
   }
 
   public equals(y: Device): boolean {
@@ -16,6 +19,7 @@ export class Device {
 
   public static merge(x: Device, y: Device): Device {
     return new Device(
+      y.provider || x.provider,
       y.name || x.name,
       y.macAddress || x.macAddress,
       y.ip || x.ip,

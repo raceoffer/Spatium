@@ -1,20 +1,17 @@
-import { BitcoreWallet } from './bitcorewallet';
-import { Coin, KeyChainService } from '../../../keychain.service';
 import { NgZone } from '@angular/core';
-import { ConnectivityService } from '../../../connectivity.service';
-
 import { BitcoinCashTransaction, BitcoinCashWallet as CoreBitcoinCashWallet } from 'crypto-core-async';
+import { ConnectionProviderService } from '../../../connection-provider';
+import { Coin, KeyChainService } from '../../../keychain.service';
+import { BitcoreWallet } from './bitcorewallet';
 
 export class BitcoinCashWallet extends BitcoreWallet {
-  constructor(
-    endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    connectivityService: ConnectivityService,
-    ngZone: NgZone,
-    worker: any
-  ) {
+  constructor(endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              connectionProviderService: ConnectionProviderService,
+              ngZone: NgZone,
+              worker: any) {
     super(
       BitcoinCashTransaction,
       CoreBitcoinCashWallet,
@@ -23,7 +20,7 @@ export class BitcoinCashWallet extends BitcoreWallet {
       keychain,
       Coin.BCH,
       account,
-      connectivityService,
+      connectionProviderService,
       ngZone,
       worker
     );
@@ -31,7 +28,7 @@ export class BitcoinCashWallet extends BitcoreWallet {
 
   public verifyAddress(address: string): boolean {
     return address &&
-           (super.verifyAddress(address) ||
-            /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );
+      (super.verifyAddress(address) ||
+        /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );
   }
 }

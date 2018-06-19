@@ -2,9 +2,8 @@ import { Balance, CurrencyWallet, HistoryEntry, Status } from '../currencywallet
 import { Coin, KeyChainService } from '../../../keychain.service';
 import { LoggerService } from '../../../logger.service';
 import { NgZone } from '@angular/core';
-
 import { timer } from 'rxjs';
-import { ConnectivityService } from '../../../connectivity.service';
+import { ConnectionProviderService } from '../../../connection-provider';
 
 export class BitcoreWallet extends CurrencyWallet {
   private wallet: any = null;
@@ -18,11 +17,11 @@ export class BitcoreWallet extends CurrencyWallet {
     keychain: KeyChainService,
     coin: Coin,
     account: number,
-    connectivityService: ConnectivityService,
+    connectionProviderService: ConnectionProviderService,
     ngZone: NgZone,
     worker: any
   ) {
-    super(network, keychain, coin, account, connectivityService, ngZone, worker);
+    super(network, keychain, coin, account, connectionProviderService, ngZone, worker);
   }
 
   public async reset() {

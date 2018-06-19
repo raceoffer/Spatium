@@ -1,22 +1,18 @@
 import { Injectable, NgZone } from '@angular/core';
-
-import { BehaviorSubject,  Observable,  ReplaySubject } from 'rxjs';
-import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
+import { CompoundKey } from 'crypto-core-async';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
-
-import { ConnectivityService } from './connectivity.service';
+import { ConnectionProviderService } from './connection-provider';
 import { CurrencyService } from './currency.service';
-import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './primitives/wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './primitives/wallet/bitcoin/bitcoinwallet';
 import { LitecoinWallet } from './primitives/wallet/bitcoin/litecoinwallet';
-
 import { CurrencyWallet, Status } from './primitives/wallet/currencywallet';
 import { ERC20Wallet } from './primitives/wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './primitives/wallet/ethereum/ethereumwallet';
-
-import { CompoundKey } from 'crypto-core-async';
+import { WorkerService } from './worker.service';
 
 @Injectable()
 export class WalletService {
@@ -39,13 +35,11 @@ export class WalletService {
   public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-  constructor(
-    private readonly connectivityService: ConnectivityService,
+  constructor(private readonly connectionProviderService: ConnectionProviderService,
               private readonly currencyService: CurrencyService,
               private readonly keychain: KeyChainService,
-    private readonly ngZone: NgZone,
-    private readonly workerService: WorkerService
-  ) {
+              private readonly ngZone: NgZone,
+              private readonly workerService: WorkerService) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -53,7 +47,7 @@ export class WalletService {
         'testnet',
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker
       ));
@@ -64,7 +58,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker
       ));
@@ -75,7 +69,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker
       ));
@@ -86,7 +80,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker
       ));
@@ -97,7 +91,7 @@ export class WalletService {
         'main',
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker
       ));
@@ -114,26 +108,26 @@ export class WalletService {
     }
 
 
-    this.connectivityService.message.pipe(
+    this.connectionProviderService.message.pipe(
       filter(object => object.type === 'verifyTransaction'),
       map(object => object.content),
     ).subscribe(async content => {
-        const wallet = this.currencyWallets.get(content.coin);
-        return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
-      });
+      const wallet = this.currencyWallets.get(content.coin);
+      return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
+    });
 
-    this.connectivityService.message.pipe(
+    this.connectionProviderService.message.pipe(
       filter(object => object.type === 'cancel')
     ).subscribe(async () => {
-        // pop the queue
-        this.connectivityService.message.next({});
+      // pop the queue
+      this.connectionProviderService.message.next({});
 
-        this.status.next(Status.Cancelled);
+      this.status.next(Status.Cancelled);
 
-        for (const wallet of Array.from(this.coinWallets.values())) {
-          await wallet.cancelSync();
-        }
-      });
+      for (const wallet of Array.from(this.coinWallets.values())) {
+        await wallet.cancelSync();
+      }
+    });
   }
 
   public async reset() {
@@ -218,7 +212,7 @@ export class WalletService {
     }
 
     try {
-      await this.connectivityService.send({
+      await this.connectionProviderService.send({
         type: 'cancel',
         content: {}
       });
@@ -240,7 +234,7 @@ export class WalletService {
         network,
         this.keychain,
         1,
-        this.connectivityService,
+        this.connectionProviderService,
         this.ngZone,
         this.workerService.worker,
         token,
