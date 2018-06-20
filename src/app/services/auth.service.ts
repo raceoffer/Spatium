@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 
 declare const nfc: any;
+declare const cordova: any;
 
 import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
 import { WorkerService } from "./worker.service";
+import { checkNfc } from "../utils/nfc";
 
 export enum IdFactor {
   Login,
@@ -51,15 +53,8 @@ export class AuthService {
   private async init() {
     await this.deviceService.deviceReady();
 
-    const nfcSupported = await new Promise<boolean>((resolve, reject) => nfc.enabled(
-      () => resolve(true),
-      e => {
-        if (e === 'NO_NFC' || e === 'NO_NFC_OR_NFC_DISABLED') {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      }));
+    const nfcSupported = await checkNfc();
+    const cameraSupported = await this.checkCamera();
 
     this.idFactors.set(IdFactor.Login, new Factor(
       IdFactor.Login,
@@ -68,12 +63,14 @@ export class AuthService {
       null
     ));
 
-    this.idFactors.set(IdFactor.QR, new Factor(
-      IdFactor.QR,
-      'QR',
-      null,
-      'icon-custom-qr_code'
-    ));
+    if (cameraSupported) {
+      this.idFactors.set(IdFactor.QR, new Factor(
+        IdFactor.QR,
+        'QR',
+        null,
+        'icon-custom-qr_code'
+      ));
+    }
 
     if (nfcSupported) {
       this.idFactors.set(IdFactor.NFC, new Factor(
@@ -112,12 +109,14 @@ export class AuthService {
     //   null
     // ));
 
-    this.authFactors.set(AuthFactor.QR, new Factor(
-      AuthFactor.QR,
-      'QR',
-      null,
-      'icon-custom-qr_code'
-    ));
+    if (cameraSupported) {
+      this.authFactors.set(AuthFactor.QR, new Factor(
+        AuthFactor.QR,
+        'QR',
+        null,
+        'icon-custom-qr_code'
+      ));
+    }
 
     if (nfcSupported) {
       this.authFactors.set(AuthFactor.NFC, new Factor(
@@ -127,6 +126,19 @@ export class AuthService {
         null
       ));
     }
+  }
+
+  private async checkCamera() {
+    if (this.deviceService.platform === Platform.Windows) {
+      try {
+        return await cordova.plugins.cameraInfo.isAvailable();
+      } catch(e) {
+        console.log('Failed to check camera availability');
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public async toId(name: string) {

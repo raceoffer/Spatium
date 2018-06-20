@@ -14,7 +14,7 @@
           <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
         </button>
       </div>
-      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" >
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isCameraAvailable">
         <button
           mat-icon-button
           class="fab"
@@ -50,13 +50,13 @@
 
   <app-qr-reader
     class="header text-center"
-    *ngIf="content === contentType.QR"
+    *ngIf="content === contentType.QR && isCameraAvailable"
     (scanned)="onInput(contentType.QR, $event)">
   </app-qr-reader>
 
   <app-nfc-reader
     class="header text-center"
-    *ngIf="content === contentType.NFC"
+    *ngIf="content === contentType.NFC && isNfcAvailable"
     (scanned)="onInput(contentType.NFC, $event)">
   </app-nfc-reader>
 

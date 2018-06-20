@@ -73,4 +73,5 @@
     <plugin name="phonegap-nfc" spec="^0.7.3" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
+    <plugin name="cordova-plugin-camera-info" spec="ssh+git@github.com:CaspianTechnologies/cordova-plugin-camera-info.git" />
 </widget>

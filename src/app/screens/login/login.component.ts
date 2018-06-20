@@ -11,6 +11,7 @@ declare const cordova: any;
 
 import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from "../../utils/nfc";
+import { DeviceService, Platform } from "../../services/device.service";
 
 export enum State {
   Empty,
@@ -38,6 +39,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public buttonState = State.Empty;
 
   public isNfcAvailable = true;
+  public isCameraAvailable = true;
 
   private subscriptions = [];
 
@@ -48,6 +50,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public valid = null;
 
   constructor(
+    private readonly device: DeviceService,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
@@ -64,6 +67,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.isNfcAvailable = await checkNfc();
+    this.isCameraAvailable = await this.checkCamera();
   }
 
   ngAfterViewInit() {
@@ -75,6 +79,19 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  async checkCamera() {
+    if (this.device.platform === Platform.Windows) {
+      try {
+        return await cordova.plugins.cameraInfo.isAvailable();
+      } catch(e) {
+        console.log('Failed to check camera availability');
+        return false;
+      }
+    }
+
+    return true;
   }
 
   toggleContent(content) {

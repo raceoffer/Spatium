@@ -21,6 +21,7 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
+    "cordova-plugin-camera-info": "ssh+git@github.com:CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
@@ -56,7 +57,8 @@
       "cordova-plugin-bluetooth": {},
       "phonegap-nfc": {},
       "CordovaClipboard": {},
-      "Canvas2ImagePlugin": {}
+      "Canvas2ImagePlugin": {},
+      "cordova-plugin-camera-info": {}
     },
     "platforms": [
       "browser",
