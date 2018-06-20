@@ -1,0 +1,21 @@
+<app-toolbar
+  label="NFC"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-nfc-reader
+    class="factor-content"
+    (scanned)="onScanned($event)">
+  </app-nfc-reader>
+</div>
+
+
+
+

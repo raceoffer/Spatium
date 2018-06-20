@@ -28,6 +28,22 @@ $green: rgb(24, 154, 57);//#189a39
   width: 100%;
 }
 
+.factor-component {
+  width: 100%;
+  min-height: 100%;
+  background-color: $white;
+  padding-top: 56px;
+}
+
+.overlay-background {
+  background-color: $white;
+  width: 100%;
+}
+
+.factor-content {
+  width: 100%;
+}
+
 .small-video-container {
   width: 200px;
   overflow: hidden;
@@ -250,6 +266,10 @@ mat-icon.size-40{
 
 .optical-4 {
   opacity: 0.4;
+}
+
+.optical-2 {
+  opacity: 0.2;
 }
 
 .mat-list, .mat-nav-list, .mat-selection-list {
@@ -610,12 +630,6 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   margin-bottom: 0px !important;
 }
 
-.dialog-label{
-  width: 100%;
-  height: 40px;
-  background-color: $white_two;
-}
-
 .dialog-container {
   padding: 10px 10px 10px 8px;
 }
@@ -863,7 +877,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   width: 100%;
 }
 
-.box .factor-content{
+.box {
   flex-direction: column;
   box-sizing: border-box;
   display: flex;

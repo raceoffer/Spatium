@@ -1,5 +1,6 @@
 <app-toolbar
-  (backClicked)="onBackClicked()"></app-toolbar>
+  (backClicked)="onBack()">
+</app-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <div class="header text-center">
@@ -8,11 +9,16 @@
 
   <div class="content text-center" fxLayout="column" fxLayoutAlign="space-around center">
     <div style="font-size: 18px;line-height: 48px;">
-      <span>{{stSuccess0}}</span>
-      <span>{{stSuccess1}}</span>
+      <span>You have successfully created a secure, personal SPATIUM account!</span>
     </div>
-    <button mat-raised-button color="accent" (click)="goWaiting()" class="width-button color" >{{stOpenWallet}}</button>
-  </div>
 
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="onSubmit()"
+      class="width-button color">
+      Open wallet
+    </button>
+  </div>
 </div>
 

@@ -1,90 +1,180 @@
-import {
-  AfterViewInit, Component, EventEmitter, HostBinding, Input, OnChanges, Output, SimpleChange,
-  SimpleChanges
-} from '@angular/core';
-import { State } from '../login-parent/login-parent.component';
+import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService, IdFactor } from '../../services/auth.service';
+import { DDSService } from '../../services/dds.service';
+import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
+import { WorkerService } from '../../services/worker.service';
+import { LoginComponent as LoginInput } from "../../inputs/login/login.component";
 
-declare const nfc: any;
+declare const cordova: any;
+
+import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
+import { checkNfc, Type } from "../../utils/nfc";
+import { DeviceService, Platform } from "../../services/device.service";
+
+export enum State {
+  Empty,
+  Exists,
+  New,
+  Updating,
+  Error
+}
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-login-screen',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements AfterViewInit, OnChanges {
-  @HostBinding('class') classes = 'full-width_nopadding';
-  stLogin = 'Username';
-  stateType = State;
-  @Input() genericLogin: string;
-  @Input() usernameState: State;
-  timer;
-  @Output() clearEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() buisyEvent: EventEmitter<any> = new EventEmitter<any>();
-  @Output() inputEvent: EventEmitter<string> = new EventEmitter<string>();
-  @Output() generateEvent: EventEmitter<any> = new EventEmitter<any>();
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component';
 
-  userNameSpacesValidationError = false;
+  public contentType = IdFactor;
+  public content = IdFactor.Login;
 
-  constructor() { }
+  public login = null;
+  public loginType = null;
 
-  private _userName = '';
+  public stateType = State;
+  public buttonState = State.Empty;
 
-  get userName() {
-    return this._userName;
-  }
+  public isNfcAvailable = true;
+  public isCameraAvailable = true;
 
-  set userName(newUserName) {
-    this.userNameSpacesValidationError = this.hasSpaces(newUserName);
+  private subscriptions = [];
 
-    this._userName = newUserName;
-    if (this._userName.length > 0) {
-      this.buisyEvent.emit();
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
-      this.timer = setTimeout(() => {
-        this.inputEvent.emit(this._userName);
-      }, 1000);
-    } else {
-      this.clearEvent.emit();
-      if (this.timer) {
-        clearTimeout(this.timer);
-      }
-    }
-  }
+  @ViewChild(LoginInput) public loginComponent: LoginInput;
 
-  // Hide the keyboard after pressing the submit button on the keyboard
-  removeFocus(el) { el.target.blur(); }
+  public delayed = null;
+  public generating = null;
+  public valid = null;
 
-  hasSpaces(v: string): boolean {
-    return !!v.match(/\s/);
-  }
+  constructor(
+    private readonly device: DeviceService,
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly notification: NotificationService,
+    private readonly dds: DDSService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService
+  ) {}
 
-  ngOnChanges(changes: SimpleChanges) {
-    const genericLogin: SimpleChange = changes.genericLogin;
-    if (genericLogin.currentValue !== null) {
-      this.userName = genericLogin.currentValue;
-    }
+  async ngOnInit() {
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBack();
+      })
+    );
+
+    this.isNfcAvailable = await checkNfc();
+    this.isCameraAvailable = await this.checkCamera();
   }
 
   ngAfterViewInit() {
-    if (this.genericLogin !== null) {
-      this.userName = this.genericLogin;
-      this.genericLogin = null;
-    } else {
-      this.userName = '';
+    this.delayed = this.loginComponent.delayed;
+    this.generating = this.loginComponent.generating;
+    this.valid = this.loginComponent.valid;
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+  }
+
+  async checkCamera() {
+    if (this.device.platform === Platform.Windows) {
+      try {
+        return await cordova.plugins.cameraInfo.isAvailable();
+      } catch(e) {
+        console.log('Failed to check camera availability');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  toggleContent(content) {
+    this.buttonState = State.Empty;
+    this.content = content;
+
+    this.loginType = null;
+    this.login = null;
+  }
+
+  async onInput(type: IdFactor, input: any) {
+    let login = null;
+    switch (type) {
+      case IdFactor.Login:
+        if (this.valid.getValue()) {
+          login = input;
+        }
+        break;
+      case IdFactor.QR:
+        let bytes = null;
+        try {
+          bytes = Buffer.from(input, 'hex');
+        } catch (e) {}
+        if (input && bytes) {
+          login = await tryUnpackLogin(bytes, this.workerService.worker);
+        }
+        break;
+      case IdFactor.NFC:
+        if (input && input.type === Type.MIME) {
+          login = await tryUnpackLogin(input.payload, this.workerService.worker);
+        }
+        break;
+    }
+
+    if (!login) {
+      this.buttonState = State.Empty;
+      if (type !== IdFactor.Login) {
+        this.notification.show('Failed to extract a Spatium identifier');
+      }
+      return;
+    }
+
+    this.loginType = type;
+    this.login = login;
+
+    await this.checkLogin(type, login);
+  }
+
+  async retry() {
+    await this.checkLogin(this.loginType, this.login);
+  }
+
+  async checkLogin(type: IdFactor, login: string) {
+    const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
+
+    try {
+      this.buttonState = State.Updating;
+
+      const exists = await this.dds.exists(id);
+
+      if (exists) {
+        this.buttonState = State.Exists;
+      } else if (type === IdFactor.Login){
+        this.buttonState = State.New;
+      } else {
+        this.buttonState = State.Empty;
+        this.notification.show('A Spatium identifier was not found in the storage. Please, sign in with login');
+      }
+    } catch(e) {
+      this.notification.show('The storage is unavailable');
+      this.buttonState = State.Error;
     }
   }
 
-  async generateNewLogin() {
-    this.generateEvent.emit();
+  async signUp() {
+    await this.router.navigate(['/registration', this.login]);
   }
 
-  onFocusOut() {
-    this.stLogin = 'Username';
+  async signIn() {
+    await this.router.navigate(['/auth', this.loginType, this.login]);
   }
 
-  onFocus() {
-    this.stLogin = '';
+  async onBack() {
+    await this.router.navigate(['/start']);
   }
 }

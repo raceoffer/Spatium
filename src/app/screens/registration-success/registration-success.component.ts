@@ -1,40 +1,28 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { NavigationService } from '../../services/navigation.service';
+import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
+import { NavigationService } from "../../services/navigation.service";
 
 @Component({
   selector: 'app-registration-success',
   templateUrl: './registration-success.component.html',
   styleUrls: ['./registration-success.component.css']
 })
-export class RegistrationSuccessComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
-  stSuccess0 = 'You have successfully created a secure, ';
-  stSuccess1 = 'personal SPATIUM account!';
-  stOpenWallet = 'Open wallet';
-  private subscriptions = [];
+export class RegistrationSuccessComponent {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  constructor(private readonly router: Router,
-              private readonly navigationService: NavigationService) { }
+  @Output() submit: EventEmitter<any> = new EventEmitter<any>();
+  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
 
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
+  constructor(private readonly navigationService: NavigationService) {}
+
+  public cancel() {
+    this.cancelled.next();
   }
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
+  public onBack() {
+    this.navigationService.back();
   }
 
-  async goWaiting() {
-    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
-  }
-
-  async onBackClicked() {
-    await this.router.navigate(['/login']);
+  public onSubmit() {
+    this.submit.next();
   }
 }

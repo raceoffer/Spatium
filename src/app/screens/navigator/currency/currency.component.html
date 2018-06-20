@@ -3,7 +3,7 @@
   [isColored] = "true"
   [isShadowed] = "true"
   [hasSettings] = "true"
-  (backClicked) = "onBackClicked()"
+  (backClicked) = "onBack()"
   (settingsClicked) = "onSettingsClicked()"></app-toolbar>
 
 <div class="currency-component box" [ngClass]="{'windows' : isWindows(), 'with-transactions': ((transactions | async) !== null)}" fxLayout="column" fxLayoutAlign="start center">

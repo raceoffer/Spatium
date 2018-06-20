@@ -1,46 +1,50 @@
 import { Injectable } from '@angular/core';
-import { FileUploadComponent } from '../screens/factors/file-upload/file-upload.component';
-import { GraphicKeyComponent } from '../screens/factors/graphic-key/graphic-key.component';
-import { NfcReaderComponent } from '../screens/factors/nfc-reader/nfc-reader.component';
-import { NfcWriterComponent } from '../screens/factors/nfc-writer/nfc-writer.component';
-import { PasswordComponent } from '../screens/factors/password/password.component';
-import { PincodeComponent } from '../screens/factors/pincode/pincode.component';
-import { QrReaderComponent } from '../screens/factors/qr-reader/qr-reader.component';
-import { QrWriterComponent } from '../screens/factors/qr-writer/qr-writer.component';
-import { NotificationService } from './notification.service';
-import { LoginComponent } from '../screens/factors/login/login.component';
-import { WorkerService } from './worker.service';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 
 declare const nfc: any;
-declare const device: any;
+declare const cordova: any;
 
 import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
+import { WorkerService } from "./worker.service";
+import { checkNfc } from "../utils/nfc";
+
+export enum IdFactor {
+  Login,
+  QR,
+  NFC
+}
+
+export enum AuthFactor {
+  Pincode,
+  Password,
+  File,
+  GraphicKey,
+  QR,
+  NFC
+}
+
+export class Factor {
+  type: IdFactor | AuthFactor;
+  name: string;
+  icon: string;
+  icon_asset: string;
+
+  constructor(type, name, icon, icon_asset) {
+    this.type = type;
+    this.name = name;
+    this.icon = icon;
+    this.icon_asset = icon_asset;
+  }
+}
+
 @Injectable()
 export class AuthService {
-  login: string;
-  password: string;
-  loginType: LoginType;
-  isPasswordFirst: boolean;
-
-  factors: Factor[] = [];
-  available: AvailableFactor[] = [];
-  authFactors: AvailableFactor[] = [];
-
-  decryptedSeed: any = null;
-
-  encryptedSeed: string = null;
-
-  remoteEncryptedTrees: Array<Array<any>> = [];
-
-  currentTree: any = null;
-
-  stFactorError = 'Incorrect factor ';
+  public idFactors = new Map<IdFactor, Factor>();
+  public authFactors = new Map<AuthFactor, Factor>();
 
   constructor(
     private readonly deviceService: DeviceService,
-    private readonly notification: NotificationService,
     private readonly workerService: WorkerService
   ) {
     this.init();
@@ -49,155 +53,121 @@ export class AuthService {
   private async init() {
     await this.deviceService.deviceReady();
 
-    this.available.push(new AvailableFactor(FactorType.PIN, AvailableFactorName.PIN, FactorIcon.PIN,
-      FactorIconAsset.PIN, FactorLink.PIN, PincodeComponent));
-    this.available.push(new AvailableFactor(FactorType.PASSWORD, AvailableFactorName.PASSWORD, FactorIcon.PASSWORD,
-      FactorIconAsset.PASSWORD, FactorLink.PASSWORD, PasswordComponent));
-    /*this.available.push(new AvailableFactor(FactorType.FILE, AvailableFactorName.FILE, FactorIcon.FILE,
-      FactorIconAsset.FILE, FactorLink.FILE, FileUploadComponent));*/
-    this.available.push(new AvailableFactor(FactorType.GRAPHIC_KEY, AvailableFactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY,
-      FactorIconAsset.GRAPHIC_KEY, FactorLink.GRAPHIC_KEY, GraphicKeyComponent));
-    this.authFactors.push(new AvailableFactor(FactorType.LOGIN, AvailableFactorName.LOGIN, FactorIcon.LOGIN,
-      FactorIconAsset.LOGIN, FactorLink.LOGIN, LoginComponent));
-    this.available.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, QrReaderComponent));
-    this.authFactors.push(new AvailableFactor(FactorType.QR, AvailableFactorName.QR, FactorIcon.QR,
-      FactorIconAsset.QR, FactorLink.QR, QrWriterComponent));
+    const nfcSupported = await checkNfc();
+    const cameraSupported = await this.checkCamera();
 
-    const addNFCFactor = () => {
-      this.available.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC, NfcReaderComponent));
-      this.authFactors.push(new AvailableFactor(FactorType.NFC, AvailableFactorName.NFC, FactorIcon.NFC,
-        FactorIconAsset.NFC, FactorLink.NFC, NfcWriterComponent));
-    };
+    this.idFactors.set(IdFactor.Login, new Factor(
+      IdFactor.Login,
+      'Login',
+      'text_fields',
+      null
+    ));
 
-    nfc.enabled(addNFCFactor, (e) => {
-      if (e === 'NO_NFC') {
-        return;
+    if (cameraSupported) {
+      this.idFactors.set(IdFactor.QR, new Factor(
+        IdFactor.QR,
+        'QR',
+        null,
+        'icon-custom-qr_code'
+      ));
+    }
+
+    if (nfcSupported) {
+      this.idFactors.set(IdFactor.NFC, new Factor(
+        IdFactor.NFC,
+        'NFC',
+        'nfc',
+        null
+      ));
+    }
+
+    this.authFactors.set(AuthFactor.Password, new Factor(
+      AuthFactor.Password,
+      'Password',
+      'keyboard',
+      null
+    ));
+
+    this.authFactors.set(AuthFactor.Pincode, new Factor(
+      AuthFactor.Pincode,
+      'Pincode',
+      'dialpad',
+      null
+    ));
+
+    this.authFactors.set(AuthFactor.GraphicKey, new Factor(
+      AuthFactor.GraphicKey,
+      'Graphic key',
+      null,
+      'icon-custom-graphic_key'
+    ));
+
+    // this.authFactors.set(AuthFactor.File, new Factor(
+    //   AuthFactor.File,
+    //   'File',
+    //   'insert_drive_file',
+    //   null
+    // ));
+
+    if (cameraSupported) {
+      this.authFactors.set(AuthFactor.QR, new Factor(
+        AuthFactor.QR,
+        'QR',
+        null,
+        'icon-custom-qr_code'
+      ));
+    }
+
+    if (nfcSupported) {
+      this.authFactors.set(AuthFactor.NFC, new Factor(
+        AuthFactor.NFC,
+        'NFC',
+        'nfc',
+        null
+      ));
+    }
+  }
+
+  private async checkCamera() {
+    if (this.deviceService.platform === Platform.Windows) {
+      try {
+        return await cordova.plugins.cameraInfo.isAvailable();
+      } catch(e) {
+        console.log('Failed to check camera availability');
+        return false;
       }
-      if (this.isWindows() && e === 'NO_NFC_OR_NFC_DISABLED') {
-        return;
-      }
-      addNFCFactor();
-    });
+    }
+
+    return true;
   }
 
   public async toId(name: string) {
     return await sha256(Buffer.from(name, 'utf-8'), this.workerService.worker);
   }
 
-  getAllAvailableFactors() {
-    return this.available;
+  public async pack(type: IdFactor | AuthFactor, value: Buffer) {
+    const prefix = Buffer.alloc(4);
+    prefix.writeUInt32BE(type, 0);
+
+    return await sha256(Buffer.concat([prefix, value]), this.workerService.worker);
   }
 
-  getAuthFactors() {
-    return this.authFactors;
-  }
+  async tryDecryptWith(remoteEncryptedTrees, factor) {
+    const currentData = remoteEncryptedTrees[remoteEncryptedTrees.length - 1];
 
-  newFactor(type, value) {
-    switch (type) {
-      case FactorType.PIN: {
-        return new Factor(FactorType.PIN, FactorName.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value, this.workerService.worker);
-      }
-      case FactorType.PASSWORD: {
-        return new Factor(FactorType.PASSWORD, FactorName.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value, this.workerService.worker);
-      }
-      /*case FactorType.FILE: {
-        return new Factor(FactorType.FILE, FactorName.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value, this.workerService.worker);
-      }*/
-      case FactorType.GRAPHIC_KEY: {
-        return new Factor(FactorType.GRAPHIC_KEY, FactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value, this.workerService.worker);
-      }
-      case FactorType.QR: {
-        return new Factor(FactorType.QR, FactorName.QR, FactorIcon.QR, FactorIconAsset.QR, value, this.workerService.worker);
-      }
-      case FactorType.NFC: {
-        return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value, this.workerService.worker);
-      }
-      case FactorType.LOGIN: {
-        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value, this.workerService.worker);
-      }
-    }
-  }
-
-  async tryDecryptWith(factor) {
-    const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
-
-    const matchResult = await matchPassphrase(currentData, await factor.toBuffer(), this.workerService.worker);
+    const matchResult = await matchPassphrase(currentData, await this.pack(factor.type, factor.value), this.workerService.worker);
 
     if (typeof matchResult.seed !== 'undefined') {
-      this.decryptedSeed = matchResult.seed;
-      return true;
+      return { success: true, seed: matchResult.seed };
     }
 
     if (matchResult.subtexts.length < 1) {
-      return false;
+      return { success: false };
     }
 
-    this.remoteEncryptedTrees.push(matchResult.subtexts);
+    remoteEncryptedTrees.push(matchResult.subtexts);
 
-    return true;
-  }
-
-  async addFactor(type, value) {
-    this.factors.push(this.newFactor(type, value));
-  }
-
-  async addAuthFactor(type, value) {
-    const newFactor = this.newFactor(type, value);
-
-    const success = await this.tryDecryptWith(newFactor);
-
-    if (success) {
-      this.factors.push(newFactor);
-      if (this.factors.length === 1 && this.loginType === LoginType.LOGIN) {
-        this.isPasswordFirst = true;
-      }
-    } else {
-      this.notification.show(this.stFactorError + newFactor.name);
-    }
-
-    return this.isPasswordFirst;
-  }
-
-  rmFactor(factor) {
-    this.factors.splice(this.factors.indexOf(factor), 1);
-  }
-
-  rmFactorWithChildren(factor) {
-    const index = this.factors.indexOf(factor);
-
-    this.factors = this.factors.slice(0, index);
-  }
-
-  rmAuthFactor(factor) {
-    const index = this.factors.indexOf(factor);
-
-    this.factors = this.factors.slice(0, index);
-    this.remoteEncryptedTrees = this.remoteEncryptedTrees.slice(0, index + 1);
-    if (this.decryptedSeed) {
-      this.decryptedSeed.fill(0);
-      this.decryptedSeed = null;
-    }
-
-    if (this.factors.length === 0 && this.loginType === LoginType.LOGIN) {
-      this.isPasswordFirst = false;
-    }
-
-    return this.isPasswordFirst;
-  }
-
-  clearFactors() {
-    this.factors = [];
-  }
-
-  reset() {
-    if (this.decryptedSeed) {
-      this.decryptedSeed.fill(0);
-      this.decryptedSeed = null;
-    }
-
-    this.remoteEncryptedTrees = [];
+    return { success: true };
   }
 
   makeNewLogin(length: number) {
@@ -209,131 +179,5 @@ export class AuthService {
     }
 
     return text;
-  }
-
-  makeNewPIN(length: number) {
-    let text = '';
-    const possible = '0123456789';
-
-    for (let i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
-    return text;
-  }
-
-  isWindows(): boolean {
-    return device.platform === 'windows';
-  }
-}
-
-export enum LoginType {
-  LOGIN = 0,
-  QR = 1,
-  NFC = 2
-}
-
-export enum FactorType {
-  PIN,
-  PASSWORD,
-  FILE,
-  GRAPHIC_KEY,
-  QR,
-  NFC,
-  LOGIN
-}
-
-export enum AvailableFactorName {
-  PIN = 'PIN',
-  PASSWORD = 'Password',
-  FILE = 'File',
-  GRAPHIC_KEY = 'Graphic key',
-  QR = 'QR',
-  NFC = 'NFC',
-  LOGIN = 'Login',
-}
-
-export enum FactorName {
-  PIN = 'PIN code',
-  PASSWORD = 'password',
-  FILE = 'file',
-  GRAPHIC_KEY = 'graphic key',
-  QR = 'QR code',
-  NFC = 'NFC tag',
-  LOGIN = 'login',
-}
-
-export enum FactorIcon {
-  PIN = 'dialpad',
-  PASSWORD = 'keyboard',
-  FILE = 'insert_drive_file',
-  GRAPHIC_KEY = '',
-  QR = '',
-  NFC = 'nfc',
-  LOGIN = 'text_fields'
-}
-
-export enum FactorIconAsset {
-  PIN = '',
-  PASSWORD = '',
-  FILE = '',
-  GRAPHIC_KEY = 'icon-custom-graphic_key',
-  QR = 'icon-custom-qr_code',
-  NFC = '',
-  LOGIN = ''
-}
-
-export enum FactorLink {
-  PIN = 'pincode',
-  PASSWORD = 'password',
-  FILE = 'file-upload',
-  GRAPHIC_KEY = 'graphic-key',
-  QR = 'qr-code',
-  NFC = 'nfc',
-  LOGIN = 'login-factor'
-}
-
-export class AvailableFactor {
-  type: FactorType;
-  name: AvailableFactorName;
-  icon: string;
-  icon_asset: string;
-  link: string;
-  component: any;
-
-  constructor(type, name, icon, icon_asset, link, component) {
-    this.type = type;
-    this.name = name;
-    this.icon = icon;
-    this.icon_asset = icon_asset;
-    this.link = link;
-    this.component = component;
-  }
-}
-
-export class Factor {
-  type: FactorType;
-  name: FactorName;
-  icon: string;
-  icon_asset: string;
-  value: any;
-  state: string;
-  worker: any;
-
-  constructor(type, name, icon, asset, value, worker) {
-    this.type = type;
-    this.name = name;
-    this.icon = icon;
-    this.icon_asset = asset;
-    this.value = value;
-    this.state = 'active';
-    this.worker = worker;
-  }
-
-  public async toBuffer() {
-    const prefix = Buffer.alloc(4);
-    prefix.writeUInt32BE(this.type, 0);
-
-    return await sha256(Buffer.concat([prefix, this.value]), this.worker);
   }
 }

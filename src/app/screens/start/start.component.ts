@@ -1,12 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { FileService } from '../../services/file.service';
 import { NavigationService } from '../../services/navigation.service';
-import { DeviceService } from '../../services/device.service';
+import { DeviceService, Platform } from '../../services/device.service';
 
 declare const navigator: any;
-declare const device: any;
 declare const Windows: any;
 
 @Component({
@@ -23,15 +20,14 @@ export class StartComponent implements OnInit, OnDestroy {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly fs: FileService,
-    private readonly navigationService: NavigationService) {}
+    private readonly navigationService: NavigationService
+  ) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
     this.ready = true;
-    this.isWindows = device.platform === 'windows';
+    this.isWindows = this.deviceService.platform === Platform.Windows;
 
     if (this.isWindows) {
       this.router.events
@@ -65,13 +61,7 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onConnectClicked() {
-    try {
-      this.authService.encryptedSeed = await this.fs.readFile(this.fs.safeFileName('seed'));
-    } catch (e) {
-      this.authService.encryptedSeed = null;
-    }
-
-    await this.router.navigate(['/confirmation-entry', {back: 'start'}]);
+    await this.router.navigate(['/verifier-create']);
   }
 
   eventOnBackClicked(e) {
