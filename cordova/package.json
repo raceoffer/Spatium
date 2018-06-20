@@ -60,7 +60,8 @@
     },
     "platforms": [
       "browser",
-      "windows"
+      "windows",
+      "android"
     ]
   },
   "devDependencies": {

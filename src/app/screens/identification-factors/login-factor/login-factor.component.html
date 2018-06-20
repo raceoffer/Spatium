@@ -13,8 +13,7 @@
   <app-login
     class="factor-content"
     style="margin-top: 70px"
-    (login)="onInput($event)"
-    (busy)="onBusy($event)">
+    (login)="onInput($event)">
   </app-login>
 
   <button
@@ -23,8 +22,8 @@
     color="accent"
     class="width-button color"
     (click)="onSubmit()"
-    [disabled]="!input"
-    *ngIf="!busy">
+    [disabled]="!(valid | async)"
+    *ngIf="!(generating | async) && !(delayed | async)">
     Continue
   </button>
   <button
@@ -33,7 +32,7 @@
     color="accent"
     class="width-button color"
     disabled
-    *ngIf="busy">
+    *ngIf="(generating | async) || (delayed | async)">
     <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
   </button>
 </div>

@@ -1,10 +1,11 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, IdFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
+import { LoginComponent as LoginInput } from "../../inputs/login/login.component";
 
 declare const cordova: any;
 
@@ -24,7 +25,7 @@ export enum State {
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   public contentType = IdFactor;
@@ -36,11 +37,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   public stateType = State;
   public buttonState = State.Empty;
 
-  public generating = false;
-
   public isNfcAvailable = true;
 
   private subscriptions = [];
+
+  @ViewChild(LoginInput) public loginComponent: LoginInput;
+
+  public delayed = null;
+  public generating = null;
+  public valid = null;
 
   constructor(
     private readonly router: Router,
@@ -61,6 +66,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isNfcAvailable = await checkNfc();
   }
 
+  ngAfterViewInit() {
+    this.delayed = this.loginComponent.delayed;
+    this.generating = this.loginComponent.generating;
+    this.valid = this.loginComponent.valid;
+  }
+
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
@@ -78,7 +89,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     let login = null;
     switch (type) {
       case IdFactor.Login:
-        login = input;
+        if (this.valid.getValue()) {
+          login = input;
+        }
         break;
       case IdFactor.QR:
         let bytes = null;
@@ -134,10 +147,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.notification.show('The storage is unavailable');
       this.buttonState = State.Error;
     }
-  }
-
-  onBusy(busy) {
-    this.generating = busy;
   }
 
   async signUp() {

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { FormControl } from "@angular/forms";
+import { FormControl, Validators } from "@angular/forms";
 import { DDSService } from "../../services/dds.service";
 import { AuthService } from "../../services/auth.service";
 
@@ -21,10 +21,16 @@ export class LoginComponent implements OnDestroy{
   public stateType = State;
   public state = new BehaviorSubject<State>(State.Ready);
 
-  public loginControl = new FormControl();
+  public loginControl = new FormControl(null, [
+    Validators.minLength(1),
+    Validators.pattern(/^[^\s]*$/)
+  ]);
+
+  public valid = new BehaviorSubject<boolean>(false);
+  public delayed = new BehaviorSubject<boolean>(false);
+  public generating = new BehaviorSubject<boolean>(false);
 
   @Output() login = new EventEmitter<string>();
-  @Output() busy = new EventEmitter<boolean>();
 
   private subscriptions = [];
 
@@ -35,11 +41,12 @@ export class LoginComponent implements OnDestroy{
     this.subscriptions.push(
       this.loginControl.valueChanges.pipe(
         map(value => value ? value : ''),
-        tap(() => this.busy.next(true)),
+        tap(() => this.delayed.next(true)),
         debounceTime(1000)
       ).subscribe(value => {
-        this.busy.next(false);
-        this.login.next(value)
+        this.delayed.next(false);
+        this.valid.next(this.loginControl.valid);
+        this.login.next(value);
       })
     );
 
@@ -67,7 +74,7 @@ export class LoginComponent implements OnDestroy{
   async generateNewLogin() {
     try {
       this.state.next(State.Updating);
-      this.busy.next(true);
+      this.generating.next(true);
 
       let login = null;
       do {
@@ -80,7 +87,7 @@ export class LoginComponent implements OnDestroy{
 
       this.state.next(State.Ready);
     } catch(e) {
-      this.busy.next(false);
+      this.generating.next(false);
       this.state.next(State.Error);
     }
   }
