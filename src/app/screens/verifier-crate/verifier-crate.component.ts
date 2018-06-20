@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationService } from "../../services/navigation.service";
 import { Router } from "@angular/router";
 import { KeyChainService } from "../../services/keychain.service";
@@ -19,6 +19,7 @@ import { BehaviorSubject } from "rxjs/index";
 import { toBehaviourSubject } from "../../utils/transformers";
 import { map } from "rxjs/operators";
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
+import { PincodeComponent } from "../../inputs/pincode/pincode.component";
 
 @Component({
   selector: 'app-verifier-crate',
@@ -27,6 +28,8 @@ import { DeleteSecretComponent } from "../delete-secret/delete-secret.component"
 })
 export class VerifierCrateComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
+
+  @ViewChild(PincodeComponent) public pincoedComponent: PincodeComponent;
 
   private subscriptions = [];
 
@@ -163,6 +166,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
         }
       }
     } catch (e) {
+      this.pincoedComponent.onClear();
       this.notification.show('Authorization error');
     } finally {
       this.busy = false;
