@@ -23,6 +23,7 @@
         <p class="list-info" mat-line>{{ device.macAddress }} {{ device.ip }}</p>
         <mat-icon class="list-icon" *ngIf="device.paired" matSuffix>link</mat-icon>
         <mat-icon class="list-icon">{{ providers.get(device.provider).icon }}</mat-icon>
+        <span class="{{ providers.get(device.provider).custom_icon }}"></span>
       </mat-list-item>
     </mat-nav-list>
     <div style="width: 100%; text-align: center; padding: 5px 0px;">

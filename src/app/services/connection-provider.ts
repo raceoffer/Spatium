@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, merge, Subject } from 'rxjs';
+import { combineLatest, merge } from 'rxjs';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
 import { ConnectivityService } from './connectivity.service';
@@ -13,6 +13,8 @@ export enum ProviderType {
 export class Provider {
   constructor(public provider: ProviderType,
               public icon: string,
+              public custom_icon: string,
+              public enable_srting: string,
               public service: any) { }
 }
 
@@ -57,8 +59,8 @@ export class ConnectionProviderService {
 
   constructor(private readonly bt: BluetoothService,
               private readonly connectivityService: ConnectivityService) {
-    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'bluetooth', this.bt));
-    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'wifi', this.connectivityService));
+    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'bluetooth', null, 'Bluetooth synchronization', this.bt));
+    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, null, 'icon-custom-bonjour_black', 'WiFi/LAN synchronization', this.connectivityService));
   }
 
   async searchDevices() {
@@ -120,6 +122,22 @@ export class ConnectionProviderService {
     this.providers.forEach((value: Provider, key: ProviderType) => {
       value.service.stopListening();
     });
+  }
+
+  async enableProvider(providerType: ProviderType) {
+    try {
+      await this.providers.get(providerType).service.requestEnable();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async enableDiscoverable(providerType: ProviderType) {
+    try {
+      await this.providers.get(providerType).service.enableDiscoverable();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
 }

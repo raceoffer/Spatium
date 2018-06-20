@@ -258,24 +258,8 @@ mat-icon.size-40{
 }
 
 //toggler
-.mat-slide-toggle-thumb {
-  background-color: $charcoal_grey;
-}
-
-.mat-list .mat-list-item, .mat-nav-list .mat-list-item, .mat-selection-list .mat-list-item {
-  color: $dark;
-}
-
-.mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
-  background-color: #cccccc;
-}
-
-.mat-slide-toggle-bar {
-  background-color: rgba(55, 55, 65, 0.36);
-}
-
-.mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-bar {
-  background-color: rgba(255, 255, 255, 0.36);
+.mat-slide-toggle-label {
+  justify-content: space-around;
 }
 
 // input
@@ -703,6 +687,18 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   content: "\e901";
   color: $bluish;
   font-size: 40px !important;
+}
+
+.icon-custom-bonjour_black:before {
+  content: "\e902";
+  color: $dark;
+  font-size: 24px !important;
+}
+
+.icon-custom-bonjour_blue:before {
+  content: "\e902";
+  color: $bluish;
+  font-size: 24px !important;
 }
 
 .glass{
