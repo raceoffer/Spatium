@@ -3,10 +3,13 @@
     <div class="spatium-textfield entry noborder">
       <input type="password-pin" [(ngModel)]="pincode" disabled>
     </div>
-    <!--<div class="spatium-textfield entry bottom10" *ngIf="isWindows()">-->
-      <!--<input type="password" [(ngModel)]="pincode" disabled>-->
-    <!--</div>-->
-    <button mat-icon-button matSuffix style="margin-right: 24px;" (click)="onBackspace()" [disabled]="busy">
+    <button
+      mat-icon-button
+      matSuffix style="margin-right: 24px;"
+      (click)="onBackspace()"
+      [disabled]="busy"
+      long-press
+      (longpress)="onClear()">
       <mat-icon matSuffix>backspace</mat-icon>
     </button>
   </div>

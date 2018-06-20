@@ -22,6 +22,10 @@ export class PincodeComponent {
     this.pincode = this.pincode.substr(0, this.pincode.length - 1);
   }
 
+  onClear() {
+    this.pincode = '';
+  }
+
   onFinger() {
     this.fingerpintRequested.next();
   }
