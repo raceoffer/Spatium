@@ -21,7 +21,7 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
-    "cordova-plugin-camera-info": "ssh+git@github.com:CaspianTechnologies/cordova-plugin-camera-info.git",
+    "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
@@ -67,7 +67,7 @@
     ]
   },
   "devDependencies": {
-    "crypto-core-async": "ssh+git@github.com:CaspianTechnologies/crypto-core-async.git",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git",
     "webpack": "^4.12.0",
     "webpack-cli": "^2.1.5"
   }
