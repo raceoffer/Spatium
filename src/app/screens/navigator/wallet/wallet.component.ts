@@ -1,5 +1,4 @@
-import { Component, HostBinding, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -9,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from "../currency/currency.component";
 import { WaitingComponent } from "../waiting/waiting.component";
+import { BluetoothService } from "../../../services/bluetooth.service";
 
 declare const navigator: any;
 
@@ -17,7 +17,7 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnDestroy {
+export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
@@ -50,11 +50,11 @@ export class WalletComponent implements OnDestroy {
   private subscriptions = [];
 
   constructor(
-    private readonly router: Router,
     private readonly keychain: KeyChainService,
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
-    private readonly wallet: WalletService
+    private readonly wallet: WalletService,
+    private readonly bt: BluetoothService
   ) {
     const titles = this.staticTitles;
 
@@ -69,6 +69,12 @@ export class WalletComponent implements OnDestroy {
     this.titles = titles;
 
     this.filtredTitles = this.titles;
+  }
+
+  async ngOnInit() {
+    if (!this.bt.connected.getValue()) {
+      await this.goToSync();
+    }
   }
 
   get filterValue() {
@@ -149,7 +155,7 @@ export class WalletComponent implements OnDestroy {
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+          await this.goToSync();
         }
       },
       '',

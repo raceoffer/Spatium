@@ -55,6 +55,7 @@ export class VerifierComponent implements OnInit {
   public currencyWallets = this.wallet.currencyWallets;
 
   public enabled = this.bt.enabled;
+  public discoverable = this.bt.discoverable;
   public connected = this.bt.connected;
 
   public synchronizing = this.wallet.synchronizing;
@@ -110,6 +111,12 @@ export class VerifierComponent implements OnInit {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.back.next();
+      })
+    );
+
+    this.subscriptions.push(
+      this.back.subscribe(async () => {
+        this.notification.show('Tap back again to exit');
       })
     );
 

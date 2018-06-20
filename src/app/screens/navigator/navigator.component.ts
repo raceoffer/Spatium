@@ -96,6 +96,12 @@ export class NavigatorComponent implements OnDestroy {
     );
 
     this.subscriptions.push(
+      this.back.subscribe(async () => {
+        this.notification.show('Tap back again to exit');
+      })
+    );
+
+    this.subscriptions.push(
       this.doubleBack.subscribe(async () => {
         this.notification.hide();
         await this.router.navigate(['/start']);
