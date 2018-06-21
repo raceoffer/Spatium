@@ -36,3 +36,9 @@
 table .full-width td {
   width: 100px;
 }
+
+.main-nav-list-custom {
+  height: 60px;
+  display: flex !important;
+  border-bottom: 1px solid #f1f1f4;
+}

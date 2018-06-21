@@ -1,6 +1,6 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConnectionProviderService } from '../../../../services/connection-provider';
+import { ConnectionProviderService, Provider } from '../../../../services/connection-provider';
 import { NavigationService } from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { WalletService } from '../../../../services/wallet.service';
@@ -15,6 +15,7 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
 
   public isExitTap = false;
   private subscriptions = [];
+  providers = Array.from(this.connectionProviderService.providers.values());
 
   constructor(private readonly connectionProviderService: ConnectionProviderService,
               private readonly navigationService: NavigationService,
@@ -57,5 +58,23 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
         this.isExitTap = false;
       }), 3000);
     }
+  }
+
+  async toggleProvider(provider: Provider, event) {
+    console.log('toggle');
+    event.source.disabled = true;
+    event.source.checked = !event.source.checked;
+    event.checked = !event.checked;
+
+    await this.connectionProviderService.toggleProvider(provider.provider);
+
+    event.source.disabled = ((provider.service.starting.getValue()) || (provider.service.stopping.getValue())) && !(provider.service.listening.getValue());
+    event.source.checked = ((provider.service.listening.getValue()) || (provider.service.starting.getValue()));
+    event.checked = event.source.checked;
+  }
+
+
+  async enableDiscovery(provider: Provider) {
+    await this.connectionProviderService.enableDiscovery(provider.provider);
   }
 }

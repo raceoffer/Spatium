@@ -14,6 +14,7 @@ export class Provider {
   constructor(public provider: ProviderType,
               public icon: string,
               public custom_icon: string,
+              public discovery_icon: string,
               public enable_srting: string,
               public service: any) { }
 }
@@ -23,20 +24,21 @@ export class ConnectionProviderService {
 
   public providers: Map<ProviderType, Provider> = new Map<ProviderType, Provider>();
 
+  public enabledEvent = merge(this.bt.enabledEvent, this.connectivityService.enabledEvent);
   public connectedEvent = merge(this.bt.connectedEvent, this.connectivityService.connectedEvent);
   public disconnectedEvent = merge(this.bt.disconnectedEvent, this.connectivityService.disconnectedEvent);
   public connected = toBehaviourSubject(combineLatest(
     [
       this.bt.connected, this.connectivityService.connected
     ], (bt, zeroconf) => {
-      return bt || zeroconf;
+      return (bt || zeroconf);
     }), false);
 
   public discovering = toBehaviourSubject(combineLatest(
     [
       this.bt.discovering, this.connectivityService.discovering
     ], (bt, zeroconf) => {
-      return bt || zeroconf;
+      return (bt || zeroconf);
     }), false);
 
   public combinedDevices = toBehaviourSubject(combineLatest(
@@ -52,15 +54,15 @@ export class ConnectionProviderService {
     [
       this.bt.listening, this.connectivityService.listening
     ], (bt, zeroconf) => {
-      return bt || zeroconf;
+      return (bt || zeroconf);
     }), false);
 
   public message = toReplaySubject(merge(this.bt.message, this.connectivityService.message), 1);
 
   constructor(private readonly bt: BluetoothService,
               private readonly connectivityService: ConnectivityService) {
-    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'bluetooth', null, 'Bluetooth synchronization', this.bt));
-    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, null, 'icon-custom-bonjour_black', 'WiFi/LAN synchronization', this.connectivityService));
+    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'bluetooth', null, 'bluetooth_searching', 'Bluetooth synchronization', this.bt));
+    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'wifi', null, null, 'WiFi/LAN synchronization', this.connectivityService));
   }
 
   async searchDevices() {
@@ -124,17 +126,17 @@ export class ConnectionProviderService {
     });
   }
 
-  async enableProvider(providerType: ProviderType) {
+  async toggleProvider(providerType: ProviderType) {
     try {
-      await this.providers.get(providerType).service.requestEnable();
+      await this.providers.get(providerType).service.toggleProvider();
     } catch (e) {
       console.error(e);
     }
   }
 
-  async enableDiscoverable(providerType: ProviderType) {
+  async enableDiscovery(providerType: ProviderType) {
     try {
-      await this.providers.get(providerType).service.enableDiscoverable();
+      await this.providers.get(providerType).service.enableDiscovery();
     } catch (e) {
       console.error(e);
     }

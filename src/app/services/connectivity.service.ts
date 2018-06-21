@@ -56,9 +56,9 @@ export class ConnectivityService implements IConnectionProvider {
     }),
     State.Stopped
   );
-  public listening: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.serverState.pipe(map(state => state === State.Started)),
-    false);
+  public starting: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Starting)), false);
+  public stopping: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Stopping)), false);
+  public listening: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Started)), false);
   public listeningChanged: Observable<any> = this.listening.pipe(distinctUntilChanged(), skip(1));
   public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
   public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
@@ -75,12 +75,27 @@ export class ConnectivityService implements IConnectionProvider {
     this.socketServerService.message.pipe(filter(_ => !this.socketClientService.connected.getValue()))
   ), 1);
   public devices = this.discoveryService.devices;
+  public isToggler = false;
+
+  discoverableState: BehaviorSubject<State>;
+  discoverable: BehaviorSubject<boolean>;
+  discoverableChanged: Observable<boolean>;
+  discoverableStartedEvent: Observable<any>;
+  discoverableFinishedEvent: Observable<any>;
 
   constructor(private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
               private readonly discoveryService: DiscoveryService) {}
 
   // Server interface
+
+  public async toggleProvider() {
+    if (this.listening) {
+      this.stopListening();
+    } else {
+      this.startListening();
+    }
+  }
 
   public async startListening() {
     await Promise.all([
@@ -122,4 +137,6 @@ export class ConnectivityService implements IConnectionProvider {
       this.socketClientService.send(message);
     }
   }
+
+  async enableDiscovery() {}
 }

@@ -6,6 +6,9 @@ export interface IConnectionProvider {
 
   state: BehaviorSubject<State>;
 
+  starting: BehaviorSubject<boolean>;
+  stopping: BehaviorSubject<boolean>;
+
   enabled: BehaviorSubject<boolean>;
   enabledChanged: Observable<boolean> ;
   enabledEvent: Observable<any>;
@@ -30,9 +33,18 @@ export interface IConnectionProvider {
   discoveryStartedEvent: Observable<any>;
   discoveryStoppedEvent: Observable<any>;
 
+  discoverableState: BehaviorSubject<State>;
+  discoverable: BehaviorSubject<boolean>;
+  discoverableChanged: Observable<boolean>;
+  discoverableStartedEvent: Observable<any>;
+  discoverableFinishedEvent: Observable<any>;
+
   devices: BehaviorSubject<Map<string, Device>>;
 
   message: Subject<any>;
+  isToggler: boolean;
+
+  toggleProvider(): void;
 
   startListening(): void;
 
@@ -45,5 +57,7 @@ export interface IConnectionProvider {
   disconnect(): void;
 
   send(message: any): void;
+
+  enableDiscovery(): void;
 
 }

@@ -33,11 +33,9 @@ export class BluetoothService implements IConnectionProvider {
   public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
 
   public listeningState: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-
-  public listening: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.listeningState.pipe(
-      map(state => state === State.Started)
-    ), false);
+  public starting: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Starting)), false);
+  public stopping: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Stopping)), false);
+  public listening: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Started)), false);
   public listeningChanged: Observable<boolean> = this.listening.pipe(distinctUntilChanged(), skip(1));
   public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
   public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
@@ -67,6 +65,7 @@ export class BluetoothService implements IConnectionProvider {
     skip(1));
 
   public message: Subject<any> = new Subject<any>();
+  public isToggler = false;
 
   constructor(private readonly deviceService: DeviceService,
               private readonly ngZone: NgZone) {
@@ -86,13 +85,29 @@ export class BluetoothService implements IConnectionProvider {
     }
   }
 
+  async toggleProvider() {
+    if (this.state.getValue() === State.Stopped) {
+      this.isToggler = true;
+      await this.requestEnable();
+    } else if (this.state.getValue() === State.Started && this.listeningState.getValue() === State.Stopped) {
+      this.isToggler = true;
+      await this.startListening();
+    } else {
+      await this.stopListening();
+    }
+  }
+
+  async disable() {
+    await cordova.plugins.bluetooth.disable();
+  }
+
   async requestEnable() {
     if (this.state.getValue() !== State.Stopped) {
       return;
     }
 
     try {
-      await cordova.plugins.bluetooth.enable();
+      await cordova.plugins.bluetooth.requestEnable();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start listening', e);
       throw e;
@@ -100,7 +115,7 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   async startListening() {
-    if (this.listeningState.getValue() !== State.Stopped) {
+    if (this.listeningState.getValue() !== State.Stopped || !this.isToggler) {
       return;
     }
 
@@ -114,6 +129,8 @@ export class BluetoothService implements IConnectionProvider {
       this.listeningState.next(State.Stopped);
       throw e;
     }
+
+    this.isToggler = false;
   }
 
   async stopListening() {
@@ -231,6 +248,9 @@ export class BluetoothService implements IConnectionProvider {
 
   private async init() {
     await this.deviceService.deviceReady();
+
+    this.enabledEvent.subscribe(() => this.startListening());
+    this.disabledEvent.subscribe(() => this.stopListening());
 
     cordova.plugins.bluetooth.setConnectedCallback(device => this.ngZone.run(async () => {
       this.connectionState.next(device ? ConnectionState.Connected : ConnectionState.None);

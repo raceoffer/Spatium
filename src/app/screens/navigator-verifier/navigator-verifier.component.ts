@@ -29,8 +29,6 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
       this.wallet.failedEvent.subscribe(async () => {
         await this.connectionProviderService.disconnect();
       }));
-
-    await this.connectionProviderService.startListening();
   }
 
   public async ngOnDestroy() {

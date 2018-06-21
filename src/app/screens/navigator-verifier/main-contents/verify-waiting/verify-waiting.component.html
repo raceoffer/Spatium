@@ -1,11 +1,33 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <mat-nav-list class="main-nav-list-custom width-button-width" fxLayout="row" fxLayoutAlign=" center"
+                *ngFor="let provider of providers">
+    <mat-icon class="list-icon" *ngIf="provider.icon">{{ provider.icon }}</mat-icon>
+    <span> {{ provider.enable_srting }} </span>
+
+    <span class="spacer"></span>
+
+    <button mat-icon-button
+            *ngIf="provider.discovery_icon && ((provider.service.listening | async) || (provider.service.starting | async))"
+            [disabled]="(provider.service.discoverable | async)">
+      <mat-icon *ngIf="!(provider.service.discoverable | async)" style="opacity: 0.6;"
+                (click)="enableDiscovery(provider)">
+        {{ provider.discovery_icon }}
+      </mat-icon>
+      <mat-icon *ngIf="(provider.service.discoverable | async)" class="blue-color pulse">
+        {{ provider.discovery_icon }}
+      </mat-icon>
+    </button>
+
+    <mat-slide-toggle mat-list-item class="custom-slide-toggle"
+                      [checked]="(provider.service.listening | async) || (provider.service.starting | async)"
+                      [disabled]="((provider.service.starting | async) || (provider.service.stopping | async)) && !(provider.service.listening | async)"
+                      (change)="toggleProvider(provider, $event)">
+    </mat-slide-toggle>
+  </mat-nav-list>
+
   <div class="width-button-container content" fxLayout="column" fxLayoutAlign="center center">
     <div class="verify-transaction-text" *ngIf="(ready | async)">
       <span>Awaiting connection from the main device.</span>
-    </div>
-    <div class="width-button-container" style="margin-top:25px;"
-         fxLayout="column" fxLayoutAlign="start center" *ngIf="!(ready | async)">
-      <mat-spinner mode="indeterminate" [strokeWidth] = "5" color="accent"></mat-spinner>
     </div>
   </div>
 </div>
