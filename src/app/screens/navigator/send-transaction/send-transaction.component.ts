@@ -1,8 +1,10 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BehaviorSubject ,  combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, flatMap } from 'rxjs/operators';
+import BN from 'bn.js';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
+import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -13,7 +15,6 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
 
-import BN from 'bn.js';
 
 enum Phase {
   Creation,
@@ -84,8 +85,14 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
+  public isToken = false;
 
   public currencyWallet: CurrencyWallet = null;
+
+  public ethWallet = this.walletService.currencyWallets.get(Coin.ETH);
+  public ethBalance = toBehaviourSubject(
+    this.ethWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
+    null);
 
   public address: BehaviorSubject<string> = null;
   public balance: BehaviorSubject<BN> = null;
@@ -126,6 +133,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.route.params.subscribe(async (params: Params) => {
         this.currency = Number(params['coin']) as Coin | Token;
         this.currencyInfo = await this.currencyService.getInfo(this.currency);
+        this.isToken = this.currency in Token;
 
         this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
 
@@ -148,15 +156,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.balance.pipe(
             distinctUntilChanged(),
             flatMap(async balance => {
-            if (balance === null || balance.eq(new BN())) {
-              return 1;
-            }
+              if (balance === null || balance.eq(new BN())) {
+                return 1;
+              }
 
-            const testTx = await this.currencyWallet.createTransaction(
-              this.address.getValue(),
-              balance.div(new BN(2)));
+              const testTx = await this.currencyWallet.createTransaction(
+                this.address.getValue(),
+                balance.div(new BN(2)));
 
-            return await testTx.estimateSize();
+              return await testTx.estimateSize();
             })
           ), 1);
 
@@ -168,19 +176,24 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
         this.sufficientBalance = toBehaviourSubject(combineLatest([
             this.balance,
+            this.ethBalance,
             this.amount,
             this.fee,
             this.subtractFee
           ],
-          (balance, amount, fee, substractFee) => {
+          (balance, ethBalance, amount, fee, substractFee) => {
             if (balance === null || balance.eq(new BN())) {
               return false;
             }
             if (amount.gt(new BN())) {
+              if (this.currency in Coin) {
               if (!substractFee) {
                 return balance.gte(amount.add(fee));
               } else {
                 return balance.gte(amount);
+              }
+            } else {
+                return balance.gte(amount) && ethBalance.gte(fee);
               }
             } else {
               return true;
@@ -195,9 +208,13 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           ],
           (amount, fee, subtractFee) => {
             if (amount.gt(new BN())) {
+              if (this.currency in Coin) {
               if (subtractFee) {
                 return amount.gte(fee);
               } else {
+                return true;
+              }
+            } else {
                 return true;
               }
             } else {
@@ -251,7 +268,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
 
         this.subscriptions.push(
-          this.receiverField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.receiverField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: string) => {
             this.receiver.next(value);
           })
         );
@@ -259,14 +276,26 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
           this.fee.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feeFocused) {
+              if (this.currency in Token) {
               this.feeField.setValue(
+                  this.ethWallet.fromInternal(value),
+                  {emitEvent: false});
+              } else {
+                this.feeField.setValue(
                 this.currencyWallet.fromInternal(value),
                 {emitEvent: false});
             }
+            }
             if (!this.feeUsdFocused) {
+              if (this.currency in Token) {
               this.feeUsdField.setValue(
+                  this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                  {emitEvent: false});
+              } else {
+                this.feeUsdField.setValue(
                 this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
+            }
             }
           })
         );
@@ -274,52 +303,102 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
           this.feePrice.pipe(distinctUntilChanged()).subscribe(value => {
             if (!this.feePriceFocused) {
+              if (this.currency in Token) {
               this.feePriceField.setValue(
+                  this.ethWallet.fromInternal(value),
+                  {emitEvent: false});
+              } else {
+                this.feePriceField.setValue(
                 this.currencyWallet.fromInternal(value),
                 {emitEvent: false});
             }
+            }
             if (!this.feePriceUsdFocused) {
+              if (this.currency in Token) {
               this.feePriceUsdField.setValue(
+                this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+                {emitEvent: false});
+              } else {
+                this.feePriceUsdField.setValue(
                 this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
                 {emitEvent: false});
+            }
             }
           })
         );
 
         this.subscriptions.push(
-          this.amountField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.amountField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value));
           })
         );
         this.subscriptions.push(
-          this.amountUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.amountUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
             this.amount.next(this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1)));
           })
         );
         this.subscriptions.push(
-          this.feeField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
-            const fee = this.currencyWallet.toInternal(value);
+          this.feeField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            let fee = null;
+            if (this.currency in Token) {
+              fee = this.ethWallet.toInternal(value);
+            } else {
+              fee = this.currencyWallet.toInternal(value);
+            }
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feeUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
-            const fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+          this.feeUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            let fee = null;
+            if (this.currency in Token) {
+              fee = this.ethWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            } else {
+              fee = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            }
             this.fee.next(fee);
             this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
-            const feePrice = this.currencyWallet.toInternal(value);
+          this.feePriceField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            let feePrice = null;
+            if (this.currency in Token) {
+              feePrice = this.ethWallet.toInternal(value);
+            } else {
+              feePrice = this.currencyWallet.toInternal(value);
+            }
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
         );
         this.subscriptions.push(
-          this.feePriceUsdField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
-            const feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+          this.feePriceUsdField.valueChanges.pipe(
+            filter(isNumber),
+            distinctUntilChanged()
+          ).subscribe((value: number) => {
+            let feePrice = null;
+            if (this.currency in Token) {
+              feePrice = this.ethWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            } else {
+              feePrice = this.currencyWallet.toInternal(value / (this.currencyInfo.rate.getValue() || 1));
+            }
             this.feePrice.next(feePrice);
             this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
           })
@@ -330,7 +409,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           })
         );
         this.subscriptions.push(
-          this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe(value => {
+          this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: boolean) => {
             this.subtractFee.next(value);
           })
         );
@@ -376,7 +455,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           })
         );
 
+        this.subscriptions.push(
+          this.walletService.cancelResyncEvent.subscribe(async () => {
+            this.phase.next(Phase.Creation);
+          }));
+
+
         this.feeTypeField.setValue(Fee.Normal);
+        if (this.isToken) {
+          this.subtractFeeField.disable();
+        } else {
+          this.subtractFeeField.enable();
+        }
       }));
   }
 
@@ -398,7 +488,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
-      await this.currencyWallet.requestTransactionVerify(tx);
+      if (!await this.walletService.trySignTransaction(this.currencyWallet, tx)) {
+        this.phase.next(Phase.Creation);
+      }
     }
   }
 
@@ -412,7 +504,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.phase.next(Phase.Creation);
 
     try {
-      await this.router.navigate(['/navigator', { outlets: { 'navigator': ['currency', this.currency] } }]);
+      await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', this.currency]}}]);
 
       await this.currencyWallet.verifySignature();
       await this.currencyWallet.pushTransaction();
@@ -455,21 +547,27 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   setReceiverFocused(focused: boolean): void {
     this.receiverFocused = focused;
   }
+
   setAmountFocused(focused: boolean): void {
     this.amountFocused = focused;
   }
+
   setAmountUsdFocused(focused: boolean): void {
     this.amountUsdFocused = focused;
   }
+
   setFeeFocused(focused: boolean): void {
     this.feeFocused = focused;
   }
+
   setFeeUsdFocused(focused: boolean): void {
     this.feeUsdFocused = focused;
   }
+
   setFeePriceFocused(focused: boolean): void {
     this.feePriceFocused = focused;
   }
+
   setFeePriceUsdFocused(focused: boolean): void {
     this.feePriceUsdFocused = focused;
   }

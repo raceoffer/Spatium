@@ -22,7 +22,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   enabled = this.bt.enabled;
   discovering = this.bt.discovering;
   connected = false;
-  ready = this.wallet.ready;
   connectedDevice = this.bt.connectedDevice;
   devices = [];
   nextConnected = false;
@@ -36,10 +35,6 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
 
-    if (this.ready.getValue()) {
-      this.Label = 'Connected to ' + this.bt.connectedDevice.getValue().name;
-    }
-
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
@@ -47,18 +42,8 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.wallet.cancelledEvent.subscribe(async () => {
-        this.Label = this.stLabel;
-      }));
-
-    this.subscriptions.push(
-      this.wallet.failedEvent.subscribe(async () => {
-        this.Label = this.stLabel;
-      }));
-
-    this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
-        this.wallet.startSync();
+        this.wallet.sendSessionKey(false);
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
 
@@ -107,18 +92,14 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async connectTo(name, address) {
-
-    if (this.ready.getValue()) {
-      this.openDialog(new Device(name, address));
-    } else {
-      console.log('connect' + name + address);
-      this.Label = 'Connecting to ' + name;
-      this.connected = true;
-      await this.bt.cancelDiscovery();
-      if (!await this.bt.connect(new Device(name, address))) {
-        this.connected = false;
-        this.Label = this.stLabel;
-      }
+    this.bt.disconnect();
+    console.log('connect' + name + address);
+    this.Label = 'Connecting to ' + name;
+    this.connected = true;
+    await this.bt.cancelDiscovery();
+    if (!await this.bt.connect(new Device(name, address))) {
+      this.connected = false;
+      this.Label = this.stLabel;
     }
   }
 
@@ -128,35 +109,5 @@ export class WaitingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBackClicked() {
     await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-  }
-
-  async cancelConnect() {
-    this.openDialog(null);
-  }
-
-  async openDialog(device: Device) {
-    navigator.notification.confirm(
-      'Cancel synchronization',
-      async (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          await this.bt.disconnect();
-
-          if (device != null) {
-            this.nextConnected = true;
-            console.log('connect' + device.name + device.address);
-            this.Label = 'Connecting to ' + device.name;
-            this.connected = true;
-            await this.bt.cancelDiscovery();
-            if (!await this.bt.connect(device)) {
-              this.connected = false;
-              this.Label = this.stLabel;
-            }
-            this.nextConnected = false;
-          }
-        }
-      },
-      '',
-      ['YES', 'NO']
-    );
   }
 }

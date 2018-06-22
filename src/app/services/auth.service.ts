@@ -15,7 +15,7 @@ import { DeviceService } from './device.service';
 declare const nfc: any;
 declare const device: any;
 
-import { sha256, matchPassphrase, useWorker } from 'crypto-core-async/lib/utils';
+import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
 @Injectable()
 export class AuthService {
@@ -38,16 +38,11 @@ export class AuthService {
 
   stFactorError = 'Incorrect factor ';
 
-  static async toId(name: string) {
-    return (await sha256(Buffer.from(name, 'utf-8'))).toString('hex');
-  }
-
   constructor(
     private readonly deviceService: DeviceService,
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
   ) {
-    useWorker(workerService.worker);
     this.init();
   }
 
@@ -87,6 +82,10 @@ export class AuthService {
     });
   }
 
+  public async toId(name: string) {
+    return await sha256(Buffer.from(name, 'utf-8'), this.workerService.worker);
+  }
+
   getAllAvailableFactors() {
     return this.available;
   }
@@ -98,25 +97,25 @@ export class AuthService {
   newFactor(type, value) {
     switch (type) {
       case FactorType.PIN: {
-        return new Factor(FactorType.PIN, FactorName.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value);
+        return new Factor(FactorType.PIN, FactorName.PIN, FactorIcon.PIN, FactorIconAsset.PIN, value, this.workerService.worker);
       }
       case FactorType.PASSWORD: {
-        return new Factor(FactorType.PASSWORD, FactorName.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value);
+        return new Factor(FactorType.PASSWORD, FactorName.PASSWORD, FactorIcon.PASSWORD, FactorIconAsset.PASSWORD, value, this.workerService.worker);
       }
       /*case FactorType.FILE: {
-        return new Factor(FactorType.FILE, FactorName.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value);
+        return new Factor(FactorType.FILE, FactorName.FILE, FactorIcon.FILE, FactorIconAsset.FILE, value, this.workerService.worker);
       }*/
       case FactorType.GRAPHIC_KEY: {
-        return new Factor(FactorType.GRAPHIC_KEY, FactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value);
+        return new Factor(FactorType.GRAPHIC_KEY, FactorName.GRAPHIC_KEY, FactorIcon.GRAPHIC_KEY, FactorIconAsset.GRAPHIC_KEY, value, this.workerService.worker);
       }
       case FactorType.QR: {
-        return new Factor(FactorType.QR, FactorName.QR, FactorIcon.QR, FactorIconAsset.QR, value);
+        return new Factor(FactorType.QR, FactorName.QR, FactorIcon.QR, FactorIconAsset.QR, value, this.workerService.worker);
       }
       case FactorType.NFC: {
-        return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value);
+        return new Factor(FactorType.NFC, FactorName.NFC, FactorIcon.NFC, FactorIconAsset.NFC, value, this.workerService.worker);
       }
       case FactorType.LOGIN: {
-        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value);
+        return new Factor(FactorType.LOGIN, FactorName.LOGIN, FactorIcon.LOGIN, FactorIconAsset.LOGIN, value, this.workerService.worker);
       }
     }
   }
@@ -124,7 +123,7 @@ export class AuthService {
   async tryDecryptWith(factor) {
     const currentData = this.remoteEncryptedTrees[this.remoteEncryptedTrees.length - 1];
 
-    const matchResult = await matchPassphrase(currentData, await factor.toBuffer());
+    const matchResult = await matchPassphrase(currentData, await factor.toBuffer(), this.workerService.worker);
 
     if (typeof matchResult.seed !== 'undefined') {
       this.decryptedSeed = matchResult.seed;
@@ -319,20 +318,22 @@ export class Factor {
   icon_asset: string;
   value: any;
   state: string;
+  worker: any;
 
-  constructor(type, name, icon, asset, value) {
+  constructor(type, name, icon, asset, value, worker) {
     this.type = type;
     this.name = name;
     this.icon = icon;
     this.icon_asset = asset;
     this.value = value;
     this.state = 'active';
+    this.worker = worker;
   }
 
   public async toBuffer() {
     const prefix = Buffer.alloc(4);
     prefix.writeUInt32BE(this.type, 0);
 
-    return await sha256(Buffer.concat([prefix, this.value]));
+    return await sha256(Buffer.concat([prefix, this.value]), this.worker);
   }
 }

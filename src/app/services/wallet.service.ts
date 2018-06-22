@@ -1,64 +1,64 @@
 import { Injectable, NgZone } from '@angular/core';
-
-import { BehaviorSubject,  Observable,  ReplaySubject, timer } from 'rxjs';
-import { filter, skip, map, mapTo, distinctUntilChanged } from 'rxjs/operators';
+import { CompoundKey } from 'crypto-core-async';
+import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
-
-import { BluetoothService } from './bluetooth.service';
+import { BluetoothService, Device } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
-import { WorkerService } from './worker.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
 import { BitcoinWallet } from './wallet/bitcoin/bitcoinwallet';
 import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
-
-import { CurrencyWallet, Status } from './wallet/currencywallet';
+import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
+import { WorkerService } from './worker.service';
 
-import {
-  CompoundKey,
-  BitcoinTransaction,
-  BitcoinCashTransaction,
-  LitecoinTransaction,
-  EthereumTransaction
-} from 'crypto-core-async';
+declare const navigator: any;
+
+export enum WalletStatus {
+  None = 0,
+  Partially,
+  Fully
+}
 
 @Injectable()
 export class WalletService {
   public coinWallets = new Map<Coin, CurrencyWallet>();
   public tokenWallets = new Map<Token, ERC20Wallet>();
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
-  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Synchronizing)), false);
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Ready)), false);
-  public cancelled: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Cancelled)), false);
-  public failed: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.status.pipe(map(status => status === Status.Failed)), false);
-  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
-  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
-  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
-  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
-  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
+  public synchronizing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public status: BehaviorSubject<WalletStatus> = new BehaviorSubject<WalletStatus>(WalletStatus.None);
+  public noneSync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.None)), false);
+  public partiallySync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.Partially)), false);
+  public fullySync: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(map(status => status === WalletStatus.Fully)), false);
   public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+
+  private mustResync: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public mustResyncChanged: Observable<boolean> = this.mustResync.pipe(skip(1), distinctUntilChanged());
+  public resyncEvent: Observable<any> = this.mustResyncChanged.pipe(filter(enabled => enabled), mapTo(null));
+  public cancelResyncEvent: Observable<any> = this.mustResyncChanged.pipe(filter(enabled => !enabled), mapTo(null));
+
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
+  private sessionKey = Buffer.from('');
+  private sessionPartnerKey = Buffer.from('');
+  private partnerDevice: BehaviorSubject<Device> = new BehaviorSubject<Device>(null);
+  private currencyWallet: CurrencyWallet = null;
+  private tx: any = null;
+  private isTransactionReconnect = false;
+  private isPartnerFully = false;
 
-  constructor(
-    private readonly bt: BluetoothService,
-    private readonly currencyService: CurrencyService,
-    private readonly keychain: KeyChainService,
-    private readonly ngZone: NgZone,
-    private readonly workerService: WorkerService
-  ) {
-    CompoundKey.useWorker(workerService.worker);
-    BitcoinTransaction.useWorker(workerService.worker);
-    BitcoinCashTransaction.useWorker(workerService.worker);
-    LitecoinTransaction.useWorker(workerService.worker);
-    EthereumTransaction.useWorker(workerService.worker);
+  private coinIndex = 0;
+  private tokenIndex = 0;
 
+  constructor(private readonly bt: BluetoothService,
+              private readonly currencyService: CurrencyService,
+              private readonly keychain: KeyChainService,
+              private readonly ngZone: NgZone,
+              private readonly workerService: WorkerService) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -68,7 +68,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BTC,
@@ -79,7 +80,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.BCH,
@@ -90,7 +92,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.LTC,
@@ -101,7 +104,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
     this.coinWallets.set(
       Coin.ETH,
@@ -112,7 +116,8 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone
+        this.ngZone,
+        this.workerService.worker
       ));
 
     keychain.topTokens.forEach((tokenInfo) => {
@@ -131,122 +136,313 @@ export class WalletService {
     });
 
     this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyVerifyer'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log(this.sessionPartnerKey);
+      const data = Buffer.from(content.data);
+      console.log(data);
+      console.log(!this.sessionPartnerKey.equals(data));
+      const isOlder = this.sessionPartnerKey.equals(data);
+
+      if (this.isTransactionReconnect) {
+        this.isTransactionReconnect = false;
+        if (!isOlder) {
+          console.log('poherili kluch');
+          this.openPairedDeviceChangeDialog();
+        } else {
+          console.log('vso normalno');
+          await this.currencyWallet.requestTransactionVerify(this.tx);
+        }
+      } else { // sync
+        if (!isOlder && this.status.value !== WalletStatus.None) {
+          console.log('sessionKeyVerifyer other key');
+          await this.openUpdateKeyDialog();
+        } else {
+          console.log('sessionKeyVerifyer ok key or none status');
+          this.sessionPartnerKey = data;
+          if (!isOlder) {
+            await this.reset();
+          }
+          this.startSync();
+
+          await this.bt.send(JSON.stringify({
+            type: 'startSync',
+            content: isOlder
+          }));
+        }
+      }
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyVerifyerUpd'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log('sessionKeyVerifyerUpd');
+      const data = Buffer.from(content.data);
+      this.sessionPartnerKey = data;
+      await this.reset();
+      this.startSync();
+
+      await this.bt.send(JSON.stringify({
+        type: 'startSync',
+        content: false
+      }));
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKey'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log(this.sessionPartnerKey);
+      const data = Buffer.from(content.data);
+      console.log(data);
+      console.log(!this.sessionPartnerKey.equals(data));
+      if (!this.sessionPartnerKey.equals(data)) {
+        console.log('sessionKey other key');
+      } else {
+        console.log('sessionKey ok key');
+      }
+      this.sessionPartnerKey = data;
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'sessionKeyUpd'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log('sessionKeyUpd');
+      const data = Buffer.from(content.data);
+      this.sessionPartnerKey = data;
+      console.log('generate sessionKey verif');
+      this.sessionKey = Buffer.from(new Date().toString());
+
+      await this.bt.send(JSON.stringify({
+        type: 'sessionKeyVerifyerUpd',
+        content: this.sessionKey
+      }));
+    });
+
+    this.messageSubject.pipe(
       filter(object => object.type === 'verifyTransaction'),
       map(object => object.content),
     ).subscribe(async content => {
-        const wallet = this.currencyWallets.get(content.coin);
-        return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
-      });
+      const wallet = this.currencyWallets.get(content.coin);
+      return await wallet.startTransactionVerify(await wallet.fromJSON(content.tx));
+    });
 
     this.messageSubject.pipe(
       filter(object => object.type === 'cancel')
     ).subscribe(async () => {
-        // pop the queue
-        this.messageSubject.next({});
+      // pop the queue
+      this.messageSubject.next({});
 
-        this.status.next(Status.Cancelled);
+      this.cancelSync();
+    });
 
-        for (const wallet of Array.from(this.coinWallets.values())) {
-          await wallet.cancelSync();
-        }
-      });
+    this.messageSubject.pipe(
+      filter(object => object.type === 'fullySynced')
+    ).subscribe(async () => {
+      this.isPartnerFully = true;
+    });
+
+    this.messageSubject.pipe(
+      filter(object => object.type === 'startSync'),
+      map(object => object.content),
+    ).subscribe(async content => {
+      console.log('start sync');
+      if (!content) { // other partner
+        this.reset();
+      }
+      this.startSync();
+    });
   }
 
+  public async trySignTransaction(currencyWallet: CurrencyWallet, tx: any) {
+    console.log('qwewqeqweq');
+    this.currencyWallet = currencyWallet;
+    this.tx = tx;
+    if (this.partnerDevice !== null) {
+      this.isTransactionReconnect = true;
+      if (!await this.bt.connect(this.partnerDevice.value)) {
+        this.isTransactionReconnect = false;
+        this.currencyWallet = null;
+        this.tx = null;
+      }
+    }
+
+    return this.isTransactionReconnect;
+  }
+
+  // ��� ����������������� � ������ �����������/������
   public async reset() {
-    if (this.status.getValue() === Status.None) {
+    console.log('reset');
+    if (this.status.getValue() === WalletStatus.None) {
       return;
     }
 
-    this.status.next(Status.None);
+    this.coinIndex = 0;
+    this.tokenIndex = 0;
+    this.currencyWallet = null;
+    this.tx = null;
+    this.isTransactionReconnect = null;
+    this.changeStatus();
     this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
     }
   }
 
+  public async resetSession() {
+    console.log('resetSession');
+    this.sessionKey = Buffer.from('');
+    this.sessionPartnerKey = Buffer.from('');
+    this.partnerDevice.next(null);
+  }
+
   public setProgress(value: number): void {
     this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
   }
 
-  public async startSync() {
-    if (this.status.getValue() === Status.Synchronizing) {
-      throw new Error('Sync in progress');
-    }
-
+  public async sendSessionKey(isVerifyer: boolean) {
     try {
-      this.setProgress(0);
-      this.status.next(Status.Synchronizing);
+      console.log(this.sessionKey);
+      if (this.sessionKey.equals(Buffer.from(''))) {
+        console.log('first generate sessionKey');
+        this.sessionKey = Buffer.from(new Date().toString());
+      }
 
-      const paillierKeys = await CompoundKey.generatePaillierKeys();
+      if (await this.bt.send(JSON.stringify({
+          type: isVerifyer ? 'sessionKeyVerifyer' : 'sessionKey',
+          content: this.sessionKey
+        }))) {
+      } else {
+        console.log('error sessionKey');
+      }
+
+    } catch (e) {
+      console.log(e);
+      this.synchronizing.next(false);
+      this.changeStatus();
+      this.bt.disconnect();
+    }
+  }
+
+  public async startSync() {
+    try {
+      this.isPartnerFully = false;
+      this.partnerDevice.next(this.bt.connectedDevice.value);
+
+      this.setProgress(0);
+      this.synchronizing.next(true);
+
+      const paillierKeys = await CompoundKey.generatePaillierKeys(this.workerService.worker);
 
       this.setProgress(0.1);
 
-      let coinIndex = 0;
+      this.coinIndex = 0;
       for (const wallet of Array.from(this.coinWallets.values())) {
-        if (this.status.getValue() !== Status.Synchronizing) {
+        if (!this.synchronizing.value) {
           return;
         }
 
-        const sub = wallet.syncProgress.subscribe(num => {
-          this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
-        });
+        if (!wallet.ready.value) {
+          const sub = wallet.syncProgress.subscribe(num => {
+            this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
+          });
+          this.changeStatus();
+          await wallet.sync(paillierKeys);
+          sub.unsubscribe();
+        } else {
+          console.log('skip');
+          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.coinWallets.size);
+        }
+        await timer(100).toPromise();
 
-        await wallet.sync(paillierKeys);
-
-        sub.unsubscribe();
-
-        coinIndex++;
+        this.coinIndex++;
       }
 
-      if (this.status.getValue() !== Status.Synchronizing) {
+      if (!this.synchronizing.value) {
         return;
       }
 
       const ethWallet = this.coinWallets.get(Coin.ETH);
 
-      let tokenIndex = 0;
+      this.tokenIndex = 0;
       for (const wallet of Array.from(this.tokenWallets.values())) {
-        if (this.status.getValue() !== Status.Synchronizing) {
+        if (!this.synchronizing.value) {
           return;
         }
 
-        await wallet.syncDuplicate(ethWallet);
+        if (!wallet.ready.value) {
+          await wallet.syncDuplicate(ethWallet);
+          this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
+          this.changeStatus();
+        } else {
+          console.log('skip');
+          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.tokenWallets.size);
+        }
 
-        this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
-        await timer(100).toPromise();
-
-        tokenIndex++;
+        this.tokenIndex++;
       }
 
       this.setProgress(1);
 
-      if (this.status.getValue() === Status.Synchronizing) {
-        this.status.next(Status.Ready);
+      if (this.synchronizing.value) {
+        console.log('fully sync');
+
+        await this.bt.send(JSON.stringify({
+          type: 'fullySynced',
+          content: {}
+        }));
+
+        this.synchronizing.next(false);
+        this.changeStatus();
+        this.bt.disconnect();
       }
     } catch (e) {
       console.log(e);
-      this.status.next(Status.Failed);
+      this.synchronizing.next(false);
+      this.changeStatus();
+      this.bt.disconnect();
+    }
+  }
+
+  public changeStatus() {
+    if (this.coinIndex === this.coinWallets.size && this.tokenIndex === this.tokenWallets.size) {
+      this.status.next(WalletStatus.Fully);
+    } else {
+      if (this.coinIndex !== 0 || this.tokenIndex !== 0) {
+        this.status.next(WalletStatus.Partially);
+      } else {
+        this.status.next(WalletStatus.None);
+      }
     }
   }
 
   public async cancelSync() {
-    if (this.status.getValue() !== Status.Synchronizing) {
+    console.log('cancel sync ' + this.isPartnerFully);
+    if (!this.synchronizing.value || this.isPartnerFully) {
       return;
     }
 
     try {
-      await this.bt.send(JSON.stringify({
-        type: 'cancel',
-        content: {}
-      }));
+      for (const wallet of Array.from(this.coinWallets.values())) {
+        if (!wallet.ready.value && !wallet.none.value) {
+          await wallet.reset();
+        }
+      }
+
+      for (const wallet of Array.from(this.tokenWallets.values())) {
+        if (!wallet.ready.value && !wallet.none.value) {
+          await wallet.reset();
+        }
+      }
     } catch (ignored) {
     }
 
-    this.status.next(Status.Cancelled);
-
-    for (const wallet of Array.from(this.coinWallets.values())) {
-      await wallet.cancelSync();
-    }
+    this.synchronizing.next(false);
+    await this.bt.disconnect();
+    this.changeStatus();
   }
 
   createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
@@ -260,9 +456,48 @@ export class WalletService {
         this.messageSubject,
         this.bt,
         this.ngZone,
+        this.workerService.worker,
         token,
         contractAddress,
         decimals,
       ));
+  }
+
+  async openUpdateKeyDialog() {
+    navigator.notification.confirm(
+      'You are about to connect with another device. This will undo current synchronization progress. Are you sure?',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+
+          console.log('sessionKey update');
+          this.sessionKey = Buffer.from(new Date().toString());
+          await this.bt.send(JSON.stringify({
+            type: 'sessionKeyUpd',
+            content: this.sessionKey
+          }));
+        } else {
+          await this.cancelSync();
+        }
+      },
+      '',
+      ['YES', 'NO']
+    );
+  }
+
+  async openPairedDeviceChangeDialog() {
+    navigator.notification.confirm(
+      'Confirmation device was changed. Please, syncronize your wallet again.',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+
+          console.log('go to connect');
+          this.mustResync.next(true);
+        } else {
+          this.mustResync.next(false);
+        }
+      },
+      '',
+      ['YES', 'NO']
+    );
   }
 }

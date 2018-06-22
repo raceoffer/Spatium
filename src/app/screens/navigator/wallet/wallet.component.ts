@@ -21,10 +21,8 @@ declare const navigator: any;
 export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   synchronizing = this.wallet.synchronizing;
-  ready = this.wallet.ready;
-  cancelled = this.wallet.cancelled;
-  failed = this.wallet.failed;
-  status = this.wallet.status;
+  partiallySync = this.wallet.partiallySync;
+
   cols: any = 2;
   public isOpened = false;
   public title = 'Wallet';
@@ -213,7 +211,6 @@ export class WalletComponent implements OnInit, OnDestroy {
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.bt.disconnect();
           await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
         }
       },
@@ -233,13 +230,13 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
-    const balanceConfirmed = toBehaviourSubject(
-      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null)),
+    const balanceUnconfirmed = toBehaviourSubject(
+      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
       null);
     this.tileBalanceInfo[coin] = {
-      balance: balanceConfirmed,
+      balance: balanceUnconfirmed,
       balanceUSD: toBehaviourSubject(combineLatest(
-        balanceConfirmed,
+        balanceUnconfirmed,
         currencyInfo.rate,
         (balance, rate) => {
           if (rate === null || balance === null) {

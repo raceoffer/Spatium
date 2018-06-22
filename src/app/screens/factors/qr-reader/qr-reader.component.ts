@@ -8,8 +8,7 @@ declare const window: any;
 
 import {
   tryUnpackLogin,
-  tryUnpackEncryptedSeed,
-  useWorker
+  tryUnpackEncryptedSeed
 } from 'crypto-core-async/lib/utils';
 
 @Component({
@@ -40,9 +39,7 @@ export class QrReaderComponent implements OnInit {
     private readonly ngZone: NgZone,
     private readonly notification: NotificationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   async ngOnInit() {
     this.canScanAgain = true;
@@ -117,7 +114,7 @@ export class QrReaderComponent implements OnInit {
       if (this.isImport) {
         try {
           console.log(buffer);
-          const value = await tryUnpackEncryptedSeed(buffer);
+          const value = await tryUnpackEncryptedSeed(buffer, this.workerService.worker);
           this.qrcode = value.toString('hex');
           console.log(this.qrcode);
         } catch (exc) {
@@ -125,7 +122,7 @@ export class QrReaderComponent implements OnInit {
           this.qrcode = null;
         }
       } else {
-        this.qrcode = await tryUnpackLogin(buffer);
+        this.qrcode = await tryUnpackLogin(buffer, this.workerService.worker);
       }
     }
     await this.onNext();

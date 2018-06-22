@@ -5,7 +5,16 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
+
+  <span class="spacer"></span>
+
+  <mat-icon *ngIf="!(synchronizing | async) && (fullySync | async)">sync</mat-icon>
+  <mat-icon *ngIf="!(synchronizing | async) && (partiallySync | async)">sync_problem</mat-icon>
 </mat-toolbar>
+
+<mat-progress-bar mode="determinate" color="accent" [value]="(progress | async)" *ngIf="(synchronizing | async)"
+      style="width: 100%; position: fixed; z-index: 2;">
+</mat-progress-bar>
 
 
 <div fxLayout="column" fxLayoutAlign="start center" class="box" *ngIf="!(synchronizing | async)">
@@ -14,7 +23,7 @@
                      (linkClicked)="onNav($event)"></app-main-drawer>
   </mat-sidenav-container>
 
-  <app-verify-waiting *ngIf="!(ready | async)" ></app-verify-waiting>
+  <app-verify-waiting *ngIf="(!(partiallySync | async) && !(fullySync | async)) || !(enabledBT | async)" ></app-verify-waiting>
 
-  <app-verify-transaction *ngIf="(ready | async)"></app-verify-transaction>
+  <app-verify-transaction *ngIf="((partiallySync | async) || (fullySync | async)) && (enabledBT | async)"></app-verify-transaction>
 </div>

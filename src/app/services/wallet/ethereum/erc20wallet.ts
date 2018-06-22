@@ -2,7 +2,9 @@ import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
-import { timer  } from 'rxjs';
+
+import { from, of, timer } from 'rxjs';
+import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
 
@@ -22,11 +24,12 @@ export class ERC20Wallet extends CurrencyWallet {
     messageSubject: any,
     bt: BluetoothService,
     ngZone: NgZone,
+    worker: any,
     token: Token,
     address: string,
     decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
 
     this.contractAddress = address;
     this.token = token;
@@ -53,7 +56,7 @@ export class ERC20Wallet extends CurrencyWallet {
   }
 
   public async fromJSON(tx) {
-    return await EthereumTransaction.fromJSON(tx);
+    return await EthereumTransaction.fromJSON(tx, this.worker);
   }
 
   public currencyCode(): Coin | Token {
@@ -72,17 +75,26 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    this.address.next(this.wallet.address);
+    const request = () => from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
 
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.address.next(this.wallet.address);
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        request().pipe(
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => request())
+            )
+          )
+        )
+      ),
+      filter(r => r),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }
@@ -99,17 +111,26 @@ export class ERC20Wallet extends CurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    this.address.next(this.wallet.address);
+    const request = () => from(this.wallet.getBalance()).pipe(
+      catchError(e => of(null)));
 
-    this.routineTimerSub = timer(1000, 20000).subscribe(async () => {
-      try {
-        const balance = await this.wallet.getBalance();
-        this.balance.next(new Balance(
-          balance.confirmed,
-          balance.unconfirmed
-        ));
-      } catch (ignored) {}
-    });
+    this.address.next(this.wallet.address);
+    this.routineTimerSub = timer(1000).pipe(
+      mergeMap(() =>
+        request().pipe(
+          expand(() =>
+            timer(20000).pipe(
+              mergeMap(() => request())
+            )
+          )
+        )
+      ),
+      filter(r => r),
+      map((balance: any) => new Balance(
+        balance.confirmed,
+        balance.unconfirmed
+      ))
+    ).subscribe(balance => this.balance.next(balance));
 
     this.status.next(Status.Ready);
   }
@@ -120,7 +141,7 @@ export class ERC20Wallet extends CurrencyWallet {
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
-      new EthereumTransaction(),
+      await EthereumTransaction.create(this.worker),
       address,
       value,
       fee ? fee : undefined

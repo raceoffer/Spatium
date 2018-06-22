@@ -96,7 +96,14 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
-      this.discoveredDevices.next(this.discoveredDevices.getValue().concat([Device.fromJSON(device)]));
+      var devices = this.discoveredDevices.getValue();
+      var index = devices.map(function(item) { return item.address; }).indexOf(device.address);
+      if(index == -1)
+        devices = devices.concat(Device.fromJSON(device));
+      else {
+        devices[index].name = device.name;
+      }
+      this.discoveredDevices.next(devices);
     }));
 
     cordova.plugins.bluetooth.setDiscoveryCallback((discovery) => this.ngZone.run(() => {
@@ -138,9 +145,7 @@ export class BluetoothService {
     await this.disconnect();
 
     try {
-      if (!await cordova.plugins.bluetooth.getListening()) {
-        await cordova.plugins.bluetooth.startListening();
-      }
+      await cordova.plugins.bluetooth.startListening();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to ensure that bluetooth devices are listening', e);
       return false;
@@ -164,7 +169,7 @@ export class BluetoothService {
 
   async disconnect() {
     try {
-      if (await cordova.plugins.bluetooth.getConnected()) {
+      if (this.connected.value) {
         await cordova.plugins.bluetooth.disconnect();
       }
     } catch (e) {
@@ -177,7 +182,9 @@ export class BluetoothService {
 
   async send(message) {
     try {
-      await cordova.plugins.bluetooth.write(message);
+      if (this.connected.value) {
+        await cordova.plugins.bluetooth.write(message);
+      }
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to send message to a bluetooth device', e);
       return false;
@@ -200,6 +207,8 @@ export class BluetoothService {
   }
 
   async stopListening() {
-    await cordova.plugins.bluetooth.stopListening();
+    if (await cordova.plugins.bluetooth.getListening()) {
+      await cordova.plugins.bluetooth.stopListening();
+    }
   }
 }

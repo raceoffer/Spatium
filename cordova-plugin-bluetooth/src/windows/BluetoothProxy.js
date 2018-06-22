@@ -1,4 +1,3 @@
-cordova.define("cordova-plugin-bluetooth.BluetoothProxy", function (require, exports, module) {
   var rfcomm = Windows.Devices.Bluetooth.Rfcomm
   var sockets = Windows.Networking.Sockets
   var streams = Windows.Storage.Streams
@@ -73,6 +72,10 @@ cordova.define("cordova-plugin-bluetooth.BluetoothProxy", function (require, exp
     for (var i = 0; i < _deviceArray.length; i++) {
       if (_deviceArray[i].id == devUpdate.id) {
         _deviceArray[i].update(devUpdate)
+
+        if (_discoveredCallback) {
+          _discoveredCallback({ name: _deviceArray[i].name ? _deviceArray[i].name : 'Communications device', address: _deviceArray[i].id }, { keepCallback: true })
+        }
         console.log(`<p>Device updated. name:  ${_deviceArray[i].name} "</p>`)
       }
     }
@@ -240,7 +243,7 @@ cordova.define("cordova-plugin-bluetooth.BluetoothProxy", function (require, exp
     console.log('pairing result: ')
     console.log(pairingResult)
 
-    if (!pairingResult || pairingResult.status !== Windows.Devices.Enumeration.DevicePairingResultStatus.paired) {
+    if (!pairingResult || (pairingResult.status !== 3 && pairingResult.status !== Windows.Devices.Enumeration.DevicePairingResultStatus.paired)) {
       const errorMessage = 'failed to pair devices'
       console.log(errorMessage)
       errorCallback(errorMessage)
@@ -488,4 +491,3 @@ cordova.define("cordova-plugin-bluetooth.BluetoothProxy", function (require, exp
       _stateCallback = successCallback
     }
   })
-})

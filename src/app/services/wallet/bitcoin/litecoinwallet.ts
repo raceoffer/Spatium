@@ -13,7 +13,8 @@ export class LitecoinWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone
+    ngZone: NgZone,
+    worker: any
   ) {
     super(
       LitecoinTransaction,
@@ -25,11 +26,13 @@ export class LitecoinWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone);
+      ngZone,
+      worker
+    );
   }
 
   public verifyAddress(address: string): boolean {
     return address &&
-           /^[Lm][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+           /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
   }
 }

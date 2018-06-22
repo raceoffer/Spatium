@@ -31,9 +31,10 @@ import { NotificationService } from '../../../services/notification.service';
 import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
 import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 import { WorkerService } from '../../../services/worker.service';
+import { randomBytes } from 'crypto-core-async/lib/utils';
 
 
-import { packLogin, tryUnpackLogin, packTree, useWorker } from 'crypto-core-async/lib/utils';
+import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils';
 
 @Component({
   selector: 'app-factor-node',
@@ -76,9 +77,7 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -117,10 +116,12 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       do {
         this.value.next('');
-        const login = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(login));
+        const loginBytes = await randomBytes(32, this.workerService.worker);
+        const exists = await this.dds.exists(loginBytes.toString('hex'));
+        console.log(`FactorNodeComponent.generateLogin 1: loginBytes=${loginBytes}, isQr=${isQr}, exists=${exists}`);
+        console.log('FactorNodeComponent.generateLogin 2:', loginBytes);
         if (!exists) {
-          const packedLogin = await packLogin(login);
+          const packedLogin = await packLogin(loginBytes, this.workerService.worker);
           if (isQr) {
             this.value.next(await packedLogin.toString('hex'));
           } else {
@@ -207,8 +208,8 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
         }
         case FactorType.LOGIN: {
-          console.log(result.value);
-          await this.authService.addFactor(result.factor, await packLogin(result.value));
+          console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
+          await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
           break;
         }
         default: {
@@ -251,10 +252,11 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const login = (await tryUnpackLogin(idFactor)).toString('utf-8');
+      const login = (await tryUnpackLogin(idFactor, this.workerService.worker)).toString('utf-8');
       console.log(login);
-      const id = await AuthService.toId(login);
-      const data = await packTree(tree, this.keychain.getSeed());
+      const id = await this.authService.toId(login);
+      console.log(`FactorNodeComponent.onSaveClicked: login=${login}`);
+      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
       this.authService.currentTree = data;
 
       try {

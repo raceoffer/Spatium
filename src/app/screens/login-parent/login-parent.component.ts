@@ -10,7 +10,7 @@ import { WorkerService } from '../../services/worker.service';
 declare const cordova: any;
 declare const device: any;
 
-import { randomBytes, useWorker } from 'crypto-core-async/lib/utils';
+import { randomBytes } from 'crypto-core-async/lib/utils';
 
 export enum State {
   Ready,
@@ -61,9 +61,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     private readonly dds: DDSService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
-  ) {
-    useWorker(workerService.worker);
-  }
+  ) {}
 
   ngOnInit() {
     this.subscriptions.push(
@@ -129,7 +127,12 @@ export class LoginParentComponent implements OnInit, OnDestroy {
           this.buttonState = State.Updating;
         });
 
-        const exists = await this.dds.exists(await AuthService.toId(input));
+        let inputForId = this.input;
+        if (this.content === this.contentType.Login) {
+          inputForId = inputForId.toLowerCase();
+        }
+        const exists = await this.dds.exists(await this.authService.toId(inputForId));
+        console.log(`LoginParentComponent.checkInput: input=${input}, this.input=${this.input}, inputForId=${inputForId}, exists=${exists}`);
         if (input !== this.input) { // in case of updates to userName during lookup
           return;
         }
@@ -170,7 +173,8 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     try {
       do {
         this.loginGenerate = this.authService.makeNewLogin(10);
-        const exists = await this.dds.exists(await AuthService.toId(this.loginGenerate));
+        const exists = await this.dds.exists(await this.authService.toId(this.loginGenerate.toLowerCase()));
+        console.log(`LoginParentComponent.generateNewLogin: this.loginGenerate=${this.loginGenerate.toLowerCase()}, exists=${exists}`);
         if (!exists) {
           this.notification.show('Unique login was generated');
           this.ngZone.run(async () => {
@@ -220,7 +224,12 @@ export class LoginParentComponent implements OnInit, OnDestroy {
         // Let it spin a bit more
         this.buttonState = State.Updating;
         this.authService.remoteEncryptedTrees = [];
-        this.authService.remoteEncryptedTrees.push(await this.dds.read(await AuthService.toId(this.input)));
+        let inputForId = this.input;
+        if (this.content === this.contentType.Login) {
+          inputForId = inputForId.toLowerCase();
+        }
+        this.authService.remoteEncryptedTrees.push(await this.dds.read(await this.authService.toId(inputForId)));
+        console.log(`LoginParentComponent.letLogin: this.input=${this.input}, inputForId=${inputForId}`);
       } catch (e) {
         this.notification.show('No backup found');
       } finally {
@@ -231,7 +240,7 @@ export class LoginParentComponent implements OnInit, OnDestroy {
     } else if (this.buttonState === State.New) {
       this.authService.login = this.input;
       this.authService.password = '';
-      this.keychain.setSeed(await randomBytes(64));
+      this.keychain.setSeed(await randomBytes(64, this.workerService.worker));
 
       await this.router.navigate(['/registration']);
     } else {

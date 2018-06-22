@@ -12,31 +12,32 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(private readonly wallet: WalletService,
+              private readonly router: Router,
               private readonly bt: BluetoothService) {}
 
   public ngOnInit() {
 
     this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.reset();
+        await this.wallet.cancelSync();
       }));
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         console.log('Disconnected');
         await this.wallet.cancelSync();
-        await this.wallet.reset();
       }));
 
     this.subscriptions.push(
-      this.wallet.cancelledEvent.subscribe(async () => {
-        await this.bt.disconnect();
+      this.wallet.resyncEvent.subscribe(async () => {
+        await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
       }));
 
     this.subscriptions.push(
-      this.wallet.failedEvent.subscribe(async () => {
-        await this.bt.disconnect();
+      this.wallet.cancelResyncEvent.subscribe(async () => {
+        this.bt.disconnect();
       }));
+
   }
 
   public async ngOnDestroy() {
@@ -44,6 +45,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
+    await this.wallet.resetSession();
     await this.bt.disconnect();
   }
 }

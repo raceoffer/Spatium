@@ -71,6 +71,11 @@ export class CurrencyWallet {
       map(status => status === Status.Ready)
     ), false);
 
+  public none: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.status.pipe(
+      map(status => status === Status.None)
+    ), false);
+
   public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
 
   public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
@@ -96,7 +101,8 @@ export class CurrencyWallet {
     private account: number,
     private messageSubject: any,
     private bt: BluetoothService,
-    protected ngZone: NgZone
+    protected ngZone: NgZone,
+    protected worker: any
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
@@ -127,9 +133,9 @@ export class CurrencyWallet {
 
   public async sync(paillierKeys: any) {
     this.compoundKey = await CompoundKey.fromOptions({
-      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account)),
+      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account), this.worker),
       localPaillierKeys: paillierKeys
-    });
+    }, this.worker);
 
     const prover = await this.compoundKey.startInitialCommitment();
 
