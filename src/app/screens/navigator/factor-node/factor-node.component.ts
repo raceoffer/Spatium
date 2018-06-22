@@ -1,11 +1,8 @@
 import {
-  AfterViewInit,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
   OnDestroy,
-  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -16,25 +13,30 @@ import {
   trigger,
 } from '@angular/animations';
 import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
 import * as $ from 'jquery';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { take, takeUntil, map } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
-import { FactorParentOverlayRef } from '../../../modals/factor-parent-overlay/factor-parent-overlay-ref';
-import { FactorParentOverlayService } from '../../../modals/factor-parent-overlay/factor-parent-overlay.service';
-import { AuthService, FactorType } from '../../../services/auth.service';
+import { AuthService, AuthFactor, IdFactor } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { NfcWriterComponent } from '../../factors/nfc-writer/nfc-writer.component';
-import { QrWriterComponent } from '../../factors/qr-writer/qr-writer.component';
 import { WorkerService } from '../../../services/worker.service';
-import { randomBytes } from 'crypto-core-async/lib/utils';
 
-
-import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils';
+import { packLogin, tryUnpackLogin, packTree, randomBytes } from 'crypto-core-async/lib/utils';
+import { toBehaviourSubject } from "../../../utils/transformers";
+import { LoginFactorComponent } from "../../identification-factors/login-factor/login-factor.component";
+import { QrFactorComponent } from "../../identification-factors/qr-factor/qr-factor.component";
+import { NfcFactorComponent } from "../../identification-factors/nfc-factor/nfc-factor.component";
+import { PasswordAuthFactorComponent } from "../../authorization-factors/password-auth-factor/password-auth-factor.component";
+import { PincodeAuthFactorComponent } from "../../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
+import { GraphicKeyAuthFactorComponent } from "../../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
+import { FileAuthFactorComponent } from "../../authorization-factors/file-auth-factor/file-auth-factor.component";
+import { QrAuthFactorComponent } from "../../authorization-factors/qr-auth-factor/qr-auth-factor.component";
+import { NfcAuthFactorComponent } from "../../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
+import { catchError, mapTo } from "rxjs/internal/operators";
+import { BackupComponent } from "../../backup/backup.component";
 
 @Component({
   selector: 'app-factor-node',
@@ -51,59 +53,51 @@ import { packLogin, tryUnpackLogin, packTree } from 'crypto-core-async/lib/utils
   templateUrl: './factor-node.component.html',
   styleUrls: ['./factor-node.component.css']
 })
-export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
-  @ViewChild(FactorParentOverlayRef) child;
+export class FactorNodeComponent implements OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
   @ViewChild('factorContainer') factorContainer: ElementRef;
-  @ViewChild('dialogButton') dialogButton;
 
-  public value: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  title = 'Adding authorization path';
-  factors = [];
-  uploading = false;
-  cancel = new Subject<boolean>();
-  isAuth = false;
-  dialogFactorRef = null;
+  public idFactor = new BehaviorSubject<any>(null);
+  public idFactorItem = toBehaviourSubject(this.idFactor.pipe(
+    map(factor => {
+      if (!factor) {
+        return null;
+      }
+
+      const entry = this.authService.idFactors.get(factor.type as IdFactor);
+      return {
+        icon: entry.icon,
+        icon_asset: entry.icon_asset
+      }
+    })), null);
+
+  public factors = new BehaviorSubject<Array<any>>([]);
+  public factorItems = toBehaviourSubject(this.factors.pipe(
+    map(factors => factors.map(factor => {
+      const entry = this.authService.authFactors.get(factor.type as AuthFactor);
+      return {
+        icon: entry.icon,
+        icon_asset: entry.icon_asset
+      }
+    }))), []);
+
+  public uploading = false;
+  private cancel = new Subject<boolean>();
+
   private subscriptions = [];
 
   constructor(
-    public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
-    private readonly router: Router,
     private readonly dds: DDSService,
     private readonly notification: NotificationService,
     private readonly keychain: KeyChainService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService
   ) {}
 
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    this.factors = this.authService.factors;
-  }
-
-  ngAfterViewInit() {
-    this.changeDetectorRef.detectChanges();
-  }
-
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    if (this.dialogFactorRef) {
-      this.dialogFactorRef.close();
-      this.dialogFactorRef = null;
-    }
-    if (this.child) {
-      this.child.close();
-      this.child = null;
-    }
   }
 
   goBottom() {
@@ -112,137 +106,136 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
-  async generateLogin(isQr) {
-    try {
-      do {
-        this.value.next('');
-        const loginBytes = await randomBytes(32, this.workerService.worker);
-        const exists = await this.dds.exists(loginBytes.toString('hex'));
-        console.log(`FactorNodeComponent.generateLogin 1: loginBytes=${loginBytes}, isQr=${isQr}, exists=${exists}`);
-        console.log('FactorNodeComponent.generateLogin 2:', loginBytes);
-        if (!exists) {
-          const packedLogin = await packLogin(loginBytes, this.workerService.worker);
-          if (isQr) {
-            this.value.next(await packedLogin.toString('hex'));
-          } else {
-            this.value.next(packedLogin);
-          }
-          break;
-        }
-      } while (true);
-    } catch (ignored) {
-      console.log(ignored);
-      this.notification.show('DDS is unavailable');
+  public onAdd() {
+    if (this.idFactor.getValue()) {
+      this.openFactorDialog();
+    } else {
+      this.openIdFactorDialog()
     }
   }
 
-  addNewFactor() {
-    this.isAuth = this.factors.length === 0;
-    let label = 'Authorization factor';
-    if (this.isAuth) {
-      label = 'Identification factor';
-    }
-    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
-      width: '250px',
-      data: {isAuth: this.isAuth, label: label, isColored: true, isShadowed: true},
-    });
+  public openIdFactorDialog() {
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    componentRef.instance.factors = Array.from(this.authService.idFactors.values());
 
-    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
-      this.openFactorOverlay(label, result);
-    });
+    componentRef.instance.selected.subscribe(result => {
+      this.navigationService.acceptOverlay();
 
-    this.dialogFactorRef.afterClosed().subscribe(() => {
-      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.dialogFactorRef = null;
+      this.openIdFactorOverlay(result);
     });
   }
 
-  async openFactorOverlay(label, component) {
-    if (typeof component !== 'undefined') {
-      if (component === QrWriterComponent) {
-        this.generateLogin(true).catch(() => {});
-      } else if (component === NfcWriterComponent) {
-        this.generateLogin(false).catch(() => {});
-      }
-
-      this.child = this.factorParentDialog.open({
-        label: label,
-        isColored: true,
-        isShadowed: true,
-        content: component
-      });
-
-      this.child.onAddFactor.subscribe((result) => {
-        this.addFactor(result);
-        this.child.close();
-        this.child = null;
-      });
-
-      this.child.onBackClicked.subscribe(() => {
-        this.onBackClicked();
-      });
-
-      this.child.value = this.value;
-
-      console.log(this.child);
+  public openIdFactorOverlay(type: IdFactor) {
+    switch (type) {
+      case IdFactor.Login:
+        return this.openIdFactorOverlayOfType(LoginFactorComponent);
+      case IdFactor.QR:
+        return this.openIdFactorOverlayOfType(QrFactorComponent);
+      case IdFactor.NFC:
+        return this.openIdFactorOverlayOfType(NfcFactorComponent);
     }
   }
 
-  async addFactor(result) {
-    try {
-      switch (result.factor) {
-        case FactorType.QR: {
-          if (this.isAuth) {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'hex'));
-          } else {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-          }
-          break;
-        }
-        case FactorType.NFC: {
-          if (this.isAuth) {
-            await this.authService.addFactor(result.factor, result.value);
-          } else {
-            await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-          }
-          break;
-        }
-        case FactorType.LOGIN: {
-          console.log(`login=${result.value}, login to id=${result.value.toLowerCase()}`);
-          await this.authService.addFactor(result.factor, await packLogin(result.value.toLowerCase(), this.workerService.worker));
-          break;
-        }
-        default: {
-          await this.authService.addFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-        }
-      }
-      this.goBottom();
-    } catch (e) {
-      console.log(e);
+  public openIdFactorOverlayOfType(componentType) {
+    const componentRef = this.navigationService.pushOverlay(componentType);
+
+    componentRef.instance.submit.subscribe(async factor => {
+      this.navigationService.acceptOverlay();
+      await this.setIdFactor(factor);
+    });
+  }
+
+  public setIdFactor(factor) {
+    this.idFactor.next(factor);
+
+    if (!factor) {
+      this.removeFactor(0);
     }
   }
 
-  async removeFactor(factor) {
-    this.authService.rmFactorWithChildren(factor);
-    this.factors = this.authService.factors;
-    this.changeDetectorRef.detectChanges();
+  public openFactorDialog() {
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    componentRef.instance.factors = Array.from(this.authService.authFactors.values());
+
+    componentRef.instance.selected.subscribe(result => {
+      this.navigationService.acceptOverlay();
+
+      this.openFactorOverlay(result);
+    });
   }
 
-  async onSaveClicked() {
+  public openFactorOverlay(type: AuthFactor) {
+    switch (type) {
+      case AuthFactor.Password:
+        return this.openFactorOverlayOfType(PasswordAuthFactorComponent);
+      case AuthFactor.Pincode:
+        return this.openFactorOverlayOfType(PincodeAuthFactorComponent);
+      case AuthFactor.GraphicKey:
+        return this.openFactorOverlayOfType(GraphicKeyAuthFactorComponent);
+      case AuthFactor.File:
+        return this.openFactorOverlayOfType(FileAuthFactorComponent);
+      case AuthFactor.QR:
+        return this.openFactorOverlayOfType(QrAuthFactorComponent);
+      case AuthFactor.NFC:
+        return this.openFactorOverlayOfType(NfcAuthFactorComponent);
+    }
+  }
+
+  private openFactorOverlayOfType(componentType) {
+    const componentRef = this.navigationService.pushOverlay(componentType);
+
+    componentRef.instance.submit.subscribe(async (factor) => {
+      this.navigationService.acceptOverlay();
+      await this.addFactor(factor);
+    });
+  }
+
+  removeFactor(index){
+    this.factors.next(this.factors.getValue().slice(0, index));
+  }
+
+  addFactor(factor) {
+    const factors = this.factors.getValue();
+
+    factors.push(factor);
+
+    this.factors.next(factors);
+    this.goBottom();
+  }
+
+  public openBackupOverlay(id, data) {
+    const componentRef = this.navigationService.pushOverlay(BackupComponent);
+
+    componentRef.instance.id = id;
+    componentRef.instance.data = data;
+
+    componentRef.instance.success.subscribe(async () => {
+      // accept the backup overlay
+      this.navigationService.acceptOverlay();
+
+      // and then accept this one
+      this.navigationService.acceptOverlay();
+
+      this.notification.show('Successfully uploaded the secret');
+    });
+  }
+
+  async onSave() {
     try {
       this.uploading = true;
 
-      console.log(this.factors);
-      const idFactor = this.factors[0].value;
+      const seed = this.keychain.getSeed();
 
-      let factors = [];
-      for (let i = 1; i < this.factors.length; ++i) {
-        factors.push(await this.factors[i].toBuffer());
+      const factors = this.factors.getValue();
+
+      const packed = [];
+      for (const factor of factors) {
+        packed.push(await this.authService.pack(factor.type, factor.value));
       }
 
-      factors = factors.reverse();
+      const reversed = packed.reverse();
 
-      const tree = factors.reduce((rest, factor) => {
+      const tree = reversed.reduce((rest, factor) => {
         const node = {
           factor: factor
         };
@@ -252,45 +245,41 @@ export class FactorNodeComponent implements OnInit, AfterViewInit, OnDestroy {
         return node;
       }, null);
 
-      const login = (await tryUnpackLogin(idFactor, this.workerService.worker)).toString('utf-8');
-      console.log(login);
+      const idFactor = this.idFactor.getValue();
+      const login = idFactor.type === IdFactor.Login
+                  ? idFactor.value.toLowerCase()
+                  : idFactor.value;
+
       const id = await this.authService.toId(login);
-      console.log(`FactorNodeComponent.onSaveClicked: login=${login}`);
-      const data = await packTree(tree, this.keychain.getSeed(), this.workerService.worker);
-      this.authService.currentTree = data;
+      const data = await packTree(tree, seed, this.workerService.worker);
 
-      try {
-        const success = await this.dds.sponsorStore(id, data).pipe(take(1), takeUntil(this.cancel)).toPromise();
-        if (!success) {
-          await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
-          return;
-        }
+      const result = await this.dds.sponsorStore(id, data).pipe(
+        take(1),
+        takeUntil(this.cancel),
+        mapTo({ success: true }),
+        catchError(error => of({ success: false }))
+      ).toPromise();
 
-        this.authService.clearFactors();
-        this.authService.password = '';
-        this.authService.currentTree = null;
-        this.factors = [];
-
+      if (!result) {
+        // that means cancelled
+        return;
+      } else if (result.success === false) {
+        await this.openBackupOverlay(id, data);
+        this.notification.show('Failed to save registration data to the storage. You can perform registration manually');
+      } else if (result.success === true) {
+        // accept this overlay
+        this.navigationService.acceptOverlay();
         this.notification.show('Successfully uploaded the secret');
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-      } catch (ignored) {
-          await this.router.navigate(['/backup', { back: 'factor-node', next: 'wallet' }]);
       }
+    } catch (ignored) {
+      this.notification.show('Registration error');
     } finally {
       this.uploading = false;
     }
   }
 
-  async onBackClicked() {
+  async onBack() {
     this.cancel.next(true);
-    if (this.dialogFactorRef != null) {
-      this.dialogFactorRef.close();
-      this.dialogFactorRef = null;
-    } else if (this.child != null) {
-      this.child.close();
-      this.child = null;
-    } else {
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['settings']}}]);
-    }
+    this.navigationService.back();
   }
 }

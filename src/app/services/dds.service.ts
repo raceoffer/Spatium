@@ -1,7 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, mapTo } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
@@ -23,7 +21,7 @@ export class DDSAccount {
   public async store(id: string, data: any, gasPrice: number) {
     const accountSecret = await getAccountSecret(id, 0, this.worker);
     return await this.dds.store({
-      secret: accountSecret,
+      id: accountSecret,
       data: data,
       account: this.account,
       gasPrice: gasPrice
@@ -33,7 +31,7 @@ export class DDSAccount {
   public async estimateGas(id: string, data: any) {
     const accountSecret = await getAccountSecret(id, 0, this.worker);
     return this.dds.estimateStoreGas({
-      secret: accountSecret,
+      id: accountSecret,
       data: data,
       account: this.account
     });
@@ -91,12 +89,6 @@ export class DDSService {
       url,
       body,
       httpOptions
-    ).pipe(
-      catchError(error => {
-        console.log(error);
-        return of('Something bad happened; please try again later.');
-      }),
-      mapTo(true)
     );
   }
 

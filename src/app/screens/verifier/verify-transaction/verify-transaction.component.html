@@ -1,0 +1,93 @@
+<div fxLayout="column" fxLayoutAlign="start center" class="content">
+  <app-toolbar
+    label="Verify transaction"
+    [isColored]="true"
+    [isShadowed]="true"
+    (backClicked)="onBack()">
+  </app-toolbar>
+
+  <div class="width-button-container" style="margin-top:25px;"
+       fxLayout="column" fxLayoutAlign="start center" *ngIf="state === stateType.Preparing">
+    <mat-spinner mode="indeterminate" [strokeWidth] = "5" color="accent"></mat-spinner>
+  </div>
+
+  <div class="transaction-container currency-component" *ngIf="state === stateType.Verifying">
+    <table class="full-width two-columns" style="text-align: left; table-layout: fixed;">
+      <tr>
+        <td colspan="2">
+          <span class="label" style="margin-left: 5px;">Recipient address</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <mat-form-field class="field disable" color="accent" style="margin-bottom: 13px;">
+            <textarea matInput [(ngModel)]="address" disabled></textarea>
+          </mat-form-field>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">Transaction amount</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+        </td>
+        <td class="left">
+          <span class="label" style="margin-left: 5px;">USD</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <div class="field disable">
+            <span>
+              {{ btc }}
+            </span>
+          </div>
+        </td>
+        <td class="left">
+          <div class="field right disable">
+            <span>
+              {{ usd }}
+            </span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">Transaction fee</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+        </td>
+        <td class="left">
+          <span class="label" style="margin-left: 5px;">USD</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="right">
+          <div class="field disable">
+            <span>
+              {{ fee }}
+            </span>
+          </div>
+        </td>
+        <td class="left">
+          <div class="field right disable">
+            <span>
+              {{ feeUsd }}
+            </span>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center" style="margin-top: 32px;">
+      <button mat-raised-button color="accent" class="width-button color" (click)="onConfirm()">Confirm</button>
+      <button mat-raised-button color="accent" class="width-button color" (click)="onDecline()">Decline</button>
+    </div>
+  </div>
+</div>

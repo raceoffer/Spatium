@@ -3,10 +3,10 @@
   [isColored] = "true"
   [isShadowed] = "true"
   [hasSettings] = "true"
-  (backClicked) = "onBackClicked()"
+  (backClicked) = "onBack()"
   (settingsClicked) = "onSettingsClicked()"></app-toolbar>
 
-<div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
+<div class="currency-component box" [ngClass]="{'windows' : isWindows(), 'with-transactions': ((transactions | async) !== null)}" fxLayout="column" fxLayoutAlign="start center">
   <mat-progress-bar mode="indeterminate" color="accent"
                     style="width: 100%; position: fixed; z-index: 2;"
                     *ngIf="(((walletAddress | async) === null) ||
@@ -100,8 +100,3 @@
     </button>
   </div>
 </div>
-
-
-
-
-

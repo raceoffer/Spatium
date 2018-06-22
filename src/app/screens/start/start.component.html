@@ -2,9 +2,21 @@
   <app-logo-block style="margin-top: 56px;"></app-logo-block>
 
   <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
-    <button mat-raised-button color="accent" class="width-button color"
-            (click)="onOpenClicked()" *ngIf="ready">Wallet mode</button>
-    <button mat-raised-button color="accent" class="width-button color"
-            (click)="onConnectClicked()" *ngIf="ready && isWindows !== true">Confirmation mode</button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      (click)="onOpenClicked()"
+      *ngIf="ready">
+      Wallet mode
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      (click)="onConnectClicked()"
+      *ngIf="ready && isWindows !== true">
+      Confirmation mode
+    </button>
   </div>
 </div>
