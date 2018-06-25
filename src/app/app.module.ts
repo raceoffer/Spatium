@@ -88,6 +88,7 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
+import { HockeyService } from './services/hockey.service';
 
 @NgModule({
   declarations: [
@@ -184,7 +185,8 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     DDSService,
     KeyChainService,
     CurrencyService,
-    NavigationService
+    NavigationService,
+    HockeyService
   ],
   bootstrap: [
     AppComponent

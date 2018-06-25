@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { LoggerService } from './services/logger.service';
+import {HockeyService} from './services/hockey.service';
 
 declare const hockeyapp: any;
 
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(private readonly fs: FileService,
               private readonly logger: LoggerService,
-              private readonly deviceService: DeviceService) { }
+              private readonly deviceService: DeviceService,
+              private readonly hockeyService: HockeyService) { }
 
   ngOnInit() {
     this.init();
@@ -38,7 +40,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     await this.logger.createSessionLog();
     this.logger.deleteOldLogFiles();
-    // TODO: Pass AppId according to a platform
-    hockeyapp.start(null, null, '6a66e9dc6499491187e1bb8c3bfeced9', true, hockeyapp.CHECK_MANUALLY, false, true);
+    hockeyapp.start(null, null, this.hockeyService.appId, true, hockeyapp.CHECK_MANUALLY, false, true);
   }
 }
