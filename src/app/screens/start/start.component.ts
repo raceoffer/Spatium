@@ -1,10 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 import { DeviceService, Platform } from '../../services/device.service';
 
 declare const navigator: any;
 declare const Windows: any;
+declare const NativeStorage: any;
 
 @Component({
   selector: 'app-start',
@@ -20,11 +21,13 @@ export class StartComponent implements OnInit, OnDestroy {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly router: Router,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly ngZone: NgZone
   ) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
+    NativeStorage.remove('startPath');
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
@@ -57,15 +60,35 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onOpenClicked() {
-    await this.router.navigate(['/login']);
+    this.navigate(
+      'loginPresentation',
+      '/login-presentation',
+      '/login'
+    );
   }
 
   async onConnectClicked() {
-    await this.router.navigate(['/verifier-create']);
+    this.navigate(
+      'confirmationPresentation',
+      '/confirmation-presentation',
+      '/verifier-create'
+    );
   }
 
   eventOnBackClicked(e) {
     e.preventDefault();
     navigator.app.exitApp();
+  }
+
+  async navigate(storageName, presenatationPath, pagePath) {
+    NativeStorage.getItem(storageName,
+      (value) => this.ngZone.run(async () => {
+        NativeStorage.setItem('startPath', pagePath);
+        await this.router.navigate([pagePath]);
+      }),
+      (error) => this.ngZone.run(async () => {
+        await this.router.navigate([presenatationPath]);
+      }),
+    );
   }
 }

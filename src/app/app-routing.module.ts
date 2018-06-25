@@ -8,6 +8,8 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { StartComponent } from './screens/start/start.component';
 import { VerifierCrateComponent } from "./screens/verifier-crate/verifier-crate.component";
 import { VerifierComponent } from "./screens/verifier/verifier.component";
+import { PresentationLoginModeComponent} from "./screens/presentation/login-mode.component";
+import { PresentationConfirmationModeComponent } from "./screens/presentation/confirmation-mode.component";
 
 const appRoutes: Routes = [{
   path: '',
@@ -39,7 +41,14 @@ const appRoutes: Routes = [{
 }, {
   path: 'verifier',
   component: VerifierComponent
-}];
+}, {
+  path: 'login-presentation',
+  component: PresentationLoginModeComponent
+}, {
+  path: 'confirmation-presentation',
+  component: PresentationConfirmationModeComponent
+}
+];
 
 @NgModule({
   imports: [

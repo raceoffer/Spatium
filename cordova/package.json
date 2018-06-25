@@ -55,6 +55,7 @@
       },
       "cordova-plugin-device": {},
       "cordova-plugin-bluetooth": {},
+      "cordova-plugin-nativestorage": {},
       "phonegap-nfc": {},
       "CordovaClipboard": {},
       "Canvas2ImagePlugin": {},
