@@ -17,6 +17,8 @@ export class ToolbarComponent implements OnInit {
   @Input() isShadowed: false;
   @Input() hasSettings: false;
   @Input() hasSend: false;
+  @Input() sendEnabled: true;
+  @Input() progress: false;
 
   @Output() settingsClicked: EventEmitter<any> = new EventEmitter<any>();
   @Output() sendClicked: EventEmitter<any> = new EventEmitter<any>();

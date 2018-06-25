@@ -3,6 +3,8 @@
   [isColored]="true"
   [isShadowed]="true"
   [hasSend]="true"
+  [sendEnabled]="feedbackValid"
+  [progress]="sending"
   (backClicked)="onBackClicked()"
   (sendClicked)="onSendClicked()"></app-toolbar>
 
@@ -17,7 +19,8 @@
     <tr>
       <td colspan="2">
         <mat-form-field style="margin-bottom: 13px;" color="accent">
-          <input matInput [(ngModel)]="email">
+          <input matInput type="email" required [formControl]="email">
+          <mat-error *ngIf="email.invalid">{{getEmailErrorMessage()}}</mat-error>
         </mat-form-field>
       </td>
     </tr>
@@ -29,7 +32,8 @@
     <tr>
       <td colspan="2">
         <mat-form-field style="margin-bottom: 13px;" color="accent">
-          <textarea matInput matTextareaAutosize matAutosizeMinRows=4 [(ngModel)]="description"></textarea>
+          <textarea required matInput matTextareaAutosize matAutosizeMinRows=4 [formControl]="description"></textarea>
+          <mat-error *ngIf="description.invalid">{{getDescriptionErrorMessage()}}</mat-error>
         </mat-form-field>
       </td>
     </tr>

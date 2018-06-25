@@ -1,10 +1,12 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { DDSService } from "../../services/dds.service";
 import { NavigationService } from '../../services/navigation.service';
 import { LoggerService } from '../../services/logger.service';
 import { FeedbackData, FeedbackDataFile } from '../../data/feedback-data';
 import { FileInfo } from '../../data/file-info';
+import { NotificationService } from '../../services/notification.service';
+import { FormControl, Validators } from '@angular/forms';
 
 declare const cordova: any;
 declare const window: any;
@@ -15,68 +17,33 @@ declare const hockeyapp: any;
   templateUrl: './feedback.component.html',
   styleUrls: ['./feedback.component.css']
 })
-export class FeedbackComponent implements OnInit, OnDestroy {
-  @HostBinding('class') classes = 'toolbars-component';
+export class FeedbackComponent implements OnInit {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
   title = 'Feedback';
   stContact = 'Enter your email:';
   stProblem = 'Describe your problem:';
   stAppLogs = 'Add app logs';
   stScreenshots = 'Add screenshots:';
-  back = null;
   contactInfo = '';
   cols = 1;
   screenshotsPreview: FileInfo[] = [];
   maximumScreenshots: number = 2;
   sendLogs = true;
-
-  private subscriptions = [];
+  sending = false;
+  email = new FormControl('', [Validators.required, Validators.email]);
+  description = new FormControl('', [Validators.required]);
 
   constructor(private readonly ngZone: NgZone,
               private readonly router: Router,
               private readonly route: ActivatedRoute,
               private readonly dds: DDSService,
               private readonly navigationService: NavigationService,
-              private readonly loggerService: LoggerService) { }
+              private readonly loggerService: LoggerService,
+              private readonly notificationService: NotificationService) { }
 
-  private _email = '';
-
-  get email() {
-    return this._email;
-  }
-
-  set email(newEmail) {
-    this._email = newEmail;
-  }
-
-  private _description = '';
-
-  get description() {
-    return this._description;
-  }
-
-  set description(newDescription) {
-    this._description = newDescription;
-  }
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    this.route.params.subscribe((params: Params) => {
-      if (params['back']) {
-        this.back = params['back'];
-      }
-    });
-
     this.onResize();
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
   }
 
   paste() {
@@ -99,6 +66,10 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     return this.screenshotsPreview.length < this.maximumScreenshots;
   }
 
+  get feedbackValid(): boolean {
+    return this.email.valid && this.description.valid;
+  }
+
   onUploadFileClick(event) {
     console.log(event);
 
@@ -119,9 +90,10 @@ export class FeedbackComponent implements OnInit, OnDestroy {
   }
 
   async onSendClicked() {
+    this.sending = true;
     const feedbackData = new FeedbackData();
-    feedbackData.email = this.email;
-    feedbackData.text = this.description;
+    feedbackData.email = this.email.value;
+    feedbackData.text = this.description.value;
 
     if (this.sendLogs) {
       const data: string = await this.loggerService.getLogData();
@@ -136,19 +108,27 @@ export class FeedbackComponent implements OnInit, OnDestroy {
 
     hockeyapp.sendFeedback(feedbackData, (ok) => {
       console.log('send success:', ok);
+      this.sending = false;
+      this.notificationService.show('Thank you for the feedback');
+      this.navigationService.back();
     }, (e) => {
       console.log('send error:', e);
+      this.sending = false;
+      this.notificationService.show('Failed to send the feedback');
     });
   }
 
-  async onBackClicked() {
-    switch (this.back) {
-      case 'main':
-        await this.router.navigate(['/navigator', {outlets: {'navigator': ['waiting']}}]);
-        break;
-      case 'second':
-        await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
-        break;
-    }
+  onBackClicked() {
+    this.navigationService.back();
+  }
+
+  getEmailErrorMessage(): string {
+    return this.email.hasError('required') ? 'You must enter an email' :
+      this.email.hasError('email') ? 'Not a valid email' :
+        '';
+  }
+
+  getDescriptionErrorMessage(): string {
+    return this.description.hasError('required') ? 'You must enter a description' : '';
   }
 }
