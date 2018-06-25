@@ -40,24 +40,42 @@ export class DiscoveryService {
 
     this.advertising.next(State.Starting);
 
+    let hasErrors = false;
+
     const [hostname, name, ip] = await Promise.all([
-      this.getHostName(),
-      this.getDeviceName(),
-      this.getDeviceIp()
+      this.getHostName().catch((e) => {
+        console.log(e);
+        hasErrors = true;
+      }),
+      this.getDeviceName().catch((e) => {
+        console.log(e);
+        hasErrors = true;
+      }),
+      this.getDeviceIp().catch((e) => {
+        console.log(e);
+        hasErrors = true;
+      })
     ]);
-    return await new Promise((resolve, reject) => {
-      cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
-        name: name,
-        ip: ip
-      }, () => this.ngZone.run(() => {
-        this.advertising.next(State.Started);
-        resolve();
-      }), error => this.ngZone.run(() => {
-        this.advertising.next(State.Stopped);
-        console.log(error);
-        reject(error);
-      }));
-    });
+
+    if (!hasErrors) {
+      return await new Promise((resolve, reject) => {
+        cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
+          name: name,
+          ip: ip
+        }, () => this.ngZone.run(() => {
+          this.advertising.next(State.Started);
+          resolve();
+        }), error => this.ngZone.run(() => {
+          this.advertising.next(State.Stopped);
+          console.log(error);
+          reject(error);
+        }));
+      });
+    } else {
+      this.advertising.next(State.Stopped);
+      return;
+    }
+
   }
 
   async stopAdvertising() {

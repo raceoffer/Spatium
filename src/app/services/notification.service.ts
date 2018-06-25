@@ -11,23 +11,10 @@ export class NotificationService {
   public decline: Subject<any> = new Subject<any>();
   snackBarRef: MatSnackBarRef<any>;
 
-  constructor(
-    private readonly deviceService: DeviceService,
-    private readonly ngZone: NgZone,
-    private snackBar: MatSnackBar
-  ) {
+  constructor(private readonly deviceService: DeviceService,
+              private readonly ngZone: NgZone,
+              private snackBar: MatSnackBar) {
     this.init();
-  }
-
-  private async init() {
-    await this.deviceService.deviceReady();
-
-    cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
-      this.confirm.next();
-    }));
-    cordova.plugins.notification.local.on('decline', (notification, eopts) => this.ngZone.run(() => {
-      this.decline.next();
-    }));
   }
 
   public askConfirmation(title: string, text: string) {
@@ -56,7 +43,28 @@ export class NotificationService {
     });
   }
 
+  public showWifiSettings(message: string) {
+    this.snackBarRef = this.snackBar.open(message, 'Settings', {duration: 3000});
+
+    this.snackBarRef.onAction().subscribe(() => {
+      // cordova.plugins.diagnostic.switchToSettings(); ios
+      cordova.plugins.diagnostic.switchToWifiSettings(); // android win
+      this.snackBarRef.dismiss();
+    });
+  }
+
   public hide() {
     this.snackBar.dismiss();
+  }
+
+  private async init() {
+    await this.deviceService.deviceReady();
+
+    cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
+      this.confirm.next();
+    }));
+    cordova.plugins.notification.local.on('decline', (notification, eopts) => this.ngZone.run(() => {
+      this.decline.next();
+    }));
   }
 }

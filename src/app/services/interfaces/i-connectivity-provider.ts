@@ -42,7 +42,7 @@ export interface IConnectionProvider {
   devices: BehaviorSubject<Map<string, Device>>;
 
   message: Subject<any>;
-  isToggler: boolean;
+  isToggler: BehaviorSubject<boolean>;
 
   toggleProvider(): void;
 

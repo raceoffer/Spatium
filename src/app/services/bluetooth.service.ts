@@ -11,6 +11,7 @@ import { Device, equals } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 
 declare const cordova: any;
+declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
@@ -65,7 +66,7 @@ export class BluetoothService implements IConnectionProvider {
     skip(1));
 
   public message: Subject<any> = new Subject<any>();
-  public isToggler = false;
+  public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly deviceService: DeviceService,
               private readonly ngZone: NgZone) {
@@ -87,10 +88,10 @@ export class BluetoothService implements IConnectionProvider {
 
   async toggleProvider() {
     if (this.state.getValue() === State.Stopped) {
-      this.isToggler = true;
-      await this.requestEnable();
+      this.isToggler.next(true);
+      await this.openRequestBluetoothDialog();
     } else if (this.state.getValue() === State.Started && this.listeningState.getValue() === State.Stopped) {
-      this.isToggler = true;
+      this.isToggler.next(true);
       await this.startListening();
     } else {
       await this.stopListening();
@@ -101,21 +102,27 @@ export class BluetoothService implements IConnectionProvider {
     await cordova.plugins.bluetooth.disable();
   }
 
-  async requestEnable() {
+  async openRequestBluetoothDialog() {
     if (this.state.getValue() !== State.Stopped) {
       return;
     }
 
-    try {
-      await cordova.plugins.bluetooth.requestEnable();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to start listening', e);
-      throw e;
-    }
+    navigator.notification.confirm(
+      'An app wants to turn on Bluetooth',
+      async (buttonIndex) => {
+        if (buttonIndex === 1) { // yes
+          await cordova.plugins.bluetooth.enable();
+        } else {
+          this.isToggler.next(false);
+        }
+      },
+      '',
+      ['ALLOW', 'DENY']
+    );
   }
 
   async startListening() {
-    if (this.listeningState.getValue() !== State.Stopped || !this.isToggler) {
+    if (this.listeningState.getValue() !== State.Stopped || !this.isToggler.getValue()) {
       return;
     }
 
@@ -124,13 +131,13 @@ export class BluetoothService implements IConnectionProvider {
     try {
       await cordova.plugins.bluetooth.startListening();
       this.listeningState.next(State.Started);
+      this.isToggler.next(false);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start listening', e);
       this.listeningState.next(State.Stopped);
+      this.isToggler.next(false);
       throw e;
     }
-
-    this.isToggler = false;
   }
 
   async stopListening() {

@@ -7,6 +7,10 @@ import { IConnectionProvider } from './interfaces/i-connectivity-provider';
 import { ConnectionState, State } from './primitives/state';
 import { SocketClientService } from './socketclient.service';
 import { SocketServerService } from './socketserver.service';
+import { NotificationService } from './notification.service';
+
+declare const cordova;
+declare const navigator;
 
 @Injectable()
 export class ConnectivityService implements IConnectionProvider {
@@ -75,7 +79,7 @@ export class ConnectivityService implements IConnectionProvider {
     this.socketServerService.message.pipe(filter(_ => !this.socketClientService.connected.getValue()))
   ), 1);
   public devices = this.discoveryService.devices;
-  public isToggler = false;
+  public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   discoverableState: BehaviorSubject<State>;
   discoverable: BehaviorSubject<boolean>;
@@ -83,18 +87,70 @@ export class ConnectivityService implements IConnectionProvider {
   discoverableStartedEvent: Observable<any>;
   discoverableFinishedEvent: Observable<any>;
 
-  constructor(private readonly socketClientService: SocketClientService,
+  constructor(private readonly notification: NotificationService,
+              private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
-              private readonly discoveryService: DiscoveryService) {}
+              private readonly discoveryService: DiscoveryService) {
+
+    document.addEventListener('offline', () => {
+      this.stopListening();
+    }, false);
+
+  }
 
   // Server interface
 
   public async toggleProvider() {
-    if (this.listening) {
-      this.stopListening();
+    if (!this.listening.getValue()) {
+      this.isToggler.next(true);
+      await cordova.plugins.diagnostic.isWifiAvailable(async (available) => {
+        console.log('WiFi is ' + (available ? 'available' : 'not available'));
+        if (available) {
+          const networkState = navigator.connection.type;
+          console.log(networkState);
+          if (networkState === 'wifi') {
+            await this.startListening();
+          } else {
+            this.notification.showWifiSettings('No WiFi conection');
+          }
+        } else {
+          await this.openRequestWiFiDialog();
+        }
+      }, (error) => {
+        console.error('The following error occurred: ' + error);
+      });
     } else {
-      this.startListening();
+      await this.stopListening();
     }
+  }
+
+  async openRequestWiFiDialog() {
+    navigator.notification.confirm(
+      'An app wants to turn on WiFi',
+      buttonIndex => {
+        if (buttonIndex === 1) { // yes
+          cordova.plugins.diagnostic.setWifiState(() => {
+              console.log('Wifi was enabled');
+              document.addEventListener('online', () => {
+                const networkState = navigator.connection.type
+                console.log(networkState);
+                if (networkState === 'wifi') {
+                  this.startListening();
+                } else {
+
+                }
+              }, false);
+            }, (error) => {
+              console.error('The following error occurred: ' + error);
+            },
+            true);
+        } else {
+          this.isToggler.next(false);
+        }
+      },
+      '',
+      ['ALLOW', 'DENY']
+    );
   }
 
   public async startListening() {
@@ -102,6 +158,11 @@ export class ConnectivityService implements IConnectionProvider {
       this.socketServerService.start(),
       this.discoveryService.startAdvertising()
     ]);
+
+    if (this.discoveryService.advertising.getValue() === State.Stopped) {
+      await this.socketServerService.stop();
+    }
+    this.isToggler.next(false);
   }
 
   public async stopListening() {
@@ -109,6 +170,7 @@ export class ConnectivityService implements IConnectionProvider {
       await this.discoveryService.stopAdvertising(),
       await this.socketServerService.stop()
     ]);
+    this.isToggler.next(false);
   }
 
   // Client interface

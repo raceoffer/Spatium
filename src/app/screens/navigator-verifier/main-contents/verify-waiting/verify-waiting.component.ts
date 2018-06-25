@@ -62,15 +62,13 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
 
   async toggleProvider(provider: Provider, event) {
     console.log('toggle');
-    event.source.disabled = true;
-    event.source.checked = !event.source.checked;
-    event.checked = !event.checked;
 
-    await this.connectionProviderService.toggleProvider(provider.provider);
-
-    event.source.disabled = ((provider.service.starting.getValue()) || (provider.service.stopping.getValue())) && !(provider.service.listening.getValue());
+    event.source.disabled = ((((provider.service.starting.getValue()) || (provider.service.stopping.getValue())))
+      && !(provider.service.listening.getValue()));
     event.source.checked = ((provider.service.listening.getValue()) || (provider.service.starting.getValue()));
     event.checked = event.source.checked;
+
+    await this.connectionProviderService.toggleProvider(provider.provider);
   }
 
 

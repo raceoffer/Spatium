@@ -37,6 +37,7 @@
     "cordova-plugin-wkwebview-engine": "^1.1.4",
     "cordova-plugin-zeroconf": "^1.3.3",
     "cordova-windows": "^6.0.0",
+    "cordova.plugins.diagnostic": "~4.0.8",
     "ionic-native-http-angular-wrapper": "^3.0.1",
     "org.devgeeks.Canvas2ImagePlugin": "file:../org.devgeeks.Canvas2ImagePlugin",
     "phonegap-nfc": "^0.7.3",
@@ -71,11 +72,13 @@
       "cordova-plugin-device-name": {},
       "cordova-plugin-device": {},
       "cordova-plugin-bluetooth": {},
-      "phonegap-nfc": {}
+      "phonegap-nfc": {},
+      "cordova.plugins.diagnostic": {}
     },
     "platforms": [
       "browser",
-      "windows"
+      "windows",
+      "android"
     ]
   },
   "devDependencies": {
