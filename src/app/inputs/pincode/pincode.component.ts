@@ -9,7 +9,7 @@ export class PincodeComponent {
   @Input() busy = false;
   @Input() allowFingerprint = false;
 
-  @Output() fingerpintRequested: EventEmitter<any> = new EventEmitter<any>();
+  @Output() fingerprintRequested: EventEmitter<any> = new EventEmitter<any>();
   @Output() submit: EventEmitter<string> = new EventEmitter<string>();
 
   public pincode: string = '';
@@ -27,7 +27,7 @@ export class PincodeComponent {
   }
 
   onFinger() {
-    this.fingerpintRequested.next();
+    this.fingerprintRequested.next();
   }
 
   onSubmit() {

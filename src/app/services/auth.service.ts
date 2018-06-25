@@ -12,7 +12,8 @@ import { checkNfc } from "../utils/nfc";
 export enum IdFactor {
   Login,
   QR,
-  NFC
+  NFC,
+  Pincode,
 }
 
 export enum AuthFactor {

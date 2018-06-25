@@ -29,13 +29,13 @@ import { PincodeComponent } from "../../inputs/pincode/pincode.component";
 export class VerifierCrateComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
-  @ViewChild(PincodeComponent) public pincoedComponent: PincodeComponent;
+  @ViewChild(PincodeComponent) public pincodeComponent: PincodeComponent;
 
   private subscriptions = [];
 
   public busy = false;
 
-  public touchAvailable = false;
+  public touchAvailable: any;
 
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
@@ -56,8 +56,12 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-    this.touchAvailable = await this.checkAvailable() && await this.checkExisting();
+    try {
+      this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
+      this.touchAvailable = this.checkAvailable() && this.checkExisting();
+    } catch(e) {
+      console.log(e, this.checkAvailable(), this.checkExisting());
+    }
   }
 
   async checkAvailable() {
@@ -112,6 +116,8 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
       this.fileData.next(encryptedSecret);
 
+      this.touchAvailable = this.checkAvailable() && this.checkExisting();
+
       // ^This is optional^
       await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSecret.toString('hex'));
 
@@ -147,7 +153,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
         await this.router.navigate(['/verifier']);
       } else {
-        if (this.touchAvailable) {
+        if (this.checkAvailable()) {
           try {
             if (await this.saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);
@@ -166,7 +172,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
         }
       }
     } catch (e) {
-      this.pincoedComponent.onClear();
+      this.pincodeComponent.onClear();
       this.notification.show('Authorization error');
     } finally {
       this.busy = false;
