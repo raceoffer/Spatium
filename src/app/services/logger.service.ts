@@ -34,12 +34,12 @@ export class LoggerService {
   }
 
   public static log(message, data) {
-    window.fabric.Crashlytics.addLog(message + ': ' + JSON.stringify(data));
+    // TODO: send log to hockey
     console.log(message, JSON.stringify(data));
   }
 
   public static nonFatalCrash(message, exception) {
-    window.fabric.Crashlytics.sendNonFatalCrash(message + ': ' + exception);
+    // TODO: send crash to hockey
     console.log(message, exception);
   }
 
@@ -79,11 +79,11 @@ export class LoggerService {
   }
 
   async createSessionLog() {
-    var datePipe = new DatePipe('en-US');
+    const datePipe = new DatePipe('en-US');
     const format = 'yyyy-MM-ddTHH-mm-ss';
     const datelog = datePipe.transform(new Date(), format);
     this.sessionlogName = this.fs.logFileName(datelog);
-    this.sessionlogPath = this.fs.getExternalPath();
+    this.sessionlogPath = await this.fs.getLogPath();
 
     await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, '');
   }
@@ -91,6 +91,14 @@ export class LoggerService {
   async logBufferToLog() {
     await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
     this.logBuffer = null;
+  }
+
+  async getLogData(): Promise<string> {
+    return await this.fs.readFile(this.sessionlogName);
+  }
+
+  get logFileName(): string {
+    return this.sessionlogName;
   }
 
   async deleteOldLogFiles() {

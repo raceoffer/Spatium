@@ -14,10 +14,9 @@
   "dependencies": {
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git",
-    "cordova-android": "^6.3.0",
+    "cordova-android": "^7.0.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
-    "cordova-fabric-plugin": "^1.1.10",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
@@ -25,6 +24,7 @@
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
+    "cordova-plugin-hockeyapp": "file:../../HockeySDK-Cordova",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
@@ -40,10 +40,6 @@
       "cordova-plugin-whitelist": {},
       "cordova-custom-config": {},
       "cordova-plugin-file": {},
-      "cordova-fabric-plugin": {
-        "FABRIC_API_KEY": "752fc70596e44939199e6f2f35f9275dc6bae22c",
-        "FABRIC_API_SECRET": "e1c81eb1e61ab8206e8d1a91d678ef95b530b905db4fffc27625ae06ad81f267"
-      },
       "cordova-plugin-vibration": {},
       "cordova-plugin-android-permissions": {},
       "cordova-plugin-keychain-touch-id": {},
@@ -58,7 +54,8 @@
       "phonegap-nfc": {},
       "CordovaClipboard": {},
       "Canvas2ImagePlugin": {},
-      "cordova-plugin-camera-info": {}
+      "cordova-plugin-camera-info": {},
+      "cordova-plugin-hockeyapp": {}
     },
     "platforms": [
       "browser",

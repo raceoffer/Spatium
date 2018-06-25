@@ -67,15 +67,15 @@ export class FileService {
     })
   }
 
-  async readFile(filename) {
+  async readFile(filename): Promise<string> {
     return await new Promise<string>((resolve, reject) => {
       window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
         fs.root.getFile(filename, {create: false}, fileEntry => {
           fileEntry.file(file => {
             const reader = new FileReader();
             reader.onloadend = (e: any) => {
-              const initiatorDDSKey = e.target.result;
-              resolve(initiatorDDSKey);
+              const data: string = e.target.result;
+              resolve(data);
             };
             reader.readAsText(file);
           });
@@ -84,11 +84,11 @@ export class FileService {
     });
   }
 
-  async getFile(filename) {
-    return await new Promise<string>((resolve, reject) => {
+  async getFile(filename): Promise<object> {
+    return await new Promise<object>((resolve, reject) => {
       window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
         fs.root.getFile(filename, {create: false}, fileEntry => {
-          fileEntry.file();
+          fileEntry.file(resolve, reject);
         }, reject);
       });
     });
@@ -108,23 +108,22 @@ export class FileService {
     const time: number = 24 * 60 * 60 * 1000; // 24h
     const date: number = new Date().getTime();
 
-    window.resolveLocalFileSystemURL(this.getExternalPath(),
+    window.resolveLocalFileSystemURL(await this.getLogPath(),
       function (fileSystem) {
-        var reader = fileSystem.createReader();
+        const reader = fileSystem.createReader();
         reader.readEntries(
           function (entries) {
-            var i;
-            for (i = 0; i < entries.length; i++) {
-              let entry = entries[i];
-              if (entry.isFile) {
-                entry.file((f) => {
+            entries
+              .filter(entry => entry.isFile)
+              .filter(entry => entry.name.includes('log_'))
+              .forEach(entry => {
+                entry.file(f => {
                   let diff = date - f.lastModifiedDate;
                   if (diff > time) {
                     entry.remove();
                   }
                 });
-              }
-            }
+              });
           },
           function (e) { }
         );
@@ -132,7 +131,16 @@ export class FileService {
     );
   }
 
-  getExternalPath() {
+  async getLogPath(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        const path = fs.root.nativeURL;
+        resolve(path);
+      }, reject);
+    });
+  }
+
+  getExternalPath(): string {
     let path: string;
     switch (device.platform.toLowerCase()) {
       case 'android':

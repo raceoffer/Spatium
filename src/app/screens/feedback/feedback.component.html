@@ -36,7 +36,7 @@
     <tr>
       <td colspan="2">
         <div style="margin-bottom: 13px;">
-          <mat-checkbox [disabled]="true" checked = '{{sendLogs}}'>{{stAppLogs}}</mat-checkbox>
+          <mat-checkbox [(ngModel)]=sendLogs>{{stAppLogs}}</mat-checkbox>
         </div>
       </td>
     </tr>
@@ -59,7 +59,7 @@
             </div>
 
           </mat-grid-tile>
-          <mat-grid-tile>
+          <mat-grid-tile *ngIf="canUploadFile">
             <div class="grid-item" fxLayout="row" fxLayoutAlign="center center">
               <button mat-button style="height: 100%; width: 100%; padding: 0px;">
                 <mat-icon class="color-cool_grey icon-50">add</mat-icon>

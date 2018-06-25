@@ -38,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     await this.logger.createSessionLog();
     this.logger.deleteOldLogFiles();
+    // TODO: Pass AppId according to a platform
     hockeyapp.start(null, null, '6a66e9dc6499491187e1bb8c3bfeced9', true, hockeyapp.CHECK_MANUALLY, false, true);
   }
 }

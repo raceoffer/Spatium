@@ -2,9 +2,13 @@ import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { DDSService } from "../../services/dds.service";
 import { NavigationService } from '../../services/navigation.service';
+import { LoggerService } from '../../services/logger.service';
+import { FeedbackData, FeedbackDataFile } from '../../data/feedback-data';
+import { FileInfo } from '../../data/file-info';
 
 declare const cordova: any;
 declare const window: any;
+declare const hockeyapp: any;
 
 @Component({
   selector: 'app-feedback',
@@ -21,8 +25,9 @@ export class FeedbackComponent implements OnInit, OnDestroy {
   back = null;
   contactInfo = '';
   cols = 1;
-  screenshotsPreview = [];
-  sendLogs = false;
+  screenshotsPreview: FileInfo[] = [];
+  maximumScreenshots: number = 2;
+  sendLogs = true;
 
   private subscriptions = [];
 
@@ -30,7 +35,8 @@ export class FeedbackComponent implements OnInit, OnDestroy {
               private readonly router: Router,
               private readonly route: ActivatedRoute,
               private readonly dds: DDSService,
-              private readonly navigationService: NavigationService) { }
+              private readonly navigationService: NavigationService,
+              private readonly loggerService: LoggerService) { }
 
   private _email = '';
 
@@ -89,16 +95,22 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     this.screenshotsPreview.splice(this.screenshotsPreview.indexOf(screen), 1);
   }
 
+  get canUploadFile(): boolean {
+    return this.screenshotsPreview.length < this.maximumScreenshots;
+  }
+
   onUploadFileClick(event) {
     console.log(event);
 
     if (event.srcElement.files && event.srcElement.files[0]) {
       const reader = new FileReader();
+      const file: File = event.srcElement.files[0];
 
       reader.onload = (e) => {
         console.log(e.target);
-        const file: FileInfo = new FileInfo(event.srcElement.files[0], (<FileReader>e.target).result);
-        this.screenshotsPreview.push(file);
+        console.log('file:', );
+        const fileInfo: FileInfo = new FileInfo(file, (<FileReader>e.target).result);
+        this.screenshotsPreview.push(fileInfo);
         console.log(this.screenshotsPreview);
       };
 
@@ -106,31 +118,27 @@ export class FeedbackComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSendClicked() {
-    let formData = new FormData();
-    formData.append('email', this.email);
-    formData.append('description', this.description);
+  async onSendClicked() {
+    const feedbackData = new FeedbackData();
+    feedbackData.email = this.email;
+    feedbackData.text = this.description;
 
     if (this.sendLogs) {
-      /*for (const log of this.filelogs) {
-        formData.append('log[]', log, log.name);
-      }*/
+      const data: string = await this.loggerService.getLogData();
+      const blob: Blob = new Blob([data], {type: 'text/plain'});
+      const name: string = this.loggerService.logFileName;
+      feedbackData.logFile = new FeedbackDataFile(blob, name);
     }
-
-    formData.append('log[]', 'log content', 'log name');
-    formData.append('log[]', 'log content 2', 'log name 2');
 
     for (const screen of this.screenshotsPreview) {
-      const file = screen.bolb;
-      formData.append('screenshot[]', file, file.name);
+      feedbackData.attachments.push(screen.file);
     }
 
-    console.log(formData.getAll('email'));
-    console.log(formData.getAll('description'));
-    console.log(formData.getAll('screenshot[]'));
-
-    this.dds.sponsorFeedback(formData);
-
+    hockeyapp.sendFeedback(feedbackData, (ok) => {
+      console.log('send success:', ok);
+    }, (e) => {
+      console.log('send error:', e);
+    });
   }
 
   async onBackClicked() {
@@ -142,16 +150,5 @@ export class FeedbackComponent implements OnInit, OnDestroy {
         await  this.router.navigate(['/navigator-verifier', {outlets: {'navigator': ['main']}}]);
         break;
     }
-  }
-
-}
-
-export class FileInfo {
-  bolb: any;
-  src: string;
-
-  constructor(bolb, src) {
-    this.bolb = bolb;
-    this.src = src;
   }
 }

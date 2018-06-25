@@ -2,8 +2,6 @@ package capital.spatium.wallet;
 
 import android.os.Bundle;
 import org.apache.cordova.*;
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends CordovaActivity
 {
@@ -18,8 +16,7 @@ public class MainActivity extends CordovaActivity
             moveTaskToBack(true);
         }
 
-        // Initialize Crashlytics
-        Fabric.with(this, new Crashlytics());
+        // TODO: Initialize Hockey
 
         // Set by <content src="index.html" /> in config.xml
         loadUrl(launchUrl);
