@@ -24,7 +24,7 @@
     "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
-    "cordova-plugin-hockeyapp": "file:../../HockeySDK-Cordova",
+    "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",

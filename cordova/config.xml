@@ -66,7 +66,7 @@
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-camera-info" spec="ssh+git@github.com:CaspianTechnologies/cordova-plugin-camera-info.git" />
-    <plugin name="cordova-plugin-hockeyapp" spec="../../HockeySDK-Cordova" />
+    <plugin name="cordova-plugin-hockeyapp" spec="git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^7.0.0" />
