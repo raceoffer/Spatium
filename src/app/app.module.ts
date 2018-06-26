@@ -142,7 +142,6 @@ import { DeviceService } from './services/device.service';
     HttpModule,
     NativeHttpWrapper,
     ReactiveFormsModule,
-    AppRoutingModule,
     BrowserModule,
     NoopAnimationsModule,
     BrowserAnimationsModule,
@@ -166,7 +165,8 @@ import { DeviceService } from './services/device.service';
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule
+    QRCodeModule,
+    AppRoutingModule
   ],
   providers: [
     DeviceService,

@@ -12,10 +12,14 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "dependencies": {
+    "cocoon-cordova-labs-local-webserver": "^2.4.1",
+    "cocoon-cordova-labs-wkwebview-engine-localhost": "^0.5.1",
+    "cocoon-cordova-plugin-wkwebview-engine": "^1.1.1",
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
     "cordova-fabric-plugin": "^1.1.10",
+    "cordova-labs-wkwebview-engine-localhost": "git+https://github.com/apache/cordova-plugins.git#wkwebview-engine-localhost",
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
@@ -34,7 +38,6 @@
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-websocket-server": "^1.4.10",
     "cordova-plugin-whitelist": "^1.3.3",
-    "cordova-plugin-wkwebview-engine": "^1.1.4",
     "cordova-plugin-zeroconf": "^1.3.3",
     "cordova-windows": "^6.0.0",
     "ionic-native-http-angular-wrapper": "^3.0.1",
@@ -66,16 +69,17 @@
       "cordova-plugin-zeroconf": {},
       "cordova-plugin-websocket-server": {},
       "cordova-plugin-networkinterface": {},
-      "cordova-plugin-wkwebview-engine": {},
       "cordova-plugin-advanced-http": {},
       "cordova-plugin-device-name": {},
       "cordova-plugin-device": {},
       "cordova-plugin-bluetooth": {},
-      "phonegap-nfc": {}
+      "phonegap-nfc": {},
+      "cocoon-cordova-labs-wkwebview-engine-localhost": {}
     },
     "platforms": [
       "browser",
-      "windows"
+      "windows",
+      "android"
     ]
   },
   "devDependencies": {
