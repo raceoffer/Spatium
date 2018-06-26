@@ -6,6 +6,7 @@ export enum Coin {
   BTC = 0,
   BTC_test = 1,
   LTC = 2,
+  NEM = 43,
   ETH = 60,
   BCH = 145
 }

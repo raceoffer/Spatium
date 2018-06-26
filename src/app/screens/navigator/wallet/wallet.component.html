@@ -1,74 +1,32 @@
-<div (window:resize)="onResize()">
-  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="onNavRequest()">
-      <mat-icon>menu</mat-icon>
-    </button>
+<mat-grid-list cols="{{cols}}" rowHeight="4:3">
+  <mat-grid-tile
+    *ngFor="let tile of filtredTitles"
+    [colspan]="tile.cols"
+    [rowspan]="tile.rows">
 
-    <span>{{ title }} </span>
+    <div class="grid-item">
+      <button mat-button class="block" style="padding: 0px;" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
+        <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
+          <div class="logo {{tile.logo}}"></div>
+          <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
+            white-space: normal;text-align: left;">
+            <span class="sym">{{ tile.symbols }}</span>
+            <span class="title">{{ tile.title }}</span>
+          </div>
+        </div>
+        <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
+          <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
+            {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
+          </span>
 
-    <span class="spacer"></span>
+          <span class="balanceUSD" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
+            {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
+          </span>
 
-    <button mat-icon-button (click)="toggleSearch(true)">
-      <mat-icon>search</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
-      <mat-icon>sync</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
-      <mat-icon>sync_problem</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="cancelSync()" *ngIf="(synchronizing | async)">
-      <mat-icon class="sync">sync</mat-icon>
-    </button>
-  </mat-toolbar>
-
-  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
-    <button mat-icon-button (click)="toggleSearch(false)">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-
-    <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
-      <input type="text" placeholder="Search" name="UserName" [(ngModel)]="filterValue" [autofocus]>
+            <span class="sync-in-progress" *ngIf="getTileBalanceInfo(tile.coin) !== undefined && (getTileBalanceInfo(tile.coin).balance | async) === null">Loading...</span>
+        </div>
+      </button>
     </div>
-
-    <button mat-button mat-icon-button (click)="clearFilterValue()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-toolbar>
-
-  <mat-grid-list cols="{{cols}}" rowHeight="4:3">
-    <mat-grid-tile
-      *ngFor="let tile of filtredTitles"
-      [colspan]="tile.cols"
-      [rowspan]="tile.rows">
-
-      <div class="grid-item">
-        <button mat-button class="block" style="padding: 0px;" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
-          <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.logo}}"></div>
-            <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
-              white-space: normal;text-align: left;">
-              <span class="sym">{{ tile.symbols }}</span>
-              <span class="title">{{ tile.title }}</span>
-            </div>
-          </div>
-          <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
-            <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
-            </span>
-
-            <span class="balanceUSD" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
-            </span>
-
-              <span class="sync-in-progress" *ngIf="getTileBalanceInfo(tile.coin) !== undefined && (getTileBalanceInfo(tile.coin).balance | async) === null">Loading...</span>
-          </div>
-        </button>
-      </div>
-    </mat-grid-tile>
-  </mat-grid-list>
-</div>
+  </mat-grid-tile>
+</mat-grid-list>
 

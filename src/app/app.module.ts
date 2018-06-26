@@ -87,6 +87,12 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
+import { IcoComponent } from './screens/navigator/ico/ico.component';
+import { MainComponent } from './screens/navigator/main/main.component';
+import { InvestmentComponent } from './screens/navigator/ico/investment/investment.component';
+import { NewIcoComponent } from './screens/navigator/ico/new-ico/new-ico.component';
+import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.component';
+import { TransactionsComponent } from './screens/navigator/ico/transactions/transactions.component';
 
 @NgModule({
   declarations: [
@@ -110,7 +116,6 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     LoginScreenComponent,
     RegistrationComponent,
     LongPressDirective,
-    WalletComponent,
     RegistrationSuccessComponent,
     AutofocusDirective,
     FactorNodeComponent,
@@ -136,7 +141,14 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     EqualToDirective,
     VerifierCrateComponent,
     VerifierComponent,
-    NfcWriterComponent
+    NfcWriterComponent,
+    IcoComponent,
+    MainComponent,
+    WalletComponent,
+    InvestmentComponent,
+    WhitelistComponent,
+    NewIcoComponent,
+    TransactionsComponent
   ],
   imports: [
     OverlayModule,
@@ -207,7 +219,11 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     SecretExportComponent,
     DeleteSecretComponent,
     VerifyTransactionComponent,
-    NfcFactorComponent
+    NfcFactorComponent,
+    InvestmentComponent,
+    WhitelistComponent,
+    NewIcoComponent,
+    TransactionsComponent
   ]
 })
 

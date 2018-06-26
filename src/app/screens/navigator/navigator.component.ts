@@ -20,12 +20,17 @@ export class NavigatorComponent implements OnDestroy {
   public navLinks = [{
     name: 'Wallet',
     clicked: async () => {
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}])
+      this.current = 'Wallet';
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['main', 'wallet']}}])
     }
   }, {
     name: 'Exchange'
   }, {
-    name: 'ICO'
+    name: 'ICO',
+    clicked: async () => {
+      this.current = 'ICO';
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['main', 'ico']}}])
+    }
   }, {
     name: 'Portfolio Investment'
   }, {
