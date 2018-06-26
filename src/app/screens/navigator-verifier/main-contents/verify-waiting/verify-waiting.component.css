@@ -42,3 +42,7 @@ table .full-width td {
   display: flex !important;
   border-bottom: 1px solid #f1f1f4;
 }
+
+.list-icon {
+  padding-right: 5px;
+}

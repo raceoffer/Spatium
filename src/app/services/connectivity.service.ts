@@ -106,7 +106,7 @@ export class ConnectivityService implements IConnectionProvider {
 
     this.offline.subscribe(() => {
       this.state.next(State.Stopped);
-    }, false);
+    });
 
     this.online.subscribe(() => {
       if (navigator.connection.type === 'wifi') {
