@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutAlign="center center" class="content" style="height:246px;">
+<div fxLayout="column" fxLayoutAlign="center center" class="content text-center" style="height:246px;">
   <div class="width-button-container text-center" *ngIf="!(enabled | async)">
     <div class="connect-text">
       <span>Turn on NFC to proceed</span>
@@ -11,7 +11,7 @@
   </div>
 
   <div *ngIf="(enabled | async)">
-    <div
+    <div style="height: 204px;"
       class="small-video-container"
       fxLayout="column"
       fxLayoutAlign="center center"
@@ -22,7 +22,7 @@
       </mat-icon>
     </div>
 
-    <span style="width: 100%; text-align: center;" *ngIf="value">
+    <span *ngIf="value">
       Touch an NFC tag
     </span>
 
