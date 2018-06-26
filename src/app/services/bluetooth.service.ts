@@ -15,6 +15,7 @@ declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
+  public isMainDevice = true;
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -67,6 +68,7 @@ export class BluetoothService implements IConnectionProvider {
 
   public message: Subject<any> = new Subject<any>();
   public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public awaitingEnable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly deviceService: DeviceService,
               private readonly ngZone: NgZone) {
@@ -122,7 +124,7 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   async startListening() {
-    if (this.listeningState.getValue() !== State.Stopped || !this.isToggler.getValue()) {
+    if (this.listeningState.getValue() !== State.Stopped) {
       return;
     }
 
@@ -200,6 +202,8 @@ export class BluetoothService implements IConnectionProvider {
       return;
     }
 
+    this.devices.next(new Map<string, Device>());
+
     this.discoveryState.next(State.Starting);
 
     const paired = await cordova.plugins.bluetooth.listPairedDevices();
@@ -256,8 +260,18 @@ export class BluetoothService implements IConnectionProvider {
   private async init() {
     await this.deviceService.deviceReady();
 
-    this.enabledEvent.subscribe(() => this.startListening());
-    this.disabledEvent.subscribe(() => this.stopListening());
+    this.enabledEvent.subscribe(() => {
+      if (this.isMainDevice) {
+        this.searchDevices(5 * 1000);
+      } else if (this.isToggler.getValue()) {
+        this.startListening();
+      }
+    });
+    this.disabledEvent.subscribe(() => {
+      this.devices.next(new Map<string, Device>());
+      this.discoveryState.next(State.Stopped);
+      this.stopListening();
+    });
 
     cordova.plugins.bluetooth.setConnectedCallback(device => this.ngZone.run(async () => {
       this.connectionState.next(device ? ConnectionState.Connected : ConnectionState.None);

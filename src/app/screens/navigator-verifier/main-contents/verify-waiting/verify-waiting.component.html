@@ -20,7 +20,7 @@
 
     <mat-slide-toggle mat-list-item class="custom-slide-toggle"
                       [checked]="(provider.service.listening | async) || (provider.service.starting | async)"
-                      [disabled]="(((provider.service.starting | async) || (provider.service.stopping | async))) && !(provider.service.listening | async)"
+                      [disabled]="((provider.service.starting | async) || (provider.service.stopping | async) || (provider.service.awaitingEnable | async)) && !(provider.service.listening | async)"
                       (change)="toggleProvider(provider, $event)">
     </mat-slide-toggle>
   </mat-nav-list>

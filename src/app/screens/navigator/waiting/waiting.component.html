@@ -26,6 +26,13 @@
         <span class="{{ providers.get(device.provider).custom_icon }}"></span>
       </mat-list-item>
     </mat-nav-list>
+
+    <div *ngFor="let provider of providersArray" class="connect-div" fxLayout="row" fxLayoutAlign=" center">
+      <span *ngIf="!(provider.service.enabled | async)">{{ provider.enable_srting }}</span>
+      <span class="spacer"></span>
+      <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent" (click)="toggleProvider(provider)">enable</button>
+    </div>
+
     <div style="width: 100%; text-align: center; padding: 5px 0px;">
       <button mat-icon-button (click)="startDiscovery()">
         <mat-icon class="button-imitator-large" *ngIf="!(discovering | async)">sync</mat-icon>

@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, combineLatest, merge, Observable, timer, fromEvent } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip, takeUntil } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/i-connectivity-provider';
@@ -8,12 +8,15 @@ import { ConnectionState, State } from './primitives/state';
 import { SocketClientService } from './socketclient.service';
 import { SocketServerService } from './socketserver.service';
 import { NotificationService } from './notification.service';
+import { Device } from './primitives/device';
 
 declare const cordova;
 declare const navigator;
 
 @Injectable()
 export class ConnectivityService implements IConnectionProvider {
+
+  public isMainDevice = true;
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -80,6 +83,7 @@ export class ConnectivityService implements IConnectionProvider {
   ), 1);
   public devices = this.discoveryService.devices;
   public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public awaitingEnable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   discoverableState: BehaviorSubject<State>;
   discoverable: BehaviorSubject<boolean>;
@@ -87,14 +91,40 @@ export class ConnectivityService implements IConnectionProvider {
   discoverableStartedEvent: Observable<any>;
   discoverableFinishedEvent: Observable<any>;
 
-  constructor(private readonly notification: NotificationService,
+  online = fromEvent(document, 'online');
+  offline = fromEvent(document, 'offline');
+
+  constructor(private readonly ngZone: NgZone,
+              private readonly notification: NotificationService,
               private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
               private readonly discoveryService: DiscoveryService) {
 
-    document.addEventListener('offline', () => {
-      this.stopListening();
+    if (navigator.connection.type === 'wifi') {
+      this.state.next(State.Started);
+    }
+
+    this.offline.subscribe(() => {
+      this.state.next(State.Stopped);
     }, false);
+
+    this.online.subscribe(() => {
+      if (navigator.connection.type === 'wifi') {
+        this.state.next(State.Started);
+      }
+    }, (e) => console.log('online error'));
+
+    this.enabledEvent.subscribe(() => {
+      if (this.isMainDevice) {
+        this.searchDevices(5 * 1000);
+      } else if (this.isToggler.getValue()) {
+        this.startListening();
+      }
+    });
+    this.disabledEvent.subscribe(() => {
+      this.devices.next(new Map<string, Device>());
+      this.stopListening();
+    });
 
   }
 
@@ -111,7 +141,7 @@ export class ConnectivityService implements IConnectionProvider {
           if (networkState === 'wifi') {
             await this.startListening();
           } else {
-            this.notification.showWifiSettings('No WiFi conection');
+            this.notification.showWifiSettings('No WiFi connection');
           }
         } else {
           await this.openRequestWiFiDialog();
@@ -129,23 +159,31 @@ export class ConnectivityService implements IConnectionProvider {
       'An app wants to turn on WiFi',
       buttonIndex => {
         if (buttonIndex === 1) { // yes
-          cordova.plugins.diagnostic.setWifiState(() => {
+          cordova.plugins.diagnostic.setWifiState(async () => this.ngZone.run( async () => {
               console.log('Wifi was enabled');
-              document.addEventListener('online', () => {
+              this.awaitingEnable.next(true);
+
+              const onlineEvent = await this.online.pipe(
+                takeUntil(timer(10000))
+              ).toPromise();
+
+              if (!onlineEvent) {
+                this.notification.showWifiSettings('No WiFi connection');
+                this.awaitingEnable.next(false);
+                this.isToggler.next(false);
+              } else {
                 const networkState = navigator.connection.type
                 console.log(networkState);
                 if (networkState === 'wifi') {
                   this.startListening();
-                } else {
-
                 }
-              }, false);
-            }, (error) => {
+              }
+            }), (error) => {
               console.error('The following error occurred: ' + error);
-            },
-            true);
+            }, true);
         } else {
           this.isToggler.next(false);
+          this.awaitingEnable.next(false);
         }
       },
       '',
@@ -163,6 +201,7 @@ export class ConnectivityService implements IConnectionProvider {
       await this.socketServerService.stop();
     }
     this.isToggler.next(false);
+    this.awaitingEnable.next(false);
   }
 
   public async stopListening() {
@@ -171,6 +210,7 @@ export class ConnectivityService implements IConnectionProvider {
       await this.socketServerService.stop()
     ]);
     this.isToggler.next(false);
+    this.awaitingEnable.next(false);
   }
 
   // Client interface

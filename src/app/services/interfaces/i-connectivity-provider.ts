@@ -4,6 +4,7 @@ import { ConnectionState, State } from '../primitives/state';
 
 export interface IConnectionProvider {
 
+  isMainDevice: boolean;
   state: BehaviorSubject<State>;
 
   starting: BehaviorSubject<boolean>;
@@ -43,6 +44,7 @@ export interface IConnectionProvider {
 
   message: Subject<any>;
   isToggler: BehaviorSubject<boolean>;
+  awaitingEnable: BehaviorSubject<boolean>;
 
   toggleProvider(): void;
 

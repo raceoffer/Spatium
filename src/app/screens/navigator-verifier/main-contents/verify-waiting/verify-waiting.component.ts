@@ -14,15 +14,17 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
   public ready = this.connectionProviderService.listening;
 
   public isExitTap = false;
-  private subscriptions = [];
   providers = Array.from(this.connectionProviderService.providers.values());
+  private subscriptions = [];
 
   constructor(private readonly connectionProviderService: ConnectionProviderService,
               private readonly navigationService: NavigationService,
               private readonly ngZone: NgZone,
               private readonly router: Router,
               private readonly notification: NotificationService,
-              private readonly wallet: WalletService) { }
+              private readonly wallet: WalletService) {
+    this.connectionProviderService.setConfMode();
+  }
 
   ngOnInit() {
     this.subscriptions.push(
@@ -63,7 +65,7 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
   async toggleProvider(provider: Provider, event) {
     console.log('toggle');
 
-    event.source.disabled = ((((provider.service.starting.getValue()) || (provider.service.stopping.getValue())))
+    event.source.disabled = ((((provider.service.starting.getValue()) || (provider.service.stopping.getValue()) || (provider.service.awaitingEnable.getValue())))
       && !(provider.service.listening.getValue()));
     event.source.checked = ((provider.service.listening.getValue()) || (provider.service.starting.getValue()));
     event.checked = event.source.checked;

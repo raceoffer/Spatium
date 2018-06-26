@@ -1,0 +1,4 @@
+.connect-div {
+  width: calc(100% - 32px);
+  display: flex !important;
+}

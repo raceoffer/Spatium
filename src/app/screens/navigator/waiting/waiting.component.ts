@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { ConnectionProviderService } from '../../../services/connection-provider';
+import { ConnectionProviderService, Provider } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 
@@ -21,6 +21,7 @@ export class WaitingComponent implements OnInit, OnDestroy {
   public connected = this.connectionProviderService.connected;
   public devices = this.connectionProviderService.combinedDevices;
   public providers = this.connectionProviderService.providers;
+  public providersArray = Array.from(this.connectionProviderService.providers.values());
   public ready = this.wallet.ready;
 
   private subscriptions = [];
@@ -87,5 +88,9 @@ export class WaitingComponent implements OnInit, OnDestroy {
       '',
       ['YES', 'NO']
     );
+  }
+
+  async toggleProvider(provider: Provider) {
+    await this.connectionProviderService.toggleProvider(provider.provider);
   }
 }
