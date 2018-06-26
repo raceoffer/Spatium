@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 import { SecretExportComponent } from "../secret-export/secret-export.component";
 import { VerifyTransactionComponent } from "./verify-transaction/verify-transaction.component";
+import { SettingsComponent } from "./settings/settings.component";
 import { Router } from "@angular/router";
 import { WalletService } from "../../services/wallet.service";
 import { BluetoothService } from "../../services/bluetooth.service";
@@ -15,6 +16,7 @@ import { Status } from "../../services/wallet/currencywallet";
 import { CurrencyService } from "../../services/currency.service";
 
 declare const window: any;
+declare const NativeStorage: any;
 
 @Component({
   selector: 'app-verifier',
@@ -34,6 +36,11 @@ export class VerifierComponent implements OnInit {
     }
   }, {
     name: 'Change PIN'
+  },{
+    name: 'Settings',
+    clicked: () => {
+      this.onSettings();
+    }
   }, {
     name: 'Delete secret',
     clicked: () => {
@@ -255,6 +262,10 @@ export class VerifierComponent implements OnInit {
     });
   }
 
+  public onSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
@@ -269,7 +280,8 @@ export class VerifierComponent implements OnInit {
 
   public async delete() {
     return new Promise((resolve, reject) => {
-      window.plugins.touchid.delete('spatium', resolve, reject);
+      window.plugins.touchid.delete('spatium');
+      NativeStorage.remove("hasTouchID", resolve, reject);
     });
   }
 }

@@ -58,7 +58,8 @@
       "phonegap-nfc": {},
       "CordovaClipboard": {},
       "Canvas2ImagePlugin": {},
-      "cordova-plugin-camera-info": {}
+      "cordova-plugin-camera-info": {},
+      "cordova-plugin-nativestorage": {}
     },
     "platforms": [
       "browser",

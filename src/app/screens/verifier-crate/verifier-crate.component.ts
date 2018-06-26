@@ -5,6 +5,7 @@ import { KeyChainService } from "../../services/keychain.service";
 import { WorkerService } from "../../services/worker.service";
 
 declare const window: any;
+declare const NativeStorage: any;
 
 import {
   deriveAesKey,
@@ -35,7 +36,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   public busy = false;
 
-  public touchAvailable: any;
+  public touchAvailable: boolean;
 
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
@@ -57,10 +58,11 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     try {
+      console.log(await this.checkAvailable(), await this.checkExisting(), await this.checkSettings());
       this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-      this.touchAvailable = this.checkAvailable() && this.checkExisting();
+      this.touchAvailable = await this.checkAvailable() && await this.checkExisting() && await this.checkSettings();
     } catch(e) {
-      console.log(e, this.checkAvailable(), this.checkExisting());
+      console.log(e);
     }
   }
 
@@ -73,6 +75,21 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   async checkExisting() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
+    });
+  }
+
+  async checkSettings() {
+    return new Promise<boolean>((resolve, ignored) => {
+      NativeStorage.getItem("hasTouchID", 
+      (value) => {
+        resolve(value);
+      }, 
+      (error) => {
+        if (error.code === 2) {
+          NativeStorage.setItem("hasTouchID", true);
+          this.checkSettings();
+        }
+      });
     });
   }
 
@@ -116,7 +133,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
       this.fileData.next(encryptedSecret);
 
-      this.touchAvailable = this.checkAvailable() && this.checkExisting();
+      this.touchAvailable = await this.checkAvailable() && await this.checkExisting();
 
       // ^This is optional^
       await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSecret.toString('hex'));
@@ -153,7 +170,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
         await this.router.navigate(['/verifier']);
       } else {
-        if (this.checkAvailable()) {
+        if (await this.checkAvailable() && await this.checkSettings()) {
           try {
             if (await this.saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);

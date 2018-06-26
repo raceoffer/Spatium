@@ -13,7 +13,7 @@
   <app-pincode
     class="factor-content"
     [busy]="busy"
-    [allowFingerprint]="(touchAvailable | async)"
+    [allowFingerprint]="touchAvailable"
     (submit)="onSubmit($event)">
   </app-pincode>
 

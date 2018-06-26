@@ -87,6 +87,7 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
+import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/settings.component';
 
 @NgModule({
   declarations: [
@@ -136,7 +137,8 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     EqualToDirective,
     VerifierCrateComponent,
     VerifierComponent,
-    NfcWriterComponent
+    NfcWriterComponent,
+    VerifierSettingsComponent
   ],
   imports: [
     OverlayModule,
@@ -207,7 +209,8 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     SecretExportComponent,
     DeleteSecretComponent,
     VerifyTransactionComponent,
-    NfcFactorComponent
+    NfcFactorComponent,
+    VerifierSettingsComponent
   ]
 })
 

@@ -49,9 +49,6 @@
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
         </custom-config-file>
     </platform>
-    <engine name="browser" spec="^5.0.2" />
-    <engine name="windows" spec="^6.0.0" />
-    <engine name="android" spec="^6.3.0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
@@ -74,4 +71,8 @@
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-camera-info" spec="ssh+git@github.com:CaspianTechnologies/cordova-plugin-camera-info.git" />
+    <plugin name="cordova-plugin-nativestorage" spec="~2.3.1" />
+    <engine name="browser" spec="^5.0.2" />
+    <engine name="windows" spec="^6.0.0" />
+    <engine name="android" spec="^6.3.0" />
 </widget>
