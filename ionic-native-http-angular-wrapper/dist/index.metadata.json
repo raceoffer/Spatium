@@ -1,0 +1,1 @@
+[{"__symbolic":"module","version":3,"metadata":{},"exports":[{"from":"./native-http-wrapper.module"},{"from":"./providers/http-wrapper"}]},{"__symbolic":"module","version":1,"metadata":{},"exports":[{"from":"./native-http-wrapper.module"},{"from":"./providers/http-wrapper"}]}]
