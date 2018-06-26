@@ -27,10 +27,11 @@
       </mat-list-item>
     </mat-nav-list>
 
-    <div *ngFor="let provider of providersArray" class="connect-div" fxLayout="row" fxLayoutAlign=" center">
-      <span *ngIf="!(provider.service.enabled | async)">{{ provider.enable_srting }}</span>
-      <span class="spacer"></span>
-      <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent" (click)="toggleProvider(provider)">enable</button>
+    <div class="connect-div" fxLayout="column" fxLayoutAlign="center center" *ngIf="hasDisabled()">
+      <span class="message">Cannot find a device?</span>
+      <div *ngFor="let provider of providersArray">
+        <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent" (click)="toggleProvider(provider)" >Enable {{provider.name}}</button>
+      </div>
     </div>
 
     <div style="width: 100%; text-align: center; padding: 5px 0px;">

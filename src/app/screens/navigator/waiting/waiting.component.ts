@@ -93,4 +93,13 @@ export class WaitingComponent implements OnInit, OnDestroy {
   async toggleProvider(provider: Provider) {
     await this.connectionProviderService.toggleProvider(provider.provider);
   }
+
+  hasDisabled() {
+    const temp = this.providersArray.filter(p => !p.service.enabled.getValue());
+    if (temp.length > 0) {
+      return true;
+    }
+
+    return false;
+  }
 }

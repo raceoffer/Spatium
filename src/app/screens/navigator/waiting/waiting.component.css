@@ -1,4 +1,23 @@
 .connect-div {
-  width: calc(100% - 32px);
-  display: flex !important;
+  padding-top: 10px;
+}
+
+.message {
+  line-height: 36px;
+  opacity: 0.5;
+  font-size: 12px;
+  float: right;
+}
+
+.connect-div button {
+  font-size: 12px;
+}
+
+.mat-list .mat-list-item.mat-2-line,
+.mat-list .mat-list-option.mat-2-line,
+.mat-nav-list .mat-list-item.mat-2-line,
+.mat-nav-list .mat-list-option.mat-2-line,
+.mat-selection-list .mat-list-item.mat-2-line,
+.mat-selection-list .mat-list-option.mat-2-line {
+  height: 56px;
 }

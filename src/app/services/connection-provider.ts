@@ -12,6 +12,7 @@ export enum ProviderType {
 
 export class Provider {
   constructor(public provider: ProviderType,
+              public name: string,
               public icon: string,
               public custom_icon: string,
               public discovery_icon: string,
@@ -61,8 +62,8 @@ export class ConnectionProviderService {
 
   constructor(private readonly bt: BluetoothService,
               private readonly connectivityService: ConnectivityService) {
-    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'bluetooth', null, 'bluetooth_searching', 'Bluetooth synchronization', this.bt));
-    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'wifi', null, null, 'WiFi/LAN synchronization', this.connectivityService));
+    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'Bluetooth', 'bluetooth', null, 'bluetooth_searching', 'Bluetooth synchronization', this.bt));
+    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'WiFi', 'wifi', null, null, 'WiFi/LAN synchronization', this.connectivityService));
   }
 
   async setConfMode() {
