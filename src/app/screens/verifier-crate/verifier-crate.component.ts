@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Component, HostBinding, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { NavigationService } from "../../services/navigation.service";
 import { Router } from "@angular/router";
 import { KeyChainService } from "../../services/keychain.service";
@@ -29,13 +29,13 @@ import { PincodeComponent } from "../../inputs/pincode/pincode.component";
 export class VerifierCrateComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
-  @ViewChild(PincodeComponent) public pincoedComponent: PincodeComponent;
+  @ViewChild(PincodeComponent) public pincodeComponent: PincodeComponent;
 
   private subscriptions = [];
 
   public busy = false;
 
-  public touchAvailable = false;
+  public touchAvailable = new BehaviorSubject<any>(false);
 
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
@@ -57,7 +57,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-    this.touchAvailable = await this.checkAvailable() && await this.checkExisting();
+    this.touchAvailable.next(await this.checkAvailable() && await this.checkExisting());
   }
 
   async checkAvailable() {
@@ -99,6 +99,12 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     });
   }
 
+  async getTouchPassword() {
+    return new Promise<string>((resolve) => {
+      window.plugins.touchid.verify('spatium', '',(pincode) => resolve(pincode));
+    });
+  }
+
   async delete() {
     return new Promise((resolve, reject) => {
       window.plugins.touchid.delete('spatium', resolve, reject);
@@ -135,7 +141,16 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     })
   }
 
+  public async onFinger() {
+    const pincode = await this.getTouchPassword();
+    await this.submit(pincode);
+  }
+
   public async onSubmit(pincode) {
+    await this.submit(pincode);
+  }
+
+  public async submit(pincode) {
     try {
       this.busy = true;
 
@@ -166,7 +181,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
         }
       }
     } catch (e) {
-      this.pincoedComponent.onClear();
+      this.pincodeComponent.onClear();
       this.notification.show('Authorization error');
     } finally {
       this.busy = false;
