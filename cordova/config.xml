@@ -19,6 +19,7 @@
     <allow-navigation href="*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <content src="index.html" />
     </platform>
     <platform name="ios">
         <config-file parent="NSAppTransportSecurity" platform="ios" target="*-Info.plist">

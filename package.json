@@ -30,7 +30,7 @@
     "core-js": "^2.4.1",
     "crypto-core-async": "file:src/crypto-core-async",
     "hammerjs": "^2.0.8",
-    "ionic-native-http-angular-wrapper": "^1.0.1",
+    "ionic-native-http-angular-wrapper": "file:ionic-native-http-angular-wrapper",
     "jquery": "^3.2.1",
     "patternlock": "file:patternlock",
     "rxjs": "^6.1.0",

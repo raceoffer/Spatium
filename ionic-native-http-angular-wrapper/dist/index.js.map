@@ -1,1 +1,1 @@
-{"version":3,"sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,8BAA8B,CAAC;AAC7C,cAAc,0BAA0B,CAAC","file":"index.js","sourceRoot":"","sourcesContent":["export * from './native-http-wrapper.module';\r\nexport * from './providers/http-wrapper';\r\n"]}
+{"version":3,"sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,8BAA8B,CAAC;AAC7C,cAAc,0BAA0B,CAAC","file":"index.js","sourceRoot":"","sourcesContent":["export * from './native-http-wrapper.module';\nexport * from './providers/http-wrapper';\n"]}
