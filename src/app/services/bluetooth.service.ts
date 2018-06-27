@@ -15,7 +15,7 @@ declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
-  public isMainDevice = true;
+
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -260,13 +260,6 @@ export class BluetoothService implements IConnectionProvider {
   private async init() {
     await this.deviceService.deviceReady();
 
-    this.enabledEvent.subscribe(() => {
-      if (this.isMainDevice) {
-        this.searchDevices(5 * 1000);
-      } else if (this.isToggler.getValue()) {
-        this.startListening();
-      }
-    });
     this.disabledEvent.subscribe(() => {
       this.devices.next(new Map<string, Device>());
       this.discoveryState.next(State.Stopped);

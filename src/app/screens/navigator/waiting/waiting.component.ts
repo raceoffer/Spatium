@@ -33,6 +33,7 @@ export class WaitingComponent implements OnInit, OnDestroy {
               private readonly connectionProviderService: ConnectionProviderService) { }
 
   async ngOnInit() {
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
@@ -44,6 +45,13 @@ export class WaitingComponent implements OnInit, OnDestroy {
         this.wallet.startSync();
         await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
       }));
+
+    this.providersArray.forEach((provider) => {
+      this.subscriptions.push(
+        provider.service.enabledEvent.subscribe(() => {
+          provider.service.searchDevices(5 * 1000);
+        }));
+    });
 
     await this.connectionProviderService.searchDevices();
   }

@@ -66,12 +66,6 @@ export class ConnectionProviderService {
     this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'WiFi', 'wifi', null, null, 'WiFi/LAN synchronization', this.connectivityService));
   }
 
-  async setConfMode() {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.isMainDevice = false;
-    });
-  }
-
   async searchDevices() {
     const duration = 5 * 1000;
     this.providers.forEach((value: Provider, key: ProviderType) => {

@@ -4,7 +4,6 @@ import { ConnectionState, State } from '../primitives/state';
 
 export interface IConnectionProvider {
 
-  isMainDevice: boolean;
   state: BehaviorSubject<State>;
 
   starting: BehaviorSubject<boolean>;

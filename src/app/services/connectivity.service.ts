@@ -16,7 +16,6 @@ declare const navigator;
 @Injectable()
 export class ConnectivityService implements IConnectionProvider {
 
-  public isMainDevice = true;
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
@@ -99,33 +98,7 @@ export class ConnectivityService implements IConnectionProvider {
               private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
               private readonly discoveryService: DiscoveryService) {
-
-    if (navigator.connection.type === 'wifi') {
-      this.state.next(State.Started);
-    }
-
-    this.offline.subscribe(() => {
-      this.state.next(State.Stopped);
-    });
-
-    this.online.subscribe(() => {
-      if (navigator.connection.type === 'wifi') {
-        this.state.next(State.Started);
-      }
-    }, (e) => console.log('online error'));
-
-    this.enabledEvent.subscribe(() => {
-      if (this.isMainDevice) {
-        this.searchDevices(5 * 1000);
-      } else if (this.isToggler.getValue()) {
-        this.startListening();
-      }
-    });
-    this.disabledEvent.subscribe(() => {
-      this.devices.next(new Map<string, Device>());
-      this.stopListening();
-    });
-
+    this.init();
   }
 
   // Server interface
@@ -159,28 +132,28 @@ export class ConnectivityService implements IConnectionProvider {
       'An app wants to turn on WiFi',
       buttonIndex => {
         if (buttonIndex === 1) { // yes
-          cordova.plugins.diagnostic.setWifiState(async () => this.ngZone.run( async () => {
-              console.log('Wifi was enabled');
-              this.awaitingEnable.next(true);
+          cordova.plugins.diagnostic.setWifiState(async () => this.ngZone.run(async () => {
+            console.log('Wifi was enabled');
+            this.awaitingEnable.next(true);
 
-              const onlineEvent = await this.online.pipe(
-                takeUntil(timer(10000))
-              ).toPromise();
+            const onlineEvent = await this.online.pipe(
+              takeUntil(timer(10000))
+            ).toPromise();
 
-              if (!onlineEvent) {
-                this.notification.showWifiSettings('No WiFi connection');
-                this.awaitingEnable.next(false);
-                this.isToggler.next(false);
-              } else {
-                const networkState = navigator.connection.type
-                console.log(networkState);
-                if (networkState === 'wifi') {
-                  this.startListening();
-                }
+            if (!onlineEvent) {
+              this.notification.showWifiSettings('No WiFi connection');
+              this.awaitingEnable.next(false);
+              this.isToggler.next(false);
+            } else {
+              const networkState = navigator.connection.type
+              console.log(networkState);
+              if (networkState === 'wifi') {
+                this.startListening();
               }
-            }), (error) => {
-              console.error('The following error occurred: ' + error);
-            }, true);
+            }
+          }), (error) => {
+            console.error('The following error occurred: ' + error);
+          }, true);
         } else {
           this.isToggler.next(false);
           this.awaitingEnable.next(false);
@@ -241,4 +214,25 @@ export class ConnectivityService implements IConnectionProvider {
   }
 
   async enableDiscovery() {}
+
+  private async init() {
+    if (navigator.connection.type === 'wifi') {
+      this.state.next(State.Started);
+    }
+
+    this.offline.subscribe(() => {
+      this.state.next(State.Stopped);
+    });
+
+    this.online.subscribe(() => {
+      if (navigator.connection.type === 'wifi') {
+        this.state.next(State.Started);
+      }
+    }, (e) => console.log('online error'));
+
+    this.disabledEvent.subscribe(() => {
+      this.devices.next(new Map<string, Device>());
+      this.stopListening();
+    });
+  }
 }

@@ -14,7 +14,7 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
   public ready = this.connectionProviderService.listening;
 
   public isExitTap = false;
-  providers = Array.from(this.connectionProviderService.providers.values());
+  public providersArray = Array.from(this.connectionProviderService.providers.values());
   private subscriptions = [];
 
   constructor(private readonly connectionProviderService: ConnectionProviderService,
@@ -22,11 +22,10 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
               private readonly ngZone: NgZone,
               private readonly router: Router,
               private readonly notification: NotificationService,
-              private readonly wallet: WalletService) {
-    this.connectionProviderService.setConfMode();
-  }
+              private readonly wallet: WalletService) { }
 
   ngOnInit() {
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBackClicked();
@@ -42,6 +41,16 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
       this.connectionProviderService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
       }));
+
+    this.providersArray.forEach((provider) => {
+      this.subscriptions.push(
+        provider.service.enabledEvent.subscribe(() => {
+          provider.service.searchDevices(5 * 1000);
+          if (provider.service.isToggler.getValue()) {
+            provider.service.startListening();
+          }
+        }));
+    });
   }
 
   ngOnDestroy() {
@@ -65,6 +74,7 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
   async toggleProvider(provider: Provider, event) {
     console.log('toggle');
 
+    // overwrite default event result
     event.source.disabled = ((((provider.service.starting.getValue()) || (provider.service.stopping.getValue()) || (provider.service.awaitingEnable.getValue())))
       && !(provider.service.listening.getValue()));
     event.source.checked = ((provider.service.listening.getValue()) || (provider.service.starting.getValue()));
