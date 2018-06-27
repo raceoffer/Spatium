@@ -1,0 +1,13 @@
+<app-toolbar
+  [label] = "label"
+  [isColored] = "true"
+  [isShadowed] = "true"
+  (backClicked)="onBack()"></app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="center center">
+  <app-pincode
+    [busy]="busy"
+    (submit)="(confirmation) ? onConfirm($event) : onSuccess($event)"
+  ></app-pincode>
+</div>
+
