@@ -68,7 +68,7 @@
         *ngFor="let factor of (factorItems | async); index as i"
         [@anim]="'active'">
         <div style="margin-left: 50px;">
-          <button
+          <button type="button"
             mat-icon-button
             [disabled]="uploading"
             style="width: 16px; height: 16px; line-height: 16px"
