@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { findParentElement, isElementDisabled } from '../../utils/dom';
 
 @Component({
   selector: 'app-pincode',
@@ -22,7 +23,14 @@ export class PincodeComponent {
     this.pincode = this.pincode.substr(0, this.pincode.length - 1);
   }
 
-  onClear() {
+  onClear(event = null) {
+    if (event) {
+      const element = findParentElement(event.target, 'button', true);
+      if (isElementDisabled(element)) {
+        console.log('button disabled: prevent onClear');
+        return;
+      }
+    }
     this.pincode = '';
   }
 

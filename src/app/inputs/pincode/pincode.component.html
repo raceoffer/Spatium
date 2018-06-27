@@ -11,8 +11,7 @@
       matSuffix style="margin-right: 24px;"
       (click)="onBackspace()"
       [disabled]="busy"
-      long-press
-      (longpress)="onClear()">
+      (longpress)="onClear($event)">
       <mat-icon matSuffix>backspace</mat-icon>
     </button>
   </div>
