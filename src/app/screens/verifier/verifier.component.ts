@@ -10,7 +10,7 @@ import { NavigationService } from "../../services/navigation.service";
 import { NotificationService } from "../../services/notification.service";
 import { FileService } from "../../services/file.service";
 import { Subject } from "rxjs";
-import { bufferWhen, map, timeInterval, filter} from 'rxjs/operators';
+import { bufferWhen, map, timeInterval, filter, skipUntil} from 'rxjs/operators';
 import { Status } from "../../services/wallet/currencywallet";
 import { CurrencyService } from "../../services/currency.service";
 
@@ -66,11 +66,12 @@ export class VerifierComponent implements OnInit {
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
+      skipUntil(this.back),
       timeInterval(),
       filter(time => time.interval < 3000)
     )),
     map(emits => emits.length),
-    filter(emits => emits > 1)
+    filter(emits => emits > 0)
   );
 
   @ViewChild('sidenav') sidenav;
