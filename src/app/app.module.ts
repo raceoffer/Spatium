@@ -45,6 +45,7 @@ import { LoginComponent as LoginScreenComponent } from './screens/login/login.co
 import { DeleteSecretComponent } from './screens/delete-secret/delete-secret.component';
 import { VerifyTransactionComponent } from './screens/verifier/verify-transaction/verify-transaction.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
+import { FeedbackComponent } from './screens/feedback/feedback.component';
 import { CurrencySettingsComponent } from './screens/navigator/currency-settings/currency-settings.component';
 import { CurrencyComponent } from './screens/navigator/currency/currency.component';
 import { FactorNodeComponent } from './screens/navigator/factor-node/factor-node.component';
@@ -86,6 +87,7 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
+import { HockeyService } from './services/hockey.service';
 
 @NgModule({
   declarations: [
@@ -134,7 +136,8 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     EqualToDirective,
     VerifierCrateComponent,
     VerifierComponent,
-    NfcWriterComponent
+    NfcWriterComponent,
+    FeedbackComponent
   ],
   imports: [
     OverlayModule,
@@ -180,7 +183,8 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
     DDSService,
     KeyChainService,
     CurrencyService,
-    NavigationService
+    NavigationService,
+    HockeyService
   ],
   bootstrap: [
     AppComponent

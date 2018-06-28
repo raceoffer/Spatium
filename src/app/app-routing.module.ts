@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './screens/auth/auth.component';
 import { LoginComponent } from './screens/login/login.component';
+import { FeedbackComponent } from "./screens/feedback/feedback.component";
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
@@ -31,6 +32,11 @@ const appRoutes: Routes = [{
   children: [{
     path: 'wallet',
     component: WalletComponent,
+    outlet: 'navigator'
+  },
+  {
+    path: 'feedback/:back',
+    component: FeedbackComponent,
     outlet: 'navigator'
   }]
 }, {

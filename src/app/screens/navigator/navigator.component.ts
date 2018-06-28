@@ -8,6 +8,7 @@ import { bufferWhen, map, debounceTime, filter } from "rxjs/operators";
 import { Subject } from "rxjs/index";
 import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
+import { FeedbackComponent } from '../feedback/feedback.component';
 
 @Component({
   selector: 'app-navigator',
@@ -34,6 +35,11 @@ export class NavigatorComponent implements OnDestroy {
     name: 'Settings',
     clicked: () => {
       this.openSettings();
+    }
+  }, {
+    name: 'Feedback',
+    clicked: () => {
+      this.openFeedback();
     }
   }, {
     name: 'Exit',
@@ -111,6 +117,10 @@ export class NavigatorComponent implements OnDestroy {
 
   public openSettings() {
     const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+  public openFeedback() {
+    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
   }
 
   public toggleNavigation() {

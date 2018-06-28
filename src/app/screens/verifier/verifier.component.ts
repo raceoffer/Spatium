@@ -13,6 +13,7 @@ import { Subject } from "rxjs";
 import { bufferWhen, debounceTime, filter, map } from "rxjs/operators";
 import { Status } from "../../services/wallet/currencywallet";
 import { CurrencyService } from "../../services/currency.service";
+import { FeedbackComponent } from '../feedback/feedback.component';
 
 declare const window: any;
 
@@ -38,6 +39,11 @@ export class VerifierComponent implements OnInit {
     name: 'Delete secret',
     clicked: () => {
       this.onDelete();
+    }
+  }, {
+    name: 'Feedback',
+    clicked: () => {
+      this.openFeedback();
     }
   }, {
     name: 'Exit',
@@ -206,6 +212,10 @@ export class VerifierComponent implements OnInit {
 
   public toggleNavigation() {
     this.sidenav.toggle();
+  }
+
+  public openFeedback() {
+    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
   }
 
   public onTransaction(coin, transaction) {
