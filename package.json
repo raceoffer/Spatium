@@ -26,6 +26,7 @@
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/router": "^6.0.2",
     "@ionic-native/http": "^4.7.0",
+    "@ionic-native/core": "^4.2.0",
     "angular2-qrcode": "^2.0.1",
     "core-js": "^2.4.1",
     "crypto-core-async": "file:src/crypto-core-async",
@@ -61,6 +62,6 @@
     "ts-node": "~3.2.0",
     "tslint": "^5.7.0",
     "types-bn": "^0.0.1",
-    "typescript": "^2.7.2"
+    "typescript": "2.7.2"
   }
 }
