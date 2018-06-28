@@ -25,6 +25,7 @@
     "@angular/platform-browser": "^6.0.2",
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/router": "^6.0.2",
+    "ajv": "^6.0.0",
     "angular2-qrcode": "^2.0.1",
     "core-js": "^2.4.1",
     "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git",

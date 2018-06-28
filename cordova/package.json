@@ -14,6 +14,8 @@
   "dependencies": {
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git",
+    "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
+    "ajv": "^6.0.0",
     "cordova-android": "^7.0.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
@@ -21,7 +23,7 @@
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
-    "cordova-plugin-device": "^2.0.2",
+    "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
