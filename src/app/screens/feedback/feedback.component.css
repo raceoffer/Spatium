@@ -1,0 +1,45 @@
+textarea {
+  caret-color: black;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.mat-form-field-flex {
+  background-color: white;
+}
+
+.mat-form-field-underline {
+  display: none!important;
+}
+
+figure {
+  margin: 5px;
+  background: white;
+}
+
+.grid-item {
+  height: calc(100% - 10px);
+  width: calc(100% - 10px);
+  background: white;
+  overflow: hidden;
+  position: relative;
+}
+
+.img-gradient {
+  height: 50%;
+  width: 100%;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0));
+}
+
+.img-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: white;
+  z-index: 3;
+}

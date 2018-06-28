@@ -1,0 +1,18 @@
+<app-toolbar
+  label="Pincode"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-pincode
+    class="factor-content"
+    [allowFingerprint]="false"
+    (submit)="onSubmit($event)">
+  </app-pincode>
+</div>

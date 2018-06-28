@@ -12,12 +12,16 @@ export class ToolbarComponent implements OnInit {
   SHADOW = ' shadow';
   MONOCHROME = ' color-custom-dark';
 
+  @Input() label: string;
   @Input() isColored: false;
   @Input() isShadowed: false;
-  @Input() label: string;
   @Input() hasSettings: false;
+  @Input() hasSend: false;
+  @Input() sendEnabled: true;
+  @Input() progress: false;
 
   @Output() settingsClicked: EventEmitter<any> = new EventEmitter<any>();
+  @Output() sendClicked: EventEmitter<any> = new EventEmitter<any>();
   @Output() backClicked: EventEmitter<any> = new EventEmitter<any>();
 
   constructor() { }
@@ -37,6 +41,10 @@ export class ToolbarComponent implements OnInit {
 
   onSettingsClicked() {
     this.settingsClicked.emit();
+  }
+
+  onSendClicked() {
+    this.sendClicked.emit();
   }
 
   isWindows(): boolean {

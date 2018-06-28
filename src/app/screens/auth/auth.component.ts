@@ -1,12 +1,8 @@
 import {
-  AfterViewInit,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   HostBinding,
   OnDestroy,
-  OnInit,
-  NgZone,
   ViewChild
 } from '@angular/core';
 import {
@@ -16,18 +12,31 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { FactorParentOverlayRef } from '../../modals/factor-parent-overlay/factor-parent-overlay-ref';
-import { FactorParentOverlayService } from '../../modals/factor-parent-overlay/factor-parent-overlay.service';
-import { AuthService, FactorIconAsset, LoginType } from '../../services/auth.service';
+import { AuthFactor, AuthService, IdFactor } from '../../services/auth.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
+import { DDSService } from '../../services/dds.service';
+import { BehaviorSubject } from "rxjs/index";
+import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
+import { PincodeAuthFactorComponent } from "../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
+import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
+import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
+import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
+import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
+import { toBehaviourSubject } from "../../utils/transformers";
+import { map } from "rxjs/operators";
+import { DefaultAuthFactorComponent } from "../authorization-factors/default-auth-factor/default-auth-factor.component";
 
-declare const Buffer: any;
+export enum State {
+  Loading,
+  Decryption,
+  Ready,
+  Error
+}
 
 @Component({
   selector: 'app-auth',
@@ -44,63 +53,84 @@ declare const Buffer: any;
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AuthComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  @ViewChild(FactorParentOverlayRef) child;
   @ViewChild('factorContainer') factorContainer: ElementRef;
   @ViewChild('dialogButton') dialogButton;
 
-  busy = false;
-  username = '';
-  login = 'Sign in';
-  factors = [];
-  ready = false;
-  loginType = LoginType.LOGIN;
-  isPasswordFirst = false;
-  isAdvanced = false;
+  public login = null;
+  public type = IdFactor.Login;
+  public loginType = IdFactor;
 
-  icon_qr = '';
-  dialogFactorRef = null;
+  public stateType = State;
+  public state = State.Loading;
+
+  public busy = false;
+  public advanced = false;
+
+  public factors = new BehaviorSubject<Array<any>>([]);
+  public factorItems = [];
+
+  public isAdvanced = false;
+
+  private decryptedSeed = null;
+  private remoteEncryptedTrees = [];
+
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-    public factorParentDialog: FactorParentOverlayService,
-    private readonly ngZone: NgZone,
+  constructor(
     private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute,
     private readonly authService: AuthService,
-    private readonly changeDetectorRef: ChangeDetectorRef,
     private readonly notification: NotificationService,
     private readonly keyChain: KeyChainService,
-              private readonly navigationService: NavigationService) { }
-
-  ngOnInit() {
+    private readonly navigationService: NavigationService,
+    private readonly dds: DDSService
+  ) {
     this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
+      activatedRoute.paramMap.subscribe(async params => {
+        this.type = Number(params.get('type')) as IdFactor;
+        this.login = params.get('login');
+
+        await this.fetchData(this.type, this.login);
       })
     );
 
-    this.loginType = this.authService.loginType;
-    this.isPasswordFirst = this.authService.isPasswordFirst;
-    this.icon_qr = FactorIconAsset.QR;
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBack();
+      })
+    );
+  }
+
+  async fetchData(type, login) {
+    try {
+      this.state = State.Loading;
+
+      const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
+
+      this.remoteEncryptedTrees = [ await this.dds.read(id) ];
+
+      this.state = State.Decryption;
+
+      if (type !== IdFactor.Login) {
+        this.openFactorDialog();
+      } else {
+        this.opendDefaultFactorOverlay();
+      }
+    } catch (e) {
+      this.state = State.Error;
+      this.notification.show('Failed to fetch an authorization tree from the storage.')
+    }
+  }
+
+  async retry() {
+    await this.fetchData(this.type, this.login);
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-    if (this.dialogFactorRef) {
-      this.dialogFactorRef.close();
-      this.dialogFactorRef = null;
-  }
-    if (this.child) {
-      this.child.close();
-      this.child = null;
-    }
-  }
-
-  isPasswordChanged(val) {
-    this.isPasswordFirst = val;
-    this.ready = this.authService.decryptedSeed !== null;
   }
 
   goBottom() {
@@ -109,102 +139,123 @@ export class AuthComponent implements OnInit, AfterViewInit, OnDestroy {
     container.animate({scrollTop: height}, 500, 'swing');
   }
 
-  ngAfterViewInit() {
-    this.username = this.authService.login;
-    this.factors = this.authService.factors;
-    this.ready = this.authService.decryptedSeed !== null;
-    this.changeDetectorRef.detectChanges();
+  openFactorDialog() {
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    componentRef.instance.factors = Array.from(this.authService.getAuthFactors(true, true).values());
 
-    if (this.loginType !== LoginType.LOGIN && this.factors.length === 0) {
-      this.addNewFactor();
-    }
-  }
+    componentRef.instance.selected.subscribe(result => {
+      this.navigationService.acceptOverlay();
 
-  addNewFactor(): void {
-    this.dialogFactorRef = this.dialog.open(DialogFactorsComponent, {
-      width: '250px',
-      data: {isColored: false, isShadowed: false}
-    });
-
-    this.dialogFactorRef.componentInstance.goToFactor.subscribe((result) => {
       this.openFactorOverlay(result);
     });
+  }
 
-    this.dialogFactorRef.afterClosed().subscribe(() => {
-      this.dialogButton._elementRef.nativeElement.classList.remove('cdk-program-focused');
-      this.dialogFactorRef = null;
+  public opendDefaultFactorOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DefaultAuthFactorComponent);
+
+    componentRef.instance.advanced.subscribe(() => {
+      this.advanced = true;
+      this.navigationService.acceptOverlay();
+    });
+    componentRef.instance.cancelled.subscribe(() => {
+      this.advanced = true;
+    });
+    componentRef.instance.submit.subscribe(async factor => {
+      this.navigationService.acceptOverlay();
+      await this.addFactor(factor);
     });
   }
 
-  async openFactorOverlay(component) {
-    if (typeof component !== 'undefined') {
-      this.child = this.factorParentDialog.open({
-        label: '',
-        isColored: false,
-        isShadowed: false,
-        content: component
-      });
-
-      this.child.onAddFactor.subscribe((result) => {
-        this.addFactor(result);
-        this.child.close();
-        this.child = null;
-      });
-
-      this.child.onBackClicked.subscribe(() => {
-        this.onBackClicked();
-      });
+  public openFactorOverlay(type: AuthFactor) {
+    switch (type) {
+      case AuthFactor.Password:
+        return this.openFactorOverlayOfType(PasswordAuthFactorComponent);
+      case AuthFactor.Pincode:
+        return this.openFactorOverlayOfType(PincodeAuthFactorComponent);
+      case AuthFactor.GraphicKey:
+        return this.openFactorOverlayOfType(GraphicKeyAuthFactorComponent);
+      case AuthFactor.File:
+        return this.openFactorOverlayOfType(FileAuthFactorComponent);
+      case AuthFactor.QR:
+        return this.openFactorOverlayOfType(QrAuthFactorComponent);
+      case AuthFactor.NFC:
+        return this.openFactorOverlayOfType(NfcAuthFactorComponent);
     }
   }
 
-  removeFactor(factor): void {
-    this.isPasswordFirst = this.authService.rmAuthFactor(factor);
-    this.factors = this.authService.factors;
-    this.ready = this.authService.decryptedSeed !== null;
-    this.changeDetectorRef.detectChanges();
+  private openFactorOverlayOfType(componentType) {
+    const componentRef = this.navigationService.pushOverlay(componentType);
+
+    componentRef.instance.submit.subscribe(async factor => {
+      this.navigationService.acceptOverlay();
+      await this.addFactor(factor);
+    });
   }
 
-  async addFactor(result) {
+  async addFactor(factor) {
     try {
-      this.goBottom();
       this.busy = true;
-      this.isPasswordFirst = true;
-      this.ngZone.run(async () => {
-        this.isPasswordFirst = await this.authService.addAuthFactor(result.factor, Buffer.from(result.value, 'utf-8'));
-        this.ready = this.authService.decryptedSeed !== null;
-        this.busy = false;
-      });
-    } catch (e) {
-      console.log(e);
+
+      const result = await this.authService.tryDecryptWith(this.remoteEncryptedTrees, factor);
+
+      if (result.success) {
+        const factors = this.factors.getValue();
+
+        factors.push(factor);
+
+        this.factors.next(factors);
+
+        const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
+        this.factorItems.push({
+            icon: entry.icon,
+            icon_asset: entry.icon_asset
+        });
+
+        this.goBottom();
+
+        if (result.seed) {
+          this.decryptedSeed = result.seed;
+          this.state = State.Ready;
+        }
+      } else {
+        throw new Error('Unknown error');
+      }
+    } catch(e) {
+      if (this.type === IdFactor.Login && !this.advanced && this.factors.getValue().length === 0) {
+        this.opendDefaultFactorOverlay();
+      }
+      this.notification.show('Failed to decrypt secret with this factor');
     } finally {
+      this.busy = false;
     }
   }
 
-  async letLogin() {
-    if (!this.authService.decryptedSeed) {
+  removeFactor(index) {
+    this.factors.next(this.factors.getValue().slice(0, index));
+    this.factorItems = this.factorItems.slice(0, index);
+
+    this.remoteEncryptedTrees = this.remoteEncryptedTrees.slice(0, index + 1);
+
+    this.advanced = true;
+
+    if (this.decryptedSeed) {
+      this.decryptedSeed = null;
+      this.state = State.Decryption;
+    }
+  }
+
+  async signIn() {
+    if (!this.decryptedSeed) {
       this.notification.show('Authorization error');
       return;
     }
 
-    this.keyChain.setSeed(this.authService.decryptedSeed);
-    this.authService.reset();
+    this.keyChain.setSeed(this.decryptedSeed);
 
-    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+    await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
   }
 
-  openAdvanced() {
-    this.isAdvanced = true;
-  }
-
-  async onBackClicked() {
-    if (this.dialogFactorRef != null) {
-      this.dialogFactorRef.close();
-      this.dialogFactorRef = null;
-    } else if (this.child != null) {
-      this.child.close();
-      this.child = null;
-    } else {
-      await this.router.navigate(['/login']);
-    }
+  async onBack() {
+    await this.router.navigate(['/login']);
   }
 }

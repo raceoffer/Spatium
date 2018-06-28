@@ -1,20 +1,103 @@
-<div fxLayout="column" fxLayoutAlign="start center">
+<app-toolbar
+  [label]=""
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()"></app-toolbar>
 
-  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
-
-    <div class="spatium-textfield entry bottom32" style="display: flex; position: relative;">
-      <input type="text" placeholder="{{stLogin}}" [(ngModel)]="userName" name="UserName" [autofocus]
-             (focus)="onFocus()" (focusout)="onFocusOut()" (keyup.enter)="removeFocus($event)">
-
-      <span matSuffix mat-icon-button (click)="generateNewLogin()" style="position: absolute; right: 0px;">
-        <mat-icon style="opacity: 0.5;" *ngIf="usernameState === stateType.Ready">sync</mat-icon>
-        <mat-icon class="sync" *ngIf="usernameState === stateType.Updating">sync</mat-icon>
-        <mat-icon *ngIf="usernameState === stateType.Error">sync_problem</mat-icon>
-      </span>
+<div fxLayout="column" fxLayoutAlign="start center" class="box">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+    <div fxLayout="row" fxLayoutAlign="center center" style="width: 100%;" class="start-tagline-padding">
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;">
+        <button mat-icon-button class="fab" (click)="toggleContent(contentType.Login)" [disabled]="buttonState === stateType.Updating || (generating | async) || (delayed | async)">
+          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.Login">text_fields</mat-icon>
+          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.Login">text_fields</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isCameraAvailable">
+        <button
+          mat-icon-button
+          class="fab"
+          fxLayout="row"
+          fxLayoutAlign="center center"
+          [disabled]="buttonState === stateType.Updating || (generating | async)"
+          (click)="toggleContent(contentType.QR)">
+          <div fxLayoutAlign="center center">
+              <span
+                [class.icon-custom-qr_code_blue]="content === contentType.QR"
+                [class.icon-custom-qr_code_black]="content !== contentType.QR"
+                [class.optical-4]="content !== contentType.QR && !(buttonState === stateType.Updating || (generating | async) || (delayed | async))"
+                [class.optical-2]="content !== contentType.QR && (buttonState === stateType.Updating || (generating | async) || (delayed | async))">
+              </span>
+          </div>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isNfcAvailable">
+        <button mat-icon-button class="fab" (click)="toggleContent(contentType.NFC)"  [disabled]="buttonState === stateType.Updating || (generating | async) || (delayed | async)">
+          <mat-icon class="size-40" color="accent" *ngIf="content === contentType.NFC">nfc</mat-icon>
+          <mat-icon class="size-40 optical-4" *ngIf="content !== contentType.NFC">nfc</mat-icon>
+        </button>
+      </div>
     </div>
+  </div>
 
-  </form>
+  <app-login
+    #login
+    class="header text-center"
+    *ngIf="content === contentType.Login"
+    (login)="onInput(contentType.Login, $event)">
+  </app-login>
 
-  <router-outlet name="login"></router-outlet>
+  <app-qr-reader
+    class="header text-center"
+    *ngIf="content === contentType.QR && isCameraAvailable"
+    (scanned)="onInput(contentType.QR, $event)">
+  </app-qr-reader>
+
+  <app-nfc-reader
+    class="header text-center"
+    *ngIf="content === contentType.NFC && isNfcAvailable"
+    (scanned)="onInput(contentType.NFC, $event)">
+  </app-nfc-reader>
+
+  <div class="footer text-center">
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      (click)="signIn()"
+      [disabled]="buttonState === stateType.Empty"
+      *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty && !(delayed | async)">
+      Sign in
+    </button>
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      (click)="signUp()"
+      *ngIf="buttonState === stateType.New && !(delayed | async)">
+      Sign up
+    </button>
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      disabled
+      *ngIf="buttonState === stateType.Updating || (delayed | async)">
+      <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+    </button>
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      (click)="retry()"
+      *ngIf="buttonState === stateType.Error && !(delayed | async)">
+      Retry
+    </button>
+  </div>
+
 </div>
-

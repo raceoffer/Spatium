@@ -1,0 +1,38 @@
+<app-toolbar
+  label="Password"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-login
+    class="factor-content"
+    style="margin-top: 70px"
+    (login)="onInput($event)">
+  </app-login>
+
+  <button
+    type="button"
+    mat-raised-button
+    color="accent"
+    class="width-button color"
+    (click)="onSubmit()"
+    [disabled]="!(valid | async)"
+    *ngIf="!(generating | async) && !(delayed | async)">
+    Continue
+  </button>
+  <button
+    type="button"
+    mat-raised-button
+    color="accent"
+    class="width-button color"
+    disabled
+    *ngIf="(generating | async) || (delayed | async)">
+    <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
+  </button>
+</div>

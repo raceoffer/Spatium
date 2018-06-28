@@ -8,9 +8,15 @@
 
     <span class="spacer"></span>
 
-    <button mat-icon-button (click)="onSettingsClicked()" *ngIf="hasSettings">
+    <button mat-icon-button (click)="onSettingsClicked()" *ngIf="!progress && hasSettings">
       <mat-icon>settings</mat-icon>
     </button>
+
+    <button [disabled]="!sendEnabled" mat-icon-button (click)="onSendClicked()" *ngIf="!progress && hasSend">
+      <mat-icon>send</mat-icon>
+    </button>
+
+    <mat-spinner *ngIf="progress" diameter="25" color="accent"></mat-spinner>
   </mat-toolbar-row>
 </mat-toolbar>
 

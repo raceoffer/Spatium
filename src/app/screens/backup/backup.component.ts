@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NotificationService } from '../../services/notification.service';
@@ -26,67 +26,36 @@ enum SyncState {
   styleUrls: ['./backup.component.css']
 })
 export class BackupComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'overlay-background';
+
   private subscriptions = [];
   private account: DDSAccount = null;
-
-  private backupWallet = null;
-
-  public backupLabel = 'Saving to decentralized storage';
-  public backupText = 'Please top up this address in order to save your secret into decentralized storage.';
-  public ethAddressLabel = 'Ethereum address';
-  public backupCostLabel = 'Estimated fee, ETH';
-  public notEnoughLabel = 'Not enough Ethereum';
-  public ethBalanceLabel = 'Balance, ETH';
-
-  public saveLabel = 'Save';
 
   public address = '';
   public balance = 0.0;
   public comission = null;
   public enough = false;
 
+  public gasPrice: number = this.dds.toWei('5', 'gwei');
+
   public syncStateType = SyncState;
   public syncState: SyncState = SyncState.Ready;
 
   public saving = false;
 
-  public id: any = null;
-  public data: any = null;
+  @Input() public id: any = null;
+  @Input() public data: any = null;
 
-  public gasPrice: number = this.dds.toWei('5', 'gwei');
-
-  private back: string = null;
-  private next: string = null;
+  @Output() success: EventEmitter<any> = new EventEmitter<any>();
+  @Output() back: EventEmitter<any> = new EventEmitter<any>();
 
   constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
     private readonly dds: DDSService,
-    private readonly notification: NotificationService,
-    private readonly authService: AuthService,
-    private readonly navigationService: NavigationService
-  ) {
-    this.route.params.subscribe((params: Params) => {
-      if (params['back']) {
-        this.back = params['back'];
-      }
-
-      if (params['next']) {
-        this.next = params['next'];
-      }
-    });
-  }
+    private readonly notification: NotificationService
+  ) {}
 
   async ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    this.id = await this.authService.toId(this.authService.login);
     this.account = await this.dds.getStoreAccount(this.id);
-    this.data = this.authService.currentTree;
     this.address = this.account.address;
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
     await this.updateBalance();
@@ -97,23 +66,8 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  async onBackClicked() {
-    switch (this.back) {
-      case 'factor-node':
-        if (!this.saving) {
-          await this.router.navigate(['/navigator', { outlets: { navigator: ['factornode'] } }]);
-        } else {
-          await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
-        }
-        break;
-      case 'registration':
-        if (!this.saving) {
-          await this.router.navigate(['/registration']);
-        } else {
-          await this.router.navigate(['/start']);
-        }
-        break;
-    }
+  async onBack() {
+    this.back.next();
   }
 
   async updateBalance() {
@@ -147,19 +101,7 @@ export class BackupComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.notification.show('Successfully uploaded the secret');
-
-        switch (this.next) {
-            case 'reg-success':
-                await this.router.navigate(['/reg-success']);
-                break;
-            case 'wallet':
-                await this.router.navigate(['/navigator', { outlets: { navigator: ['wallet'] } }]);
-                break;
-            default:
-                await this.router.navigate(['/reg-success']);
-                break;
-        }
+        this.success.emit();
     });
   }
 }
