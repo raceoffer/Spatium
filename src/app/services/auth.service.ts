@@ -1,5 +1,6 @@
 import {Injectable, NgZone} from '@angular/core';
-import { DeviceService, Platform } from './device.service';
+import { DeviceService } from './device.service';
+import pull from 'lodash/pull';
 
 declare const nfc: any;
 declare const cordova: any;
@@ -40,8 +41,10 @@ export class Factor {
 
 @Injectable()
 export class AuthService {
-  public idFactors = new Map<IdFactor, Factor>();
-  public authFactors = new Map<AuthFactor, Factor>();
+  private idFactors = new Map<IdFactor, Factor>();
+  private authFactors = new Map<AuthFactor, Factor>();
+  private nfcSupported = true;
+  private qrSupported = true;
 
   constructor(
     private readonly deviceService: DeviceService,
@@ -54,7 +57,10 @@ export class AuthService {
   private async init() {
     await this.deviceService.deviceReady();
 
-    const nfcSupported = await checkNfc();
+    this.nfcSupported = await checkNfc();
+    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
+      this.qrSupported = isCameraAvailable;
+    }));
 
     this.idFactors.set(IdFactor.Login, new Factor(
       IdFactor.Login,
@@ -63,27 +69,19 @@ export class AuthService {
       null
     ));
 
-    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
-      if (isCameraAvailable) {
-        this.idFactors.set(IdFactor.QR, new Factor(
-          IdFactor.QR,
-          'QR',
-          null,
-          'icon-custom-qr_code'
-        ));
-      } else {
-        this.idFactors.delete(IdFactor.QR);
-      }
-    }));
+    this.idFactors.set(IdFactor.QR, new Factor(
+      IdFactor.QR,
+      'QR',
+      null,
+      'icon-custom-qr_code'
+    ));
 
-    if (nfcSupported) {
-      this.idFactors.set(IdFactor.NFC, new Factor(
-        IdFactor.NFC,
-        'NFC',
-        'nfc',
-        null
-      ));
-    }
+    this.idFactors.set(IdFactor.NFC, new Factor(
+      IdFactor.NFC,
+      'NFC',
+      'nfc',
+      null
+    ));
 
     this.authFactors.set(AuthFactor.Password, new Factor(
       AuthFactor.Password,
@@ -113,27 +111,45 @@ export class AuthService {
     //   null
     // ));
 
-    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
-      if (isCameraAvailable) {
-        this.authFactors.set(AuthFactor.QR, new Factor(
-          AuthFactor.QR,
-          'QR',
-          null,
-          'icon-custom-qr_code'
-        ));
-      } else {
-        this.authFactors.delete(AuthFactor.QR);
-      }
-    }));
+    this.authFactors.set(AuthFactor.QR, new Factor(
+      AuthFactor.QR,
+      'QR',
+      null,
+      'icon-custom-qr_code'
+    ));
 
-    if (nfcSupported) {
-      this.authFactors.set(AuthFactor.NFC, new Factor(
-        AuthFactor.NFC,
-        'NFC',
-        'nfc',
-        null
-      ));
-    }
+    this.authFactors.set(AuthFactor.NFC, new Factor(
+      AuthFactor.NFC,
+      'NFC',
+      'nfc',
+      null
+    ));
+  }
+
+  public getIdFactors(checkCameraSupport = true, checkNfcSupport = true): Map<IdFactor, Factor> {
+    const withQr = checkCameraSupport ? this.qrSupported : true;
+    const withNfc = checkNfcSupport ? this.nfcSupported : true;
+    const keysToRemove = [];
+    if (!withQr) keysToRemove.push(IdFactor.QR);
+    if (!withNfc) keysToRemove.push(IdFactor.NFC);
+    return this.filterMap(this.idFactors, keysToRemove);
+  }
+
+  public getAuthFactors(checkCameraSupport = true, checkNfcSupport = true): Map<AuthFactor, Factor> {
+    const withQr = checkCameraSupport ? this.qrSupported : true;
+    const withNfc = checkNfcSupport ? this.nfcSupported : true;
+    const keysToRemove = [];
+    if (!withQr) keysToRemove.push(AuthFactor.QR);
+    if (!withNfc) keysToRemove.push(AuthFactor.NFC);
+    return this.filterMap(this.authFactors, keysToRemove);
+  }
+
+  private filterMap<K, V>(map: Map<K, V>, keysToRemove: Array<K>): Map<K, V> {
+    const keys = Array.from(map.keys());
+    const filteredKeys = pull(keys, ...keysToRemove);
+    const filteredMap = new Map<K, V>();
+    filteredKeys.forEach(key => filteredMap.set(key, map.get(key)));
+    return filteredMap;
   }
 
   public async toId(name: string) {
