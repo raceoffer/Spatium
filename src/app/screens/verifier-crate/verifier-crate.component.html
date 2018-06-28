@@ -14,7 +14,8 @@
     class="factor-content"
     [busy]="busy"
     [allowFingerprint]="(touchAvailable | async)"
-    (submit)="onSubmit($event)">
+    (submit)="onSubmit($event)"
+    (fingerprintRequested)="onFinger()">
   </app-pincode>
 
   <div class="footer text-center" style="bottom: 0px;">

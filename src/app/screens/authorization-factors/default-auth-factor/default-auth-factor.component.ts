@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
 import { AuthFactor } from "../../../services/auth.service";
 import { NavigationService } from "../../../services/navigation.service";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-default-auth-factor',
@@ -14,10 +15,13 @@ export class DefaultAuthFactorComponent {
   @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() submit: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private readonly navigationService: NavigationService) {}
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly router: Router
+  ) {}
 
-  public cancel() {
-    this.cancelled.next();
+  public async cancel() {
+    await this.router.navigate(['/login']);
   }
 
   public onBack() {

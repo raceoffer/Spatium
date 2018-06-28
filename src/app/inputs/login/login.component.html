@@ -20,8 +20,8 @@
       </span>
     </div>
 
-    <div *ngIf="loginControl.invalid && (loginControl.dirty || loginControl.touched)">
-      <mat-error *ngIf="loginControl.errors.pattern">Spaces are not allowed</mat-error>
+    <div class="bottom32" *ngIf="loginControl.invalid && (loginControl.dirty || loginControl.touched)">
+      <mat-error *ngIf="loginControl.errors.pattern">Only alphanumeric characters allowed</mat-error>
     </div>
   </form>
 </div>

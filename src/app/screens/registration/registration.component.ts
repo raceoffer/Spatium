@@ -180,8 +180,12 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   removeFactor(index){
-    this.factors.next(this.factors.getValue().slice(0, index));
-    this.factorItems = this.factorItems.slice(0, index);
+    const factors = this.factors.getValue();
+
+    factors.splice(index, 1);
+
+    this.factors.next(factors);
+    this.factorItems.splice(index, 1);
   }
 
   addFactor(factor) {

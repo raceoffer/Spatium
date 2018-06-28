@@ -22,8 +22,7 @@ export class LoginComponent implements OnDestroy{
   public state = new BehaviorSubject<State>(State.Ready);
 
   public loginControl = new FormControl(null, [
-    Validators.minLength(1),
-    Validators.pattern(/^[^\s]*$/)
+    Validators.pattern(/^[a-z0-9]+$/i)
   ]);
 
   public valid = new BehaviorSubject<boolean>(false);
