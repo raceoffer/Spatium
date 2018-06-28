@@ -20,7 +20,7 @@
           class="fab"
           fxLayout="row"
           fxLayoutAlign="center center"
-          [disabled]="buttonState === stateType.Updating || generating | async"
+          [disabled]="buttonState === stateType.Updating || (generating | async)"
           (click)="toggleContent(contentType.QR)">
           <div fxLayoutAlign="center center">
               <span
