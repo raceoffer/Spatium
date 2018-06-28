@@ -36,7 +36,9 @@ export class PincodeComponent implements OnInit {
           if (!this.isCreate && !this.isFactor) {
             window.plugins.touchid.has('spatium', () => {
               console.log('Touch ID avaialble and Password key available');
-              this.hasTouch = true;
+              this.ngZone.run(async () => {
+                this.hasTouch = true;
+              });
             }, () => {
               console.log('Touch ID available but no Password Key available');
             });
