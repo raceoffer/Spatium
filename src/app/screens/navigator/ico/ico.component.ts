@@ -8,7 +8,7 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
 import { Input} from '@angular/core';
-import { InvestmentComponent } from './investment/investment.component';
+import { IcoDetailsComponent } from './ico-details/ico-details.component';
 
 declare const navigator: any;
 declare const window: any;
@@ -41,7 +41,7 @@ export class IcoComponent implements OnInit, OnDestroy {
 
   public async onTileClicked(project: any) {
     console.log(project);
-    const componentRef = this.navigationService.pushOverlay(InvestmentComponent);
+    const componentRef = this.navigationService.pushOverlay(IcoDetailsComponent);
     componentRef.instance.project = project;
   }
 }

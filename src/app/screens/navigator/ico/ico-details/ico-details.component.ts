@@ -2,16 +2,16 @@ import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core'
 import { FormControl } from '@angular/forms';
 import { WhitelistComponent } from '../whitelist/whitelist.component';
 import { SendTransactionComponent } from '../../send-transaction/send-transaction.component';
-import { TransactionsComponent } from '../transactions/transactions.component';
+import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { NavigationService } from '../../../../services/navigation.service';
 
 @Component({
-  selector: 'app-investment',
-  templateUrl: './investment.component.html',
-  styleUrls: ['./investment.component.css'],
+  selector: 'app-ico-details',
+  templateUrl: './ico-details.component.html',
+  styleUrls: ['./ico-details.component.css'],
 })
-export class InvestmentComponent implements OnInit, OnDestroy {
+export class IcoDetailsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public project: any = null;
@@ -49,9 +49,10 @@ export class InvestmentComponent implements OnInit, OnDestroy {
     overalyRef.instance.project = this.project;
   }
 
-  transactions() {
-    const overalyRef = this.navigationService.pushOverlay(TransactionsComponent);
+  investments(investor: boolean) {
+    const overalyRef = this.navigationService.pushOverlay(InvestmentsComponent);
     overalyRef.instance.project = this.project;
+    overalyRef.instance.investor = investor;
   }
 
   async reminder() {

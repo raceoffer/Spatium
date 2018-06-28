@@ -89,10 +89,10 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { IcoComponent } from './screens/navigator/ico/ico.component';
 import { MainComponent } from './screens/navigator/main/main.component';
-import { InvestmentComponent } from './screens/navigator/ico/investment/investment.component';
+import { IcoDetailsComponent } from './screens/navigator/ico/ico-details/ico-details.component';
 import { NewIcoComponent } from './screens/navigator/ico/new-ico/new-ico.component';
 import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.component';
-import { TransactionsComponent } from './screens/navigator/ico/transactions/transactions.component';
+import { InvestmentsComponent } from './screens/navigator/ico/investments/investments.component';
 
 @NgModule({
   declarations: [
@@ -145,10 +145,10 @@ import { TransactionsComponent } from './screens/navigator/ico/transactions/tran
     IcoComponent,
     MainComponent,
     WalletComponent,
-    InvestmentComponent,
+    IcoDetailsComponent,
     WhitelistComponent,
     NewIcoComponent,
-    TransactionsComponent
+    InvestmentsComponent
   ],
   imports: [
     OverlayModule,
@@ -220,10 +220,10 @@ import { TransactionsComponent } from './screens/navigator/ico/transactions/tran
     DeleteSecretComponent,
     VerifyTransactionComponent,
     NfcFactorComponent,
-    InvestmentComponent,
+    IcoDetailsComponent,
     WhitelistComponent,
     NewIcoComponent,
-    TransactionsComponent
+    InvestmentsComponent
   ]
 })
 

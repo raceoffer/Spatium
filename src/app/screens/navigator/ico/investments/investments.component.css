@@ -37,6 +37,7 @@
 .big-logo {
     height: 64px !important; 
     width: 100% !important;
+    margin: auto;
 }
 
 .row-elem {
@@ -124,4 +125,29 @@ a {
     color: rgb(34,119,186);
     text-decoration: none;
     font-family: "Roboto-Medium";
+}
+
+.header {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat-button-toggle-group, .mat-button-toggle-standalone {
+    box-shadow: none;
+}
+
+.ticker {
+    font-size: 12px !important; 
+    color: gray;
+}
+
+.filter-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 8px
+}
+
+.filter-menu > * {
+    height: 30px;
 }

@@ -8,7 +8,7 @@ import { NavigationService } from '../../../../services/navigation.service';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../../utils/transformers';
-import { InvestmentComponent } from '../investment/investment.component';
+import { IcoDetailsComponent } from '../ico-details/ico-details.component';
 
 @Component({
   selector: 'app-whitelist',
