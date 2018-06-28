@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, IdFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
@@ -11,7 +11,6 @@ declare const cordova: any;
 
 import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from "../../utils/nfc";
-import { DeviceService, Platform } from "../../services/device.service";
 
 export enum State {
   Empty,
@@ -50,13 +49,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public valid = null;
 
   constructor(
-    private readonly device: DeviceService,
     private readonly router: Router,
     private readonly authService: AuthService,
     private readonly notification: NotificationService,
     private readonly dds: DDSService,
     private readonly navigationService: NavigationService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly ngZone: NgZone,
   ) {}
 
   async ngOnInit() {
@@ -67,7 +66,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.isNfcAvailable = await checkNfc();
-    this.isCameraAvailable = await this.checkCamera();
+
+    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
+      this.isCameraAvailable = isCameraAvailable;
+    }));
   }
 
   ngAfterViewInit() {
@@ -79,19 +81,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-  }
-
-  async checkCamera() {
-    if (this.device.platform === Platform.Windows) {
-      try {
-        return await cordova.plugins.cameraInfo.isAvailable();
-      } catch(e) {
-        console.log('Failed to check camera availability');
-        return false;
-      }
-    }
-
-    return true;
   }
 
   toggleContent(content) {

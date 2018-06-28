@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 import { DeviceService, Platform } from './device.service';
 
 declare const nfc: any;
@@ -45,7 +45,8 @@ export class AuthService {
 
   constructor(
     private readonly deviceService: DeviceService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly ngZone: NgZone,
   ) {
     this.init();
   }
@@ -54,7 +55,6 @@ export class AuthService {
     await this.deviceService.deviceReady();
 
     const nfcSupported = await checkNfc();
-    const cameraSupported = await this.checkCamera();
 
     this.idFactors.set(IdFactor.Login, new Factor(
       IdFactor.Login,
@@ -63,14 +63,18 @@ export class AuthService {
       null
     ));
 
-    if (cameraSupported) {
-      this.idFactors.set(IdFactor.QR, new Factor(
-        IdFactor.QR,
-        'QR',
-        null,
-        'icon-custom-qr_code'
-      ));
-    }
+    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
+      if (isCameraAvailable) {
+        this.idFactors.set(IdFactor.QR, new Factor(
+          IdFactor.QR,
+          'QR',
+          null,
+          'icon-custom-qr_code'
+        ));
+      } else {
+        this.idFactors.delete(IdFactor.QR);
+      }
+    }));
 
     if (nfcSupported) {
       this.idFactors.set(IdFactor.NFC, new Factor(
@@ -109,14 +113,18 @@ export class AuthService {
     //   null
     // ));
 
-    if (cameraSupported) {
-      this.authFactors.set(AuthFactor.QR, new Factor(
-        AuthFactor.QR,
-        'QR',
-        null,
-        'icon-custom-qr_code'
-      ));
-    }
+    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
+      if (isCameraAvailable) {
+        this.authFactors.set(AuthFactor.QR, new Factor(
+          AuthFactor.QR,
+          'QR',
+          null,
+          'icon-custom-qr_code'
+        ));
+      } else {
+        this.authFactors.delete(AuthFactor.QR);
+      }
+    }));
 
     if (nfcSupported) {
       this.authFactors.set(AuthFactor.NFC, new Factor(
@@ -126,19 +134,6 @@ export class AuthService {
         null
       ));
     }
-  }
-
-  private async checkCamera() {
-    if (this.deviceService.platform === Platform.Windows) {
-      try {
-        return await cordova.plugins.cameraInfo.isAvailable();
-      } catch(e) {
-        console.log('Failed to check camera availability');
-        return false;
-      }
-    }
-
-    return true;
   }
 
   public async toId(name: string) {
