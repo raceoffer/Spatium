@@ -72,14 +72,7 @@ export class FactorNodeComponent implements OnDestroy {
     })), null);
 
   public factors = new BehaviorSubject<Array<any>>([]);
-  public factorItems = toBehaviourSubject(this.factors.pipe(
-    map(factors => factors.map(factor => {
-      const entry = this.authService.authFactors.get(factor.type as AuthFactor);
-      return {
-        icon: entry.icon,
-        icon_asset: entry.icon_asset
-      }
-    }))), []);
+  public factorItems = [];
 
   public uploading = false;
   private cancel = new Subject<boolean>();
@@ -192,14 +185,22 @@ export class FactorNodeComponent implements OnDestroy {
 
   removeFactor(index){
     this.factors.next(this.factors.getValue().slice(0, index));
+    this.factorItems = this.factorItems.slice(0, index);
   }
 
   addFactor(factor) {
     const factors = this.factors.getValue();
 
     factors.push(factor);
-
+    
     this.factors.next(factors);
+
+    const entry = this.authService.authFactors.get(factor.type as AuthFactor);
+    this.factorItems.push({
+        icon: entry.icon,
+        icon_asset: entry.icon_asset
+    });
+
     this.goBottom();
   }
 

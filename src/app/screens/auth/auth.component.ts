@@ -69,14 +69,7 @@ export class AuthComponent implements OnDestroy {
   public advanced = false;
 
   public factors = new BehaviorSubject<Array<any>>([]);
-  public factorItems = toBehaviourSubject(this.factors.pipe(
-    map(factors => factors.map(factor => {
-      const entry = this.authService.authFactors.get(factor.type as AuthFactor);
-      return {
-        icon: entry.icon,
-        icon_asset: entry.icon_asset
-      }
-    }))), []);
+  public factorItems = [];
 
   public isAdvanced = false;
 
@@ -212,6 +205,12 @@ export class AuthComponent implements OnDestroy {
 
         this.factors.next(factors);
 
+        const entry = this.authService.authFactors.get(factor.type as AuthFactor);
+        this.factorItems.push({
+            icon: entry.icon,
+            icon_asset: entry.icon_asset
+        });
+
         this.goBottom();
 
         if (result.seed) {
@@ -233,6 +232,7 @@ export class AuthComponent implements OnDestroy {
 
   removeFactor(index) {
     this.factors.next(this.factors.getValue().slice(0, index));
+    this.factorItems = this.factorItems.slice(0, index);
 
     this.remoteEncryptedTrees = this.remoteEncryptedTrees.slice(0, index + 1);
 
