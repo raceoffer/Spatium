@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { DeviceService, Platform } from '../../services/device.service';
 
 declare const cordova: any;
 declare const window: any;
@@ -13,6 +14,9 @@ export class QrReaderComponent implements OnInit {
   @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() error: EventEmitter<any> = new EventEmitter<any>();
 
+  constructor(private readonly deviceService: DeviceService) {
+  }
+
   async ngOnInit() {
     if (!await this.checkPermissions()) {
       await this.requestPermission();
@@ -20,11 +24,19 @@ export class QrReaderComponent implements OnInit {
   }
 
   async checkPermissions() {
-    return await new Promise<boolean>((resolve, reject) =>
+    return await new Promise<boolean>((resolve, reject) => {
+      // plugins.permissions is not available on Windows
+      // Windows will request permission automatically
+      if (this.deviceService.platform === Platform.Windows) {
+        resolve(true);
+        return;
+      }
+
       cordova.plugins.permissions.checkPermission(
         cordova.plugins.permissions.CAMERA,
         status => resolve(status.hasPermission),
-        reject));
+        reject);
+    });
   }
 
   async requestPermission() {

@@ -64,7 +64,7 @@ export class FactorNodeComponent implements OnDestroy {
         return null;
       }
 
-      const entry = this.authService.idFactors.get(factor.type as IdFactor);
+      const entry = this.authService.getIdFactors(false, true).get(factor.type as IdFactor);
       return {
         icon: entry.icon,
         icon_asset: entry.icon_asset
@@ -109,7 +109,7 @@ export class FactorNodeComponent implements OnDestroy {
 
   public openIdFactorDialog() {
     const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
-    componentRef.instance.factors = Array.from(this.authService.idFactors.values());
+    componentRef.instance.factors = Array.from(this.authService.getIdFactors(false, true).values());
 
     componentRef.instance.selected.subscribe(result => {
       this.navigationService.acceptOverlay();
@@ -148,7 +148,7 @@ export class FactorNodeComponent implements OnDestroy {
 
   public openFactorDialog() {
     const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
-    componentRef.instance.factors = Array.from(this.authService.authFactors.values());
+    componentRef.instance.factors = Array.from(this.authService.getAuthFactors(true, true).values());
 
     componentRef.instance.selected.subscribe(result => {
       this.navigationService.acceptOverlay();
@@ -195,7 +195,7 @@ export class FactorNodeComponent implements OnDestroy {
     
     this.factors.next(factors);
 
-    const entry = this.authService.authFactors.get(factor.type as AuthFactor);
+    const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
     this.factorItems.push({
         icon: entry.icon,
         icon_asset: entry.icon_asset
