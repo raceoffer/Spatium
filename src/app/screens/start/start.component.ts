@@ -41,8 +41,8 @@ export class StartComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async (e) => {
-        await this.eventOnBackClicked(e);
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.onBack();
       })
     );
 
@@ -65,8 +65,7 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/verifier-create']);
   }
 
-  eventOnBackClicked(e) {
-    e.preventDefault();
+  onBack() {
     navigator.app.exitApp();
   }
 }

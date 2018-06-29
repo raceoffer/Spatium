@@ -231,7 +231,8 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     WhitelistComponent,
     NewIcoComponent,
     InvestmentsComponent,
-    IcoComponent
+    IcoComponent,
+    FeedbackComponent
   ]
 })
 
