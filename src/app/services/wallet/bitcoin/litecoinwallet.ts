@@ -31,8 +31,8 @@ export class LitecoinWallet extends BitcoreWallet {
     );
   }
 
-  public verifyAddress(address: string): boolean {
-    return address &&
-           /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
-  }
+  // public verifyAddress(address: string): boolean {
+  //   return address &&
+  //          /^[367LM][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(address);
+  // }
 }

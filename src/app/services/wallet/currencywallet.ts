@@ -9,6 +9,7 @@ import { toBehaviourSubject } from '../../utils/transformers';
 
 import { CompoundKey } from 'crypto-core-async';
 import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';
+import * as WalletAddressValidator from 'wallet-address-validator';
 
 export enum Status {
   None = 0,
@@ -223,8 +224,12 @@ export class CurrencyWallet {
     return this.currency;
   }
 
-  public verifyAddress(address: string): boolean {
-    return address && address.length > 0;
+  public verifyAddress(address: string, symbol: string): boolean {
+    return WalletAddressValidator.validate(
+      address,
+      symbol,
+      this.network == 'main' ? 'prod' : 'testnet'
+    );
   }
 
   public async requestTransactionVerify(transaction) {

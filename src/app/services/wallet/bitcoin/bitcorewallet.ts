@@ -83,10 +83,10 @@ export class BitcoreWallet extends CurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public verifyAddress(address: string): boolean {
-    return address &&
-           /^([135KLmn29с]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
-  }
+  // public verifyAddress(address: string): boolean {
+  //   return address &&
+  //          /^([135KLmn29с]|xpub|xprv|tpub|tprv)[a-km-zA-HJ-NP-Z1-9]{25,111}$/.test(address);
+  // }
 
   public async listTransactionHistory() {
     if (this.wallet === null) {

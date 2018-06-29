@@ -33,6 +33,7 @@
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",
     "rxjs": "^6.1.0",
     "text-encoding": "^0.6.4",
+    "wallet-address-validator": "^0.1.7",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
