@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { LoggerService } from './services/logger.service';
-import {HockeyService} from './services/hockey.service';
+import { HockeyService } from './services/hockey.service';
+import { ActivityService } from "./services/activity.service";
 
 declare const hockeyapp: any;
 declare const navigator: any;
@@ -13,35 +14,17 @@ declare const navigator: any;
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'Spatium Wallet app';
-  message = 'Loading...';
   private subscriptions = [];
-  time = 180000;
-  timer = setTimeout(() => {
-    navigator.app.exitApp();
-  }, this.time);
 
-  constructor(private readonly fs: FileService,
-              private readonly logger: LoggerService,
-              private readonly deviceService: DeviceService,
-              private readonly hockeyService: HockeyService) { }
+  constructor(
+    private readonly fs: FileService,
+    private readonly logger: LoggerService,
+    private readonly deviceService: DeviceService,
+    private readonly hockeyService: HockeyService,
+    private readonly activityService: ActivityService
+  ) { }
 
-  ngOnInit() {
-    this.init();
-
-  timerUpdate() {
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      navigator.app.exitApp();
-    }, this.time);
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  private async init() {
+  async ngOnInit() {
     await this.deviceService.deviceReady();
 
     this.subscriptions.push(
@@ -50,7 +33,16 @@ export class AppComponent implements OnInit, OnDestroy {
       }));
 
     await this.logger.createSessionLog();
-    this.logger.deleteOldLogFiles();
+    await this.logger.deleteOldLogFiles();
     hockeyapp.start(null, null, this.hockeyService.appId, true, hockeyapp.CHECK_MANUALLY, false, true);
+  }
+
+  onActivity() {
+    this.activityService.onActivity();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 }

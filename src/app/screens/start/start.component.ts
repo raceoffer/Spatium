@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 import { DeviceService, Platform } from '../../services/device.service';
+import { ActivityService } from "../../services/activity.service";
 
 declare const navigator: any;
 declare const Windows: any;

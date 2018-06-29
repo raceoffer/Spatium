@@ -89,6 +89,7 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { HockeyService } from './services/hockey.service';
 import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
+import { ActivityService } from "./services/activity.service";
 
 @NgModule({
   declarations: [
@@ -186,7 +187,8 @@ import { ChangePincodeComponent } from './screens/verifier/change-pincode/change
     KeyChainService,
     CurrencyService,
     NavigationService,
-    HockeyService
+    HockeyService,
+    ActivityService
   ],
   bootstrap: [
     AppComponent

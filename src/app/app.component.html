@@ -1,13 +1,14 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div 
-(click)="timerUpdate()" 
-(mousemove)="timerUpdate()" 
-(keyup)="timerUpdate()"
-(keypressed)="timerUpdate()"
-(keydown)="timerUpdate()"
-(mousemdown)="timerUpdate()"
-(mouseup)="timerUpdate()">
-<router-outlet></router-outlet>
+<div
+  style="width:100%; height: 100%;"
+  (click)="onActivity()"
+  (mousemove)="onActivity()"
+  (keyup)="onActivity()"
+  (keypressed)="onActivity()"
+  (keydown)="onActivity()"
+  (mousemdown)="onActivity()"
+  (mouseup)="onActivity()">
+  <router-outlet></router-outlet>
 </div>
 
 
