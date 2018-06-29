@@ -4,7 +4,7 @@ import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
 import { KeyChainService } from "../../services/keychain.service";
 import { NavigationService } from "../../services/navigation.service";
-import { bufferWhen, map, debounceTime, filter } from "rxjs/operators";
+import { bufferWhen, map, timeInterval, filter, skipUntil } from "rxjs/operators";
 import { Subject } from "rxjs/index";
 import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
@@ -45,12 +45,14 @@ export class NavigatorComponent implements OnDestroy {
   public current = 'Wallet';
 
   private back = new Subject<any>();
-  public  doubleBack = this.back.pipe(
+  public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
-      debounceTime(3000)
+      skipUntil(this.back),
+      timeInterval(),
+      filter(time => time.interval < 3000)
     )),
     map(emits => emits.length),
-    filter(emits => emits > 1)
+    filter(emits => emits > 0)
   );
 
   @ViewChild('sidenav') sidenav;
