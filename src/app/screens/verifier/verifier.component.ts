@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 import { SecretExportComponent } from "../secret-export/secret-export.component";
 import { VerifyTransactionComponent } from "./verify-transaction/verify-transaction.component";
+import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { Router } from "@angular/router";
 import { WalletService } from "../../services/wallet.service";
 import { BluetoothService } from "../../services/bluetooth.service";
@@ -24,17 +25,15 @@ declare const window: any;
 })
 export class VerifierComponent implements OnInit {
   public navLinks = [{
-    name: 'Verification',
-    clicked: async () => {
-      await this.router.navigate(['/navigator', { outlets: { navigator: ['main'] } }])
-    }
-  }, {
     name: 'Export secret',
     clicked: async () => {
       await this.onExport();
     }
   }, {
-    name: 'Change PIN'
+    name: 'Change PIN',
+    clicked: () => {
+      this.onChangePIN();
+    }
   }, {
     name: 'Delete secret',
     clicked: () => {
@@ -265,6 +264,15 @@ export class VerifierComponent implements OnInit {
       await this.router.navigate(['/start']);
       this.notification.show('The secret successfully removed');
     });
+  }
+
+  public onChangePIN() {
+    const componentRef = this.navigationService.pushOverlay(ChangePincodeComponent);
+    componentRef.instance.success.subscribe(async () => {
+      this.navigationService.acceptOverlay();
+      await this.router.navigate(['/start']);
+      this.notification.show('You have successfully changed a PIN-code');
+    })
   }
 
   public async checkAvailable() {

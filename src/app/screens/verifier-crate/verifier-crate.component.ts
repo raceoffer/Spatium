@@ -20,6 +20,10 @@ import { toBehaviourSubject } from "../../utils/transformers";
 import { map } from "rxjs/operators";
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 import { PincodeComponent } from "../../inputs/pincode/pincode.component";
+import {
+  checkAvailable, checkExisting, deleteTouch, getTouchPassword,
+  saveTouchPassword
+} from "../../utils/fingerprint";
 
 @Component({
   selector: 'app-verifier-crate',
@@ -57,19 +61,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-    this.touchAvailable.next(await this.checkAvailable() && await this.checkExisting());
-  }
-
-  async checkAvailable() {
-    return new Promise<boolean>((resolve, ignored) => {
-      window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
-    });
-  }
-
-  async checkExisting() {
-    return new Promise<boolean>((resolve, ignored) => {
-      window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
-    });
+    this.touchAvailable.next(await checkAvailable() && await checkExisting());
   }
 
   ngOnDestroy() {
@@ -93,24 +85,6 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/verifier']);
   }
 
-  async saveTouchPassword(pincode) {
-    return new Promise(async (success, error) => {
-      window.plugins.touchid.save('spatium', pincode, true, success, error);
-    });
-  }
-
-  async getTouchPassword() {
-    return new Promise<string>((resolve) => {
-      window.plugins.touchid.verify('spatium', '',(pincode) => resolve(pincode));
-    });
-  }
-
-  async delete() {
-    return new Promise((resolve, reject) => {
-      window.plugins.touchid.delete('spatium', resolve, reject);
-    });
-  }
-
   public onImport() {
     const componentRef = this.navigationService.pushOverlay(SecretImportComponent);
     componentRef.instance.imported.subscribe(async encryptedSecret => {
@@ -131,7 +105,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
       this.navigationService.acceptOverlay();
 
       if (this.touchAvailable) {
-        await this.delete();
+        await deleteTouch();
       }
 
       await this.fs.deleteFile(this.fs.safeFileName('seed'));
@@ -142,7 +116,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   }
 
   public async onFinger() {
-    const pincode = await this.getTouchPassword();
+    const pincode = await getTouchPassword();
     await this.submit(pincode);
   }
 
@@ -164,7 +138,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
       } else {
         if (this.touchAvailable) {
           try {
-            if (await this.saveTouchPassword(pincode)) {
+            if (await saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);
             }
           } catch (e) {

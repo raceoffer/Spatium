@@ -9,6 +9,7 @@ import { Subject } from "rxjs/index";
 import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
 import { FeedbackComponent } from '../feedback/feedback.component';
+import { ActivityService } from "../../services/activity.service";
 
 @Component({
   selector: 'app-navigator',
@@ -69,7 +70,8 @@ export class NavigatorComponent implements OnDestroy {
     private readonly router: Router,
     private readonly bt: BluetoothService,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly activityService: ActivityService
   ) {
     this.subscriptions.push(
       this.bt.disabledEvent.subscribe(async () => {
@@ -115,6 +117,13 @@ export class NavigatorComponent implements OnDestroy {
         await this.router.navigate(['/start']);
       })
     );
+
+    this.subscriptions.push(
+      this.activityService.inactivity.subscribe(async () => {
+        await this.router.navigate(['/start']);
+      })
+    );
+    this.activityService.onActivity();
   }
 
   public openSettings() {

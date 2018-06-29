@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, AfterViewInit, Output } from '@angular/core';
 import { DeviceService, Platform } from "../../services/device.service";
 import { NotificationService } from "../../services/notification.service";
+import { checkPermission, Permission, requestPermission } from "../../utils/permissions";
 
-declare const cordova: any;
 declare const window: any;
 
 @Component({
@@ -10,7 +10,7 @@ declare const window: any;
   templateUrl: './qr-writer.component.html',
   styleUrls: ['./qr-writer.component.css']
 })
-export class QrWriterComponent implements OnInit {
+export class QrWriterComponent implements AfterViewInit {
   @Input() public value: string = null;
   @Output() public saved = new EventEmitter<any>();
 
@@ -19,56 +19,26 @@ export class QrWriterComponent implements OnInit {
     private readonly notification: NotificationService
   ) { }
 
-  public async ngOnInit() {
-    await this.ensurePermission();
+  async ngAfterViewInit() {
+    if (this.deviceService.platform !== Platform.Windows && !await checkPermission(Permission.Storage)) {
+      await requestPermission(Permission.Storage);
+    }
   }
 
   public async onSave() {
-    await this.ensurePermission();
+    if (this.deviceService.platform !== Platform.Windows && !await checkPermission(Permission.Storage)) {
+      await requestPermission(Permission.Storage);
+    } else {
+      const canvas = document.getElementsByTagName('canvas')[0];
 
-    const canvas = document.getElementsByTagName('canvas')[0];
+      try {
+        await this.saveCanvas(canvas);
 
-    try {
-      await this.saveCanvas(canvas);
-
-      this.saved.next(this.value);
-    } catch (ignored) {
-      this.notification.show('Failed to save the QR image')
-    }
-  }
-
-  public async ensurePermission() {
-    let hasPermission = true;
-    if (this.deviceService.platform !== Platform.Windows) {
-      hasPermission = await this.hasPermission();
-    }
-
-    if (!hasPermission) {
-      if(!await this.requestPermission()) {
-        this.notification.show('Failed to acquire a permission to save the QR image');
-        return false;
+        this.saved.next(this.value);
+      } catch (ignored) {
+        this.notification.show('Failed to save the QR image')
       }
     }
-
-    return hasPermission;
-  }
-
-  public async hasPermission() {
-    return await new Promise<boolean>((resolve, reject) => {
-      cordova.plugins.permissions.checkPermission(
-        cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
-        status => resolve(status.hasPermission),
-        reject);
-    });
-  }
-
-  public async requestPermission() {
-    return await new Promise<boolean>((resolve, reject) => {
-      cordova.plugins.permissions.requestPermission(
-        cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
-        status => resolve(status.hasPermission),
-        reject);
-    });
   }
 
   public async saveCanvas(canvas) {

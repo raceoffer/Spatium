@@ -88,6 +88,8 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { HockeyService } from './services/hockey.service';
+import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
+import { ActivityService } from "./services/activity.service";
 
 @NgModule({
   declarations: [
@@ -115,6 +117,7 @@ import { HockeyService } from './services/hockey.service';
     AutofocusDirective,
     FactorNodeComponent,
     CurrencyComponent,
+    CurrencySettingsComponent,
     DeleteSecretComponent,
     MainDrawerComponent,
     SecretExportComponent,
@@ -137,7 +140,8 @@ import { HockeyService } from './services/hockey.service';
     VerifierCrateComponent,
     VerifierComponent,
     NfcWriterComponent,
-    FeedbackComponent
+    FeedbackComponent,
+    ChangePincodeComponent
   ],
   imports: [
     OverlayModule,
@@ -184,7 +188,8 @@ import { HockeyService } from './services/hockey.service';
     KeyChainService,
     CurrencyService,
     NavigationService,
-    HockeyService
+    HockeyService,
+    ActivityService
   ],
   bootstrap: [
     AppComponent
@@ -203,13 +208,15 @@ import { HockeyService } from './services/hockey.service';
     LoginFactorComponent,
     QrFactorComponent,
     CurrencyComponent,
+    CurrencySettingsComponent,
     WaitingComponent,
     SendTransactionComponent,
     SecretImportComponent,
     SecretExportComponent,
     DeleteSecretComponent,
     VerifyTransactionComponent,
-    NfcFactorComponent
+    NfcFactorComponent,
+    ChangePincodeComponent
   ]
 })
 
