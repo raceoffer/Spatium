@@ -92,7 +92,9 @@ export class CurrencyService {
           map(ac => ac.get('BTC') || null),
           distinctUntilChanged()
         ),
-        null)
+        null),
+        null,
+        'bitcoin'
     )],
     [Coin.BTC_test, new Info(
       'Bitcoin Test',
@@ -105,7 +107,9 @@ export class CurrencyService {
           map(ac => ac.get('BTC') || null),
           distinctUntilChanged()
         ),
-        null)
+        null),
+        null,
+        'bitcoin'
     )],
     [Coin.BCH, new Info(
       'Bitcoin Cash',
@@ -118,7 +122,9 @@ export class CurrencyService {
           map(ac => ac.get('BCH') || null),
           distinctUntilChanged()
         ),
-        null)
+        null),
+        null,
+        'bitcoin-cash'
     )],
     [Coin.ETH, new Info(
       'Ethereum',
@@ -131,7 +137,9 @@ export class CurrencyService {
           map(ac => ac.get('ETH') || null),
           distinctUntilChanged()
         ),
-        null)
+        null),
+        null,
+        'ethereum'
     )],
     [Coin.LTC, new Info(
       'Litecoin',
@@ -144,7 +152,9 @@ export class CurrencyService {
           map(ac => ac.get('LTC') || null),
           distinctUntilChanged()
         ),
-        null)
+        null),
+        null,
+        'litecoin'
     )],
   ]);
 

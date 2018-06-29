@@ -10,6 +10,7 @@ import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { ActivityService } from "../../services/activity.service";
+import { IcoComponent } from "./ico/ico.component";
 
 @Component({
   selector: 'app-navigator',
@@ -22,12 +23,17 @@ export class NavigatorComponent implements OnDestroy {
   public navLinks = [{
     name: 'Wallet',
     clicked: async () => {
+      this.current = 'Wallet';
       await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}])
     }
   }, {
     name: 'Exchange'
   }, {
-    name: 'ICO'
+    name: 'ICO',
+    clicked: async () => {
+      this.current = 'ICO';
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}])
+    }
   }, {
     name: 'Portfolio Investment'
   }, {

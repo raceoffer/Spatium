@@ -1,0 +1,153 @@
+.transactions-list {
+    text-align: center;
+    position: fixed;
+    bottom: 70px;
+    top: 56px;
+    overflow: scroll;
+}
+
+.data-row {
+    width: 100% !important;
+    display: inline-flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+}
+
+.center {
+    align-self: center;
+}
+
+.mat-form-field-suffix {
+    padding: 0 5px;
+}
+
+.mat-form-field-infix {
+    padding: 5px;
+}
+
+.currency-component .mat-input-element {
+    resize: none;
+}
+
+.logo {
+    width: 35px;
+    max-width: 35px;
+}
+
+.big-logo {
+    height: 64px !important; 
+    width: 100% !important;
+    margin: auto;
+}
+
+.row-elem {
+    text-align: left;
+    margin: 0 10px;
+}
+
+.details > div {
+    margin: 10px;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    margin: 12px 0 !important;
+    width: calc(100% - 20px);
+    display: inline-flex;
+}
+
+.right {
+    margin: 0 5px 0 0 !important;
+}
+
+.left {
+    margin: 0 0 0 5px !important;
+}
+
+.transaction-amount {
+    font-family: 'Roboto-Medium';
+    font-size: 18px !important;
+}
+
+.transaction-address {
+    font-family: 'RobotoMono-Regular';
+    word-break: break-word;
+    white-space: normal !important;
+    text-align: left;
+    line-height: 1;
+    overflow: unset !important;
+}
+
+.transaction-time {
+    font-family: 'Roboto-Light';
+}
+
+.list-item {
+    position: relative;
+}
+
+.list-label {
+    justify-content: space-between; 
+    width: 80%; 
+    text-align: left; 
+    align-items: normal;
+}
+
+.green {
+    color: rgb(0,150,136);
+}
+
+.red {
+    color: rgb(244,67,54);
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.center-row {
+    display: inline-flex !important;
+    flex-direction: column;
+}
+
+.medium {
+    font-family: 'Roboto-Medium';
+}
+
+.price-label {
+    display: inline-flex !important; 
+    flex-direction: row; 
+    align-items: baseline;
+}
+
+a {
+    color: rgb(34,119,186);
+    text-decoration: none;
+    font-family: "Roboto-Medium";
+}
+
+.header {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mat-button-toggle-group, .mat-button-toggle-standalone {
+    box-shadow: none;
+}
+
+.ticker {
+    font-size: 12px !important; 
+    color: gray;
+}
+
+.filter-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 8px
+}
+
+.filter-menu > * {
+    height: 30px;
+}

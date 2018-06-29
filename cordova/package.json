@@ -40,7 +40,6 @@
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},
-      "cordova-custom-config": {},
       "cordova-plugin-file": {},
       "cordova-plugin-vibration": {},
       "cordova-plugin-android-permissions": {},
@@ -57,7 +56,8 @@
       "CordovaClipboard": {},
       "Canvas2ImagePlugin": {},
       "cordova-plugin-camera-info": {},
-      "cordova-plugin-hockeyapp": {}
+      "cordova-plugin-hockeyapp": {},
+      "cordova-custom-config": {}
     },
     "platforms": [
       "browser",

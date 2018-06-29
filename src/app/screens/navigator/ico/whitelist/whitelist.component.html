@@ -1,0 +1,48 @@
+<app-toolbar
+  [label]="title"
+  [isColored]="true"
+  [isShadowed]="true"
+  (backClicked)="onBack()"></app-toolbar>
+
+<div class="currency-component box" fxLayout="column" *ngIf="!next">
+  <div class="inner">
+    <div class="info">Select the coins you wish to invest to the project</div>
+    <div *ngFor="let coin of coins" (click)="click(coin)" [class.colored]="coin.chosen" style="text-align: center">
+      <div class="coin-check full-width">
+          <div class="logo {{coin.logo}}"></div>
+          <div style="align-self: center; white-space: nowrap; flex-grow: 1">{{coin.title}}</div>
+          <div class="balance">{{getBalance(coin.coin) + ' ' + coin.symbols}}</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <button type="button" mat-raised-button color="accent" class="width-button-full color" style="margin-bottom: 0" (click)="nextScreen($event)">NEXT</button>
+  </div>
+</div>
+
+<div class="currency-component box" fxLayout="column" style="text-align: center" *ngIf="next">
+  <div class="inner">
+    <div class="info">Enter amount of each coin you wish to invest</div>
+    <div *ngFor="let chosencoin of chosencoins" class="coin-field">
+      <div class="left-field">
+        <span class="label">{{chosencoin.title}}</span>
+        <div class="field" style="margin-bottom: 13px;">
+          <span>
+            <input (focusout)="verifyAmount($event, chosencoin)" matInput [formControl]="chosencoin.amount" type="number"/>
+          </span>
+        </div>
+      </div>
+      <div class="right-field">
+        <span class="label">{{chosencoin.title}} balance</span>
+        <div class="field disable" style="margin-bottom: 13px;">
+          <span>
+            {{getBalance(chosencoin.coin) + ' ' + chosencoin.symbols}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <button type="button" mat-raised-button color="accent" class="width-button-full color" style="margin-bottom: 0" (click)="participateProject($event)">PARTICIPATE</button>
+  </div>
+</div>

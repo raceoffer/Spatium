@@ -90,6 +90,11 @@ import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { HockeyService } from './services/hockey.service';
 import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
 import { ActivityService } from "./services/activity.service";
+import { IcoComponent } from './screens/navigator/ico/ico.component';
+import { IcoDetailsComponent } from './screens/navigator/ico/ico-details/ico-details.component';
+import { NewIcoComponent } from './screens/navigator/ico/new-ico/new-ico.component';
+import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.component';
+import { InvestmentsComponent } from './screens/navigator/ico/investments/investments.component';
 
 @NgModule({
   declarations: [
@@ -112,7 +117,6 @@ import { ActivityService } from "./services/activity.service";
     QrFactorComponent,
     LoginScreenComponent,
     RegistrationComponent,
-    WalletComponent,
     RegistrationSuccessComponent,
     AutofocusDirective,
     FactorNodeComponent,
@@ -141,7 +145,13 @@ import { ActivityService } from "./services/activity.service";
     VerifierComponent,
     NfcWriterComponent,
     FeedbackComponent,
-    ChangePincodeComponent
+    ChangePincodeComponent,
+    IcoComponent,
+    WalletComponent,
+    IcoDetailsComponent,
+    WhitelistComponent,
+    NewIcoComponent,
+    InvestmentsComponent
   ],
   imports: [
     OverlayModule,
@@ -216,7 +226,12 @@ import { ActivityService } from "./services/activity.service";
     DeleteSecretComponent,
     VerifyTransactionComponent,
     NfcFactorComponent,
-    ChangePincodeComponent
+    ChangePincodeComponent,
+    IcoDetailsComponent,
+    WhitelistComponent,
+    NewIcoComponent,
+    InvestmentsComponent,
+    IcoComponent
   ]
 })
 
