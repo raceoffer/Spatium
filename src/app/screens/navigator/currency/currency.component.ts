@@ -11,6 +11,9 @@ import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { SendTransactionComponent } from "../send-transaction/send-transaction.component";
+import {Router} from '@angular/router';
+import { CurrencySettingsComponent } from "../currency-settings/currency-settings.component";
+import {SettingsComponent} from '../settings/settings.component';
 
 declare const cordova: any;
 declare const device: any;
@@ -124,7 +127,8 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   async onSettingsClicked() {
-
+    const componentRef = this.navigationService.pushOverlay(CurrencySettingsComponent);
+    componentRef.instance.currency = this.currency;
   }
 
   async onBack() {
