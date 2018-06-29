@@ -89,8 +89,7 @@ import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 import { CarouselItemDirective } from './elements/carousel/carousel-item.directive';
-import { PresentationLoginModeComponent } from './screens/presentation/login-mode.component';
-import { PresentationConfirmationModeComponent } from './screens/presentation/confirmation-mode.component';
+import { PresentationComponent } from './screens/presentation/presentation.component';
 
 @NgModule({
   declarations: [
@@ -144,8 +143,7 @@ import { PresentationConfirmationModeComponent } from './screens/presentation/co
     CarouselComponent,
     CarouselItemDirective,
     CarouselItemElement,
-    PresentationLoginModeComponent,
-    PresentationConfirmationModeComponent
+    PresentationComponent,
   ],
   imports: [
     OverlayModule,
@@ -217,8 +215,7 @@ import { PresentationConfirmationModeComponent } from './screens/presentation/co
     DeleteSecretComponent,
     VerifyTransactionComponent,
     NfcFactorComponent,
-    PresentationLoginModeComponent,
-    PresentationConfirmationModeComponent
+    PresentationComponent,
   ]
 })
 

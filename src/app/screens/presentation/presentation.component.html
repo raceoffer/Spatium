@@ -1,5 +1,5 @@
 <div fxLayout="column" fxLayoutAlign="start center">
-  <carousel (nextScreen)="onForward()" (prevScreen)="onBack()">
+  <carousel (close)="onBack()">
     <ng-container *ngFor="let item of items;">
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="start center">

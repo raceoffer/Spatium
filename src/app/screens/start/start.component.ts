@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
 import { DeviceService, Platform } from '../../services/device.service';
+import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
+import { PresentationComponent } from '../presentation/presentation.component';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -28,6 +30,13 @@ export class StartComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
     NativeStorage.remove('startPath');
+
+    NativeStorage.getItem('presentation',
+      (value) => {},
+      (error) => this.ngZone.run(async () => {
+        const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
+      })
+    );
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
@@ -60,35 +69,17 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onOpenClicked() {
-    this.navigate(
-      'loginPresentation',
-      '/login-presentation',
-      '/login'
-    );
+    NativeStorage.setItem('startPath', '/login');
+    await this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {
-    this.navigate(
-      'confirmationPresentation',
-      '/confirmation-presentation',
-      '/verifier-create'
-    );
+    NativeStorage.setItem('startPath', '/verifier-create');
+    await this.router.navigate(['/verifier-create']);
   }
 
   eventOnBackClicked(e) {
     e.preventDefault();
     navigator.app.exitApp();
-  }
-
-  async navigate(storageName, presenatationPath, pagePath) {
-    NativeStorage.getItem(storageName,
-      (value) => this.ngZone.run(async () => {
-        NativeStorage.setItem('startPath', pagePath);
-        await this.router.navigate([pagePath]);
-      }),
-      (error) => this.ngZone.run(async () => {
-        await this.router.navigate([presenatationPath]);
-      }),
-    );
   }
 }

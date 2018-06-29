@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
+import {NavigationService} from '../../services/navigation.service';
 
 declare const NativeStorage: any;
 
@@ -8,7 +8,7 @@ declare const NativeStorage: any;
   templateUrl: './presentation.component.html',
   styleUrls: ['./presentation.component.css']
 })
-export class PresentationLoginModeComponent implements OnInit {
+export class PresentationComponent implements OnInit {
 
   items = [
     { title: 'Bitcoin',
@@ -25,18 +25,13 @@ export class PresentationLoginModeComponent implements OnInit {
     },
   ]
 
-  constructor(private readonly router: Router) { }
+  constructor(private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
   }
 
-  async onForward() {
-    NativeStorage.setItem('startPath', '/login');
-    NativeStorage.setItem('loginPresentation', 'viewed');
-    await this.router.navigate(['/login']);
-  }
-
   async onBack() {
-    await this.router.navigate(['/start']);
+    NativeStorage.setItem('presentation', 'viewed');
+    this.navigationService.back();
   }
 }

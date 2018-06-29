@@ -40,7 +40,7 @@ export class CarouselComponent implements OnInit {
   ngOnInit() {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async (e) => {
-        await this.prev();
+        this.prev();
       })
     );
   }
@@ -50,8 +50,7 @@ export class CarouselComponent implements OnInit {
   @ViewChild('carousel') private carousel : ElementRef;
   @Input() timing = '250ms ease-in';
 
-  @Output() prevScreen: EventEmitter<any> = new EventEmitter<any>();
-  @Output() nextScreen: EventEmitter<any> = new EventEmitter<any>();
+  @Output() close: EventEmitter<any> = new EventEmitter<any>();
 
   private player : AnimationPlayer;
   private itemWidth : number;
@@ -60,7 +59,7 @@ export class CarouselComponent implements OnInit {
 
   next() {
     if( this.currentSlide + 1 === this.items.length ) {
-      this.nextScreen.emit();
+      this.skip();
       return;
     }
 
@@ -79,7 +78,6 @@ export class CarouselComponent implements OnInit {
 
   prev() {
     if( this.currentSlide === 0 ) {
-      this.prevScreen.emit();
       return;
     }
 
@@ -92,7 +90,7 @@ export class CarouselComponent implements OnInit {
   }
 
   skip() {
-    this.nextScreen.emit();
+    this.close.emit();
   }
 
   ngAfterViewInit() {
