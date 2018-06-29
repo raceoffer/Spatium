@@ -123,13 +123,6 @@ export class NavigatorComponent implements OnDestroy {
         await this.router.navigate(['/start']);
       })
     );
-
-    this.subscriptions.push(
-      this.activityService.inactivity.subscribe(async () => {
-        await this.router.navigate(['/start']);
-      })
-    );
-    this.activityService.onActivity();
   }
 
   public openSettings() {
