@@ -5,6 +5,7 @@ import { LoggerService } from './services/logger.service';
 import {HockeyService} from './services/hockey.service';
 
 declare const hockeyapp: any;
+declare const navigator: any;
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,10 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'Spatium Wallet app';
   message = 'Loading...';
   private subscriptions = [];
+  time = 180000;
+  timer = setTimeout(() => {
+    navigator.app.exitApp();
+  }, this.time);
 
   constructor(private readonly fs: FileService,
               private readonly logger: LoggerService,
@@ -23,6 +28,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.init();
+
+  timerUpdate() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      navigator.app.exitApp();
+    }, this.time);
   }
 
   ngOnDestroy() {
