@@ -1,21 +1,66 @@
-<mat-grid-list [cols]="cols" rowHeight="4:3">
-  <mat-grid-tile
-    *ngFor="let tile of filtredTitles"
-    [colspan]="tile.cols"
-    [rowspan]="tile.rows">
+<div (window:resize)="onResize()">
+  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
+    <button mat-icon-button (click)="onNavRequest()">
+      <mat-icon>menu</mat-icon>
+    </button>
 
-    <div class="grid-item">
-      <button mat-button class="block" style="padding: 0px;" [disabled]="tile.opened == false" (click)='onTileClicked(tile)'>
-        <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-          <div class="logo {{tile.className}}"></div>
-          <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
-            white-space: normal;text-align: left;">
-            <span class="title">{{ tile.title }}</span>
-          </div>
-        </div>
-      </button>
+    <span>{{ title }} </span>
+
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="toggleSearch(true)">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
+      <mat-icon>sync</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
+      <mat-icon>sync_problem</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="cancelSync()" *ngIf="(synchronizing | async)">
+      <mat-icon class="sync">sync</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="goToNewICO()">
+      <mat-icon>add</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
+    <button mat-icon-button (click)="toggleSearch(false)">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
+      <input type="text" placeholder="Search" name="UserName" [(ngModel)]="filterValue" [autofocus]>
     </div>
-  </mat-grid-tile>
-</mat-grid-list>
+
+    <button mat-button mat-icon-button (click)="clearFilterValue()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-grid-list [cols]="cols" rowHeight="4:3">
+    <mat-grid-tile
+      *ngFor="let tile of filtredTitles"
+      [colspan]="tile.cols"
+      [rowspan]="tile.rows">
+  
+      <div class="grid-item">
+        <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
+          <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
+            <div class="logo {{tile.className}}"></div>
+            <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
+              <span class="title">{{ tile.title }}</span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
 
 

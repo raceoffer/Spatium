@@ -75,3 +75,11 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   height: 99.9%;
   max-height: 60% !important;
 }
+
+.tile-inf {
+  height:100%; 
+  width: 50%; 
+  padding-left: 10px;
+  white-space: normal;
+  text-align: left;
+}

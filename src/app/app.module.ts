@@ -88,7 +88,6 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { IcoComponent } from './screens/navigator/ico/ico.component';
-import { MainComponent } from './screens/navigator/main/main.component';
 import { IcoDetailsComponent } from './screens/navigator/ico/ico-details/ico-details.component';
 import { NewIcoComponent } from './screens/navigator/ico/new-ico/new-ico.component';
 import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.component';
@@ -143,7 +142,6 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     VerifierComponent,
     NfcWriterComponent,
     IcoComponent,
-    MainComponent,
     WalletComponent,
     IcoDetailsComponent,
     WhitelistComponent,
@@ -223,7 +221,8 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     IcoDetailsComponent,
     WhitelistComponent,
     NewIcoComponent,
-    InvestmentsComponent
+    InvestmentsComponent,
+    IcoComponent
   ]
 })
 

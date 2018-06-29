@@ -7,7 +7,8 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { StartComponent } from './screens/start/start.component';
 import { VerifierCrateComponent } from "./screens/verifier-crate/verifier-crate.component";
 import { VerifierComponent } from "./screens/verifier/verifier.component";
-import { MainComponent } from './screens/navigator/main/main.component';
+import { WalletComponent } from "./screens/navigator/wallet/wallet.component";
+import { IcoComponent } from "./screens/navigator/ico/ico.component";
 
 const appRoutes: Routes = [{
   path: '',
@@ -29,8 +30,12 @@ const appRoutes: Routes = [{
   path: 'navigator',
   component: NavigatorComponent,
   children: [{
-      path: 'main/:type',
-      component: MainComponent,
+      path: 'wallet',
+      component: WalletComponent,
+      outlet: 'navigator'
+    }, {
+      path: 'ico',
+      component: IcoComponent,
       outlet: 'navigator'
     }]
 }, {

@@ -8,6 +8,7 @@ import { bufferWhen, map, debounceTime, filter } from "rxjs/operators";
 import { Subject } from "rxjs/index";
 import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
+import { IcoComponent } from "./ico/ico.component";
 
 @Component({
   selector: 'app-navigator',
@@ -21,7 +22,7 @@ export class NavigatorComponent implements OnDestroy {
     name: 'Wallet',
     clicked: async () => {
       this.current = 'Wallet';
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['main', 'wallet']}}])
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}])
     }
   }, {
     name: 'Exchange'
@@ -29,7 +30,7 @@ export class NavigatorComponent implements OnDestroy {
     name: 'ICO',
     clicked: async () => {
       this.current = 'ICO';
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['main', 'ico']}}])
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}])
     }
   }, {
     name: 'Portfolio Investment'
