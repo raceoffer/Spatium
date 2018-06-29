@@ -25,11 +25,6 @@ declare const window: any;
 })
 export class VerifierComponent implements OnInit {
   public navLinks = [{
-    name: 'Verification',
-    clicked: async () => {
-      await this.router.navigate(['/navigator', { outlets: { navigator: ['main'] } }])
-    }
-  }, {
     name: 'Export secret',
     clicked: async () => {
       await this.onExport();
