@@ -3,11 +3,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './screens/auth/auth.component';
 import { LoginComponent } from './screens/login/login.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
-import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { StartComponent } from './screens/start/start.component';
 import { VerifierCrateComponent } from "./screens/verifier-crate/verifier-crate.component";
 import { VerifierComponent } from "./screens/verifier/verifier.component";
+import { WalletComponent } from "./screens/navigator/wallet/wallet.component";
+import { IcoComponent } from "./screens/navigator/ico/ico.component";
 
 const appRoutes: Routes = [{
   path: '',
@@ -29,10 +30,14 @@ const appRoutes: Routes = [{
   path: 'navigator',
   component: NavigatorComponent,
   children: [{
-    path: 'wallet',
-    component: WalletComponent,
-    outlet: 'navigator'
-  }]
+      path: 'wallet',
+      component: WalletComponent,
+      outlet: 'navigator'
+    }, {
+      path: 'ico',
+      component: IcoComponent,
+      outlet: 'navigator'
+    }]
 }, {
   path: 'verifier-create',
   component: VerifierCrateComponent

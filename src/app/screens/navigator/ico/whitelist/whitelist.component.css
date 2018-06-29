@@ -1,0 +1,93 @@
+.full-width {
+  text-align: left;
+}
+
+.logo {
+  width: 10%;
+  max-width: 15%;
+  background-position: center !important;
+  background-size: contain !important;
+  background-repeat: no-repeat;
+}
+
+.coin-check {
+  padding: 5px 0;
+  height: 30px;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 18px;
+}
+
+.chosen {
+  background-color: #80bdff;
+}
+
+.footer {
+  padding: 12px;
+  width: calc(100% - 24px);
+  position: fixed;
+  bottom: 0;
+}
+
+.inner {
+  position: fixed;
+  overflow: scroll;
+  top: 56px;
+  bottom: 74px;
+}
+
+.balance {
+  align-self: center;
+  width: 20%;
+  font-family: 'Roboto-Light';
+  font-size: initial;
+}
+
+.coin-amount {
+  height: 25px;
+  width: 100%;
+}
+
+.coin-field {
+  width: 90%;
+  display: inline-flex;
+  flex-direction: row;
+  padding: 5px 0;
+  text-align: left;
+}
+
+.label {
+  white-space: nowrap;
+  color: #373741;
+  font-family: 'Roboto-Light';
+  font-size: 13px;
+}
+
+.left-field {
+  width: calc(50% - 5px);
+  margin-right: 5px;
+}
+
+.right-field {
+  width: calc(50% - 5px);
+  margin-left: 5px;
+}
+
+.info {
+  padding: 20px;
+  text-align: center;
+}
+
+.colored {
+  background-color: rgba(128,189,255, 0.5);
+}
+
+input {
+  border: 0;
+  outline: 0;
+}
+
+.width-button-full {
+  margin: 0 !important;
+}

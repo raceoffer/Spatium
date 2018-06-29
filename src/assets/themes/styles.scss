@@ -1093,3 +1093,33 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .error {
   color: #f44336 !important;
 }
+
+//ICO components
+.investment-component {
+  width: auto;
+  margin: 0 12px;
+}
+
+.spatium-ico {
+  background-image: url("../images/drawable/ico/spatium.png");
+}
+
+.coin-info {
+  height: 50px !important;
+}
+
+.coin-info .mat-form-field-wrapper {
+  height: inherit !important;
+}
+
+.coin-info .mat-form-field-flex {
+  height: inherit !important;
+}
+
+.logo {
+  width: 10%;
+  max-width: 15%;
+  background-position: center !important;
+  background-size: contain !important;
+  background-repeat: no-repeat;
+}
