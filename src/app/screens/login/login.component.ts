@@ -37,8 +37,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public stateType = State;
   public buttonState = State.Empty;
 
-  public isNfcAvailable = true;
-  public isCameraAvailable = true;
+  public isNfcAvailable = false;
+  public isCameraAvailable = false;
 
   private subscriptions = [];
 
@@ -66,6 +66,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.isNfcAvailable = await checkNfc();
+    this.isCameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
 
     cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
       this.isCameraAvailable = isCameraAvailable;
