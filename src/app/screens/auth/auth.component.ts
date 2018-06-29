@@ -193,6 +193,8 @@ export class AuthComponent implements OnDestroy {
   }
 
   async addFactor(factor) {
+    const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
+
     try {
       this.busy = true;
 
@@ -205,7 +207,6 @@ export class AuthComponent implements OnDestroy {
 
         this.factors.next(factors);
 
-        const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
         this.factorItems.push({
             icon: entry.icon,
             icon_asset: entry.icon_asset
@@ -224,7 +225,7 @@ export class AuthComponent implements OnDestroy {
       if (this.type === IdFactor.Login && !this.advanced && this.factors.getValue().length === 0) {
         this.opendDefaultFactorOverlay();
       }
-      this.notification.show('Failed to decrypt secret with this factor');
+      this.notification.show(entry.name + ' is incorrect');
     } finally {
       this.busy = false;
     }
