@@ -273,6 +273,11 @@ export class VerifierComponent implements OnInit {
 
   public onChangePIN() {
     const componentRef = this.navigationService.pushOverlay(ChangePincodeComponent);
+    componentRef.instance.success.subscribe(async () => {
+      this.navigationService.acceptOverlay();
+      await this.router.navigate(['/start']);
+      this.notification.show('You have successfully changed a PIN-code');
+    })
   }
 
   public async checkAvailable() {

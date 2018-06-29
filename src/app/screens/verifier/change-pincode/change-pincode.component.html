@@ -1,5 +1,5 @@
 <app-toolbar
-  [label] = "label"
+  [label] = "stateLabel | async"
   [isColored] = "true"
   [isShadowed] = "true"
   (backClicked)="onBack()"></app-toolbar>
@@ -7,7 +7,9 @@
 <div class="box" fxLayout="column" fxLayoutAlign="center center">
   <app-pincode
     [busy]="busy"
-    (submit)="(confirmation) ? onConfirm($event) : onSuccess($event)"
+    [allowFingerprint]="(state | async) === stateType.Decryption && (touchAvailable | async)"
+    (fingerprintRequested)="onFinger()"
+    (submit)="onInput($event)"
   ></app-pincode>
 </div>
 
