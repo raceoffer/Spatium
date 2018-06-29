@@ -12,18 +12,6 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
-      <mat-icon>sync</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
-      <mat-icon>sync_problem</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="cancelSync()" *ngIf="(synchronizing | async)">
-      <mat-icon class="sync">sync</mat-icon>
-    </button>
-
     <button mat-icon-button (click)="goToNewICO()">
       <mat-icon>add</mat-icon>
     </button>
@@ -48,7 +36,7 @@
       *ngFor="let tile of filtredTitles"
       [colspan]="tile.cols"
       [rowspan]="tile.rows">
-  
+
       <div class="grid-item">
         <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
           <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >

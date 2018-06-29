@@ -66,7 +66,7 @@
 <div *ngIf="!transaction" class="currency-component box" fxLayout="column" style="place-content: normal !important">
 
   <mat-list *ngIf="!investor" class="text-center" [class.transactions-list]="selector">
-    <mat-list-item 
+    <mat-list-item
       class="list-item"
       *ngFor="let transaction of filtered_input"
       (click)="selector?(!transaction.handled && check($event, transaction)):popUpDetails(transaction)"
@@ -82,13 +82,13 @@
         </div>
         <span matLine
         class="transaction-address"
-        [class.red]="(transaction.from !== transaction.valid_from || transaction.to !== transaction.valid_to)" 
+        [class.red]="(transaction.from !== transaction.valid_from || transaction.to !== transaction.valid_to)"
         [class.green]="transaction.from === transaction.valid_from && transaction.to === transaction.valid_to">
-        {{ structuredAddress(transaction.from) }} 
+        {{ structuredAddress(transaction.from) }}
         </span>
         <div matLine class="price-label data-row">
           <div>
-            <span 
+            <span
               class="transaction-amount">
               {{transaction.amount}}
             </span>
@@ -96,7 +96,7 @@
           </div>
           <div *ngIf="transaction.handled">
             <div *ngIf="transaction.handled.type === 'approved'">
-              <span 
+              <span
                 class="transaction-amount">
                 {{transaction.handled.amount}}
               </span>
@@ -112,8 +112,8 @@
 
 
   <mat-list *ngIf="investor" class="text-center">
-    <mat-list-item 
-      class="list-item" 
+    <mat-list-item
+      class="list-item"
       *ngFor="let transaction of output_tx"
       (click)="popUpDetails(transaction)">
       <div style="width: 20%; text-align: -webkit-center;">
@@ -126,11 +126,11 @@
         </div>
         <span matLine
         class="transaction-address">
-        {{ structuredAddress(transaction.to) }} 
+        {{ structuredAddress(transaction.to) }}
         </span>
         <div matLine class="price-label data-row">
           <div>
-            <span 
+            <span
               class="transaction-amount">
               {{transaction.amount}}
             </span>
@@ -138,7 +138,7 @@
           </div>
           <div *ngIf="transaction.handled">
             <div *ngIf="transaction.handled.type === 'approved'">
-              <span 
+              <span
                 class="transaction-amount">
                 {{transaction.handled.amount}}
               </span>
@@ -196,7 +196,7 @@
         <span class="transaction-address"> {{ transaction.id }}</span>
       </div>
       <div style="align-self: center;">
-        <a href="https://chain.so/tx/BTC/{{transaction.id}}">VIEW ON BLOCKCHAIN EXPLORER</a>
+        <a href="https://chain.so/tx/BTC/{{transaction.id}}">View in a blockchain explorer</a>
       </div>
     </div>
   </div>

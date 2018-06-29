@@ -6,9 +6,9 @@
 
 <div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
   <div class="text-field">
-    <div class="header">About {{project.title}}</div>
+    <div class="header">About</div>
     <p class="about text">
-      Something about project
+      Something about the project
     </p>
     <div class="header">Balances</div>
     <p class="balances text">
@@ -20,17 +20,9 @@
     </p>
   </div>
   <div class="form-field">
-    <mat-select placeholder="Coin" class="form-field-select" (selectionChange)="changeSel($event)" [(value)]="coin">
-      <mat-option *ngFor="let coin of project.coins" [value]="coin.place">
-        {{coin.name}}
-      </mat-option>
-    </mat-select>
     <div class="form-field-input">
-      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="whitelist()">Whitelist me</button>
-      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="import()">Import</button>
-      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments for organizer</button>
-      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(true)">Investments for investor</button>
-      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="reminder()">Add reminder</button>
+      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="whitelist()">Whitelist me</button>
+      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments</button>
     </div>
   </div>
 </div>

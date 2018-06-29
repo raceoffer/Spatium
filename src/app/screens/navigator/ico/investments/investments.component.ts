@@ -31,7 +31,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   }, {
     visible: true,
     icon: 'mail'
-  }]
+  }];
   monthNames: any = [
     "January", "February", "March",
     "April", "May", "June",
@@ -92,58 +92,58 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
               private readonly notification: NotificationService,
               private readonly navigationService: NavigationService) {
    this.transactions = [
-      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol, 
-        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 
+      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol,
+        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
         to: '1LL87k1vMqAaMJBCR4wfy7nGivgt3hmBKG', valid_to: '1LL87k1vMqAaMJBCR2wfy7nGivgt3hmBKG',
         id:'0794d9c0fb0b5bc430cbaeea2b6e76fef551855c69ef0093c176a74c4459505e',
         amount: '20,77', raw_date: 1429492572, confirmations: 3, type: this.txType.Out},
-      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol, 
+      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol,
         from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
         to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH', valid_to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH',
         id:'651aff924e44eeef11b4bc24bfca7242f4bb87f0f8bd8dc89106c8bdcc7fb8bc',
         amount: '3,22', raw_date: 1529492572, confirmations: 5, type: this.txType.Out},
-      {coin: this.currency.getInfo(Coin.LTC).icon, symbol: this.currency.getInfo(Coin.LTC).symbol, 
+      {coin: this.currency.getInfo(Coin.LTC).icon, symbol: this.currency.getInfo(Coin.LTC).symbol,
         from: '3CDJNfdWX8m2NwuGUV3nhXHXEeLygMXoAj', valid_from: '3CDJNfdWX8m2NwuGUV3nhXHXEeLygMXoAj',
         to: 'LWSygPfS6FEiDqdj2xmVF8CSZJREo4LbKd', valid_to: 'LfPZJhLRpuELaKPmtbYNEEwCXVcxk1WUdp',
         id:'1bcaac25e1fec7449e5915d54726ef35bef2beb4905549a0d7a4450404104080',
         amount: '14,88', raw_date: 1329492572, confirmations: 19, type: this.txType.In},
-      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol, 
+      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol,
         from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
         to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH', valid_to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH',
         id:'651aff924e44eeef11b4bc24bfca7242f4bb87f0f8bd8dc89106c8bdcc7fb8bc',
         amount: '2,28', raw_date: 1529412572, confirmations: 48, type: this.txType.In},
-      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol, 
-        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 
+      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol,
+        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
         to: '1LL87k1vMqAaMJBCR4wfy7nGivgt3hmBKG', valid_to: '1LL87k1vMqAaMJBCR4wfy7nGivgt3hmBKG',
         id:'0794d9c0fb0b5bc430cbaeea2b6e76fef551855c69ef0093c176a74c4459505e',
         amount: '13,37', raw_date: 1439482572, confirmations: 41, type: this.txType.In, handled: {
-          type: 'approved', amount: 12, ticker: 'SPT'
+          type: 'approved', amount: 12, ticker: 'XYZ'
         }},
-      {coin: this.currency.getInfo(Coin.LTC).icon, symbol: this.currency.getInfo(Coin.LTC).symbol, 
+      {coin: this.currency.getInfo(Coin.LTC).icon, symbol: this.currency.getInfo(Coin.LTC).symbol,
         from: '3CDJNfdWX8m2NwuGUV3nhXHXEeLygMXoAj', valid_from: '3CDJNfdWX8m2NwuGUV3nhXHXEeLygMXoAj',
         to: 'LWSygPfS6FEiDqdj2xmVF8CSZJREo4LbKd', valid_to: 'LfPZJhLRpuELaKPmtbYNEEwCXVcxk1WUdp',
         id:'1bcaac25e1fec7449e5915d54726ef35bef2beb4905549a0d7a4450404104080',
         amount: '14,88', raw_date: 1379492572, confirmations: 22, type: this.txType.In},
-      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol, 
+      {coin: this.currency.getInfo(Coin.ETH).icon, symbol: this.currency.getInfo(Coin.ETH).symbol,
         from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy',
         to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH', valid_to: '1FfmbHfnpaZjKFvyi1okTjJJusN455paPH',
         id:'651aff924e44eeef11b4bc24bfca7242f4bb87f0f8bd8dc89106c8bdcc7fb8bc',
         amount: '2,28', raw_date: 1522912572, confirmations: 30, type: this.txType.In, handled: {
           type: 'refunded'
         }},
-      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol, 
-        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', 
+      {coin: this.currency.getInfo(Coin.BTC).icon, symbol: this.currency.getInfo(Coin.BTC).symbol,
+        from: '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', valid_from: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2',
         to: '1LL87k1vMqAaMJBCR4wfy7nGivgt3hmBKG', valid_to: '1LL87k1vMqAaMJBCR4wfy7nGivgt3hmBKG',
         id:'0794d9c0fb0b5bc430cbaeea2b6e76fef551855c69ef0093c176a74c4459505e',
         amount: '13,37', raw_date: 1411482572, confirmations: 4, type: this.txType.In, handled: {
-          type: 'approved', amount: 10, ticker: 'SPT'
+          type: 'approved', amount: 10, ticker: 'XYZ'
         }},
     ];
     this.filter_name = [this.validation_types[0], this.resolution_types[0]];
   }
 
-  ngOnInit() {         
-    console.log(this.blocks);   
+  ngOnInit() {
+    console.log(this.blocks);
     this.transactions.sort((a, b) => {
       if (a.raw_date > b.raw_date)
         return -1;
