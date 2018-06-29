@@ -88,6 +88,7 @@ import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { HockeyService } from './services/hockey.service';
+import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
 
 @NgModule({
   declarations: [
@@ -137,7 +138,8 @@ import { HockeyService } from './services/hockey.service';
     VerifierCrateComponent,
     VerifierComponent,
     NfcWriterComponent,
-    FeedbackComponent
+    FeedbackComponent,
+    ChangePincodeComponent
   ],
   imports: [
     OverlayModule,
@@ -209,7 +211,8 @@ import { HockeyService } from './services/hockey.service';
     SecretExportComponent,
     DeleteSecretComponent,
     VerifyTransactionComponent,
-    NfcFactorComponent
+    NfcFactorComponent,
+    ChangePincodeComponent
   ]
 })
 
