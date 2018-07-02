@@ -1,9 +1,10 @@
-import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnDestroy, NgZone, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { WhitelistComponent } from '../whitelist/whitelist.component';
 import { SendTransactionComponent } from '../../send-transaction/send-transaction.component';
 import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
+import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
 
 @Component({
@@ -16,13 +17,24 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
 
   @Input() public project: any = null;
   public coin: any = undefined;
-  public currency: any = undefined;
+  public chosencurrency: any = undefined;
+  public coins: any = [];
 
-  constructor(private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    private readonly notification: NotificationService,
+    private readonly currency: CurrencyService,
+    private readonly navigationService: NavigationService) {  }
 
   ngOnInit() {
-    
+    this.project.coins.forEach((item) => {
+      this.coins.push({
+          'icon': this.currency.getInfo(item.place).icon,
+          'symbol': this.currency.getInfo(item.place).symbol,
+          'coin': item.place,
+          'name': item.name,
+          'chosen': false, 
+      })
+    });
   }
 
   ngOnDestroy() {
@@ -34,13 +46,12 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   }
 
   import() {
-    if (this.currency === undefined) {
+    if (this.chosencurrency === undefined) {
       this.notification.show('Please choose coin');
     } else {
       const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
-      overalyRef.instance.currency = this.currency;
-      overalyRef.instance.receiverField.setValue(this.project.address, {emitEvent: false});
-      overalyRef.instance.receiverField.disable();
+      overalyRef.instance.currency = this.chosencurrency;
+      overalyRef.instance.fixedaddress = this.project.address;
     }
   }
 
@@ -59,7 +70,13 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
     console.log('DO SOME SHIT');
   }
 
-  async changeSel(e) {
-    this.currency = e.value;
+  changeCurrency(coin) {
+    console.log(coin, this);
+    coin.chosen = !coin.chosen;
+    this.coins.forEach((item) => {
+      if (item.coin === this.chosencurrency)
+        item.chosen = false;
+    });
+    this.chosencurrency = (coin.chosen)?coin.coin:undefined;
   }
 }

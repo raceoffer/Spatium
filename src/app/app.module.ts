@@ -21,7 +21,9 @@ import {
   MatSidenavModule,
   MatSlideToggleModule,
   MatSnackBarModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatNativeDateModule,
+  MatDatepickerModule,
 } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -158,6 +160,8 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     NoopAnimationsModule,
     BrowserAnimationsModule,
     MatToolbarModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
     MatRadioModule,
     MatButtonModule,
     MatButtonToggleModule,

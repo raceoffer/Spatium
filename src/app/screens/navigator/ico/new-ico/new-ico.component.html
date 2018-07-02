@@ -104,21 +104,21 @@
     </div>
     <h4>Detailed info</h4>
     <div class="deployment-date-input">
-      <div class="info f-left input-2">
+      <div class="info">
         <span class="label full-width-label">Start</span>
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-            <input type="date" matInput placeholder="Start date" [formControl]="start_date">
-          </span>
-        </div>
+        <mat-form-field class="field" style="margin-bottom: 13px">
+          <input matInput [matDatepicker]="picker1" [formControl]="start_date">
+          <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
       </div>
-      <div class="info f-right input-2">
+      <div class="info">
         <span class="label full-width-label">End</span>
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-            <input type="date" matInput placeholder="End date" [formControl]="end_date">
-          </span>
-        </div>
+        <mat-form-field class="field" style="margin-bottom: 13px">
+          <input matInput [matDatepicker]="picker2" [formControl]="end_date">
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
       </div>
     </div>
     <div class="token-price-input">
@@ -165,21 +165,21 @@
     <div class="whitelist-input"> <!--//If true, do some shit-->
       <mat-checkbox [(ngModel)]="white_list">Use white list?</mat-checkbox>
       <div *ngIf="white_list">
-        <div class="info f-left input-2">
+        <div class="info">
           <span class="label full-width-label">Start registration</span>
-          <div class="field" style="margin-bottom: 13px;">
-            <span>
-              <input type="date" matInput placeholder="Start date" [formControl]="start_registration">
-            </span>
-          </div>
+          <mat-form-field class="field" style="margin-bottom: 13px">
+            <input matInput [matDatepicker]="picker3" [formControl]="start_registration">
+            <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+            <mat-datepicker #picker3></mat-datepicker>
+          </mat-form-field>
         </div>
-        <div class="info f-right input-2">
+        <div class="info">
           <span class="label full-width-label">End registration</span>
-          <div class="field" style="margin-bottom: 13px;">
-            <span>
-              <input type="date" matInput placeholder="End date" [formControl]="end_registration">
-            </span>
-          </div>
+          <mat-form-field class="field" style="margin-bottom: 13px">
+            <input matInput [matDatepicker]="picker4" [formControl]="end_registration">
+            <mat-datepicker-toggle matSuffix [for]="picker4"></mat-datepicker-toggle>
+            <mat-datepicker #picker4></mat-datepicker>
+          </mat-form-field>
         </div>
         <div>
           <span class="label full-width-label">Invite system</span><br/>
