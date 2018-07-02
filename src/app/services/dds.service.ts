@@ -1,7 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, mapTo } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
@@ -23,7 +21,7 @@ export class DDSAccount {
   public async store(id: string, data: any, gasPrice: number) {
     const accountSecret = await getAccountSecret(id, 0, this.worker);
     return await this.dds.store({
-      secret: accountSecret,
+      id: accountSecret,
       data: data,
       account: this.account,
       gasPrice: gasPrice
@@ -33,7 +31,7 @@ export class DDSAccount {
   public async estimateGas(id: string, data: any) {
     const accountSecret = await getAccountSecret(id, 0, this.worker);
     return this.dds.estimateStoreGas({
-      secret: accountSecret,
+      id: accountSecret,
       data: data,
       account: this.account
     });
@@ -45,6 +43,7 @@ export class DDSService {
   private dds: any = null;
   private network = 'main'; // 'main'; | 'testnet';
   private sponsor = 'http://185.219.80.169:8080/sponsor';
+  private secret = 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs';
 
   constructor(
     private readonly http: HttpClient,
@@ -76,7 +75,7 @@ export class DDSService {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Auth-Key': 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs',
+        'X-Auth-Key': this.secret,
         'Access-Control-Allow-Origin': '*',
       })
     };
@@ -90,13 +89,34 @@ export class DDSService {
       url,
       body,
       httpOptions
-    ).pipe(
-      catchError(error => {
-        console.log(error);
-        return of('Something bad happened; please try again later.');
-      }),
-      mapTo(true)
     );
+  }
+
+  public sponsorFeedback(data: FormData) {
+    let XHR = new XMLHttpRequest();
+    XHR.open('POST', this.sponsor + '/feedback');
+    XHR.setRequestHeader('X-Auth-Key', this.secret);
+    XHR.send(data);
+
+    XHR.addEventListener('load', function(event) {
+      console.log(event.target);
+    });
+
+    // Define what happens in case of error
+    XHR.addEventListener('error', function(event) {
+      console.log('Oops! Something went wrong.');
+    });
+
+    XHR.onreadystatechange = () => {
+      if (XHR.readyState === 4) {
+        console.log(XHR.response);
+        /*if (xhr.status === 200) {
+          resolve(JSON.parse(xhr.response));
+        } else {
+          reject(xhr.response);
+        }*/
+      }
+    };
   }
 
   public fromWei(wei: any, coin: string) {

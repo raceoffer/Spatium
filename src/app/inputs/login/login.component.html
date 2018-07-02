@@ -1,0 +1,27 @@
+<div fxLayout="column" fxLayoutAlign="start center">
+  <form class="width-button-container margin32" fxLayout="column" fxLayoutAlign="start center">
+    <div
+      class="spatium-textfield entry bottom32"
+      style="display: flex; position: relative;"
+      [class.error-field]="loginControl.invalid && (loginControl.dirty || loginControl.touched)">
+      <input
+        id="loginControl"
+        type="text"
+        placeholder="Username"
+        [formControl]="loginControl"
+        name="Username"
+        [autofocus]
+        (keyup.enter)="removeFocus($event)">
+
+      <span matSuffix mat-icon-button (click)="generateNewLogin()" style="position: absolute; right: 0px; cursor: pointer;">
+        <mat-icon style="opacity: 0.5;" *ngIf="(state | async) === stateType.Ready">sync</mat-icon>
+        <mat-icon class="sync" *ngIf="(state | async) === stateType.Updating">sync</mat-icon>
+        <mat-icon *ngIf="(state | async) === stateType.Error">sync_problem</mat-icon>
+      </span>
+    </div>
+
+    <div class="bottom32" *ngIf="loginControl.invalid && (loginControl.dirty || loginControl.touched)">
+      <mat-error *ngIf="loginControl.errors.pattern">Only alphanumeric characters allowed</mat-error>
+    </div>
+  </form>
+</div>

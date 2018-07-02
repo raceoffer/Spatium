@@ -1,0 +1,30 @@
+<app-toolbar
+  label="QR"
+  [isColored]="true"
+  [isShadowed]="true"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-qr-writer
+    [value]="qrData"
+    (saved)="onSaved($event)">
+  </app-qr-writer>
+
+  <div class="footer text-center" style="bottom: 0px;">
+    <button
+      type="button"
+      mat-raised-button
+      color="accent"
+      class="width-button color"
+      [disabled]="(busy | async)"
+      (click)="onSubmit()">
+      Continue
+    </button>
+  </div>
+</div>
+

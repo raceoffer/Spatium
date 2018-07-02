@@ -1,21 +1,13 @@
 <app-toolbar
-  [label] = "title"
+  label = "Settings"
   [isColored] = "true"
   [isShadowed] = "true"
-  (backClicked)="onBackClicked()"></app-toolbar>
+  (backClicked)="onBack()"></app-toolbar>
 
-<div class="content text-center" fxLayout="column" fxLayoutAlign="start center" *ngIf="state === 0">
+<div class="content text-center" fxLayout="column" fxLayoutAlign="start center">
   <mat-nav-list *ngFor="let navLink of navLinks" style="width: 100%;">
-    <a mat-list-item class="main-nav-list-custom" (click)="onSettingsClick(navLink)">
+    <a mat-list-item class="main-nav-list-custom" (click)="onSelected(navLink)">
       {{ navLink.name }}
-    </a>
-  </mat-nav-list>
-</div>
-
-<div class="content text-center" fxLayout="column" fxLayoutAlign="start center" *ngIf="state === 1">
-  <mat-nav-list *ngFor="let language of languages" style="width: 100%;">
-    <a mat-list-item class="main-nav-list-custom selected" (click)="onLanguageClick(language)">
-      {{ language.name }}
     </a>
   </mat-nav-list>
 </div>

@@ -1,15 +1,14 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
-import { BluetoothService } from '../../../services/bluetooth.service';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
-import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { CurrencyComponent } from "../currency/currency.component";
+import { WaitingComponent } from "../waiting/waiting.component";
+import { BluetoothService } from "../../../services/bluetooth.service";
 
 declare const navigator: any;
 
@@ -20,52 +19,17 @@ declare const navigator: any;
 })
 export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
-  synchronizing = this.wallet.synchronizing;
-  partiallySync = this.wallet.partiallySync;
 
-  cols: any = 2;
-  public isOpened = false;
+  public synchronizing = this.wallet.synchronizing;
+  public partiallySync = this.wallet.partiallySync;
+
+  public cols: any = Math.ceil(window.innerWidth / 350);
+
   public title = 'Wallet';
-  public isExitTap = false;
   public isSearch = false;
   public filtredTitles = [];
-  public navLinks = [{
-    name: 'Wallet',
-    link: ['/navigator', {outlets: {navigator: ['wallet']}}],
-    isSelected: true,
-    isActive: true
-  }, {
-    name: 'Exchange',
-    link: '',
-    isSelected: false,
-    isActive: false
-  }, {
-    name: 'ICO',
-    link: '',
-    isSelected: false,
-    isActive: false
-  }, {
-    name: 'Portfolio Investment',
-    link: '',
-    isSelected: false,
-    isActive: false
-  }, {
-    name: 'Verification',
-    link: '',
-    isSelected: false,
-    isActive: false
-  }, {
-    name: 'Settings',
-    link: ['/navigator', {outlets: {navigator: ['settings']}}],
-    isSelected: false,
-    isActive: true
-  }, {
-    name: 'Exit',
-    link: ['/start'],
-    isSelected: false,
-    isActive: true
-  }];
-  public titles: any = [
+
+  public staticTitles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
@@ -77,35 +41,48 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
   ];
 
+  public titles: any = [];
+
+  private _filterValue = '';
+
   private tileBalanceInfo = {};
 
-  @ViewChild('sidenav') sidenav;
   private subscriptions = [];
 
-  constructor(public dialog: MatDialog,
-              private readonly bt: BluetoothService,
-              private readonly ngZone: NgZone,
-              private readonly router: Router,
-              private readonly keychain: KeyChainService,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly wallet: WalletService) {
+  constructor(
+    private readonly keychain: KeyChainService,
+    private readonly navigationService: NavigationService,
+    private readonly currency: CurrencyService,
+    private readonly wallet: WalletService,
+    private readonly bt: BluetoothService
+  ) {
+    const titles = this.staticTitles;
+
     keychain.topTokens.forEach((tokenInfo) => {
-      this.titles.push(this.tokenEntry(tokenInfo));
+      titles.push(WalletComponent.tokenEntry(tokenInfo));
     });
 
-    this.titles.push(
+    titles.push(
       {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test}
     );
+
+    this.titles = titles;
 
     this.filtredTitles = this.titles;
   }
 
-  public _filterValue = '';
+  async ngOnInit() {
+    if (!this.bt.connected.getValue()) {
+      await this.goToSync();
+    }
+  }
 
   get filterValue() {
     return this._filterValue;
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   set filterValue(newUserName) {
@@ -120,11 +97,15 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }
 
-  clearFilterValue() {
+  public onNavRequest() {
+    this.navigationService.toggleNavigation();
+  }
+
+  public clearFilterValue() {
     this.filterValue = '';
   }
 
-  public tokenEntry(tokenInfo: TokenEntry) {
+  public static tokenEntry(tokenInfo: TokenEntry) {
     return {
       title: tokenInfo.name,
       symbols: tokenInfo.ico,
@@ -135,78 +116,46 @@ export class WalletComponent implements OnInit, OnDestroy {
     };
   }
 
-  ngOnInit() {
-    this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBackClicked();
-      })
-    );
-
-    this.onResize();
-  }
-
-  ngOnDestroy() {
+  public ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }
 
-  public async onNav(navLink) {
-    await this.router.navigate(navLink.link);
+  public  async onTileClicked(coin: Coin) {
+    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
+    componentRef.instance.currency = coin;
   }
 
-  public toggle() {
-    this.isOpened = !this.isOpened;
-  }
-
-  async onTileClicked(coin: Coin) {
-    console.log(coin);
-    await this.router.navigate(['/navigator', {outlets: {'navigator': ['currency', coin]}}]);
-  }
-
-  async toggleSearch(value) {
+  public toggleSearch(value) {
     this.isSearch = value;
     this.clearFilterValue();
   }
 
-  async onBackClicked() {
+  public async onBackClicked() {
     if (this.isSearch) {
       this.filterValue = '';
       this.isSearch = false;
-    } else if (this.isOpened) {
-      console.log('isOpened');
-      this.sidenav.toggle();
-    } else if (this.isExitTap) {
-      console.log('isExitTap');
-      this.notification.hide();
-      await this.router.navigate(['/start']);
-    } else {
-      console.log('await');
-      this.notification.show('Tap again to exit');
-      this.isExitTap = true;
-      setTimeout(() => this.ngZone.run(() => {
-        this.isExitTap = false;
-      }), 3000);
     }
   }
 
-  onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
+  public async goToSync() {
+    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    componentRef.instance.connected.subscribe(device => {
+      this.navigationService.acceptOverlay();
+      console.log('Connected to', device);
+    })
   }
 
-  async goToSync() {
-    await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
-  }
-
-  async cancelSync() {
+  public async cancelSync() {
     await this.openDialog();
   }
 
-  async openDialog() {
+  public async openDialog() {
     navigator.notification.confirm(
       'Syncronize with another device',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+          await this.goToSync();
         }
       },
       '',

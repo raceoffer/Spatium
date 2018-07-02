@@ -1,0 +1,17 @@
+<app-toolbar
+  label="Graphic key"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-graphic-key
+    class="factor-content"
+    (submit)="onSubmit($event)">
+  </app-graphic-key>
+</div>

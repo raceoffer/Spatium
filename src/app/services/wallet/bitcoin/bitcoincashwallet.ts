@@ -2,6 +2,7 @@ import { BitcoreWallet } from './bitcorewallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
 import { NgZone } from '@angular/core';
+import * as CashAddr from 'cashaddrjs';
 
 import { BitcoinCashTransaction, BitcoinCashWallet as CoreBitcoinCashWallet } from 'crypto-core-async';
 
@@ -31,9 +32,12 @@ export class BitcoinCashWallet extends BitcoreWallet {
     );
   }
 
-  public verifyAddress(address: string) : boolean {
-    return address &&
-           (super.verifyAddress(address) ||
-            /^(bitcoincash:|bchtest:|bchreg:)[pq]([a-zA-Z0-9]{41})$/.test(address) );
+  public verifyAddress(address: string, symbol: string) : boolean {
+    try {
+      CashAddr.decode(address);
+      return true;
+    } catch (ignored) {
+      return super.verifyAddress(address, symbol);
+    }
   }
 }

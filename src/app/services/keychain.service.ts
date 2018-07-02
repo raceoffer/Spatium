@@ -6,6 +6,7 @@ export enum Coin {
   BTC = 0,
   BTC_test = 1,
   LTC = 2,
+  NEM = 43,
   ETH = 60,
   BCH = 145
 }
@@ -140,7 +141,6 @@ export class TokenEntry {
 @Injectable()
 export class KeyChainService {
   public readonly topTokens = [
-    new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos', 18),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron', 6),
     new TokenEntry(Token.VECHAIN, 'VeChain', 'VEN', '0xd850942ef8811f2a866692a623011bde52a462c1', 'veChain', 18),
     new TokenEntry(Token.ICON, 'ICON', 'ICX', '0xb5a5f22694352c15b00323844ad545abb2b11028', 'icon', 18),

@@ -1,0 +1,33 @@
+<div fxLayout="column" fxLayoutAlign="center center" class="content text-center" style="height:246px;">
+  <div class="width-button-container text-center" *ngIf="!(enabled | async)">
+    <div class="connect-text">
+      <span>Turn on NFC to proceed</span>
+    </div>
+
+    <button mat-fab  class="width-button">
+      <mat-icon (click)="toggleNfc()">nfc
+      </mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="(enabled | async)">
+    <div style="height: 204px;"
+      class="small-video-container"
+      fxLayout="column"
+      fxLayoutAlign="center center"
+      *ngIf="value && value.length > 0">
+      <mat-icon
+        style="width: 200px; height: 200px; font-size: 200px;" class="pulse">
+        nfc
+      </mat-icon>
+    </div>
+
+    <span *ngIf="value">
+      Touch an NFC tag
+    </span>
+
+    <div *ngIf="!value">
+      <mat-spinner color="accent"></mat-spinner>
+    </div>
+  </div>
+</div>

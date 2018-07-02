@@ -1,0 +1,28 @@
+<app-toolbar
+  [label] = "project.title"
+  [isColored] = "true"
+  [isShadowed] = "true"
+  (backClicked) = "onBack()"></app-toolbar>
+
+<div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
+  <div class="text-field">
+    <div class="header">About</div>
+    <p class="about text">
+      Something about the project
+    </p>
+    <div class="header">Balances</div>
+    <p class="balances text">
+      Something about balances
+    </p>
+    <div class="header">Transactions</div>
+    <p class="transactions text">
+      Something about transactions
+    </p>
+  </div>
+  <div class="form-field">
+    <div class="form-field-input">
+      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="whitelist()">Whitelist me</button>
+      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments</button>
+    </div>
+  </div>
+</div>

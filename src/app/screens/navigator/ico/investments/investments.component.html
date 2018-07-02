@@ -1,0 +1,207 @@
+<app-toolbar
+  *ngIf="investor"
+  [label]="title"
+  [isColored]="true"
+  [isShadowed]="true"
+  (backClicked)="onBack()"></app-toolbar>
+
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!selector && !investor">
+  <button mat-icon-button (click)="onBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <span>{{title}}</span>
+
+  <span class="spacer"></span>
+
+  <button mat-button mat-icon-button *ngIf="!transaction" [matMenuTriggerFor]="filters">
+    <mat-icon>filter_list</mat-icon>
+  </button>
+
+  <mat-menu #filters="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="validation">Validation</button>
+    <button mat-menu-item [matMenuTriggerFor]="resolution">Resolution</button>
+  </mat-menu>
+
+  <mat-menu #validation>
+    <mat-radio-group [(ngModel)]="filter_name[0]" class="filter-menu">
+      <mat-radio-button *ngFor="let validation of validation_types" [value]="validation" (change)="filter(validation.criterion + ' && ' + filter_name[1].criterion)">
+        {{validation.name}}
+      </mat-radio-button>
+    </mat-radio-group>
+  </mat-menu>
+
+  <mat-menu #resolution>
+    <mat-radio-group [(ngModel)]="filter_name[1]" class="filter-menu">
+      <mat-radio-button *ngFor="let resolution of resolution_types" [value]="resolution" (change)="filter(resolution.criterion + ' && ' + filter_name[0].criterion)">
+        {{resolution.name}}
+      </mat-radio-button>
+    </mat-radio-group>
+  </mat-menu>
+
+</mat-toolbar>
+
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="selector && !investor">
+  <button mat-icon-button (click)="longPress($event)">
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <span>{{'Selected(' + counter + ')'}}</span>
+
+  <span class="spacer"></span>
+
+  <button mat-button mat-icon-button
+  (click)="eachTransaction('chosen', 'transaction.from === transaction.valid_from && transaction.to === transaction.valid_to')">
+    <mat-icon>add_circle_outline</mat-icon>
+  </button>
+  <button mat-button mat-icon-button
+  (click)="eachTransaction('chosen', 'transaction.from !== transaction.valid_from || transaction.to !== transaction.valid_to')">
+    <mat-icon>remove_circle_outline</mat-icon>
+  </button>
+  <button mat-button mat-icon-button (click)="eachTransaction('chosen', true)">
+    <mat-icon>select_all</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div *ngIf="!transaction" class="currency-component box" fxLayout="column" style="place-content: normal !important">
+
+  <mat-list *ngIf="!investor" class="text-center" [class.transactions-list]="selector">
+    <mat-list-item
+      class="list-item"
+      *ngFor="let transaction of filtered_input"
+      (click)="selector?(!transaction.handled && check($event, transaction)):popUpDetails(transaction)"
+      (longpress)="selector?check($event,transaction):longPress($event)">
+      <div style="width: 20%; text-align: -webkit-center;">
+        <mat-checkbox *ngIf="selector && (transaction.confirmations > 5) && !transaction.handled" [(ngModel)]="transaction.chosen"></mat-checkbox>
+        <div *ngIf="!selector" class="logo {{transaction.coin}} big-logo"></div>
+      </div>
+      <div class="center-row list-label">
+        <div matLine class="data-row">
+          <span class="label">received from</span>
+          <span class="label"> {{ transaction.date }}</span>
+        </div>
+        <span matLine
+        class="transaction-address"
+        [class.red]="(transaction.from !== transaction.valid_from || transaction.to !== transaction.valid_to)"
+        [class.green]="transaction.from === transaction.valid_from && transaction.to === transaction.valid_to">
+        {{ structuredAddress(transaction.from) }}
+        </span>
+        <div matLine class="price-label data-row">
+          <div>
+            <span
+              class="transaction-amount">
+              {{transaction.amount}}
+            </span>
+            <span class="ticker">{{ transaction.symbol }}</span>
+          </div>
+          <div *ngIf="transaction.handled">
+            <div *ngIf="transaction.handled.type === 'approved'">
+              <span
+                class="transaction-amount">
+                {{transaction.handled.amount}}
+              </span>
+              <span class="ticker">{{ transaction.handled.ticker }}</span>
+            </div>
+            <span *ngIf="transaction.handled.type === 'refunded'" class="transaction-amount">Refunded</span>
+          </div>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+    </mat-list-item>
+  </mat-list>
+
+
+  <mat-list *ngIf="investor" class="text-center">
+    <mat-list-item
+      class="list-item"
+      *ngFor="let transaction of output_tx"
+      (click)="popUpDetails(transaction)">
+      <div style="width: 20%; text-align: -webkit-center;">
+        <div class="logo {{transaction.coin}} big-logo"></div>
+      </div>
+      <div class="center-row list-label">
+        <div matLine class="data-row">
+          <span class="label">sent to</span>
+          <span class="label"> {{ transaction.date }}</span>
+        </div>
+        <span matLine
+        class="transaction-address">
+        {{ structuredAddress(transaction.to) }}
+        </span>
+        <div matLine class="price-label data-row">
+          <div>
+            <span
+              class="transaction-amount">
+              {{transaction.amount}}
+            </span>
+            <span class="ticker">{{ transaction.symbol }}</span>
+          </div>
+          <div *ngIf="transaction.handled">
+            <div *ngIf="transaction.handled.type === 'approved'">
+              <span
+                class="transaction-amount">
+                {{transaction.handled.amount}}
+              </span>
+              <span class="ticker">{{ transaction.handled.ticker }}</span>
+            </div>
+            <span *ngIf="transaction.handled.type === 'refunded'" class="transaction-amount">Refunded</span>
+          </div>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+    </mat-list-item>
+  </mat-list>
+
+  <div class="footer" *ngIf="selector">
+    <button type="button" mat-raised-button color="accent" class="width-button-full color right" (click)="acceptTransaction()">Approve</button>
+    <button type="button" mat-raised-button color="accent" class="width-button-full color left" (click)="rejectTransaction()">Decline</button>
+  </div>
+</div>
+
+<div class="currency-component box" fxLayout="column" *ngIf="transaction">
+  <div class="transactions-list">
+    <div class="data-row details" style="flex-direction: column">
+      <div class="row-elem">
+        <span class="label medium">Date</span><br/>
+        <span class="transaction-time"> {{ transaction.raw_date*1000 | date: 'medium' }}</span>
+      </div>
+      <div class="row-elem">
+        <span class="label medium">Status</span><br/>
+        <span class="transaction-time"> {{ transaction.confirmations + " confirmations"}}</span>
+      </div>
+      <div class="row-elem">
+        <span class="label medium">{{!investor?'Received':'Sent'}}</span><br/>
+        <div style="display: inline-flex; align-items: center">
+          <div class="logo {{transaction.coin}}" style="height: 30px"></div>
+          <div class="price-label">
+            <span class="transaction-amount" style="font-size: 20px !important">
+              {{transaction.amount}}
+            </span>
+            <span style="font-size: 14px; color: gray;"> {{ transaction.symbol }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row-elem" (click)="copy(transaction.from)">
+        <span class="label medium">From</span><br/>
+        <span class="transaction-address">{{ structuredAddress(transaction.from) }}</span><br/>
+        <span *ngIf="!investor && transaction.from !== transaction.valid_from" class="label red">Sender address is not in whitelist</span>
+      </div>
+      <div class="row-elem" (click)="copy(transaction.to)">
+        <span class="label medium">To</span><br/>
+        <span class="transaction-address">{{ structuredAddress(transaction.to) }}</span><br/>
+        <span *ngIf="!investor && transaction.to !== transaction.valid_to" class="label red">Recipient address does not match the one allotted to the sender address</span>
+      </div>
+      <div class="row-elem">
+        <span class="label medium">Transaction ID</span><br/>
+        <span class="transaction-address"> {{ transaction.id }}</span>
+      </div>
+      <div style="align-self: center;">
+        <a href="https://chain.so/tx/BTC/{{transaction.id}}">View in a blockchain explorer</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer" *ngIf="!investor">
+    <button type="button" mat-raised-button color="accent" class="width-button-full color right" (click)="acceptTransaction()">Approve</button>
+    <button type="button" mat-raised-button color="accent" class="width-button-full color left" (click)="rejectTransaction()">Decline</button>
+  </div>
+</div>

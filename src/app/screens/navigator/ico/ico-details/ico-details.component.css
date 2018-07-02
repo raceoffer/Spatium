@@ -1,0 +1,55 @@
+.header {
+  font-family: 'Roboto-Medium';
+  margin: 0;
+  margin-top: 12px;
+}
+
+.text {
+  font-family: 'Roboto-Light';
+  font-size: 0.8rem;
+  margin: 10px 0;
+}
+
+.coin {
+  display: flex;
+  position: absolute;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.form-field-input {
+  margin: 12px;
+  width: auto;
+}
+
+.form-field-select {
+  margin: 12px;
+  width: auto;
+}
+
+.coin-amount {
+  text-align: center;
+  font-family: 'Roboto-Light';
+  font-size: 18px;
+  width: 100%;
+  height: 30px;
+  margin: 10px 0;
+  background-color: #e7e8eb;
+  border: 0;
+  border-radius: 3px !important;
+  outline: none;
+}
+
+.import {
+  width: 100%;
+}
+
+.text-field {
+  flex: 1 1 auto;
+  word-break: break-all;
+}
+
+.form-field {
+  position: relative;
+  flex: 0 1 auto;
+}

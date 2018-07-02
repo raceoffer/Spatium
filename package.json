@@ -25,6 +25,7 @@
     "@angular/platform-browser": "^6.0.2",
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/router": "^6.0.2",
+    "ajv": "^6.0.0",
     "angular2-qrcode": "^2.0.1",
     "core-js": "^2.4.1",
     "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git",
@@ -33,6 +34,7 @@
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",
     "rxjs": "^6.1.0",
     "text-encoding": "^0.6.4",
+    "wallet-address-validator": "^0.1.7",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
