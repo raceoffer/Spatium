@@ -47,6 +47,12 @@ export class NavigationService {
     return this.overlayStack.length;
   }
 
+  public clearOverlayStack() {
+    while(this.overlayCount > 0) {
+      this.popOverlay();
+    }
+  }
+
   public pushOverlay(ComponentType, fullscreen = true): ComponentRef<typeof ComponentType> {
     const config = new OverlayConfig();
 

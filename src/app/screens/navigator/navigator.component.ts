@@ -149,9 +149,7 @@ export class NavigatorComponent implements OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
 
-    while(this.navigationService.overlayCount > 0) {
-      this.navigationService.popOverlay();
-    }
+    this.navigationService.clearOverlayStack();
 
     await this.wallet.reset();
     await this.keychain.reset();
