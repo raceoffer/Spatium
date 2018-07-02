@@ -32,9 +32,13 @@ export class AppComponent implements OnInit, OnDestroy {
         await this.logger.logBufferToLog();
       }));
 
+    const lastLogData = await this.logger.getLastLogData();
     await this.logger.createSessionLog();
     await this.logger.deleteOldLogFiles();
     hockeyapp.start(null, null, this.hockeyService.appId, true, hockeyapp.CHECK_MANUALLY, false, true);
+    if (lastLogData) {
+      hockeyapp.addMetaData(null, null, lastLogData);
+    }
   }
 
   onActivity() {
