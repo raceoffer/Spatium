@@ -45,7 +45,6 @@
         <preference name="loadUrlTimeoutValue" value="700000" />
         <custom-config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.CAMERA" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
         </custom-config-file>
     </platform>
     <engine name="browser" spec="^5.0.2" />
