@@ -35,7 +35,8 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   public busy = false;
 
-  public touchAvailable = new BehaviorSubject<any>(false);
+  public touchAvailable = new BehaviorSubject<boolean>(false);
+  public touchExisting = new BehaviorSubject<boolean>(false);
 
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
@@ -56,8 +57,13 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-    this.touchAvailable.next(await this.checkAvailable() && await this.checkExisting());
+    try {
+      const encryptedSeed = Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex');
+      this.fileData.next(encryptedSeed);
+    } catch {}
+
+    this.touchAvailable.next(await this.checkAvailable());
+    this.touchExisting.next(await this.checkExisting());
   }
 
   async checkAvailable() {
@@ -130,7 +136,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
-      if (this.touchAvailable) {
+      if (this.touchExisting.getValue()) {
         await this.delete();
       }
 
@@ -162,7 +168,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
         await this.router.navigate(['/verifier']);
       } else {
-        if (this.touchAvailable) {
+        if (this.touchAvailable.getValue()) {
           try {
             if (await this.saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);
