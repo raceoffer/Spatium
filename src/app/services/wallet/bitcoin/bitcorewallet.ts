@@ -53,7 +53,7 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
     await super.finishSync(data);
 
     this.wallet = await this.Wallet.fromOptions({
-      key: this.publicKey,
+      point: this.publicKey,
       network: this.network,
       endpoint: this.endpoint,
     });

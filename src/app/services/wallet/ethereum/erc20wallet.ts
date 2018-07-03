@@ -60,7 +60,7 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
 
     this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      key: this.publicKey,
+      point: this.publicKey,
       network: this.network,
       contractAddress: this.contractAddress,
       decimals: this.decimals,
@@ -96,7 +96,7 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
 
     this.wallet = await CoreERC20Wallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      key: this.publicKey,
+      point: this.publicKey,
       contractAddress: this.contractAddress,
       network: this.network,
       decimals: this.decimals,

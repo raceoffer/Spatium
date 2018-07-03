@@ -5,6 +5,8 @@ import { LoggerService } from '../../logger.service';
 
 import { filter, take, map, takeUntil } from 'rxjs/operators';
 
+import { Marshal } from 'crypto-core-async';
+
 export enum SynchronizationStatus {
   None = 0,
   Started,
@@ -43,43 +45,50 @@ export class SyncSession implements OnDestroy {
     this.initialCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'initialCommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.initialDecommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'initialDecommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.verifierCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'verifierCommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.proverCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'proverCommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.verifierDecommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'verifierDecommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.proverDecommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'proverDecommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  private async send(msg, obj) {
+    return await this.bt.send(JSON.stringify({
+      type: msg,
+      content: Marshal.wrap(obj)
+    }))
   }
 
   public async cancel() {
@@ -105,7 +114,7 @@ export class SyncSession implements OnDestroy {
 
     let prover = null;
     try {
-      prover = this.compoundKey.startSyncSession()
+      prover = await this.compoundKey.startSyncSession()
     } catch (e) {
       return this.handleFailure('Failed to start sync session', e);
     }
@@ -121,10 +130,7 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'initialCommitment',
-        content: initialCommitment
-      }))) {
+    if (!await this.send('initialCommitment', initialCommitment)) {
       return this.handleFailure('Failed to send initialCommitment', null);
     }
 
@@ -150,10 +156,7 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'initialDecommitment',
-        content: initialDecommitment
-      }))) {
+    if (!await this.send('initialDecommitment', initialDecommitment)) {
       return this.handleFailure('Failed to send initialDecommitment', null);
     }
 
@@ -180,10 +183,7 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'verifierCommitment',
-        content: verifierCommitment
-      }))) {
+    if (!await this.send('verifierCommitment', verifierCommitment)) {
       return this.handleFailure('Failed to send verifierCommitment', null);
     }
 
@@ -208,10 +208,7 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'proverCommitment',
-        content: proverCommitment
-      }))) {
+    if (!await this.send('proverCommitment', proverCommitment)) {
       return this.handleFailure('Failed to send proverCommitment', null);
     }
 
@@ -237,10 +234,7 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'verifierDecommitment',
-        content: verifierDecommitment
-      }))) {
+    if (!await this.send('verifierDecommitment', verifierDecommitment)) {
       return this.handleFailure('Failed to send verifierDecommitment', null);
     }
 
@@ -262,10 +256,7 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'proverDecommitment',
-        content: proverDecommitment
-      }))) {
+    if (!await this.send('proverDecommitment', proverDecommitment)) {
       return this.handleFailure('Failed to send proverDecommitment', null);
     }
 

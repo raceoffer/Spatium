@@ -266,11 +266,11 @@ export class WalletService {
 
       console.log('Received remote sessionkey', remoteSessionKey.toString('hex'));
 
-      const compound = sha256(Buffer.concat([remoteSessionKey, this.sessionKey]));
+      const compound = await sha256(Buffer.concat([remoteSessionKey, this.sessionKey]));
 
       console.log('Session fingerprint is', compound.toString('hex'));
 
-      if (compound.equals(this.compoundSessionKey)) {
+      if (this.compoundSessionKey && compound.equals(this.compoundSessionKey)) {
         console.log('Session fingerprint is okay');
         this.synchronizatonStatus.next(SyncStatus.HandshakeReady);
         return;
@@ -313,7 +313,7 @@ export class WalletService {
 
       console.log('Received new remote sessionkey', newRemoteSessionKey.toString('hex'));
 
-      this.compoundSessionKey = sha256(Buffer.concat([newRemoteSessionKey, this.sessionKey]));
+      this.compoundSessionKey = await sha256(Buffer.concat([newRemoteSessionKey, this.sessionKey]));
 
       console.log('New session fingerprint is', this.compoundSessionKey.toString('hex'));
 

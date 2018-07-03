@@ -52,7 +52,7 @@ export class EthereumWallet extends EcdsaCurrencyWallet {
 
     this.wallet = await CoreEthereumWallet.fromOptions({
       infuraToken: 'DKG18gIcGSFXCxcpvkBm',
-      key: this.publicKey,
+      point: this.publicKey,
       network: this.network,
       endpoint: this.endpoint,
     });

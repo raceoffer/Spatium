@@ -81,17 +81,12 @@ export class NavigatorComponent implements OnDestroy {
     this.subscriptions.push(
       this.bt.connectedEvent.subscribe(async () => {
         await this.wallet.startHandshake();
-        await this.router.navigate(['/navigator', {outlets: {'navigator': ['wallet']}}]);
+        await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
       this.bt.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
-      }));
-
-    this.subscriptions.push(
-      this.wallet.resyncEvent.subscribe(async () => {
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
       }));
 
     this.subscriptions.push(
@@ -149,7 +144,6 @@ export class NavigatorComponent implements OnDestroy {
 
     await this.wallet.reset();
     await this.keychain.reset();
-    await this.wallet.resetSession();
     await this.bt.disconnect();
   }
 }

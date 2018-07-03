@@ -102,6 +102,7 @@ export class VerifierComponent implements OnInit {
       this.bt.connectedEvent.subscribe(async () => {
         await this.bt.stopListening();
         await this.wallet.startHandshake();
+        await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
