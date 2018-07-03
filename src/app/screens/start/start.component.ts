@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation.service';
+import { AuthService } from '../../services/auth.service';
 import { DeviceService, Platform } from '../../services/device.service';
 
 declare const navigator: any;
@@ -20,12 +21,14 @@ export class StartComponent implements OnInit, OnDestroy {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly router: Router,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly auth: AuthService,
   ) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
+    this.auth.theUserHasDeclinedSyncronization = false;
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
 

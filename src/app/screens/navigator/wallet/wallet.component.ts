@@ -3,6 +3,7 @@ import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
+import { AuthService } from '../../../services/auth.service';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
@@ -54,7 +55,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly bt: BluetoothService
+    private readonly bt: BluetoothService,
+    private readonly auth: AuthService,
   ) {
     const titles = this.staticTitles;
 
@@ -72,7 +74,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    if (!this.bt.connected.getValue()) {
+    if (!this.bt.connected.getValue() && !this.auth.theUserHasDeclinedSyncronization) {
       await this.goToSync();
     }
   }

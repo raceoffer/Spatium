@@ -4,6 +4,7 @@ import { BluetoothService, Device } from '../../../services/bluetooth.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { map, take, takeUntil } from "rxjs/operators";
 import { NotificationService } from "../../../services/notification.service";
+import { AuthService } from "../../../services/auth.service";
 
 @Component({
   selector: 'app-waiting',
@@ -49,7 +50,8 @@ export class WaitingComponent {
   constructor(
     private readonly bt: BluetoothService,
     private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly auth: AuthService,
   ) {}
 
   async ngOnInit() {
@@ -96,6 +98,7 @@ export class WaitingComponent {
 
   onBack() {
     this.cancel.next(true);
+    this.auth.theUserHasDeclinedSyncronization = true;
     this.navigationService.back();
   }
 }

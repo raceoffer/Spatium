@@ -43,6 +43,8 @@ export class AuthService {
   public idFactors = new Map<IdFactor, Factor>();
   public authFactors = new Map<AuthFactor, Factor>();
 
+  public theUserHasDeclinedSyncronization = false;
+
   constructor(
     private readonly deviceService: DeviceService,
     private readonly workerService: WorkerService
