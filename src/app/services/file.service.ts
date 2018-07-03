@@ -79,7 +79,7 @@ export class FileService {
             };
             reader.readAsText(file);
           });
-        }, reject);
+        }, () => resolve(null));
       });
     });
   }
