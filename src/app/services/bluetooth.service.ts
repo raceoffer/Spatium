@@ -101,7 +101,9 @@ export class BluetoothService {
 
     cordova.plugins.bluetooth.setConnectedCallback((device) => this.ngZone.run(async () => {
       this.connectedDevice.next(device ? Device.fromJSON(device) : null);
-      await cordova.plugins.bluetooth.startReading();
+      if (device) {
+        await cordova.plugins.bluetooth.startReading();
+      }
     }));
 
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
@@ -181,7 +183,9 @@ export class BluetoothService {
       if (!await cordova.plugins.bluetooth.getListening()) {
         return false;
       }
+
       await cordova.plugins.bluetooth.stopListening();
+
       return true;
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to stop listening', e);

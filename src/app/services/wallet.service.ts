@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject, timer } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
+import { filter, map, mapTo } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
 import { CurrencyService } from './currency.service';
@@ -88,13 +88,7 @@ export class WalletService {
   private sessionKey = null;
   private compoundSessionKey = null;
 
-  private currencyWallet: CurrencyWallet = null;
-  private tx: any = null;
-  private isTransactionReconnect = false;
-  private isPartnerFully = false;
-
-  private coinIndex = 0;
-  private tokenIndex = 0;
+  private paillierKeys = null;
 
   constructor(
     private readonly bt: BluetoothService,
@@ -195,24 +189,13 @@ export class WalletService {
     });
 
     this.ready.next(true);
-      }
-
-  public async trySignTransaction(currencyWallet: CurrencyWallet, tx: any) {
-
-    }
+  }
 
   public async reset() {
-    console.log('reset');
     if (this.status.getValue() === WalletStatus.None) {
       return;
     }
 
-    this.coinIndex = 0;
-    this.tokenIndex = 0;
-    this.currencyWallet = null;
-    this.tx = null;
-    this.isTransactionReconnect = null;
-    this.changeStatus();
     this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
@@ -330,30 +313,34 @@ export class WalletService {
 
       this.synchronizing.next(true);
 
-      const paillierKeys = await CompoundKeyEcdsa.generatePaillierKeys(this.workerService.worker);
+      if (!this.paillierKeys) {
+        this.paillierKeys = await CompoundKeyEcdsa.generatePaillierKeys(this.workerService.worker);
+      }
 
       this.setProgress(0.1);
 
-      this.coinIndex = 0;
+      let coinIndex = 0;
       for (const wallet of Array.from(this.coinWallets.values())) {
         if (!this.synchronizing.getValue()) {
           return;
         }
 
         if (!wallet.ready.getValue()) {
+          await wallet.reset();
           const sub = wallet.syncProgress.subscribe(num => {
-            this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
+            this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
           });
-          this.changeStatus();
-          await wallet.sync({ paillierKeys });
+          await wallet.sync({ paillierKeys: this.paillierKeys });
           sub.unsubscribe();
         } else {
-          console.log('skip');
-          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.coinWallets.size);
+          this.setProgress(0.1 + 0.8 * (coinIndex + 1) / this.coinWallets.size);
         }
+
         await timer(100).toPromise();
 
-        this.coinIndex++;
+        this.synchronizedCurrencies.next(coinIndex + 1);
+
+        coinIndex++;
       }
 
       if (!this.synchronizing.getValue()) {
@@ -362,62 +349,34 @@ export class WalletService {
 
       const ethWallet = this.coinWallets.get(Coin.ETH);
 
-      this.tokenIndex = 0;
+      let tokenIndex = 0;
       for (const wallet of Array.from(this.tokenWallets.values())) {
         if (!this.synchronizing.getValue()) {
           return;
         }
 
         if (!wallet.ready.getValue()) {
+          await wallet.reset();
           await wallet.syncDuplicate(ethWallet);
-          this.setProgress(0.9 + 0.1 * (this.tokenIndex + 1) / this.tokenWallets.size);
-          this.changeStatus();
-        } else {
-          console.log('skip');
-          this.setProgress(0.1 + 0.8 * (this.coinIndex + 1) / this.tokenWallets.size);
         }
 
-        this.tokenIndex++;
+        this.setProgress(0.9 + 0.1 * (tokenIndex + 1) / this.tokenWallets.size);
+        this.synchronizedCurrencies.next(this.coinWallets.size + tokenIndex + 1);
+
+        tokenIndex++;
       }
 
+      this.synchronizatonStatus.next(SyncStatus.None);
       this.setProgress(1);
-
-      if (this.synchronizing.getValue()) {
-        console.log('fully sync');
-
-        await this.bt.send(JSON.stringify({
-          type: 'fullySynced',
-          content: {}
-        }));
-
-        this.synchronizing.next(false);
-        this.changeStatus();
-        this.bt.disconnect();
-      }
     } catch (e) {
       console.log(e);
-      this.synchronizing.next(false);
-      this.changeStatus();
-      this.bt.disconnect();
-    }
-  }
-
-  public changeStatus() {
-    if (this.coinIndex === this.coinWallets.size && this.tokenIndex === this.tokenWallets.size) {
-      this.status.next(WalletStatus.Fully);
-    } else {
-      if (this.coinIndex !== 0 || this.tokenIndex !== 0) {
-        this.status.next(WalletStatus.Partially);
-      } else {
-        this.status.next(WalletStatus.None);
-      }
     }
   }
 
   public async cancelSync() {
     this.cancelSubject.next(true);
     this.synchronizatonStatus.next(SyncStatus.None);
-    }
+  }
 
   createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
     this.tokenWallets.set(

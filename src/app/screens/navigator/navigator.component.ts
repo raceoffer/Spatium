@@ -95,12 +95,6 @@ export class NavigatorComponent implements OnDestroy {
       }));
 
     this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
-      })
-    );
-
-    this.subscriptions.push(
       this.navigationService.navigationEvent.subscribe(() => {
         this.toggleNavigation();
       })

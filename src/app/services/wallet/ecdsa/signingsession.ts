@@ -5,6 +5,8 @@ import { LoggerService } from '../../logger.service';
 
 import { filter, take, map, takeUntil } from 'rxjs/operators';
 
+import { Marshal } from 'crypto-core-async';
+
 export enum TransactionStatus {
   None = 0,
   Started,
@@ -42,25 +44,32 @@ export class SignSession implements OnDestroy {
     this.entropyCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'entropyCommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.entropyDecommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'entropyDecommitment'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
 
     this.partialSignatureObsever =
       this.messageSubject.pipe(
         filter(object => object.type === 'partialSignature'),
-        map(object => object.content)
+        map(object => Marshal.unwrap(object.content))
       );
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  private async send(msg, obj) {
+    return await this.bt.send(JSON.stringify({
+      type: msg,
+      content: Marshal.wrap(obj)
+    }))
   }
 
   public get transaction() {
@@ -106,10 +115,7 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'entropyCommitment',
-        content: entropyCommitment
-      }))) {
+    if (!await this.send('entropyCommitment', entropyCommitment)) {
       return this.handleFailure('Failed to send entropyCommitment', null);
     }
 
@@ -135,10 +141,7 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'entropyDecommitment',
-        content: entropyDecommitment
-      }))) {
+    if (!await this.send('entropyDecommitment', entropyDecommitment)) {
       return this.handleFailure('Failed to send entropyDecommitment', null);
     }
 
@@ -184,10 +187,7 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.bt.send(JSON.stringify({
-        type: 'partialSignature',
-        content: partialSignature
-      }))) {
+    if (!await this.send('partialSignature', partialSignature)) {
       return this.handleFailure('Failed to send a partial signature', null);
     }
   }

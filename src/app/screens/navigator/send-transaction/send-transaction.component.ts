@@ -11,6 +11,8 @@ import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { BluetoothService } from "../../../services/bluetooth.service";
+import { WaitingComponent } from "../waiting/waiting.component";
 
 declare const cordova: any;
 
@@ -85,6 +87,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public currencyInfo: Info = null;
   public isToken = false;
 
+  public connected = this.bt.connected;
+
   public currencyWallet: CurrencyWallet = null;
 
   public ethWallet = this.walletService.currencyWallets.get(Coin.ETH);
@@ -114,6 +118,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly ngZone: NgZone,
+    private readonly bt: BluetoothService,
     private readonly walletService: WalletService,
     private readonly notification: NotificationService,
     private readonly currencyService: CurrencyService,
@@ -280,7 +285,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.feeField.setValue(
             this.currencyWallet.fromInternal(value),
             {emitEvent: false});
-        }
+          }
         }
         if (!this.feeUsdFocused) {
           if (this.currency in Token) {
@@ -291,7 +296,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             this.feeUsdField.setValue(
             this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
             {emitEvent: false});
-        }
+          }
         }
       })
     );
@@ -483,10 +488,20 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
     if (tx) {
       this.phase.next(Phase.Confirmation);
-      if (!await this.walletService.trySignTransaction(this.currencyWallet, tx)) {
+      if (this.connected.getValue()) {
+        await this.currencyWallet.requestTransactionVerify(tx);
+      } else {
+        await this.openConnectOverlay();
         this.phase.next(Phase.Creation);
       }
     }
+  }
+
+  public async openConnectOverlay() {
+    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    componentRef.instance.connected.subscribe(device => {
+      this.navigationService.acceptOverlay();
+    });
   }
 
   async cancelTransaction() {
