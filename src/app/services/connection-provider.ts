@@ -133,6 +133,12 @@ export class ConnectionProviderService {
     });
   }
 
+  public resetToggler(): void {
+    this.providers.forEach((value: Provider, key: ProviderType) => {
+      value.service.toggled.next(false);
+    });
+  }
+
   async toggleProvider(providerType: ProviderType) {
     try {
       await this.providers.get(providerType).service.toggleProvider();

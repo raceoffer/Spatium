@@ -36,6 +36,7 @@ export class NavigatorVerifierComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.wallet.reset();
+    await this.connectionProviderService.resetToggler();
     await this.connectionProviderService.disconnect();
     await this.connectionProviderService.stopListening();
   }

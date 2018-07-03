@@ -68,7 +68,7 @@ export class BluetoothService implements IConnectionProvider {
   public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
     distinctUntilChanged(equals),
     skip(1));
-  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(null);
+  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(new Array<Device>());
 
   public message: Subject<any> = new Subject<any>();
 

@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, fromEvent, merge, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { DiscoveryService } from './discovery.service';
@@ -93,7 +93,7 @@ export class ConnectivityService implements IConnectionProvider {
   public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
     distinctUntilChanged(equals),
     skip(1));
-  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(null);
+  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(new Array<Device>());
 
   public message = toReplaySubject(merge(
     this.socketClientService.message,
@@ -158,9 +158,9 @@ export class ConnectivityService implements IConnectionProvider {
     ]);
 
     if (this.discoveryService.advertising.getValue() === State.Stopped
-    || this.socketServerService.state.getValue() === State.Stopped) {
+      || this.socketServerService.state.getValue() === State.Stopped) {
       await this.discoveryService.stopAdvertising(),
-      await this.socketServerService.stop();
+        await this.socketServerService.stop();
     }
   }
 
