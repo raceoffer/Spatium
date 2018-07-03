@@ -32,6 +32,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
 import { NgInitDirective } from './directives/ng-init.directive';
+import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/bluetooth.component';
+import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
@@ -134,7 +136,9 @@ import { WorkerService } from './services/worker.service';
     QrReaderComponent,
     QrWriterComponent,
     MainComponent,
-    LoginComponentFactor
+    LoginComponentFactor,
+    BluetoothComponent,
+    ZeroconfComponent
   ],
   imports: [
     OverlayModule,

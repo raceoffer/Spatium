@@ -43,16 +43,6 @@ export class NotificationService {
     });
   }
 
-  public showWifiSettings(message: string) {
-    this.snackBarRef = this.snackBar.open(message, 'Settings', {duration: 3000});
-
-    this.snackBarRef.onAction().subscribe(() => {
-      // cordova.plugins.diagnostic.switchToSettings(); ios
-      cordova.plugins.diagnostic.switchToWifiSettings(); // android win
-      this.snackBarRef.dismiss();
-    });
-  }
-
   public hide() {
     this.snackBar.dismiss();
   }

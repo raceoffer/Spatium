@@ -1,14 +1,13 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, merge, Observable, timer, fromEvent } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, skip, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, fromEvent, merge, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/i-connectivity-provider';
+import { Device, equals } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { SocketClientService } from './socketclient.service';
 import { SocketServerService } from './socketserver.service';
-import { NotificationService } from './notification.service';
-import { Device } from './primitives/device';
 
 declare const cordova;
 declare const navigator;
@@ -16,8 +15,11 @@ declare const navigator;
 @Injectable()
 export class ConnectivityService implements IConnectionProvider {
 
+  public toggled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
+  public enabling: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Starting)), false);
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
   public enabledChanged: Observable<boolean> = this.enabled.pipe(distinctUntilChanged(), skip(1));
   public enabledEvent: Observable<any> = this.enabledChanged.pipe(filter(enabled => enabled), mapTo(null));
@@ -38,14 +40,15 @@ export class ConnectivityService implements IConnectionProvider {
     }),
     ConnectionState.None
   );
+  public connectionStateChanged: Observable<ConnectionState> = this.connectionState.pipe(distinctUntilChanged(), skip(1));
+
   public connected: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.connectionState.pipe(map(state => state === ConnectionState.Connected)),
-    false);
+    this.connectionState.pipe(map(state => state === ConnectionState.Connected)), false);
   public connectedChanged: Observable<any> = this.connected.pipe(distinctUntilChanged(), skip(1));
   public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
   public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
-  public connectionStateChanged: Observable<ConnectionState> = this.connectionState.pipe(distinctUntilChanged(), skip(1));
-  public serverState: BehaviorSubject<State> = toBehaviourSubject(
+
+  public listeningState: BehaviorSubject<State> = toBehaviourSubject(
     combineLatest([
       this.discoveryService.advertising,
       this.socketServerService.state
@@ -62,39 +65,47 @@ export class ConnectivityService implements IConnectionProvider {
     }),
     State.Stopped
   );
-  public starting: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Starting)), false);
-  public stopping: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Stopping)), false);
-  public listening: BehaviorSubject<boolean> = toBehaviourSubject(this.serverState.pipe(map(state => state === State.Started)), false);
+  public stopped: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Stopped)), false);
+  public starting: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Starting)), false);
+  public startingChanged: Observable<any> = this.starting.pipe(distinctUntilChanged(), skip(1));
+  public startingStoppedEvent: Observable<any> = this.startingChanged.pipe(filter(starting => !starting), mapTo(null));
+  public stopping: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Stopping)), false);
+  public listening: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Started)), false);
   public listeningChanged: Observable<any> = this.listening.pipe(distinctUntilChanged(), skip(1));
   public listeningStartedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => listening), mapTo(null));
   public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
+
   public discoveryState: BehaviorSubject<State> = this.discoveryService.discovering;
   public discovering: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.discoveryState.pipe(map(state => state === State.Started)),
-    false);
+    this.discoveryState.pipe(map(state => state === State.Started)), false);
   public discoveringChanged: Observable<any> = this.discovering.pipe(distinctUntilChanged(), skip(1));
   public discoveryStartedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => discovering), mapTo(null));
   public discoveryStoppedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
+
+  public discoverableState: BehaviorSubject<State> = this.discoveryService.advertising;
+  public discoverable: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.discoverableState.pipe(map(state => state === State.Started)), false);
+  public discoverableChanged: Observable<boolean> = this.discoverable.pipe(distinctUntilChanged(), skip(1));
+  public discoverableStartedEvent: Observable<any> = this.discoverableChanged.pipe(filter(discoverable => discoverable), mapTo(null));
+  public discoverableFinishedEvent: Observable<any> = this.discoverableChanged.pipe(filter(discoverable => !discoverable), mapTo(null));
+
+  public devices = this.discoveryService.devices;
+  public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
+    distinctUntilChanged(equals),
+    skip(1));
+  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(null);
+
   public message = toReplaySubject(merge(
     this.socketClientService.message,
     // in order to prevent a mess we ignore messages to the server while the client is connected
     this.socketServerService.message.pipe(filter(_ => !this.socketClientService.connected.getValue()))
   ), 1);
-  public devices = this.discoveryService.devices;
-  public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public awaitingEnable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
-  discoverableState: BehaviorSubject<State>;
-  discoverable: BehaviorSubject<boolean>;
-  discoverableChanged: Observable<boolean>;
-  discoverableStartedEvent: Observable<any>;
-  discoverableFinishedEvent: Observable<any>;
 
   online = fromEvent(document, 'online');
   offline = fromEvent(document, 'offline');
+  timer: any;
 
   constructor(private readonly ngZone: NgZone,
-              private readonly notification: NotificationService,
               private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
               private readonly discoveryService: DiscoveryService) {
@@ -104,59 +115,37 @@ export class ConnectivityService implements IConnectionProvider {
   // Server interface
 
   public async toggleProvider() {
-    if (!this.listening.getValue()) {
-      this.isToggler.next(true);
-      await cordova.plugins.diagnostic.isWifiAvailable(async (available) => {
-        console.log('WiFi is ' + (available ? 'available' : 'not available'));
-        if (available) {
-          const networkState = navigator.connection.type;
-          console.log(networkState);
-          if (networkState === 'wifi') {
-            await this.startListening();
-          } else {
-            this.notification.showWifiSettings('No WiFi connection');
-          }
-        } else {
-          await this.openRequestWiFiDialog();
+    if (!this.listening.getValue() && !this.toggled.getValue()) {
+      if (this.enabled.getValue() || this.enabling.getValue()) {
+        this.toggled.next(true);
+        if (this.enabled.getValue()) {
+          await this.startListening();
         }
-      }, (error) => {
-        console.error('The following error occurred: ' + error);
-      });
+      } else {
+        await this.openRequestWiFiDialog();
+      }
     } else {
+      this.toggled.next(false);
       await this.stopListening();
     }
   }
 
   async openRequestWiFiDialog() {
+    if (this.state.getValue() !== State.Stopped) {
+      return;
+    }
+
     navigator.notification.confirm(
       'An app wants to turn on WiFi',
-      buttonIndex => {
+      (buttonIndex) => {
         if (buttonIndex === 1) { // yes
-          cordova.plugins.diagnostic.setWifiState(async () => this.ngZone.run(async () => {
+          this.toggled.next(true);
+          cordova.plugins.diagnostic.setWifiState(() => {
             console.log('Wifi was enabled');
-            this.awaitingEnable.next(true);
-
-            const onlineEvent = await this.online.pipe(
-              takeUntil(timer(10000))
-            ).toPromise();
-
-            if (!onlineEvent) {
-              this.notification.showWifiSettings('No WiFi connection');
-              this.awaitingEnable.next(false);
-              this.isToggler.next(false);
-            } else {
-              const networkState = navigator.connection.type
-              console.log(networkState);
-              if (networkState === 'wifi') {
-                this.startListening();
-              }
-            }
-          }), (error) => {
+          }, (error) => {
             console.error('The following error occurred: ' + error);
+            this.toggled.next(false);
           }, true);
-        } else {
-          this.isToggler.next(false);
-          this.awaitingEnable.next(false);
         }
       },
       '',
@@ -170,11 +159,11 @@ export class ConnectivityService implements IConnectionProvider {
       this.discoveryService.startAdvertising()
     ]);
 
-    if (this.discoveryService.advertising.getValue() === State.Stopped) {
+    if (this.discoveryService.advertising.getValue() === State.Stopped
+    || this.socketServerService.state.getValue() === State.Stopped) {
+      await this.discoveryService.stopAdvertising(),
       await this.socketServerService.stop();
     }
-    this.isToggler.next(false);
-    this.awaitingEnable.next(false);
   }
 
   public async stopListening() {
@@ -182,8 +171,6 @@ export class ConnectivityService implements IConnectionProvider {
       await this.discoveryService.stopAdvertising(),
       await this.socketServerService.stop()
     ]);
-    this.isToggler.next(false);
-    this.awaitingEnable.next(false);
   }
 
   // Client interface
@@ -192,8 +179,11 @@ export class ConnectivityService implements IConnectionProvider {
     await this.discoveryService.searchDevices(duration);
   }
 
-  public connect(ip: string): void {
-    this.socketClientService.connect(ip);
+  public connect(device: Device): void {
+    if (device.ip != null) {
+      this.socketClientService.connect(device.ip);
+      this.connectedDevices.getValue().push(device);
+    }
   }
 
   // Mixed interface
@@ -202,6 +192,7 @@ export class ConnectivityService implements IConnectionProvider {
     // we assume that services perform noop if not connected
     this.socketClientService.disconnect();
     this.socketServerService.disconnect();
+    this.connectedDevices.next(new Array<Device>());
   }
 
   public send(message: any): void {
@@ -213,16 +204,49 @@ export class ConnectivityService implements IConnectionProvider {
     }
   }
 
+  public goToNetworkSettings() {
+    // cordova.plugins.diagnostic.switchToSettings(); ios
+    cordova.plugins.diagnostic.switchToWifiSettings(); // android win
+  }
+
+  timeout() {
+    this.timer = setTimeout(() => this.ngZone.run(() => {
+      this.checkWiFiState();
+      this.timeout();
+    }), 100);
+  }
+
   async enableDiscovery() {}
 
-  private async init() {
-    if (navigator.connection.type === 'wifi') {
-      this.state.next(State.Started);
-    }
-
-    this.offline.subscribe(() => {
+  private async checkWiFiState() {
+    await cordova.plugins.diagnostic.isWifiEnabled((available) => {
+      console.log(available);
+      if (available === 1) {
+        if (navigator.connection.type === 'wifi') {
+          this.state.next(State.Started);
+        } else {
+          this.state.next(State.Starting);
+        }
+      } else {
+        if (this.state.getValue() !== State.Stopped) {
+          this.state.next(State.Stopped);
+          this.devices.next(new Map<string, Device>());
+          this.toggled.next(false);
+          this.stopListening();
+        }
+      }
+    }, (error) => {
+      console.error('The following error occurred: ' + error);
       this.state.next(State.Stopped);
+      this.devices.next(new Map<string, Device>());
+      this.toggled.next(false);
+      this.stopListening();
     });
+  }
+
+  private async init() {
+
+    this.timeout();
 
     this.online.subscribe(() => {
       if (navigator.connection.type === 'wifi') {
@@ -230,9 +254,8 @@ export class ConnectivityService implements IConnectionProvider {
       }
     }, (e) => console.log('online error'));
 
-    this.disabledEvent.subscribe(() => {
-      this.devices.next(new Map<string, Device>());
-      this.stopListening();
-    });
+    this.offline.subscribe(() => {
+      this.state.next(State.Starting);
+    }, (e) => console.log('offline error'));
   }
 }

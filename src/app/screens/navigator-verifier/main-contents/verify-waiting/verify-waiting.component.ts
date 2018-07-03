@@ -45,8 +45,7 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
     this.providersArray.forEach((provider) => {
       this.subscriptions.push(
         provider.service.enabledEvent.subscribe(() => {
-          provider.service.searchDevices(5 * 1000);
-          if (provider.service.isToggler.getValue()) {
+          if (provider.service.toggled.getValue()) {
             provider.service.startListening();
           }
         }));
@@ -69,22 +68,5 @@ export class VerifyWaitingComponent implements OnInit, OnDestroy {
         this.isExitTap = false;
       }), 3000);
     }
-  }
-
-  async toggleProvider(provider: Provider, event) {
-    console.log('toggle');
-
-    // overwrite default event result
-    event.source.disabled = ((((provider.service.starting.getValue()) || (provider.service.stopping.getValue()) || (provider.service.awaitingEnable.getValue())))
-      && !(provider.service.listening.getValue()));
-    event.source.checked = ((provider.service.listening.getValue()) || (provider.service.starting.getValue()));
-    event.checked = event.source.checked;
-
-    await this.connectionProviderService.toggleProvider(provider.provider);
-  }
-
-
-  async enableDiscovery(provider: Provider) {
-    await this.connectionProviderService.enableDiscovery(provider.provider);
   }
 }

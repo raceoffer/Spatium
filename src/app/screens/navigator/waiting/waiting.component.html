@@ -30,7 +30,8 @@
     <div class="connect-div" fxLayout="column" fxLayoutAlign="center center" *ngIf="hasDisabled()">
       <span class="message">Cannot find a device?</span>
       <div *ngFor="let provider of providersArray">
-        <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent" (click)="toggleProvider(provider)" >Enable {{provider.name}}</button>
+        <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent"
+                (click)="toggleProvider(provider)" >Enable {{provider.name}}</button>
       </div>
     </div>
 

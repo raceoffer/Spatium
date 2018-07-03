@@ -16,8 +16,11 @@ declare const navigator: any;
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
 
+  public toggled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
+  public enabling: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Stopping)), false);
   public enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.state.pipe(map(state => state === State.Started)), false);
   public enabledChanged: Observable<boolean> = this.enabled.pipe(distinctUntilChanged(), skip(1));
   public enabledEvent: Observable<any> = this.enabledChanged.pipe(filter(enabled => enabled), mapTo(null));
@@ -35,6 +38,7 @@ export class BluetoothService implements IConnectionProvider {
   public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
 
   public listeningState: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
+  public stopped: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Stopped)), false);
   public starting: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Starting)), false);
   public stopping: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Stopping)), false);
   public listening: BehaviorSubject<boolean> = toBehaviourSubject(this.listeningState.pipe(map(state => state === State.Started)), false);
@@ -43,7 +47,6 @@ export class BluetoothService implements IConnectionProvider {
   public listeningStoppedEvent: Observable<any> = this.listeningChanged.pipe(filter(listening => !listening), mapTo(null));
 
   public discoveryState: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-
   public discovering: BehaviorSubject<boolean> = toBehaviourSubject(
     this.discoveryState.pipe(
       map(state => state === State.Started)
@@ -65,10 +68,9 @@ export class BluetoothService implements IConnectionProvider {
   public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
     distinctUntilChanged(equals),
     skip(1));
+  public connectedDevices: BehaviorSubject<Array<Device>> = new BehaviorSubject<Array<Device>>(null);
 
   public message: Subject<any> = new Subject<any>();
-  public isToggler: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public awaitingEnable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly deviceService: DeviceService,
               private readonly ngZone: NgZone) {
@@ -90,10 +92,9 @@ export class BluetoothService implements IConnectionProvider {
 
   async toggleProvider() {
     if (this.state.getValue() === State.Stopped) {
-      this.isToggler.next(true);
       await this.openRequestBluetoothDialog();
     } else if (this.state.getValue() === State.Started && this.listeningState.getValue() === State.Stopped) {
-      this.isToggler.next(true);
+      this.toggled.next(true);
       await this.startListening();
     } else {
       await this.stopListening();
@@ -113,9 +114,8 @@ export class BluetoothService implements IConnectionProvider {
       'An app wants to turn on Bluetooth',
       async (buttonIndex) => {
         if (buttonIndex === 1) { // yes
+          this.toggled.next(true);
           await cordova.plugins.bluetooth.enable();
-        } else {
-          this.isToggler.next(false);
         }
       },
       '',
@@ -133,11 +133,9 @@ export class BluetoothService implements IConnectionProvider {
     try {
       await cordova.plugins.bluetooth.startListening();
       this.listeningState.next(State.Started);
-      this.isToggler.next(false);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start listening', e);
       this.listeningState.next(State.Stopped);
-      this.isToggler.next(false);
       throw e;
     }
   }
@@ -150,11 +148,13 @@ export class BluetoothService implements IConnectionProvider {
     this.listeningState.next(State.Stopping);
 
     try {
+      this.toggled.next(false);
       await cordova.plugins.bluetooth.stopListening();
       this.listeningState.next(State.Stopped);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to start listening', e);
       this.listeningState.next(State.Started);
+      this.toggled.next(true);
       throw e;
     }
   }
@@ -164,14 +164,17 @@ export class BluetoothService implements IConnectionProvider {
       return;
     }
 
-    this.connectionState.next(ConnectionState.Connecting);
+    if (device.macAddress != null) {
+      this.connectionState.next(ConnectionState.Connecting);
 
-    try {
-      await cordova.plugins.bluetooth.connect({name: device.name, address: device.macAddress});
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to connect', e);
-      this.connectionState.next(ConnectionState.None);
-      throw e;
+      try {
+        await cordova.plugins.bluetooth.connect({name: device.name, address: device.macAddress});
+        this.connectedDevices.getValue().push(device);
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to connect', e);
+        this.connectionState.next(ConnectionState.None);
+        throw e;
+      }
     }
   }
 
@@ -182,6 +185,7 @@ export class BluetoothService implements IConnectionProvider {
 
     try {
       await cordova.plugins.bluetooth.disconnect();
+      this.connectedDevices.next(new Array<Device>());
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to disconnect bluetooth devices', e);
       throw e;

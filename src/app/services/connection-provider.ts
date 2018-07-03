@@ -15,8 +15,7 @@ export class Provider {
               public name: string,
               public icon: string,
               public custom_icon: string,
-              public discovery_icon: string,
-              public enable_srting: string,
+              public confirmation_manage_selector: string,
               public service: any) { }
 }
 
@@ -62,8 +61,28 @@ export class ConnectionProviderService {
 
   constructor(private readonly bt: BluetoothService,
               private readonly connectivityService: ConnectivityService) {
-    this.providers.set(ProviderType.BLUETOOTH, new Provider(ProviderType.BLUETOOTH, 'Bluetooth', 'bluetooth', null, 'bluetooth_searching', 'Bluetooth synchronization', this.bt));
-    this.providers.set(ProviderType.ZEROCONF, new Provider(ProviderType.ZEROCONF, 'WiFi', 'wifi', null, null, 'WiFi/LAN synchronization', this.connectivityService));
+    this.providers.set(
+      ProviderType.BLUETOOTH,
+      new Provider(
+        ProviderType.BLUETOOTH,
+        'Bluetooth',
+        'bluetooth',
+        null,
+        'app-confirmation-bluetooth-manage',
+        this.bt
+      )
+    );
+    this.providers.set(
+      ProviderType.ZEROCONF,
+      new Provider(
+        ProviderType.ZEROCONF,
+        'WiFi',
+        'wifi',
+        null,
+        'app-confirmation-zeroconf-manage',
+        this.connectivityService
+      )
+    );
   }
 
   async searchDevices() {
@@ -75,20 +94,7 @@ export class ConnectionProviderService {
 
   async connect(device: Device) {
     console.log('connect');
-    switch (device.provider) {
-      case ProviderType.BLUETOOTH: {
-        if (device.macAddress != null) {
-          await this.providers.get(device.provider).service.connect(device);
-        }
-        break;
-      }
-      case ProviderType.ZEROCONF: {
-        if (device.ip != null) {
-          await this.providers.get(device.provider).service.connect(device.ip);
-        }
-        break;
-      }
-    }
+    await this.providers.get(device.provider).service.connect(device);
   }
 
   async disconnect() {

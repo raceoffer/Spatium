@@ -4,11 +4,12 @@ import { ConnectionState, State } from '../primitives/state';
 
 export interface IConnectionProvider {
 
+  toggled: BehaviorSubject<boolean>;
+
+  // module state
   state: BehaviorSubject<State>;
 
-  starting: BehaviorSubject<boolean>;
-  stopping: BehaviorSubject<boolean>;
-
+  enabling: BehaviorSubject<boolean>;
   enabled: BehaviorSubject<boolean>;
   enabledChanged: Observable<boolean> ;
   enabledEvent: Observable<any>;
@@ -22,6 +23,11 @@ export interface IConnectionProvider {
   connectedEvent: Observable<any>;
   disconnectedEvent: Observable<any>;
 
+  // service state
+  listeningState: BehaviorSubject<State>;
+  stopped: BehaviorSubject<boolean>;
+  starting: BehaviorSubject<boolean>;
+  stopping: BehaviorSubject<boolean>;
   listening: BehaviorSubject<boolean>;
   listeningChanged: Observable<any>;
   listeningStartedEvent: Observable<any>;
@@ -40,10 +46,10 @@ export interface IConnectionProvider {
   discoverableFinishedEvent: Observable<any>;
 
   devices: BehaviorSubject<Map<string, Device>>;
+  devicesChanged: Observable<Map<string, Device>>;
+  connectedDevices: BehaviorSubject<Array<Device>>;
 
   message: Subject<any>;
-  isToggler: BehaviorSubject<boolean>;
-  awaitingEnable: BehaviorSubject<boolean>;
 
   toggleProvider(): void;
 
