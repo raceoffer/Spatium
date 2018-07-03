@@ -1,15 +1,15 @@
 import { OnDestroy } from '@angular/core';
 import { BehaviorSubject,  Observable,  ReplaySubject,  Subject } from 'rxjs';
-import { BluetoothService } from '../bluetooth.service';
-import { LoggerService } from '../logger.service';
+import { BluetoothService } from '../../bluetooth.service';
+import { LoggerService } from '../../logger.service';
 
 import { filter, take, map, takeUntil } from 'rxjs/operators';
 
 export enum TransactionStatus {
   None = 0,
   Started,
-  EntropyCommitments,
-  EntropyDecommitments,
+  EntropyCommitment,
+  EntropyDecommitment,
   Ready,
   Signed,
   Cancelled,
@@ -19,9 +19,9 @@ export enum TransactionStatus {
 export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
 
-  private entropyCommitmentsObserver:   Observable<any>;
-  private entropyDecommitmentsObserver: Observable<any>;
-  private chiphertextsObserver:         Observable<any>;
+  private entropyCommitmentObserver:   Observable<any>;
+  private entropyDecommitmentObserver: Observable<any>;
+  private partialSignatureObsever:     Observable<any>;
 
   public ready: Subject<any> = new Subject<any>();
   public signed: Subject<any> = new Subject<any>();
@@ -31,8 +31,6 @@ export class SignSession implements OnDestroy {
 
   private canceledSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  private mapping: any = null;
-
   private subscriptions = [];
 
   constructor(
@@ -41,21 +39,21 @@ export class SignSession implements OnDestroy {
     private messageSubject: ReplaySubject<any>,
     private bt: BluetoothService
   ) {
-    this.entropyCommitmentsObserver =
+    this.entropyCommitmentObserver =
       this.messageSubject.pipe(
-        filter(object => object.type === 'entropyCommitments'),
+        filter(object => object.type === 'entropyCommitment'),
         map(object => object.content)
       );
 
-    this.entropyDecommitmentsObserver =
+    this.entropyDecommitmentObserver =
       this.messageSubject.pipe(
-        filter(object => object.type === 'entropyDecommitments'),
+        filter(object => object.type === 'entropyDecommitment'),
         map(object => object.content)
       );
 
-    this.chiphertextsObserver =
+    this.partialSignatureObsever =
       this.messageSubject.pipe(
-        filter(object => object.type === 'chiphertexts'),
+        filter(object => object.type === 'partialSignature'),
         map(object => object.content)
       );
   }
@@ -97,17 +95,13 @@ export class SignSession implements OnDestroy {
   public async sync() {
     this.status.next(TransactionStatus.Started);
 
-    this.mapping = await this.tx.mapInputs(this.compoundKey);
+    await this.tx.startSignSession(this.compoundKey);
 
-    const hashes = await this.tx.getHashes(this.mapping);
-
-    await this.tx.startSign(hashes, this.mapping);
-
-    let entropyCommitments = null;
+    let entropyCommitment = null;
     try {
-      entropyCommitments = await this.tx.createEntropyCommitments();
+      entropyCommitment = await this.tx.createCommitment();
     } catch (e) {
-      return this.handleFailure('Failed to get entropyCommitments', e);
+      return this.handleFailure('Failed to get entropyCommitment', e);
     }
 
     if (this.canceledSubject.getValue()) {
@@ -115,24 +109,26 @@ export class SignSession implements OnDestroy {
     }
 
     if (!await this.bt.send(JSON.stringify({
-        type: 'entropyCommitments',
-        content: entropyCommitments
+        type: 'entropyCommitment',
+        content: entropyCommitment
       }))) {
       return this.handleFailure('Failed to send entropyCommitment', null);
     }
 
-    const remoteEntropyCommitments = await this.entropyCommitmentsObserver.pipe(
+    const remoteEntropyCommitment = await this.entropyCommitmentObserver.pipe(
       take(1),
       takeUntil(this.canceledSubject.pipe(filter(b => b)))
     ).toPromise();
+
     if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
 
-    this.status.next(TransactionStatus.EntropyCommitments);
-    let entropyDecommitments = null;
+    this.status.next(TransactionStatus.EntropyCommitment);
+
+    let entropyDecommitment = null;
     try {
-      entropyDecommitments = await this.tx.processEntropyCommitments(remoteEntropyCommitments);
+      entropyDecommitment = await this.tx.processCommitment(remoteEntropyCommitment);
     } catch (e) {
       return this.handleFailure('Failed to process remoteEntropyCommitment', e);
     }
@@ -142,25 +138,27 @@ export class SignSession implements OnDestroy {
     }
 
     if (!await this.bt.send(JSON.stringify({
-        type: 'entropyDecommitments',
-        content: entropyDecommitments
+        type: 'entropyDecommitment',
+        content: entropyDecommitment
       }))) {
-      return this.handleFailure('Failed to send entropyDecommitments', null);
+      return this.handleFailure('Failed to send entropyDecommitment', null);
     }
 
-    const remoteEntropyDecommitments = await this.entropyDecommitmentsObserver.pipe(
+    const remoteEntropyDecommitment = await this.entropyDecommitmentObserver.pipe(
       take(1),
       takeUntil(this.canceledSubject.pipe(filter(b => b)))
     ).toPromise();
+
     if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
 
-    this.status.next(TransactionStatus.EntropyDecommitments);
+    this.status.next(TransactionStatus.EntropyDecommitment);
+
     try {
-      await this.tx.processEntropyDecommitments(remoteEntropyDecommitments);
+      await this.tx.processDecommitment(remoteEntropyDecommitment);
     } catch (e) {
-      return this.handleFailure('Failed to process remoteEntropyDecommitments', e);
+      return this.handleFailure('Failed to process remoteEntropyDecommitment', e);
     }
 
     if (this.canceledSubject.getValue()) {
@@ -171,17 +169,17 @@ export class SignSession implements OnDestroy {
     this.ready.next();
   }
 
-  public async submitChiphertexts() {
+  public async submitPartialSignature() {
     if (this.status.getValue() !== TransactionStatus.Ready) {
       LoggerService.nonFatalCrash('Cannot submit non-synchronized tx', null);
       return;
     }
 
-    let chiphertexts = null;
+    let partialSignature = null;
     try {
-      chiphertexts = await this.tx.computeCiphertexts();
+      partialSignature = await this.tx.computeSignature();
     } catch (e) {
-      return this.handleFailure('Failed to compute chiphertexts', e);
+      return this.handleFailure('Failed to compute a partial signature', e);
     }
 
     if (this.canceledSubject.getValue()) {
@@ -189,37 +187,29 @@ export class SignSession implements OnDestroy {
     }
 
     if (!await this.bt.send(JSON.stringify({
-        type: 'chiphertexts',
-        content: chiphertexts
+        type: 'partialSignature',
+        content: partialSignature
       }))) {
-      return this.handleFailure('Failed to send chiphertexts', null);
+      return this.handleFailure('Failed to send a partial signature', null);
     }
   }
 
-  public async awaitConfirmation() {
+  public async awaitPartialSignature() {
     if (this.status.getValue() !== TransactionStatus.Ready) {
-      LoggerService.nonFatalCrash('Cannot await chiphertexts for non-synchronized tx', null);
+      LoggerService.nonFatalCrash('Cannot await partial signature for non-synchronized tx', null);
       return;
     }
 
-    const remoteChiphertexts = await this.chiphertextsObserver.pipe(
+    const remotePartialSignature = await this.partialSignatureObsever.pipe(
       take(1),
       takeUntil(this.canceledSubject.pipe(filter(b => b)))
     ).toPromise();
-    if (!remoteChiphertexts) {
+
+    if (this.canceledSubject.getValue()) {
       return this.handleCancel();
     }
 
-    let rawSignatures = null;
-    try {
-      rawSignatures = await this.tx.extractSignatures(remoteChiphertexts);
-    } catch (e) {
-      return this.handleFailure('Failed to process remoteChiphertexts', e);
-    }
-
-    const signatures = await this.tx.normalizeSignatures(this.mapping, rawSignatures);
-
-    await this.tx.applySignatures(signatures);
+    await this.tx.applySignature(remotePartialSignature);
 
     this.status.next(TransactionStatus.Signed);
     this.signed.next();

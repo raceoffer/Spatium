@@ -1,18 +1,15 @@
 import { Balance, CurrencyWallet, Status } from '../currencywallet';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
-import { NgZone } from '@angular/core';
 
 import { from, of, timer } from 'rxjs';
 import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
+import { EcdsaCurrencyWallet } from "../ecdsacurrencywallet";
 
-export class ERC20Wallet extends CurrencyWallet {
+export class ERC20Wallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
-  private contractAddress: string = null;
-  private token: Token = null;
-  private decimals = 18;
 
   private routineTimerSub: any = null;
 
@@ -23,17 +20,12 @@ export class ERC20Wallet extends CurrencyWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone,
     worker: any,
-    token: Token,
-    address: string,
-    decimals: number = 18
+    private token: Token,
+    private contractAddress: string,
+    private decimals: number = 18
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
-
-    this.contractAddress = address;
-    this.token = token;
-    this.decimals = decimals;
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, worker);
   }
 
   public async reset() {
@@ -134,10 +126,6 @@ export class ERC20Wallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
-
-   // public verifyAddress(address: string): boolean {
-   //   return this.wallet.verifyAddress(address);
-   // }
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(

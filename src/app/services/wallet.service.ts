@@ -1,5 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
-import { CompoundKey } from 'crypto-core-async';
+import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject, timer } from 'rxjs';
 import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
@@ -13,6 +12,8 @@ import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { WorkerService } from './worker.service';
+
+import { CompoundKeyEcdsa } from 'crypto-core-async';
 
 declare const navigator: any;
 
@@ -54,11 +55,12 @@ export class WalletService {
   private coinIndex = 0;
   private tokenIndex = 0;
 
-  constructor(private readonly bt: BluetoothService,
-              private readonly currencyService: CurrencyService,
-              private readonly keychain: KeyChainService,
-              private readonly ngZone: NgZone,
-              private readonly workerService: WorkerService) {
+  constructor(
+    private readonly bt: BluetoothService,
+    private readonly currencyService: CurrencyService,
+    private readonly keychain: KeyChainService,
+    private readonly workerService: WorkerService
+  ) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -68,7 +70,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -80,7 +81,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -92,7 +92,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -104,7 +103,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -116,7 +114,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker
       ));
 
@@ -335,7 +332,7 @@ export class WalletService {
       this.setProgress(0);
       this.synchronizing.next(true);
 
-      const paillierKeys = await CompoundKey.generatePaillierKeys(this.workerService.worker);
+      const paillierKeys = await CompoundKeyEcdsa.generatePaillierKeys(this.workerService.worker);
 
       this.setProgress(0.1);
 
@@ -350,7 +347,7 @@ export class WalletService {
             this.setProgress(0.1 + 0.8 * (this.coinIndex + num / 100) / this.coinWallets.size);
           });
           this.changeStatus();
-          await wallet.sync(paillierKeys);
+          await wallet.sync({ paillierKeys });
           sub.unsubscribe();
         } else {
           console.log('skip');
@@ -455,7 +452,6 @@ export class WalletService {
         1,
         this.messageSubject,
         this.bt,
-        this.ngZone,
         this.workerService.worker,
         token,
         contractAddress,

@@ -1,14 +1,14 @@
-import { Balance, CurrencyWallet, Status } from '../currencywallet';
+import { Balance, Status } from '../currencywallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
-import { NgZone } from '@angular/core';
 
 import { from, of, timer } from 'rxjs';
 import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
 
 import { EthereumTransaction, EthereumWallet as CoreEthereumWallet } from 'crypto-core-async';
+import { EcdsaCurrencyWallet } from "../ecdsacurrencywallet";
 
-export class EthereumWallet extends CurrencyWallet {
+export class EthereumWallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
 
@@ -19,10 +19,9 @@ export class EthereumWallet extends CurrencyWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone,
     worker: any
   ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, ngZone, worker);
+    super(network, keychain, Coin.ETH, account, messageSubject, bt, worker);
   }
 
   public async reset() {
@@ -81,10 +80,6 @@ export class EthereumWallet extends CurrencyWallet {
 
     this.status.next(Status.Ready);
   }
-
-   // public verifyAddress(address: string): boolean {
-   //   return this.wallet.verifyAddress(address);
-   // }
 
   public async createTransaction(address: string, value: any, fee?: any) {
     return await this.wallet.prepareTransaction(
