@@ -27,7 +27,7 @@
       </mat-list-item>
     </mat-nav-list>
 
-    <div class="connect-div" fxLayout="column" fxLayoutAlign="center center" *ngIf="hasDisabled()">
+    <div class="connect-div" *ngIf="hasDisabled()">
       <span class="message">Cannot find a device?</span>
       <div *ngFor="let provider of providersArray">
         <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent"

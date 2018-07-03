@@ -22,7 +22,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (starting | async) && (toggled | async)">
+     *ngIf="(enabled | async) && !(listening | async) && (toggled | async)">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>

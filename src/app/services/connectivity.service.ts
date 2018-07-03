@@ -101,8 +101,6 @@ export class ConnectivityService implements IConnectionProvider {
     this.socketServerService.message.pipe(filter(_ => !this.socketClientService.connected.getValue()))
   ), 1);
 
-  online = fromEvent(document, 'online');
-  offline = fromEvent(document, 'offline');
   timer: any;
 
   constructor(private readonly ngZone: NgZone,
@@ -220,12 +218,18 @@ export class ConnectivityService implements IConnectionProvider {
 
   private async checkWiFiState() {
     await cordova.plugins.diagnostic.isWifiEnabled((available) => {
-      console.log(available);
       if (available === 1) {
         if (navigator.connection.type === 'wifi') {
           this.state.next(State.Started);
+          if (this.toggled.getValue() && this.stopped.getValue()) {
+            this.startListening();
+          }
         } else {
           this.state.next(State.Starting);
+          if (this.toggled.getValue() && this.listening.getValue()) {
+            this.devices.next(new Map<string, Device>());
+            this.stopListening();
+          }
         }
       } else {
         if (this.state.getValue() !== State.Stopped) {
@@ -247,15 +251,5 @@ export class ConnectivityService implements IConnectionProvider {
   private async init() {
 
     this.timeout();
-
-    this.online.subscribe(() => {
-      if (navigator.connection.type === 'wifi') {
-        this.state.next(State.Started);
-      }
-    }, (e) => console.log('online error'));
-
-    this.offline.subscribe(() => {
-      this.state.next(State.Starting);
-    }, (e) => console.log('offline error'));
   }
 }
