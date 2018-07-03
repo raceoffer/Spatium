@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -17,7 +17,7 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnInit, OnDestroy {
+export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
@@ -54,7 +54,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly bt: BluetoothService
+    private readonly bt: BluetoothService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
 
@@ -75,6 +76,13 @@ export class WalletComponent implements OnInit, OnDestroy {
     if (!this.bt.connected.getValue()) {
       await this.goToSync();
     }
+  }
+
+  ngAfterViewInit() {
+    this.changeDetector.detach();
+    setInterval(() => {
+      this.changeDetector.detectChanges();
+    }, 1000);
   }
 
   get filterValue() {
