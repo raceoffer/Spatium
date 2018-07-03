@@ -73,7 +73,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     if (!this.bt.connected.getValue()) {
-      await this.goToSync();
+      await this.openConnectOverlay();
     }
   }
 
@@ -138,28 +138,28 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }
 
-  public async goToSync() {
+  public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
     componentRef.instance.connected.subscribe(device => {
       this.navigationService.acceptOverlay();
       console.log('Connected to', device);
-    })
+    });
   }
 
   public async cancelSync() {
-    await this.openDialog();
+    if (await this.confirmSynchronize()) {
+      await this.openConnectOverlay();
+    }
   }
 
-  public async openDialog() {
-    navigator.notification.confirm(
-      'Syncronize with another device',
-      async (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          await this.goToSync();
-        }
-      },
-      '',
-      ['YES', 'NO']
+  public async confirmSynchronize() {
+    return await new Promise<boolean>((resolve, reject) =>
+      navigator.notification.confirm(
+        'Syncronize with another device',
+        buttonIndex => resolve(buttonIndex === 1),
+        '',
+        ['YES', 'NO']
+      )
     );
   }
 
@@ -174,20 +174,24 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
+
     const balanceUnconfirmed = toBehaviourSubject(
       currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
       null);
+
     this.tileBalanceInfo[coin] = {
       balance: balanceUnconfirmed,
-      balanceUSD: toBehaviourSubject(combineLatest(
+      balanceUSD: toBehaviourSubject(combineLatest([
         balanceUnconfirmed,
-        currencyInfo.rate,
-        (balance, rate) => {
+        currencyInfo.rate
+      ]).pipe(map(
+        ([balance, rate]) => {
           if (rate === null || balance === null) {
             return null;
           }
           return balance * rate;
-        }), null)
+        }
+      )), null)
     };
 
     return this.tileBalanceInfo[coin];

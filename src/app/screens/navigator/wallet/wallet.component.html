@@ -12,11 +12,11 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
+    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
       <mat-icon>sync</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
+    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
       <mat-icon>sync_problem</mat-icon>
     </button>
 

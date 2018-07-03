@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject ,  Observable ,  combineLatest ,  Subject } from 'rxjs';
-import { skip, filter, distinctUntilChanged, mapTo, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, merge } from 'rxjs';
+import { skip, filter, distinctUntilChanged, mapTo } from 'rxjs/operators';
 
 import { LoggerService } from './logger.service';
 import { DeviceService } from './device.service';
@@ -43,11 +43,7 @@ export class BluetoothService {
   public discoveringChanged: Observable<boolean> = this.discovering.pipe(skip(1), distinctUntilChanged());
   public discoveryStartedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => discovering), mapTo(null));
   public discoveryFinishedEvent: Observable<any> = this.discoveringChanged.pipe(filter(discovering => !discovering), mapTo(null));
-  private deviceRelatedChange = combineLatest(
-    this.enabled.pipe(filter(enabled => enabled)),
-    this.connected,
-    this.discovering
-  );
+
   public discoverable: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public discoverableChanged: Observable<boolean> = this.discoverable.pipe(skip(1), distinctUntilChanged());
   public discoverableStartedEvent: Observable<any> = this.discoverableChanged.pipe(filter(discoverable => discoverable), mapTo(null));
@@ -69,6 +65,15 @@ export class BluetoothService {
       x.length === y.length &&
       x.reduce((s, xi, i) => xi.name === y[i].name && xi.address === y[i].address && s, true)));
   public message: Subject<string> = new Subject<string>();
+
+  private refreshDevicesEvent = new Subject<any>();
+
+  private deviceRelatedChange = merge(
+    this.refreshDevicesEvent,
+    this.enabled.pipe(filter(enabled => enabled)),
+    this.connected,
+    this.discovering
+  );
 
   constructor(
     private readonly deviceService: DeviceService,
@@ -96,11 +101,11 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setDiscoveredCallback((device) => this.ngZone.run(() => {
-      var devices = this.discoveredDevices.getValue();
-      var index = devices.map(function(item) { return item.address; }).indexOf(device.address);
-      if(index == -1)
+      let devices = this.discoveredDevices.getValue();
+      const index = devices.map(function(item) { return item.address; }).indexOf(device.address);
+      if(index == -1) {
         devices = devices.concat(Device.fromJSON(device));
-      else {
+      } else {
         devices[index].name = device.name;
       }
       this.discoveredDevices.next(devices);
@@ -129,6 +134,10 @@ export class BluetoothService {
     cordova.plugins.bluetooth.getState().then((state) => this.ngZone.run(() => {
       this.state.next(state);
     }));
+  }
+
+  public refreshDevices() {
+    this.refreshDevicesEvent.next();
   }
 
   async requestEnable() {
