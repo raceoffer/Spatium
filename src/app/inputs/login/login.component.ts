@@ -87,8 +87,9 @@ export class LoginComponent implements OnDestroy{
 
       this.state.next(State.Ready);
     } catch(e) {
-      this.generating.next(false);
       this.state.next(State.Error);
+    } finally {
+      this.generating.next(false);
     }
   }
 }
