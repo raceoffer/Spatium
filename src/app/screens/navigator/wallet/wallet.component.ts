@@ -120,7 +120,8 @@ export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
       logo: tokenInfo.className,
       cols: 1,
       rows: 1,
-      coin: tokenInfo.token
+      coin: tokenInfo.token,
+      erc20: true,
     };
   }
 
