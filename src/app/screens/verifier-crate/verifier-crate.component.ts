@@ -39,7 +39,8 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
   public busy = false;
 
-  public touchAvailable = new BehaviorSubject<any>(false);
+  public touchAvailable = new BehaviorSubject<boolean>(false);
+  public touchExisting = new BehaviorSubject<boolean>(false);
 
   public fileData = new BehaviorSubject<any>(null);
   public exists = toBehaviourSubject(this.fileData.pipe(map(data => data !== null)), false);
@@ -64,7 +65,8 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     if (file) {
       this.fileData.next(Buffer.from(file, 'hex'));
     }
-    this.touchAvailable.next(await checkAvailable() && await checkExisting());
+     this.touchAvailable.next(await checkAvailable());
+    this.touchExisting.next(await checkExisting());
   }
 
   ngOnDestroy() {
@@ -107,7 +109,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
     componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
-      if (this.touchAvailable) {
+      if (this.touchExisting.getValue()) {
         await deleteTouch();
       }
 
