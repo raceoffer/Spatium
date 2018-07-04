@@ -18,6 +18,7 @@ import { CompoundKeyEcdsa } from 'crypto-core-async';
 import { sha256 } from 'crypto-core-async/lib/utils';
 import { take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { NemWallet } from "./wallet/nem/nemwallet";
 
 declare const navigator: any;
 
@@ -145,6 +146,17 @@ export class WalletService {
       new EthereumWallet(
         currencyService.getApiServer(Coin.ETH),
         'main',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.bt,
+        this.workerService.worker
+      ));
+    this.coinWallets.set(
+      Coin.NEM,
+      new NemWallet(
+        currencyService.getApiServer(Coin.NEM),
+        'testnet',
         this.keychain,
         1,
         this.messageSubject,

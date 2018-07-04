@@ -1,6 +1,5 @@
 import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
 import { BluetoothService } from '../bluetooth.service';
-import { SignSession } from './ecdsa/signingsession';
 import { Coin, KeyChainService, Token } from '../keychain.service';
 
 import { toBehaviourSubject } from '../../utils/transformers';

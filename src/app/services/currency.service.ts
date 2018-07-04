@@ -43,6 +43,7 @@ export enum CurrencyServerName {
   Blockdozer = 'bch.blockdozer.com',
   Infura = 'mainnet.infura.io',
   Litecore = 'insight.litecore.io',
+  Native = 'Nem native',
 }
 
 export class CurrencySettings {
@@ -77,6 +78,10 @@ export class CurrencyService {
     [Coin.LTC, new Map<string, string>([
       [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/lightcoin/mainnet/insights`],
       [CurrencyServerName.Litecore, 'https://insight.litecore.io/api']
+    ])],
+    [Coin.NEM, new Map<string, string>([
+      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/lightcoin/mainnet/insights`],
+      [CurrencyServerName.Native, 'https://insight.litecore.io/api']
     ])]
   ]);
 
@@ -155,6 +160,21 @@ export class CurrencyService {
         null),
         null,
         'litecoin'
+    )],
+    [Coin.NEM, new Info(
+      'NEM',
+      'NEM',
+      50000,
+      30000,
+      'NEM/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('XEM') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'nem'
     )],
   ]);
 
