@@ -28,6 +28,7 @@ table .full-width td {
 }
 
 input.mat-input-element{
+  height: inherit;
   margin-top: 0em;
 }
 
