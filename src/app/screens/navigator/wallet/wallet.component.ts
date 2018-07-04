@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostBinding, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy, AfterViewInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -17,7 +17,7 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
+export class WalletComponent implements OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
@@ -70,12 +70,6 @@ export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
     this.titles = titles;
 
     this.filtredTitles = this.titles;
-  }
-
-  async ngOnInit() {
-    if (!this.bt.connected.getValue()) {
-      await this.openConnectOverlay();
-    }
   }
 
   ngAfterViewInit() {
