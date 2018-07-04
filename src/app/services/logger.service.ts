@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
+import { stringify } from 'flatted/esm';
 
 declare const cordova: any;
 declare const device: any;
@@ -57,7 +58,7 @@ export class LoggerService {
       let textForLogger = text[0];
       var i;
       for (i = 1; i < text.length; i++) {
-        textForLogger = textForLogger + ' ' + text[i];
+        textForLogger = textForLogger + ' ' + this.convertToString(text[i]);
       }
       textForLogger = textForLogger + '\n';
 
@@ -78,6 +79,26 @@ export class LoggerService {
     }
   }
 
+  convertToString(obj) {
+   if (typeof obj === 'string') {
+      return obj;
+    } 
+
+    if (obj.constructor && obj.constructor.name === 'DebugContext_') {
+      return 'DebugContext_';
+    }
+
+    if (obj.name && obj.name === 'Error') {
+      return obj;
+    }
+
+    if (obj.constructor && obj.constructor.name === 'Error') {
+      return obj;
+    }
+
+    return stringify(obj);
+  }
+
   async createSessionLog() {
     const datePipe = new DatePipe('en-US');
     const format = 'yyyy-MM-ddTHH-mm-ss';
@@ -95,6 +116,19 @@ export class LoggerService {
 
   async getLogData(): Promise<string> {
     return await this.fs.readFile(this.sessionlogName);
+  }
+
+  async getLastLogData(): Promise<string | null> {
+    const lastLogFileName = (await this.fs.listFiles())
+      .filter(name => name.includes('log_'))
+      .sort()
+      .pop();
+    if (lastLogFileName) {
+      return await this.fs.readFile(lastLogFileName);
+    }
+    else {
+      return null;
+    }
   }
 
   get logFileName(): string {

@@ -1,13 +1,9 @@
 import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
 import { BluetoothService } from '../bluetooth.service';
-import { SynchronizationStatus, SyncSession } from './syncsession';
-import { SignSession } from './signingsession';
 import { Coin, KeyChainService, Token } from '../keychain.service';
-import { NgZone } from '@angular/core';
 
 import { toBehaviourSubject } from '../../utils/transformers';
 
-import { CompoundKey } from 'crypto-core-async';
 import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';
 import * as WalletAddressValidator from 'wallet-address-validator';
 
@@ -53,13 +49,7 @@ export class Balance {
   ) {}
 }
 
-export class CurrencyWallet {
-  public compoundKey: any = null;
-  public publicKey: any = null;
-
-  protected syncSession: SyncSession = null;
-  protected signSession: SignSession = null;
-
+export abstract class CurrencyWallet {
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
 
   public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
@@ -75,7 +65,7 @@ export class CurrencyWallet {
   public none: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.None)
-    ), false);
+    ), true);
 
   public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
 
@@ -97,12 +87,11 @@ export class CurrencyWallet {
 
   constructor(
     protected network: string,
-    private keychain: KeyChainService,
-    private currency: Coin,
-    private account: number,
-    private messageSubject: any,
-    private bt: BluetoothService,
-    protected ngZone: NgZone,
+    protected keychain: KeyChainService,
+    protected currency: Coin,
+    protected account: number,
+    protected messageSubject: any,
+    protected bt: BluetoothService,
     protected worker: any
   ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
@@ -110,85 +99,20 @@ export class CurrencyWallet {
     this.messageSubject.pipe(
       filter((obj: any) => obj.type === 'cancelTransaction')
     ).subscribe(async () => {
-        // pop the queue
-        this.messageSubject.next({});
+      // pop the queue
+      this.messageSubject.next({});
 
-        if (this.signSession) {
-          await this.signSession.cancel();
-          this.signSession = null;
-        }
-      });
-  }
-
-  public toInternal(amount: number): any {
-    return 0;
-  }
-
-  public fromInternal(amount: any): number {
-    return 0;
-  }
-
-  public fromJSON(ignored) {
-    return null;
-  }
-
-  public async sync(paillierKeys: any) {
-    this.compoundKey = await CompoundKey.fromOptions({
-      localPrivateKey: await CompoundKey.keyFromSecret(this.keychain.getCoinSecret(this.currency, this.account), this.worker),
-      localPaillierKeys: paillierKeys
-    }, this.worker);
-
-    const prover = await this.compoundKey.startInitialCommitment();
-
-    this.status.next(Status.Synchronizing);
-    this.syncSession = new SyncSession(prover, this.messageSubject, this.bt);
-    this.syncSession.status.subscribe(state => {
-      this.syncProgress.next(
-        Math.max(Math.min(Math.round(state * 100 / (SynchronizationStatus.Finished - SynchronizationStatus.None + 1)), 100), 0)
-      );
+      await this.cancelSign();
     });
-    this.syncSession.canceled.subscribe(() => {
-      this.status.next(Status.Cancelled);
-      this.syncSession = null;
-    });
-    this.syncSession.failed.subscribe(() => {
-      this.status.next(Status.Failed);
-      this.syncSession = null;
-    });
-
-    const data = await this.syncSession.sync();
-    this.syncSession = null;
-
-    await this.finishSync(data);
   }
 
-  public async reset() {
-    this.status.next(Status.None);
+  public abstract toInternal(amount: number): any;
+  public abstract fromInternal(amount: any): number;
 
-    this.compoundKey = null;
-    this.publicKey = null;
+  public abstract fromJSON(ignored);
 
-    if (this.syncSession) {
-      await this.syncSession.cancel();
-      this.syncSession = null;
-    }
-
-    if (this.signSession) {
-      await this.signSession.cancel();
-      this.signSession = null;
-    }
-
-    this.address.next(null);
-    this.balance.next(null);
-    this.syncProgress.next(0);
-  }
-
-  public async cancelSync() {
-    if (this.syncSession) {
-      await this.syncSession.cancel();
-      this.syncSession = null;
-    }
-  }
+  public abstract async cancelSync();
+  public abstract async cancelSign();
 
   public async rejectTransaction() {
     try {
@@ -198,27 +122,16 @@ export class CurrencyWallet {
       }));
     } catch (ignored) { }
 
-    if (this.signSession) {
-      await this.signSession.cancel();
-      this.signSession = null;
-    }
+    await this.cancelSign();
   }
 
-  public async acceptTransaction() {
-    if (this.signSession) {
-      await this.signSession.submitChiphertexts();
-    }
-  }
+  public abstract async acceptTransaction();
 
-  public async syncDuplicate(other: CurrencyWallet) {
-    this.compoundKey = other.compoundKey;
-    this.publicKey = other.publicKey;
-  }
+  public abstract async sync(options: any);
+  public abstract async syncDuplicate(other: CurrencyWallet);
+  public abstract async finishSync(data: any);
 
-  public async finishSync(data) {
-    await this.compoundKey.finishInitialSync(data);
-    this.publicKey = await this.compoundKey.getCompoundPublicKey();
-  }
+  public abstract async reset();
 
   public currencyCode(): Coin | Token  {
     return this.currency;
@@ -232,95 +145,13 @@ export class CurrencyWallet {
     );
   }
 
-  public async requestTransactionVerify(transaction) {
-    await this.bt.send(JSON.stringify({
-      type: 'verifyTransaction',
-      content: {
-        tx: await transaction.toJSON(),
-        coin: this.currencyCode()
-      }
-    }));
+  public abstract async requestTransactionVerify(transaction);
+  public abstract async startTransactionVerify(transaction);
 
-    this.signSession = new SignSession(
-      transaction,
-      this.compoundKey,
-      this.messageSubject,
-      this.bt
-    );
+  public abstract async verifySignature();
 
-    this.signSession.ready.subscribe(async () => {
-      await this.signSession.awaitConfirmation();
-    });
-    this.signSession.canceled.subscribe(async () => {
-      console.log('canceled');
-      this.messageSubject.next({});
-      this.signSession = null;
-      this.rejectedEvent.next();
-    });
-    this.signSession.failed.subscribe(async () => {
-      console.log('failed');
-      this.messageSubject.next({});
-      this.signSession = null;
-      this.rejectedEvent.next();
-    });
-    this.signSession.signed.subscribe(async () => {
-      console.log('signed');
-      this.messageSubject.next({});
-      this.acceptedEvent.next();
-      this.signedEvent.next();
-    });
+  public abstract async listTransactionHistory();
 
-    this.signSession.sync().catch(() => {});
-  }
-
-  public async startTransactionVerify(transaction) {
-    this.signSession = new SignSession(
-      transaction,
-      this.compoundKey,
-      this.messageSubject,
-      this.bt
-    );
-
-    this.startVerifyEvent.next();
-
-    this.signSession.ready.subscribe(() => {
-      this.verifyEvent.next(transaction);
-    });
-    this.signSession.canceled.subscribe(() => {
-      this.messageSubject.next({});
-      this.signSession = null;
-      this.rejectedEvent.next();
-    });
-    this.signSession.failed.subscribe(() => {
-      this.messageSubject.next({});
-      this.signSession = null;
-      this.rejectedEvent.next();
-    });
-
-    this.signSession.sync().catch((e) => { console.log(e); });
-  }
-
-  public async verifySignature() {
-    let verify = false;
-
-    if (this.signSession) {
-      verify = await this.signSession.transaction.verify();
-    }
-
-    return verify;
-  }
-
-  public async listTransactionHistory() {
-    return [];
-  }
-
-  public async createTransaction(
-    address: string,
-    value: any,
-    fee?: any
-  ) {
-    return null;
-  }
-
-  public async pushTransaction() { }
+  public abstract async createTransaction(address: string, value: any, fee?: any);
+  public abstract async pushTransaction();
 }

@@ -12,11 +12,11 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
+    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="!(synchronizing | async) && !(partiallySync | async)">
       <mat-icon>sync</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="goToSync()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
+    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="!(synchronizing | async) && (partiallySync | async)">
       <mat-icon>sync_problem</mat-icon>
     </button>
 
@@ -64,7 +64,11 @@
               {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
             </span>
 
-              <span class="sync-in-progress" *ngIf="getTileBalanceInfo(tile.coin) !== undefined && (getTileBalanceInfo(tile.coin).balance | async) === null">Loading...</span>
+            <span class="sync-in-progress"
+                *ngIf="getTileBalanceInfo(tile.coin) !== undefined &&
+                  (getTileBalanceInfo(tile.coin).balance | async) === null">
+              {{(synchronizing | async) ? "Loading..." : "Not synced"}}
+            </span>
           </div>
         </button>
       </div>

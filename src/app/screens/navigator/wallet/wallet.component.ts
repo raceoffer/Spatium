@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -17,7 +17,7 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnInit, OnDestroy {
+export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
@@ -38,7 +38,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem'}
+    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem', coin: Coin.NEM}
   ];
 
   public titles: any = [];
@@ -54,7 +54,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly bt: BluetoothService
+    private readonly bt: BluetoothService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
 
@@ -73,8 +74,15 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     if (!this.bt.connected.getValue()) {
-      await this.goToSync();
+      await this.openConnectOverlay();
     }
+  }
+
+  ngAfterViewInit() {
+    this.changeDetector.detach();
+    setInterval(() => {
+      this.changeDetector.detectChanges();
+    }, 1000);
   }
 
   get filterValue() {
@@ -138,28 +146,28 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }
 
-  public async goToSync() {
+  public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
     componentRef.instance.connected.subscribe(device => {
       this.navigationService.acceptOverlay();
       console.log('Connected to', device);
-    })
+    });
   }
 
   public async cancelSync() {
-    await this.openDialog();
+    if (await this.confirmSynchronize()) {
+      await this.openConnectOverlay();
+    }
   }
 
-  public async openDialog() {
-    navigator.notification.confirm(
-      'Syncronize with another device',
-      async (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          await this.goToSync();
-        }
-      },
-      '',
-      ['YES', 'NO']
+  public async confirmSynchronize() {
+    return await new Promise<boolean>((resolve, reject) =>
+      navigator.notification.confirm(
+        'Syncronize with another device',
+        buttonIndex => resolve(buttonIndex === 1),
+        '',
+        ['YES', 'NO']
+      )
     );
   }
 
@@ -174,20 +182,24 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
+
     const balanceUnconfirmed = toBehaviourSubject(
       currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
       null);
+
     this.tileBalanceInfo[coin] = {
       balance: balanceUnconfirmed,
-      balanceUSD: toBehaviourSubject(combineLatest(
+      balanceUSD: toBehaviourSubject(combineLatest([
         balanceUnconfirmed,
-        currencyInfo.rate,
-        (balance, rate) => {
+        currencyInfo.rate
+      ]).pipe(map(
+        ([balance, rate]) => {
           if (rate === null || balance === null) {
             return null;
           }
           return balance * rate;
-        }), null)
+        }
+      )), null)
     };
 
     return this.tileBalanceInfo[coin];

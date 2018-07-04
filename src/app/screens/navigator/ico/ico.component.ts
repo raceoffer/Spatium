@@ -35,11 +35,22 @@ export class IcoComponent implements OnInit, OnDestroy {
   public filtredTitles = [];
 
   public staticProjects: any = [
-    {title: 'Example', cols: 1, rows: 1, about: '', symbols:'EXMPL', className: 'spatium-ico', transactions: '', balances: '', address: 'WLOD_IS_LOVE', coins: [
-      {place: Coin.BTC, name: 'Bitcoin'},
-      {place: Coin.ETH, name: 'Ethereum'},
-      {place: Coin.NEM, name: 'New economy movement'},
-      {place: Coin.LTC, name: 'Litecoin'}]},
+    {
+      title: 'Example', 
+      cols: 1, rows: 1, 
+      about: '', 
+      symbols:'EXMPL', 
+      className: 'spatium-ico', 
+      transactions: '', 
+      balances: '', 
+      address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', 
+      coins: [
+        {place: Coin.BTC, name: 'Bitcoin'},
+        {place: Coin.ETH, name: 'Ethereum'},
+        {place: Coin.BCH, name: 'Bitcoin Cash'},
+        {place: Coin.LTC, name: 'Litecoin'}
+      ]
+    },
   ];
 
   constructor(

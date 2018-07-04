@@ -1,6 +1,6 @@
 {
   "name": "wallet",
-  "version": "0.0.0",
+  "version": "0.13.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -27,8 +27,10 @@
     "@angular/router": "^6.0.2",
     "ajv": "^6.0.0",
     "angular2-qrcode": "^2.0.1",
+    "cashaddrjs": "^0.2.8",
     "core-js": "^2.4.1",
-    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#fbd2020cc42eaa330ff8c1fe862b57b9f4b5ce8a",
+    "flatted": "^0.2.2",
     "hammerjs": "^2.0.8",
     "jquery": "^3.2.1",
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",

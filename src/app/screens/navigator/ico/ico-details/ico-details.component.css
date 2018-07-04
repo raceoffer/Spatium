@@ -1,7 +1,9 @@
 .header {
   font-family: 'Roboto-Medium';
   margin: 0;
-  margin-top: 12px;
+  margin-top: 12px;    
+  display: inline-flex;
+  align-items: center;
 }
 
 .text {
@@ -10,9 +12,14 @@
   margin: 10px 0;
 }
 
-.coin {
-  display: flex;
-  position: absolute;
+.text-medium {
+  font-family: 'Roboto-Medium';
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.space-between {
+  display: inline-flex !important;
   width: 100%;
   justify-content: space-between;
 }
@@ -52,4 +59,12 @@
 .form-field {
   position: relative;
   flex: 0 1 auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 10px 0;
+}
+
+.colored {
+  background-color: rgba(128,189,255, 0.5);
 }
