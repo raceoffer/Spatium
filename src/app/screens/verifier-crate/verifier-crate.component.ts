@@ -60,7 +60,10 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
+    const file = await this.fs.readFile(this.fs.safeFileName('seed'));
+    if (file) {
+      this.fileData.next(Buffer.from(file, 'hex'));
+    }
     this.touchAvailable.next(await checkAvailable() && await checkExisting());
   }
 
@@ -136,7 +139,7 @@ export class VerifierCrateComponent implements OnInit, OnDestroy {
 
         await this.router.navigate(['/verifier']);
       } else {
-        if (this.touchAvailable) {
+        if (this.touchAvailable.getValue()) {
           try {
             if (await saveTouchPassword(pincode)) {
               await this.saveSeed(aesKey);

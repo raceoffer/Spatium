@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -17,6 +17,8 @@ enum State {
   styleUrls: ['./verify-transaction.component.css']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
+  @HostBinding('class') classes = 'toolbars-component overlay-background';
+
   public address;
   public btc;
   public usd;
