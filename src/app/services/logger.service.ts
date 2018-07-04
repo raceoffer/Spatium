@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
+import { stringify } from 'flatted/esm';
 
 declare const cordova: any;
 declare const device: any;
@@ -57,7 +58,7 @@ export class LoggerService {
       let textForLogger = text[0];
       var i;
       for (i = 1; i < text.length; i++) {
-        textForLogger = textForLogger + ' ' + text[i];
+        textForLogger = textForLogger + ' ' + this.convertToString(text[i]);
       }
       textForLogger = textForLogger + '\n';
 
@@ -76,6 +77,26 @@ export class LoggerService {
       } catch (e) {
       }
     }
+  }
+
+  convertToString(obj) {
+   if (typeof obj === 'string') {
+      return obj;
+    } 
+
+    if (obj.constructor && obj.constructor.name === 'DebugContext_') {
+      return 'DebugContext_';
+    }
+
+    if (obj.name && obj.name === 'Error') {
+      return obj;
+    }
+
+    if (obj.constructor && obj.constructor.name === 'Error') {
+      return obj;
+    }
+
+    return stringify(obj);
   }
 
   async createSessionLog() {
