@@ -55,7 +55,7 @@
               <span class="title">{{ tile.title }}</span>
             </div>
           </div>
-          <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
+          <div [className]="tile.erc20 ? 'half-height erc20 ethereum' : 'half-height'" fxLayout="column" fxLayoutAlign="center center">
             <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
               {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
             </span>
