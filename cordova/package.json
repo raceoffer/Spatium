@@ -1,7 +1,7 @@
 {
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
-  "version": "1.0.0",
+  "version": "0.13.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
@@ -66,7 +66,7 @@
     ]
   },
   "devDependencies": {
-    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#fbd2020cc42eaa330ff8c1fe862b57b9f4b5ce8a",
     "webpack": "^4.12.0",
     "webpack-cli": "^2.1.5"
   }
