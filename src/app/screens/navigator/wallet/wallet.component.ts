@@ -3,12 +3,11 @@ import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from "../currency/currency.component";
 import { WaitingComponent } from "../waiting/waiting.component";
-import { BluetoothService } from "../../../services/bluetooth.service";
 
 declare const navigator: any;
 
@@ -54,7 +53,6 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly bt: BluetoothService,
     private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
@@ -74,9 +72,9 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     this.changeDetector.detach();
-    setInterval(() => {
+    this.subscriptions.push(interval(1000).subscribe(() => {
       this.changeDetector.detectChanges();
-    }, 1000);
+    }));
   }
 
   get filterValue() {
