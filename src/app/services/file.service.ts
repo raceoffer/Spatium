@@ -79,7 +79,7 @@ export class FileService {
             };
             reader.readAsText(file);
           });
-        }, reject);
+        }, () => resolve(null));
       });
     });
   }
@@ -129,6 +129,20 @@ export class FileService {
         );
       }, function (e) {}
     );
+  }
+
+  async listFiles(): Promise<Array<string>> {
+    return await new Promise<Array<string>>((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        const reader = fs.root.createReader();
+        reader.readEntries(entries => {
+          const fileNames = entries
+            .filter(entry => !entry.isDirectory)
+            .map(entry => entry.name);
+          resolve(fileNames);
+        }, reject);
+      }, reject);
+    });
   }
 
   async getLogPath(): Promise<string> {

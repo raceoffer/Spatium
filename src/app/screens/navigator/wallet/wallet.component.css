@@ -75,3 +75,8 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   height: 99.9%;
   max-height: 60% !important;
 }
+.erc20 {
+  background-repeat: no-repeat;
+  background-size: 8%;
+  background-position: left 5% bottom 25%;
+}

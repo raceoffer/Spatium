@@ -980,10 +980,11 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   font-size: 16px;
   color: #373741;
   font-family: 'Roboto-Light';
-  line-height: 40px;
+  line-height: 44px;
   overflow: hidden;
   text-overflow: ellipsis;
   width: calc(100% - 40px);
+  height: inherit;
   display: inline-block;
 }
 
@@ -1043,6 +1044,12 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .currency-component .mat-form-field-flex {
   align-items: center;
+  height: inherit;
+}
+
+.currency-component .mat-form-field-wrapper {
+  align-items: center;
+  height: inherit;
 }
 
 .currency-component .mat-form-field-prefix, .mat-form-field-suffix{

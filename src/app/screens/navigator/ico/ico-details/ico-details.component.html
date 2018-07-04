@@ -6,23 +6,96 @@
 
 <div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
   <div class="text-field">
-    <div class="header">About</div>
-    <p class="about text">
-      Something about the project
-    </p>
-    <div class="header">Balances</div>
-    <p class="balances text">
-      Something about balances
-    </p>
-    <div class="header">Transactions</div>
-    <p class="transactions text">
-      Something about transactions
-    </p>
+    <div class="header">
+      <div class="logo {{project.className}}" style="height: 40px;"></div>
+      <h2>{{project.title}}</h2>
+    </div>
+    <mat-list>
+      <mat-divider></mat-divider>
+      <mat-list-item>
+        <div matLine>
+          <p class="text">About project</p>
+        </div>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+    </mat-list>
+    <h4>Investments</h4>
+    <mat-list>
+      <mat-divider></mat-divider>
+      <mat-list-item>
+        <div matLine>
+          <p class="text">Amount of fees</p>
+        </div>
+        <div matLine>
+          <p class="text">Amount of tokens</p>
+        </div>
+        <div matLine>
+          <p class="text">Amount of emission</p>
+        </div>
+        <div matLine>
+          <p class="text">Contract address</p>
+        </div>
+        <div matLine>  
+          <p class="text">Max amount of investments</p>
+        </div>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+    </mat-list>
+    <h4>Currencies</h4>
+    <mat-list *ngIf="coins.length < 5">
+      <mat-divider></mat-divider>
+      <mat-list-item matLine *ngFor="let coin of coins" (click)="changeCurrency(coin)" [class.colored]="coin.chosen">
+        <div class="logo {{coin.icon}}" style="height: 25px;"></div>
+        <span style="color: gray;">{{coin.name}}</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+    </mat-list>
+    <h4>ICO type</h4>
+    <mat-list>
+      <mat-divider></mat-divider>
+      <mat-list-item>
+        <div matLine>
+          <p class="text">ICO type</p>
+        </div>
+        <div matLine>
+          <p class="text">Whitelist or not</p>
+        </div>
+        <div matLine>
+          <p class="text">Registration type if whitelist</p>
+        </div>
+        <div matLine>
+          <p class="text">Investment scheme (turn by turn or crowd)</p>
+        </div>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+    </mat-list>
+    <h4>Dates</h4>
+    <mat-list>
+      <mat-divider></mat-divider>
+      <mat-list-item matLine>
+        <div matLine class="space-between">
+          <span class="text">Whitelist registration start</span>
+          <span class="text">Whitelist registration end</span>
+        </div>
+      </mat-list-item>
+      <mat-list-item matLine>
+        <div matLine class="space-between">
+          <span class="text">ICO start</span>
+          <span class="text">ICO end</span>
+        </div>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+    </mat-list>
+    <p class="text-medium">If the purpose of fees is not achieved, all funds will be returned to their owners</p>
+    <mat-divider></mat-divider>
   </div>
   <div class="form-field">
     <div class="form-field-input">
-      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="whitelist()">Whitelist me</button>
-      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="whitelist()">Whitelist me</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="import()">Import</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments for organizer</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(true)">Investments for investor</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="reminder()">Add reminder</button>
     </div>
   </div>
 </div>

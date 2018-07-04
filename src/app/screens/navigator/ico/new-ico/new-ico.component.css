@@ -1,17 +1,17 @@
-.company-info {
-  margin-top: 20px;
-}
+/*.company-info {*/
+  /*margin-top: 20px;*/
+/*}*/
 
-.company-info > div {
-  padding: 5px;
-  margin-top: 5px;
-  text-align: left;
-  border: 1px lightgray solid;
-  border-radius: 2px;
-}
+/*.company-info > div {*/
+  /*padding: 5px;*/
+  /*margin-top: 5px;*/
+  /*text-align: left;*/
+  /*border: 1px lightgray solid;*/
+  /*border-radius: 2px;*/
+/*}*/
 
 .input-2 {
-  width: calc(50% - 5px);
+  width: calc(50% - 10px);
 }
 
 .full-width-label {
@@ -19,23 +19,25 @@
 }
 
 .f-left {
-  margin-right: 5px;
+  margin-right: 10px;
   float: left;
 }
 
 .f-right {
-  margin-left: 5px;
+  margin-left: 10px;
   float: right;
 }
 
-.coin-selector {
+.field.coin-selector {
   flex-shrink: 0;
-  width: 70%;
+  width: calc(70% - 10px);
+  margin-right: 10px;
 }
 
-.after-selector {
+.field.after-selector {
   flex-shrink: 0;
-  width: 30%
+  width: calc(30% - 10px);
+  margin-left: 10px;
 }
 
 .flex-2-btn {
@@ -65,4 +67,53 @@ input {
 
 .box {
   height: auto;
+}
+
+.field {
+  width: 100%;
+  height: 44px;
+  background-color: white;
+  border-radius: 2px;
+  text-align: left;
+  margin-bottom: 13px;
+}
+
+.disable {
+  background-color: #e7e8eb !important;
+}
+
+.field span {
+  margin: 0 20px 0 20px;
+  font-size: 16px;
+  color: #373741;
+  font-family: 'Roboto-Light';
+  line-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc(100% - 40px);
+  display: inline-block;
+}
+
+.mat-select span {
+  display: inline;
+}
+
+.mat-radio-button, .mat-checkbox {
+  font-family: 'Roboto-Light';
+}
+.mat-checkbox-layout, .mat-radio-button {
+  margin-bottom: 13px;
+}
+h4 {
+  padding: 10px 0;
+  margin: 10px 0;
+  border-top-color: rgba(0, 0, 0, 0.12);
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-bottom-color: rgba(0, 0, 0, 0.12);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+.currency-component {
+  margin-top: 5px;
 }

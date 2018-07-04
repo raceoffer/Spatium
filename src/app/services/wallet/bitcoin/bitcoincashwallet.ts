@@ -1,7 +1,7 @@
 import { BitcoreWallet } from './bitcorewallet';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { BluetoothService } from '../../bluetooth.service';
-import { NgZone } from '@angular/core';
+
 import * as CashAddr from 'cashaddrjs';
 
 import { BitcoinCashTransaction, BitcoinCashWallet as CoreBitcoinCashWallet } from 'crypto-core-async';
@@ -14,7 +14,6 @@ export class BitcoinCashWallet extends BitcoreWallet {
     account: number,
     messageSubject: any,
     bt: BluetoothService,
-    ngZone: NgZone,
     worker: any
   ) {
     super(
@@ -27,7 +26,6 @@ export class BitcoinCashWallet extends BitcoreWallet {
       account,
       messageSubject,
       bt,
-      ngZone,
       worker
     );
   }

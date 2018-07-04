@@ -18,10 +18,9 @@ export class WaitingComponent {
   public connectedDevice = this.bt.connectedDevice;
   public connecting = new BehaviorSubject<boolean>(false);
 
-  private cancel = new Subject<any>();
+  private connectionCancelled = new Subject<any>();
 
   @Output() connected = new EventEmitter<Device>();
-
   public devices = combineLatest([
       this.bt.discoveredDevices,
       this.bt.pairedDevices
@@ -56,6 +55,8 @@ export class WaitingComponent {
     if (!this.enabled.getValue()) {
       await this.bt.requestEnable();
     }
+
+    this.bt.refreshDevices();
   }
 
   async connectTo(name, address) {
@@ -71,19 +72,25 @@ export class WaitingComponent {
 
       const device = new Device(name, address);
 
-      const result = await from(this.bt.connect(device)).pipe(take(1), takeUntil(this.cancel)).toPromise();
+      const result = await from(this.bt.connect(device)).pipe(take(1), takeUntil(this.connectionCancelled)).toPromise();
       if (typeof result === 'undefined') {
         // assume cancelled
+        console.log('Connection cancelled');
       } else if(!result) {
-        throw new Error('Conenction error');
+        throw new Error('Generic connection error');
       } else {
         this.connected.next(device)
       }
-    } catch (ignored) {
+    } catch (e) {
+      console.log('Connection failure:', e);
       this.notification.show('Failed to connect to ' + name);
     } finally {
       this.connecting.next(false);
     }
+  }
+
+  public cancel() {
+    this.connectionCancelled.next();
   }
 
   async enableBluetooth() {
@@ -95,7 +102,6 @@ export class WaitingComponent {
   }
 
   onBack() {
-    this.cancel.next(true);
     this.navigationService.back();
   }
 }

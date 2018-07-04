@@ -88,7 +88,7 @@
         <span class="label full-width-label">{{ stFee }}</span>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="allowFeeConfiguration">
       <td colspan="2">
         <div class="field" style="margin-bottom: 13px;">
           <mat-select [formControl]="feeTypeField">
@@ -105,7 +105,7 @@
         </div>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="allowFeeConfiguration">
       <td class="right">
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
       </td>
@@ -113,7 +113,7 @@
         <span class="label" style="margin-left: 5px;">USD</span>
       </td>
     </tr>
-    <tr>
+    <tr *ngIf="allowFeeConfiguration">
       <td class="right">
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
@@ -145,7 +145,7 @@
         </div>
       </td>
     </tr>
-    <tr *ngIf="feeTypeField.value === feeType.Manual">
+    <tr *ngIf="feeTypeField.value === feeType.Manual && allowFeeConfiguration">
       <td class="right">
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
       </td>
@@ -153,7 +153,7 @@
         <span class="label" style="margin-left: 5px;">USD</span>
       </td>
     </tr>
-    <tr *ngIf="feeTypeField.value === feeType.Manual">
+    <tr *ngIf="feeTypeField.value === feeType.Manual && allowFeeConfiguration">
       <td class="right">
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>

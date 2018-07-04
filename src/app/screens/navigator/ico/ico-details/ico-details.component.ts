@@ -1,6 +1,10 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, OnDestroy, NgZone, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { WhitelistComponent } from '../whitelist/whitelist.component';
+import { SendTransactionComponent } from '../../send-transaction/send-transaction.component';
 import { InvestmentsComponent } from '../investments/investments.component';
+import { NotificationService } from '../../../../services/notification.service';
+import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
 
 @Component({
@@ -8,20 +12,47 @@ import { NavigationService } from '../../../../services/navigation.service';
   templateUrl: './ico-details.component.html',
   styleUrls: ['./ico-details.component.css'],
 })
-export class IcoDetailsComponent {
+export class IcoDetailsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public project: any = null;
-
   public coin: any = undefined;
-  public currency: any = undefined;
+  public chosencurrency: any = undefined;
+  public coins: any = [];
 
   constructor(
-    private readonly navigationService: NavigationService
-  ) { }
+    private readonly notification: NotificationService,
+    private readonly currency: CurrencyService,
+    private readonly navigationService: NavigationService) {  }
+
+  ngOnInit() {
+    this.project.coins.forEach((item) => {
+      this.coins.push({
+          'icon': this.currency.getInfo(item.place).icon,
+          'symbol': this.currency.getInfo(item.place).symbol,
+          'coin': item.place,
+          'name': item.name,
+          'chosen': false, 
+      })
+    });
+  }
+
+  ngOnDestroy() {
+
+  }
 
   async onBack() {
     this.navigationService.back();
+  }
+
+  import() {
+    if (this.chosencurrency === undefined) {
+      this.notification.show('Please choose coin');
+    } else {
+      const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
+      overalyRef.instance.currency = this.chosencurrency;
+      overalyRef.instance.fixedaddress = this.project.address;
+    }
   }
 
   whitelist() {
@@ -35,7 +66,17 @@ export class IcoDetailsComponent {
     overalyRef.instance.investor = investor;
   }
 
-  async changeSel(e) {
-    this.currency = e.value;
+  async reminder() {
+    console.log('DO SOME SHIT');
+  }
+
+  changeCurrency(coin) {
+    console.log(coin, this);
+    coin.chosen = !coin.chosen;
+    this.coins.forEach((item) => {
+      if (item.coin === this.chosencurrency)
+        item.chosen = false;
+    });
+    this.chosencurrency = (coin.chosen)?coin.coin:undefined;
   }
 }

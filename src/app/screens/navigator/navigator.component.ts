@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BluetoothService } from '../../services/bluetooth.service';
 import { WalletService } from '../../services/wallet.service';
@@ -10,14 +10,14 @@ import { NotificationService } from "../../services/notification.service";
 import { SettingsComponent } from "./settings/settings.component";
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { ActivityService } from "../../services/activity.service";
-import { IcoComponent } from "./ico/ico.component";
+import { WaitingComponent } from "./waiting/waiting.component";
 
 @Component({
   selector: 'app-navigator',
   templateUrl: './navigator.component.html',
   styleUrls: ['./navigator.component.css']
 })
-export class NavigatorComponent implements OnDestroy {
+export class NavigatorComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   public navLinks = [{
@@ -56,7 +56,6 @@ export class NavigatorComponent implements OnDestroy {
   }];
 
   public current = 'Wallet';
-
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -80,8 +79,9 @@ export class NavigatorComponent implements OnDestroy {
     private readonly activityService: ActivityService
   ) {
     this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
+      this.bt.connectedEvent.subscribe(async () => {
+        await this.wallet.startHandshake();
+        await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
@@ -90,12 +90,7 @@ export class NavigatorComponent implements OnDestroy {
       }));
 
     this.subscriptions.push(
-      this.wallet.resyncEvent.subscribe(async () => {
-        await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
-      }));
-
-    this.subscriptions.push(
-      this.wallet.cancelResyncEvent.subscribe(async () => {
+      this.wallet.cancelEvent.subscribe(async () => {
         await this.bt.disconnect();
       }));
 
@@ -123,6 +118,28 @@ export class NavigatorComponent implements OnDestroy {
         await this.router.navigate(['/start']);
       })
     );
+
+    this.subscriptions.push(
+      this.activityService.inactivity.subscribe(async () => {
+        await this.router.navigate(['/start']);
+      })
+    );
+
+    this.activityService.onActivity();
+  }
+
+  async ngOnInit() {
+    if (!this.bt.connected.getValue()) {
+      await this.openConnectOverlay();
+    }
+  }
+
+  public async openConnectOverlay() {
+    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    componentRef.instance.connected.subscribe(device => {
+      this.navigationService.acceptOverlay();
+      console.log('Connected to', device);
+    });
   }
 
   public openSettings() {
@@ -141,9 +158,10 @@ export class NavigatorComponent implements OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
 
+    this.navigationService.clearOverlayStack();
+
     await this.wallet.reset();
     await this.keychain.reset();
-    await this.wallet.resetSession();
     await this.bt.disconnect();
   }
 }
