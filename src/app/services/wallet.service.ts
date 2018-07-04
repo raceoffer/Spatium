@@ -279,6 +279,8 @@ export class WalletService {
           console.log('Rejected to change session');
           this.synchronizatonStatus.next(SyncStatus.None);
           return;
+        } else {
+          await this.reset();
         }
       }
 
