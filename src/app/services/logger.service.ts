@@ -84,7 +84,15 @@ export class LoggerService {
       return obj;
     } 
 
+    if (obj.constructor && obj.constructor.name === 'DebugContext_') {
+      return 'DebugContext_';
+    }
+
     if (obj.name && obj.name === 'Error') {
+      return obj;
+    }
+
+    if (obj.constructor && obj.constructor.name === 'Error') {
       return obj;
     }
 
