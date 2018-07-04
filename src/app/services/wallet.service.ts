@@ -208,6 +208,12 @@ export class WalletService {
       return;
     }
 
+    this.sessionKey = null;
+    this.compoundSessionKey = null;
+
+    this.synchronizatonStatus.next(SyncStatus.None);
+    this.synchronizedCurrencies.next(0);
+
     this.syncProgress.next(0);
     for (const wallet of Array.from(this.currencyWallets.values())) {
       await wallet.reset();
