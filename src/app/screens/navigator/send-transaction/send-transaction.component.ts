@@ -96,6 +96,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.ethWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
     null);
 
+  public fixedaddress: string = null;
   public address: BehaviorSubject<string> = null;
   public balance: BehaviorSubject<BN> = null;
   public receiver: BehaviorSubject<string> = null;
@@ -467,6 +468,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.subtractFeeField.disable();
     } else {
       this.subtractFeeField.enable();
+    }
+
+    if (this.fixedaddress) {
+      this.receiverField.setValue(this.fixedaddress);
+      this.receiverField.disable();
     }
   }
 

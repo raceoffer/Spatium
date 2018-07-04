@@ -10,59 +10,74 @@
                     *ngIf="(((walletAddress | async) === null) ||
                     ((balanceCurrencyUnconfirmed | async) === null) ||
                     ((balanceUsdUnconfirmed | async) === null))"></mat-progress-bar>-->
-  <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
-    <!--<tr>
-      <td colspan="2">
-        <span class="label full-width-label">{{ accountLabel }}</span>
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2" style="margin-bottom: 13px;">
-        <div class="field auto-height">
-          <div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>
-          <div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>
-          <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
-            <mat-icon>content_copy</mat-icon>
-          </button>
-        </div>
-      </td>
-    </tr>-->
-    <tr> <!--//Check if coin < fee, show a notification-->
-      <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ coinSym }}</span>
-      </td>
-      <td class="left">
-        <span class="label" style="margin-left: 5px;">{{ feeTitle }}</span>
-      </td>
-    </tr>
-    <tr>
-      <td class="right">
-        <div class="field disable">
-          <!--<span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">{{ balanceCurrencyUnconfirmed | async }}</span>
-          <span *ngIf="(balanceCurrencyUnconfirmed | async) === null">Loading&hellip;</span>-->
-          <span>{{ balanceCurrency}}</span>
-        </div>
-      </td>
-      <td class="left">
-        <div class="field disable">
-          <!--<span *ngIf="(balanceUsdUnconfirmed | async) !== null">{{ balanceUsdUnconfirmed | async }}</span>
-          <span *ngIf="(balanceUsdUnconfirmed | async) === null">Loading&hellip;</span>-->
-          <span>{{ feePrice }}</span>
-        </div>
-      </td>
-    </tr>
-    <!--<tr *ngIf="(balanceCurrencyUnconfirmed | async) !== null &&
-               (balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async)">
-      <td class="right">
-        <span class="label" style="margin-left: 5px;">Unconfirmed balance</span>
-      </td>
-    </tr>-->
-  </table>
-  <div fxLayout="column" fxLayoutAlign="start left" class="full-width company-info">
+  <!--<table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">-->
+    <!--&lt;!&ndash;<tr>-->
+      <!--<td colspan="2">-->
+        <!--<span class="label full-width-label">{{ accountLabel }}</span>-->
+      <!--</td>-->
+    <!--</tr>-->
+    <!--<tr>-->
+      <!--<td colspan="2">-->
+        <!--<div class="field auto-height">-->
+          <!--<div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>-->
+          <!--<div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>-->
+          <!--<button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">-->
+            <!--<mat-icon>content_copy</mat-icon>-->
+          <!--</button>-->
+        <!--</div>-->
+      <!--</td>-->
+    <!--</tr>&ndash;&gt;-->
+    <!--<tr> &lt;!&ndash;//Check if coin < fee, show a notification&ndash;&gt;-->
+      <!--<td class="right">-->
+        <!--<span class="label" style="margin-left: 5px;">{{ coinSym }}</span>-->
+      <!--</td>-->
+      <!--<td class="left">-->
+        <!--<span class="label" style="margin-left: 5px;">{{ feeTitle }}</span>-->
+      <!--</td>-->
+    <!--</tr>-->
+    <!--<tr>-->
+      <!--<td class="right">-->
+        <!--<div class="field disable">-->
+          <!--&lt;!&ndash;<span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">{{ balanceCurrencyUnconfirmed | async }}</span>-->
+          <!--<span *ngIf="(balanceCurrencyUnconfirmed | async) === null">Loading&hellip;</span>&ndash;&gt;-->
+          <!--<span>{{ balanceCurrency}}</span>-->
+        <!--</div>-->
+      <!--</td>-->
+      <!--<td class="left">-->
+        <!--<div class="field disable">-->
+          <!--&lt;!&ndash;<span *ngIf="(balanceUsdUnconfirmed | async) !== null">{{ balanceUsdUnconfirmed | async }}</span>-->
+          <!--<span *ngIf="(balanceUsdUnconfirmed | async) === null">Loading&hellip;</span>&ndash;&gt;-->
+          <!--<span>{{ feePrice }}</span>-->
+        <!--</div>-->
+      <!--</td>-->
+    <!--</tr>-->
+    <!--&lt;!&ndash;<tr *ngIf="(balanceCurrencyUnconfirmed | async) !== null &&-->
+               <!--(balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async)">-->
+      <!--<td class="right">-->
+        <!--<span class="label" style="margin-left: 5px;">Unconfirmed balance</span>-->
+      <!--</td>-->
+    <!--</tr>&ndash;&gt;-->
+  <!--</table>-->
+
+  <div class="full-width">
+    <div class="info f-left input-2">
+      <span class="label full-width-label">{{ coinSym }}</span>
+      <div class="field disable">
+        <span>{{ balanceCurrency}}</span>
+      </div>
+    </div>
+    <div class="info f-right input-2">
+      <span class="label full-width-label">{{ feeTitle }}</span>
+      <div class="field disable">
+        <span>{{ feePrice }}</span>
+      </div>
+    </div>
+  </div>
+  <div fxLayout="column" fxLayoutAlign="start left" class="full-width">
     <h4>Company info</h4>
     <div class="name-input">
       <span class="label full-width-label">Name</span>
-      <div class="field" style="margin-bottom: 13px;">
+      <div class="field">
         <span>
           <input matInput placeholder="Name of company" [formControl]="comp_name">
         </span>
@@ -70,7 +85,7 @@
     </div>
     <div class="ticker-input">
       <span class="label full-width-label">Ticker</span>
-      <div class="field" style="margin-bottom: 13px;">
+      <div class="field">
         <span>
           <input matInput placeholder="Ticker of token" [formControl]="ticker">
         </span>
@@ -79,7 +94,7 @@
     <div class="tokens-amount-input">
       <div class="info f-left input-2">
         <span class="label full-width-label">Amount emitted</span>
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field">
           <span>
             <input type="number" matInput placeholder="Tokens emitted" [formControl]="amount_emitted">
           </span>
@@ -87,7 +102,7 @@
       </div>
       <div class="info f-right input-2">
         <span class="label full-width-label">Amount offered</span>
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field">
           <span>
             <input type="number" matInput placeholder="Tokens offered" [formControl]="amount_offered">
           </span>
@@ -96,7 +111,7 @@
     </div>
     <div class="address-input">
       <span class="label full-width-label">Address</span>
-      <div class="field" style="margin-bottom: 13px;">
+      <div class="field">
         <span>  <!--Need to add verification of contract, if contract not exist => offer to create a contract-->
           <input matInput placeholder="Address of contract" [formControl]="address">
         </span>
@@ -104,32 +119,34 @@
     </div>
     <h4>Detailed info</h4>
     <div class="deployment-date-input">
-      <div class="info f-left input-2">
+      <div class="info">
         <span class="label full-width-label">Start</span>
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-            <input type="date" matInput placeholder="Start date" [formControl]="start_date">
-          </span>
-        </div>
+        <mat-form-field class="field" style="margin-bottom: 13px">
+          <input matInput [matDatepicker]="picker1" [formControl]="start_date">
+          <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
       </div>
-      <div class="info f-right input-2">
+      <div class="info">
         <span class="label full-width-label">End</span>
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-            <input type="date" matInput placeholder="End date" [formControl]="end_date">
-          </span>
-        </div>
+        <mat-form-field class="field" style="margin-bottom: 13px">
+          <input matInput [matDatepicker]="picker2" [formControl]="end_date">
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
       </div>
     </div>
     <div class="token-price-input">
-      <span class="label full-width-label">Starting price</span><br/>
+      <span class="label full-width-label">Starting price</span>
       <div style="display: flex">
-        <mat-select class="coin-selector" (selectionChange)="changeStartPrice($event)" [(value)]="coinOfStartPrice">
-          <mat-option *ngFor="let coin of coins" [value]="coin">
-            {{coin}}
-          </mat-option>
-        </mat-select>
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field coin-selector">
+          <mat-select class="coin-selector" (selectionChange)="changeStartPrice($event)" [(value)]="coinOfStartPrice">
+            <mat-option *ngFor="let coin of coins" [value]="coin">
+              {{coin}}
+            </mat-option>
+          </mat-select>
+        </div>
+        <div class="field after-selector">
           <span>
             <input type="number" class="after-selector" matInput placeholder="Starting price of coin" [formControl]="starting_price">
           </span>
@@ -146,7 +163,7 @@
       <div *ngIf="companyType === companyTypes[1]" class="additional">
         <div class="info f-left input-2">
           <span class="label full-width-label">Interval time</span>
-          <div class="field" style="margin-bottom: 13px;">
+          <div class="field">
             <span>
               <input matInput placeholder="Interval time" [formControl]="interval_time_auction">
             </span>
@@ -154,7 +171,7 @@
         </div>
         <div class="info f-right input-2">
           <span class="label full-width-label">Coefficient</span>
-          <div class="field" style="margin-bottom: 13px;">
+          <div class="field">
             <span>
               <input  matInput placeholder="Coefficient" [formControl]="factor">
             </span>
@@ -165,21 +182,21 @@
     <div class="whitelist-input"> <!--//If true, do some shit-->
       <mat-checkbox [(ngModel)]="white_list">Use white list?</mat-checkbox>
       <div *ngIf="white_list">
-        <div class="info f-left input-2">
+        <div class="info">
           <span class="label full-width-label">Start registration</span>
-          <div class="field" style="margin-bottom: 13px;">
-            <span>
-              <input type="date" matInput placeholder="Start date" [formControl]="start_registration">
-            </span>
-          </div>
+          <mat-form-field class="field" style="margin-bottom: 13px">
+            <input matInput [matDatepicker]="picker3" [formControl]="start_registration">
+            <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+            <mat-datepicker #picker3></mat-datepicker>
+          </mat-form-field>
         </div>
-        <div class="info f-right input-2">
+        <div class="info">
           <span class="label full-width-label">End registration</span>
-          <div class="field" style="margin-bottom: 13px;">
-            <span>
-              <input type="date" matInput placeholder="End date" [formControl]="end_registration">
-            </span>
-          </div>
+          <mat-form-field class="field" style="margin-bottom: 13px">
+            <input matInput [matDatepicker]="picker4" [formControl]="end_registration">
+            <mat-datepicker-toggle matSuffix [for]="picker4"></mat-datepicker-toggle>
+            <mat-datepicker #picker4></mat-datepicker>
+          </mat-form-field>
         </div>
         <div>
           <span class="label full-width-label">Invite system</span><br/>
@@ -192,7 +209,7 @@
         <div *ngIf="slotsType === slotsTypes[1]" class="additional">
           <div class="info f-left input-2">
             <span class="label full-width-label">Interval time</span>
-            <div class="field" style="margin-bottom: 13px;">
+            <div class="field">
               <span>
                 <input matInput placeholder="Interval time" [formControl]="interval_time_invite">
               </span>
@@ -200,7 +217,7 @@
           </div>
           <div class="info f-right input-2">
             <span class="label full-width-label">Periodicity</span>
-            <div class="field" style="margin-bottom: 13px;">
+            <div class="field">
               <span>
                 <input matInput placeholder="Periodicity" [formControl]="periodicity">
               </span>
@@ -210,22 +227,26 @@
       </div>
     </div>
     <div class="available-coins-input">
-      <span class="label full-width-label">Available coins</span><br/>
-      <mat-select [formControl]="available_coins" multiple>
-        <mat-option *ngFor="let coin of coins" [value]="coin">{{coin}}</mat-option>
-      </mat-select>
+      <span class="label full-width-label">Available coins</span>
+      <div class="field">
+        <mat-select [formControl]="available_coins" multiple>
+          <mat-option *ngFor="let coin of coins" [value]="coin">{{coin}}</mat-option>
+        </mat-select>
+      </div>
     </div>
     <div class="fees-input">
-      <span class="label full-width-label">Amount of fees</span><br/>
+      <span class="label full-width-label">Amount of fees</span>
       <div style="display: flex">
-        <mat-select class="coin-selector" (selectionChange)="changeFeesAmount($event)" [(value)]="coinOfFeesAmount">
-          <mat-option *ngFor="let coin of coins" [value]="coin">
-            {{coin}}
-          </mat-option>
-        </mat-select>
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field coin-selector">
+          <mat-select (selectionChange)="changeFeesAmount($event)" [(value)]="coinOfFeesAmount">
+            <mat-option *ngFor="let coin of coins" [value]="coin">
+              {{coin}}
+            </mat-option>
+          </mat-select>
+        </div>
+        <div class="field after-selector">
           <span>
-            <input type="number" class="after-selector" matInput placeholder="Amount of fees" [formControl]="amount_fees">
+            <input type="number" class="" matInput placeholder="Amount of fees" [formControl]="amount_fees">
           </span>
         </div>
       </div>
@@ -239,24 +260,28 @@
       </mat-radio-group>
     </div>
     <div class="price-range-input">
-      <span class="label full-width-label">Choose coin</span><br/>
-      <mat-select (selectionChange)="changeInvestmentAmount($event)" [(value)]="coinOfInvestmentAmount">
-        <mat-option *ngFor="let coin of coins" [value]="coin">
-          {{coin}}
-        </mat-option>
-      </mat-select>
-      <div class="info f-left input-2">
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-              <input type="number" matInput placeholder="Max investment amount" [formControl]="max_amount">
-          </span>
-        </div>
+      <span class="label full-width-label">Choose coin</span>
+      <div class="field">
+        <mat-select (selectionChange)="changeInvestmentAmount($event)" [(value)]="coinOfInvestmentAmount">
+          <mat-option *ngFor="let coin of coins" [value]="coin">
+            {{coin}}
+          </mat-option>
+        </mat-select>
       </div>
-      <div class="info f-right input-2">
-        <div class="field" style="margin-bottom: 13px;">
-          <span>
-              <input type="number" matInput placeholder="Min investment amount" [formControl]="min_amount">
-          </span>
+      <div>
+        <div class="info f-left input-2">
+          <div class="field">
+            <span>
+                <input type="number" matInput placeholder="Max investment amount" [formControl]="max_amount">
+            </span>
+          </div>
+        </div>
+        <div class="info f-right input-2">
+          <div class="field">
+            <span>
+                <input type="number" matInput placeholder="Min investment amount" [formControl]="min_amount">
+            </span>
+          </div>
         </div>
       </div>
     </div>
