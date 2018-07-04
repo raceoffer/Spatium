@@ -1,14 +1,13 @@
-import { ChangeDetectorRef, Component, HostBinding, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostBinding, OnDestroy, AfterViewInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from "../currency/currency.component";
 import { WaitingComponent } from "../waiting/waiting.component";
-import { BluetoothService } from "../../../services/bluetooth.service";
 
 declare const navigator: any;
 
@@ -17,7 +16,7 @@ declare const navigator: any;
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css']
 })
-export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
+export class WalletComponent implements OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component';
 
   public synchronizing = this.wallet.synchronizing;
@@ -54,7 +53,6 @@ export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly bt: BluetoothService,
     private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
@@ -72,17 +70,11 @@ export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filtredTitles = this.titles;
   }
 
-  async ngOnInit() {
-    if (!this.bt.connected.getValue()) {
-      await this.openConnectOverlay();
-    }
-  }
-
   ngAfterViewInit() {
     this.changeDetector.detach();
-    setInterval(() => {
+    this.subscriptions.push(interval(1000).subscribe(() => {
       this.changeDetector.detectChanges();
-    }, 1000);
+    }));
   }
 
   get filterValue() {
@@ -120,7 +112,8 @@ export class WalletComponent implements OnInit, OnDestroy, AfterViewInit {
       logo: tokenInfo.className,
       cols: 1,
       rows: 1,
-      coin: tokenInfo.token
+      coin: tokenInfo.token,
+      erc20: true,
     };
   }
 

@@ -80,8 +80,7 @@ export class CurrencyService {
       [CurrencyServerName.Litecore, 'https://insight.litecore.io/api']
     ])],
     [Coin.NEM, new Map<string, string>([
-      [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/lightcoin/mainnet/insights`],
-      [CurrencyServerName.Native, 'https://insight.litecore.io/api']
+      [CurrencyServerName.Native, 'http://hugealice3.nem.ninja']
     ])]
   ]);
 
@@ -178,9 +177,10 @@ export class CurrencyService {
     )],
   ]);
 
-
-  constructor(private readonly keychain: KeyChainService,
-              private readonly currencyPriceService: CurrencyPriceService) {
+  constructor(
+    private readonly keychain: KeyChainService,
+    private readonly currencyPriceService: CurrencyPriceService
+  ) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
     });

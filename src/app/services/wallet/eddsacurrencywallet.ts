@@ -77,9 +77,9 @@ export abstract class EddsaCurrencyWallet extends CurrencyWallet {
   }
 
   public async cancelSign() {
-    if (this.syncSession) {
-      await this.syncSession.cancel();
-      this.syncSession = null;
+    if (this.signSession) {
+      await this.signSession.cancel();
+      this.signSession = null;
     }
   }
 
