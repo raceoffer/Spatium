@@ -118,6 +118,14 @@ export class NavigatorComponent implements OnDestroy {
         await this.router.navigate(['/start']);
       })
     );
+
+    this.subscriptions.push(
+      this.activityService.inactivity.subscribe(async () => {
+        await this.router.navigate(['/start']);
+      })
+    );
+
+    this.activityService.onActivity();
   }
 
   public openSettings() {
@@ -135,6 +143,8 @@ export class NavigatorComponent implements OnDestroy {
   public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+
+    this.navigationService.clearOverlayStack();
 
     await this.wallet.reset();
     await this.keychain.reset();
