@@ -182,7 +182,7 @@ export class RegistrationComponent implements OnDestroy {
 
       this.keychain.setSeed(this.seed);
 
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['waiting']}}]);
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
     });
   }
 
