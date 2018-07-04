@@ -97,6 +97,19 @@ export class LoggerService {
     return await this.fs.readFile(this.sessionlogName);
   }
 
+  async getLastLogData(): Promise<string | null> {
+    const lastLogFileName = (await this.fs.listFiles())
+      .filter(name => name.includes('log_'))
+      .sort()
+      .pop();
+    if (lastLogFileName) {
+      return await this.fs.readFile(lastLogFileName);
+    }
+    else {
+      return null;
+    }
+  }
+
   get logFileName(): string {
     return this.sessionlogName;
   }
