@@ -87,6 +87,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public currencyInfo: Info = null;
   public isToken = false;
 
+  public allowFeeConfiguration = false;
+
   public connected = this.bt.connected;
 
   public currencyWallet: CurrencyWallet = null;
@@ -131,6 +133,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.isToken = this.currency in Token;
 
     this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
+    this.allowFeeConfiguration = !([Coin.NEM] as Array<Coin | Token>).includes(this.currency);
 
     this.subscriptions.push(
       this.currencyWallet.rejectedEvent.subscribe(async () => {
@@ -491,7 +494,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   // Pressed start signature
   async startSigning() {
     const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
-    const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, this.fee.getValue());
+    // temporarily allow NEM to choose fee itself
+    const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
+    const tx = await this.currencyWallet.createTransaction(this.receiver.getValue(), value, fee);
     if (tx) {
       this.phase.next(Phase.Confirmation);
       if (this.connected.getValue()) {
