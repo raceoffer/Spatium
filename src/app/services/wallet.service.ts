@@ -156,7 +156,7 @@ export class WalletService {
       Coin.NEM,
       new NemWallet(
         currencyService.getApiServer(Coin.NEM),
-        'testnet',
+        'main',
         this.keychain,
         1,
         this.messageSubject,
