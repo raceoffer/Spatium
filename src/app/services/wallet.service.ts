@@ -219,10 +219,9 @@ export class WalletService {
   }
 
   private async newSessionKey() {
-    const deviceName = this.bt.connectedDevice.getValue().name;
     const timestamp = new Date().toString();
     const seed = this.keychain.getSeed();
-    return await sha256(Buffer.concat([Buffer.from(deviceName + timestamp), await sha256(seed)]));
+    return await sha256(Buffer.concat([Buffer.from(timestamp), await sha256(seed)]));
   }
 
   public async startHandshake() {
