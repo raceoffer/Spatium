@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, HostBinding, OnDestroy, AfterViewInit } from '@angular/core';
 import { CurrencyService } from '../../../services/currency.service';
+import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
@@ -21,6 +22,8 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
+
+  public isWindows;
 
   public cols: any = Math.ceil(window.innerWidth / 350);
 
@@ -53,6 +56,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
+    private readonly device: DeviceService,
     private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
@@ -68,6 +72,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     this.titles = titles;
 
     this.filtredTitles = this.titles;
+    this.isWindows = (this.device.platform === Platform.Windows);
   }
 
   ngAfterViewInit() {

@@ -1,4 +1,4 @@
-<div (window:resize)="onResize()">
+<div (window:resize)="onResize()" [class.scroll]="isWindows">
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
     <button mat-icon-button (click)="onNavRequest()">
       <mat-icon>menu</mat-icon>
@@ -39,7 +39,7 @@
     </button>
   </mat-toolbar>
 
-  <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+  <mat-grid-list cols="{{cols}}" rowHeight="4:3" [class.windows]="isWindows">
     <mat-grid-tile
       *ngFor="let tile of filtredTitles"
       [colspan]="tile.cols"
