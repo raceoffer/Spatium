@@ -35,7 +35,8 @@
     "cordova-windows": "^6.0.0",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5",
+    "cordova-plugin-nativestorage": "~2.3.1"
   },
   "cordova": {
     "plugins": {
@@ -57,7 +58,8 @@
       "Canvas2ImagePlugin": {},
       "cordova-plugin-camera-info": {},
       "cordova-plugin-hockeyapp": {},
-      "cordova-custom-config": {}
+      "cordova-custom-config": {},
+      "cordova-plugin-nativestorage": {}
     },
     "platforms": [
       "browser",

@@ -18,6 +18,7 @@ import {
   checkAvailable, checkExisting, deleteTouch, getTouchPassword,
   saveTouchPassword
 } from "../../../utils/fingerprint";
+import { getValue } from "../../../utils/storage";
 
 declare const Buffer: any;
 declare const window: any;
@@ -74,6 +75,7 @@ export class ChangePincodeComponent implements OnInit {
 
   public touchAvailable = new BehaviorSubject<boolean>(false);
   public touchExisting = new BehaviorSubject<boolean>(false);
+  public touchEnabled = new BehaviorSubject<boolean>(false);
 
   constructor(
     private readonly fs: FileService,
@@ -86,6 +88,11 @@ export class ChangePincodeComponent implements OnInit {
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
+    try {
+      this.touchEnabled.next(await getValue('fingerprintEnabled'));
+    } catch (ignored) {
+      this.touchEnabled.next(true);
+    }
   }
 
   onBack() {

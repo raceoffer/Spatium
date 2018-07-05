@@ -14,6 +14,7 @@ import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
 import { NotificationService } from "../../../services/notification.service";
 import { checkAvailable, checkExisting, deleteTouch, getTouchPassword } from "../../../utils/fingerprint";
 import { DeleteSecretComponent } from '../../delete-secret/delete-secret.component';
+import { getValue } from "../../../utils/storage";
 
 @Component({
   selector: 'app-decrypt',
@@ -34,6 +35,7 @@ export class DecryptComponent implements OnInit {
 
   public touchAvailable = new BehaviorSubject<boolean>(false);
   public touchExisting = new BehaviorSubject<boolean>(false);
+  public touchEnabled = new BehaviorSubject<boolean>(false);
 
   constructor(
     private readonly navigationService: NavigationService,
@@ -45,6 +47,11 @@ export class DecryptComponent implements OnInit {
   async ngOnInit() {
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
+    try {
+      this.touchEnabled.next(await getValue('fingerprintEnabled'));
+    } catch (ignored) {
+      this.touchEnabled.next(true);
+    }
   }
 
   public onDelete() {

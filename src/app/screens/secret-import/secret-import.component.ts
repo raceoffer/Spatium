@@ -19,6 +19,7 @@ import { PincodeComponent } from "../../inputs/pincode/pincode.component";
 import { FileService } from "../../services/file.service";
 import { checkAvailable, checkExisting, saveTouchPassword } from "../../utils/fingerprint";
 import { BehaviorSubject } from "rxjs/index";
+import { getValue } from "../../utils/storage";
 
 enum State {
   Empty,
@@ -56,6 +57,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
   public touchAvailable = new BehaviorSubject<boolean>(false);
   public touchExisting = new BehaviorSubject<boolean>(false);
+  public touchEnabled = new BehaviorSubject<boolean>(false);
 
   private subscriptions = [];
   private cameraChangesCallbackId: number;
@@ -73,6 +75,11 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     this.cameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
+    try {
+      this.touchEnabled.next(await getValue('fingerprintEnabled'));
+    } catch (ignored) {
+      this.touchEnabled.next(true);
+    }
 
     this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(cameraAvailable => this.ngZone.run(() => {
       this.cameraAvailable = cameraAvailable;

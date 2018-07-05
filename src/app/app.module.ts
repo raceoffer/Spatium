@@ -99,6 +99,7 @@ import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.
 import { InvestmentsComponent } from './screens/navigator/ico/investments/investments.component';
 import { CreateComponent } from './screens/verifier-auth/create/create.component';
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
+import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
 
 @NgModule({
   declarations: [
@@ -157,7 +158,8 @@ import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.compon
     NewIcoComponent,
     InvestmentsComponent,
     CreateComponent,
-    DecryptComponent
+    DecryptComponent,
+	VerifierSettingsComponent
   ],
   imports: [
     OverlayModule,
@@ -242,7 +244,8 @@ import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.compon
     IcoComponent,
     FeedbackComponent,
     CreateComponent,
-    DecryptComponent
+    DecryptComponent,
+    VerifierSettingsComponent
   ]
 })
 
