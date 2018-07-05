@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, skip } from "rxjs/internal/operators";
 import { Device, equals } from "./primitives/device";
 import { State } from "./primitives/state";
+import { DeviceService, Platform } from './device.service';
 
 declare const cordova: any;
 declare const window: any;
@@ -18,7 +19,7 @@ export class DiscoveryService {
     distinctUntilChanged(equals),
     skip(1));
 
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone, private readonly deviceService: DeviceService) {}
 
   async getHostName() {
     return await new Promise((resolve, reject) => cordova.plugins.zeroconf.getHostname(resolve, reject));
@@ -91,7 +92,9 @@ export class DiscoveryService {
       result => this.ngZone.run(() => {
         const action = result.action;
         const service = result.service;
-        if (action === 'resolved') {
+
+        const isWindows = this.deviceService.platform === Platform.Windows;
+        if (action === 'resolved' || (isWindows && action === 'added')) {
           const devices = this.devices.getValue();
 
           devices.set(service.txtRecord.name, new Device(
