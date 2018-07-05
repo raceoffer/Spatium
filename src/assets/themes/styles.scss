@@ -1127,6 +1127,6 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   width: 10%;
   max-width: 15%;
   background-position: center !important;
-  background-size: contain !important;
+  background-size: 100% 100% !important;
   background-repeat: no-repeat;
 }
