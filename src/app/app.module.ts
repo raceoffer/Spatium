@@ -103,6 +103,7 @@ import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
+import { IpfsService } from './services/ipfs.service';
 import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { CreateComponent } from './screens/verifier-auth/create/create.component';
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
@@ -168,7 +169,7 @@ import { SettingsComponent as VerifierSettingsComponent } from './screens/verifi
     ZeroconfComponent,
     CreateComponent,
     DecryptComponent,
-    VerifierSettingsComponent
+	VerifierSettingsComponent
   ],
   imports: [
     OverlayModule,
@@ -220,6 +221,7 @@ import { SettingsComponent as VerifierSettingsComponent } from './screens/verifi
     HockeyService,
     ActivityService,
     DiscoveryService,
+    IpfsService,
     SocketServerService,
     SocketClientService,
     ConnectivityService,
