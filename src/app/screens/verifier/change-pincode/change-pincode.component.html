@@ -7,7 +7,7 @@
 <div class="box" fxLayout="column" fxLayoutAlign="center center">
   <app-pincode
     [busy]="busy"
-    [allowFingerprint]="(state | async) === stateType.Decryption && (touchAvailable | async)"
+    [allowFingerprint]="(state | async) === stateType.Decryption && (touchAvailable | async) && (touchAvailable | async)"
     (fingerprintRequested)="onFinger()"
     (submit)="onInput($event)"
   ></app-pincode>

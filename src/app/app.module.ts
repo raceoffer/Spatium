@@ -86,7 +86,7 @@ import { LoginComponent } from "./inputs/login/login.component";
 import { QrWriterComponent } from './inputs/qr-writer/qr-writer.component';
 import { DefaultAuthFactorComponent } from './screens/authorization-factors/default-auth-factor/default-auth-factor.component';
 import { EqualToDirective } from './directives/equal-to.directive';
-import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
+import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { NfcWriterComponent } from './inputs/nfc-writer/nfc-writer.component';
 import { HockeyService } from './services/hockey.service';
@@ -97,6 +97,8 @@ import { IcoDetailsComponent } from './screens/navigator/ico/ico-details/ico-det
 import { NewIcoComponent } from './screens/navigator/ico/new-ico/new-ico.component';
 import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.component';
 import { InvestmentsComponent } from './screens/navigator/ico/investments/investments.component';
+import { CreateComponent } from './screens/verifier-auth/create/create.component';
+import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
 
 @NgModule({
   declarations: [
@@ -143,7 +145,7 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     QrWriterComponent,
     DefaultAuthFactorComponent,
     EqualToDirective,
-    VerifierCrateComponent,
+    VerifierAuthComponent,
     VerifierComponent,
     NfcWriterComponent,
     FeedbackComponent,
@@ -153,7 +155,9 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     IcoDetailsComponent,
     WhitelistComponent,
     NewIcoComponent,
-    InvestmentsComponent
+    InvestmentsComponent,
+    CreateComponent,
+    DecryptComponent
   ],
   imports: [
     OverlayModule,
@@ -236,7 +240,9 @@ import { InvestmentsComponent } from './screens/navigator/ico/investments/invest
     NewIcoComponent,
     InvestmentsComponent,
     IcoComponent,
-    FeedbackComponent
+    FeedbackComponent,
+    CreateComponent,
+    DecryptComponent
   ]
 })
 

@@ -1,5 +1,5 @@
 <app-toolbar
-  [label]="(exists | async) ? 'Unlock Secret' : 'Create secret'"
+  label="Unlock Secret"
   [isColored]="false"
   [isShadowed]="false"
   (backClicked)="onBack()">
@@ -25,12 +25,7 @@
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item *ngIf="!(exists | async)"  (click)="onImport()" [disabled]="busy">
-          <mat-icon>import_export</mat-icon>
-          <span>Import secret</span>
-        </button>
-
-        <button mat-menu-item *ngIf="(exists | async)" (click)="onDelete()" [disabled]="busy">
+        <button mat-menu-item (click)="onDelete()" [disabled]="busy">
           <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
         </button>
