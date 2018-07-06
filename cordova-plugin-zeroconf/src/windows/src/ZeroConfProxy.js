@@ -112,8 +112,12 @@ var watch = function (success, failure, params) {
         var l = devices.length;
         for (var i = 0; i != l; ++i) {
             var device = sender.detail[i];
+            var actionType = sender.type;
+            if (actionType === 'added') {
+              actionType = 'resolved';
+            }
             var result = {
-                action: sender.type,
+                action: actionType,
                 service: {
                     type: type,
                     name: device.name,
@@ -141,7 +145,7 @@ var watch = function (success, failure, params) {
                 result.service.txtRecord[pair[0]] = pair[1];
             }
             result.service.txtRecord['name'] = device.name;
-            success(result);
+            success(result, { keepCallback: true });
         }
     }
 
