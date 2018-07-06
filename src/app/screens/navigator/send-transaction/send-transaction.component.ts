@@ -1,8 +1,7 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import BN from 'bn.js';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, flatMap, filter } from 'rxjs/operators';
+import { map, distinctUntilChanged, flatMap, filter, tap } from 'rxjs/operators';
 import isNumber from 'lodash/isNumber';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
@@ -13,6 +12,8 @@ import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { BluetoothService } from "../../../services/bluetooth.service";
 import { WaitingComponent } from "../waiting/waiting.component";
+
+import BN from 'bn.js';
 
 declare const cordova: any;
 
@@ -115,6 +116,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public requiredFilled: BehaviorSubject<boolean> = null;
   public valid: BehaviorSubject<boolean> = null;
 
+  public ready: BehaviorSubject<boolean> = null;
+
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
   private subscriptions = [];
@@ -131,6 +134,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.currencyInfo = await this.currencyService.getInfo(this.currency);
     this.isToken = this.currency in Token;
+
+    this.ready = new BehaviorSubject<boolean>(false);
 
     this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
     this.allowFeeConfiguration = !([Coin.NEM] as Array<Coin | Token>).includes(this.currency);
@@ -163,7 +168,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             balance.div(new BN(2)));
 
           return await testTx.estimateSize();
-        })
+        }),
+        tap(size => this.ready.next(size as boolean))
       ), 1);
 
     this.receiver = new BehaviorSubject<string>('');
@@ -510,7 +516,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(device => {
+    componentRef.instance.connected.subscribe(ignored => {
       this.navigationService.acceptOverlay();
     });
   }
