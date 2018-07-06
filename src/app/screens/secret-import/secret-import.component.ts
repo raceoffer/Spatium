@@ -144,14 +144,24 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
       await this.fs.writeFile(this.fs.safeFileName('seed'), this.encryptedSeed.toString('hex'));
 
-      if (this.touchAvailable.getValue()) {
-        await saveTouchPassword(pincode)
+      try {
+        if (this.touchAvailable.getValue()) {
+          await saveTouchPassword(pincode)
+        }
+      } catch (e) {
+        if (e !== 'Cancelled') {
+          throw e;
+        }
       }
 
       this.imported.next(seed);
     } catch (e) {
-      this.pincodeComponent.onClear();
-      this.notification.show('Authorization error');
+      if (e === 'KeyPermanentlyInvalidatedException') {
+        this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
+      } else {
+        this.pincodeComponent.onClear();
+        this.notification.show('Fingerprint authorization error');
+      }
     } finally {
       this.busy = false;
     }

@@ -15,7 +15,10 @@ import {
 } from 'crypto-core-async/lib/utils';
 import { PincodeComponent } from "../../../inputs/pincode/pincode.component";
 import {
-  checkAvailable, checkExisting, deleteTouch, getTouchPassword,
+  checkAvailable,
+  checkExisting,
+  deleteTouch,
+  getTouchPassword,
   saveTouchPassword
 } from "../../../utils/fingerprint";
 import { getValue } from "../../../utils/storage";
@@ -148,18 +151,22 @@ export class ChangePincodeComponent implements OnInit {
 
        await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSeed);
 
-       if (this.touchAvailable.getValue()) {
-         if (this.touchExisting.getValue()) {
-           await deleteTouch();
+       try {
+         if (this.touchAvailable.getValue()) {
+           if (this.touchExisting.getValue()) {
+             await deleteTouch();
+           }
+           await saveTouchPassword(pincode)
          }
-         await saveTouchPassword(pincode)
+       } catch (e) {
+         if (e !== 'Cancelled') {
+           throw e;
+         }
        }
 
        this.success.emit();
      } catch (e) {
-       if (e === 'Cancelled') {
-         // So be it
-       } else if (e === 'KeyPermanentlyInvalidatedException') {
+       if (e === 'KeyPermanentlyInvalidatedException') {
          this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
        } else {
          this.pincodeComponent.onClear();
