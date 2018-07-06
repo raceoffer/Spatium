@@ -73,15 +73,19 @@ export class CreateComponent implements OnInit {
 
       await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSeed);
 
-      if (this.touchAvailable.getValue()) {
-        await saveTouchPassword(pincode)
+      try {
+        if (this.touchAvailable.getValue()) {
+          await saveTouchPassword(pincode)
+        }
+      } catch (e) {
+        if (e !== 'Cancelled') {
+          throw e;
+        }
       }
 
       this.created.next(seed);
     } catch (e) {
-      if (e === 'Cancelled') {
-        // So be it
-      } else if (e === 'KeyPermanentlyInvalidatedException') {
+      if (e === 'KeyPermanentlyInvalidatedException') {
         this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
       } else {
         this.pincodeComponent.onClear();
