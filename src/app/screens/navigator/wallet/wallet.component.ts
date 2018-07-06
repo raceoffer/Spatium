@@ -26,18 +26,18 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   public title = 'Wallet';
   public isSearch = false;
-  public filtredTitles = [];
+  public filteredTitles = [];
 
   public staticTitles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
     {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
     {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
     {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC},
+    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem', coin: Coin.NEM},
     {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
     {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
     {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
     {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
-    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem', coin: Coin.NEM}
   ];
 
   public titles: any = [];
@@ -67,7 +67,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
     this.titles = titles;
 
-    this.filtredTitles = this.titles;
+    this.filteredTitles = this.titles;
   }
 
   ngAfterViewInit() {
@@ -88,12 +88,12 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   set filterValue(newUserName) {
     this._filterValue = newUserName;
     if (this._filterValue.length > 0) {
-      this.filtredTitles = this.titles.filter(
+      this.filteredTitles = this.titles.filter(
         t => (t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
           t.symbols.includes(this._filterValue.toUpperCase()))
       );
     } else {
-      this.filtredTitles = this.titles;
+      this.filteredTitles = this.titles;
     }
   }
 

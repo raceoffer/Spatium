@@ -41,6 +41,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public isCameraAvailable = false;
 
   private subscriptions = [];
+  private cameraChangesCallbackId: number;
 
   @ViewChild(LoginInput) public loginComponent: LoginInput;
 
@@ -68,7 +69,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isNfcAvailable = await checkNfc();
     this.isCameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
 
-    cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
+    this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
       this.isCameraAvailable = isCameraAvailable;
     }));
   }
@@ -82,6 +83,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+    cordova.plugins.cameraInfo.unsubscribeFromAvailabilityChanges(this.cameraChangesCallbackId);
   }
 
   toggleContent(content) {

@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
 import { SecretExportComponent } from "../secret-export/secret-export.component";
 import { VerifyTransactionComponent } from "./verify-transaction/verify-transaction.component";
+import { SettingsComponent } from './settings/verifier-settings.component';
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { Router } from "@angular/router";
 import { WalletService } from "../../services/wallet.service";
@@ -15,6 +16,7 @@ import { bufferWhen, map, timeInterval, filter, skipUntil} from 'rxjs/operators'
 import { Status } from "../../services/wallet/currencywallet";
 import { CurrencyService } from "../../services/currency.service";
 import { FeedbackComponent } from '../feedback/feedback.component';
+import { deleteTouch } from "../../utils/fingerprint";
 
 declare const window: any;
 
@@ -33,6 +35,11 @@ export class VerifierComponent implements OnInit {
     name: 'Change PIN',
     clicked: () => {
       this.onChangePIN();
+    }
+  }, {
+    name: 'Settings',
+    clicked: () => {
+      this.onSettings();
     }
   }, {
     name: 'Delete secret',
@@ -256,7 +263,7 @@ export class VerifierComponent implements OnInit {
       this.navigationService.acceptOverlay();
 
       if (await this.checkAvailable() && await this.checkExisting()) {
-        await this.delete();
+        await deleteTouch();
       }
 
       await this.fs.deleteFile(this.fs.safeFileName('seed'));
@@ -275,6 +282,11 @@ export class VerifierComponent implements OnInit {
     })
   }
 
+  public onSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
@@ -284,12 +296,6 @@ export class VerifierComponent implements OnInit {
   public async checkExisting() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
-    });
-  }
-
-  public async delete() {
-    return new Promise((resolve, reject) => {
-      window.plugins.touchid.delete('spatium', resolve, reject);
     });
   }
 }

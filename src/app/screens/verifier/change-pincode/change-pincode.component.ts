@@ -14,7 +14,14 @@ import {
   randomBytes
 } from 'crypto-core-async/lib/utils';
 import { PincodeComponent } from "../../../inputs/pincode/pincode.component";
-import { checkAvailable, checkExisting, getTouchPassword, saveTouchPassword } from "../../../utils/fingerprint";
+import {
+  checkAvailable,
+  checkExisting,
+  deleteTouch,
+  getTouchPassword,
+  saveTouchPassword
+} from "../../../utils/fingerprint";
+import { getValue } from "../../../utils/storage";
 
 declare const Buffer: any;
 declare const window: any;
@@ -67,9 +74,11 @@ export class ChangePincodeComponent implements OnInit {
     }
   })), '');
 
-  busy = false;
+  public busy = false;
 
-  public touchAvailable = new BehaviorSubject<any>(false);
+  public touchAvailable = new BehaviorSubject<boolean>(false);
+  public touchExisting = new BehaviorSubject<boolean>(false);
+  public touchEnabled = new BehaviorSubject<boolean>(false);
 
   constructor(
     private readonly fs: FileService,
@@ -80,7 +89,13 @@ export class ChangePincodeComponent implements OnInit {
 
   async ngOnInit() {
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
-    this.touchAvailable.next(await checkAvailable() && await checkExisting());
+    this.touchAvailable.next(await checkAvailable());
+    this.touchExisting.next(await checkExisting());
+    try {
+      this.touchEnabled.next(await getValue('fingerprintEnabled'));
+    } catch (ignored) {
+      this.touchEnabled.next(true);
+    }
   }
 
   onBack() {
@@ -129,26 +144,34 @@ export class ChangePincodeComponent implements OnInit {
        this.busy = true;
 
        const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
-       if (this.touchAvailable) {
-         try {
-           if (await saveTouchPassword(pincode)) {
-             await this.saveSeed(aesKey);
+
+       const seed = await randomBytes(64, this.workerService.worker);
+
+       const encryptedSeed = (await encrypt(seed, aesKey, this.workerService.worker)).toString('hex');
+
+       await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSeed);
+
+       try {
+         if (this.touchAvailable.getValue()) {
+           if (this.touchExisting.getValue()) {
+             await deleteTouch();
            }
-         } catch (e) {
-           if (e === 'Cancelled') {
-             await this.saveSeed(aesKey);
-           } else if (e === 'KeyPermanentlyInvalidatedException') {
-             this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
-           } else {
-             this.notification.show('Fingerprint authorization error');
-           }
+           await saveTouchPassword(pincode)
          }
-       } else {
-         await this.saveSeed(aesKey);
+       } catch (e) {
+         if (e !== 'Cancelled') {
+           throw e;
+         }
        }
+
+       this.success.emit();
      } catch (e) {
-       this.pincodeComponent.onClear();
-       this.notification.show('Authorization error');
+       if (e === 'KeyPermanentlyInvalidatedException') {
+         this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
+       } else {
+         this.pincodeComponent.onClear();
+         this.notification.show('Fingerprint authorization error');
+       }
      } finally {
        this.busy = false;
      }
@@ -156,14 +179,6 @@ export class ChangePincodeComponent implements OnInit {
      this.notification.show('Incorrect confirmation, please try again');
     }
     this.pincodeComponent.onClear();
-  }
-
-  async saveSeed(aesKey) {
-    const encryptedSeed = (await encrypt(this.seed.getValue(), aesKey, this.workerService.worker)).toString('hex');
-
-    await this.fs.writeFile(this.fs.safeFileName('seed'), encryptedSeed);
-
-    this.success.emit();
   }
 }
 
