@@ -1,0 +1,34 @@
+<app-toolbar
+  label="Create secret"
+  [isColored]="false"
+  [isShadowed]="false"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="box" fxLayout="column" fxLayoutAlign="start center">
+  <div class="header text-center">
+    <app-logo-block></app-logo-block>
+  </div>
+
+  <app-pincode
+    class="factor-content"
+    [busy]="busy"
+    [allowFingerprint]="false"
+    (submit)="onSubmit($event)">
+  </app-pincode>
+
+  <div class="footer text-center" style="bottom: 0px;">
+    <div class="width-button-width" style="display: inline-block;">
+      <button mat-icon-button [matMenuTriggerFor]="menu" style="float: right;" [disabled]="busy">
+        <mat-icon style="opacity: 0.5;">settings</mat-icon>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onImport()" [disabled]="busy">
+          <mat-icon>import_export</mat-icon>
+          <span>Import secret</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</div>

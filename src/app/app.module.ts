@@ -80,7 +80,6 @@ import { RegistrationComponent } from './screens/registration/registration.compo
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { StartComponent } from './screens/start/start.component';
-import { VerifierCrateComponent } from './screens/verifier-crate/verifier-crate.component';
 import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { VerifyTransactionComponent } from './screens/verifier/verify-transaction/verify-transaction.component';
@@ -104,6 +103,10 @@ import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
+import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
+import { CreateComponent } from './screens/verifier-auth/create/create.component';
+import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
+import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
 
 @NgModule({
   declarations: [
@@ -150,7 +153,7 @@ import { WorkerService } from './services/worker.service';
     QrWriterComponent,
     DefaultAuthFactorComponent,
     EqualToDirective,
-    VerifierCrateComponent,
+    VerifierAuthComponent,
     VerifierComponent,
     NfcWriterComponent,
     FeedbackComponent,
@@ -162,7 +165,10 @@ import { WorkerService } from './services/worker.service';
     NewIcoComponent,
     InvestmentsComponent,
     BluetoothComponent,
-    ZeroconfComponent
+    ZeroconfComponent,
+    CreateComponent,
+    DecryptComponent,
+    VerifierSettingsComponent
   ],
   imports: [
     OverlayModule,
@@ -250,7 +256,10 @@ import { WorkerService } from './services/worker.service';
     NewIcoComponent,
     InvestmentsComponent,
     IcoComponent,
-    FeedbackComponent
+    FeedbackComponent,
+    CreateComponent,
+    DecryptComponent,
+    VerifierSettingsComponent
   ]
 })
 

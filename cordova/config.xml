@@ -86,4 +86,5 @@
     <plugin name="cordova.plugins.diagnostic" spec="~4.0.8" />
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
+    <plugin name="cordova-plugin-nativestorage" spec="~2.3.1" />
 </widget>

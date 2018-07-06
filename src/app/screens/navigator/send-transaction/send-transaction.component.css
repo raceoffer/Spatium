@@ -20,5 +20,10 @@ textarea.mat-input-element{
   resize: none;
 }
 
+.estimating {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
 
 

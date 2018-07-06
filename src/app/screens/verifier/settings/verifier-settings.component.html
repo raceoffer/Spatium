@@ -1,0 +1,18 @@
+<app-toolbar
+  label = "Settings"
+  [isColored] = "true"
+  [isShadowed] = "true"
+  (backClicked)="onBack()">
+</app-toolbar>
+
+<div class="content text-center" fxLayout="column" fxLayoutAlign="start start">
+  <div class="toggle-row">
+    <div class="toggle-label">Use fingerprint authentication</div>
+    <mat-slide-toggle
+      class="toggle-button"
+      [checked]="fingerprintEnabled"
+      [disabled]="!fingerprintAvailable"
+      (change)="onFingerprintChanged($event)">
+    </mat-slide-toggle>
+  </div>
+</div>

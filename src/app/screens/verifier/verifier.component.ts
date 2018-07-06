@@ -13,8 +13,10 @@ import { Status } from '../../services/wallet/currencywallet';
 import { DeleteSecretComponent } from '../delete-secret/delete-secret.component';
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { SecretExportComponent } from '../secret-export/secret-export.component';
+import { SettingsComponent } from './settings/verifier-settings.component';
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
+import { deleteTouch } from "../../utils/fingerprint";
 
 declare const window: any;
 
@@ -34,6 +36,11 @@ export class VerifierComponent implements OnInit {
     name: 'Change PIN',
     clicked: () => {
       this.onChangePIN();
+    }
+  }, {
+    name: 'Settings',
+    clicked: () => {
+      this.onSettings();
     }
   }, {
     name: 'Delete secret',
@@ -98,7 +105,7 @@ export class VerifierComponent implements OnInit {
 
     this.subscriptions.push(
       this.connectionProviderService.connectedEvent.subscribe(async () => {
-        await this.connectionProviderService.stopListening(); //zeroconf РЅРµ СЃС‚РѕРїР°С‚СЊ
+        await this.connectionProviderService.stopListening(); //zeroconf не стопать
         await this.wallet.startHandshake();
         await this.wallet.startSync();
       }));
@@ -240,7 +247,7 @@ export class VerifierComponent implements OnInit {
       this.navigationService.acceptOverlay();
 
       if (await this.checkAvailable() && await this.checkExisting()) {
-        await this.delete();
+        await deleteTouch();
       }
 
       await this.fs.deleteFile(this.fs.safeFileName('seed'));
@@ -259,6 +266,11 @@ export class VerifierComponent implements OnInit {
     });
   }
 
+  public onSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
@@ -270,10 +282,4 @@ export class VerifierComponent implements OnInit {
       window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
     });
   }
-
-  public async delete() {
-    return new Promise((resolve, reject) => {
-      window.plugins.touchid.delete('spatium', resolve, reject);
-    });
   }
-}
