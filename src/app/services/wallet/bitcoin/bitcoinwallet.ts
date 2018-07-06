@@ -1,19 +1,16 @@
-import { BitcoreWallet } from './bitcorewallet';
-import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
-
 import { BitcoinTransaction, BitcoinWallet as CoreBitcoinWallet } from 'crypto-core-async';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService } from '../../keychain.service';
+import { BitcoreWallet } from './bitcorewallet';
 
 export class BitcoinWallet extends BitcoreWallet {
-  constructor(
-    endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any
-  ) {
+  constructor(endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any) {
     super(
       BitcoinTransaction,
       CoreBitcoinWallet,
@@ -23,7 +20,7 @@ export class BitcoinWallet extends BitcoreWallet {
       network === 'main' ? Coin.BTC : Coin.BTC_test,
       account,
       messageSubject,
-      bt,
+      connectionProviderService,
       worker
     );
   }

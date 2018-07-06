@@ -1,19 +1,16 @@
-import { BitcoreWallet } from './bitcorewallet';
-import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
-
 import { LitecoinTransaction, LitecoinWallet as CoreLitecoinWallet } from 'crypto-core-async';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService } from '../../keychain.service';
+import { BitcoreWallet } from './bitcorewallet';
 
 export class LitecoinWallet extends BitcoreWallet {
-  constructor(
-    endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any
-  ) {
+  constructor(endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any) {
     super(
       LitecoinTransaction,
       CoreLitecoinWallet,
@@ -23,7 +20,7 @@ export class LitecoinWallet extends BitcoreWallet {
       Coin.LTC,
       account,
       messageSubject,
-      bt,
+      connectionProviderService,
       worker
     );
   }

@@ -1,10 +1,9 @@
-import { CurrencyWallet, Status } from "./currencywallet";
-import { Coin, KeyChainService } from "../keychain.service";
-import { BluetoothService } from "../bluetooth.service";
-import { SignSession } from "./ecdsa/signingsession";
-import { SynchronizationStatus, SyncSession } from './ecdsa/syncsession';
-
 import { CompoundKeyEcdsa } from 'crypto-core-async';
+import { ConnectionProviderService } from '../connection-provider';
+import { Coin, KeyChainService } from '../keychain.service';
+import { CurrencyWallet, Status } from './currencywallet';
+import { SignSession } from './ecdsa/signingsession';
+import { SynchronizationStatus, SyncSession } from './ecdsa/syncsession';
 
 export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
   public compoundKey: any = null;
@@ -13,16 +12,14 @@ export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
   protected syncSession: SyncSession = null;
   protected signSession: SignSession = null;
 
-  constructor(
-    network: string,
-    keychain: KeyChainService,
-    currency: Coin,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any
-  ) {
-    super(network, keychain, currency, account, messageSubject, bt, worker);
+  constructor(network: string,
+              keychain: KeyChainService,
+              currency: Coin,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any) {
+    super(network, keychain, currency, account, messageSubject, connectionProviderService, worker);
   }
 
   public async sync(options: any) {
@@ -34,7 +31,7 @@ export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
 
     this.status.next(Status.Synchronizing);
 
-    this.syncSession = new SyncSession(this.compoundKey, this.messageSubject, this.bt);
+    this.syncSession = new SyncSession(this.compoundKey, this.messageSubject, this.connectionProviderService);
     this.syncSession.status.subscribe(state => {
       this.syncProgress.next(
         Math.max(Math.min(Math.round(state * 100 / (SynchronizationStatus.Finished - SynchronizationStatus.None + 1)), 100), 0)
@@ -103,19 +100,22 @@ export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
   }
 
   public async requestTransactionVerify(transaction) {
-    await this.bt.send(JSON.stringify({
-      type: 'verifyTransaction',
-      content: {
-        tx: await transaction.toJSON(),
-        coin: this.currencyCode()
-      }
-    }));
+    try {
+      await this.connectionProviderService.send(JSON.stringify({
+        type: 'verifyTransaction',
+        content: {
+          tx: await transaction.toJSON(),
+          coin: this.currencyCode()
+        }
+      }));
+    } catch (ignored) {
+    }
 
     this.signSession = new SignSession(
       transaction,
       this.compoundKey,
       this.messageSubject,
-      this.bt
+      this.connectionProviderService
     );
 
     this.signSession.ready.subscribe(async () => {
@@ -145,7 +145,7 @@ export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
       transaction,
       this.compoundKey,
       this.messageSubject,
-      this.bt
+      this.connectionProviderService
     );
 
     this.startVerifyEvent.next();

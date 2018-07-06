@@ -1,7 +1,5 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
-import {
-  animate, transition, trigger, style
-} from '@angular/animations';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrencyService, Info } from '../../../services/currency.service';
@@ -10,10 +8,8 @@ import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
-import { SendTransactionComponent } from "../send-transaction/send-transaction.component";
-import {Router} from '@angular/router';
-import { CurrencySettingsComponent } from "../currency-settings/currency-settings.component";
-import {SettingsComponent} from '../settings/settings.component';
+import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
+import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
 
 declare const cordova: any;
 declare const device: any;
@@ -55,11 +51,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService
-  ) {}
+  constructor(private readonly wallet: WalletService,
+              private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
     this.currencyInfo = await this.currencyService.getInfo(this.currency);

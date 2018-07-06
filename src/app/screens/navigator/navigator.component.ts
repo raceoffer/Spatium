@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { BluetoothService } from '../../services/bluetooth.service';
+import { Subject } from 'rxjs/index';
+import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { ActivityService } from '../../services/activity.service';
+import { ConnectionProviderService } from '../../services/connection-provider';
+import { KeyChainService } from '../../services/keychain.service';
+import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
-import { KeyChainService } from "../../services/keychain.service";
-import { NavigationService } from "../../services/navigation.service";
-import { bufferWhen, map, timeInterval, filter, skipUntil} from 'rxjs/operators';
-import { Subject } from "rxjs/index";
-import { NotificationService } from "../../services/notification.service";
-import { SettingsComponent } from "./settings/settings.component";
 import { FeedbackComponent } from '../feedback/feedback.component';
-import { ActivityService } from "../../services/activity.service";
-import { WaitingComponent } from "./waiting/waiting.component";
+import { SettingsComponent } from './settings/settings.component';
+import { WaitingComponent } from './waiting/waiting.component';
 
 @Component({
   selector: 'app-navigator',
@@ -18,13 +18,12 @@ import { WaitingComponent } from "./waiting/waiting.component";
   styleUrls: ['./navigator.component.css']
 })
 export class NavigatorComponent implements OnInit, OnDestroy {
-  private subscriptions = [];
-
+  public current = 'Wallet';
   public navLinks = [{
     name: 'Wallet',
     clicked: async () => {
       this.current = 'Wallet';
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}])
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
     }
   }, {
     name: 'Exchange'
@@ -32,7 +31,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     name: 'ICO',
     clicked: async () => {
       this.current = 'ICO';
-      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}])
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}]);
     }
   }, {
     name: 'Portfolio Investment'
@@ -51,11 +50,11 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }, {
     name: 'Exit',
     clicked: async () => {
-      await this.router.navigate(['/start'])
+      await this.router.navigate(['/start']);
     }
   }];
-
-  public current = 'Wallet';
+  @ViewChild('sidenav') sidenav;
+  private subscriptions = [];
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -67,31 +66,27 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     filter(emits => emits > 0)
   );
 
-  @ViewChild('sidenav') sidenav;
-
-  constructor(
-    private readonly wallet: WalletService,
-    private readonly keychain: KeyChainService,
-    private readonly router: Router,
-    private readonly bt: BluetoothService,
-    private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService,
-    private readonly activityService: ActivityService
-  ) {
+  constructor(private readonly wallet: WalletService,
+              private readonly keychain: KeyChainService,
+              private readonly router: Router,
+              private readonly connectionProviderService: ConnectionProviderService,
+              private readonly navigationService: NavigationService,
+              private readonly notification: NotificationService,
+              private readonly activityService: ActivityService) {
     this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(async () => {
+      this.connectionProviderService.connectedEvent.subscribe(async () => {
         await this.wallet.startHandshake();
         await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
+      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
       }));
 
     this.subscriptions.push(
       this.wallet.cancelEvent.subscribe(async () => {
-        await this.bt.disconnect();
+        await this.connectionProviderService.disconnect();
       }));
 
     this.subscriptions.push(
@@ -121,7 +116,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.activityService.inactivity.subscribe(async () => {
-        await this.router.navigate(['/start']);
+        //await this.router.navigate(['/start']);
       })
     );
 
@@ -129,16 +124,15 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    if (!this.bt.connected.getValue()) {
+    if (!this.connectionProviderService.connected.getValue()) {
       await this.openConnectOverlay();
     }
   }
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(device => {
+    componentRef.instance.connected.subscribe(() => {
       this.navigationService.acceptOverlay();
-      console.log('Connected to', device);
     });
   }
 
@@ -162,6 +156,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     await this.wallet.reset();
     await this.keychain.reset();
-    await this.bt.disconnect();
+    await this.connectionProviderService.disconnect();
   }
 }

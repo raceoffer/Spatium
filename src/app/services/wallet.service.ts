@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject, timer } from 'rxjs';
-import { filter, map, mapTo } from 'rxjs/operators';
+import { CompoundKeyEcdsa } from 'crypto-core-async';
+import { sha256 } from 'crypto-core-async/lib/utils';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subject, timer } from 'rxjs';
+import { filter, map, mapTo, take, takeUntil } from 'rxjs/operators';
+import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject } from '../utils/transformers';
-import { BluetoothService } from './bluetooth.service';
+import { ConnectionProviderService } from './connection-provider';
 import { CurrencyService } from './currency.service';
 import { Coin, KeyChainService, Token } from './keychain.service';
 import { BitcoinCashWallet } from './wallet/bitcoin/bitcoincashwallet';
@@ -11,14 +14,8 @@ import { LitecoinWallet } from './wallet/bitcoin/litecoinwallet';
 import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
+import { NemWallet } from './wallet/nem/nemwallet';
 import { WorkerService } from './worker.service';
-
-import { CompoundKeyEcdsa } from 'crypto-core-async';
-
-import { sha256 } from 'crypto-core-async/lib/utils';
-import { take, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
-import { NemWallet } from "./wallet/nem/nemwallet";
 
 declare const navigator: any;
 
@@ -37,18 +34,11 @@ export enum SyncStatus {
 
 @Injectable()
 export class WalletService {
-  private sessionKeyObserver: Observable<any> = null;
-  private resyncSubject: Subject<boolean> = new Subject<boolean>();
-  private cancelSubject: Subject<boolean> = new Subject<boolean>();
-
   public coinWallets = new Map<Coin, CurrencyWallet>();
   public tokenWallets = new Map<Token, ERC20Wallet>();
   public currencyWallets = new Map<Coin | Token, CurrencyWallet>();
-
   public ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
   public synchronizedCurrencies: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-
   public status: BehaviorSubject<WalletStatus> = toBehaviourSubject(
     combineLatest([
       this.ready,
@@ -63,25 +53,23 @@ export class WalletService {
           }
         })
       )]).pipe(
-        map(([ready, status]) => (ready ? status : WalletStatus.None) as WalletStatus)
-      ), WalletStatus.None);
-
-  public synchronizatonStatus: BehaviorSubject<SyncStatus> =
-    new BehaviorSubject<SyncStatus>(SyncStatus.None);
-
-  public handshaking: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.synchronizatonStatus.pipe(map(status => status === SyncStatus.Handshake)), false);
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
-    this.synchronizatonStatus.pipe(map(status => status === SyncStatus.Synchronization)), false);
-
-  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-
+      map(([ready, status]) => (ready ? status : WalletStatus.None) as WalletStatus)
+    ), WalletStatus.None);
   public partiallySync: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(map(status => status === WalletStatus.Partially)), false);
   public fullySync: BehaviorSubject<boolean> = toBehaviourSubject(
     this.status.pipe(map(status => status === WalletStatus.Fully)), false);
-
+  public synchronizatonStatus: BehaviorSubject<SyncStatus> =
+    new BehaviorSubject<SyncStatus>(SyncStatus.None);
+  public handshaking: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.synchronizatonStatus.pipe(map(status => status === SyncStatus.Handshake)), false);
+  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
+    this.synchronizatonStatus.pipe(map(status => status === SyncStatus.Synchronization)), false);
+  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  private sessionKeyObserver: Observable<any> = null;
+  private resyncSubject: Subject<boolean> = new Subject<boolean>();
   public resyncEvent: Observable<any> = this.resyncSubject.pipe(filter(b => b), mapTo(null));
+  private cancelSubject: Subject<boolean> = new Subject<boolean>();
   public cancelEvent: Observable<any> = this.cancelSubject.pipe(filter(b => b), mapTo(null));
 
   private messageSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
@@ -91,12 +79,10 @@ export class WalletService {
 
   private paillierKeys = null;
 
-  constructor(
-    private readonly bt: BluetoothService,
-    private readonly currencyService: CurrencyService,
-    private readonly keychain: KeyChainService,
-    private readonly workerService: WorkerService
-  ) {
+  constructor(private readonly connectionProviderService: ConnectionProviderService,
+              private readonly currencyService: CurrencyService,
+              private readonly keychain: KeyChainService,
+              private readonly workerService: WorkerService) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -105,7 +91,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -116,7 +102,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -127,7 +113,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -138,7 +124,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -149,7 +135,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
     this.coinWallets.set(
@@ -160,7 +146,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker
       ));
 
@@ -175,7 +161,7 @@ export class WalletService {
       this.currencyWallets.set(token, this.tokenWallets.get(token));
     }
 
-    this.bt.message.subscribe((message) => {
+    this.connectionProviderService.message.subscribe((message) => {
       this.messageSubject.next(JSON.parse(message));
     });
 
@@ -224,12 +210,6 @@ export class WalletService {
     this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
   }
 
-  private async newSessionKey() {
-    const timestamp = new Date().toString();
-    const seed = this.keychain.getSeed();
-    return await sha256(Buffer.concat([Buffer.from(timestamp), await sha256(seed)]));
-  }
-
   public async startHandshake() {
     try {
       if (this.synchronizatonStatus.getValue() !== SyncStatus.None) {
@@ -244,7 +224,7 @@ export class WalletService {
 
       console.log('Sending sessionkey', this.sessionKey.toString('hex'));
 
-      await this.bt.send(JSON.stringify({
+      await this.connectionProviderService.send(JSON.stringify({
         type: 'sessionKey',
         content: {
           sessionKey: this.sessionKey.toString('hex')
@@ -280,7 +260,7 @@ export class WalletService {
 
       if (this.status.getValue() !== WalletStatus.None) {
         console.log('But wallet is fresh too');
-        if (!await this.openUpdateKeyDialog()) {
+        if (!await requestDialog('You are about to connect with another device. This will undo current synchronization progress. Are you sure?')) {
           console.log('Rejected to change session');
           this.synchronizatonStatus.next(SyncStatus.None);
           return;
@@ -293,7 +273,7 @@ export class WalletService {
 
       console.log('Agreed to change session, sending key', this.sessionKey.toString('hex'));
 
-      await this.bt.send(JSON.stringify({
+      await this.connectionProviderService.send(JSON.stringify({
         type: 'sessionKey',
         content: {
           sessionKey: this.sessionKey.toString('hex')
@@ -349,7 +329,7 @@ export class WalletService {
           const sub = wallet.syncProgress.subscribe(num => {
             this.setProgress(0.1 + 0.8 * (coinIndex + num / 100) / this.coinWallets.size);
           });
-          await wallet.sync({ paillierKeys: this.paillierKeys });
+          await wallet.sync({paillierKeys: this.paillierKeys});
           sub.unsubscribe();
         } else {
           this.setProgress(0.1 + 0.8 * (coinIndex + 1) / this.coinWallets.size);
@@ -406,7 +386,7 @@ export class WalletService {
         this.keychain,
         1,
         this.messageSubject,
-        this.bt,
+        this.connectionProviderService,
         this.workerService.worker,
         token,
         contractAddress,
@@ -414,18 +394,9 @@ export class WalletService {
       ));
   }
 
-  async openUpdateKeyDialog() {
-    return new Promise((resolve, reject) => navigator.notification.confirm(
-      'You are about to connect with another device. This will undo current synchronization progress. Are you sure?',
-      (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      },
-      '',
-      ['YES', 'NO']
-    ));
+  private async newSessionKey() {
+    const timestamp = new Date().toString();
+    const seed = this.keychain.getSeed();
+    return await sha256(Buffer.concat([Buffer.from(timestamp), await sha256(seed)]));
   }
-        }
+}

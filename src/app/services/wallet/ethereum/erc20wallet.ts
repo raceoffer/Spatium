@@ -1,31 +1,27 @@
-import { Balance, CurrencyWallet, Status } from '../currencywallet';
-import { Coin, KeyChainService, Token } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
-
+import { ERC20Wallet as CoreERC20Wallet, EthereumTransaction } from 'crypto-core-async';
 import { from, of, timer } from 'rxjs';
-import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
-
-import { EthereumTransaction, ERC20Wallet as CoreERC20Wallet } from 'crypto-core-async';
-import { EcdsaCurrencyWallet } from "../ecdsacurrencywallet";
+import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService, Token } from '../../keychain.service';
+import { Balance, CurrencyWallet, Status } from '../currencywallet';
+import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class ERC20Wallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
 
   private routineTimerSub: any = null;
 
-  constructor(
-    private endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any,
-    private token: Token,
-    private contractAddress: string,
-    private decimals: number = 18
-  ) {
-    super(network, keychain, Coin.ETH, account, messageSubject, bt, worker);
+  constructor(private endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any,
+              private token: Token,
+              private contractAddress: string,
+              private decimals: number = 18) {
+    super(network, keychain, Coin.ETH, account, messageSubject, connectionProviderService, worker);
   }
 
   public async reset() {

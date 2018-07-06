@@ -1,17 +1,11 @@
-import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
-import { NotificationService } from '../../../services/notification.service';
-import { Input} from '@angular/core';
-import { IcoDetailsComponent } from './ico-details/ico-details.component';
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-import { CurrencyService } from '../../../services/currency.service';
-import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
+import { Coin } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { BluetoothService } from "../../../services/bluetooth.service";
-import { NewIcoComponent } from "../ico/new-ico/new-ico.component";
-import { WaitingComponent } from "../waiting/waiting.component";
+import { NewIcoComponent } from '../ico/new-ico/new-ico.component';
+import { WaitingComponent } from '../waiting/waiting.component';
+import { IcoDetailsComponent } from './ico-details/ico-details.component';
+import { requestDialog } from "../../../utils/dialog";
 
 declare const navigator: any;
 declare const window: any;
@@ -27,23 +21,21 @@ export class IcoComponent implements OnInit, OnDestroy {
 
   public title = 'ICO';
   public titles: any = [];
-  private _filterValue = '';
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
   public cols: any = Math.ceil(window.innerWidth / 350);
   public isSearch = false;
   public filtredTitles = [];
-
   public staticProjects: any = [
     {
-      title: 'Example', 
-      cols: 1, rows: 1, 
-      about: '', 
-      symbols:'EXMPL', 
-      className: 'spatium-ico', 
-      transactions: '', 
-      balances: '', 
-      address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX', 
+      title: 'Example',
+      cols: 1, rows: 1,
+      about: '',
+      symbols: 'EXMPL',
+      className: 'spatium-ico',
+      transactions: '',
+      balances: '',
+      address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX',
       coins: [
         {place: Coin.BTC, name: 'Bitcoin'},
         {place: Coin.ETH, name: 'Ethereum'},
@@ -53,25 +45,17 @@ export class IcoComponent implements OnInit, OnDestroy {
     },
   ];
 
-  constructor(
-    private readonly navigationService: NavigationService,
-    private readonly wallet: WalletService,
-  ) {
+  constructor(private readonly navigationService: NavigationService,
+              private readonly wallet: WalletService,) {
     this.titles = this.staticProjects;
 
     this.filtredTitles = this.titles;
   }
 
-  async ngOnInit() {
-
-  }
+  private _filterValue = '';
 
   get filterValue() {
     return this._filterValue;
-  }
-
-  onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   set filterValue(newUserName) {
@@ -84,6 +68,14 @@ export class IcoComponent implements OnInit, OnDestroy {
     } else {
       this.filtredTitles = this.staticProjects;
     }
+  }
+
+  async ngOnInit() {
+
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   public onNavRequest() {
@@ -115,7 +107,7 @@ export class IcoComponent implements OnInit, OnDestroy {
     componentRef.instance.connected.subscribe(device => {
       this.navigationService.acceptOverlay();
       console.log('Connected to', device);
-    })
+    });
   }
 
   goToNewICO() {
@@ -123,20 +115,9 @@ export class IcoComponent implements OnInit, OnDestroy {
   }
 
   public async cancelSync() {
-    await this.openDialog();
-  }
-
-  public async openDialog() {
-    navigator.notification.confirm(
-      'Syncronize with another device',
-      async (buttonIndex) => {
-        if (buttonIndex === 1) { // yes
-          await this.goToSync();
-        }
-      },
-      '',
-      ['YES', 'NO']
-    );
+    if (await requestDialog('Syncronize with another device')) {
+      await this.goToSync();
+    }
   }
 
   public async onTileClicked(project: any) {

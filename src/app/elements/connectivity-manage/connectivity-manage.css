@@ -1,0 +1,33 @@
+.connection-div {
+  height: 56px;
+  display: flex !important;
+}
+
+.list-icon {
+  padding-right: 5px;
+}
+
+.status {
+  padding-bottom: 5px;
+  width: 100%;
+}
+
+.list-status {
+  font-family: 'Roboto-Light';
+  font-size: 13px !important;
+  color: #373741;
+  line-height: 30px;
+  padding: 0 5px;
+}
+
+.button-style {
+  font-size: 13px;
+  font: 400 13px Roboto-Regular;
+  line-height: 30px;
+  padding: 0 5px;
+}
+
+mat-spinner {
+  margin-bottom: 3px;
+  margin-right: 5px;
+}

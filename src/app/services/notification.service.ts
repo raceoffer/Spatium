@@ -11,23 +11,10 @@ export class NotificationService {
   public decline: Subject<any> = new Subject<any>();
   snackBarRef: MatSnackBarRef<any>;
 
-  constructor(
-    private readonly deviceService: DeviceService,
-    private readonly ngZone: NgZone,
-    private snackBar: MatSnackBar
-  ) {
+  constructor(private readonly deviceService: DeviceService,
+              private readonly ngZone: NgZone,
+              private snackBar: MatSnackBar) {
     this.init();
-  }
-
-  private async init() {
-    await this.deviceService.deviceReady();
-
-    cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
-      this.confirm.next();
-    }));
-    cordova.plugins.notification.local.on('decline', (notification, eopts) => this.ngZone.run(() => {
-      this.decline.next();
-    }));
   }
 
   public askConfirmation(title: string, text: string) {
@@ -58,5 +45,16 @@ export class NotificationService {
 
   public hide() {
     this.snackBar.dismiss();
+  }
+
+  private async init() {
+    await this.deviceService.deviceReady();
+
+    cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
+      this.confirm.next();
+    }));
+    cordova.plugins.notification.local.on('decline', (notification, eopts) => this.ngZone.run(() => {
+      this.decline.next();
+    }));
   }
 }

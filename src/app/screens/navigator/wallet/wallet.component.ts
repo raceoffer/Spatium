@@ -1,13 +1,14 @@
-import { ChangeDetectorRef, Component, HostBinding, OnDestroy, AfterViewInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy } from '@angular/core';
+import { combineLatest, interval } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { combineLatest, interval } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
-import { CurrencyComponent } from "../currency/currency.component";
-import { WaitingComponent } from "../waiting/waiting.component";
+import { CurrencyComponent } from '../currency/currency.component';
+import { WaitingComponent } from '../waiting/waiting.component';
 
 declare const navigator: any;
 
@@ -41,20 +42,14 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   ];
 
   public titles: any = [];
-
-  private _filterValue = '';
-
   private tileBalanceInfo = {};
-
   private subscriptions = [];
 
-  constructor(
-    private readonly keychain: KeyChainService,
-    private readonly navigationService: NavigationService,
-    private readonly currency: CurrencyService,
-    private readonly wallet: WalletService,
-    private readonly changeDetector: ChangeDetectorRef
-  ) {
+  constructor(private readonly keychain: KeyChainService,
+              private readonly navigationService: NavigationService,
+              private readonly currency: CurrencyService,
+              private readonly wallet: WalletService,
+              private readonly changeDetector: ChangeDetectorRef) {
     const titles = this.staticTitles;
 
     keychain.topTokens.forEach((tokenInfo) => {
@@ -70,39 +65,24 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     this.filtredTitles = this.titles;
   }
 
-  ngAfterViewInit() {
-    this.changeDetector.detach();
-    this.subscriptions.push(interval(1000).subscribe(() => {
-      this.changeDetector.detectChanges();
-    }));
-  }
+  private _filterValue = '';
 
   get filterValue() {
     return this._filterValue;
-  }
-
-  onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   set filterValue(newUserName) {
     this._filterValue = newUserName;
     if (this._filterValue.length > 0) {
       this.filtredTitles = this.titles.filter(
-        t => (t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
-          t.symbols.includes(this._filterValue.toUpperCase()))
+        t => (
+          t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
+          t.symbols.includes(this._filterValue.toUpperCase())
+        )
       );
     } else {
       this.filtredTitles = this.titles;
     }
-  }
-
-  public onNavRequest() {
-    this.navigationService.toggleNavigation();
-  }
-
-  public clearFilterValue() {
-    this.filterValue = '';
   }
 
   public static tokenEntry(tokenInfo: TokenEntry) {
@@ -117,12 +97,31 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  ngAfterViewInit() {
+    this.changeDetector.detach();
+    this.subscriptions.push(interval(1000).subscribe(() => {
+      this.changeDetector.detectChanges();
+    }));
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
+  }
+
+  public onNavRequest() {
+    this.navigationService.toggleNavigation();
+  }
+
+  public clearFilterValue() {
+    this.filterValue = '';
+  }
+
   public ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }
 
-  public  async onTileClicked(coin: Coin) {
+  public async onTileClicked(coin: Coin) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
     componentRef.instance.currency = coin;
   }
@@ -148,20 +147,9 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   }
 
   public async cancelSync() {
-    if (await this.confirmSynchronize()) {
+    if (await requestDialog('Syncronize with another device')) {
       await this.openConnectOverlay();
     }
-  }
-
-  public async confirmSynchronize() {
-    return await new Promise<boolean>((resolve, reject) =>
-      navigator.notification.confirm(
-        'Syncronize with another device',
-        buttonIndex => resolve(buttonIndex === 1),
-        '',
-        ['YES', 'NO']
-      )
-    );
   }
 
   public getTileBalanceInfo(coin: any) {
