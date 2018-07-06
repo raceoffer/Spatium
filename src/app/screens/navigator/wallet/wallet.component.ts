@@ -27,7 +27,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   public title = 'Wallet';
   public isSearch = false;
-  public filtredTitles = [];
+  public filteredTitles = [];
 
   public staticTitles: any = [
     {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
@@ -62,7 +62,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
     this.titles = titles;
 
-    this.filtredTitles = this.titles;
+    this.filteredTitles = this.titles;
   }
 
   private _filterValue = '';
@@ -74,14 +74,14 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   set filterValue(newUserName) {
     this._filterValue = newUserName;
     if (this._filterValue.length > 0) {
-      this.filtredTitles = this.titles.filter(
+      this.filteredTitles = this.titles.filter(
         t => (
           t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
           t.symbols.includes(this._filterValue.toUpperCase())
         )
       );
     } else {
-      this.filtredTitles = this.titles;
+      this.filteredTitles = this.titles;
     }
   }
 
