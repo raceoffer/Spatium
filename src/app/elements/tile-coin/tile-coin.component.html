@@ -12,19 +12,19 @@
       </div>
     </div>
     <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
-            <span class="balance" *ngIf="balanceInfo === undefined || (balanceInfo.balance | async) !== null">
-              {{ balanceInfo !== undefined ? (balanceInfo.balance | async)?.toFixed(6) * 1 : 0 }} {{ coin.symbols }}
-            </span>
+      <span class="balance" *ngIf="balanceInfo === undefined || (balanceInfo.balance | async) !== null">
+        {{ balanceInfo !== undefined ? (balanceInfo.balance | async)?.toFixed(6) * 1 : 0 }} {{ coin.symbols }}
+      </span>
 
       <span class="balanceUSD" *ngIf="balanceInfo === undefined || (balanceInfo.balance | async) !== null">
-              {{ balanceInfo !== undefined ? (balanceInfo.balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
-            </span>
+        {{ balanceInfo !== undefined ? (balanceInfo.balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
+      </span>
 
       <span class="sync-in-progress"
-            *ngIf="balanceInfo !== undefined &&
-                  (balanceInfo.balance | async) === null">
-              {{(synchronizing | async) ? "Loading..." : "Not synced"}}
-            </span>
+        *ngIf="balanceInfo !== undefined &&
+        (balanceInfo.balance | async) === null">
+        {{synchronizing ? "Loading..." : "Not synced"}}
+      </span>
     </div>
   </button>
 </div>
