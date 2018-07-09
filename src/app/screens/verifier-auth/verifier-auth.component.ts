@@ -1,12 +1,10 @@
-import {Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { NavigationService } from "../../services/navigation.service";
-import { Router } from "@angular/router";
-import { KeyChainService } from "../../services/keychain.service";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NavigationService } from '../../services/navigation.service';
+import { Router } from '@angular/router';
+import { KeyChainService } from '../../services/keychain.service';
 
-declare const window: any;
-
-import { FileService } from "../../services/file.service";
-import { NotificationService } from "../../services/notification.service";
+import { FileService } from '../../services/file.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-verifier-auth',
@@ -38,7 +36,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
     const file = await this.fs.readFile(this.fs.safeFileName('seed'));
     if (file) {
       this.fileData = Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex');
-      this.exists = true
+      this.exists = true;
     }
     this.ready = true;
   }
