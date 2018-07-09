@@ -48,7 +48,7 @@
       <div class="grid-item">
         <button mat-button class="block" style="padding: 0px;" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
           <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.logo}}"></div>
+            <div class="logo {{tile.logo}}" [class.win-logo]="isWindows"></div>
             <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
               white-space: normal;text-align: left;">
               <span class="sym">{{ tile.symbols }}</span>

@@ -6,6 +6,7 @@ import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
+import { DeviceService, Platform } from '../../../../services/device.service';
 
 @Component({
   selector: 'app-ico-details',
@@ -20,10 +21,15 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   public chosencurrency: any = undefined;
   public coins: any = [];
 
+  public isWindows;
+
   constructor(
     private readonly notification: NotificationService,
     private readonly currency: CurrencyService,
-    private readonly navigationService: NavigationService) {  }
+    private readonly device: DeviceService,
+    private readonly navigationService: NavigationService) {
+    this.isWindows = (this.device.platform === Platform.Windows);  
+  }
 
   ngOnInit() {
     this.project.coins.forEach((item) => {

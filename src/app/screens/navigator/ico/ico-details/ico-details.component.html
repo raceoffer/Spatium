@@ -4,7 +4,7 @@
   [isShadowed] = "true"
   (backClicked) = "onBack()"></app-toolbar>
 
-<div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
+<div class="box" [class.investment-component]="!isWindows" fxLayout="column" fxLayoutAlign="start left">
   <div class="text-field">
     <div class="header">
       <div class="logo {{project.className}}" style="height: 40px;"></div>

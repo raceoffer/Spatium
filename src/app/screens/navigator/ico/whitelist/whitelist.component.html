@@ -4,8 +4,8 @@
   [isShadowed]="true"
   (backClicked)="onBack()"></app-toolbar>
 
-<div class="currency-component box" fxLayout="column" *ngIf="!next">
-  <div class="inner">
+<div class="currency-component box" fxLayout="column">
+  <div class="inner" *ngIf="!next">
     <div class="info">Select the coins you wish to invest to the project</div>
     <div *ngFor="let coin of coins" (click)="click(coin)" [class.colored]="coin.chosen" style="text-align: center">
       <div class="coin-check full-width">
@@ -15,15 +15,12 @@
       </div>
     </div>
   </div>
-  <div class="footer">
+  <div class="footer"  *ngIf="!next">
     <button type="button" mat-raised-button color="accent" class="width-button-full color" style="margin-bottom: 0" (click)="nextScreen($event)">Next</button>
   </div>
-</div>
-
-<div class="currency-component box" fxLayout="column" style="text-align: center" *ngIf="next">
-  <div class="inner">
+  <div class="inner" *ngIf="next">
     <div class="info">Enter amount of each coin you wish to invest</div>
-    <div *ngFor="let chosencoin of chosencoins" class="coin-field">
+    <div *ngFor="let chosencoin of chosencoins" class="coin-field full-width">
       <div class="left-field">
         <span class="label">{{chosencoin.title}}</span>
         <div class="field" style="margin-bottom: 13px;">
@@ -42,7 +39,7 @@
       </div>
     </div>
   </div>
-  <div class="footer">
+  <div class="footer"  *ngIf="next">
     <button type="button" mat-raised-button color="accent" class="width-button-full color" style="margin-bottom: 0" (click)="participateProject($event)">Participate</button>
   </div>
 </div>

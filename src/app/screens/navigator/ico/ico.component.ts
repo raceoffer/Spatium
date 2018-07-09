@@ -12,6 +12,7 @@ import { WalletService } from '../../../services/wallet.service';
 import { BluetoothService } from "../../../services/bluetooth.service";
 import { NewIcoComponent } from "../ico/new-ico/new-ico.component";
 import { WaitingComponent } from "../waiting/waiting.component";
+import { DeviceService, Platform } from '../../../services/device.service';
 
 declare const navigator: any;
 declare const window: any;
@@ -33,6 +34,8 @@ export class IcoComponent implements OnInit, OnDestroy {
   public cols: any = Math.ceil(window.innerWidth / 350);
   public isSearch = false;
   public filtredTitles = [];
+
+  public isWindows;
 
   public staticProjects: any = [
     {
@@ -56,10 +59,13 @@ export class IcoComponent implements OnInit, OnDestroy {
   constructor(
     private readonly navigationService: NavigationService,
     private readonly wallet: WalletService,
+    private readonly device: DeviceService,
   ) {
     this.titles = this.staticProjects;
 
     this.filtredTitles = this.titles;
+
+    this.isWindows = (this.device.platform === Platform.Windows);
   }
 
   async ngOnInit() {

@@ -41,7 +41,7 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   max-width: 50%;
   height: 75%;
   background-position: center !important;
-  background-size: 100% 100% !important;
+  background-size: contain !important;
   background-repeat: no-repeat;
 }
 
@@ -82,4 +82,8 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   padding-left: 10px;
   white-space: normal;
   text-align: left;
+}
+
+.win-logo {
+  height: 85px !important;
 }

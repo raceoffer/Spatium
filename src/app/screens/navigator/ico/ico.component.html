@@ -40,7 +40,7 @@
       <div class="grid-item">
         <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
           <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.className}}"></div>
+            <div class="logo {{tile.className}}" [class.win-logo]="isWindows"></div>
             <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
               <span class="title">{{ tile.title }}</span>
             </div>
