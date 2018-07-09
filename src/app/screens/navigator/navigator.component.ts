@@ -116,7 +116,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.activityService.inactivity.subscribe(async () => {
-        //await this.router.navigate(['/start']);
+        await this.router.navigate(['/start']);
       })
     );
 
