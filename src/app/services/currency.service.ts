@@ -50,8 +50,13 @@ export class CurrencySettings {
   serverName: CurrencyServerName;
   serverUrl: string;
 
-  constructor() {
-    this.serverName = CurrencyServerName.Spatium;
+  constructor(currency: Coin | Token = null) {
+    // Nem do not have a spatium provider yet
+    if (currency === Coin.NEM) {
+      this.serverName = CurrencyServerName.Native;
+    } else {
+      this.serverName = CurrencyServerName.Spatium;
+    }
   }
 }
 
@@ -240,7 +245,7 @@ export class CurrencyService {
 
   public getSettings(currency: Coin | Token): CurrencySettings {
     let jsonSettings: any;
-    const settings: CurrencySettings = new CurrencySettings();
+    const settings: CurrencySettings = new CurrencySettings(currency);
 
     jsonSettings = localStorage.getItem('settings.currency');
     if (jsonSettings) {
