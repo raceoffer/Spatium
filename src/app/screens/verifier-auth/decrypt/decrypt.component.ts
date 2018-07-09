@@ -1,7 +1,7 @@
 import { Component, EventEmitter, HostBinding, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject } from "rxjs/index";
-import { NavigationService } from "../../../services/navigation.service";
-import { WorkerService } from "../../../services/worker.service";
+import { BehaviorSubject } from 'rxjs';
+import { NavigationService } from '../../../services/navigation.service';
+import { WorkerService } from '../../../services/worker.service';
 
 import {
   deriveAesKey,
@@ -9,12 +9,12 @@ import {
   decrypt,
   randomBytes
 } from 'crypto-core-async/lib/utils';
-import { FileService } from "../../../services/file.service";
+import { FileService } from '../../../services/file.service';
 import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
-import { NotificationService } from "../../../services/notification.service";
-import { checkAvailable, checkExisting, deleteTouch, getTouchPassword } from "../../../utils/fingerprint";
+import { NotificationService } from '../../../services/notification.service';
+import { checkAvailable, checkExisting, deleteTouch, getTouchPassword } from '../../../utils/fingerprint';
 import { DeleteSecretComponent } from '../../delete-secret/delete-secret.component';
-import { getValue } from "../../../utils/storage";
+import { getValue } from '../../../utils/storage';
 
 @Component({
   selector: 'app-decrypt',
@@ -68,7 +68,7 @@ export class DecryptComponent implements OnInit {
       this.deleted.next();
 
       this.notification.show('The secret successfully removed');
-    })
+    });
   }
 
   public async onFinger() {

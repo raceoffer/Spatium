@@ -3,9 +3,9 @@ import { FileService } from '../../../services/file.service';
 import { NotificationService } from '../../../services/notification.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WorkerService } from '../../../services/worker.service';
-import { BehaviorSubject, combineLatest } from "rxjs";
-import { map } from "rxjs/operators";
-import { toBehaviourSubject } from "../../../utils/transformers";
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { toBehaviourSubject } from '../../../utils/transformers';
 
 import {
   deriveAesKey,
@@ -13,15 +13,15 @@ import {
   decrypt,
   randomBytes
 } from 'crypto-core-async/lib/utils';
-import { PincodeComponent } from "../../../inputs/pincode/pincode.component";
+import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
 import {
   checkAvailable,
   checkExisting,
   deleteTouch,
   getTouchPassword,
   saveTouchPassword
-} from "../../../utils/fingerprint";
-import { getValue } from "../../../utils/storage";
+} from '../../../utils/fingerprint';
+import { getValue } from '../../../utils/storage';
 
 declare const Buffer: any;
 declare const window: any;
@@ -156,7 +156,7 @@ export class ChangePincodeComponent implements OnInit {
            if (this.touchExisting.getValue()) {
              await deleteTouch();
            }
-           await saveTouchPassword(pincode)
+           await saveTouchPassword(pincode);
          }
        } catch (e) {
          if (e !== 'Cancelled') {
@@ -170,7 +170,7 @@ export class ChangePincodeComponent implements OnInit {
          this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
        } else {
          this.pincodeComponent.onClear();
-         this.notification.show('Fingerprint authorization error');
+         this.notification.show('Authorization error');
        }
      } finally {
        this.busy = false;

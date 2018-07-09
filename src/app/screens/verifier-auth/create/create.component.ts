@@ -1,8 +1,8 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject } from "rxjs/index";
-import { checkAvailable, checkExisting, saveTouchPassword } from "../../../utils/fingerprint";
-import { NavigationService } from "../../../services/navigation.service";
-import { WorkerService } from "../../../services/worker.service";
+import { BehaviorSubject } from 'rxjs';
+import { checkAvailable, checkExisting, saveTouchPassword } from '../../../utils/fingerprint';
+import { NavigationService } from '../../../services/navigation.service';
+import { WorkerService } from '../../../services/worker.service';
 
 import {
   deriveAesKey,
@@ -10,11 +10,11 @@ import {
   decrypt,
   randomBytes
 } from 'crypto-core-async/lib/utils';
-import { FileService } from "../../../services/file.service";
-import { SecretImportComponent } from "../../secret-import/secret-import.component";
+import { FileService } from '../../../services/file.service';
+import { SecretImportComponent } from '../../secret-import/secret-import.component';
 import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
-import { NotificationService } from "../../../services/notification.service";
-import { getValue } from "../../../utils/storage";
+import { NotificationService } from '../../../services/notification.service';
+import { getValue } from '../../../utils/storage';
 
 @Component({
   selector: 'app-create',
@@ -58,7 +58,7 @@ export class CreateComponent implements OnInit {
       this.navigationService.acceptOverlay();
 
       this.imported.next(seed);
-    })
+    });
   }
 
   public async onSubmit(pincode) {
@@ -75,7 +75,7 @@ export class CreateComponent implements OnInit {
 
       try {
         if (this.touchAvailable.getValue()) {
-          await saveTouchPassword(pincode)
+          await saveTouchPassword(pincode);
         }
       } catch (e) {
         if (e !== 'Cancelled') {
@@ -89,7 +89,7 @@ export class CreateComponent implements OnInit {
         this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
       } else {
         this.pincodeComponent.onClear();
-        this.notification.show('Fingerprint authorization error');
+        this.notification.show('Authorization error');
       }
     } finally {
       this.busy = false;

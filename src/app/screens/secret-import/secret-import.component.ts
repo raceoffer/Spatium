@@ -1,11 +1,11 @@
 import { Component, EventEmitter, HostBinding, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NavigationService } from '../../services/navigation.service';
-import { IdFactor } from "../../services/auth.service";
-import { NotificationService } from "../../services/notification.service";
-import { WorkerService } from "../../services/worker.service";
+import { IdFactor } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
+import { WorkerService } from '../../services/worker.service';
 
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
-import { checkNfc, Type } from "../../utils/nfc";
+import { checkNfc, Type } from '../../utils/nfc';
 
 declare const cordova: any;
 
@@ -15,11 +15,11 @@ import {
   decrypt,
   randomBytes
 } from 'crypto-core-async/lib/utils';
-import { PincodeComponent } from "../../inputs/pincode/pincode.component";
-import { FileService } from "../../services/file.service";
-import { checkAvailable, checkExisting, saveTouchPassword } from "../../utils/fingerprint";
-import { BehaviorSubject } from "rxjs/index";
-import { getValue } from "../../utils/storage";
+import { PincodeComponent } from '../../inputs/pincode/pincode.component';
+import { FileService } from '../../services/file.service';
+import { checkAvailable, checkExisting, saveTouchPassword } from '../../utils/fingerprint';
+import { BehaviorSubject } from 'rxjs';
+import { getValue } from '../../utils/storage';
 
 enum State {
   Empty,
@@ -81,9 +81,10 @@ export class SecretImportComponent implements OnInit, OnDestroy {
       this.touchEnabled.next(true);
     }
 
-    this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(cameraAvailable => this.ngZone.run(() => {
-      this.cameraAvailable = cameraAvailable;
-    }));
+    this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(
+      cameraAvailable => this.ngZone.run(() => {
+        this.cameraAvailable = cameraAvailable;
+      }));
   }
 
   ngOnDestroy() {
@@ -131,7 +132,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     this.secretType = type;
     this.encryptedSeed = secret;
 
-    this.buttonState = State.Imported
+    this.buttonState = State.Imported;
   }
 
   async onPincode(pincode) {
@@ -146,7 +147,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
 
       try {
         if (this.touchAvailable.getValue()) {
-          await saveTouchPassword(pincode)
+          await saveTouchPassword(pincode);
         }
       } catch (e) {
         if (e !== 'Cancelled') {
@@ -160,7 +161,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
         this.notification.show('Some of the fingerprints were invalidated. Please confirm the pincode once again');
       } else {
         this.pincodeComponent.onClear();
-        this.notification.show('Fingerprint authorization error');
+        this.notification.show('Authorization error');
       }
     } finally {
       this.busy = false;

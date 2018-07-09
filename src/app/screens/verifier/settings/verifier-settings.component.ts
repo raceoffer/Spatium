@@ -1,7 +1,7 @@
 import { Component, OnInit, HostBinding } from '@angular/core';
-import { NavigationService } from "../../../services/navigation.service";
-import { getValue, setValue } from "../../../utils/storage";
-import { checkAvailable } from "../../../utils/fingerprint";
+import { NavigationService } from '../../../services/navigation.service';
+import { getValue, setValue } from '../../../utils/storage';
+import { checkAvailable } from '../../../utils/fingerprint';
 
 @Component({
   selector: 'app-verifier-settings',
