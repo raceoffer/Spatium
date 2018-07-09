@@ -44,37 +44,12 @@
       *ngFor="let tile of filteredTitles"
       [colspan]="tile.cols"
       [rowspan]="tile.rows">
-
-      <div class="grid-item">
-        <button mat-button class="block" style="padding: 0px;" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
-          <div class="erc20" *ngIf="tile.erc20">
-            <div class="ethereum">
-            </div>
-          </div>
-          <div class="div-height" fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.logo}}"></div>
-            <div class="wallet-description">
-              <span class="sym">{{ tile.symbols }}</span>
-              <span class="title">{{ tile.title }}</span>
-            </div>
-          </div>
-          <div class="half-height" fxLayout="column" fxLayoutAlign="center center">
-            <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
-            </span>
-
-            <span class="balanceUSD" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
-            </span>
-
-            <span class="sync-in-progress"
-                *ngIf="getTileBalanceInfo(tile.coin) !== undefined &&
-                  (getTileBalanceInfo(tile.coin).balance | async) === null">
-              {{(synchronizing | async) ? "Loading..." : "Not synced"}}
-            </span>
-          </div>
-        </button>
-      </div>
+      <app-tile-coin
+        [coin]="tile"
+        [balanceInfo]="getTileBalanceInfo(tile.coin)"
+        [synchronizing]="(synchronizing | async)"
+        (onClicked)="onTileClicked(tile.coin)">
+      </app-tile-coin>
     </mat-grid-tile>
   </mat-grid-list>
 </div>

@@ -79,7 +79,7 @@
   text-align: center;
 }
 
-.colored {
+.block.colored {
   background-color: rgba(128,189,255, 0.5);
 }
 
@@ -91,3 +91,4 @@ input {
 .width-button-full {
   margin: 0 !important;
 }
+

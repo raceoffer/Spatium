@@ -24,6 +24,8 @@ export class WhitelistComponent implements OnInit, OnDestroy {
   confirmed_coins: any = [];
   chosencoins: any = [];
   next: boolean = false;
+  cols: any = Math.ceil(window.innerWidth / 350);
+  synchronizing = this.wallet.synchronizing;
 
   private balanceInfo: any = {};
 
@@ -32,16 +34,11 @@ export class WhitelistComponent implements OnInit, OnDestroy {
               private readonly currency: CurrencyService,
               private readonly notification: NotificationService) {
     this.coins = [
-      {title: 'Bitcoin', symbols: 'BTC', logo: 'bitcoin', coin: Coin.BTC, chosen: false},
-      {title: 'Bitcoin Cash', symbols: 'BCH', logo: 'bitcoin-cash', coin: Coin.BCH, chosen: false},
-      {title: 'Ethereum', symbols: 'ETH', logo: 'ethereum', coin: Coin.ETH, chosen: false},
-      {title: 'Litecoin', symbols: 'LTC',logo: 'litecoin', coin: Coin.LTC, chosen: false},
-      {title: 'Cardano', symbols: 'ADA', logo: 'cardano', chosen: false},
-      {title: 'NEO', symbols: 'NEO', logo: 'neo', chosen: false},
-      {title: 'Ripple', symbols: 'XRP', logo: 'ripple', chosen: false},
-      {title: 'Stellar', symbols: 'XLM', logo: 'stellar', chosen: false},
-      {title: 'NEM', symbols: 'XEM', logo: 'nem', chosen: false},
-      {title: 'Bitcoin Test', symbols: 'BTC_test', logo: 'bitcoin', coin: Coin.BTC_test, chosen: false},
+      {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC, chosen: false},
+      {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH, chosen: false},
+      {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH, chosen: false},
+      {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC, chosen: false},
+      {title: 'Bitcoin Test', symbols: 'BTC_test', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test, chosen: false},
     ];
   }
 
@@ -64,35 +61,43 @@ export class WhitelistComponent implements OnInit, OnDestroy {
   }
 
   getBalance(coin: any) {
+    this.balanceInfo[coin] = this.getTileBalanceInfo(coin);
+
+    return (!!this.balanceInfo[coin].balance.value) ? this.balanceInfo[coin].balance.value.toFixed(6) : 0;
+  }
+
+  public getTileBalanceInfo(coin: any) {
     if (coin === undefined || coin === null) {
-      return 0;
+      return undefined;
     }
 
     if (this.balanceInfo[coin] !== undefined) {
-      return (!!this.balanceInfo[coin].balance.value)?this.balanceInfo[coin].balance.value.toFixed(6):0;
+      return this.balanceInfo[coin];
     }
 
     const currencyInfo = this.currency.getInfo(coin);
     const currencyWallet = this.wallet.currencyWallets.get(coin);
-    const balanceConfirmed = toBehaviourSubject(
-      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.confirmed) : null)),
+
+    const balanceUnconfirmed = toBehaviourSubject(
+      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
       null);
+
     this.balanceInfo[coin] = {
-      balance: balanceConfirmed,
-      balanceUSD: toBehaviourSubject(combineLatest(
-        balanceConfirmed,
-        currencyInfo.rate,
-        (balance, rate) => {
+      balance: balanceUnconfirmed,
+      balanceUSD: toBehaviourSubject(combineLatest([
+        balanceUnconfirmed,
+        currencyInfo.rate
+      ]).pipe(map(
+        ([balance, rate]) => {
           if (rate === null || balance === null) {
             return null;
           }
           return balance * rate;
-        }), null)
+        }
+      )), null)
     };
 
-    console.log(this.balanceInfo[coin]);
-
-    return (!!this.balanceInfo[coin].balance.value)?this.balanceInfo[coin].balance.value.toFixed(6):0;
+    return this.balanceInfo[coin];
   }
 
   click(coin) {
@@ -118,12 +123,12 @@ export class WhitelistComponent implements OnInit, OnDestroy {
     if (coin.amount > +this.getBalance(coin.coin)) {
       this.notification.show("Insufficient funds");
     } else {
-      //do nothing
+      // do nothing
     }
   }
 
   async participateProject(e) {
-    //do something
+    // do something
     console.log(this);
   }
 }

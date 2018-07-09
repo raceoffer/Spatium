@@ -107,6 +107,7 @@ import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.com
 import { CreateComponent } from './screens/verifier-auth/create/create.component';
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
 import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
+import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
 
 @NgModule({
   declarations: [
@@ -168,7 +169,8 @@ import { SettingsComponent as VerifierSettingsComponent } from './screens/verifi
     ZeroconfComponent,
     CreateComponent,
     DecryptComponent,
-    VerifierSettingsComponent
+    VerifierSettingsComponent,
+    TileCoinComponent
   ],
   imports: [
     OverlayModule,
