@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
-import { NavigationService } from "../../services/navigation.service";
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-registration-success',

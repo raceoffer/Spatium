@@ -17,13 +17,14 @@ export class SocketServerService {
   public connectedChanged: Observable<any> = this.connected.pipe(skip(1), distinctUntilChanged());
   public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
   public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
-
+  private stoppedListening: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private currentPeer: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
   constructor(private ngZone: NgZone) {}
 
   public async start() {
     if (this.state.getValue() !== State.Stopped) {
+      this.stoppedListening.next(false);
       return;
     }
 
@@ -35,7 +36,7 @@ export class SocketServerService {
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
-          if (this.connectionState.getValue() !== ConnectionState.None) {
+          if (this.connectionState.getValue() !== ConnectionState.None && !this.stoppedListening.getValue()) {
             cordova.plugins.wsserver.close(conn);
           } else {
             this.currentPeer.next(conn.uuid);
@@ -57,6 +58,10 @@ export class SocketServerService {
         this.state.next(State.Stopped);
         reject(reason);
       })));
+  }
+
+  public async stopListening() {
+    this.stoppedListening.next(true);
   }
 
   public async stop() {

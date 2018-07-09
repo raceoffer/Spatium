@@ -221,15 +221,17 @@ export class BluetoothService implements IConnectionProvider {
     await this.deviceService.deviceReady();
 
     this.deviceRelatedChange.subscribe(() => this.ngZone.run(async () => {
-      const paired = await cordova.plugins.bluetooth.listPairedDevices();
+      if (this.enabled.getValue()) {
+        const paired = await cordova.plugins.bluetooth.listPairedDevices();
 
-      const mapped = new Map<string, Device>();
-      for (const device of paired) {
-        if (device.hasOwnProperty('name')) {
-          mapped.set(device.name, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+        const mapped = new Map<string, Device>();
+        for (const device of paired) {
+          if (device.hasOwnProperty('name')) {
+            mapped.set(device.name, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+          }
         }
+        this.devices.next(mapped);
       }
-      this.devices.next(mapped);
     }));
 
     this.discoveryStartedEvent.subscribe(() => this.devices.next(new Map<string, Device>()));

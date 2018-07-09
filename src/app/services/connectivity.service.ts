@@ -154,7 +154,9 @@ export class ConnectivityService implements IConnectionProvider {
     }
   }
 
-  public async stopListening() { }
+  public async stopListening() {
+    await this.socketServerService.stopListening();
+  }
 
   async stopServiceListening() {
     await Promise.all([
@@ -213,6 +215,8 @@ export class ConnectivityService implements IConnectionProvider {
       this.timeout();
     }), 100);
   }
+
+  async cancelDiscovery() {}
 
   async enableDiscovery() {}
 
