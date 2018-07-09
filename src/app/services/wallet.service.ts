@@ -310,7 +310,7 @@ export class WalletService {
     try {
       this.setProgress(0);
 
-      this.synchronizing.next(true);
+      this.synchronizatonStatus.next(SyncStatus.Synchronization);
 
       if (!this.paillierKeys) {
         this.paillierKeys = await CompoundKeyEcdsa.generatePaillierKeys(this.workerService.worker);
