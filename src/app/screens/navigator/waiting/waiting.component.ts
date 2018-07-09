@@ -1,65 +1,35 @@
-import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
-import { BehaviorSubject, combineLatest, from, Subject } from 'rxjs';
-import { BluetoothService, Device } from '../../../services/bluetooth.service';
+import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
+import { BehaviorSubject, from, Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService, Provider } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
-import { map, take, takeUntil } from "rxjs/operators";
-import { NotificationService } from "../../../services/notification.service";
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-waiting',
   templateUrl: './waiting.component.html',
   styleUrls: ['./waiting.component.css']
 })
-export class WaitingComponent {
+export class WaitingComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  public enabled = this.bt.enabled;
-  public discovering = this.bt.discovering;
-  public connectedDevice = this.bt.connectedDevice;
+  public discovering = this.connectionProviderService.discovering;
   public connecting = new BehaviorSubject<boolean>(false);
-
+  public devices = this.connectionProviderService.combinedDevices;
+  public providers = this.connectionProviderService.providers;
+  public providersArray = Array.from(this.connectionProviderService.providers.values());
+  @Output() connected = new EventEmitter<any>();
   private connectionCancelled = new Subject<any>();
 
-  @Output() connected = new EventEmitter<Device>();
-  public devices = combineLatest([
-      this.bt.discoveredDevices,
-      this.bt.pairedDevices
-    ]).pipe(
-      map(([ discovered, paired ]) => {
-        const devices = paired.map(device => {
-          const json = device.toJSON();
-          json.paired = true;
-          return json;
-        });
-        discovered.forEach(device => {
-          for (let i = 0; i < devices.length; ++i) {
-            if (devices[i].name === device.name && devices[i].address === device.address) {
-              return;
-            }
-          }
-          const json = device.toJSON();
-          json.paired = false;
-          devices.push(json);
-        });
-        return devices;
-      })
-    );
-
-  constructor(
-    private readonly bt: BluetoothService,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
-  ) {}
+  constructor(private readonly connectionProviderService: ConnectionProviderService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
-    if (!this.enabled.getValue()) {
-      await this.bt.requestEnable();
-    }
-
-    this.bt.refreshDevices();
+    await this.connectionProviderService.searchDevices();
   }
 
-  async connectTo(name, address) {
+  async connectTo(device) {
     if (this.connecting.getValue()) {
       return;
     }
@@ -67,19 +37,12 @@ export class WaitingComponent {
     try {
       this.connecting.next(true);
 
-      await this.bt.disconnect();
-      await this.bt.cancelDiscovery();
+      await this.connectionProviderService.disconnect();
+      await this.connectionProviderService.cancelDiscovery();
 
-      const device = new Device(name, address);
-
-      const result = await from(this.bt.connect(device)).pipe(take(1), takeUntil(this.connectionCancelled)).toPromise();
-      if (typeof result === 'undefined') {
-        // assume cancelled
-        console.log('Connection cancelled');
-      } else if(!result) {
-        throw new Error('Generic connection error');
-      } else {
-        this.connected.next(device)
+      await from(this.connectionProviderService.connect(device)).pipe(take(1), takeUntil(this.connectionCancelled)).toPromise();
+      if (this.connectionProviderService.connected.getValue()) {
+        this.connected.next();
       }
     } catch (e) {
       console.log('Connection failure:', e);
@@ -89,16 +52,25 @@ export class WaitingComponent {
     }
   }
 
+  async startDiscovery() {
+    await this.connectionProviderService.searchDevices();
+  }
+
+  async toggleProvider(provider: Provider) {
+    await this.connectionProviderService.toggleProvider(provider.provider);
+  }
+
+  hasDisabled() {
+    const temp = this.providersArray.filter(p => !p.service.enabled.getValue());
+    if (temp.length > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   public cancel() {
     this.connectionCancelled.next();
-  }
-
-  async enableBluetooth() {
-    await this.bt.requestEnable();
-  }
-
-  async startDiscovery() {
-    await this.bt.startDiscovery();
   }
 
   onBack() {

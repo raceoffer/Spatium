@@ -1,11 +1,9 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
-import { BluetoothService } from '../../bluetooth.service';
-import { LoggerService } from '../../logger.service';
-
-import { filter, take, map, takeUntil } from 'rxjs/operators';
-
 import { Marshal } from 'crypto-core-async';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { LoggerService } from '../../logger.service';
 
 export enum SynchronizationStatus {
   None = 0,
@@ -21,27 +19,22 @@ export enum SynchronizationStatus {
 
 export class SyncSession implements OnDestroy {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
-
-  private initialCommitmentObserver:    Observable<any>;
-  private initialDecommitmentObserver:  Observable<any>;
-  private verifierCommitmentObserver:   Observable<any>;
-  private proverCommitmentObserver:     Observable<any>;
-  private verifierDecommitmentObserver: Observable<any>;
-  private proverDecommitmentObserver:   Observable<any>;
-
   public finished: EventEmitter<any> = new EventEmitter();
   public canceled: EventEmitter<any> = new EventEmitter();
-  public failed:   EventEmitter<any> = new EventEmitter();
-
+  public failed: EventEmitter<any> = new EventEmitter();
+  private initialCommitmentObserver: Observable<any>;
+  private initialDecommitmentObserver: Observable<any>;
+  private verifierCommitmentObserver: Observable<any>;
+  private proverCommitmentObserver: Observable<any>;
+  private verifierDecommitmentObserver: Observable<any>;
+  private proverDecommitmentObserver: Observable<any>;
   private cancelled: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private subscriptions = [];
 
-  constructor(
-    private compoundKey: any,
-    private messageSubject: ReplaySubject<any>,
-    private bt: BluetoothService
-  ) {
+  constructor(private compoundKey: any,
+              private messageSubject: ReplaySubject<any>,
+              private connectionProviderService: ConnectionProviderService) {
     this.initialCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'initialCommitment'),
@@ -84,29 +77,8 @@ export class SyncSession implements OnDestroy {
     this.subscriptions = [];
   }
 
-  private async send(msg, obj) {
-    return await this.bt.send(JSON.stringify({
-      type: msg,
-      content: Marshal.wrap(obj)
-    }))
-  }
-
   public async cancel() {
     this.cancelled.next(true);
-  }
-
-  private handleFailure(message, exception) {
-    LoggerService.nonFatalCrash(message, exception);
-    this.status.next(SynchronizationStatus.Finished);
-    this.failed.emit();
-    throw new Error(message);
-  }
-
-  private handleCancel() {
-    LoggerService.log('Cancelled', {});
-    this.status.next(SynchronizationStatus.Finished);
-    this.canceled.emit();
-    throw new Error('Cancelled');
   }
 
   public async sync() {
@@ -114,7 +86,7 @@ export class SyncSession implements OnDestroy {
 
     let prover = null;
     try {
-      prover = await this.compoundKey.startSyncSession()
+      prover = await this.compoundKey.startSyncSession();
     } catch (e) {
       return this.handleFailure('Failed to start sync session', e);
     }
@@ -130,7 +102,9 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('initialCommitment', initialCommitment)) {
+    try {
+      await this.send('initialCommitment', initialCommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send initialCommitment', null);
     }
 
@@ -156,7 +130,9 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('initialDecommitment', initialDecommitment)) {
+    try {
+      await this.send('initialDecommitment', initialDecommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send initialDecommitment', null);
     }
 
@@ -183,7 +159,9 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('verifierCommitment', verifierCommitment)) {
+    try {
+      await this.send('verifierCommitment', verifierCommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send verifierCommitment', null);
     }
 
@@ -208,7 +186,9 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('proverCommitment', proverCommitment)) {
+    try {
+      await this.send('proverCommitment', proverCommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send proverCommitment', null);
     }
 
@@ -234,7 +214,9 @@ export class SyncSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('verifierDecommitment', verifierDecommitment)) {
+    try {
+      await this.send('verifierDecommitment', verifierDecommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send verifierDecommitment', null);
     }
 
@@ -256,7 +238,9 @@ export class SyncSession implements OnDestroy {
       return this.handleFailure('Failed to process remoteVerifierDecommitment', e);
     }
 
-    if (!await this.send('proverDecommitment', proverDecommitment)) {
+    try {
+      await this.send('proverDecommitment', proverDecommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send proverDecommitment', null);
     }
 
@@ -282,5 +266,26 @@ export class SyncSession implements OnDestroy {
     this.finished.emit(verifiedData);
 
     return verifiedData;
+  }
+
+  private async send(msg, obj) {
+    return await this.connectionProviderService.send(JSON.stringify({
+      type: msg,
+      content: Marshal.wrap(obj)
+    }));
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(SynchronizationStatus.Finished);
+    this.failed.emit();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(SynchronizationStatus.Finished);
+    this.canceled.emit();
+    throw new Error('Cancelled');
   }
 }

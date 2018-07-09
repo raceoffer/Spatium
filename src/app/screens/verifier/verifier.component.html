@@ -33,38 +33,20 @@
         fxLayoutAlign="start center"
         class="box"
         *ngIf="!(synchronizing | async)">
-        <div
-          class="width-button-container content"
-          fxLayout="column"
-          fxLayoutAlign="center center"
-          *ngIf="!(enabled | async)">
-          <div class="connect-text">
-            <span>Enable Bluetooth to proceed</span>
-          </div>
 
-          <button mat-fab class="width-button">
-            <mat-icon (click)="enableBluetooth()">
-              bluetooth_disabled
-            </mat-icon>
-          </button>
-        </div>
+        <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
+          <app-confirmation-bluetooth-manage></app-confirmation-bluetooth-manage>
+          <app-confirmation-zeroconf-manage></app-confirmation-zeroconf-manage>
+        </mat-nav-list>
 
         <div
           class="width-button-container content"
           fxLayout="column"
           fxLayoutAlign="center center"
-          *ngIf="(enabled | async)">
+          *ngIf="(ready | async)">
           <div class="verify-transaction-text">
             <span>Awaiting connection from the main device.</span>
           </div>
-
-          <button
-            *ngIf="!(discoverable | async)"
-            mat-button
-            color="accent"
-            (click)="enableDiscoverable()">
-            Enable device discovery
-          </button>
         </div>
       </div>
 
