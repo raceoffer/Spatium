@@ -1,6 +1,9 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { NavigationService } from '../../../../services/navigation.service';
+import { IpfsService, File, FileInfo } from '../../../../services/ipfs.service';
+
+declare const window;
 
 @Component({
   selector: 'app-new-ico',
@@ -34,6 +37,9 @@ export class NewIcoComponent implements OnInit {
   public cashbackTypes: any = ['Full refund', 'Partial refund', 'Non-refund'];
   public slotsTypes: any = ['Limited', 'Cyclical'];
 
+  @ViewChild('logo') logo;
+  @ViewChild('description') description;
+
   title: string = "New ICO";
   coinSym: string = this.coins[0];
   coinOfStartPrice: string = this.coinSym;
@@ -47,7 +53,10 @@ export class NewIcoComponent implements OnInit {
   balanceCurrency: number = 0;
   white_list: boolean = false;
 
-  constructor(private readonly navigationService: NavigationService) { }
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly ipfsService: IpfsService
+  ) {}
 
   ngOnInit() {
   }
@@ -77,5 +86,40 @@ export class NewIcoComponent implements OnInit {
 
   async saveNewICO() {
     console.log('SAVE NEW ICO', this);
+
+    let localFiles, uploadedFiles = [];
+    localFiles = await this.getFiles();
+    try {
+      uploadedFiles = await this.ipfsService.add(localFiles);
+      console.log(uploadedFiles);
+    } catch(e) {
+      // TODO show message to the user
+      console.log(e);
+    }
+  }
+
+  async getFiles() {
+    const dir = '/' + this.title + '/';
+    const files = [];
+
+    if (this.logo.nativeElement.files.length > 0) {
+      files.push({ name: dir + 'logo', path: this.logo.nativeElement.files[0] });
+    } 
+
+    if (this.description.nativeElement.files.length > 0) {
+      files.push({ name: dir + 'description', path: this.description.nativeElement.files[0] });
+    }
+
+    return Promise.all([].map.call(files, function (file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onloadend = function () {
+          resolve(new File(file.name, Buffer.from(reader.result)));
+        };
+        reader.readAsArrayBuffer(file.path);
+      });
+    })).then(function (results) {
+      return results;
+    });
   }
 }
