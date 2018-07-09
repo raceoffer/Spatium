@@ -7,13 +7,20 @@
 <div class="currency-component box" fxLayout="column" *ngIf="!next">
   <div class="inner">
     <div class="info">Select the coins you wish to invest to the project</div>
-    <div *ngFor="let coin of coins" (click)="click(coin)" [class.colored]="coin.chosen" style="text-align: center">
-      <div class="coin-check full-width">
-          <div class="logo {{coin.logo}}"></div>
-          <div style="align-self: center; white-space: nowrap; flex-grow: 1">{{coin.title}}</div>
-          <div class="balance">{{getBalance(coin.coin) + ' ' + coin.symbols}}</div>
-      </div>
-    </div>
+
+    <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+      <mat-grid-tile
+        *ngFor="let coin of coins"
+        [colspan]="coin.cols"
+        [rowspan]="coin.rows">
+        <app-tile-coin
+          [coin]="coin"
+          [balanceInfo]="getTileBalanceInfo(coin.coin)"
+          [synchronizing]="(synchronizing | async)"
+          (onClicked)="click(coin)">
+        </app-tile-coin>
+      </mat-grid-tile>
+    </mat-grid-list>
   </div>
   <div class="footer">
     <button type="button" mat-raised-button color="accent" class="width-button-full color" style="margin-bottom: 0" (click)="nextScreen($event)">Next</button>
