@@ -33,7 +33,7 @@
 
   <mat-grid-list [cols]="cols" rowHeight="4:3">
     <mat-grid-tile
-      *ngFor="let tile of filtredTitles"
+      *ngFor="let tile of (filtredTitles | async)"
       [colspan]="tile.cols"
       [rowspan]="tile.rows">
 

@@ -6,6 +6,9 @@ import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
+import { ICOService, IcoCampaign } from '../../../../services/ico.service';
+
+import { BehaviorSubject,  Observable, timer } from 'rxjs';
 
 @Component({
   selector: 'app-ico-details',
@@ -19,22 +22,23 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   public coin: any = undefined;
   public chosencurrency: any = undefined;
   public coins: any = [];
+  public campaign: BehaviorSubject<IcoCampaign> = new BehaviorSubject<IcoCampaign>(null);
 
   constructor(
+    private readonly icoService: ICOService,
+    private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
-    private readonly currency: CurrencyService,
-    private readonly navigationService: NavigationService) {  }
+    private readonly currency: CurrencyService
+  ) {
+    console.log("details");
+    //console.log(this.project);
+  }
 
-  ngOnInit() {
-    this.project.coins.forEach((item) => {
-      this.coins.push({
-          'icon': this.currency.getInfo(item.place).icon,
-          'symbol': this.currency.getInfo(item.place).symbol,
-          'coin': item.place,
-          'name': item.name,
-          'chosen': false, 
-      })
-    });
+  async ngOnInit() {
+    let campaign = await this.icoService.getCampaign(this.project.address);
+    campaign.address = this.project.address;
+    campaign.title = this.project.title;
+    this.campaign.next(campaign);
   }
 
   ngOnDestroy() {
@@ -67,7 +71,7 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   }
 
   async reminder() {
-    console.log('DO SOME SHIT');
+
   }
 
   changeCurrency(coin) {

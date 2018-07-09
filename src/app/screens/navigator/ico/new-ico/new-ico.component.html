@@ -1,64 +1,10 @@
 <app-toolbar
-  [label]="title"
+  [label]="campaign.title"
   [isColored]="true"
   [isShadowed]="true"
   (backClicked)="onBack()"></app-toolbar>
 
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
-  <!--<mat-progress-bar mode="indeterminate" color="accent"
-                    style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(((walletAddress | async) === null) ||
-                    ((balanceCurrencyUnconfirmed | async) === null) ||
-                    ((balanceUsdUnconfirmed | async) === null))"></mat-progress-bar>-->
-  <!--<table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">-->
-    <!--&lt;!&ndash;<tr>-->
-      <!--<td colspan="2">-->
-        <!--<span class="label full-width-label">{{ accountLabel }}</span>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<td colspan="2">-->
-        <!--<div class="field auto-height">-->
-          <!--<div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>-->
-          <!--<div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>-->
-          <!--<button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">-->
-            <!--<mat-icon>content_copy</mat-icon>-->
-          <!--</button>-->
-        <!--</div>-->
-      <!--</td>-->
-    <!--</tr>&ndash;&gt;-->
-    <!--<tr> &lt;!&ndash;//Check if coin < fee, show a notification&ndash;&gt;-->
-      <!--<td class="right">-->
-        <!--<span class="label" style="margin-left: 5px;">{{ coinSym }}</span>-->
-      <!--</td>-->
-      <!--<td class="left">-->
-        <!--<span class="label" style="margin-left: 5px;">{{ feeTitle }}</span>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<td class="right">-->
-        <!--<div class="field disable">-->
-          <!--&lt;!&ndash;<span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">{{ balanceCurrencyUnconfirmed | async }}</span>-->
-          <!--<span *ngIf="(balanceCurrencyUnconfirmed | async) === null">Loading&hellip;</span>&ndash;&gt;-->
-          <!--<span>{{ balanceCurrency}}</span>-->
-        <!--</div>-->
-      <!--</td>-->
-      <!--<td class="left">-->
-        <!--<div class="field disable">-->
-          <!--&lt;!&ndash;<span *ngIf="(balanceUsdUnconfirmed | async) !== null">{{ balanceUsdUnconfirmed | async }}</span>-->
-          <!--<span *ngIf="(balanceUsdUnconfirmed | async) === null">Loading&hellip;</span>&ndash;&gt;-->
-          <!--<span>{{ feePrice }}</span>-->
-        <!--</div>-->
-      <!--</td>-->
-    <!--</tr>-->
-    <!--&lt;!&ndash;<tr *ngIf="(balanceCurrencyUnconfirmed | async) !== null &&-->
-               <!--(balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async)">-->
-      <!--<td class="right">-->
-        <!--<span class="label" style="margin-left: 5px;">Unconfirmed balance</span>-->
-      <!--</td>-->
-    <!--</tr>&ndash;&gt;-->
-  <!--</table>-->
-
   <div class="full-width">
     <div class="info f-left input-2">
       <span class="label full-width-label">{{ coinSym }}</span>
@@ -77,15 +23,15 @@
     <h4>Company info</h4>
     <div class="name-input">
       <span class="label full-width-label">Name</span>
-      <div class="field">
+      <div class="field" [ngClass]="{'error': comp_name.invalid}">
         <span>
-          <input matInput placeholder="Name of company" [formControl]="comp_name">
+          <input matInput placeholder="Name of company" [formControl]="comp_name" >
         </span>
       </div>
     </div>
     <div class="ticker-input">
       <span class="label full-width-label">Ticker</span>
-      <div class="field">
+      <div class="field" [ngClass]="{'error': ticker.invalid}">
         <span>
           <input matInput placeholder="Ticker of token" [formControl]="ticker">
         </span>
@@ -94,7 +40,7 @@
     <div class="tokens-amount-input">
       <div class="info f-left input-2">
         <span class="label full-width-label">Amount emitted</span>
-        <div class="field">
+        <div class="field" [ngClass]="{'error': amount_emitted.invalid}">
           <span>
             <input type="number" matInput placeholder="Tokens emitted" [formControl]="amount_emitted">
           </span>
@@ -102,7 +48,7 @@
       </div>
       <div class="info f-right input-2">
         <span class="label full-width-label">Amount offered</span>
-        <div class="field">
+        <div class="field" [ngClass]="{'error': amount_offered.invalid}">
           <span>
             <input type="number" matInput placeholder="Tokens offered" [formControl]="amount_offered">
           </span>
@@ -111,7 +57,7 @@
     </div>
     <div class="address-input">
       <span class="label full-width-label">Address</span>
-      <div class="field">
+      <div class="field" [ngClass]="{'error': address.invalid}">
         <span>  <!--Need to add verification of contract, if contract not exist => offer to create a contract-->
           <input matInput placeholder="Address of contract" [formControl]="address">
         </span>
@@ -121,7 +67,7 @@
     <div class="deployment-date-input">
       <div class="info">
         <span class="label full-width-label">Start</span>
-        <mat-form-field class="field" style="margin-bottom: 13px">
+        <mat-form-field class="field" style="margin-bottom: 13px" [ngClass]="{'error': start_date.invalid}">
           <input matInput [matDatepicker]="picker1" [formControl]="start_date">
           <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
           <mat-datepicker #picker1></mat-datepicker>
@@ -129,7 +75,7 @@
       </div>
       <div class="info">
         <span class="label full-width-label">End</span>
-        <mat-form-field class="field" style="margin-bottom: 13px">
+        <mat-form-field class="field" style="margin-bottom: 13px" [ngClass]="{'error': end_date.invalid}">
           <input matInput [matDatepicker]="picker2" [formControl]="end_date">
           <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
           <mat-datepicker #picker2></mat-datepicker>
@@ -285,8 +231,11 @@
         </div>
       </div>
     </div>
+    <div class="errors" *ngFor="let error of errors">
+      {{ error }}
+    </div>
     <div style="border: none; padding: 0px;">
-      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="saveNewICO()">New ICO</button>
+      <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="saveNewICO()" [disabled]="isSaving" >New ICO</button>
     </div>
   </div>
 </div>

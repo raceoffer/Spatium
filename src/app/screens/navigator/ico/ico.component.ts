@@ -1,13 +1,11 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { Coin } from '../../../services/keychain.service';
-import { NavigationService } from '../../../services/navigation.service';
-import { WalletService } from '../../../services/wallet.service';
-import { NewIcoComponent } from '../ico/new-ico/new-ico.component';
-import { WaitingComponent } from '../waiting/waiting.component';
 import { IcoDetailsComponent } from './ico-details/ico-details.component';
-import { requestDialog } from "../../../utils/dialog";
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { NavigationService } from '../../../services/navigation.service';
+import { ICOService, IcoCampaign } from '../../../services/ico.service';
+import { NewIcoComponent } from '../ico/new-ico/new-ico.component';
 
-declare const navigator: any;
+import { BehaviorSubject } from 'rxjs';
+
 declare const window: any;
 
 @Component({
@@ -16,66 +14,59 @@ declare const window: any;
   styleUrls: ['./ico.component.css']
 })
 
-export class IcoComponent implements OnInit, OnDestroy {
+export class IcoComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   public title = 'ICO';
-  public titles: any = [];
-  public synchronizing = this.wallet.synchronizing;
-  public partiallySync = this.wallet.partiallySync;
+  public titles: BehaviorSubject<any> = new BehaviorSubject<any>([]);
+  public filtredTitles: BehaviorSubject<any> = new BehaviorSubject<any>([]);;
+  private _filterValue = '';
   public cols: any = Math.ceil(window.innerWidth / 350);
   public isSearch = false;
-  public filtredTitles = [];
-  public staticProjects: any = [
-    {
-      title: 'Example',
-      cols: 1, rows: 1,
-      about: '',
-      symbols: 'EXMPL',
-      className: 'spatium-ico',
-      transactions: '',
-      balances: '',
-      address: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX',
-      coins: [
-        {place: Coin.BTC, name: 'Bitcoin'},
-        {place: Coin.ETH, name: 'Ethereum'},
-        {place: Coin.BCH, name: 'Bitcoin Cash'},
-        {place: Coin.LTC, name: 'Litecoin'}
-      ]
-    },
-  ];
 
-  constructor(private readonly navigationService: NavigationService,
-              private readonly wallet: WalletService,) {
-    this.titles = this.staticProjects;
-
-    this.filtredTitles = this.titles;
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly icoService: ICOService
+  ) {
   }
 
-  private _filterValue = '';
+  async ngOnInit() {
+    let campaings = await this.icoService.getCampaignList();
+    this.titles.next(campaings.map(function (value, index) {
+      return {
+        cols: 1,
+        rows: 1,
+        address: value.address,
+        title: value.title,
+        about: '',
+        symbols: '',
+        className: '',
+        transactions: '',
+        balances: '',
+        coins: [],
+      };
+    }));
+    this.filtredTitles.next(this.titles.value);
+  }
 
   get filterValue() {
     return this._filterValue;
   }
 
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
+  }
+
   set filterValue(newUserName) {
     this._filterValue = newUserName;
     if (this._filterValue.length > 0) {
-      this.filtredTitles = this.titles.filter(
+      this.filtredTitles.next(this.titles.value.filter(
         t => (t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
           t.symbols.includes(this._filterValue.toUpperCase()))
-      );
+      ));
     } else {
-      this.filtredTitles = this.staticProjects;
+      this.filtredTitles.next(this.titles.value);
     }
-  }
-
-  async ngOnInit() {
-
-  }
-
-  onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   public onNavRequest() {
@@ -84,10 +75,6 @@ export class IcoComponent implements OnInit, OnDestroy {
 
   public clearFilterValue() {
     this.filterValue = '';
-  }
-
-  public ngOnDestroy() {
-
   }
 
   public toggleSearch(value) {
@@ -102,26 +89,26 @@ export class IcoComponent implements OnInit, OnDestroy {
     }
   }
 
-  public async goToSync() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(device => {
+  goToNewICO() {
+    const componentRef = this.navigationService.pushOverlay(NewIcoComponent);
+    componentRef.instance.created.subscribe(campaign => {
+      this.titles.next(this.titles.value.push({
+        cols: 1,
+        rows: 1,
+        address: campaign.address,
+        title: campaign.title,
+        about: '',
+        symbols: '',
+        className: '',
+        transactions: '',
+        balances: '',
+        coins: [],
+      }));
       this.navigationService.acceptOverlay();
-      console.log('Connected to', device);
     });
   }
 
-  goToNewICO() {
-    const componentRef = this.navigationService.pushOverlay(NewIcoComponent);
-  }
-
-  public async cancelSync() {
-    if (await requestDialog('Syncronize with another device')) {
-      await this.goToSync();
-    }
-  }
-
   public async onTileClicked(project: any) {
-    console.log(project);
     const componentRef = this.navigationService.pushOverlay(IcoDetailsComponent);
     componentRef.instance.project = project;
   }
