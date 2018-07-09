@@ -12,7 +12,6 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as $ from 'jquery';
 
@@ -27,18 +26,17 @@ import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 
 import { packTree } from 'crypto-core-async/lib/utils';
-import { toBehaviourSubject } from "../../utils/transformers";
-import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
-import { PincodeAuthFactorComponent } from "../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
+import { PasswordAuthFactorComponent } from '../authorization-factors/password-auth-factor/password-auth-factor.component';
+import { PincodeAuthFactorComponent } from '../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
-import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
-import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
-import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
+import { FileAuthFactorComponent } from '../authorization-factors/file-auth-factor/file-auth-factor.component';
+import { QrAuthFactorComponent } from '../authorization-factors/qr-auth-factor/qr-auth-factor.component';
+import { NfcAuthFactorComponent } from '../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
 
 import { randomBytes } from 'crypto-core-async/lib/utils';
-import { RegistrationSuccessComponent } from "../registration-success/registration-success.component";
-import { BackupComponent } from "../backup/backup.component";
-import { catchError, mapTo } from "rxjs/internal/operators";
+import { RegistrationSuccessComponent } from '../registration-success/registration-success.component';
+import { BackupComponent } from '../backup/backup.component';
+import { catchError, mapTo } from 'rxjs/internal/operators';
 
 @Component({
   selector: 'app-registration',
@@ -179,7 +177,7 @@ export class RegistrationComponent implements OnDestroy {
     });
   }
 
-  removeFactor(index){
+  removeFactor(index) {
     const factors = this.factors.getValue();
 
     factors.splice(index, 1);
@@ -192,7 +190,7 @@ export class RegistrationComponent implements OnDestroy {
     const factors = this.factors.getValue();
 
     factors.push(factor);
-    
+
     this.factors.next(factors);
 
     const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
