@@ -16,10 +16,13 @@
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git",
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "ajv": "^6.0.0",
+    "cocoon-cordova-labs-local-webserver": "^2.4.1",
     "cocoon-cordova-labs-wkwebview-engine-localhost": "^0.5.1",
+    "cocoon-cordova-plugin-wkwebview-engine": "^1.1.1",
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
+    "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
@@ -32,6 +35,7 @@
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
+    "cordova-plugin-nativestorage": "^2.3.1",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
     "cordova-plugin-vibration": "^3.1.0",
@@ -39,11 +43,10 @@
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-plugin-zeroconf": "git+https://github.com/CaspianTechnologies/cordova-plugin-zeroconf.git#5a6ff88efb326171acc3496c4e81a1f311830fed",
     "cordova-windows": "^6.0.0",
-    "cordova.plugins.diagnostic": "~4.0.8",
+    "cordova.plugins.diagnostic": "^4.0.8",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5",
-    "cordova-plugin-nativestorage": "~2.3.1"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5"
   },
   "cordova": {
     "plugins": {
