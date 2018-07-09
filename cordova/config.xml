@@ -81,6 +81,7 @@
     <plugin name="cordova-plugin-camera-info" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git" />
     <plugin name="cordova-plugin-hockeyapp" spec="git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git" />
     <plugin name="cordova-custom-config" spec="^5.0.2" />
+    <plugin name="cordova-plugin-zeroconf" spec="file:../../cordova-plugin-zeroconf" />
     <plugin name="cordova-plugin-websocket-server" spec="^1.4.10" />
     <plugin name="cordova-plugin-networkinterface" spec="^2.0.0" />
     <plugin name="cordova-plugin-advanced-http" spec="^1.11.1" />
@@ -89,5 +90,4 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="~2.3.1" />
-    <plugin name="cordova-plugin-zeroconf" spec="file:../cordova-plugin-zeroconf" />
 </widget>
