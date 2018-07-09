@@ -65,6 +65,8 @@ export interface IConnectionProvider {
 
   send(message: any): void;
 
+  cancelDiscovery(): void;
+
   enableDiscovery(): void;
 
 }

@@ -113,7 +113,6 @@ export class ConnectionProviderService {
     console.log('send');
     this.providers.forEach((value: Provider, key: ProviderType) => {
       try {
-        console.log(value.service);
         if (value.service.connected.value) {
           console.log(message);
           value.service.send(message);
@@ -165,7 +164,11 @@ export class ConnectionProviderService {
   }
 
   async cancelDiscovery() {
-
+    this.providers.forEach((value: Provider, key: ProviderType) => {
+      if (value.service.enabled.getValue()) {
+        value.service.cancelDiscovery();
+      }
+    });
   }
 
 }
