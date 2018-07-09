@@ -1,8 +1,9 @@
 import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import isNumber from 'lodash/isNumber';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, flatMap, filter, tap } from 'rxjs/operators';
-import isNumber from 'lodash/isNumber';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -10,8 +11,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyWallet } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
-import { BluetoothService } from "../../../services/bluetooth.service";
-import { WaitingComponent } from "../waiting/waiting.component";
+import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
 
@@ -90,7 +90,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public allowFeeConfiguration = false;
 
-  public connected = this.bt.connected;
+  public connected = this.connectionProviderService.connected;
 
   public currencyWallet: CurrencyWallet = null;
 
@@ -122,14 +122,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly bt: BluetoothService,
-    private readonly walletService: WalletService,
-    private readonly notification: NotificationService,
-    private readonly currencyService: CurrencyService,
-    private readonly navigationService: NavigationService
-  ) { }
+  constructor(private readonly ngZone: NgZone,
+              private readonly connectionProviderService: ConnectionProviderService,
+              private readonly walletService: WalletService,
+              private readonly notification: NotificationService,
+              private readonly currencyService: CurrencyService,
+              private readonly navigationService: NavigationService) { }
 
   async ngOnInit() {
     this.currencyInfo = await this.currencyService.getInfo(this.currency);
@@ -191,12 +189,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         }
         if (amount.gt(new BN())) {
           if (this.currency in Coin) {
-          if (!substractFee) {
-            return balance.gte(amount.add(fee));
+            if (!substractFee) {
+              return balance.gte(amount.add(fee));
+            } else {
+              return balance.gte(amount);
+            }
           } else {
-            return balance.gte(amount);
-          }
-        } else {
             return balance.gte(amount) && ethBalance.gte(fee);
           }
         } else {
@@ -213,12 +211,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       (amount, fee, subtractFee) => {
         if (amount.gt(new BN())) {
           if (this.currency in Coin) {
-          if (subtractFee) {
-            return amount.gte(fee);
+            if (subtractFee) {
+              return amount.gte(fee);
+            } else {
+              return true;
+            }
           } else {
-            return true;
-          }
-        } else {
             return true;
           }
         } else {
@@ -288,24 +286,24 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.fee.pipe(distinctUntilChanged()).subscribe(value => {
         if (!this.feeFocused) {
           if (this.currency in Token) {
-          this.feeField.setValue(
+            this.feeField.setValue(
               this.ethWallet.fromInternal(value),
               {emitEvent: false});
           } else {
             this.feeField.setValue(
-            this.currencyWallet.fromInternal(value),
-            {emitEvent: false});
+              this.currencyWallet.fromInternal(value),
+              {emitEvent: false});
           }
         }
         if (!this.feeUsdFocused) {
           if (this.currency in Token) {
-          this.feeUsdField.setValue(
+            this.feeUsdField.setValue(
               this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
               {emitEvent: false});
           } else {
             this.feeUsdField.setValue(
-            this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-            {emitEvent: false});
+              this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+              {emitEvent: false});
           }
         }
       })
@@ -315,24 +313,24 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.feePrice.pipe(distinctUntilChanged()).subscribe(value => {
         if (!this.feePriceFocused) {
           if (this.currency in Token) {
-          this.feePriceField.setValue(
+            this.feePriceField.setValue(
               this.ethWallet.fromInternal(value),
               {emitEvent: false});
           } else {
             this.feePriceField.setValue(
-            this.currencyWallet.fromInternal(value),
-            {emitEvent: false});
-        }
+              this.currencyWallet.fromInternal(value),
+              {emitEvent: false});
+          }
         }
         if (!this.feePriceUsdFocused) {
           if (this.currency in Token) {
-          this.feePriceUsdField.setValue(
-            this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-            {emitEvent: false});
+            this.feePriceUsdField.setValue(
+              this.ethWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+              {emitEvent: false});
           } else {
             this.feePriceUsdField.setValue(
-            this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
-            {emitEvent: false});
+              this.currencyWallet.fromInternal(value) * (this.currencyInfo.gasRate.getValue() || 1),
+              {emitEvent: false});
           }
         }
       })

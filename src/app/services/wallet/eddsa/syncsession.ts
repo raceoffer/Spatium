@@ -1,11 +1,9 @@
 import { EventEmitter, OnDestroy } from '@angular/core';
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
-import { BluetoothService } from '../../bluetooth.service';
-import { LoggerService } from '../../logger.service';
-
-import { filter, take, map, takeUntil } from 'rxjs/operators';
-
 import { Marshal } from 'crypto-core-async';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { LoggerService } from '../../logger.service';
 
 export enum SynchronizationStatus {
   None = 0,
@@ -17,23 +15,18 @@ export enum SynchronizationStatus {
 
 export class SyncSession implements OnDestroy {
   public status: BehaviorSubject<SynchronizationStatus> = new BehaviorSubject<SynchronizationStatus>(SynchronizationStatus.None);
-
-  private commitmentObserver:    Observable<any>;
-  private decommitmentObserver:  Observable<any>;
-
   public finished: EventEmitter<any> = new EventEmitter();
   public canceled: EventEmitter<any> = new EventEmitter();
-  public failed:   EventEmitter<any> = new EventEmitter();
-
+  public failed: EventEmitter<any> = new EventEmitter();
+  private commitmentObserver: Observable<any>;
+  private decommitmentObserver: Observable<any>;
   private cancelled: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private subscriptions = [];
 
-  constructor(
-    private compoundKey: any,
-    private messageSubject: ReplaySubject<any>,
-    private bt: BluetoothService
-  ) {
+  constructor(private compoundKey: any,
+              private messageSubject: ReplaySubject<any>,
+              private connectionProviderService: ConnectionProviderService) {
     this.commitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'eddsaCommitment'),
@@ -52,29 +45,8 @@ export class SyncSession implements OnDestroy {
     this.subscriptions = [];
   }
 
-  private async send(msg, obj) {
-    return await this.bt.send(JSON.stringify({
-      type: msg,
-      content: Marshal.wrap(obj)
-    }))
-  }
-
   public async cancel() {
     this.cancelled.next(true);
-  }
-
-  private handleFailure(message, exception) {
-    LoggerService.nonFatalCrash(message, exception);
-    this.status.next(SynchronizationStatus.Finished);
-    this.failed.emit();
-    throw new Error(message);
-  }
-
-  private handleCancel() {
-    LoggerService.log('Cancelled', {});
-    this.status.next(SynchronizationStatus.Finished);
-    this.canceled.emit();
-    throw new Error('Cancelled');
   }
 
   public async sync() {
@@ -100,7 +72,9 @@ export class SyncSession implements OnDestroy {
 
     console.log('Sending commitment', commitment);
 
-    if (!await this.send('eddsaCommitment', commitment)) {
+    try {
+      await this.send('eddsaCommitment', commitment);
+    } catch (e) {
       return this.handleFailure('Failed to send commitment', null);
     }
 
@@ -130,7 +104,9 @@ export class SyncSession implements OnDestroy {
 
     console.log('Sending decommitment', decommitment);
 
-    if (!await this.send('eddsaDecommitment', decommitment)) {
+    try {
+      await this.send('eddsaDecommitment', decommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send decommitment', null);
     }
 
@@ -160,5 +136,26 @@ export class SyncSession implements OnDestroy {
     this.finished.emit(syncData);
 
     return syncData;
+  }
+
+  private async send(msg, obj) {
+    return await this.connectionProviderService.send(JSON.stringify({
+      type: msg,
+      content: Marshal.wrap(obj)
+    }));
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(SynchronizationStatus.Finished);
+    this.failed.emit();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(SynchronizationStatus.Finished);
+    this.canceled.emit();
+    throw new Error('Cancelled');
   }
 }

@@ -16,6 +16,10 @@ $white : rgb(245, 245, 245);//#f5f5f5,
 $dark_grey_21:rgba(44, 46, 49, 0.21);
 $green: rgb(24, 154, 57);//#189a39
 
+.blue-color {
+  color: $bluish;
+}
+
 .mat-toolbar-row, .mat-toolbar-single-row {
   height: 56px!important;
 }
@@ -715,6 +719,18 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   content: "\e901";
   color: $bluish;
   font-size: 40px !important;
+}
+
+.icon-custom-bonjour_black:before {
+  content: "\e902";
+  color: $dark;
+  font-size: 22px !important;
+}
+
+.icon-custom-bonjour_blue:before {
+  content: "\e902";
+  color: $bluish;
+  font-size: 22px !important;
 }
 
 .glass{

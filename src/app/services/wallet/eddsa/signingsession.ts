@@ -1,11 +1,9 @@
 import { OnDestroy } from '@angular/core';
-import { BehaviorSubject,  Observable,  ReplaySubject,  Subject } from 'rxjs';
-import { BluetoothService } from '../../bluetooth.service';
-import { LoggerService } from '../../logger.service';
-
-import { filter, take, map, takeUntil } from 'rxjs/operators';
-
 import { Marshal } from 'crypto-core-async';
+import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { LoggerService } from '../../logger.service';
 
 export enum TransactionStatus {
   None = 0,
@@ -20,27 +18,21 @@ export enum TransactionStatus {
 
 export class SignSession implements OnDestroy {
   public status: BehaviorSubject<TransactionStatus> = new BehaviorSubject<TransactionStatus>(TransactionStatus.None);
-
-  private entropyCommitmentObserver:   Observable<any>;
-  private entropyDecommitmentObserver: Observable<any>;
-  private partialSignatureObsever:     Observable<any>;
-
   public ready: Subject<any> = new Subject<any>();
   public signed: Subject<any> = new Subject<any>();
-
   public canceled: Subject<any> = new Subject<any>();
-  public failed:   Subject<any> = new Subject<any>();
-
+  public failed: Subject<any> = new Subject<any>();
+  private entropyCommitmentObserver: Observable<any>;
+  private entropyDecommitmentObserver: Observable<any>;
+  private partialSignatureObsever: Observable<any>;
   private canceledSubject: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   private subscriptions = [];
 
-  constructor(
-    private tx: any,
-    private compoundKey: any,
-    private messageSubject: ReplaySubject<any>,
-    private bt: BluetoothService
-  ) {
+  constructor(private tx: any,
+              private compoundKey: any,
+              private messageSubject: ReplaySubject<any>,
+              private connectionProviderService: ConnectionProviderService) {
     this.entropyCommitmentObserver =
       this.messageSubject.pipe(
         filter(object => object.type === 'entropyCommitment'),
@@ -60,34 +52,13 @@ export class SignSession implements OnDestroy {
       );
   }
 
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  private async send(msg, obj) {
-    return await this.bt.send(JSON.stringify({
-      type: msg,
-      content: Marshal.wrap(obj)
-    }))
-  }
-
   public get transaction() {
     return this.tx;
   }
 
-  private handleFailure(message, exception) {
-    LoggerService.nonFatalCrash(message, exception);
-    this.status.next(TransactionStatus.Failed);
-    this.failed.next();
-    throw new Error(message);
-  }
-
-  private handleCancel() {
-    LoggerService.log('Cancelled', {});
-    this.status.next(TransactionStatus.Cancelled);
-    this.canceled.next();
-    throw new Error('Cancelled');
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public async cancel() {
@@ -115,7 +86,9 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('entropyCommitment', entropyCommitment)) {
+    try {
+      await this.send('entropyCommitment', entropyCommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send entropyCommitment', null);
     }
 
@@ -141,7 +114,9 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('entropyDecommitment', entropyDecommitment)) {
+    try {
+      await this.send('entropyDecommitment', entropyDecommitment);
+    } catch (e) {
       return this.handleFailure('Failed to send entropyDecommitment', null);
     }
 
@@ -187,7 +162,9 @@ export class SignSession implements OnDestroy {
       return this.handleCancel();
     }
 
-    if (!await this.send('partialSignature', partialSignature)) {
+    try {
+      await this.send('partialSignature', partialSignature);
+    } catch (e) {
       return this.handleFailure('Failed to send a partial signature', null);
     }
   }
@@ -211,5 +188,26 @@ export class SignSession implements OnDestroy {
 
     this.status.next(TransactionStatus.Signed);
     this.signed.next();
+  }
+
+  private async send(msg, obj) {
+    return await this.connectionProviderService.send(JSON.stringify({
+      type: msg,
+      content: Marshal.wrap(obj)
+    }));
+  }
+
+  private handleFailure(message, exception) {
+    LoggerService.nonFatalCrash(message, exception);
+    this.status.next(TransactionStatus.Failed);
+    this.failed.next();
+    throw new Error(message);
+  }
+
+  private handleCancel() {
+    LoggerService.log('Cancelled', {});
+    this.status.next(TransactionStatus.Cancelled);
+    this.canceled.next();
+    throw new Error('Cancelled');
   }
 }
