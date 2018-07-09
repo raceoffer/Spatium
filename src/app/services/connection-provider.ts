@@ -89,7 +89,9 @@ export class ConnectionProviderService {
   async searchDevices() {
     const duration = 5 * 1000;
     this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.searchDevices(duration);
+      if (value.service.enabled.getValue()) {
+        value.service.searchDevices(duration);
+      }
     });
   }
 
