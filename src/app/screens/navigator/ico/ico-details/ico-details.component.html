@@ -7,14 +7,14 @@
 <div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
   <div class="text-field">
     <div class="header">
-      <div class="logo {{project.className}}" style="height: 40px;"></div>
+      <img class="logo {{project.className}}" style="height: 40px;" [src]="project.logo" *ngIf="project.logo">
       <h2>{{project.title}}</h2>
     </div>
     <mat-list>
       <mat-divider></mat-divider>
       <mat-list-item>
         <div matLine>
-          <p class="text">About project</p>
+          <p class="text">{{ project.description }}</p>
         </div>
       </mat-list-item>
       <mat-divider></mat-divider>

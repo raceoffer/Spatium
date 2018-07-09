@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnDestroy, NgZone, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, NgZone, OnInit, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { WhitelistComponent } from '../whitelist/whitelist.component';
 import { SendTransactionComponent } from '../../send-transaction/send-transaction.component';
@@ -6,13 +6,14 @@ import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
+import { IpfsService, File } from '../../../../services/ipfs.service';
 
 @Component({
   selector: 'app-ico-details',
   templateUrl: './ico-details.component.html',
   styleUrls: ['./ico-details.component.css'],
 })
-export class IcoDetailsComponent implements OnInit, OnDestroy {
+export class IcoDetailsComponent implements OnInit, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public project: any = null;
@@ -20,10 +21,14 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   public chosencurrency: any = undefined;
   public coins: any = [];
 
+  ipfsCid = 'QmXza9Tx6vGNZwieKFZequpdd2xeN9Bo8XprQNV3jRN9Vv';
+
   constructor(
     private readonly notification: NotificationService,
     private readonly currency: CurrencyService,
-    private readonly navigationService: NavigationService) {  }
+    private readonly navigationService: NavigationService,
+    private readonly ipfsService: IpfsService
+  ) {  }
 
   ngOnInit() {
     this.project.coins.forEach((item) => {
@@ -37,8 +42,9 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-
+  ngAfterViewInit() {
+    this.loadDescription();
+    this.loadLogo();
   }
 
   async onBack() {
@@ -79,4 +85,19 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
     });
     this.chosencurrency = (coin.chosen)?coin.coin:undefined;
   }
+
+  async loadDescription() {
+    const description = await this.ipfsService.get(this.ipfsCid + '/description');
+    if (description && description.length > 0) {
+      this.project.description = description[0].content.toString('utf8');
+    }
+  }
+
+  async loadLogo() {
+    const logo = await this.ipfsService.get(this.ipfsCid + '/logo');
+    if (logo && logo.length > 0) {
+      this.project.logo = "data:image/png;base64," + logo[0].content.toString('base64');
+    }
+  }
+
 }
