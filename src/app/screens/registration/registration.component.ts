@@ -68,8 +68,8 @@ export class RegistrationComponent implements OnDestroy {
   public confirmPassword = '';
 
   stWarning =
-    'Your funds safety depends on the strongness of the authentication factors. ' +
-    'Later you can add alternative authentication paths, however it is impossible to remove or alter existing paths.';
+    'Your funds safety depends on the strongness of the authorization factors. ' +
+    'Later you can add alternative authorization paths, however it is impossible to remove or alter existing paths.';
 
   public uploading = false;
   private cancel = new Subject<boolean>();
