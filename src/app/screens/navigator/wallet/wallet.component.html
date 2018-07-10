@@ -1,6 +1,6 @@
-<div (window:resize)="onResize()">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="onNavRequest()">
+    <button mat-icon-button (click)="toggleNavigation()">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -39,18 +39,24 @@
     </button>
   </mat-toolbar>
 
-  <mat-grid-list cols="{{cols}}" rowHeight="4:3">
-    <mat-grid-tile
-      *ngFor="let tile of filteredTitles"
-      [colspan]="tile.cols"
-      [rowspan]="tile.rows">
-      <app-tile-coin
-        [coin]="tile"
-        [balanceInfo]="getTileBalanceInfo(tile.coin)"
-        [synchronizing]="(synchronizing | async)"
-        (onClicked)="onTileClicked(tile.coin)">
-      </app-tile-coin>
-    </mat-grid-tile>
-  </mat-grid-list>
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" [current]="current"></app-main-drawer>
+
+    <div (window:resize)="onResize()">
+      <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+        <mat-grid-tile
+          *ngFor="let tile of filteredTitles"
+          [colspan]="tile.cols"
+          [rowspan]="tile.rows">
+          <app-tile-coin
+            [coin]="tile"
+            [balanceInfo]="getTileBalanceInfo(tile.coin)"
+            [synchronizing]="(synchronizing | async)"
+            (onClicked)="onTileClicked(tile.coin)">
+          </app-tile-coin>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </mat-sidenav-container>
 </div>
 

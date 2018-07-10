@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { combineLatest, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
@@ -9,6 +9,9 @@ import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from '../currency/currency.component';
 import { WaitingComponent } from '../waiting/waiting.component';
+import { Router } from "@angular/router";
+import { FeedbackComponent } from "../../feedback/feedback.component";
+import { SettingsComponent } from "../settings/settings.component";
 
 declare const navigator: any;
 
@@ -19,6 +22,42 @@ declare const navigator: any;
 })
 export class WalletComponent implements OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component';
+
+  public current = 'Wallet';
+  public navLinks = [{
+    name: 'Wallet',
+    clicked: async () => {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
+    }
+  }, {
+    name: 'Exchange'
+  }, {
+    name: 'ICO',
+    clicked: async () => {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}]);
+    }
+  }, {
+    name: 'Portfolio Investment'
+  }, {
+    name: 'Verification'
+  }, {
+    name: 'Settings',
+    clicked: () => {
+      this.openSettings();
+    }
+  }, {
+    name: 'Feedback',
+    clicked: () => {
+      this.openFeedback();
+    }
+  }, {
+    name: 'Exit',
+    clicked: async () => {
+      await this.router.navigate(['/start']);
+    }
+  }];
+
+  @ViewChild('sidenav') sidenav;
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
@@ -45,11 +84,14 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   private tileBalanceInfo = {};
   private subscriptions = [];
 
-  constructor(private readonly keychain: KeyChainService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly wallet: WalletService,
-              private readonly changeDetector: ChangeDetectorRef) {
+  constructor(
+    private readonly keychain: KeyChainService,
+    private readonly navigationService: NavigationService,
+    private readonly currency: CurrencyService,
+    private readonly wallet: WalletService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly router: Router
+  ) {
     const titles = this.staticTitles;
 
     keychain.topTokens.forEach((tokenInfo) => {
@@ -97,6 +139,18 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  public openSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+  public openFeedback() {
+    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
+  }
+
+  public toggleNavigation() {
+    this.sidenav.toggle();
+  }
+
   ngAfterViewInit() {
     this.changeDetector.detach();
     this.subscriptions.push(interval(1000).subscribe(() => {
@@ -106,10 +160,6 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   onResize(): void {
     this.cols = Math.ceil(window.innerWidth / 350);
-  }
-
-  public onNavRequest() {
-    this.navigationService.toggleNavigation();
   }
 
   public clearFilterValue() {
