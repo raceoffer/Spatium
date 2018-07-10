@@ -5,8 +5,8 @@ module.exports = function(context) {
   const basePath = context.opts.projectRoot;
 
   const prod = context.opts.options && context.opts.options['production'];
-  let sourceFile = basePath + "\\node_modules\\crypto-core-async\\webworker.bundle.js";
-  let targetDirectory = basePath + "\\www";
+  let sourceFile = basePath + "/node_modules/crypto-core-async/webworker.bundle.js";
+  let targetDirectory = basePath + "/www";
 
   if (!fs.existsSync(targetDirectory)) {
     return;

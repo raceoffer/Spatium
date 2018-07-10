@@ -9,6 +9,7 @@ import { BluetoothService } from '../../../services/bluetooth.service';
 export class BluetoothComponent implements OnInit {
 
   connectedDevices = this.bt.connectedDevices;
+  connected = this.bt.connected;
   listening = this.bt.listening;
   discoverable = this.bt.discoverable;
   toggled = this.bt.toggled;
@@ -24,7 +25,7 @@ export class BluetoothComponent implements OnInit {
 
   async toggleProvider(event) {
     // overwrite default event result
-    event.source.checked = this.toggled.getValue();
+    event.source.checked = this.toggled.getValue() || this.connected.getValue();
     event.checked = event.source.checked;
 
     await this.bt.toggleProvider();

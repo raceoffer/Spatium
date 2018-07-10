@@ -9,6 +9,7 @@ import { ConnectivityService } from '../../../services/connectivity.service';
 export class ZeroconfComponent implements OnInit {
 
   connectedDevices = this.connectivityService.connectedDevices;
+  connected = this.connectivityService.connected;
   listening = this.connectivityService.listening;
   discoverable = this.connectivityService.discoverable;
   toggled = this.connectivityService.toggled;
@@ -24,7 +25,7 @@ export class ZeroconfComponent implements OnInit {
 
   async toggleProvider(event) {
     // overwrite default event result
-    event.source.checked = this.toggled.getValue();
+    event.source.checked = this.toggled.getValue() || this.connected.getValue();
     event.source.disabled = (this.starting.getValue() || this.stopping.getValue());
     event.checked = event.source.checked;
 
