@@ -104,6 +104,7 @@ import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
+import { IpfsService } from './services/ipfs.service';
 import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { CreateComponent } from './screens/verifier-auth/create/create.component';
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
@@ -224,6 +225,7 @@ import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
     ActivityService,
     ICOService,
     DiscoveryService,
+    IpfsService,
     SocketServerService,
     SocketClientService,
     ConnectivityService,
