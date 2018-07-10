@@ -29,6 +29,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     name: 'Exchange'
   }, {
     name: 'ICO',
+    class: 'ico',
     clicked: async () => {
       this.current = 'ICO';
       await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}]);
