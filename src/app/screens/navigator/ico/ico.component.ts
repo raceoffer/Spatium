@@ -1,11 +1,14 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Coin } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { NewIcoComponent } from '../ico/new-ico/new-ico.component';
+import { NewIcoComponent } from './new-ico/new-ico.component';
 import { WaitingComponent } from '../waiting/waiting.component';
 import { IcoDetailsComponent } from './ico-details/ico-details.component';
-import { requestDialog } from "../../../utils/dialog";
+import { requestDialog } from '../../../utils/dialog';
+import { Router } from '@angular/router';
+import { SettingsComponent } from '../settings/settings.component';
+import { FeedbackComponent } from '../../feedback/feedback.component';
 
 declare const navigator: any;
 declare const window: any;
@@ -18,6 +21,42 @@ declare const window: any;
 
 export class IcoComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
+
+  public current = 'ICO';
+  public navLinks = [{
+    name: 'Wallet',
+    clicked: async () => {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
+    }
+  }, {
+    name: 'Exchange'
+  }, {
+    name: 'ICO',
+    clicked: async () => {
+      await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}]);
+    }
+  }, {
+    name: 'Portfolio Investment'
+  }, {
+    name: 'Verification'
+  }, {
+    name: 'Settings',
+    clicked: () => {
+      this.openSettings();
+    }
+  }, {
+    name: 'Feedback',
+    clicked: () => {
+      this.openFeedback();
+    }
+  }, {
+    name: 'Exit',
+    clicked: async () => {
+      await this.router.navigate(['/start']);
+    }
+  }];
+
+  @ViewChild('sidenav') sidenav;
 
   public title = 'ICO';
   public titles: any = [];
@@ -45,8 +84,11 @@ export class IcoComponent implements OnInit, OnDestroy {
     },
   ];
 
-  constructor(private readonly navigationService: NavigationService,
-              private readonly wallet: WalletService,) {
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly wallet: WalletService,
+    private readonly router: Router
+  ) {
     this.titles = this.staticProjects;
 
     this.filtredTitles = this.titles;
@@ -74,12 +116,20 @@ export class IcoComponent implements OnInit, OnDestroy {
 
   }
 
-  onResize(): void {
-    this.cols = Math.ceil(window.innerWidth / 350);
+  public openSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
   }
 
-  public onNavRequest() {
-    this.navigationService.toggleNavigation();
+  public openFeedback() {
+    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
+  }
+
+  public toggleNavigation() {
+    this.sidenav.toggle();
+  }
+
+  onResize(): void {
+    this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   public clearFilterValue() {
