@@ -1,6 +1,7 @@
 import { IcoDetailsComponent } from './ico-details/ico-details.component';
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
+import { IpfsService } from '../../../services/ipfs.service';
 import { ICOService, IcoCampaign } from '../../../services/ico.service';
 import { NewIcoComponent } from '../ico/new-ico/new-ico.component';
 
@@ -26,18 +27,21 @@ export class IcoComponent implements OnInit {
 
   constructor(
     private readonly navigationService: NavigationService,
-    private readonly icoService: ICOService
+    private readonly icoService: ICOService,
+    private readonly ipfsService: IpfsService
   ) {
   }
 
   async ngOnInit() {
     let campaings = await this.icoService.getCampaignList();
+
     this.titles.next(campaings.map(function (value, index) {
       return {
         cols: 1,
         rows: 1,
         address: value.address,
         title: value.title,
+        ipfsHash: value.ipfsHash,
         about: '',
         symbols: '',
         className: '',
@@ -46,8 +50,10 @@ export class IcoComponent implements OnInit {
         coins: [],
       };
     }));
+
     this.filtredTitles.next(this.titles.value);
   }
+
 
   get filterValue() {
     return this._filterValue;
@@ -112,5 +118,22 @@ export class IcoComponent implements OnInit {
     const componentRef = this.navigationService.pushOverlay(IcoDetailsComponent);
     componentRef.instance.project = project;
   }
+
+  async getLogo(tile) {
+    if (tile.logo || tile.logo.length == 0) {
+      return tile.logo;
+    }
+
+    const logo = await this.ipfsService.get(tile.ipfsHash + '/logo');
+    console.log(tile.title);
+    console.log(logo);
+    if (logo && logo.length > 0) {
+      let src = "data:image/png;base64," + logo[0].content.toString('base64');
+      tile.logo = src;
+      return src;
+    }
+    return '';
+  }
+
 }
 
