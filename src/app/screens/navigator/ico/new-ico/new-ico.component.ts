@@ -96,11 +96,11 @@ export class NewIcoComponent implements OnInit {
     console.log('CONVERTING TO SPT');
   }
 
-  public checkErrors() {
+  public async checkErrors() {
     this.errors = [];
-    console.log(sha256(Buffer.from(this.password.value)));
+    console.log(this.password.value);
 
-    if(!this.password.valid || sha256(Buffer.from(this.password.value)) != 'hash')
+    if(!this.password.valid || (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() != '8dbeac44e0c26cec8af751817eef6be75b5fb179dc113a469c90858eb23358c6')
       this.errors.push('Wrong password');
     if(!this.start_date.valid)
       this.errors.push("Start date is required");
@@ -116,7 +116,7 @@ export class NewIcoComponent implements OnInit {
   }
 
   async saveNewICO() {
-    if(this.checkErrors())
+    if(await this.checkErrors())
       return;
 
     this.isSaving = true;
