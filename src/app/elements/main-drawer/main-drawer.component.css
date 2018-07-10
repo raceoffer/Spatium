@@ -28,3 +28,11 @@
   color: #9ba0a0 !important;
   cursor: default;
 }
+
+.ico::after {
+  position: absolute;
+  content: 'demo';
+  margin-top: -38px;
+  margin-left: 46px;
+  font-size: 10px;
+}
