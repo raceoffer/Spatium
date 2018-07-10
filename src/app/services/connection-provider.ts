@@ -3,6 +3,7 @@ import { combineLatest, merge } from 'rxjs';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
 import { ConnectivityService } from './connectivity.service';
+import { DeviceService } from './device.service';
 import { Device } from './primitives/device';
 
 export enum ProviderType {
@@ -60,19 +61,23 @@ export class ConnectionProviderService {
 
   public message = toReplaySubject(merge(this.bt.message, this.connectivityService.message), 1);
 
-  constructor(private readonly bt: BluetoothService,
+  constructor(private readonly deviceService: DeviceService,
+              private readonly bt: BluetoothService,
               private readonly connectivityService: ConnectivityService) {
-    this.providers.set(
-      ProviderType.BLUETOOTH,
-      new Provider(
+    if (!this.deviceService.isIOS) {
+      this.providers.set(
         ProviderType.BLUETOOTH,
-        'Bluetooth',
-        'bluetooth',
-        null,
-        'app-confirmation-bluetooth-manage',
-        this.bt
-      )
-    );
+        new Provider(
+          ProviderType.BLUETOOTH,
+          'Bluetooth',
+          'bluetooth',
+          null,
+          'app-confirmation-bluetooth-manage',
+          this.bt
+        )
+      );
+    }
+
     this.providers.set(
       ProviderType.ZEROCONF,
       new Provider(

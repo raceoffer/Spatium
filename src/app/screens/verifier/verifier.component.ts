@@ -4,19 +4,20 @@ import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { CurrencyService } from '../../services/currency.service';
+import { DeviceService } from '../../services/device.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
 import { Status } from '../../services/wallet/currencywallet';
+import { deleteTouch } from '../../utils/fingerprint';
 import { DeleteSecretComponent } from '../delete-secret/delete-secret.component';
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { SecretExportComponent } from '../secret-export/secret-export.component';
-import { SettingsComponent } from './settings/verifier-settings.component';
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
+import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
-import { deleteTouch } from "../../utils/fingerprint";
 
 declare const window: any;
 
@@ -73,6 +74,7 @@ export class VerifierComponent implements OnInit {
 
   public providersArray = Array.from(this.connectionProviderService.providers.values());
   @ViewChild('sidenav') sidenav;
+  public isiOS = this.deviceService.isIOS;
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -86,6 +88,7 @@ export class VerifierComponent implements OnInit {
   private subscriptions = [];
 
   constructor(private readonly router: Router,
+              private readonly deviceService: DeviceService,
               private readonly wallet: WalletService,
               private readonly connectionProviderService: ConnectionProviderService,
               private readonly keychain: KeyChainService,
@@ -105,7 +108,7 @@ export class VerifierComponent implements OnInit {
 
     this.subscriptions.push(
       this.connectionProviderService.connectedEvent.subscribe(async () => {
-        await this.connectionProviderService.stopListening(); //zeroconf не стопать
+        await this.connectionProviderService.stopListening(); // zeroconf not stopped
         await this.wallet.startHandshake();
         await this.wallet.startSync();
       }));
@@ -190,6 +193,7 @@ export class VerifierComponent implements OnInit {
     await this.wallet.reset();
     this.connectionProviderService.disconnect();
     this.connectionProviderService.stopServiceListening();
+    this.connectionProviderService.resetToggler();
   }
 
   async confirm(coin) {
@@ -282,4 +286,4 @@ export class VerifierComponent implements OnInit {
       window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
     });
   }
-  }
+}
