@@ -40,7 +40,7 @@
       <div class="grid-item">
         <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
           <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <img class="logo" [src]="getLogo(tile) | async">
+            <img class="logo" [src]="'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo'">
             <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
               <span class="title">{{ tile.title }}</span>
             </div>

@@ -124,9 +124,7 @@ export class IcoComponent implements OnInit {
       return tile.logo;
     }
 
-    return 'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo';
-
-    /*const logo = await this.ipfsService.get(tile.ipfsHash + '/logo');
+    const logo = await this.ipfsService.get(tile.ipfsHash + '/logo');
     console.log(tile.title);
     console.log(logo);
     if (logo && logo.length > 0) {
@@ -134,7 +132,7 @@ export class IcoComponent implements OnInit {
       tile.logo = src;
       return src;
     }
-    return '';*/
+    return '';
   }
 
 }
