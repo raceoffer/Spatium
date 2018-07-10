@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-
+import Base58 from 'base-58';
 import web3 from 'web3';
 
 @Injectable()
@@ -20,7 +20,8 @@ export class ICOService {
         return campaings;
     
     for(let i = 0; i < result[0].length; i++) {
-        campaings.push(new IcoCampaign(result[0][i], utils.hexToUtf8(result[1][i]), utils.hexToUtf8(result[2][i])));
+        let hash = Base58.encode(Buffer.concat([Buffer.from([18,32]), Buffer.from(result[2][i].slice(2), 'hex')]))
+        campaings.push(new IcoCampaign(result[0][i], utils.hexToUtf8(result[1][i]), hash));
     }
 
     return campaings;
@@ -36,13 +37,15 @@ export class ICOService {
   }
 
   public async addCampaign(сampaign : IcoCampaign) {
+      let hash = Buffer.from(Base58.decode(сampaign.ipfsFolder).slice(2)).toString('hex');
+
       let addCampaignMethod = this.getIcoContract().methods.addCampaign(сampaign.address,
             сampaign.startDate.getTime() / 1000,
             сampaign.endDate.getTime() / 1000,
             сampaign.startDate.getTime() / 1000,
             сampaign.endDate.getTime() / 1000,
             this.web3.utils.fromUtf8(сampaign.title),
-            this.web3.utils.fromUtf8(сampaign.ipfsFolder),
+            '0x'+ hash,
             this.web3.utils.fromUtf8(JSON.stringify(сampaign.toJSON()))
         );
 

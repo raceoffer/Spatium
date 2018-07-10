@@ -131,9 +131,9 @@ export class NewIcoComponent implements OnInit {
     campaign.amountEmitted = this.amount_emitted.value;
     campaign.amountOffered = this.amount_offered.value;
 
-    await this.uploadFiles(campaign);
+    let hash = await this.uploadFiles(campaign);
 
-    campaign.ipfsFolder = 'ipfsFolder';
+    campaign.ipfsFolder = hash;
     try {
       let result = await this.icoService.addCampaign(campaign);
       console.log(result);
@@ -156,9 +156,18 @@ export class NewIcoComponent implements OnInit {
     try {
       uploadedFiles = await this.ipfsService.add(localFiles);
       console.log(uploadedFiles);
+      
+      let folder;
+      uploadedFiles.forEach(file => {
+        if (file.path == campaign.title) {
+          folder = file.hash;
+        }
+      });
+      return folder;
     } catch(e) {
       // TODO show message to the user
       console.log(e);
+      return '';
     }
   }
 

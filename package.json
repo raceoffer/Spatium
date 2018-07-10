@@ -29,6 +29,7 @@
     "@ionic-native/http": "^4.7.0",
     "ajv": "^6.0.0",
     "angular2-qrcode": "^2.0.1",
+    "base-58": "0.0.1",
     "cashaddrjs": "^0.2.8",
     "core-js": "^2.4.1",
     "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#44072b3544cf3f1ed87c985530c61f3ed01c5429",
