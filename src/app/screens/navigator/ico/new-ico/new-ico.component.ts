@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { NavigationService } from '../../../../services/navigation.service';
+import {NavigationService} from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { IpfsService, File, FileInfo } from '../../../../services/ipfs.service';
 import { ICOService, IcoCampaign } from '../../../../services/ico.service';
@@ -29,18 +29,20 @@ export class NewIcoComponent implements OnInit {
   public end_date = new FormControl('', [Validators.required]);
   public start_registration = new FormControl('', [Validators.required]);
   public end_registration = new FormControl('', [Validators.required]);
-  public max_amount = new FormControl();
-  public min_amount = new FormControl();
+  public max_investment = new FormControl(0);
   public starting_price = new FormControl(1);
   public available_coins = new FormControl(['SPT']);
   public interval_time_auction = new FormControl(1);
   public interval_time_invite = new FormControl(1);
   public factor = new FormControl(1);
   public periodicity = new FormControl();
-  public coins: any = ['SPT','BTC','BCH','ETH','LTC','ADA','NEO','XRP','XLM','XEM'];
-  public companyTypes: any = [{name:'Classic', num: 1}, {name:'Auction', num: 2}];
-  public cashbackTypes: any = ['Full refund', 'Partial refund', 'Non-refund'];
-  public slotsTypes: any = ['Limited', 'Cyclical'];
+  public logo = new FormControl();
+  public description = new FormControl();
+  public coins: any = ['SPT', 'BTC', 'BCH', 'ETH', 'LTC', 'ADA', 'NEO', 'XRP', 'XLM', 'XEM'];
+  public companyTypes: any = [{name: 'Classic', id: 1}, {name: 'Auction', id: 2}];
+  public cashbackTypes: any = [{name: 'Full refund', id: 1}, {name: 'Partial refund', id: 2}, {name: 'Non-refund', id: 3}];
+  public whitelistTypes: any = [{name: 'None', id: 0}, {name: 'Limited', id: 1}, {name: 'Cyclical', id: 2}];
+  public fundraisingTypes: any = [{name: 'Crowd', id: 1}, {name: 'Queue', id: 2}];
 
   public password = new FormControl();
 
@@ -52,14 +54,15 @@ export class NewIcoComponent implements OnInit {
   coinSym: string = this.coins[0];
   coinOfStartPrice: string = this.coinSym;
   coinOfFeesAmount: string = this.coinSym;
-  coinOfInvestmentAmount = this.coinSym;
-  feeTitle: string = "Fee";
-  feePrice: number = 0;
-  companyType: string;
-  cashbackType: string;
-  slotsType: string;
-  balanceCurrency: number = 0;
-  white_list: boolean = false;
+  feeTitle = 'Fee';
+  feePrice = 0;
+  companyType = 1;
+  cashbackType = 1;
+  whitelistType = 0;
+  fundraisingType = 1;
+  balanceCurrency = 0;
+  descriptionFileName: string;
+  logoFileName: string;
 
   isSaving: boolean = false;
 
@@ -74,7 +77,7 @@ export class NewIcoComponent implements OnInit {
   }
 
   async onBack() {
-    this.navigationService.cancelOverlay()
+    this.navigationService.cancelOverlay();
   }
 
   changeStartPrice(e) {
@@ -87,9 +90,26 @@ export class NewIcoComponent implements OnInit {
     this.coinOfFeesAmount = e.value;
   }
 
-  changeInvestmentAmount(e) {
-    console.log('CHANGE INVESTMENT AMOUNT', e);
-    this.coinOfInvestmentAmount = e.value;
+  changeFundraising(fundraisingType) {
+    if (fundraisingType === 2 && this.whitelistType === 0) {
+      this.whitelistType = 1;
+    }
+  }
+
+  changeWhitelist(whitelistType) {
+    if (whitelistType === 0 && this.fundraisingType === 2) {
+      this.fundraisingType = 1;
+    }
+  }
+
+  changeLogo(e) {
+    const file = e.target.files[0];
+    this.logoFileName = (file !== null) ? file.name : '';
+  }
+
+  changeDescription(e) {
+    const file = e.target.files[0];
+    this.descriptionFileName = (file !== null) ? file.name : '';
   }
 
   async convertToSPT() {
@@ -137,13 +157,13 @@ export class NewIcoComponent implements OnInit {
     try {
       let result = await this.icoService.addCampaign(campaign);
       console.log(result);
-    }
+  }
     catch(e) {
       console.error(e);
       this.errors.push(e);
       this.isSaving = false;
       return;
-    }
+}
 
     this.created.emit(campaign);
     this.isSaving = false;
