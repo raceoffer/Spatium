@@ -7,7 +7,7 @@
 <div class="investment-component box" fxLayout="column" fxLayoutAlign="start left">
   <div class="text-field">
     <div class="header">
-      <img class="logo {{project.className}}" style="height: 40px;" [src]="project.logo" *ngIf="project.logo">
+      <img class="logo {{project.className}}" [src]="project.logo">
       <h2>{{(campaign | async)?.title}}</h2>
     </div>
     <mat-list>
@@ -53,8 +53,8 @@
       <mat-divider></mat-divider>
       <mat-list-item matLine>
         <div matLine class="space-between">
-          <span class="text">ICO start: {{ (campaign | async)?.startDate }}</span>
-          <span class="text">ICO end: {{ (campaign | async)?.endDate }}</span>
+          <span class="text">ICO start: {{ ((campaign | async)?.startDate) | date:'medium' }}</span>
+          <span class="text">ICO end: {{ ((campaign | async)?.endDate) | date:'medium' }}</span>
         </div>
       </mat-list-item>
       <mat-divider></mat-divider>
@@ -67,6 +67,7 @@
       <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(false)">Investments for organizer</button>
       <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="investments(true)">Investments for investor</button>
       <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="reminder()">Add reminder</button>
+      <button *ngIf="true" type="button" mat-raised-button color="accent" class="width-button-full color" (click)="deleteCampaign()">Delete</button>
     </div>
   </div>
 </div>

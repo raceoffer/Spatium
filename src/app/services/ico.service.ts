@@ -65,7 +65,20 @@ export class ICOService {
   }
 
   public async removeCampaign(address: string) {
-    let result = await this.getIcoContract().methods.removeCampaign(address).call();
+    let removeCampaignMethod = this.getIcoContract().methods.removeCampaign(address);
+    let removeCampaignAbi = removeCampaignMethod.encodeABI();
+    let removeCampaignGas = await removeCampaignMethod.estimateGas();
+    const account = this.web3.eth.accounts.privateKeyToAccount(this.getSecret());
+    const tx = {
+        from: account.address,
+        to: this.contractAddress,
+        data: removeCampaignAbi,
+        gas: Math.round(1.2 * removeCampaignGas),
+        gasPrice: this.web3.utils.toWei('21', 'gwei')
+      };
+    
+    const signed = await account.signTransaction(tx);
+    let result = await this.web3.eth.sendSignedTransaction(signed.rawTransaction);
     console.log(result);
     return result;
   }

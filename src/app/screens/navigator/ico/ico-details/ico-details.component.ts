@@ -76,6 +76,12 @@ export class IcoDetailsComponent implements OnInit, AfterViewInit {
 
   }
 
+  async deleteCampaign() {
+    let result = await this.icoService.removeCampaign(this.project.address);
+    this.navigationService.acceptOverlay();
+    console.log(result);
+  }
+
   changeCurrency(coin) {
     console.log(coin, this);
     coin.chosen = !coin.chosen;

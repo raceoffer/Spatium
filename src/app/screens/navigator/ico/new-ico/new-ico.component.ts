@@ -4,6 +4,7 @@ import { NavigationService } from '../../../../services/navigation.service';
 import { NotificationService } from '../../../../services/notification.service';
 import { IpfsService, File, FileInfo } from '../../../../services/ipfs.service';
 import { ICOService, IcoCampaign } from '../../../../services/ico.service';
+import { sha256 } from 'crypto-core-async/lib/utils';
 
 declare const window;
 
@@ -40,6 +41,8 @@ export class NewIcoComponent implements OnInit {
   public companyTypes: any = [{name:'Classic', num: 1}, {name:'Auction', num: 2}];
   public cashbackTypes: any = ['Full refund', 'Partial refund', 'Non-refund'];
   public slotsTypes: any = ['Limited', 'Cyclical'];
+
+  public password = new FormControl();
 
   @ViewChild('logo') logo;
   @ViewChild('description') description;
@@ -95,6 +98,10 @@ export class NewIcoComponent implements OnInit {
 
   public checkErrors() {
     this.errors = [];
+    console.log(sha256(Buffer.from(this.password.value)));
+
+    if(!this.password.valid || sha256(Buffer.from(this.password.value)) != 'hash')
+      this.errors.push('Wrong password');
     if(!this.start_date.valid)
       this.errors.push("Start date is required");
     if(!this.end_date.valid)
