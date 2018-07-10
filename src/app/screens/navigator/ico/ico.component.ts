@@ -25,8 +25,6 @@ export class IcoComponent implements OnInit {
   public cols: any = Math.ceil(window.innerWidth / 350);
   public isSearch = false;
 
-  ipfsCid = 'QmXza9Tx6vGNZwieKFZequpdd2xeN9Bo8XprQNV3jRN9Vv';
-
   constructor(
     private readonly navigationService: NavigationService,
     private readonly icoService: ICOService,
@@ -126,7 +124,7 @@ export class IcoComponent implements OnInit {
       return tile.logo;
     }
 
-    return 'http://ipfs.io/ipfs/QmXza9Tx6vGNZwieKFZequpdd2xeN9Bo8XprQNV3jRN9Vv/logo';
+    return 'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo';
 
     /*const logo = await this.ipfsService.get(tile.ipfsHash + '/logo');
     console.log(tile.title);

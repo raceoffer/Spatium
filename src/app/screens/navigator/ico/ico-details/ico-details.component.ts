@@ -25,8 +25,6 @@ export class IcoDetailsComponent implements OnInit, AfterViewInit {
   public coins: any = [];
   public campaign: BehaviorSubject<IcoCampaign> = new BehaviorSubject<IcoCampaign>(null);
 
-  ipfsCid = 'QmXza9Tx6vGNZwieKFZequpdd2xeN9Bo8XprQNV3jRN9Vv';
-
   constructor(
     private readonly icoService: ICOService,
     private readonly navigationService: NavigationService,
@@ -87,14 +85,14 @@ export class IcoDetailsComponent implements OnInit, AfterViewInit {
   }
 
   async loadDescription() {
-    const description = await this.ipfsService.get(this.ipfsCid + '/description');
+    const description = await this.ipfsService.get(this.campaign.value.ipfsFolder + '/description');
     if (description && description.length > 0) {
       this.project.description = description[0].content.toString('utf8');
     }
   }
 
   async loadLogo() {
-    const logo = await this.ipfsService.get(this.ipfsCid + '/logo');
+    const logo = await this.ipfsService.get(this.campaign.value.ipfsFolder + '/logo');
     if (logo && logo.length > 0) {
       this.project.logo = "data:image/png;base64," + logo[0].content.toString('base64');
     }
