@@ -229,8 +229,9 @@ export class ConnectivityService implements IConnectionProvider {
   async enableDiscovery() {}
 
   private async checkWiFiState() {
-    await cordova.plugins.diagnostic.isWifiEnabled((available) => {
-      if (available === 1) {
+    await cordova.plugins.diagnostic.isWifiAvailable((available) => {
+      console.log('checkWiFiState', available, navigator.connection.type);
+      if (available) {
         if (navigator.connection.type === 'wifi') {
           this.state.next(State.Started);
           if (this.toggled.getValue() && this.stopped.getValue()) {
