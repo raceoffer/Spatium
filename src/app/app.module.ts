@@ -90,6 +90,7 @@ import { ConnectionProviderService } from './services/connection-provider';
 import { ConnectivityService } from './services/connectivity.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
+import { ICOService } from './services/ico.service';
 import { DeviceService } from './services/device.service';
 import { DiscoveryService } from './services/discovery.service';
 import { FileService } from './services/file.service';
@@ -103,6 +104,7 @@ import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
+import { IpfsService } from './services/ipfs.service';
 import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { CreateComponent } from './screens/verifier-auth/create/create.component';
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
@@ -221,7 +223,9 @@ import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
     NavigationService,
     HockeyService,
     ActivityService,
+    ICOService,
     DiscoveryService,
+    IpfsService,
     SocketServerService,
     SocketClientService,
     ConnectivityService,

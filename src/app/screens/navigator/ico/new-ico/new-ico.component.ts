@@ -1,6 +1,12 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, HostBinding, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { NavigationService } from '../../../../services/navigation.service';
+import { NotificationService } from '../../../../services/notification.service';
+import { IpfsService, File, FileInfo } from '../../../../services/ipfs.service';
+import { ICOService, IcoCampaign } from '../../../../services/ico.service';
+import { sha256 } from 'crypto-core-async/lib/utils';
+
+declare const window;
 
 @Component({
   selector: 'app-new-ico',
@@ -10,17 +16,19 @@ import { NavigationService } from '../../../../services/navigation.service';
 
 export class NewIcoComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
+
+  @Output() public created = new EventEmitter<IcoCampaign>();
   
-  public comp_name = new FormControl();
-  public ticker = new FormControl();
+  public comp_name = new FormControl('', [Validators.required]);
+  public ticker = new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]);
   public amount_emitted = new FormControl(0);
   public amount_offered = new FormControl(0);
   public amount_fees = new FormControl(1);
-  public address = new FormControl();
-  public start_date = new FormControl();
-  public end_date = new FormControl();
-  public start_registration = new FormControl();
-  public end_registration = new FormControl();
+  public address = new FormControl('', [Validators.required, Validators.pattern('^(0x){1}[0-9a-fA-F]{40}$')]);
+  public start_date = new FormControl('', [Validators.required]);
+  public end_date = new FormControl('', [Validators.required]);
+  public start_registration = new FormControl('', [Validators.required]);
+  public end_registration = new FormControl('', [Validators.required]);
   public max_amount = new FormControl();
   public min_amount = new FormControl();
   public starting_price = new FormControl(1);
@@ -34,7 +42,13 @@ export class NewIcoComponent implements OnInit {
   public cashbackTypes: any = ['Full refund', 'Partial refund', 'Non-refund'];
   public slotsTypes: any = ['Limited', 'Cyclical'];
 
-  title: string = "New ICO";
+  public password = new FormControl();
+
+  @ViewChild('logo') logo;
+  @ViewChild('description') description;
+
+  public errors: string[] = [];
+  campaign: IcoCampaign = new IcoCampaign('', 'New ICO', '');
   coinSym: string = this.coins[0];
   coinOfStartPrice: string = this.coinSym;
   coinOfFeesAmount: string = this.coinSym;
@@ -47,7 +61,14 @@ export class NewIcoComponent implements OnInit {
   balanceCurrency: number = 0;
   white_list: boolean = false;
 
-  constructor(private readonly navigationService: NavigationService) { }
+  isSaving: boolean = false;
+
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService,
+    private readonly icoService: ICOService,
+    private readonly ipfsService: IpfsService
+  ) { }
 
   ngOnInit() {
   }
@@ -75,7 +96,103 @@ export class NewIcoComponent implements OnInit {
     console.log('CONVERTING TO SPT');
   }
 
+  public async checkErrors() {
+    this.errors = [];
+    console.log(this.password.value);
+
+    if(!this.password.valid || (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() != '8dbeac44e0c26cec8af751817eef6be75b5fb179dc113a469c90858eb23358c6')
+      this.errors.push('Wrong password');
+    if(!this.start_date.valid)
+      this.errors.push("Start date is required");
+    if(!this.end_date.valid)
+      this.errors.push("End date is required");
+    if(!this.ticker.valid)
+      this.errors.push("Ticker is invalid");
+    if(!this.address.valid)
+      this.errors.push("Address is invalid");
+    if(!this.comp_name.valid)
+      this.errors.push("Company name is invalid");
+      return this.errors.length > 0;
+  }
+
   async saveNewICO() {
-    console.log('SAVE NEW ICO', this);
+    if(await this.checkErrors())
+      return;
+
+    this.isSaving = true;
+    let campaign = new IcoCampaign('', '', '');
+    campaign.startDate = this.start_date.value;
+    campaign.endDate = this.end_date.value;
+    campaign.ticker = this.ticker.value;
+    campaign.address = this.address.value;
+    campaign.title = this.comp_name.value;
+    campaign.type = this.companyType;
+    campaign.cashbackType = this.cashbackType;
+    campaign.amountEmitted = this.amount_emitted.value;
+    campaign.amountOffered = this.amount_offered.value;
+
+    let hash = await this.uploadFiles(campaign);
+
+    campaign.ipfsFolder = hash;
+    try {
+      let result = await this.icoService.addCampaign(campaign);
+      console.log(result);
+    }
+    catch(e) {
+      console.error(e);
+      this.errors.push(e);
+      this.isSaving = false;
+      return;
+    }
+
+    this.created.emit(campaign);
+    this.isSaving = false;
+    this.notification.show('ICO campaign created');
+  }
+
+  async uploadFiles(campaign: IcoCampaign) {
+    let localFiles, uploadedFiles = [];
+    localFiles = await this.getFiles(campaign);
+    try {
+      uploadedFiles = await this.ipfsService.add(localFiles);
+      console.log(uploadedFiles);
+      
+      let folder;
+      uploadedFiles.forEach(file => {
+        if (file.path == campaign.title) {
+          folder = file.hash;
+        }
+      });
+      return folder;
+    } catch(e) {
+      // TODO show message to the user
+      console.log(e);
+      return '';
+    }
+  }
+
+  async getFiles(campaign: IcoCampaign) {
+    const dir = '/' + campaign.title + '/';
+    const files = [];
+
+    if (this.logo.nativeElement.files.length > 0) {
+      files.push({ name: dir + 'logo', path: this.logo.nativeElement.files[0] });
+    }
+
+    if (this.description.nativeElement.files.length > 0) {
+      files.push({ name: dir + 'description', path: this.description.nativeElement.files[0] });
+    }
+
+    return Promise.all([].map.call(files, function (file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onloadend = function () {
+          resolve(new File(file.name, Buffer.from(reader.result)));
+        };
+        reader.readAsArrayBuffer(file.path);
+      });
+    })).then(function (results) {
+      return results;
+    });
   }
 }
