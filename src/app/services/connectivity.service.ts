@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, mapTo, skip, take } from 'rxjs/operators';
 import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
+import { DeviceService } from './device.service';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/i-connectivity-provider';
 import { Device, equals } from './primitives/device';
@@ -105,6 +106,7 @@ export class ConnectivityService implements IConnectionProvider {
   timer: any;
 
   constructor(private readonly ngZone: NgZone,
+              private readonly deviceService: DeviceService,
               private readonly socketClientService: SocketClientService,
               private readonly socketServerService: SocketServerService,
               private readonly discoveryService: DiscoveryService) {
@@ -137,20 +139,23 @@ export class ConnectivityService implements IConnectionProvider {
       }
     } else {
       this.toggled.next(false);
-      await this.stopListening();
+      await this.disconnect();
+      await this.stopServiceListening();
     }
   }
 
   public async startListening() {
-    await Promise.all([
-      this.socketServerService.start(),
-      this.discoveryService.startAdvertising()
-    ]);
+    if (this.toggled.getValue()) {
+      await Promise.all([
+        this.socketServerService.start(),
+        this.discoveryService.startAdvertising()
+      ]);
 
-    if (this.discoveryService.advertising.getValue() === State.Stopped
-      || this.socketServerService.state.getValue() === State.Stopped) {
-      await this.discoveryService.stopAdvertising(),
-        await this.socketServerService.stop();
+      if (this.discoveryService.advertising.getValue() === State.Stopped
+        || this.socketServerService.state.getValue() === State.Stopped) {
+        await this.discoveryService.stopAdvertising(),
+          await this.socketServerService.stop();
+      }
     }
   }
 
@@ -205,8 +210,11 @@ export class ConnectivityService implements IConnectionProvider {
   }
 
   public goToNetworkSettings() {
-    // cordova.plugins.diagnostic.switchToSettings(); ios
-    cordova.plugins.diagnostic.switchToWifiSettings(); // android win
+    if (this.deviceService.isIOS) {
+      cordova.plugins.diagnostic.switchToSettings();
+    } else {
+      cordova.plugins.diagnostic.switchToWifiSettings();
+    }
   }
 
   timeout() {
@@ -233,7 +241,7 @@ export class ConnectivityService implements IConnectionProvider {
           this.state.next(State.Starting);
           if (this.toggled.getValue() && this.listening.getValue()) {
             this.devices.next(new Map<string, Device>());
-            this.stopListening();
+            this.stopServiceListening();
           }
         }
       } else {
@@ -241,7 +249,7 @@ export class ConnectivityService implements IConnectionProvider {
           this.state.next(State.Stopped);
           this.devices.next(new Map<string, Device>());
           this.toggled.next(false);
-          this.stopListening();
+          this.stopServiceListening();
         }
       }
     }, (error) => {
@@ -249,7 +257,7 @@ export class ConnectivityService implements IConnectionProvider {
       this.state.next(State.Stopped);
       this.devices.next(new Map<string, Device>());
       this.toggled.next(false);
-      this.stopListening();
+      this.stopServiceListening();
     });
   }
 

@@ -5,13 +5,19 @@
   <span class="spacer"></span>
 
   <mat-slide-toggle mat-list-item class="custom-slide-toggle"
-                    [checked]="(toggled | async)"
+                    [checked]="(toggled | async) || (connected | async)"
                     (change)="toggleProvider($event)">
   </mat-slide-toggle>
 </div>
 
+<div fxLayout="column" fxLayoutAlign="start stretch" *ngFor="let device of (connectedDevices | async)">
+  <div fxLayout="row" fxLayoutAlign="start center" class="status">
+    <span class="list-status">Connected to {{device.name}}</span>
+  </div>
+</div>
+
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (starting | async) && (toggled | async)">
+     *ngIf="(enabled | async) && (starting | async) && (toggled | async) && !(connected | async)">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
@@ -19,7 +25,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (listening | async) && (toggled | async)">
+     *ngIf="(enabled | async) && (listening | async) && (toggled | async) && !(connected | async)">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Ready</span>
     <span class="spacer"></span>
@@ -30,7 +36,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (stopping | async)">
+     *ngIf="(enabled | async) && (stopping | async) && !(connected | async)">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Stopping</span>
   </div>

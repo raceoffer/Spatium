@@ -81,11 +81,15 @@ export class BluetoothService implements IConnectionProvider {
   async toggleProvider() {
     if (this.state.getValue() === State.Stopped) {
       await this.openRequestBluetoothDialog();
-    } else if (this.state.getValue() === State.Started && this.listeningState.getValue() === State.Stopped) {
+    } else if (this.state.getValue() === State.Started &&
+      this.listeningState.getValue() === State.Stopped &&
+      !this.connected.getValue()) {
       this.toggled.next(true);
       await this.startListening();
     } else {
-      await this.stopListening();
+      this.toggled.next(false);
+      await this.disconnect();
+      await this.stopServiceListening();
     }
   }
 
@@ -98,15 +102,17 @@ export class BluetoothService implements IConnectionProvider {
       return;
     }
 
-    this.listeningState.next(State.Starting);
+    if (this.toggled.getValue()) {
+      this.listeningState.next(State.Starting);
 
-    try {
-      await cordova.plugins.bluetooth.startListening();
-      this.listeningState.next(State.Started);
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to start listening', e);
-      this.listeningState.next(State.Stopped);
-      throw e;
+      try {
+        await cordova.plugins.bluetooth.startListening();
+        this.listeningState.next(State.Started);
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to start listening', e);
+        this.listeningState.next(State.Stopped);
+        throw e;
+      }
     }
   }
 
@@ -118,11 +124,12 @@ export class BluetoothService implements IConnectionProvider {
     this.listeningState.next(State.Stopping);
 
     try {
-      this.toggled.next(false);
-      await cordova.plugins.bluetooth.stopListening();
+      if (await cordova.plugins.bluetooth.getListening()) {
+        await cordova.plugins.bluetooth.stopListening();
+      }
       this.listeningState.next(State.Stopped);
     } catch (e) {
-      LoggerService.nonFatalCrash('Failed to start listening', e);
+      LoggerService.nonFatalCrash('Failed to stop listening', e);
       this.listeningState.next(State.Started);
       this.toggled.next(true);
       throw e;
@@ -160,6 +167,7 @@ export class BluetoothService implements IConnectionProvider {
     try {
       await cordova.plugins.bluetooth.disconnect();
       this.connectedDevices.next(new Array<Device>());
+      this.connectionState.next(ConnectionState.None);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to disconnect bluetooth devices', e);
       throw e;
@@ -235,6 +243,18 @@ export class BluetoothService implements IConnectionProvider {
     }));
 
     this.discoveryStartedEvent.subscribe(() => this.devices.next(new Map<string, Device>()));
+    this.disconnectedEvent.subscribe(() => {
+      this.connectedDevices.next(new Array<Device>());
+      this.devices.next(new Map<string, Device>());
+      this.connectionState.next(ConnectionState.None);
+      this.startListening();
+    });
+    this.disabledEvent.subscribe( () => {
+      this.toggled.next(false);
+      this.devices.next(new Map<string, Device>());
+      this.connectedDevices.next(new Array<Device>());
+      this.connectionState.next(ConnectionState.None);
+    })
 
     cordova.plugins.bluetooth.setConnectedCallback((device) => this.ngZone.run(async () => {
       if (device !== null) {

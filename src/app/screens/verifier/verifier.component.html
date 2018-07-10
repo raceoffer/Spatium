@@ -34,7 +34,7 @@
         *ngIf="!(synchronizing | async)">
 
         <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-          <app-confirmation-bluetooth-manage></app-confirmation-bluetooth-manage>
+          <app-confirmation-bluetooth-manage *ngIf="!isiOS"></app-confirmation-bluetooth-manage>
           <app-confirmation-zeroconf-manage></app-confirmation-zeroconf-manage>
         </mat-nav-list>
 
@@ -49,13 +49,12 @@
         </div>
       </div>
 
-      <div fxLayout="column" fxLayoutAlign="start center" class="box" *ngIf="(synchronizing | async)">
+      <div fxLayout="column" fxLayoutAlign="start start" class="box" *ngIf="(synchronizing | async)">
         <mat-list class="list">
           <mat-list-item *ngFor="let coin of synchedCoins">
             <span *ngIf="coin.status === coinStatusType.Synchronizing || coinStatusType.Ready">
               Syncing {{ coin.name }}...&nbsp;
             </span>
-
             <span *ngIf="coin.status === coinStatusType.Ready">
               done
             </span>

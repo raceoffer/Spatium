@@ -5,10 +5,16 @@
   <span class="spacer"></span>
 
   <mat-slide-toggle mat-list-item class="custom-slide-toggle"
-                    [checked]="(toggled | async)"
+                    [checked]="(toggled | async) || (connected | async)"
                     [disabled]="((starting | async) || (stopping | async))"
                     (change)="toggleProvider($event)">
   </mat-slide-toggle>
+</div>
+
+<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connected | async)">
+  <div fxLayout="row" fxLayoutAlign="start center" class="status">
+    <span class="list-status">Connected</span>
+  </div>
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
