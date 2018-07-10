@@ -1,3 +1,15 @@
+<mat-toolbar color="primary" class="header-toolbar shadow">
+    <button mat-icon-button (click)="toggleNavigation()">
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <span>Confirmation mode</span>
+
+    <span class="spacer"></span>
+
+    <mat-icon *ngIf="!(synchronizing | async) && (fullySync | async)">sync</mat-icon>
+    <mat-icon *ngIf="!(synchronizing | async) && (partiallySync | async)">sync_problem</mat-icon>
+  </mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-sidenav-container class="content">
     <app-main-drawer
@@ -5,19 +17,6 @@
       [navLinks]="navLinks"
       [current]="current">
     </app-main-drawer>
-
-    <mat-toolbar color="primary" class="header-toolbar shadow">
-      <button mat-icon-button (click)="toggleNavigation()">
-        <mat-icon>menu</mat-icon>
-      </button>
-
-      <span>Confirmation mode</span>
-
-      <span class="spacer"></span>
-
-      <mat-icon *ngIf="!(synchronizing | async) && (fullySync | async)">sync</mat-icon>
-      <mat-icon *ngIf="!(synchronizing | async) && (partiallySync | async)">sync_problem</mat-icon>
-    </mat-toolbar>
 
     <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
       <mat-progress-bar
