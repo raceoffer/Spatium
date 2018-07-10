@@ -36,7 +36,7 @@ export class SocketServerService {
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
-          if (this.connectionState.getValue() !== ConnectionState.None && !this.stoppedListening.getValue()) {
+          if (this.connectionState.getValue() !== ConnectionState.None || this.stoppedListening.getValue()) {
             cordova.plugins.wsserver.close(conn);
           } else {
             this.currentPeer.next(conn.uuid);
@@ -46,9 +46,11 @@ export class SocketServerService {
         onMessage: (conn, msg) => this.ngZone.run(() => {
           this.message.next(JSON.parse(msg));
         }),
-        onClose: () => this.ngZone.run(() => {
-          this.connectionState.next(ConnectionState.None);
-          this.currentPeer.next(null);
+        onClose: (conn) => this.ngZone.run(() => {
+          if (this.currentPeer.getValue() === conn.uuid) {
+            this.connectionState.next(ConnectionState.None);
+            this.currentPeer.next(null);
+          }
         }),
         tcpNoDelay: true
       }, () => this.ngZone.run(() => {

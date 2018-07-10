@@ -3,7 +3,7 @@ import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { LoggerService } from './services/logger.service';
 import { HockeyService } from './services/hockey.service';
-import { ActivityService } from "./services/activity.service";
+import { ActivityService } from './services/activity.service';
 
 declare const hockeyapp: any;
 declare const navigator: any;
@@ -17,32 +17,32 @@ export class AppComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   @HostListener('document:click', ['$event'])
-  onClick(ev:MouseEvent) {
+  onClick(ev: MouseEvent) {
     this.onActivity();
     console.log(`onClick ${JSON.stringify(ev)}!`);
   }
   @HostListener('document:mousemove', ['$event'])
-  onMouseMove(ev:MouseEvent) {
+  onMouseMove(ev: MouseEvent) {
     this.onActivity();
     console.log(`onMouseMove ${JSON.stringify(ev)}!`);
   }
   @HostListener('document:mousedown', ['$event'])
-  onMouseDown(ev:MouseEvent) {
+  onMouseDown(ev: MouseEvent) {
     this.onActivity();
     console.log(`onMouseDown ${JSON.stringify(ev)}!`);
   }
   @HostListener('document:keyup', ['$event'])
-  onKeyUp(ev:KeyboardEvent) {
+  onKeyUp(ev: KeyboardEvent) {
     this.onActivity();
     console.log(`The user just pressed ${ev.key}!`);
   }
   @HostListener('document:keypress', ['$event'])
-  onKeyPress(ev:KeyboardEvent) {
+  onKeyPress(ev: KeyboardEvent) {
     this.onActivity();
     console.log(`The user just pressed ${ev.key}!`);
   }
   @HostListener('document:scroll', ['$event'])
-  onScroll(ev:UIEvent) {
+  onScroll(ev: UIEvent) {
     this.onActivity();
     console.log(`onScroll ${JSON.stringify(ev)}!`);
   }

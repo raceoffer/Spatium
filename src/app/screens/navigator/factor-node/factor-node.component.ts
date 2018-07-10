@@ -139,6 +139,9 @@ export class FactorNodeComponent implements OnDestroy {
 
   public setIdFactor(factor) {
     this.idFactor.next(factor);
+	
+	this.factors.next([]);
+	this.factorItems = [];
   }
 
   public openFactorDialog() {
