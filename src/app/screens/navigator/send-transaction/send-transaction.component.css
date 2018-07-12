@@ -25,5 +25,15 @@ textarea.mat-input-element{
   width: 100% !important;
 }
 
+.by-content {
+  height: auto;
+}
 
+mat-form-field .by-content {
+  min-height: 44px;
+}
+
+.mat-form-field-infix{
+  height: inherit;
+}
 
