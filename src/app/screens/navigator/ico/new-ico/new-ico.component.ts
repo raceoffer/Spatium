@@ -46,9 +46,6 @@ export class NewIcoComponent implements OnInit {
 
   public password = new FormControl();
 
-  @ViewChild('logo') logo;
-  @ViewChild('description') description;
-
   public errors: string[] = [];
   campaign: IcoCampaign = new IcoCampaign('', 'New ICO', '');
   coinSym: string = this.coins[0];
@@ -61,7 +58,9 @@ export class NewIcoComponent implements OnInit {
   whitelistType = 0;
   fundraisingType = 1;
   balanceCurrency = 0;
+  descriptionFile: any;
   descriptionFileName: string;
+  logoFile: any;
   logoFileName: string;
 
   isSaving: boolean = false;
@@ -104,11 +103,13 @@ export class NewIcoComponent implements OnInit {
 
   changeLogo(e) {
     const file = e.target.files[0];
+    this.logoFile = file;
     this.logoFileName = (file !== null) ? file.name : '';
   }
 
   changeDescription(e) {
     const file = e.target.files[0];
+    this.descriptionFile = file;
     this.descriptionFileName = (file !== null) ? file.name : '';
   }
 
@@ -195,12 +196,12 @@ export class NewIcoComponent implements OnInit {
     const dir = '/' + campaign.title + '/';
     const files = [];
 
-    if (this.logo.nativeElement.files.length > 0) {
-      files.push({ name: dir + 'logo', path: this.logo.nativeElement.files[0] });
+    if (this.logoFile) {
+      files.push({ name: dir + 'logo', path: this.logoFile });
     }
 
-    if (this.description.nativeElement.files.length > 0) {
-      files.push({ name: dir + 'description', path: this.description.nativeElement.files[0] });
+    if (this.descriptionFile) {
+      files.push({ name: dir + 'description', path: this.descriptionFile });
     }
 
     return Promise.all([].map.call(files, function (file) {

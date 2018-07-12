@@ -107,8 +107,8 @@ export class IcoCampaign {
     public amountOffered: number;
     public startDate: Date;
     public endDate: Date;
-    public type: string;
-    public cashbackType: string;
+    public type: number;
+    public cashbackType: number;
 
     constructor(address: string, title: string, ipfsFolder: string) {
         this.address = address;
