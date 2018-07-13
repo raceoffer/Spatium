@@ -3,6 +3,7 @@
     <name>Spatium</name>
     <preference name="WindowsStorePublisherName" value="Caspian Technologies Pte. Ltd." />
     <preference name="windows-target-version" value="10.0" />
+    <preference name="WindowsDefaultUriPrefix" value="ms-appx://" />
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/copyWorker.js" type="before_prepare" />
