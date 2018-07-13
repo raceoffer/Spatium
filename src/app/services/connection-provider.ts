@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, merge } from 'rxjs';
-import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
+import { combineLatest, merge, BehaviorSubject, Observable } from 'rxjs';
+import { toBehaviourSubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
-import { ConnectivityService } from './connectivity.service';
+// import { ConnectivityService } from './connectivity.service';
 import { DeviceService } from './device.service';
 import { Device } from './primitives/device';
+import { IConnectionProvider } from './interfaces/connection-provider';
+import { ConnectionState, State } from './primitives/state';
+import { map, mergeMap } from 'rxjs/operators';
 
 export enum ProviderType {
   BLUETOOTH,
@@ -12,170 +15,240 @@ export enum ProviderType {
 }
 
 export class Provider {
-  constructor(public provider: ProviderType,
-              public name: string,
-              public icon: string,
-              public custom_icon: string,
-              public confirmation_manage_selector: string,
-              public service: any) { }
+  constructor(
+    public provider: ProviderType,
+    public name: string,
+    public icon: string,
+    public custom_icon: string,
+    public service: IConnectionProvider
+  ) { }
+}
+
+function mergeStates(states: [State]): State {
+  if (states.some(s => s === State.Started)) {
+    return State.Started;
+  } else if (states.some(s => s === State.Starting)) {
+    return State.Starting;
+  } else if (states.some(s => s === State.Stopping)) {
+    return State.Stopping;
+  } else {
+    return State.Stopped;
+  }
+}
+
+function mergeConnectionStates(states: [ConnectionState]): ConnectionState {
+  if (states.some(s => s === ConnectionState.Connected)) {
+    return ConnectionState.Connected;
+  } else if (states.some(s => s === ConnectionState.Connecting)) {
+    return ConnectionState.Connecting;
+  } else {
+    return ConnectionState.None;
+  }
 }
 
 @Injectable()
-export class ConnectionProviderService {
+export class ConnectionProviderService implements IConnectionProvider {
+  public providers = new BehaviorSubject<Map<ProviderType, Provider>>(new Map<ProviderType, Provider>());
 
-  public providers: Map<ProviderType, Provider> = new Map<ProviderType, Provider>();
+  public state = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.state);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
 
-  public enabledEvent = merge(this.bt.enabledEvent, this.connectivityService.enabledEvent);
-  public disabledEvent = merge(this.bt.disabledEvent, this.connectivityService.disabledEvent)
-  public connectedEvent = merge(this.bt.connectedEvent, this.connectivityService.connectedEvent);
-  public disconnectedEvent = merge(this.bt.disconnectedEvent, this.connectivityService.disconnectedEvent);
-  public connected = toBehaviourSubject(combineLatest(
-    [
-      this.bt.connected, this.connectivityService.connected
-    ], (bt, zeroconf) => {
-      return (bt || zeroconf);
-    }), false);
+  public connectionState = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.connectionState);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeConnectionStates)
+  ), ConnectionState.None);
 
-  public discovering = toBehaviourSubject(combineLatest(
-    [
-      this.bt.discovering, this.connectivityService.discovering
-    ], (bt, zeroconf) => {
-      return (bt || zeroconf);
-    }), false);
+  public listeningState = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.listeningState);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
 
-  public combinedDevices = toBehaviourSubject(combineLatest(
-    [
-      this.bt.devices, this.connectivityService.devices
-    ], (bt, zeroconf) => {
-      const btArray = Array.from<any>(bt.values());
-      const zeroconfArray = Array.from<any>(zeroconf.values());
-      return btArray.concat(zeroconfArray);
-    }), null);
+  public searchState = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.searchState);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
 
-  public listening = toBehaviourSubject(combineLatest(
-    [
-      this.bt.listening, this.connectivityService.listening
-    ], (bt, zeroconf) => {
-      return (bt || zeroconf);
-    }), false);
+  public discoveryState = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.discoveryState);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
 
-  public message = toReplaySubject(merge(this.bt.message, this.connectivityService.message), 1);
+  public devices = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.devices);
+    }),
+    mergeMap(devices => combineLatest(devices)),
+    map(devices => {
+      return [].concat.apply([], devices.map(d => Array.from(d.values())));
+    })
+  ), []);
 
-  constructor(private readonly deviceService: DeviceService,
-              private readonly bt: BluetoothService,
-              private readonly connectivityService: ConnectivityService) {
+  public connectedDevice = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.connectedDevice);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(devices => {
+      const device = devices.find(d => d !== null);
+      return device ? device : null;
+    })
+  ), null);
+
+  public message = this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.message);
+    }),
+    mergeMap(messageSubjects => merge(... messageSubjects))
+  );
+
+  constructor(
+    private readonly deviceService: DeviceService,
+    private readonly bt: BluetoothService,
+    // private readonly connectivityService: ConnectivityService
+  ) {
+    const providers = new Map<ProviderType, Provider>();
     if (!this.deviceService.isIOS) {
-      this.providers.set(
+      providers.set(
         ProviderType.BLUETOOTH,
         new Provider(
           ProviderType.BLUETOOTH,
           'Bluetooth',
           'bluetooth',
           null,
-          'app-confirmation-bluetooth-manage',
           this.bt
         )
       );
     }
 
-    this.providers.set(
-      ProviderType.ZEROCONF,
-      new Provider(
-        ProviderType.ZEROCONF,
-        'WiFi',
-        'wifi',
-        null,
-        'app-confirmation-zeroconf-manage',
-        this.connectivityService
+    // providers.set(
+    //   ProviderType.ZEROCONF,
+    //   new Provider(
+    //     ProviderType.ZEROCONF,
+    //     'WiFi',
+    //     'wifi',
+    //     null,
+    //     this.connectivityService
+    //   )
+    // );
+
+    this.providers.next(providers);
+  }
+
+  public async enable() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.state.getValue() !== State.Started
+      ).map(
+        provider => provider.service.enable()
       )
     );
   }
 
-  async searchDevices() {
-    const duration = 5 * 1000;
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      if (value.service.enabled.getValue()) {
-        value.service.searchDevices(duration);
-      }
-    });
+  public async reset() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).map(
+        provider => provider.service.reset()
+      )
+    );
   }
 
-  async connect(device: Device) {
-    console.log('connect');
-    await this.providers.get(device.provider).service.connect(device);
+  public async searchDevices(duration = 10 * 1000) {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.state.getValue() === State.Started
+      ).map(
+        provider => provider.service.searchDevices(duration)
+      )
+    );
   }
 
-  async disconnect() {
-    console.log('disconnect');
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      if (value.service.connected.value) {
-        value.service.disconnect();
-      }
-    });
-  }
-
-  public send(message: any): void {
-    console.log('send');
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      try {
-        if (value.service.connected.value) {
-          console.log(message);
-          value.service.send(message);
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    });
-  }
-
-  public startListening(): void {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.startListening();
-    });
-  }
-
-  public stopListening(): void {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.stopListening();
-    });
-  }
-
-  public stopServiceListening(): void {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.stopServiceListening();
-    });
-  }
-
-  public resetToggler(): void {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      value.service.toggled.next(false);
-    });
-  }
-
-  async toggleProvider(providerType: ProviderType) {
-    try {
-      await this.providers.get(providerType).service.toggleProvider();
-    } catch (e) {
-      console.error(e);
+  public async connect(device: Device) {
+    if (this.connectionState.getValue() !== ConnectionState.None) {
+      console.log('Trying to connect while still connected');
     }
+
+    await this.providers.getValue().get(device.provider).service.connect(device);
   }
 
-  async enableDiscovery(providerType: ProviderType) {
-    try {
-      await this.providers.get(providerType).service.enableDiscovery();
-    } catch (e) {
-      console.error(e);
+  public async disconnect() {
+    if (this.connectionState.getValue() !== ConnectionState.Connected) {
+      console.log('Trying to disconnect while not connected');
+      return;
     }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.connectionState.getValue() === ConnectionState.Connected
+      ).map(
+        provider => provider.service.disconnect()
+      )
+    );
   }
 
-  async cancelDiscovery() {
-    this.providers.forEach((value: Provider, key: ProviderType) => {
-      if (value.service.enabled.getValue()) {
-        value.service.cancelDiscovery();
-      }
-    });
+  public async send(message: string) {
+    if (this.connectionState.getValue() !== ConnectionState.Connected) {
+      console.log('Trying to send while not connected');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.connectionState.getValue() === ConnectionState.Connected
+      ).map(
+        provider => provider.service.send(message)
+      )
+    );
   }
 
+  public async startListening() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.listeningState.getValue() === State.Stopped
+      ).map(
+        provider => provider.service.startListening()
+      )
+    );
+  }
+
+  public async stopListening() {
+    if (this.listeningState.getValue() !== State.Started) {
+      console.log('Trying to stop listening while not listening');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.listeningState.getValue() === State.Started
+      ).map(
+        provider => provider.service.stopListening()
+      )
+    );
+  }
+
+  async enableDiscovery() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.discoveryState.getValue() === State.Stopped
+      ).map(
+        provider => provider.service.enableDiscovery()
+      )
+    );
+  }
 }
 
 

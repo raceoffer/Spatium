@@ -5,7 +5,7 @@ import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { DeviceService } from './device.service';
 import { DiscoveryService } from './discovery.service';
-import { IConnectionProvider } from './interfaces/i-connectivity-provider';
+import { IConnectionProvider } from './interfaces/connection-provider';
 import { Device, equals } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { SocketClientService } from './socketclient.service';
@@ -15,7 +15,7 @@ declare const cordova;
 declare const navigator;
 
 @Injectable()
-export class ConnectivityService implements IConnectionProvider {
+export class ConnectivityService {
 
   public toggled: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 

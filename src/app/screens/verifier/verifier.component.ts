@@ -1,7 +1,7 @@
-import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { CurrencyService } from '../../services/currency.service';
 import { DeviceService } from '../../services/device.service';
@@ -18,6 +18,8 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
+import { toBehaviourSubject } from '../../utils/transformers';
+import { State } from '../../services/primitives/state';
 
 declare const window: any;
 
@@ -26,7 +28,7 @@ declare const window: any;
   templateUrl: './verifier.component.html',
   styleUrls: ['./verifier.component.css']
 })
-export class VerifierComponent implements OnInit {
+export class VerifierComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   public navLinks = [{
     name: 'Export secret',
@@ -65,14 +67,22 @@ export class VerifierComponent implements OnInit {
   public synchedCoins = [];
   public currencyWallets = this.wallet.currencyWallets;
 
-  public ready = this.connectionProviderService.listening;
+  public ready = toBehaviourSubject(this.connectionProviderService.listeningState.pipe(
+    map(state => state === State.Started),
+    distinctUntilChanged()
+  ), false);
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
   public fullySync = this.wallet.fullySync;
   public progress = this.wallet.syncProgress;
 
-  public providersArray = Array.from(this.connectionProviderService.providers.values());
+  public providers = this.connectionProviderService.providers;
+
+  public providersArray = toBehaviourSubject(this.connectionProviderService.providers.pipe(
+    map(providers => Array.from(providers.values()))
+  ), []);
+
   @ViewChild('sidenav') sidenav;
   public isiOS = this.deviceService.isIOS;
   private back = new Subject<any>();
@@ -87,42 +97,44 @@ export class VerifierComponent implements OnInit {
   );
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly deviceService: DeviceService,
-              private readonly wallet: WalletService,
-              private readonly connectionProviderService: ConnectionProviderService,
-              private readonly keychain: KeyChainService,
-              private readonly navigationService: NavigationService,
-              private readonly notification: NotificationService,
-              private readonly currencyService: CurrencyService,
-              private readonly fs: FileService) {
+  constructor(
+    private readonly router: Router,
+    private readonly deviceService: DeviceService,
+    private readonly wallet: WalletService,
+    private readonly connectionProviderService: ConnectionProviderService,
+    private readonly keychain: KeyChainService,
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService,
+    private readonly currencyService: CurrencyService,
+    private readonly fs: FileService
+  ) {
 
-    this.providersArray.forEach((provider) => {
-      this.subscriptions.push(
-        provider.service.enabledEvent.subscribe(() => {
-          if (provider.service.toggled.getValue()) {
-            provider.service.startListening();
-          }
-        }));
-    });
-
-    this.subscriptions.push(
-      this.connectionProviderService.connectedEvent.subscribe(async () => {
-        await this.connectionProviderService.stopListening(); // zeroconf not stopped
-        await this.wallet.startHandshake();
-        await this.wallet.startSync();
-      }));
-
-    this.subscriptions.push(
-      this.connectionProviderService.disabledEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
-      }));
-
-    this.subscriptions.push(
-      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
-        await this.connectionProviderService.startListening();
-      }));
+    // this.providersArray.forEach((provider) => {
+    //   this.subscriptions.push(
+    //     provider.service.enabledEvent.subscribe(() => {
+    //       if (provider.service.toggled.getValue()) {
+    //         provider.service.startListening();
+    //       }
+    //     }));
+    // });
+    //
+    // this.subscriptions.push(
+    //   this.connectionProviderService.connectedEvent.subscribe(async () => {
+    //     await this.connectionProviderService.stopListening(); // zeroconf not stopped
+    //     await this.wallet.startHandshake();
+    //     await this.wallet.startSync();
+    //   }));
+    //
+    // this.subscriptions.push(
+    //   this.connectionProviderService.disabledEvent.subscribe(async () => {
+    //     await this.wallet.cancelSync();
+    //   }));
+    //
+    // this.subscriptions.push(
+    //   this.connectionProviderService.disconnectedEvent.subscribe(async () => {
+    //     await this.wallet.cancelSync();
+    //     await this.connectionProviderService.startListening();
+    //   }));
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -191,9 +203,7 @@ export class VerifierComponent implements OnInit {
 
     await this.keychain.reset();
     await this.wallet.reset();
-    this.connectionProviderService.disconnect();
-    this.connectionProviderService.stopServiceListening();
-    this.connectionProviderService.resetToggler();
+    this.connectionProviderService.reset();
   }
 
   async confirm(coin) {

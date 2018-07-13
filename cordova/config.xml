@@ -75,7 +75,6 @@
         <variable name="ANDROID_SUPPORT_V4_VERSION" value="27.+" />
     </plugin>
     <plugin name="cordova-plugin-device" spec="git+https://github.com/apache/cordova-plugin-device.git" />
-    <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git" />
     <plugin name="phonegap-nfc" spec="^0.7.3" />
     <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-camera-info" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git" />
@@ -90,4 +89,5 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
+    <plugin name="cordova-plugin-bluetooth" spec="file:../../cordova-plugin-bluetooth" />
 </widget>

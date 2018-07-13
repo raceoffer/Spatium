@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
 import { ActivityService } from '../../services/activity.service';
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { KeyChainService } from '../../services/keychain.service';
@@ -9,6 +9,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
 import { WaitingComponent } from './waiting/waiting.component';
+import { ConnectionState } from '../../services/primitives/state';
 
 @Component({
   selector: 'app-navigator',
@@ -38,13 +39,21 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly activityService: ActivityService
   ) {
     this.subscriptions.push(
-      this.connectionProviderService.connectedEvent.subscribe(async () => {
+      this.connectionProviderService.connectionState.pipe(
+        map(state => state === ConnectionState.Connected),
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(async () => {
         await this.wallet.startHandshake();
         await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
-      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
+      this.connectionProviderService.connectionState.pipe(
+        map(state => state !== ConnectionState.Connected),
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(async () => {
         await this.wallet.cancelSync();
       }));
 
@@ -82,14 +91,14 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    if (!this.connectionProviderService.connected.getValue()) {
+    if (this.connectionProviderService.connectionState.getValue() === ConnectionState.None) {
       await this.openConnectOverlay();
     }
   }
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(() => {
+    componentRef.instance.connectedEvent.subscribe(() => {
       this.navigationService.acceptOverlay();
     });
   }
@@ -102,6 +111,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     await this.wallet.reset();
     await this.keychain.reset();
-    await this.connectionProviderService.disconnect();
+    await this.connectionProviderService.reset();
   }
 }
