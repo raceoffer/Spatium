@@ -1,29 +1,33 @@
-import { Balance, HistoryEntry, Status } from '../currencywallet';
-import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
-import { LoggerService } from '../../logger.service';
-
 import { from, of, timer } from 'rxjs';
-import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
-import { EcdsaCurrencyWallet } from "../ecdsacurrencywallet";
+import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService } from '../../keychain.service';
+import { LoggerService } from '../../logger.service';
+import { Balance, HistoryEntry, Status } from '../currencywallet';
+import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class BitcoreWallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
 
-  constructor(
-    private Transaction: any,
-    private Wallet: any,
-    private endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    coin: Coin,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any
-  ) {
-    super(network, keychain, coin, account, messageSubject, bt, worker);
+  constructor(private Transaction: any,
+              private Wallet: any,
+              private endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              coin: Coin,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any) {
+    super(
+      network,
+      keychain,
+      coin, account,
+      messageSubject,
+      connectionProviderService,
+      worker
+    );
   }
 
   public async reset() {
@@ -59,7 +63,7 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
     });
 
     const request = () => from(this.wallet.getBalance()).pipe(
-        catchError(e => of(null)));
+      catchError(e => of(null)));
 
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(1000).pipe(
@@ -91,11 +95,9 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
     return txs.map(tx => HistoryEntry.fromJSON(tx));
   }
 
-  public async createTransaction(
-    address: string,
-    value: any,
-    fee?: any
-  ) {
+  public async createTransaction(address: string,
+                                 value: any,
+                                 fee?: any) {
     try {
       return await this.wallet.prepareTransaction(
         await this.Transaction.create(this.worker),

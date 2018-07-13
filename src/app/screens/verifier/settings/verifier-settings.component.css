@@ -1,0 +1,16 @@
+.toggle-row {
+  width: 100%;
+  text-align: left;
+}
+
+.toggle-label {
+  line-height: 50px;
+  margin-left: 15px;
+  display: inline-block;
+}
+
+.toggle-button {
+  float: right;
+  height: 50px;
+  margin-right: 15px;
+}

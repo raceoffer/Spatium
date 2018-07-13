@@ -1,27 +1,23 @@
-import { Balance, Status } from '../currencywallet';
-import { Coin, KeyChainService } from '../../keychain.service';
-import { BluetoothService } from '../../bluetooth.service';
-
-import { from, of, timer } from 'rxjs';
-import { expand, map, mergeMap, filter, catchError } from 'rxjs/operators';
-
 import { NemTransaction, NemWallet as CoreNemWallet } from 'crypto-core-async';
-import { EddsaCurrencyWallet } from "../eddsacurrencywallet";
+import { from, of, timer } from 'rxjs';
+import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../connection-provider';
+import { Coin, KeyChainService } from '../../keychain.service';
+import { Balance, Status } from '../currencywallet';
+import { EddsaCurrencyWallet } from '../eddsacurrencywallet';
 
 export class NemWallet extends EddsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
 
-  constructor(
-    private endpoint: string,
-    network: string,
-    keychain: KeyChainService,
-    account: number,
-    messageSubject: any,
-    bt: BluetoothService,
-    worker: any
-  ) {
-    super(network, keychain, Coin.NEM, account, messageSubject, bt, worker);
+  constructor(private endpoint: string,
+              network: string,
+              keychain: KeyChainService,
+              account: number,
+              messageSubject: any,
+              connectionProviderService: ConnectionProviderService,
+              worker: any) {
+    super(network, keychain, Coin.NEM, account, messageSubject, connectionProviderService, worker);
   }
 
   public async reset() {

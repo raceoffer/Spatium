@@ -12,7 +12,6 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { MatDialog } from '@angular/material';
 import * as $ from 'jquery';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { take, takeUntil, map } from 'rxjs/operators';
@@ -25,18 +24,18 @@ import { NotificationService } from '../../../services/notification.service';
 import { WorkerService } from '../../../services/worker.service';
 
 import { packLogin, tryUnpackLogin, packTree, randomBytes } from 'crypto-core-async/lib/utils';
-import { toBehaviourSubject } from "../../../utils/transformers";
-import { LoginFactorComponent } from "../../identification-factors/login-factor/login-factor.component";
-import { QrFactorComponent } from "../../identification-factors/qr-factor/qr-factor.component";
-import { NfcFactorComponent } from "../../identification-factors/nfc-factor/nfc-factor.component";
-import { PasswordAuthFactorComponent } from "../../authorization-factors/password-auth-factor/password-auth-factor.component";
-import { PincodeAuthFactorComponent } from "../../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
-import { GraphicKeyAuthFactorComponent } from "../../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
-import { FileAuthFactorComponent } from "../../authorization-factors/file-auth-factor/file-auth-factor.component";
-import { QrAuthFactorComponent } from "../../authorization-factors/qr-auth-factor/qr-auth-factor.component";
-import { NfcAuthFactorComponent } from "../../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
-import { catchError, mapTo } from "rxjs/internal/operators";
-import { BackupComponent } from "../../backup/backup.component";
+import { toBehaviourSubject } from '../../../utils/transformers';
+import { LoginFactorComponent } from '../../identification-factors/login-factor/login-factor.component';
+import { QrFactorComponent } from '../../identification-factors/qr-factor/qr-factor.component';
+import { NfcFactorComponent } from '../../identification-factors/nfc-factor/nfc-factor.component';
+import { PasswordAuthFactorComponent } from '../../authorization-factors/password-auth-factor/password-auth-factor.component';
+import { PincodeAuthFactorComponent } from '../../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
+import { GraphicKeyAuthFactorComponent } from '../../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
+import { FileAuthFactorComponent } from '../../authorization-factors/file-auth-factor/file-auth-factor.component';
+import { QrAuthFactorComponent } from '../../authorization-factors/qr-auth-factor/qr-auth-factor.component';
+import { NfcAuthFactorComponent } from '../../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
+import { catchError, mapTo } from 'rxjs/internal/operators';
+import { BackupComponent } from '../../backup/backup.component';
 
 @Component({
   selector: 'app-factor-node',
@@ -68,7 +67,7 @@ export class FactorNodeComponent implements OnDestroy {
       return {
         icon: entry.icon,
         icon_asset: entry.icon_asset
-      }
+      };
     })), null);
 
   public factors = new BehaviorSubject<Array<any>>([]);
@@ -103,7 +102,7 @@ export class FactorNodeComponent implements OnDestroy {
     if (this.idFactor.getValue()) {
       this.openFactorDialog();
     } else {
-      this.openIdFactorDialog()
+      this.openIdFactorDialog();
     }
   }
 
@@ -140,10 +139,9 @@ export class FactorNodeComponent implements OnDestroy {
 
   public setIdFactor(factor) {
     this.idFactor.next(factor);
-
-    if (!factor) {
-      this.removeFactor(0);
-    }
+	
+	this.factors.next([]);
+	this.factorItems = [];
   }
 
   public openFactorDialog() {
@@ -183,16 +181,20 @@ export class FactorNodeComponent implements OnDestroy {
     });
   }
 
-  removeFactor(index){
-    this.factors.next(this.factors.getValue().slice(0, index));
-    this.factorItems = this.factorItems.slice(0, index);
+  removeFactor(index) {
+    const factors = this.factors.getValue();
+
+    factors.splice(index, 1);
+
+    this.factors.next(factors);
+    this.factorItems.splice(index, 1);
   }
 
   addFactor(factor) {
     const factors = this.factors.getValue();
 
     factors.push(factor);
-    
+
     this.factors.next(factors);
 
     const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);

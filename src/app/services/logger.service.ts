@@ -80,7 +80,11 @@ export class LoggerService {
   }
 
   convertToString(obj) {
-   if (typeof obj === 'string') {
+    if (!obj) {
+      return obj;
+    }
+
+    if (typeof obj === 'string') {
       return obj;
     } 
 

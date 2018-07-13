@@ -1,11 +1,9 @@
-import { BehaviorSubject,  Observable,  Subject } from 'rxjs';
-import { BluetoothService } from '../bluetooth.service';
-import { Coin, KeyChainService, Token } from '../keychain.service';
-
-import { toBehaviourSubject } from '../../utils/transformers';
-
-import { filter, skip, map, distinctUntilChanged, mapTo } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
 import * as WalletAddressValidator from 'wallet-address-validator';
+import { toBehaviourSubject } from '../../utils/transformers';
+import { ConnectionProviderService } from '../connection-provider';
+import { Coin, KeyChainService, Token } from '../keychain.service';
 
 export enum Status {
   None = 0,
@@ -21,6 +19,13 @@ export enum TransactionType {
 }
 
 export class HistoryEntry {
+  constructor(public type: TransactionType,
+              public from: string,
+              public to: string,
+              public amount: number,
+              public confirmed: boolean,
+              public time: number) {}
+
   static fromJSON(json) {
     return new HistoryEntry(
       json.type === 'Out' ? TransactionType.Out : TransactionType.In,
@@ -31,22 +36,11 @@ export class HistoryEntry {
       json.time
     );
   }
-
-  constructor(
-    public type: TransactionType,
-    public from: string,
-    public to: string,
-    public amount: number,
-    public confirmed: boolean,
-    public time: number
-  ) {}
 }
 
 export class Balance {
-  constructor(
-    public confirmed: any,
-    public unconfirmed: any
-  ) {}
+  constructor(public confirmed: any,
+              public unconfirmed: any) {}
 }
 
 export abstract class CurrencyWallet {
@@ -85,15 +79,13 @@ export abstract class CurrencyWallet {
   public address: BehaviorSubject<string> = new BehaviorSubject<string>(null);
   public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(null);
 
-  constructor(
-    protected network: string,
-    protected keychain: KeyChainService,
-    protected currency: Coin,
-    protected account: number,
-    protected messageSubject: any,
-    protected bt: BluetoothService,
-    protected worker: any
-  ) {
+  constructor(protected network: string,
+              protected keychain: KeyChainService,
+              protected currency: Coin,
+              protected account: number,
+              protected messageSubject: any,
+              protected connectionProviderService: ConnectionProviderService,
+              protected worker: any) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
     this.messageSubject.pipe(
@@ -107,20 +99,23 @@ export abstract class CurrencyWallet {
   }
 
   public abstract toInternal(amount: number): any;
+
   public abstract fromInternal(amount: any): number;
 
   public abstract fromJSON(ignored);
 
   public abstract async cancelSync();
+
   public abstract async cancelSign();
 
   public async rejectTransaction() {
     try {
-      await this.bt.send(JSON.stringify({
+      await this.connectionProviderService.send(JSON.stringify({
         type: 'cancelTransaction',
         content: {}
       }));
-    } catch (ignored) { }
+    } catch (ignored) {
+    }
 
     await this.cancelSign();
   }
@@ -128,12 +123,14 @@ export abstract class CurrencyWallet {
   public abstract async acceptTransaction();
 
   public abstract async sync(options: any);
+
   public abstract async syncDuplicate(other: CurrencyWallet);
+
   public abstract async finishSync(data: any);
 
   public abstract async reset();
 
-  public currencyCode(): Coin | Token  {
+  public currencyCode(): Coin | Token {
     return this.currency;
   }
 
@@ -141,11 +138,12 @@ export abstract class CurrencyWallet {
     return WalletAddressValidator.validate(
       address,
       symbol,
-      this.network == 'main' ? 'prod' : 'testnet'
+      this.network === 'main' ? 'prod' : 'testnet'
     );
   }
 
   public abstract async requestTransactionVerify(transaction);
+
   public abstract async startTransactionVerify(transaction);
 
   public abstract async verifySignature();
@@ -153,5 +151,6 @@ export abstract class CurrencyWallet {
   public abstract async listTransactionHistory();
 
   public abstract async createTransaction(address: string, value: any, fee?: any);
+
   public abstract async pushTransaction();
 }

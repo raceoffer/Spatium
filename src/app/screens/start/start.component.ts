@@ -62,7 +62,7 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onConnectClicked() {
-    await this.router.navigate(['/verifier-create']);
+    await this.router.navigate(['/verifier-auth']);
   }
 
   onBack() {

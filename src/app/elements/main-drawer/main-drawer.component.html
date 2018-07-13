@@ -10,8 +10,9 @@
       mat-list-item
       class="main-nav-list-custom"
       [class.disabled]="!navLink.clicked"
+      [class.selected]="navLink.name === current"
       (click)="onClicked(navLink)"
-      [ngClass]="{ 'selected' : navLink.name === current }">
+      [ngClass]="navLink.class">
       {{ navLink.name }}
     </a>
   </mat-nav-list>

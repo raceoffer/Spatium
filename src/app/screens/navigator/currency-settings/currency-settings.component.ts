@@ -14,8 +14,9 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public currency: Coin | Token = null;
+
   public currencyInfo: Info = null;
-  public currencySettings : CurrencySettings = new CurrencySettings();
+  public currencySettings: CurrencySettings = new CurrencySettings();
   public apiServers: Map<string, string> = null;
 
   public customApiServerInvalid = false;
@@ -39,29 +40,29 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  getApiServerKeys(){
-    if(this.apiServers == null)
+  getApiServerKeys() {
+    if (this.apiServers == null) {
       return [];
+    }
     return Array.from(this.apiServers.keys());
   }
 
   async onSaveClicked() {
-    if(this.currencySettings.serverName == CurrencyServerName.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
+    if (this.currencySettings.serverName === CurrencyServerName.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
       this.customApiServerInvalid = true;
       return;
     }
 
     await this.currencyService.saveSettings(this.currency, this.currencySettings);
-    await this.notificationService.show("Settings saved. Restart the application to apply settings.");
-    this.onBack();
+    await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
+    await this.onBack();
   }
 
-  isValidServerUrl(url: string) : boolean {
+  isValidServerUrl(url: string): boolean {
     try {
-      new URL(url);
+      const ignored = new URL(url);
       return true;
-    }
-    catch(e) {
+    } catch (e) {
       return false;
     }
   }

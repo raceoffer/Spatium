@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnDestroy, NgZone, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, NgZone, OnInit, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { WhitelistComponent } from '../whitelist/whitelist.component';
 import { SendTransactionComponent } from '../../send-transaction/send-transaction.component';
@@ -6,39 +6,43 @@ import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
+import { ICOService, IcoCampaign } from '../../../../services/ico.service';
+import { IpfsService, File } from '../../../../services/ipfs.service';
+
+import { BehaviorSubject,  Observable, timer } from 'rxjs';
 
 @Component({
   selector: 'app-ico-details',
   templateUrl: './ico-details.component.html',
   styleUrls: ['./ico-details.component.css'],
 })
-export class IcoDetailsComponent implements OnInit, OnDestroy {
+export class IcoDetailsComponent implements OnInit, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public project: any = null;
   public coin: any = undefined;
   public chosencurrency: any = undefined;
   public coins: any = [];
+  public campaign: BehaviorSubject<IcoCampaign> = new BehaviorSubject<IcoCampaign>(null);
 
   constructor(
+    private readonly icoService: ICOService,
+    private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly currency: CurrencyService,
-    private readonly navigationService: NavigationService) {  }
+    private readonly ipfsService: IpfsService
+  ) {  }
 
-  ngOnInit() {
-    this.project.coins.forEach((item) => {
-      this.coins.push({
-          'icon': this.currency.getInfo(item.place).icon,
-          'symbol': this.currency.getInfo(item.place).symbol,
-          'coin': item.place,
-          'name': item.name,
-          'chosen': false, 
-      })
-    });
+  async ngOnInit() {
+    let campaign = await this.icoService.getCampaign(this.project.address);
+    campaign.address = this.project.address;
+    campaign.title = this.project.title;
+    this.campaign.next(campaign);
   }
 
-  ngOnDestroy() {
-
+  ngAfterViewInit() {
+    this.loadDescription();
+    this.loadLogo();
   }
 
   async onBack() {
@@ -67,7 +71,13 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
   }
 
   async reminder() {
-    console.log('DO SOME SHIT');
+
+  }
+
+  async deleteCampaign() {
+    let result = await this.icoService.removeCampaign(this.project.address);
+    this.navigationService.acceptOverlay();
+    console.log(result);
   }
 
   changeCurrency(coin) {
@@ -79,4 +89,19 @@ export class IcoDetailsComponent implements OnInit, OnDestroy {
     });
     this.chosencurrency = (coin.chosen)?coin.coin:undefined;
   }
+
+  async loadDescription() {
+    const description = await this.ipfsService.get(this.campaign.value.ipfsFolder + '/description');
+    if (description && description.length > 0) {
+      this.project.description = description[0].content.toString('utf8');
+    }
+  }
+
+  async loadLogo() {
+    const logo = await this.ipfsService.get(this.campaign.value.ipfsFolder + '/logo');
+    if (logo && logo.length > 0) {
+      this.project.logo = "data:image/png;base64," + logo[0].content.toString('base64');
+    }
+  }
+
 }

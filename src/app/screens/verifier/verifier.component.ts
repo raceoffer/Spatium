@@ -1,20 +1,23 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { DeleteSecretComponent } from "../delete-secret/delete-secret.component";
-import { SecretExportComponent } from "../secret-export/secret-export.component";
-import { VerifyTransactionComponent } from "./verify-transaction/verify-transaction.component";
-import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
-import { Router } from "@angular/router";
-import { WalletService } from "../../services/wallet.service";
-import { BluetoothService } from "../../services/bluetooth.service";
-import { KeyChainService } from "../../services/keychain.service";
-import { NavigationService } from "../../services/navigation.service";
-import { NotificationService } from "../../services/notification.service";
-import { FileService } from "../../services/file.service";
-import { Subject } from "rxjs";
-import { bufferWhen, map, timeInterval, filter, skipUntil} from 'rxjs/operators';
-import { Status } from "../../services/wallet/currencywallet";
-import { CurrencyService } from "../../services/currency.service";
+import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../services/connection-provider';
+import { CurrencyService } from '../../services/currency.service';
+import { DeviceService } from '../../services/device.service';
+import { FileService } from '../../services/file.service';
+import { KeyChainService } from '../../services/keychain.service';
+import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
+import { WalletService } from '../../services/wallet.service';
+import { Status } from '../../services/wallet/currencywallet';
+import { deleteTouch } from '../../utils/fingerprint';
+import { DeleteSecretComponent } from '../delete-secret/delete-secret.component';
 import { FeedbackComponent } from '../feedback/feedback.component';
+import { SecretExportComponent } from '../secret-export/secret-export.component';
+import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
+import { SettingsComponent } from './settings/verifier-settings.component';
+import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
 
 declare const window: any;
 
@@ -24,6 +27,7 @@ declare const window: any;
   styleUrls: ['./verifier.component.css']
 })
 export class VerifierComponent implements OnInit {
+  @HostBinding('class') classes = 'toolbars-component';
   public navLinks = [{
     name: 'Export secret',
     clicked: async () => {
@@ -33,6 +37,11 @@ export class VerifierComponent implements OnInit {
     name: 'Change PIN',
     clicked: () => {
       this.onChangePIN();
+    }
+  }, {
+    name: 'Settings',
+    clicked: () => {
+      this.onSettings();
     }
   }, {
     name: 'Delete secret',
@@ -47,27 +56,25 @@ export class VerifierComponent implements OnInit {
   }, {
     name: 'Exit',
     clicked: async () => {
-      await this.router.navigate(['/start'])
+      await this.router.navigate(['/start']);
     }
   }];
 
   public coinStatusType = Status;
-
   public current = 'Verification';
-
   public synchedCoins = [];
-
   public currencyWallets = this.wallet.currencyWallets;
 
-  public enabled = this.bt.enabled;
-  public discoverable = this.bt.discoverable;
-  public connected = this.bt.connected;
+  public ready = this.connectionProviderService.listening;
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
   public fullySync = this.wallet.fullySync;
   public progress = this.wallet.syncProgress;
 
+  public providersArray = Array.from(this.connectionProviderService.providers.values());
+  @ViewChild('sidenav') sidenav;
+  public isiOS = this.deviceService.isIOS;
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -78,42 +85,43 @@ export class VerifierComponent implements OnInit {
     map(emits => emits.length),
     filter(emits => emits > 0)
   );
-
-  @ViewChild('sidenav') sidenav;
-
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly wallet: WalletService,
-    private readonly bt: BluetoothService,
-    private readonly keychain: KeyChainService,
-    private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService,
-    private readonly currencyService: CurrencyService,
-    private readonly fs: FileService
-  ) {
-    this.subscriptions.push(
-      this.bt.enabledEvent.subscribe(async () => {
-        await this.bt.ensureListening();
-      }));
+  constructor(private readonly router: Router,
+              private readonly deviceService: DeviceService,
+              private readonly wallet: WalletService,
+              private readonly connectionProviderService: ConnectionProviderService,
+              private readonly keychain: KeyChainService,
+              private readonly navigationService: NavigationService,
+              private readonly notification: NotificationService,
+              private readonly currencyService: CurrencyService,
+              private readonly fs: FileService) {
+
+    this.providersArray.forEach((provider) => {
+      this.subscriptions.push(
+        provider.service.enabledEvent.subscribe(() => {
+          if (provider.service.toggled.getValue()) {
+            provider.service.startListening();
+          }
+        }));
+    });
 
     this.subscriptions.push(
-      this.bt.connectedEvent.subscribe(async () => {
-        await this.bt.stopListening();
+      this.connectionProviderService.connectedEvent.subscribe(async () => {
+        await this.connectionProviderService.stopListening(); // zeroconf not stopped
         await this.wallet.startHandshake();
         await this.wallet.startSync();
       }));
 
     this.subscriptions.push(
-      this.bt.disabledEvent.subscribe(async () => {
+      this.connectionProviderService.disabledEvent.subscribe(async () => {
         await this.wallet.cancelSync();
       }));
 
     this.subscriptions.push(
-      this.bt.disconnectedEvent.subscribe(async () => {
+      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
         await this.wallet.cancelSync();
-        await this.bt.ensureListening();
+        await this.connectionProviderService.startListening();
       }));
 
     this.subscriptions.push(
@@ -175,12 +183,6 @@ export class VerifierComponent implements OnInit {
         })
       );
     }
-
-    if (!this.enabled.getValue()) {
-      await this.bt.requestEnable();
-    } else {
-      await this.bt.ensureListening();
-    }
   }
 
   public async ngOnDestroy() {
@@ -189,16 +191,9 @@ export class VerifierComponent implements OnInit {
 
     await this.keychain.reset();
     await this.wallet.reset();
-    await this.bt.disconnect();
-    await this.bt.stopListening();
-  }
-
-  async enableBluetooth() {
-    await this.bt.requestEnable();
-  }
-
-  async enableDiscoverable() {
-    await this.bt.enableDiscovery();
+    this.connectionProviderService.disconnect();
+    this.connectionProviderService.stopServiceListening();
+    this.connectionProviderService.resetToggler();
   }
 
   async confirm(coin) {
@@ -256,7 +251,7 @@ export class VerifierComponent implements OnInit {
       this.navigationService.acceptOverlay();
 
       if (await this.checkAvailable() && await this.checkExisting()) {
-        await this.delete();
+        await deleteTouch();
       }
 
       await this.fs.deleteFile(this.fs.safeFileName('seed'));
@@ -272,8 +267,13 @@ export class VerifierComponent implements OnInit {
       this.navigationService.acceptOverlay();
       await this.router.navigate(['/start']);
       this.notification.show('You have successfully changed a PIN-code');
-    })
+    });
   }
+
+  public onSettings() {
+    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+  }
+
 
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {
@@ -284,12 +284,6 @@ export class VerifierComponent implements OnInit {
   public async checkExisting() {
     return new Promise<boolean>((resolve, ignored) => {
       window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
-    });
-  }
-
-  public async delete() {
-    return new Promise((resolve, reject) => {
-      window.plugins.touchid.delete('spatium', resolve, reject);
     });
   }
 }

@@ -1,19 +1,17 @@
 import { ComponentRef, Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DeviceService } from './device.service';
-import { Overlay, OverlayConfig, OverlayRef } from "@angular/cdk/overlay";
-import { ComponentPortal } from "@angular/cdk/portal";
+import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 
 @Injectable()
 export class NavigationService {
   private backSubject: Subject<any> = new Subject<any>();
   private overlayStack: Array<[ OverlayRef, any ]> = [];
-  private navSubject: Subject<any> = new Subject<any>();
 
   private backEventSubject: Subject<any> = new Subject<any>();
 
   public backEvent = this.backEventSubject.asObservable();
-  public navigationEvent = this.navSubject.asObservable();
 
   constructor(
     private readonly ngZone: NgZone,
@@ -32,15 +30,11 @@ export class NavigationService {
       } else {
         this.backEventSubject.next();
       }
-    })
+    });
   }
 
   public back() {
     this.backSubject.next();
-  }
-
-  public toggleNavigation() {
-    this.navSubject.next();
   }
 
   public get overlayCount() {
@@ -48,7 +42,7 @@ export class NavigationService {
   }
 
   public clearOverlayStack() {
-    while(this.overlayCount > 0) {
+    while (this.overlayCount > 0) {
       this.popOverlay();
     }
   }

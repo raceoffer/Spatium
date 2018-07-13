@@ -5,7 +5,7 @@ import { LoginComponent } from './screens/login/login.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { StartComponent } from './screens/start/start.component';
-import { VerifierCrateComponent } from "./screens/verifier-crate/verifier-crate.component";
+import { VerifierAuthComponent } from "./screens/verifier-auth/verifier-auth.component";
 import { VerifierComponent } from "./screens/verifier/verifier.component";
 import { WalletComponent } from "./screens/navigator/wallet/wallet.component";
 import { IcoComponent } from "./screens/navigator/ico/ico.component";
@@ -39,8 +39,8 @@ const appRoutes: Routes = [{
       outlet: 'navigator'
     }]
 }, {
-  path: 'verifier-create',
-  component: VerifierCrateComponent
+  path: 'verifier-auth',
+  component: VerifierAuthComponent
 }, {
   path: 'verifier',
   component: VerifierComponent
@@ -48,7 +48,7 @@ const appRoutes: Routes = [{
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes, { useHash: true })
   ],
   exports: [
     RouterModule

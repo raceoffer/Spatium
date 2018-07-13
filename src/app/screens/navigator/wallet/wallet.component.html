@@ -1,10 +1,10 @@
-<div (window:resize)="onResize()">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="onNavRequest()">
+    <button mat-icon-button (click)="toggleNavigation()">
       <mat-icon>menu</mat-icon>
     </button>
 
-    <span>{{ title }} </span>
+    <span style="position: relative; top: 2px;">{{ title }} </span>
 
     <span class="spacer"></span>
 
@@ -39,40 +39,24 @@
     </button>
   </mat-toolbar>
 
-  <mat-grid-list cols="{{cols}}" rowHeight="4:3">
-    <mat-grid-tile
-      *ngFor="let tile of filtredTitles"
-      [colspan]="tile.cols"
-      [rowspan]="tile.rows">
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" [current]="current"></app-main-drawer>
 
-      <div class="grid-item">
-        <button mat-button class="block" style="padding: 0px;" [disabled]="tile.coin == undefined" (click)='onTileClicked(tile.coin)'>
-          <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.logo}}"></div>
-            <div fxLayout="column" fxLayoutAlign="center start" style="height:100%; width: 50%; padding-left: 10px;
-              white-space: normal;text-align: left;">
-              <span class="sym">{{ tile.symbols }}</span>
-              <span class="title">{{ tile.title }}</span>
-            </div>
-          </div>
-          <div [className]="tile.erc20 ? 'half-height erc20 ethereum' : 'half-height'" fxLayout="column" fxLayoutAlign="center center">
-            <span class="balance" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balance | async)?.toFixed(6) * 1 : 0 }} {{ tile.symbols }}
-            </span>
-
-            <span class="balanceUSD" *ngIf="getTileBalanceInfo(tile.coin) === undefined || (getTileBalanceInfo(tile.coin).balance | async) !== null">
-              {{ getTileBalanceInfo(tile.coin) !== undefined ? (getTileBalanceInfo(tile.coin).balanceUSD | async)?.toFixed(6) * 1 : 0 }} USD
-            </span>
-
-            <span class="sync-in-progress"
-                *ngIf="getTileBalanceInfo(tile.coin) !== undefined &&
-                  (getTileBalanceInfo(tile.coin).balance | async) === null">
-              {{(synchronizing | async) ? "Loading..." : "Not synced"}}
-            </span>
-          </div>
-        </button>
-      </div>
-    </mat-grid-tile>
-  </mat-grid-list>
+    <div (window:resize)="onResize()">
+      <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+        <mat-grid-tile
+          *ngFor="let tile of filteredTitles"
+          [colspan]="tile.cols"
+          [rowspan]="tile.rows">
+          <app-tile-coin
+            [coin]="tile"
+            [balanceInfo]="getTileBalanceInfo(tile.coin)"
+            [synchronizing]="(synchronizing | async)"
+            (onClicked)="onTileClicked(tile.coin)">
+          </app-tile-coin>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </mat-sidenav-container>
 </div>
 

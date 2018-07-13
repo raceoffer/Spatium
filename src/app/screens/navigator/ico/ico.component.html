@@ -1,6 +1,6 @@
-<div (window:resize)="onResize()">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="onNavRequest()">
+    <button mat-icon-button (click)="toggleNavigation()">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -31,24 +31,30 @@
     </button>
   </mat-toolbar>
 
-  <mat-grid-list [cols]="cols" rowHeight="4:3">
-    <mat-grid-tile
-      *ngFor="let tile of filtredTitles"
-      [colspan]="tile.cols"
-      [rowspan]="tile.rows">
+  <mat-sidenav-container class="content">
+    <app-main-drawer #sidenav [navLinks]="navLinks" [current]="current"></app-main-drawer>
 
-      <div class="grid-item">
-        <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
-          <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-            <div class="logo {{tile.className}}"></div>
-            <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
-              <span class="title">{{ tile.title }}</span>
-            </div>
+    <div (window:resize)="onResize()">
+      <mat-grid-list [cols]="cols" rowHeight="4:3">
+        <mat-grid-tile
+          *ngFor="let tile of (filtredTitles | async)"
+          [colspan]="tile.cols"
+          [rowspan]="tile.rows">
+
+          <div class="grid-item">
+            <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
+              <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
+                <img class="logo" [src]="'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo'">
+                <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
+                  <span class="title">{{ tile.title }}</span>
+                </div>
+              </div>
+            </button>
           </div>
-        </button>
-      </div>
-    </mat-grid-tile>
-  </mat-grid-list>
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </mat-sidenav-container>
 </div>
 
 
