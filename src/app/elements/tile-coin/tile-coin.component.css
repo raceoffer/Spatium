@@ -71,9 +71,30 @@
   padding-top: 5px;
 }
 
-.div-height {
-  height: 99.9%;
-  max-height: 60% !important;
+.block {
+  overflow: hidden;
+}
+
+.erc20 {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xLjUgMTcuNCAyMCAyMCI+PHBhdGggZmlsbD0iI2NlY2VjZSIgZD0iTS0xLjUgMTcuNGgyMHYyMGwtMjAtMjB6Ii8+PHBhdGggZmlsbD0ibm9uZSIgZD0iTS0zLjUtMi42aDI0djI0aC0yNHYtMjR6Ii8+PC9zdmc+);
+  width: 25%;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.erc20 .ethereum {
+  background-position: top 5% right 20%;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: 25%;
+  right: 0;
+  top: 0;
 }
 
 .wallet-description {
@@ -83,6 +104,11 @@
   overflow: hidden;
   white-space: normal;
   text-align: left;
+}
+
+.div-height {
+  height: 99.9%;
+  max-height: 60% !important;
 }
 
 .block.colored {
