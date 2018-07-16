@@ -3,6 +3,7 @@
     <name>Spatium</name>
     <preference name="WindowsStorePublisherName" value="Caspian Technologies Pte. Ltd." />
     <preference name="windows-target-version" value="10.0" />
+    <preference name="WindowsDefaultUriPrefix" value="ms-appx://" />
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/copyWorker.js" type="before_prepare" />
@@ -59,6 +60,20 @@
             <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
         </custom-config-file>
     </platform>
+    <platform name="windows">
+        <preference name="BackgroundColor" value="transparent" />
+        <preference name="SplashScreenBackgroundColor" value="#F5F5F5" />
+        <icon src="res/icon/windows/Square30x30Logo.png" target="Square30x30Logo" />
+        <icon src="res/icon/windows/Square44x44Logo.png" target="Square44x44Logo" />
+        <icon src="res/icon/windows/Square70x70Logo.png" target="Square70x70Logo" />
+        <icon src="res/icon/windows/Square71x71Logo.png" target="Square71x71Logo" />
+        <icon src="res/icon/windows/Square150x150Logo.png" target="Square150x150Logo" />
+        <icon src="res/icon/windows/Square310x310Logo.png" target="Square310x310Logo" />
+        <icon src="res/icon/windows/Wide310x150Logo.png" target="Wide310x150Logo" />
+        <icon src="res/icon/windows/StoreLogo.png" target="StoreLogo" />
+        <splash src="res/screen/windows/splashscreen.png" target="splashscreen" />
+        <splash src="res/screen/windows/SplashScreenPhone.png" target="SplashScreenPhone" />
+    </platform>
     <preference name="AlternateContentSrc" value="http://localhost:0" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
@@ -90,4 +105,5 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
+    <plugin name="cordova-plugin-add-tile-title" spec="https://github.com/CaspianTechnologies/cordova-plugin-add-tile-title.git" />
 </widget>
