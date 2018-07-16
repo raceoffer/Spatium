@@ -105,4 +105,5 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
+    <plugin name="cordova-plugin-add-tile-title" spec="https://github.com/CaspianTechnologies/cordova-plugin-add-tile-title.git" />
 </widget>
