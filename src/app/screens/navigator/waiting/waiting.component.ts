@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
-import { from, Subject } from 'rxjs';
-import { take, takeUntil, map, distinctUntilChanged } from 'rxjs/operators';
+import { combineLatest, from, Subject, BehaviorSubject } from 'rxjs';
+import { take, takeUntil, map, distinctUntilChanged, mergeMap, mapTo } from 'rxjs/operators';
 import { ConnectionProviderService, Provider } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
@@ -36,6 +36,20 @@ export class WaitingComponent implements OnInit {
 
   public providersArray = toBehaviourSubject(this.connectionProviderService.providers.pipe(
     map(providers => Array.from(providers.values()))
+  ), []);
+
+  public providerStateChange = this.providersArray.pipe(
+    map(providers => providers.map(provider => provider.service.state)),
+    mergeMap(providerStates => combineLatest(providerStates as Array<BehaviorSubject<State>>)),
+    distinctUntilChanged(),
+    mapTo(null)
+  );
+
+  public disabledProviders = toBehaviourSubject(combineLatest([
+    this.providersArray,
+    this.providerStateChange
+  ]).pipe(
+    map(([providerArray, ignored]) => providerArray.filter(provider => provider.service.state.getValue() === State.Stopped))
   ), []);
 
   @Output() public connectedEvent = new EventEmitter<any>();

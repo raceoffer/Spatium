@@ -17,8 +17,6 @@ export class DeviceService {
 
   public platform: Platform = null;
 
-  public isIOS = this.platform === Platform.IOS;
-
   constructor() {
       document.addEventListener('deviceready', () => {
         switch (device.platform.toLowerCase()) {

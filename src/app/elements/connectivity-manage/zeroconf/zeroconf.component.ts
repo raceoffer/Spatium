@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectivityService } from '../../../services/connectivity.service';
+import { IConnectivityManage } from '../interface/connectivity-manage';
 
 @Component({
   selector: 'app-confirmation-zeroconf-manage',
   templateUrl: './zeroconf.component.html',
   styleUrls: ['./zeroconf.component.css', '../connectivity-manage.css']
 })
-export class ZeroconfComponent implements OnInit {
+export class ZeroconfComponent extends IConnectivityManage implements OnInit {
 
   connectedDevices = this.connectivityService.connectedDevices;
   connected = this.connectivityService.connected;
@@ -18,7 +19,9 @@ export class ZeroconfComponent implements OnInit {
   starting = this.connectivityService.starting;
   stopping = this.connectivityService.stopping;
 
-  constructor(private readonly connectivityService: ConnectivityService) { }
+  constructor(private readonly connectivityService: ConnectivityService) {
+    super();
+  }
 
   ngOnInit() {
   }

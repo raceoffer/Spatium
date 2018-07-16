@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 
 import { BehaviorSubject, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, skip } from 'rxjs/internal/operators';
-import { ProviderType } from './connection-provider';
+import { ProviderType } from './interfaces/connection-provider';
 import { Device, equals } from './primitives/device';
 import { State } from './primitives/state';
 

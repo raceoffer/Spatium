@@ -1,4 +1,4 @@
-import { ProviderType } from '../connection-provider';
+import { ProviderType } from '../interfaces/connection-provider';
 
 export class Device {
   constructor(public provider: ProviderType,

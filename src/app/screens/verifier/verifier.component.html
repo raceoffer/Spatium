@@ -34,8 +34,9 @@
         *ngIf="!(synchronizing | async)">
 
         <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-          <app-confirmation-bluetooth-manage *ngIf="!isiOS"></app-confirmation-bluetooth-manage>
-          <app-confirmation-zeroconf-manage></app-confirmation-zeroconf-manage>
+          <div *ngFor="let provider of (providersArray | async)">
+            <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
+          </div>
         </mat-nav-list>
 
         <div

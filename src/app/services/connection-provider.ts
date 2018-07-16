@@ -1,18 +1,13 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, merge, BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, merge, BehaviorSubject } from 'rxjs';
 import { toBehaviourSubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
 // import { ConnectivityService } from './connectivity.service';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 import { Device } from './primitives/device';
-import { IConnectionProvider } from './interfaces/connection-provider';
+import { IConnectionProvider , ProviderType } from './interfaces/connection-provider';
 import { ConnectionState, State } from './primitives/state';
 import { map, mergeMap } from 'rxjs/operators';
-
-export enum ProviderType {
-  BLUETOOTH,
-  ZEROCONF
-}
 
 export class Provider {
   constructor(
@@ -124,7 +119,7 @@ export class ConnectionProviderService implements IConnectionProvider {
     // private readonly connectivityService: ConnectivityService
   ) {
     const providers = new Map<ProviderType, Provider>();
-    if (!this.deviceService.isIOS) {
+    if (this.deviceService.platform !== Platform.IOS) {
       providers.set(
         ProviderType.BLUETOOTH,
         new Provider(

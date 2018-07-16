@@ -2,6 +2,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Device } from '../primitives/device';
 import { ConnectionState, State } from '../primitives/state';
 
+export enum ProviderType {
+  BLUETOOTH,
+  ZEROCONF
+}
+
 export interface IConnectionProvider {
   state: BehaviorSubject<State>;
   connectionState: BehaviorSubject<ConnectionState>;

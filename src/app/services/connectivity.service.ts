@@ -3,7 +3,7 @@ import { BehaviorSubject, combineLatest, merge, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, mapTo, skip, take } from 'rxjs/operators';
 import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/connection-provider';
 import { Device, equals } from './primitives/device';
@@ -197,7 +197,7 @@ export class ConnectivityService {
     // we assume that services perform noop if not connected
     this.socketClientService.disconnect();
     this.socketServerService.disconnect();
-    this.connectedDevices.next(new Array<Device>());
+    this.connectedDevices.next([]);
   }
 
   public send(message: any): void {
@@ -210,7 +210,7 @@ export class ConnectivityService {
   }
 
   public goToNetworkSettings() {
-    if (this.deviceService.isIOS) {
+    if (this.deviceService.platform === Platform.IOS) {
       cordova.plugins.diagnostic.switchToSettings();
     } else {
       cordova.plugins.diagnostic.switchToWifiSettings();

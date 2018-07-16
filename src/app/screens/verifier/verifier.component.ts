@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged } from 'rxjs/operators';
+import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { CurrencyService } from '../../services/currency.service';
 import { DeviceService } from '../../services/device.service';
@@ -19,7 +19,7 @@ import { ChangePincodeComponent } from './change-pincode/change-pincode.componen
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
 import { toBehaviourSubject } from '../../utils/transformers';
-import { State } from '../../services/primitives/state';
+import { ConnectionState, State } from '../../services/primitives/state';
 
 declare const window: any;
 
@@ -84,7 +84,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
   ), []);
 
   @ViewChild('sidenav') sidenav;
-  public isiOS = this.deviceService.isIOS;
+
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -99,7 +99,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly router: Router,
-    private readonly deviceService: DeviceService,
     private readonly wallet: WalletService,
     private readonly connectionProviderService: ConnectionProviderService,
     private readonly keychain: KeyChainService,
@@ -108,33 +107,20 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly currencyService: CurrencyService,
     private readonly fs: FileService
   ) {
-
-    // this.providersArray.forEach((provider) => {
-    //   this.subscriptions.push(
-    //     provider.service.enabledEvent.subscribe(() => {
-    //       if (provider.service.toggled.getValue()) {
-    //         provider.service.startListening();
-    //       }
-    //     }));
-    // });
-    //
-    // this.subscriptions.push(
-    //   this.connectionProviderService.connectedEvent.subscribe(async () => {
-    //     await this.connectionProviderService.stopListening(); // zeroconf not stopped
-    //     await this.wallet.startHandshake();
-    //     await this.wallet.startSync();
-    //   }));
-    //
-    // this.subscriptions.push(
-    //   this.connectionProviderService.disabledEvent.subscribe(async () => {
-    //     await this.wallet.cancelSync();
-    //   }));
-    //
-    // this.subscriptions.push(
-    //   this.connectionProviderService.disconnectedEvent.subscribe(async () => {
-    //     await this.wallet.cancelSync();
-    //     await this.connectionProviderService.startListening();
-    //   }));
+    this.subscriptions.push(
+      this.connectionProviderService.connectionState.pipe(
+        map(state => state === ConnectionState.Connected),
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(async (connected) => {
+        if (connected) {
+          await this.wallet.startHandshake();
+          await this.wallet.startSync();
+        } else {
+          await this.wallet.cancelSync();
+        }
+      })
+    );
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -203,7 +189,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
     await this.keychain.reset();
     await this.wallet.reset();
-    this.connectionProviderService.reset();
+    await this.connectionProviderService.reset();
   }
 
   async confirm(coin) {

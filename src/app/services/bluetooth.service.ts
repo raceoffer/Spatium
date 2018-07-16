@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject,  Subject, timer } from 'rxjs';
-import { ProviderType } from './connection-provider';
 import { DeviceService } from './device.service';
-import { IConnectionProvider } from './interfaces/connection-provider';
+import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
@@ -67,20 +66,24 @@ export class BluetoothService implements IConnectionProvider {
         this.listeningState.next(listening ? State.Started : State.Stopped);
       });
 
-      this.plugin.setMessageCallback(message => {
-        this.message.next(message);
-      });
-
       this.plugin.setDiscoverableCallback(discoverable => {
         this.discoveryState.next(discoverable ? State.Started : State.Stopped);
+      });
+
+      this.plugin.setMessageCallback(message => {
+        this.message.next(message);
       });
 
       this.plugin.getState().then(state => {
         this.state.next(state);
       });
 
+      this.plugin.getListening().then(listening => {
+        this.listeningState.next(listening ? State.Started : State.Stopped);
+      });
+
       this.plugin.getDiscoverable().then(discoverable => {
-        this.discoveryState.next(discoverable);
+        this.discoveryState.next(discoverable ? State.Started : State.Stopped);
       });
     });
   }
