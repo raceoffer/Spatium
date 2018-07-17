@@ -87,11 +87,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleContent(content) {
-    this.buttonState = State.Empty;
-    this.content = content;
+    if (this.content !== content) {
+      this.buttonState = State.Empty;
+      this.content = content;
 
-    this.loginType = null;
-    this.login = null;
+      this.loginType = null;
+      this.login = null;
+    }
   }
 
   async onInput(type: IdFactor, input: any) {
