@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
+  <Identity Name="CaspianTechnologiesPTE.LT.SpatiumWallet" Publisher="CN=0700A6F2-CAD4-45BE-BC4E-D74CBE58E90A" Version="0.15.0.0" />
+  <mp:PhoneIdentity PhoneProductId="15840aab-8ba2-4214-abcb-aa48f215e3cb" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Properties>
+    <DisplayName>Spatium Wallet</DisplayName>
+    <PublisherDisplayName>Caspian Technologies PTE. LTD.</PublisherDisplayName>
+    <Logo>images\StoreLogo.png</Logo>
+    <Description>Unhackable wallet for over 100 cryptocurrencies.</Description>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily MaxVersionTested="10.0.10240.0" MinVersion="10.0.10240.0" Name="Windows.Universal" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="capital.spatium.wallet" StartPage="www/index.html">
+      <uap:VisualElements BackgroundColor="transparent" Description="Unhackable wallet for over 100 cryptocurrencies." DisplayName="Spatium Wallet" Square150x150Logo="images\Square150x150Logo.png" Square44x44Logo="images\Square44x44Logo.png">
+        <uap:SplashScreen BackgroundColor="#F5F5F5" Image="images\splashscreen.png" />
+        <uap:DefaultTile ShortName="Spatium Wallet" Square310x310Logo="images\Square310x310Logo.png" Square71x71Logo="images\Square71x71Logo.png" Wide310x150Logo="images\Wide310x150Logo.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+            <uap:ShowOn Tile="square310x310Logo" />
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+        <uap:InitialRotationPreference>
+          <uap:Rotation Preference="portrait" />
+          <uap:Rotation Preference="landscape" />
+          <uap:Rotation Preference="landscapeFlipped" />
+        </uap:InitialRotationPreference>
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <uap:Capability Name="picturesLibrary" />
+    <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="bluetooth.rfcomm">
+      <Device Id="any">
+        <Function Type="serviceId:995f40e0-ce68-4d24-8f68-f49d2b9d661f" />
+      </Device>
+    </DeviceCapability>
+  </Capabilities>
+</Package>
