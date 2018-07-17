@@ -7,6 +7,9 @@
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/copyWorker.js" type="before_prepare" />
+    <platform name="windows">
+        <hook src="hooks/copyWindows10Manifest.js" type="after_prepare" />
+    </platform>
     <content src="http://localhost:0" />
     <access allows-arbitrary-loads-for-media="true" allows-arbitrary-loads-in-web-content="true" allows-local-networking="true" origin="*" />
     <allow-intent href="http://*/*" />
@@ -105,5 +108,4 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
-    <plugin name="cordova-plugin-add-tile-title" spec="https://github.com/CaspianTechnologies/cordova-plugin-add-tile-title.git" />
 </widget>
