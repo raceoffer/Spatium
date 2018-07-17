@@ -111,6 +111,7 @@ import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.compon
 import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
+import { SyncronizationComponent } from './screens/verifier/syncronization/syncronization.component';
 
 @NgModule({
   declarations: [
@@ -174,7 +175,8 @@ import { ConnectivityManageComponent } from './elements/connectivity-manage/conn
     DecryptComponent,
     VerifierSettingsComponent,
     TileCoinComponent,
-    ConnectivityManageComponent
+    ConnectivityManageComponent,
+    SyncronizationComponent
   ],
   imports: [
     OverlayModule,
@@ -269,7 +271,8 @@ import { ConnectivityManageComponent } from './elements/connectivity-manage/conn
     DecryptComponent,
     VerifierSettingsComponent,
     ZeroconfComponent,
-    BluetoothComponent
+    BluetoothComponent,
+    SyncronizationComponent
   ]
 })
 

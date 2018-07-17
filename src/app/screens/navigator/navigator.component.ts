@@ -42,21 +42,14 @@ export class NavigatorComponent implements OnInit, OnDestroy {
       this.connectionProviderService.connectionState.pipe(
         map(state => state === ConnectionState.Connected),
         distinctUntilChanged(),
-        skip(1),
-        filter(connected => connected)
-      ).subscribe(async () => {
-        await this.wallet.startHandshake();
-        await this.wallet.startSync();
-      }));
-
-    this.subscriptions.push(
-      this.connectionProviderService.connectionState.pipe(
-        map(state => state !== ConnectionState.Connected),
-        distinctUntilChanged(),
-        skip(1),
-        filter(disconnected => disconnected)
-      ).subscribe(async () => {
-        await this.wallet.cancelSync();
+        skip(1)
+      ).subscribe(async (connected) => {
+        if (connected) {
+          await this.wallet.startHandshake();
+          await this.wallet.startSync();
+        } else {
+          await this.wallet.cancelSync();
+        }
       }));
 
     this.subscriptions.push(

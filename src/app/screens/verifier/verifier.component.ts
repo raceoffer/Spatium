@@ -1,10 +1,8 @@
-import { Component, HostBinding, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../services/connection-provider';
-import { CurrencyService } from '../../services/currency.service';
-import { DeviceService } from '../../services/device.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -20,6 +18,7 @@ import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
 import { toBehaviourSubject } from '../../utils/transformers';
 import { ConnectionState, State } from '../../services/primitives/state';
+import { SyncronizationComponent } from './syncronization/syncronization.component';
 
 declare const window: any;
 
@@ -28,7 +27,7 @@ declare const window: any;
   templateUrl: './verifier.component.html',
   styleUrls: ['./verifier.component.css']
 })
-export class VerifierComponent implements OnInit, OnDestroy {
+export class VerifierComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   public navLinks = [{
     name: 'Export secret',
@@ -62,9 +61,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
     }
   }];
 
-  public coinStatusType = Status;
-  public current = 'Verification';
-  public synchedCoins = [];
   public currencyWallets = this.wallet.currencyWallets;
 
   public ready = toBehaviourSubject(this.connectionProviderService.listeningState.pipe(
@@ -104,7 +100,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly keychain: KeyChainService,
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
-    private readonly currencyService: CurrencyService,
     private readonly fs: FileService
   ) {
     this.subscriptions.push(
@@ -118,6 +113,19 @@ export class VerifierComponent implements OnInit, OnDestroy {
           await this.wallet.startSync();
         } else {
           await this.wallet.cancelSync();
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.synchronizing.pipe(
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(synchronizing => {
+        if (synchronizing) {
+          this.navigationService.pushOverlay(SyncronizationComponent);
+        } else {
+          this.navigationService.acceptOverlay();
         }
       })
     );
@@ -157,30 +165,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
         })
       );
     });
-  }
-
-  public async ngOnInit() {
-    for (const wallet of Array.from(this.wallet.coinWallets.values())) {
-      this.subscriptions.push(
-        wallet.status.subscribe(() => {
-          const coins = [];
-
-          for (const coin of Array.from(this.wallet.coinWallets.keys())) {
-            const status = this.wallet.coinWallets.get(coin).status.getValue();
-
-            if (status === Status.Synchronizing || status === Status.Ready) {
-              const info = this.currencyService.getInfo(coin);
-              coins.push({
-                name: info.name,
-                status: this.wallet.coinWallets.get(coin).status.getValue()
-              });
-            }
-          }
-
-          this.synchedCoins = coins;
-        })
-      );
-    }
   }
 
   public async ngOnDestroy() {
@@ -269,7 +253,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
   public onSettings() {
     const componentRef = this.navigationService.pushOverlay(SettingsComponent);
   }
-
 
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {

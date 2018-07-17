@@ -164,7 +164,9 @@ export class WalletService {
     }
 
     this.connectionProviderService.message.subscribe(message => {
-      this.messageSubject.next(JSON.parse(message));
+      const obj = JSON.parse(message);
+      console.log('Received: ', obj);
+      this.messageSubject.next(JSON.parse(obj));
     });
 
     this.sessionKeyObserver = this.messageSubject.pipe(
@@ -238,7 +240,7 @@ export class WalletService {
         takeUntil(this.cancelSubject.pipe(filter(b => b)))
       ).toPromise();
       if (!remoteSessionKeyObj) {
-        // handle cancel
+        throw new Error('Handshake cancelled');
       }
 
       // pop the queue
@@ -287,7 +289,7 @@ export class WalletService {
         takeUntil(this.cancelSubject.pipe(filter(b => b)))
       ).toPromise();
       if (!newRemoteSessionKeyObj) {
-        // handle cancel
+        throw new Error('Handshake cancelled');
       }
 
       // pop the queue
@@ -303,12 +305,16 @@ export class WalletService {
 
       this.synchronizatonStatus.next(SyncStatus.HandshakeReady);
     } catch (e) {
-      console.log(e);
       this.synchronizatonStatus.next(SyncStatus.None);
+      throw e;
     }
   }
 
   public async startSync() {
+    if (this.synchronizatonStatus.getValue() !== SyncStatus.HandshakeReady) {
+      throw new Error('Trying to synchronize without handshake ready');
+    }
+
     try {
       this.setProgress(0);
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject,  Subject, timer } from 'rxjs';
 import { DeviceService } from './device.service';
 import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
@@ -27,7 +27,8 @@ export class BluetoothService implements IConnectionProvider {
   private plugin = null;
 
   constructor(
-    private readonly deviceService: DeviceService
+    private readonly deviceService: DeviceService,
+    private readonly ngZone: NgZone
   ) {
     this.deviceService.deviceReady().then(() => {
       this.plugin = cordova.plugins.bluetooth;
@@ -36,7 +37,7 @@ export class BluetoothService implements IConnectionProvider {
         this.state.next(state);
       });
 
-      this.plugin.setConnectedCallback(async device => {
+      this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
         if (device !== null) {
           await this.plugin.startReading();
           this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
@@ -45,46 +46,49 @@ export class BluetoothService implements IConnectionProvider {
           this.connectedDevice.next(null);
           this.connectionState.next(ConnectionState.None);
         }
-      });
+      }));
 
-      this.plugin.setDiscoveredCallback(device => {
+      this.plugin.setDiscoveredCallback(device => this.ngZone.run(() => {
         const devices = this.devices.getValue();
 
+        let deviceEntry = new Device(ProviderType.BLUETOOTH, device.name, device.address);
+
         if (devices.has(device.address)) {
-          return;
+          deviceEntry = deviceEntry.merge(devices.get(device.address));
         }
 
-        devices.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address));
+        devices.set(device.address, deviceEntry);
+
         this.devices.next(devices);
-      });
+      }));
 
-      this.plugin.setDiscoveryCallback(discovery => {
+      this.plugin.setDiscoveryCallback(discovery => this.ngZone.run(() => {
         this.searchState.next(discovery ? State.Started : State.Stopped);
-      });
+      }));
 
-      this.plugin.setListeningCallback(listening => {
+      this.plugin.setListeningCallback(listening => this.ngZone.run(() => {
         this.listeningState.next(listening ? State.Started : State.Stopped);
-      });
+      }));
 
-      this.plugin.setDiscoverableCallback(discoverable => {
+      this.plugin.setDiscoverableCallback(discoverable => this.ngZone.run(() => {
         this.discoveryState.next(discoverable ? State.Started : State.Stopped);
-      });
+      }));
 
-      this.plugin.setMessageCallback(message => {
+      this.plugin.setMessageCallback(message => this.ngZone.run(() => {
         this.message.next(message);
-      });
+      }));
 
-      this.plugin.getState().then(state => {
+      this.plugin.getState().then(state => this.ngZone.run(() => {
         this.state.next(state);
-      });
+      }));
 
-      this.plugin.getListening().then(listening => {
+      this.plugin.getListening().then(listening => this.ngZone.run(() => {
         this.listeningState.next(listening ? State.Started : State.Stopped);
-      });
+      }));
 
-      this.plugin.getDiscoverable().then(discoverable => {
+      this.plugin.getDiscoverable().then(discoverable => this.ngZone.run(() => {
         this.discoveryState.next(discoverable ? State.Started : State.Stopped);
-      });
+      }));
     });
   }
 

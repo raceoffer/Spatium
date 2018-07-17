@@ -48,9 +48,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
         distinctUntilChanged(),
         skip(1)
       ).subscribe(async (connected) => {
-        if (connected) {
-          await this.bt.stopListening();
-        } else if (this.toggled.getValue()) {
+        if (!connected && this.toggled.getValue()) {
           if (this.bt.state.getValue() === State.Started) {
             await this.bt.startListening();
           }
@@ -74,10 +72,16 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
   async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+
     this.cancel();
 
-    await this.bt.stopListening();
-    await this.bt.disconnect();
+    try {
+      await this.bt.stopListening();
+    } catch (ignored) {}
+
+    try {
+      await this.bt.disconnect();
+    } catch (ignored) {}
   }
 
   async toggle(event) {
@@ -103,30 +107,26 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
           this.toggled.next(false);
           return;
         }
+      }
 
-        await this.bt.startListening();
+      await this.bt.startListening();
 
-        if (!await waitForStateUntil(this.listeningState, State.Started, this.cancelSubject)) {
-          this.toggled.next(false);
-          return;
-        }
-
-        console.log('Done with enabling + listening protocol');
-      } else if (this.state.getValue() === State.Started) {
-        await this.bt.startListening();
-
-        if (!await waitForStateUntil(this.listeningState, State.Started, this.cancelSubject)) {
-          this.toggled.next(false);
-          return;
-        }
-
-        console.log('Done listening protocol');
+      if (!await waitForStateUntil(this.listeningState, State.Started, this.cancelSubject)) {
+        this.toggled.next(false);
+        return;
       }
     } else {
       this.toggled.next(false);
+
       this.cancel();
-      await this.bt.stopListening();
-      await this.bt.disconnect();
+
+      try {
+        await this.bt.stopListening();
+      } catch (ignored) {}
+
+      try {
+        await this.bt.disconnect();
+      } catch (ignored) {}
     }
   }
 

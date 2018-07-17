@@ -31,7 +31,6 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @Input() public currentCoin: Coin | Token = null;
   @Input() public transaction = null;
 
-
   @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() public confirm = new EventEmitter<any>();
   @Output() public decline = new EventEmitter<any>();
