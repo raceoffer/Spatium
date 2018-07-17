@@ -7,6 +7,7 @@ import { NewIcoComponent } from './new-ico/new-ico.component';
 import { Router } from '@angular/router';
 import { SettingsComponent } from '../settings/settings.component';
 import { FeedbackComponent } from '../../feedback/feedback.component';
+import { DeviceService, Platform } from '../../../services/device.service';
 
 import { BehaviorSubject } from 'rxjs';
 

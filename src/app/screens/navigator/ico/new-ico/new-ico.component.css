@@ -125,3 +125,19 @@ h4 {
 .currency-component {
   margin-top: 5px;
 }
+
+.file-input .attachment-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.file-input .file-name {
+  padding-left: 40px;
+  width: calc(100% - 80px);
+  white-space: nowrap;
+}
+
+.file-input {
+  position: relative;
+}

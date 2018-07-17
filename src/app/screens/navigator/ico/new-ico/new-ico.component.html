@@ -25,17 +25,9 @@
       <span class="label full-width-label">Name</span>
       <div class="field" [ngClass]="{'error': comp_name.invalid}">
         <span>
-          <input matInput placeholder="Name of company" [formControl]="comp_name" >
+          <input matInput placeholder="Name of company" [formControl]="comp_name">
         </span>
       </div>
-    </div>
-    <div>
-      <span class="label full-width-label">Logo</span>
-      <input #logo type="file">
-    </div>
-    <div>
-      <span class="label full-width-label">Description</span>
-      <input #description type="file">
     </div>
     <div class="ticker-input">
       <span class="label full-width-label">Ticker</span>
@@ -108,13 +100,15 @@
       </div>
     </div>
     <div class="company-type-input"> <!--//If auction, enter auction parameters-->
-      <span class="label full-width-label">Type of company</span><br/>
-      <mat-radio-group [(ngModel)]="companyType">
-        <mat-radio-button class="flex-2-btn" *ngFor="let type of companyTypes" [value]="type">
-          {{type.name}}
-        </mat-radio-button>
-      </mat-radio-group>
-      <div *ngIf="companyType === companyTypes[1]" class="additional">
+      <span class="label full-width-label">Type of company</span>
+      <div class="field">
+        <mat-select [(ngModel)]="companyType">
+          <mat-option *ngFor="let type of companyTypes" [value]="type.id">
+            {{type.name}}
+          </mat-option>
+        </mat-select>
+      </div>
+      <div *ngIf="companyType === 2" class="additional">
         <div class="info f-left input-2">
           <span class="label full-width-label">Interval time</span>
           <div class="field">
@@ -133,9 +127,26 @@
         </div>
       </div>
     </div>
-    <div class="whitelist-input"> <!--//If true, do some shit-->
-      <mat-checkbox [(ngModel)]="white_list">Use white list?</mat-checkbox>
-      <div *ngIf="white_list">
+    <div>
+      <span class="label full-width-label">Fundraising</span>
+      <div class="field">
+        <mat-select [(ngModel)]="fundraisingType" (valueChange)="changeFundraising($event)">
+          <mat-option *ngFor="let type of fundraisingTypes" [value]="type.id">
+            {{type.name}}
+          </mat-option>
+        </mat-select>
+      </div>
+    </div>
+    <div class="whitelist-input">
+      <span class="label full-width-label">Whitelist</span>
+      <div class="field">
+        <mat-select [(ngModel)]="whitelistType" (valueChange)="changeWhitelist($event)">
+          <mat-option *ngFor="let type of whitelistTypes" [value]="type.id">
+            {{type.name}}
+          </mat-option>
+        </mat-select>
+      </div>
+      <div *ngIf="whitelistType === 1 || whitelistType === 2">
         <div class="info">
           <span class="label full-width-label">Start registration</span>
           <mat-form-field class="field" style="margin-bottom: 13px">
@@ -152,15 +163,7 @@
             <mat-datepicker #picker4></mat-datepicker>
           </mat-form-field>
         </div>
-        <div>
-          <span class="label full-width-label">Invite system</span><br/>
-          <mat-radio-group [(ngModel)]="slotsType">
-            <mat-radio-button class="flex-2-btn" *ngFor="let type of slotsTypes" [value]="type">
-              {{type}}
-            </mat-radio-button>
-          </mat-radio-group>
-        </div>
-        <div *ngIf="slotsType === slotsTypes[1]" class="additional">
+        <div *ngIf="whitelistType === 2" class="additional">
           <div class="info f-left input-2">
             <span class="label full-width-label">Interval time</span>
             <div class="field">
@@ -206,40 +209,50 @@
       </div>
     </div>
     <div class="cashback-input">
-      <span class="label full-width-label">Type of cashback</span><br/>
-      <mat-radio-group [(ngModel)]="cashbackType">
-        <mat-radio-button class="full-width" *ngFor="let type of cashbackTypes" [value]="type">
-          {{type}}
-        </mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div class="price-range-input">
-      <span class="label full-width-label">Choose coin</span>
+      <span class="label full-width-label">Type of cashback</span>
       <div class="field">
-        <mat-select (selectionChange)="changeInvestmentAmount($event)" [(value)]="coinOfInvestmentAmount">
-          <mat-option *ngFor="let coin of coins" [value]="coin">
-            {{coin}}
+        <mat-select [(ngModel)]="cashbackType">
+          <mat-option *ngFor="let type of cashbackTypes" [value]="type.id">
+            {{type.name}}
           </mat-option>
         </mat-select>
       </div>
+    </div>
+    <div>
+      <span class="label full-width-label">Maximum investment, SPT</span>
+      <div class="field">
+        <span>
+          <input matInput type="number" placeholder="Maximum investment, SPT" [formControl]="max_investment">
+        </span>
+      </div>
+    </div>
       <div>
-        <div class="info">
+        <div class="password">
           <div class="field">
             <span>
-                <input type="number" matInput placeholder="Max investment amount" [formControl]="max_amount">
+                <input type="password" matInput placeholder="Password" [formControl]="password">
             </span>
           </div>
         </div>
+    <div>
+      <span class="label full-width-label">Logo</span>
+      <div class="field file-input">
+        <button class="attachment-button" mat-raised-button color="accent" mat-mini-fab (click)="logoInput.click()">
+          <mat-icon>attachment</mat-icon>
+        </button>
+        <span class="file-name">{{ logoFileName }}</span>
+        <input hidden type="file" [formControl]="logo" accept="image/*" #logoInput (change)="changeLogo($event)"/>
       </div>
-      <div>
-          <div class="password">
-            <div class="field">
-              <span>
-                  <input type="password" matInput placeholder="Password" [formControl]="password">
-              </span>
-            </div>
-          </div>
-        </div>
+    </div>
+    <div>
+      <span class="label full-width-label">Description</span>
+      <div class="field file-input">
+        <button class="attachment-button" mat-raised-button color="accent" mat-mini-fab (click)="descriptionInput.click()">
+          <mat-icon>attachment</mat-icon>
+        </button>
+        <span class="file-name">{{ descriptionFileName }}</span>
+        <input hidden type="file" [formControl]="description" accept="text/plain" #descriptionInput (change)="changeDescription($event)"/>
+      </div>
     </div>
     <div class="errors" *ngFor="let error of errors">
       {{ error }}

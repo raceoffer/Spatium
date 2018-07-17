@@ -68,9 +68,7 @@ export class BluetoothService implements IConnectionProvider {
 
   private deviceRelatedChange = merge(
     this.refreshDevicesEvent,
-    this.enabled.pipe(filter(enabled => enabled)),
-    this.connected,
-    this.discovering
+    this.enabled.pipe(filter(enabled => enabled))
   );
 
   constructor(private readonly deviceService: DeviceService,
@@ -242,7 +240,7 @@ export class BluetoothService implements IConnectionProvider {
       }
     }));
 
-    this.discoveryStartedEvent.subscribe(() => this.devices.next(new Map<string, Device>()));
+    // this.discoveryStartedEvent.subscribe(() => this.devices.next(new Map<string, Device>()));
     this.disconnectedEvent.subscribe(() => {
       this.connectedDevices.next(new Array<Device>());
       this.devices.next(new Map<string, Device>());

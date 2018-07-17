@@ -65,6 +65,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feeUsdFocused = false;
   public feePriceFocused = false;
   public feePriceUsdFocused = false;
+  public disable = false;
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -434,6 +435,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         map(phase => phase === Phase.Creation)
       ).subscribe((creation) => {
         if (creation) {
+          this.disable = false;
           this.receiverField.enable();
           this.amountField.enable();
           this.amountUsdField.enable();
@@ -443,6 +445,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feePriceField.enable();
           this.feePriceUsdField.enable();
         } else {
+          this.disable = true;
           this.receiverField.disable();
           this.amountField.disable();
           this.amountUsdField.disable();

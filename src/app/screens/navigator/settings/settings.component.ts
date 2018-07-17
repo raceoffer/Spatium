@@ -13,7 +13,7 @@ export class SettingsComponent {
   @Output() cancelled = new EventEmitter<any>();
 
   navLinks = [{
-    name: 'Add authentication path',
+    name: 'Add authorization path',
     link: 'factornode'
   }, {
     name: 'Language',

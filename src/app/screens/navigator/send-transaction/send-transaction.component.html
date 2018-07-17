@@ -16,9 +16,9 @@
     </tr>
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
-        <mat-form-field class="wallet-address-field field" color="accent">
-          <textarea readonly matInput [value]="address | async" *ngIf="(address | async) !== null"></textarea>
-          <textarea readonly matInput value="Loading&hellip;" *ngIf="(address | async) === null"></textarea>
+        <mat-form-field class="wallet-address-field field by-content" color="accent" fxLayout="column" fxLayoutAlign="center center">
+          <textarea readonly matInput mat-autosize="true" [value]="address | async" *ngIf="(address | async) !== null"></textarea>
+          <textarea readonly matInput mat-autosize="true" value="Loading&hellip;" *ngIf="(address | async) === null"></textarea>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
@@ -32,15 +32,17 @@
     </tr>
     <tr>
       <td colspan="2">
-        <mat-form-field class="field" style="margin-bottom: 13px;" color="accent"
+        <mat-form-field class="field by-content" style="margin-bottom: 13px;" color="accent"
+                        fxLayout="column" fxLayoutAlign="center center"
             [ngClass]="{'error': !(validReceiver | async) }">
           <textarea
             matInput
+            mat-autosize="true"
             [formControl]="receiverField"
             (blur)="setReceiverFocused(false)"
             (focus)="setReceiverFocused(true)">
           </textarea>
-          <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
+          <button [disabled]="disable" id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
             <mat-icon>content_paste</mat-icon>
           </button>
         </mat-form-field>

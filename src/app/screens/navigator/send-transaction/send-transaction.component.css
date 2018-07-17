@@ -18,6 +18,9 @@ input.mat-input-element{
 
 textarea.mat-input-element{
   resize: none;
+  padding-top: 11px;
+  height: 0px;
+  padding-bottom: 29px;
 }
 
 .estimating {
@@ -25,5 +28,15 @@ textarea.mat-input-element{
   width: 100% !important;
 }
 
+.by-content {
+  height: auto;
+}
 
+mat-form-field .by-content {
+  min-height: 44px;
+}
+
+.mat-form-field-infix{
+  height: inherit;
+}
 
