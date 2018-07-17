@@ -164,9 +164,7 @@ export class WalletService {
     }
 
     this.connectionProviderService.message.subscribe(message => {
-      const obj = JSON.parse(message);
-      console.log('Received: ', obj);
-      this.messageSubject.next(JSON.parse(obj));
+      this.messageSubject.next(JSON.parse(message));
     });
 
     this.sessionKeyObserver = this.messageSubject.pipe(

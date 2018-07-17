@@ -1,9 +1,8 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject, Observable, timer } from 'rxjs';
-import { distinctUntilChanged, skip } from 'rxjs/internal/operators';
+import { BehaviorSubject, timer } from 'rxjs';
 import { ProviderType } from './interfaces/connection-provider';
-import { Device, equals } from './primitives/device';
+import { Device } from './primitives/device';
 import { State } from './primitives/state';
 
 declare const cordova: any;
@@ -15,9 +14,6 @@ export class DiscoveryService {
   public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public devices: BehaviorSubject<Map<string, Device>> = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
-  public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
-    distinctUntilChanged(equals),
-    skip(1));
 
   constructor(private ngZone: NgZone) {}
 

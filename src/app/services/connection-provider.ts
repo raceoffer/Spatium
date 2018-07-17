@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { combineLatest, merge, BehaviorSubject } from 'rxjs';
 import { toBehaviourSubject } from '../utils/transformers';
 import { BluetoothService } from './bluetooth.service';
-// import { ConnectivityService } from './connectivity.service';
+import { ZeroconfService } from './zeroconf.service';
 import { DeviceService, Platform } from './device.service';
 import { Device } from './primitives/device';
 import { IConnectionProvider , ProviderType } from './interfaces/connection-provider';
@@ -116,7 +116,7 @@ export class ConnectionProviderService implements IConnectionProvider {
   constructor(
     private readonly deviceService: DeviceService,
     private readonly bt: BluetoothService,
-    // private readonly connectivityService: ConnectivityService
+    private readonly connectivityService: ZeroconfService
   ) {
     const providers = new Map<ProviderType, Provider>();
     if (this.deviceService.platform !== Platform.IOS) {
@@ -132,16 +132,16 @@ export class ConnectionProviderService implements IConnectionProvider {
       );
     }
 
-    // providers.set(
-    //   ProviderType.ZEROCONF,
-    //   new Provider(
-    //     ProviderType.ZEROCONF,
-    //     'WiFi',
-    //     'wifi',
-    //     null,
-    //     this.connectivityService
-    //   )
-    // );
+    providers.set(
+      ProviderType.ZEROCONF,
+      new Provider(
+        ProviderType.ZEROCONF,
+        'WiFi',
+        'wifi',
+        null,
+        this.connectivityService
+      )
+    );
 
     this.providers.next(providers);
   }

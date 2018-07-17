@@ -87,7 +87,7 @@ import { ActivityService } from './services/activity.service';
 import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { ConnectionProviderService } from './services/connection-provider';
-import { ConnectivityService } from './services/connectivity.service';
+import { ZeroconfService } from './services/zeroconf.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
 import { ICOService } from './services/ico.service';
@@ -232,7 +232,7 @@ import { SyncronizationComponent } from './screens/verifier/syncronization/syncr
     IpfsService,
     SocketServerService,
     SocketClientService,
-    ConnectivityService,
+    ZeroconfService,
     ConnectionProviderService
   ],
   bootstrap: [

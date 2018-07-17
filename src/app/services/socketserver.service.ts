@@ -1,30 +1,22 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, skip } from 'rxjs/operators';
-import { toBehaviourSubject } from '../utils/transformers';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ConnectionState, State } from './primitives/state';
 
 declare const cordova: any;
 
 @Injectable()
 export class SocketServerService {
-  public state: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-  public message: Subject<any> = new Subject<any>();
+  public state = new BehaviorSubject<State>(State.Stopped);
+  public connectionState = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
-  public connectionState: BehaviorSubject<ConnectionState> = new BehaviorSubject<ConnectionState>(ConnectionState.None);
+  public message = new Subject<string>();
 
-  public connected: BehaviorSubject<boolean> = toBehaviourSubject(this.connectionState.pipe(map(state => state === ConnectionState.Connected)), false);
-  public connectedChanged: Observable<any> = this.connected.pipe(skip(1), distinctUntilChanged());
-  public connectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => connected), mapTo(null));
-  public disconnectedEvent: Observable<any> = this.connectedChanged.pipe(filter(connected => !connected), mapTo(null));
-  private stoppedListening: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private currentPeer: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+  private currentPeer = new BehaviorSubject<string>(null);
 
   constructor(private ngZone: NgZone) {}
 
   public async start() {
     if (this.state.getValue() !== State.Stopped) {
-      this.stoppedListening.next(false);
       return;
     }
 
@@ -36,7 +28,7 @@ export class SocketServerService {
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
-          if (this.connectionState.getValue() !== ConnectionState.None || this.stoppedListening.getValue()) {
+          if (this.connectionState.getValue() !== ConnectionState.None) {
             cordova.plugins.wsserver.close(conn);
           } else {
             this.currentPeer.next(conn.uuid);
@@ -44,7 +36,7 @@ export class SocketServerService {
           }
         }),
         onMessage: (conn, msg) => this.ngZone.run(() => {
-          this.message.next(JSON.parse(msg));
+          this.message.next(msg);
         }),
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {
@@ -60,10 +52,6 @@ export class SocketServerService {
         this.state.next(State.Stopped);
         reject(reason);
       })));
-  }
-
-  public async stopListening() {
-    this.stoppedListening.next(true);
   }
 
   public async stop() {
@@ -84,18 +72,18 @@ export class SocketServerService {
   }
 
   public disconnect(): void {
-    if (!this.connected.getValue()) {
+    if (this.connectionState.getValue() !== ConnectionState.Connected) {
       return;
     }
 
     cordova.plugins.wsserver.close({uuid: this.currentPeer.getValue()});
   }
 
-  public send(message: any): void {
-    if (!this.connected.getValue()) {
+  public send(message: string): void {
+    if (this.connectionState.getValue() !== ConnectionState.Connected) {
       return;
     }
 
-    cordova.plugins.wsserver.send({uuid: this.currentPeer.getValue()}, JSON.stringify(message));
+    cordova.plugins.wsserver.send({uuid: this.currentPeer.getValue()}, message);
   }
 }

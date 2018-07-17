@@ -164,14 +164,14 @@ export class BluetoothService implements IConnectionProvider {
     }
   }
 
-  async send(message) {
+  async send(message: string) {
     if (this.connectionState.getValue() !== ConnectionState.Connected) {
       console.log('Trying to send while not connected');
       return;
     }
 
     try {
-      await this.plugin.write(JSON.stringify(message));
+      await this.plugin.write(message);
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to send message to a bluetooth device', e);
       throw e;
