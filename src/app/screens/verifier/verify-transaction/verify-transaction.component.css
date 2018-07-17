@@ -34,6 +34,9 @@ input.mat-input-element{
 
 textarea.mat-input-element {
   resize: none;
+  padding-top: 11px;
+  height: 0px;
+  padding-bottom: 29px;
 }
 
 .by-content {

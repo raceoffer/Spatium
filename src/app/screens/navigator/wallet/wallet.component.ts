@@ -2,6 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy, Vi
 import { combineLatest, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
+import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
@@ -63,6 +64,8 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
 
+  public isWindows;
+
   public cols: any = Math.ceil(window.innerWidth / 350);
 
   public title = 'Wallet';
@@ -90,8 +93,9 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
-    private readonly changeDetector: ChangeDetectorRef,
-    private readonly router: Router
+    private readonly device: DeviceService,
+    private readonly router: Router,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     const titles = this.staticTitles;
 
@@ -106,6 +110,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     this.titles = titles;
 
     this.filteredTitles = this.titles;
+    this.isWindows = (this.device.platform === Platform.Windows);
   }
 
   private _filterValue = '';

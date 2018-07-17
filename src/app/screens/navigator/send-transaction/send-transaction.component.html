@@ -42,7 +42,7 @@
             (blur)="setReceiverFocused(false)"
             (focus)="setReceiverFocused(true)">
           </textarea>
-          <button id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
+          <button [disabled]="disable" id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
             <mat-icon>content_paste</mat-icon>
           </button>
         </mat-form-field>

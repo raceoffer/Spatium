@@ -63,9 +63,9 @@
   </button>
 </mat-toolbar>
 
-<div *ngIf="!transaction" class="currency-component box" fxLayout="column" style="place-content: normal !important">
+<div *ngIf="!transaction" class="currency-component box" fxLayout="column" style="place-content: normal !important;">
 
-  <mat-list *ngIf="!investor" class="text-center" [class.transactions-list]="selector">
+  <mat-list *ngIf="!investor" class="text-center box" [class.transactions-list]="selector">
     <mat-list-item
       class="list-item"
       *ngFor="let transaction of filtered_input"
@@ -111,7 +111,7 @@
   </mat-list>
 
 
-  <mat-list *ngIf="investor" class="text-center">
+  <mat-list *ngIf="investor" class="text-center box">
     <mat-list-item
       class="list-item"
       *ngFor="let transaction of output_tx"

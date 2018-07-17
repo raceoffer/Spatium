@@ -6,6 +6,7 @@ import { InvestmentsComponent } from '../investments/investments.component';
 import { NotificationService } from '../../../../services/notification.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
+import { DeviceService, Platform } from '../../../../services/device.service';
 import { ICOService, IcoCampaign } from '../../../../services/ico.service';
 import { IpfsService, File } from '../../../../services/ipfs.service';
 
@@ -25,13 +26,16 @@ export class IcoDetailsComponent implements OnInit, AfterViewInit {
   public coins: any = [];
   public campaign: BehaviorSubject<IcoCampaign> = new BehaviorSubject<IcoCampaign>(null);
 
+  public isWindows;
+
   constructor(
     private readonly icoService: ICOService,
-    private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
-    private readonly currency: CurrencyService,
-    private readonly ipfsService: IpfsService
-  ) {  }
+    private readonly ipfsService: IpfsService,
+    private readonly device: DeviceService,
+    private readonly navigationService: NavigationService) {
+    this.isWindows = (this.device.platform === Platform.Windows);  
+  }
 
   async ngOnInit() {
     let campaign = await this.icoService.getCampaign(this.project.address);
