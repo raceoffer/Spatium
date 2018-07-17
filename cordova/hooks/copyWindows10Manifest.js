@@ -1,28 +1,47 @@
-const fs = require('fs');
-const execSync = require('child_process').execSync;
+const fs = require('fs'),
+  execSync = require('child_process').execSync,
+  parseString = require('xml2js').parseString,
+  xml2js = require('xml2js');
 
-module.exports = function(context) {
+module.exports = function (context) {
   const basePath = context.opts.projectRoot;
 
-  let sourceFile = basePath + "/package.windows10.appxmanifest";
-  let targetDirectory = basePath + "/platforms/windows";
+  const config = basePath + '/config.xml',
+    sourceFile = basePath + '/package.windows10.appxmanifest',
+    targetFile = basePath + '/platforms/windows/package.windows10.appxmanifest';
 
-  if (!fs.existsSync(targetDirectory)) {
+  if (!fs.existsSync(basePath + '/platforms/windows')) {
     return;
   }
-  
-  console.log('Copy package.windows10.appxmanifest');
 
-  const copyCommand = process.platform === 'win32' ? "copy /b/v/y " : "cp ";
-  if (process.platform === 'win32') {
-    sourceFile = sourceFile.replace(/\//g, '\\');
-    targetDirectory = targetDirectory.replace(/\//g, '\\');
-  }
+  console.log('Update package.windows10.appxmanifest');
 
-  console.log(execSync(
-    copyCommand + sourceFile + " " + targetDirectory, {
-      maxBuffer: 1024*1024,
-      cwd: basePath
-    }).toString('utf8')
-  );
+  fs.readFile(config, 'utf-8', function (err, data) {
+    if (err) throw new Error(err);
+
+    parseString(data, function (err, json) {
+      if (err) throw new Error(err);
+
+      const version = json.widget.$.version;
+
+      fs.readFile(sourceFile, 'utf-8', function (err, data) {
+        if (err) throw new Error(err);
+
+        parseString(data, function (err, json) {
+          if (err) throw new Error(err);
+
+          json.Package.Identity[0].$.Version = version;
+
+          const builder = new xml2js.Builder();
+          const xml = builder.buildObject(json);
+
+          fs.writeFile(targetFile, xml, function (err, data) {
+            if (err) throw new Error(err);
+
+            console.log('package.windows10.appxmanifest updated');
+          });
+        });
+      });
+    });
+  });
 };
