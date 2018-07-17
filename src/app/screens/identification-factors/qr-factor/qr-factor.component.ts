@@ -5,6 +5,7 @@ import { NotificationService } from "../../../services/notification.service";
 import { BehaviorSubject } from "rxjs/index";
 import { DDSService } from "../../../services/dds.service";
 import { WorkerService } from "../../../services/worker.service";
+import { DeviceService, Platform } from "../../../services/device.service";
 
 import { packLogin } from 'crypto-core-async/lib/utils';
 
@@ -29,7 +30,8 @@ export class QrFactorComponent implements OnInit {
     private readonly notification: NotificationService,
     private readonly authService: AuthService,
     private readonly ddsService: DDSService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly device: DeviceService,
   ) {}
 
   async ngOnInit() {
@@ -46,7 +48,12 @@ export class QrFactorComponent implements OnInit {
   }
 
   public onSaved(ignored) {
-    this.notification.show('The QR image was saved to the local storage')
+    if (this.device.platform === Platform.Windows) {
+      this.notification.show('The QR image was saved to the pictures gallery');
+    }
+    else {
+      this.notification.show('The QR image was saved to the local storage');
+    }
   }
 
   public onSubmit() {
