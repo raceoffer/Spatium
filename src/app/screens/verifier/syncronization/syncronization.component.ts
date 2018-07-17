@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostBinding, OnDestroy, OnInit, Output } from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { CurrencyService } from '../../../services/currency.service';
@@ -11,6 +11,8 @@ import { Status } from '../../../services/wallet/currencywallet';
 })
 export class SyncronizationComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
+
+  @Output() public cancelled = new EventEmitter<any>();
 
   public synchronizing = this.wallet.synchronizing;
   public progress = this.wallet.syncProgress;
@@ -53,6 +55,10 @@ export class SyncronizationComponent implements OnInit, OnDestroy {
   public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  public cancel() {
+    this.cancelled.next();
   }
 
   onBack() {

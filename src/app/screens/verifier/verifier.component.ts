@@ -123,7 +123,11 @@ export class VerifierComponent implements OnDestroy {
         skip(1)
       ).subscribe(synchronizing => {
         if (synchronizing) {
-          this.navigationService.pushOverlay(SyncronizationComponent);
+          const componentRef = this.navigationService.pushOverlay(SyncronizationComponent);
+          componentRef.instance.cancelled.subscribe(async () => {
+            await this.wallet.cancelSync();
+            await this.connectionProviderService.disconnect();
+          });
         } else {
           this.navigationService.acceptOverlay();
         }
