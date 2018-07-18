@@ -7,6 +7,7 @@ import { distinctUntilChanged, filter, map, skip } from 'rxjs/operators';
 import { requestDialog } from '../../../utils/dialog';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { waitForSubject } from '../../../utils/transformers';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 
 declare const cordova: any;
 
@@ -27,6 +28,8 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
   public serverState = this.zeroconf.serverState;
   public serverReady = this.zeroconf.serverReady;
 
+  public globalConnectionState = this.connectionProvider.connectionState;
+
   public toggled = new BehaviorSubject<boolean>(false);
 
   public cancelSubject = new Subject<boolean>();
@@ -35,12 +38,13 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
   constructor(
     private readonly zeroconf: ZeroconfService,
-    private readonly deviceService: DeviceService
+    private readonly deviceService: DeviceService,
+    private readonly connectionProvider: ConnectionProviderService
   ) {
     super();
 
     this.subscriptions.push(
-      this.zeroconf.connectionState.pipe(
+      this.connectionProvider.connectionState.pipe(
         map(state => state === ConnectionState.Connected),
         distinctUntilChanged(),
         skip(1)
@@ -64,7 +68,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
       if (
         this.toggled.getValue() &&
         this.zeroconf.deviceState.getValue() === State.Started &&
-        this.zeroconf.connectionState.getValue() === ConnectionState.None
+        this.connectionProvider.connectionState.getValue() === ConnectionState.None
       ) {
         await this.zeroconf.startListening();
       }
@@ -129,11 +133,8 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
         }
       }
 
-      await this.zeroconf.startListening();
-
-      if (!await waitForSubject(this.listeningState, State.Started, this.cancelSubject)) {
-        this.toggled.next(false);
-        return;
+      if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
+        await this.zeroconf.startListening();
       }
     } else {
       this.toggled.next(false);

@@ -6,6 +6,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { requestDialog } from '../../../utils/dialog';
 import { distinctUntilChanged, map, skip, filter } from 'rxjs/operators';
 import { waitForSubject } from '../../../utils/transformers';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 
 @Component({
   selector: 'app-confirmation-bluetooth-manage',
@@ -21,6 +22,8 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
   public deviceState = this.bt.deviceState;
   public connectionState = this.bt.connectionState;
 
+  public globalConnectionState = this.connectionProvider.connectionState;
+
   public listeningState = this.bt.listeningState;
   public serverState = this.bt.serverState;
   public serverReady = this.bt.serverReady;
@@ -33,16 +36,21 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
   private subscriptions = [];
 
-  constructor(private readonly bt: BluetoothService) {
+  constructor(
+    private readonly bt: BluetoothService,
+    private readonly connectionProvider: ConnectionProviderService
+  ) {
     super();
 
     this.subscriptions.push(
-      this.bt.connectionState.pipe(
+      this.connectionProvider.connectionState.pipe(
         map(state => state === ConnectionState.Connected),
         distinctUntilChanged(),
         skip(1)
       ).subscribe(async (connected) => {
-        if (!connected && this.toggled.getValue()) {
+        if (connected) {
+          await this.bt.stopListening();
+        } else if (this.toggled.getValue()) {
           if (this.bt.deviceState.getValue() === State.Started) {
             await this.bt.startListening();
           }
@@ -59,7 +67,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
       if (
         this.toggled.getValue() &&
         this.bt.deviceState.getValue() === State.Started &&
-        this.bt.connectionState.getValue() === ConnectionState.None
+        this.connectionProvider.connectionState.getValue() === ConnectionState.None
       ) {
         await this.bt.startListening();
       }
@@ -122,11 +130,8 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
         }
       }
 
-      await this.bt.startListening();
-
-      if (!await waitForSubject(this.listeningState, State.Started, this.cancelSubject)) {
-        this.toggled.next(false);
-        return;
+      if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
+        await this.bt.startListening();
       }
     } else {
       this.toggled.next(false);

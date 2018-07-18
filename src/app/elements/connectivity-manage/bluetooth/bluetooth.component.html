@@ -13,14 +13,20 @@
   </mat-slide-toggle>
 </div>
 
-<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectedDevice | async) !== null">
+<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectionState | async) !== connectionStateType.Connected && (globalConnectionState | async) === connectionStateType.Connected">
+  <div fxLayout="row" fxLayoutAlign="start center" class="status">
+    <span class="list-status">Idle</span>
+  </div>
+</div>
+
+<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectedDevice | async) !== null && (globalConnectionState | async) === connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Connected to {{ (connectedDevice | async).name }}</span>
   </div>
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (connectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
@@ -28,7 +34,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (connectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Ready</span>
     <span class="spacer"></span>
