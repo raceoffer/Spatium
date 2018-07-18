@@ -47,7 +47,8 @@
     "cordova.plugins.diagnostic": "^4.0.8",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5",
+    "xml2js": "^0.4.19"
   },
   "cordova": {
     "plugins": {
