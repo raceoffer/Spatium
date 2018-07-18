@@ -4,18 +4,8 @@ import { ConnectionState, State } from '../../../services/primitives/state';
 import { IConnectivityManage } from '../interface/connectivity-manage';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { requestDialog } from '../../../utils/dialog';
-import { distinctUntilChanged, map, skip, take, takeUntil, filter } from 'rxjs/operators';
-
-async function waitForStateUntil(subject: BehaviorSubject<State>, state: State, cancelSubject: Subject<boolean>) {
-  return  await subject.pipe(
-    map(s => s === state),
-    distinctUntilChanged(),
-    skip(1),
-    filter(s => s),
-    take(1),
-    takeUntil(cancelSubject)
-  ).toPromise();
-}
+import { distinctUntilChanged, map, skip, filter } from 'rxjs/operators';
+import { waitForSubject } from '../../../utils/transformers';
 
 @Component({
   selector: 'app-confirmation-bluetooth-manage',
@@ -126,7 +116,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
         // - Telling us that we should abort the process
         // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
         // - So, here's the story, thank you for your attention
-        if (!await waitForStateUntil(this.deviceState, State.Started, this.cancelSubject)) {
+        if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
           this.toggled.next(false);
           return;
         }
@@ -134,7 +124,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
       await this.bt.startListening();
 
-      if (!await waitForStateUntil(this.listeningState, State.Started, this.cancelSubject)) {
+      if (!await waitForSubject(this.listeningState, State.Started, this.cancelSubject)) {
         this.toggled.next(false);
         return;
       }

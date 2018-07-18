@@ -3,22 +3,12 @@ import { ZeroconfService } from '../../../services/zeroconf.service';
 import { IConnectivityManage } from '../interface/connectivity-manage';
 import { ConnectionState, State } from '../../../services/primitives/state';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, skip } from 'rxjs/operators';
 import { requestDialog } from '../../../utils/dialog';
 import { DeviceService, Platform } from '../../../services/device.service';
+import { waitForSubject } from '../../../utils/transformers';
 
 declare const cordova: any;
-
-async function waitForStateUntil(subject: BehaviorSubject<State>, state: State, cancelSubject: Subject<boolean>) {
-  return  await subject.pipe(
-    map(s => s === state),
-    distinctUntilChanged(),
-    skip(1),
-    filter(s => s),
-    take(1),
-    takeUntil(cancelSubject)
-  ).toPromise();
-}
 
 @Component({
   selector: 'app-confirmation-zeroconf-manage',
@@ -133,7 +123,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
         // - Telling us that we should abort the process
         // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
         // - So, here's the story, thank you for your attention
-        if (!await waitForStateUntil(this.deviceState, State.Started, this.cancelSubject)) {
+        if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
           this.toggled.next(false);
           return;
         }
@@ -141,7 +131,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
       await this.zeroconf.startListening();
 
-      if (!await waitForStateUntil(this.listeningState, State.Started, this.cancelSubject)) {
+      if (!await waitForSubject(this.listeningState, State.Started, this.cancelSubject)) {
         this.toggled.next(false);
         return;
       }

@@ -1,11 +1,11 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
-import { combineLatest, from, Subject, BehaviorSubject } from 'rxjs';
-import { take, takeUntil, map, distinctUntilChanged, mergeMap, mapTo, filter, skip } from 'rxjs/operators';
+import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
+import { map, distinctUntilChanged, mergeMap, mapTo } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ConnectionState, State } from '../../../services/primitives/state';
-import { toBehaviourSubject } from '../../../utils/transformers';
+import { toBehaviourSubject, waitForSubject } from '../../../utils/transformers';
 
 @Component({
   selector: 'app-waiting',
@@ -75,15 +75,7 @@ export class WaitingComponent implements OnInit {
       await this.connectionProviderService.disconnect();
       await this.connectionProviderService.connect(device);
 
-      const connected = await this.connectionProviderService.connectionState.pipe(
-        map(state => state === ConnectionState.Connected),
-        distinctUntilChanged(),
-        filter(s => s),
-        take(1),
-        takeUntil(this.connectionCancelled)
-      ).toPromise();
-
-      if (connected) {
+      if (await waitForSubject(this.connectionProviderService.connectionState, ConnectionState.Connected, this.connectionCancelled)) {
         this.connectedEvent.next();
       }
     } catch (e) {
@@ -103,13 +95,7 @@ export class WaitingComponent implements OnInit {
   public async enableProvider(provider) {
     await provider.service.enable();
 
-    await provider.service.deviceState.pipe(
-      map(state => state === State.Started),
-      distinctUntilChanged(),
-      skip(1),
-      filter((s: boolean) => s),
-      take(1)
-    ).toPromise();
+    await waitForSubject(provider.service.deviceState, State.Started);
 
     await this.connectionProviderService.searchDevices();
   }
