@@ -78,7 +78,6 @@ export class WaitingComponent implements OnInit {
       const connected = await this.connectionProviderService.connectionState.pipe(
         map(state => state === ConnectionState.Connected),
         distinctUntilChanged(),
-        skip(1),
         filter(s => s),
         take(1),
         takeUntil(this.connectionCancelled)
