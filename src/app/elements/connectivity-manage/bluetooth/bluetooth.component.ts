@@ -79,9 +79,8 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
         distinctUntilChanged(),
         skip(1),
         filter(stopped => stopped)
-      ).subscribe(() => {
-        this.cancel();
-        this.toggled.next(false);
+      ).subscribe(async () => {
+        await this.toggle({ checked: false });
       })
     );
   }
@@ -116,18 +115,18 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
         }
 
         await this.bt.enable();
+      }
 
-        // Well, now sit down and listen to daddy:
-        // - Right after we've initiated enabling of the BT
-        // - We start listening to state changes, waiting for State.Started
-        // - That lasts up until we receive the necessary event or this.cancelSubject emits,
-        // - Telling us that we should abort the process
-        // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
-        // - So, here's the story, thank you for your attention
-        if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
-          this.toggled.next(false);
-          return;
-        }
+      // Well, now sit down and listen to daddy:
+      // - Right after we've initiated enabling of the BT
+      // - We start listening to state changes, waiting for State.Started
+      // - That lasts up until we receive the necessary event or this.cancelSubject emits,
+      // - Telling us that we should abort the process
+      // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
+      // - So, here's the story, thank you for your attention
+      if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
+        this.toggled.next(false);
+        return;
       }
 
       if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {

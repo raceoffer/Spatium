@@ -80,7 +80,7 @@ export class WaitingComponent implements OnInit {
       }
     } catch (e) {
       console.log('Connection failure:', e);
-      this.notification.show('Failed to connect to ' + name);
+      this.notification.show('Failed to connect to ' + device.name);
     }
   }
 

@@ -13,12 +13,6 @@
   </mat-slide-toggle>
 </div>
 
-<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectionState | async) !== connectionStateType.Connected && (globalConnectionState | async) === connectionStateType.Connected">
-  <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Idle</span>
-  </div>
-</div>
-
 <div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectedDevice | async) !== null && (connectionState | async) === connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Connected to {{ (connectedDevice | async).name }}</span>
@@ -28,7 +22,16 @@
 <div fxLayout="column" fxLayoutAlign="start stretch"
      *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Initialization</span>
+    <span class="list-status" *ngIf="!(waiting | async)">Initialization</span>
+    <span class="list-status" *ngIf="(waiting | async)">Waiting for network</span>
+    <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
+  </div>
+</div>
+
+<div fxLayout="column" fxLayoutAlign="start stretch"
+     *ngIf="(listeningState | async) == stateType.Stopping">
+  <div fxLayout="row" fxLayoutAlign="start center" class="status">
+    <span class="list-status">Stopping</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
   </div>
 </div>
@@ -36,7 +39,7 @@
 <div fxLayout="column" fxLayoutAlign="start stretch"
      *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Ready</span>
+    <span class="list-status">Awaiting connection</span>
   </div>
 </div>
 

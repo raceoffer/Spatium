@@ -28,16 +28,6 @@
             <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
           </div>
         </mat-nav-list>
-
-        <div
-          class="width-button-container content"
-          fxLayout="column"
-          fxLayoutAlign="center center"
-          *ngIf="(ready | async)">
-          <div class="verify-transaction-text">
-            <span>Awaiting connection from the main device.</span>
-          </div>
-        </div>
       </div>
     </div>
   </mat-sidenav-container>

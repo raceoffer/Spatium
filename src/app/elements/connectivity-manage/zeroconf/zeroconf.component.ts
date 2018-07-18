@@ -32,6 +32,8 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
   public toggled = new BehaviorSubject<boolean>(false);
 
+  public waiting = new BehaviorSubject<boolean>(false);
+
   public cancelSubject = new Subject<boolean>();
 
   private subscriptions = [];
@@ -80,9 +82,8 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
         distinctUntilChanged(),
         skip(1),
         filter(stopped => stopped)
-      ).subscribe(() => {
-        this.cancel();
-        this.toggled.next(false);
+      ).subscribe(async () => {
+        await this.toggle({ checked: false });
       })
     );
   }
@@ -111,7 +112,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
       this.toggled.next(true);
 
       if (this.deviceState.getValue() === State.Stopped) {
-        if (!await requestDialog('The application wants to enable Bluetooth')) {
+        if (!await requestDialog('The application wants to enable Wifi')) {
           this.toggled.next(false);
           return;
         }
@@ -119,19 +120,17 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
         if (this.deviceService.platform !== Platform.IOS) {
           await this.zeroconf.enable();
         }
-
-        // Well, now sit down and listen to daddy:
-        // - Right after we've initiated enabling of the BT
-        // - We start listening to state changes, waiting for State.Started
-        // - That lasts up until we receive the necessary event or this.cancelSubject emits,
-        // - Telling us that we should abort the process
-        // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
-        // - So, here's the story, thank you for your attention
-        if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
-          this.toggled.next(false);
-          return;
-        }
       }
+
+      this.waiting.next(true);
+
+      if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
+        this.waiting.next(false);
+        this.toggled.next(false);
+        return;
+      }
+
+      this.waiting.next(false);
 
       if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
         await this.zeroconf.startListening();
