@@ -196,7 +196,7 @@ export class BluetoothService implements IConnectionProvider {
     this.connectionState.next(ConnectionState.Connecting);
 
     try {
-      await this.plugin.connect({name: device.name, address: device.macAddress});
+      await this.plugin.connect({ address: device.macAddress });
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to connect', e);
       this.connectionState.next(ConnectionState.None);

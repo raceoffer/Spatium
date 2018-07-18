@@ -157,16 +157,6 @@ export class ZeroconfService implements IConnectionProvider {
   public async connect(device: Device) {
     if (device.ip != null) {
       await this.socketClientService.connect(device);
-      // const result = await this.socketClientService.state.pipe(
-      //   distinctUntilChanged(),
-      //   skip(1),
-      //   filter(state => state !== ConnectionState.Connecting),
-      //   take(1)
-      // ).toPromise();
-      //
-      // if (result === ConnectionState.Connected) {
-      //   this.connectedDevice.next(device);
-      // }
     }
   }
 
