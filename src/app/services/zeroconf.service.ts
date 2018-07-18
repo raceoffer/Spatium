@@ -197,7 +197,7 @@ export class ZeroconfService implements IConnectionProvider {
 
   private async checkWiFiState() {
     return await new Promise<boolean>((resolve, reject) => {
-      cordova.plugins.diagnostic.isWifiEnabled(
+      cordova.plugins.diagnostic.isWifiAvailable(
         available => resolve(available as boolean),
         reject
       );
