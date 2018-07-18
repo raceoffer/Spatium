@@ -196,9 +196,8 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(device => {
+    componentRef.instance.connectedEvent.subscribe(device => {
       this.navigationService.acceptOverlay();
-      console.log('Connected to', device);
     });
   }
 

@@ -87,7 +87,7 @@ import { ActivityService } from './services/activity.service';
 import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { ConnectionProviderService } from './services/connection-provider';
-import { ConnectivityService } from './services/connectivity.service';
+import { ZeroconfService } from './services/zeroconf.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
 import { ICOService } from './services/ico.service';
@@ -110,6 +110,8 @@ import { CreateComponent } from './screens/verifier-auth/create/create.component
 import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
 import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
+import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
+import { SyncronizationComponent } from './screens/verifier/syncronization/syncronization.component';
 
 @NgModule({
   declarations: [
@@ -172,7 +174,9 @@ import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
     CreateComponent,
     DecryptComponent,
     VerifierSettingsComponent,
-    TileCoinComponent
+    TileCoinComponent,
+    ConnectivityManageComponent,
+    SyncronizationComponent
   ],
   imports: [
     OverlayModule,
@@ -228,7 +232,7 @@ import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
     IpfsService,
     SocketServerService,
     SocketClientService,
-    ConnectivityService,
+    ZeroconfService,
     ConnectionProviderService
   ],
   bootstrap: [
@@ -265,7 +269,10 @@ import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
     FeedbackComponent,
     CreateComponent,
     DecryptComponent,
-    VerifierSettingsComponent
+    VerifierSettingsComponent,
+    ZeroconfComponent,
+    BluetoothComponent,
+    SyncronizationComponent
   ]
 })
 

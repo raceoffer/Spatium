@@ -79,10 +79,12 @@ export class WalletService {
 
   private paillierKeys = null;
 
-  constructor(private readonly connectionProviderService: ConnectionProviderService,
-              private readonly currencyService: CurrencyService,
-              private readonly keychain: KeyChainService,
-              private readonly workerService: WorkerService) {
+  constructor(
+    private readonly connectionProviderService: ConnectionProviderService,
+    private readonly currencyService: CurrencyService,
+    private readonly keychain: KeyChainService,
+    private readonly workerService: WorkerService
+  ) {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
@@ -161,7 +163,7 @@ export class WalletService {
       this.currencyWallets.set(token, this.tokenWallets.get(token));
     }
 
-    this.connectionProviderService.message.subscribe((message) => {
+    this.connectionProviderService.message.subscribe(message => {
       this.messageSubject.next(JSON.parse(message));
     });
 
@@ -236,7 +238,7 @@ export class WalletService {
         takeUntil(this.cancelSubject.pipe(filter(b => b)))
       ).toPromise();
       if (!remoteSessionKeyObj) {
-        // handle cancel
+        throw new Error('Handshake cancelled');
       }
 
       // pop the queue
@@ -285,7 +287,7 @@ export class WalletService {
         takeUntil(this.cancelSubject.pipe(filter(b => b)))
       ).toPromise();
       if (!newRemoteSessionKeyObj) {
-        // handle cancel
+        throw new Error('Handshake cancelled');
       }
 
       // pop the queue
@@ -301,12 +303,16 @@ export class WalletService {
 
       this.synchronizatonStatus.next(SyncStatus.HandshakeReady);
     } catch (e) {
-      console.log(e);
       this.synchronizatonStatus.next(SyncStatus.None);
+      throw e;
     }
   }
 
   public async startSync() {
+    if (this.synchronizatonStatus.getValue() !== SyncStatus.HandshakeReady) {
+      throw new Error('Trying to synchronize without handshake ready');
+    }
+
     try {
       this.setProgress(0);
 

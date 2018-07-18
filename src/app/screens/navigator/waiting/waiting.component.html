@@ -9,32 +9,38 @@
 </mat-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
-  <mat-progress-bar mode="indeterminate" color="accent"
-                    style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(connecting | async)"></mat-progress-bar>
-  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
+  <mat-progress-bar
+    mode="indeterminate"
+    color="accent"
+    style="width: 100%; position: fixed; z-index: 2;"
+    *ngIf="(connecting | async)">
+  </mat-progress-bar>
 
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
     <mat-nav-list style="width: 100%;">
       <mat-list-item *ngFor="let device of (devices | async)" (click)="connectTo(device)">
         <p class="list-name" mat-line>{{ device.name }}</p>
         <p class="list-info" mat-line>{{ device.macAddress }} {{ device.ip }}</p>
         <mat-icon class="list-icon" *ngIf="device.paired" matSuffix>link</mat-icon>
-        <mat-icon class="list-icon">{{ providers.get(device.provider).icon }}</mat-icon>
-        <span class="{{ providers.get(device.provider).custom_icon }}"></span>
+        <mat-icon class="list-icon">{{ (providers | async).get(device.provider).icon }}</mat-icon>
+        <span class="{{ (providers | async).get(device.provider).custom_icon }}"></span>
       </mat-list-item>
     </mat-nav-list>
 
-    <div class="connect-div" *ngIf="hasDisabled()">
+    <div class="connect-div" *ngIf="(disabledProviders | async).length > 0">
       <span class="message">Cannot find a device?</span>
-      <div *ngFor="let provider of providersArray">
-        <button *ngIf="!(provider.service.enabled | async)" mat-button color="accent"
-                (click)="toggleProvider(provider)">Enable {{provider.name}}
+      <div *ngFor="let provider of (disabledProviders | async)">
+        <button
+          mat-button
+          color="accent"
+          (click)="enableProvider(provider)">
+          Enable {{ provider.name }}
         </button>
       </div>
     </div>
 
     <div style="width: 100%; text-align: center; padding: 5px 0px;">
-      <button mat-icon-button (click)="startDiscovery()" [disabled]="(connecting | async)">
+      <button mat-icon-button (click)="startDiscovery()" [disabled]="(connecting | async) || (discovering | async)">
         <mat-icon class="button-imitator-large" *ngIf="!(discovering | async)">sync</mat-icon>
         <mat-icon class="button-imitator-large sync" *ngIf="discovering | async">sync</mat-icon>
       </button>

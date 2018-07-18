@@ -1,10 +1,8 @@
-import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../services/connection-provider';
-import { CurrencyService } from '../../services/currency.service';
-import { DeviceService } from '../../services/device.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -18,6 +16,9 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
+import { toBehaviourSubject } from '../../utils/transformers';
+import { ConnectionState, State } from '../../services/primitives/state';
+import { SyncronizationComponent } from './syncronization/syncronization.component';
 
 declare const window: any;
 
@@ -26,7 +27,7 @@ declare const window: any;
   templateUrl: './verifier.component.html',
   styleUrls: ['./verifier.component.css']
 })
-export class VerifierComponent implements OnInit {
+export class VerifierComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   public navLinks = [{
     name: 'Export secret',
@@ -60,21 +61,26 @@ export class VerifierComponent implements OnInit {
     }
   }];
 
-  public coinStatusType = Status;
-  public current = 'Verification';
-  public synchedCoins = [];
   public currencyWallets = this.wallet.currencyWallets;
 
-  public ready = this.connectionProviderService.listening;
+  public ready = toBehaviourSubject(this.connectionProviderService.listeningState.pipe(
+    map(state => state === State.Started),
+    distinctUntilChanged()
+  ), false);
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
   public fullySync = this.wallet.fullySync;
   public progress = this.wallet.syncProgress;
 
-  public providersArray = Array.from(this.connectionProviderService.providers.values());
+  public providers = this.connectionProviderService.providers;
+
+  public providersArray = toBehaviourSubject(this.connectionProviderService.providers.pipe(
+    map(providers => Array.from(providers.values()))
+  ), []);
+
   @ViewChild('sidenav') sidenav;
-  public isiOS = this.deviceService.isIOS;
+
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -87,42 +93,46 @@ export class VerifierComponent implements OnInit {
   );
   private subscriptions = [];
 
-  constructor(private readonly router: Router,
-              private readonly deviceService: DeviceService,
-              private readonly wallet: WalletService,
-              private readonly connectionProviderService: ConnectionProviderService,
-              private readonly keychain: KeyChainService,
-              private readonly navigationService: NavigationService,
-              private readonly notification: NotificationService,
-              private readonly currencyService: CurrencyService,
-              private readonly fs: FileService) {
-
-    this.providersArray.forEach((provider) => {
-      this.subscriptions.push(
-        provider.service.enabledEvent.subscribe(() => {
-          if (provider.service.toggled.getValue()) {
-            provider.service.startListening();
-          }
-        }));
-    });
+  constructor(
+    private readonly router: Router,
+    private readonly wallet: WalletService,
+    private readonly connectionProviderService: ConnectionProviderService,
+    private readonly keychain: KeyChainService,
+    private readonly navigationService: NavigationService,
+    private readonly notification: NotificationService,
+    private readonly fs: FileService
+  ) {
+    this.subscriptions.push(
+      this.connectionProviderService.connectionState.pipe(
+        map(state => state === ConnectionState.Connected),
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(async (connected) => {
+        if (connected) {
+          await this.wallet.startHandshake();
+          await this.wallet.startSync();
+        } else {
+          await this.wallet.cancelSync();
+        }
+      })
+    );
 
     this.subscriptions.push(
-      this.connectionProviderService.connectedEvent.subscribe(async () => {
-        await this.connectionProviderService.stopListening(); // zeroconf not stopped
-        await this.wallet.startHandshake();
-        await this.wallet.startSync();
-      }));
-
-    this.subscriptions.push(
-      this.connectionProviderService.disabledEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
-      }));
-
-    this.subscriptions.push(
-      this.connectionProviderService.disconnectedEvent.subscribe(async () => {
-        await this.wallet.cancelSync();
-        await this.connectionProviderService.startListening();
-      }));
+      this.synchronizing.pipe(
+        distinctUntilChanged(),
+        skip(1)
+      ).subscribe(synchronizing => {
+        if (synchronizing) {
+          const componentRef = this.navigationService.pushOverlay(SyncronizationComponent);
+          componentRef.instance.cancelled.subscribe(async () => {
+            await this.wallet.cancelSync();
+            await this.connectionProviderService.disconnect();
+          });
+        } else {
+          this.navigationService.acceptOverlay();
+        }
+      })
+    );
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -161,39 +171,13 @@ export class VerifierComponent implements OnInit {
     });
   }
 
-  public async ngOnInit() {
-    for (const wallet of Array.from(this.wallet.coinWallets.values())) {
-      this.subscriptions.push(
-        wallet.status.subscribe(() => {
-          const coins = [];
-
-          for (const coin of Array.from(this.wallet.coinWallets.keys())) {
-            const status = this.wallet.coinWallets.get(coin).status.getValue();
-
-            if (status === Status.Synchronizing || status === Status.Ready) {
-              const info = this.currencyService.getInfo(coin);
-              coins.push({
-                name: info.name,
-                status: this.wallet.coinWallets.get(coin).status.getValue()
-              });
-            }
-          }
-
-          this.synchedCoins = coins;
-        })
-      );
-    }
-  }
-
   public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
 
     await this.keychain.reset();
     await this.wallet.reset();
-    this.connectionProviderService.disconnect();
-    this.connectionProviderService.stopServiceListening();
-    this.connectionProviderService.resetToggler();
+    await this.connectionProviderService.reset();
   }
 
   async confirm(coin) {
@@ -273,7 +257,6 @@ export class VerifierComponent implements OnInit {
   public onSettings() {
     const componentRef = this.navigationService.pushOverlay(SettingsComponent);
   }
-
 
   public async checkAvailable() {
     return new Promise<boolean>((resolve, ignored) => {

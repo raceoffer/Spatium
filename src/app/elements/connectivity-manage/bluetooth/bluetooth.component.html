@@ -4,20 +4,23 @@
 
   <span class="spacer"></span>
 
-  <mat-slide-toggle mat-list-item class="custom-slide-toggle"
-                    [checked]="(toggled | async) || (connected | async)"
-                    (change)="toggleProvider($event)">
+  <mat-slide-toggle
+    mat-list-item
+    class="custom-slide-toggle"
+    [checked]="(toggled | async)"
+    [disabled]="(listeningState | async) === stateType.Starting || (listeningState | async) === stateType.Stopping"
+    (change)="toggle($event)">
   </mat-slide-toggle>
 </div>
 
-<div fxLayout="column" fxLayoutAlign="start stretch" *ngFor="let device of (connectedDevices | async)">
+<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(connectedDevice | async) !== null && (globalConnectionState | async) === connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Connected to {{device.name}}</span>
+    <span class="list-status">Connected to {{ (connectedDevice | async).name }}</span>
   </div>
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (starting | async) && (toggled | async) && !(connected | async)">
+     *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
@@ -25,20 +28,21 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (listening | async) && (toggled | async) && !(connected | async)">
+     *ngIf="(listeningState | async) == stateType.Stopping">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Ready</span>
-    <span class="spacer"></span>
-    <button mat-button color="accent" class="button-style" *ngIf="!(discoverable | async)" (click)="enableDiscovery()">Enable device discovery</button>
-    <span class="list-status" style="padding-left: 16px;" *ngIf="(discoverable | async)">Discoverable</span>
-    <mat-spinner mode="indeterminate" diameter="13" color="accent" *ngIf="(discoverable | async)"></mat-spinner>
+    <span class="list-status">Stopping</span>
+    <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
   </div>
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(enabled | async) && (stopping | async) && !(connected | async)">
+     *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status">Stopping</span>
+    <span class="list-status">Awaiting connection</span>
+    <span class="spacer"></span>
+    <button mat-button color="accent" class="button-style" *ngIf="(discoveryState | async) === stateType.Stopped" (click)="enableDiscovery()">Enable device discovery</button>
+    <span class="list-status" style="padding-left: 16px;" *ngIf="(discoveryState | async) === stateType.Started">Discoverable</span>
+    <mat-spinner mode="indeterminate" diameter="13" color="accent" *ngIf="(discoveryState | async) !== stateType.Started && (discoveryState | async) !== stateType.Stopped"></mat-spinner>
   </div>
 </div>
 

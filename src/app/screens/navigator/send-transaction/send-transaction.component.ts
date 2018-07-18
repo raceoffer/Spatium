@@ -14,6 +14,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
+import { ConnectionState } from "../../../services/primitives/state";
 
 declare const cordova: any;
 
@@ -91,7 +92,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public allowFeeConfiguration = false;
 
-  public connected = this.connectionProviderService.connected;
+  public connected = toBehaviourSubject(this.connectionProviderService.connectionState.pipe(
+    map(state => state === ConnectionState.Connected),
+    distinctUntilChanged()
+  ), false);
 
   public currencyWallet: CurrencyWallet = null;
 
