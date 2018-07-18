@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, interval, merge } from 'rxjs';
-import { distinctUntilChanged, filter, skip, take } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
 import { DeviceService } from './device.service';
 import { DiscoveryService } from './discovery.service';
@@ -59,7 +59,19 @@ export class ZeroconfService implements IConnectionProvider {
 
   public devices = this.discoveryService.devices;
 
-  public connectedDevice = new BehaviorSubject<Device>(null);
+  public connectedDevice = toBehaviourSubject(combineLatest([
+    this.socketServerService.connectedDevice,
+    this.socketClientService.connectedDevice
+  ]).pipe(
+    map(([serverDevice, clientDevice]) => {
+      // Just for the case of unambiguity we prefer the client
+      if (clientDevice !== null) {
+        return clientDevice;
+      } else {
+        return serverDevice;
+      }
+    })
+  ), null);
 
   public message = toReplaySubject(merge(
     this.socketClientService.message,
@@ -144,18 +156,17 @@ export class ZeroconfService implements IConnectionProvider {
 
   public async connect(device: Device) {
     if (device.ip != null) {
-      this.socketClientService.connect(device.ip);
-
-      const result = await this.socketClientService.state.pipe(
-        distinctUntilChanged(),
-        skip(1),
-        filter(state => state !== ConnectionState.Connecting),
-        take(1)
-      ).toPromise();
-
-      if (result === ConnectionState.Connected) {
-        this.connectedDevice.next(device);
-      }
+      await this.socketClientService.connect(device);
+      // const result = await this.socketClientService.state.pipe(
+      //   distinctUntilChanged(),
+      //   skip(1),
+      //   filter(state => state !== ConnectionState.Connecting),
+      //   take(1)
+      // ).toPromise();
+      //
+      // if (result === ConnectionState.Connected) {
+      //   this.connectedDevice.next(device);
+      // }
     }
   }
 

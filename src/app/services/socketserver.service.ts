@@ -1,6 +1,8 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ConnectionState, State } from './primitives/state';
+import { ProviderType } from './interfaces/connection-provider';
+import { Device } from './primitives/device';
 
 declare const cordova: any;
 
@@ -10,6 +12,8 @@ export class SocketServerService {
   public connectionState = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
   public message = new Subject<string>();
+
+  public connectedDevice = new BehaviorSubject<Device>(null);
 
   private currentPeer = new BehaviorSubject<string>(null);
 
@@ -32,6 +36,15 @@ export class SocketServerService {
             cordova.plugins.wsserver.close(conn);
           } else {
             this.currentPeer.next(conn.uuid);
+
+            const match = conn.resource.match(/^\/\?name=([^\s&]*)/);
+
+            this.connectedDevice.next(new Device(
+              ProviderType.ZEROCONF,
+              match.length > 1 ? decodeURI(match[1]) : 'Unknown',
+              null,
+              conn.remoteAddr
+            ));
             this.connectionState.next(ConnectionState.Connected);
           }
         }),
@@ -41,6 +54,7 @@ export class SocketServerService {
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {
             this.connectionState.next(ConnectionState.None);
+            this.connectedDevice.next(null);
             this.currentPeer.next(null);
           }
         }),

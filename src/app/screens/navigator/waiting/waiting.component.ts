@@ -73,10 +73,18 @@ export class WaitingComponent implements OnInit {
 
     try {
       await this.connectionProviderService.disconnect();
+      await this.connectionProviderService.connect(device);
 
-      await from(this.connectionProviderService.connect(device)).pipe(take(1), takeUntil(this.connectionCancelled)).toPromise();
+      const connected = await this.connectionProviderService.connectionState.pipe(
+        map(state => state === ConnectionState.Connected),
+        distinctUntilChanged(),
+        skip(1),
+        filter(s => s),
+        take(1),
+        takeUntil(this.connectionCancelled)
+      ).toPromise();
 
-      if (this.connected.getValue()) {
+      if (connected) {
         this.connectedEvent.next();
       }
     } catch (e) {
