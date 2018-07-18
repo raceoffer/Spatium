@@ -1,4 +1,5 @@
 declare const window: any;
+declare const device: any;
 
 export async function checkAvailable() {
   return new Promise<boolean>((resolve, ignored) => {
@@ -14,7 +15,11 @@ export async function checkExisting() {
 
 export async function getTouchPassword() {
   return new Promise<string>((resolve) => {
-    window.plugins.touchid.verify('spatium', '', pincode => resolve(pincode));
+    // !!! On iOS the message is required by the OS
+    let message = 'Unlock Spatium secret';
+    message = device.platform === 'iOS' ? message : '';
+       
+    window.plugins.touchid.verify('spatium', message, pincode => resolve(pincode));
   });
 }
 
