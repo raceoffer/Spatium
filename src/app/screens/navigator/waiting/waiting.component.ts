@@ -1,7 +1,7 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { combineLatest, from, Subject, BehaviorSubject } from 'rxjs';
-import { take, takeUntil, map, distinctUntilChanged, mergeMap, mapTo } from 'rxjs/operators';
-import { ConnectionProviderService, Provider } from '../../../services/connection-provider';
+import { take, takeUntil, map, distinctUntilChanged, mergeMap, mapTo, filter, skip } from 'rxjs/operators';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ConnectionState, State } from '../../../services/primitives/state';
@@ -39,7 +39,7 @@ export class WaitingComponent implements OnInit {
   ), []);
 
   public providerStateChange = this.providersArray.pipe(
-    map(providers => providers.map(provider => provider.service.state)),
+    map(providers => providers.map(provider => provider.service.deviceState)),
     mergeMap(providerStates => combineLatest(providerStates as Array<BehaviorSubject<State>>)),
     distinctUntilChanged(),
     mapTo(null)
@@ -49,7 +49,7 @@ export class WaitingComponent implements OnInit {
     this.providersArray,
     this.providerStateChange
   ]).pipe(
-    map(([providerArray, ignored]) => providerArray.filter(provider => provider.service.state.getValue() === State.Stopped))
+    map(([providerArray, ignored]) => providerArray.filter(provider => provider.service.deviceState.getValue() === State.Stopped))
   ), []);
 
   @Output() public connectedEvent = new EventEmitter<any>();
@@ -89,12 +89,22 @@ export class WaitingComponent implements OnInit {
     await this.connectionProviderService.searchDevices();
   }
 
-  async toggleProvider(provider: Provider) {
-    // await this.connectionProviderService.toggleProvider(provider.provider);
-  }
-
   public cancel() {
     this.connectionCancelled.next();
+  }
+
+  public async enableProvider(provider) {
+    await provider.service.enable();
+
+    await provider.service.deviceState.pipe(
+      map(state => state === State.Started),
+      distinctUntilChanged(),
+      skip(1),
+      filter((s: boolean) => s),
+      take(1)
+    ).toPromise();
+
+    await this.connectionProviderService.searchDevices();
   }
 
   onBack() {

@@ -15,7 +15,7 @@ declare const navigator;
 
 @Injectable()
 export class ZeroconfService implements IConnectionProvider {
-  public state = new BehaviorSubject<State>(State.Stopped);
+  public deviceState = new BehaviorSubject<State>(State.Stopped);
 
   public connectionState = toBehaviourSubject(
     combineLatest([
@@ -33,10 +33,13 @@ export class ZeroconfService implements IConnectionProvider {
     ConnectionState.None
   );
 
-  public listeningState = toBehaviourSubject(
+  public serverState = this.socketServerService.state;
+  public listeningState = this.discoveryService.advertising;
+
+  public serverReady = toBehaviourSubject(
     combineLatest([
-      this.discoveryService.advertising,
-      this.socketServerService.state
+      this.listeningState,
+      this.serverState
     ], (discoveryState, serverState) => {
       if (discoveryState === serverState) {
         return serverState;
@@ -77,16 +80,16 @@ export class ZeroconfService implements IConnectionProvider {
         try {
           if (await this.checkWiFiState()) {
             if (navigator.connection.type === 'wifi') {
-              this.state.next(State.Started);
+              this.deviceState.next(State.Started);
             } else {
-              this.state.next(State.Starting);
+              this.deviceState.next(State.Starting);
             }
           } else {
-            this.state.next(State.Stopped);
+            this.deviceState.next(State.Stopped);
           }
         } catch (error) {
           console.error('The following error occurred: ' + error);
-          this.state.next(State.Stopped);
+          this.deviceState.next(State.Stopped);
         }
       });
     });
@@ -99,19 +102,38 @@ export class ZeroconfService implements IConnectionProvider {
     ]);
   }
 
+  public async startServer() {
+    await this.socketServerService.start();
+  }
 
-  public async startListening() {
+  public async stopServer() {
     await Promise.all([
-      this.socketServerService.start(),
-      this.discoveryService.startAdvertising()
+      this.socketServerService.stop(),
+      await this.discoveryService.stopAdvertising()
     ]);
   }
 
+  public async startListening() {
+    if (this.serverState.getValue() !== State.Started) {
+      console.log('Cannot start listening with stopped server');
+      return;
+    }
+
+    if (this.listeningState.getValue() !== State.Stopped) {
+      console.log('Failed to start listening while still listening');
+      return;
+    }
+
+    await this.discoveryService.startAdvertising();
+  }
+
   public async stopListening() {
-    await Promise.all([
-      this.socketServerService.stop(),
-      this.discoveryService.stopAdvertising()
-    ]);
+    if (this.listeningState.getValue() !== State.Started) {
+      console.log('Failed to stop listening while not listening');
+      return;
+    }
+
+    await this.discoveryService.stopAdvertising();
   }
 
   // Client interface

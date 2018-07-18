@@ -1,23 +1,43 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject,  Subject, timer } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject, timer } from 'rxjs';
 import { DeviceService } from './device.service';
 import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
+import { toBehaviourSubject } from '../utils/transformers';
 
 declare const cordova: any;
 declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
-  public state = new BehaviorSubject<State>(State.Stopped);
+  public deviceState = new BehaviorSubject<State>(State.Stopped);
   public connectionState = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
   public searchState = new BehaviorSubject<State>(State.Stopped);
   public discoveryState = new BehaviorSubject<State>(State.Stopped);
 
+  public serverState = new BehaviorSubject<State>(State.Stopped);
   public listeningState = new BehaviorSubject<State>(State.Stopped);
+
+  public serverReady = toBehaviourSubject(
+    combineLatest([
+      this.listeningState,
+      this.serverState
+    ], (discoveryState, serverState) => {
+      if (discoveryState === serverState) {
+        return serverState;
+      } else if ([discoveryState, serverState].some(v => v === State.Starting)) {
+        return State.Starting;
+      } else if ([discoveryState, serverState].some(v => v === State.Stopping)) {
+        return State.Stopping;
+      } else {
+        return State.Starting;
+      }
+    }),
+    State.Stopped
+  );
 
   public devices = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
   public connectedDevice = new BehaviorSubject<Device>(null);
@@ -34,7 +54,7 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin = cordova.plugins.bluetooth;
 
       this.plugin.setStateCallback(state => {
-        this.state.next(state);
+        this.deviceState.next(state);
       });
 
       this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
@@ -79,7 +99,7 @@ export class BluetoothService implements IConnectionProvider {
       }));
 
       this.plugin.getState().then(state => this.ngZone.run(() => {
-        this.state.next(state);
+        this.deviceState.next(state);
       }));
 
       this.plugin.getListening().then(listening => this.ngZone.run(() => {
@@ -99,7 +119,41 @@ export class BluetoothService implements IConnectionProvider {
     ]);
   }
 
+  async startServer() {
+    if (this.serverState.getValue() !== State.Stopped) {
+      console.log('Trying to start server while still not finised');
+      return;
+    }
+
+    this.serverState.next(State.Started);
+  }
+
+  async stopServer() {
+    if (this.serverState.getValue() !== State.Started) {
+      console.log('Trying to stop server while still not started');
+      return;
+    }
+
+    this.serverState.next(State.Stopping);
+
+    try {
+      if (this.listeningState.getValue() === State.Started) {
+        await this.stopListening();
+      }
+      this.serverState.next(State.Stopped);
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to stop server', e);
+      this.serverState.next(State.Started);
+      throw e;
+    }
+  }
+
   async startListening() {
+    if (this.serverState.getValue() !== State.Started) {
+      console.log('Cannot start listening with stopped server');
+      return;
+    }
+
     if (this.listeningState.getValue() !== State.Stopped) {
       console.log('Trying to start listening while still not finised');
       return;
@@ -222,18 +276,18 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   async enable() {
-    if (this.state.getValue() !== State.Stopped) {
+    if (this.deviceState.getValue() !== State.Stopped) {
       console.log('Trying to enable enabled BT');
       return;
     }
 
-    this.state.next(State.Starting);
+    this.deviceState.next(State.Starting);
 
     try {
       await this.plugin.enable();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to enable BT', e);
-      this.state.next(State.Stopped);
+      this.deviceState.next(State.Stopped);
       throw e;
     }
   }

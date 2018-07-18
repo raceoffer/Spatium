@@ -8,9 +8,13 @@ export enum ProviderType {
 }
 
 export interface IConnectionProvider {
-  state: BehaviorSubject<State>;
+  deviceState: BehaviorSubject<State>;
+
   connectionState: BehaviorSubject<ConnectionState>;
+
+  serverState: BehaviorSubject<State>;
   listeningState: BehaviorSubject<State>;
+  serverReady: BehaviorSubject<State>;
 
   searchState: BehaviorSubject<State>;
   discoveryState: BehaviorSubject<State>;
@@ -22,6 +26,9 @@ export interface IConnectionProvider {
 
   enable();
   reset();
+
+  startServer();
+  stopServer();
 
   startListening();
   stopListening();

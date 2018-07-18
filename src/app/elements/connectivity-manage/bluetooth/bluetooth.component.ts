@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BluetoothService } from '../../../services/bluetooth.service';
 import { ConnectionState, State } from '../../../services/primitives/state';
 import { IConnectivityManage } from '../interface/connectivity-manage';
@@ -22,15 +22,19 @@ async function waitForStateUntil(subject: BehaviorSubject<State>, state: State, 
   templateUrl: './bluetooth.component.html',
   styleUrls: ['./bluetooth.component.css', '../connectivity-manage.css']
 })
-export class BluetoothComponent extends IConnectivityManage implements OnDestroy {
+export class BluetoothComponent extends IConnectivityManage implements OnInit, OnDestroy {
   public stateType = State;
   public connectionStateType = ConnectionState;
 
   public connectedDevice = this.bt.connectedDevice;
 
-  public state = this.bt.state;
+  public deviceState = this.bt.deviceState;
   public connectionState = this.bt.connectionState;
+
   public listeningState = this.bt.listeningState;
+  public serverState = this.bt.serverState;
+  public serverReady = this.bt.serverReady;
+
   public discoveryState = this.bt.discoveryState;
 
   public toggled = new BehaviorSubject<boolean>(false);
@@ -49,15 +53,30 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
         skip(1)
       ).subscribe(async (connected) => {
         if (!connected && this.toggled.getValue()) {
-          if (this.bt.state.getValue() === State.Started) {
+          if (this.bt.deviceState.getValue() === State.Started) {
             await this.bt.startListening();
           }
         }
       })
     );
 
+    this.subscriptions.push(this.bt.listeningState.pipe(
+      map(state => state === State.Stopped),
+      distinctUntilChanged(),
+      skip(1),
+      filter(s => s)
+    ).subscribe(async () => {
+      if (
+        this.toggled.getValue() &&
+        this.bt.deviceState.getValue() === State.Started &&
+        this.bt.connectionState.getValue() === ConnectionState.None
+      ) {
+        await this.bt.startListening();
+      }
+    }));
+
     this.subscriptions.push(
-      this.bt.state.pipe(
+      this.bt.deviceState.pipe(
         map(state => state !== State.Started),
         distinctUntilChanged(),
         skip(1),
@@ -69,6 +88,10 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
     );
   }
 
+  async ngOnInit() {
+    await this.bt.startServer();
+  }
+
   async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
@@ -76,7 +99,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
     this.cancel();
 
     try {
-      await this.bt.stopListening();
+      await this.bt.stopServer();
     } catch (ignored) {}
 
     try {
@@ -88,7 +111,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
     if (event.checked) {
       this.toggled.next(true);
 
-      if (this.state.getValue() === State.Stopped) {
+      if (this.deviceState.getValue() === State.Stopped) {
         if (!await requestDialog('The application wants to enable Bluetooth')) {
           this.toggled.next(false);
           return;
@@ -103,7 +126,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnDestroy
         // - Telling us that we should abort the process
         // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
         // - So, here's the story, thank you for your attention
-        if (!await waitForStateUntil(this.state, State.Started, this.cancelSubject)) {
+        if (!await waitForStateUntil(this.deviceState, State.Started, this.cancelSubject)) {
           this.toggled.next(false);
           return;
         }

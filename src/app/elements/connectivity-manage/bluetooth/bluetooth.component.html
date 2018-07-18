@@ -8,6 +8,7 @@
     mat-list-item
     class="custom-slide-toggle"
     [checked]="(toggled | async)"
+    [disabled]="(listeningState | async) === stateType.Starting || (listeningState | async) === stateType.Stopping"
     (change)="toggle($event)">
   </mat-slide-toggle>
 </div>
@@ -19,7 +20,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (listeningState | async) !== stateType.Started && (connectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (connectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
@@ -27,7 +28,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (listeningState | async) === stateType.Started && (connectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (connectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Ready</span>
     <span class="spacer"></span>

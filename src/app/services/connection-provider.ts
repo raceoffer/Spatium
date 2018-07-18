@@ -45,9 +45,9 @@ function mergeConnectionStates(states: [ConnectionState]): ConnectionState {
 export class ConnectionProviderService implements IConnectionProvider {
   public providers = new BehaviorSubject<Map<ProviderType, Provider>>(new Map<ProviderType, Provider>());
 
-  public state = toBehaviourSubject(this.providers.pipe(
+  public deviceState = toBehaviourSubject(this.providers.pipe(
     map(providers => {
-      return Array.from(providers.values()).map(provider => provider.service.state);
+      return Array.from(providers.values()).map(provider => provider.service.deviceState);
     }),
     mergeMap(states => combineLatest(states)),
     map(mergeStates)
@@ -60,6 +60,22 @@ export class ConnectionProviderService implements IConnectionProvider {
     mergeMap(states => combineLatest(states)),
     map(mergeConnectionStates)
   ), ConnectionState.None);
+
+  public serverState = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.serverState);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
+
+  public serverReady = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.serverReady);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(mergeStates)
+  ), State.Stopped);
 
   public listeningState = toBehaviourSubject(this.providers.pipe(
     map(providers => {
@@ -149,7 +165,7 @@ export class ConnectionProviderService implements IConnectionProvider {
   public async enable() {
     await Promise.all(
       Array.from(this.providers.getValue().values()).filter(
-        provider => provider.service.state.getValue() !== State.Started
+        provider => provider.service.deviceState.getValue() !== State.Started
       ).map(
         provider => provider.service.enable()
       )
@@ -167,7 +183,7 @@ export class ConnectionProviderService implements IConnectionProvider {
   public async searchDevices(duration = 10 * 1000) {
     await Promise.all(
       Array.from(this.providers.getValue().values()).filter(
-        provider => provider.service.state.getValue() === State.Started
+        provider => provider.service.deviceState.getValue() === State.Started
       ).map(
         provider => provider.service.searchDevices(duration)
       )
@@ -207,6 +223,30 @@ export class ConnectionProviderService implements IConnectionProvider {
         provider => provider.service.connectionState.getValue() === ConnectionState.Connected
       ).map(
         provider => provider.service.send(message)
+      )
+    );
+  }
+
+  public async startServer() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.serverState.getValue() === State.Stopped
+      ).map(
+        provider => provider.service.startServer()
+      )
+    );
+  }
+
+  public async stopServer() {
+    if (this.serverState.getValue() !== State.Started) {
+      console.log('Trying to stop listening while not listening');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.serverState.getValue() === State.Started
+      ).map(
+        provider => provider.service.stopServer()
       )
     );
   }
