@@ -26,7 +26,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
   public listeningState = this.bt.listeningState;
   public serverState = this.bt.serverState;
-  public serverReady = this.bt.serverReady;
+  public connectableState = this.bt.connectableState;
 
   public discoveryState = this.bt.discoveryState;
 

@@ -21,7 +21,7 @@ export class BluetoothService implements IConnectionProvider {
   public serverState = new BehaviorSubject<State>(State.Stopped);
   public listeningState = new BehaviorSubject<State>(State.Stopped);
 
-  public serverReady = toBehaviourSubject(
+  public connectableState = toBehaviourSubject(
     combineLatest([
       this.listeningState,
       this.serverState
