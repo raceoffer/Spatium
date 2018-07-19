@@ -29,6 +29,10 @@ export class DiscoveryService {
     return (await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject)) as any).ip;
   }
 
+  async reset() {
+    return await new Promise((resolve, reject) => cordova.plugins.zeroconf.reInit(resolve, reject));
+  }
+
   async startAdvertising() {
     if (this.advertising.getValue() !== State.Stopped) {
       return;
@@ -71,7 +75,6 @@ export class DiscoveryService {
       this.advertising.next(State.Stopped);
       return;
     }
-
   }
 
   async stopAdvertising() {

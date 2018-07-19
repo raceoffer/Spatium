@@ -238,7 +238,12 @@ export class BluetoothService implements IConnectionProvider {
 
   async searchDevices(duration: number) {
     if (this.searchState.getValue() !== State.Stopped) {
-      console.log('Trying to tssrt search while not finished');
+      console.log('Trying to stsrt search while not finished');
+      return;
+    }
+
+    if (this.deviceState.getValue() !== State.Started) {
+      console.log('Trying to search devices with disabled BT');
       return;
     }
 
