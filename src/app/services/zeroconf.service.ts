@@ -206,6 +206,7 @@ export class ZeroconfService implements IConnectionProvider {
     switch (this.listeningState.getValue()) {
       case State.Stopped:
         console.log('Starting listening from stopped state');
+        await this.discoveryService.reset();
         await this.discoveryService.startAdvertising();
         break;
       case State.Stopping:
@@ -213,6 +214,7 @@ export class ZeroconfService implements IConnectionProvider {
         this.listeningStateScheduled.next(true);
         if (await waitForSubject(this.listeningState, State.Stopped, this.interruptListeningSubject)) {
           console.log('Starting listening after it has been stopped (awaited)');
+          await this.discoveryService.reset();
           await this.discoveryService.startAdvertising();
         } else {
           console.log('Scheduled listening start was canceled');

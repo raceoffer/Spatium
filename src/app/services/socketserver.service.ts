@@ -37,11 +37,11 @@ export class SocketServerService {
           } else {
             this.currentPeer.next(conn.uuid);
 
-            const match = conn.resource.match(/^\/\?name=([^\s&]*)/);
+            const match = conn.resource.match(/^\/?\??name=([^\s&]*)/);
 
             this.connectedDevice.next(new Device(
               ProviderType.ZEROCONF,
-              (match && match.length) > 1 ? decodeURI(match[1]) : 'Unknown',
+              (match && (match.length > 1)) ? decodeURI(match[1]) : 'Unknown',
               null,
               conn.remoteAddr
             ));
