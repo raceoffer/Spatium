@@ -33,8 +33,16 @@
         <button
           mat-button
           color="accent"
-          (click)="enableProvider(provider)">
+          (click)="enableProvider(provider)"
+          *ngIf="(provider.service.deviceState | async) === stateType.Stopped">
           Enable {{ provider.name }}
+        </button>
+        <button
+          mat-button
+          color="accent"
+          (click)="enableProvider(provider)"
+          *ngIf="(provider.service.deviceState | async) === stateType.Starting">
+          {{ provider.name }} settings
         </button>
       </div>
     </div>

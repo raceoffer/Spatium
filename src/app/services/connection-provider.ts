@@ -69,9 +69,9 @@ export class ConnectionProviderService implements IConnectionProvider {
     map(mergeStates)
   ), State.Stopped);
 
-  public serverReady = toBehaviourSubject(this.providers.pipe(
+  public connectableState = toBehaviourSubject(this.providers.pipe(
     map(providers => {
-      return Array.from(providers.values()).map(provider => provider.service.serverReady);
+      return Array.from(providers.values()).map(provider => provider.service.connectableState);
     }),
     mergeMap(states => combineLatest(states)),
     map(mergeStates)
@@ -176,6 +176,14 @@ export class ConnectionProviderService implements IConnectionProvider {
     await Promise.all(
       Array.from(this.providers.getValue().values()).map(
         provider => provider.service.reset()
+      )
+    );
+  }
+
+  public async resetDevices() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).map(
+        provider => provider.service.resetDevices()
       )
     );
   }

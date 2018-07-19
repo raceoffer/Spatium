@@ -26,7 +26,10 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
   public connectionState = this.zeroconf.connectionState;
   public listeningState = this.zeroconf.listeningState;
   public serverState = this.zeroconf.serverState;
-  public serverReady = this.zeroconf.serverReady;
+
+  public connectableState = this.zeroconf.connectableState;
+
+  public connectableStateScheduled = this.zeroconf.connectableStateScheduled;
 
   public globalConnectionState = this.connectionProvider.connectionState;
 
@@ -98,30 +101,12 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
     this.cancel();
 
-    try {
-      await this.zeroconf.stopServer();
-    } catch (ignored) {}
-
-    try {
-      await this.zeroconf.disconnect();
-    } catch (ignored) {}
+    await this.zeroconf.reset();
   }
 
   async toggle(event) {
     if (event.checked) {
       this.toggled.next(true);
-
-      if (this.deviceState.getValue() === State.Stopped) {
-        if (!await requestDialog('The application wants to enable Wifi')) {
-          this.toggled.next(false);
-          return;
-        }
-
-        if (this.deviceService.platform !== Platform.IOS) {
-          await this.zeroconf.enable();
-        }
-      }
-
       this.waiting.next(true);
 
       if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
@@ -140,18 +125,23 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
       this.cancel();
 
-      try {
-        await this.zeroconf.stopListening();
-      } catch (ignored) {}
-
-      try {
-        await this.zeroconf.disconnect();
-      } catch (ignored) {}
+      await this.zeroconf.stopListening();
+      await this.zeroconf.disconnect();
     }
   }
 
   public cancel() {
     this.cancelSubject.next(true);
+  }
+
+  async enableWifi() {
+    if (this.deviceService.platform === Platform.Android) {
+      if (await requestDialog('The application wants to enable Wifi')) {
+        await this.zeroconf.enable();
+      }
+    } else {
+      this.networkSettings();
+    }
   }
 
   networkSettings() {

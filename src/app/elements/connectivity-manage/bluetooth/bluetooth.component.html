@@ -20,7 +20,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (serverReady | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (connectableState | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Initialization</span>
     <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
@@ -36,7 +36,7 @@
 </div>
 
 <div fxLayout="column" fxLayoutAlign="start stretch"
-     *ngIf="(toggled | async) && (serverReady | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
+     *ngIf="(toggled | async) && (connectableState | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
     <span class="list-status">Awaiting connection</span>
     <span class="spacer"></span>

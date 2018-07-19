@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, interval, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest, interval, merge, Subject } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
-import { toBehaviourSubject, toReplaySubject } from '../utils/transformers';
+import { toBehaviourSubject, toReplaySubject, waitForSubject } from '../utils/transformers';
 import { DeviceService } from './device.service';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/connection-provider';
@@ -36,7 +36,7 @@ export class ZeroconfService implements IConnectionProvider {
   public serverState = this.socketServerService.state;
   public listeningState = this.discoveryService.advertising;
 
-  public serverReady = toBehaviourSubject(
+  public connectableState = toBehaviourSubject(
     combineLatest([
       this.listeningState,
       this.serverState
@@ -81,6 +81,20 @@ export class ZeroconfService implements IConnectionProvider {
 
   private refreshTimer = interval(500);
 
+  public serverStateScheduled = new BehaviorSubject<boolean>(false);
+  public listeningStateScheduled = new BehaviorSubject<boolean>(false);
+  public connectableStateScheduled = toBehaviourSubject(combineLatest([
+    this.serverStateScheduled,
+    this.listeningStateScheduled
+  ]).pipe(
+    map(([serverStateScheduled, listeningStateScheduled]) => {
+      return serverStateScheduled || listeningStateScheduled;
+    })
+  ), false);
+
+  private interruptServerSubject = new Subject<any>();
+  private interruptListeningSubject = new Subject<any>();
+
   constructor(
     private readonly socketClientService: SocketClientService,
     private readonly socketServerService: SocketServerService,
@@ -110,45 +124,140 @@ export class ZeroconfService implements IConnectionProvider {
   public async reset() {
     await Promise.all([
       this.disconnect(),
+      this.stopServer(),
       this.stopListening()
     ]);
   }
 
   public async startServer() {
-    await this.socketServerService.start();
+    // Cancel any scheduled state change
+    console.log('Socket server start was requested, interrupting other actions');
+
+    this.interruptServerSubject.next();
+
+    switch (this.serverState.getValue()) {
+      case State.Stopped:
+        console.log('Starting socket server from stopped state');
+        await this.socketServerService.start();
+        break;
+      case State.Stopping:
+        console.log('Starting socket server from stopping state, waiting for being stopped');
+        this.serverStateScheduled.next(true);
+        if (await waitForSubject(this.serverState, State.Stopped, this.interruptServerSubject)) {
+          console.log('Starting socket server after it has been stopped (awaited)');
+          await this.socketServerService.start();
+        } else {
+          console.log('Scheduled socket server start was canceled');
+        }
+        this.serverStateScheduled.next(false);
+        break;
+      case State.Starting:
+        console.log('Starting socket server from starting state, perform no actions');
+        break;
+      case State.Started:
+        console.log('Socket server is already started');
+        break;
+    }
   }
 
   public async stopServer() {
-    await Promise.all([
-      this.socketServerService.stop(),
-      await this.discoveryService.stopAdvertising()
-    ]);
+    // Cancel any scheduled state change
+    console.log('Socket server stop was requested, interrupting other actions');
+
+    this.interruptServerSubject.next();
+
+    switch (this.serverState.getValue()) {
+      case State.Started:
+        console.log('Stopping socket server from started state');
+        await this.socketServerService.stop();
+        break;
+      case State.Starting:
+        console.log('Stopping socket server from starting state, waiting for being started');
+        this.serverStateScheduled.next(true);
+        if (await waitForSubject(this.serverState, State.Started, this.interruptServerSubject)) {
+          console.log('Stopping socket server after it has been started (awaited)');
+          await this.socketServerService.stop();
+        } else {
+          console.log('Scheduled socket server stop was canceled');
+        }
+        this.serverStateScheduled.next(false);
+        break;
+      case State.Stopping:
+        console.log('Stopping socket server from sopping state, perform no actions');
+        break;
+      case State.Stopped:
+        console.log('Socket server is already stopped');
+        break;
+    }
   }
 
   public async startListening() {
-    if (this.serverState.getValue() !== State.Started) {
-      console.log('Cannot start listening with stopped server');
-      return;
-    }
+    // Cancel any scheduled state change
+    console.log('Listening start was requested, interrupting other actions');
 
-    if (this.listeningState.getValue() !== State.Stopped) {
-      console.log('Failed to start listening while still listening');
-      return;
-    }
+    this.interruptListeningSubject.next();
 
-    await this.discoveryService.startAdvertising();
+    switch (this.listeningState.getValue()) {
+      case State.Stopped:
+        console.log('Starting listening from stopped state');
+        await this.discoveryService.startAdvertising();
+        break;
+      case State.Stopping:
+        console.log('Starting listening from stopping state, waiting for being stopped');
+        this.listeningStateScheduled.next(true);
+        if (await waitForSubject(this.listeningState, State.Stopped, this.interruptListeningSubject)) {
+          console.log('Starting listening after it has been stopped (awaited)');
+          await this.discoveryService.startAdvertising();
+        } else {
+          console.log('Scheduled listening start was canceled');
+        }
+        this.listeningStateScheduled.next(false);
+        break;
+      case State.Starting:
+        console.log('Starting listening from starting state, perform no actions');
+        break;
+      case State.Started:
+        console.log('Listening is already started');
+        break;
+    }
   }
 
   public async stopListening() {
-    if (this.listeningState.getValue() !== State.Started) {
-      console.log('Failed to stop listening while not listening');
-      return;
-    }
+    // Cancel any scheduled state change
+    console.log('Listening stop was requested, interrupting other actions');
 
-    await this.discoveryService.stopAdvertising();
+    this.interruptListeningSubject.next();
+
+    switch (this.listeningState.getValue()) {
+      case State.Started:
+        console.log('Stopping listening from started state');
+        await this.discoveryService.stopAdvertising();
+        break;
+      case State.Starting:
+        console.log('Stopping listening from starting state, waiting for being started');
+        this.listeningStateScheduled.next(true);
+        if (await waitForSubject(this.listeningState, State.Started, this.interruptListeningSubject)) {
+          console.log('Stopping socket server after it has been started (awaited)');
+          await this.discoveryService.stopAdvertising();
+        } else {
+          console.log('Scheduled listening stop was canceled');
+        }
+        this.listeningStateScheduled.next(false);
+        break;
+      case State.Stopping:
+        console.log('Stopping listening from sopping state, perform no actions');
+        break;
+      case State.Stopped:
+        console.log('Listening is already stopped');
+        break;
+    }
   }
 
   // Client interface
+
+  public async resetDevices() {
+    await this.discoveryService.resetDevices();
+  }
 
   public async searchDevices(duration: number) {
     await this.discoveryService.searchDevices(duration);

@@ -6,6 +6,11 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ConnectionState, State } from '../../../services/primitives/state';
 import { toBehaviourSubject, waitForSubject } from '../../../utils/transformers';
+import { ProviderType } from '../../../services/interfaces/connection-provider';
+import { requestDialog } from '../../../utils/dialog';
+import { DeviceService, Platform } from '../../../services/device.service';
+
+declare const cordova: any;
 
 @Component({
   selector: 'app-waiting',
@@ -49,8 +54,10 @@ export class WaitingComponent implements OnInit {
     this.providersArray,
     this.providerStateChange
   ]).pipe(
-    map(([providerArray, ignored]) => providerArray.filter(provider => provider.service.deviceState.getValue() === State.Stopped))
+    map(([providerArray, ignored]) => providerArray.filter(provider => provider.service.deviceState.getValue() !== State.Started))
   ), []);
+
+  public stateType = State;
 
   @Output() public connectedEvent = new EventEmitter<any>();
 
@@ -59,7 +66,8 @@ export class WaitingComponent implements OnInit {
   constructor(
     private readonly connectionProviderService: ConnectionProviderService,
     private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly deviceService: DeviceService
   ) {}
 
   async ngOnInit() {
@@ -85,6 +93,7 @@ export class WaitingComponent implements OnInit {
   }
 
   async startDiscovery() {
+    await this.connectionProviderService.resetDevices();
     await this.connectionProviderService.searchDevices();
   }
 
@@ -93,11 +102,36 @@ export class WaitingComponent implements OnInit {
   }
 
   public async enableProvider(provider) {
-    await provider.service.enable();
+    switch (provider.provider) {
+      case ProviderType.ZEROCONF:
+        if (provider.service.deviceState.getValue() === State.Stopped) {
+          if (this.deviceService.platform === Platform.Android) {
+            if (await requestDialog('The application wants to enable Wifi')) {
+              await provider.service.enable();
+            }
+          } else {
+            this.networkSettings();
+          }
+        } else {
+          this.networkSettings();
+        }
+        break;
+      case ProviderType.BLUETOOTH:
+        await provider.service.enable();
+        break;
+    }
 
-    await waitForSubject(provider.service.deviceState, State.Started);
+    await waitForSubject(provider.service.deviceState, State.Started, this.connectionCancelled);
 
     await this.connectionProviderService.searchDevices();
+  }
+
+  networkSettings() {
+    if (this.deviceService.platform === Platform.IOS) {
+      cordova.plugins.diagnostic.switchToSettings();
+    } else {
+      cordova.plugins.diagnostic.switchToWifiSettings();
+    }
   }
 
   onBack() {

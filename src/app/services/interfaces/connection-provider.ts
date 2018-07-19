@@ -14,7 +14,7 @@ export interface IConnectionProvider {
 
   serverState: BehaviorSubject<State>;
   listeningState: BehaviorSubject<State>;
-  serverReady: BehaviorSubject<State>;
+  connectableState: BehaviorSubject<State>;
 
   searchState: BehaviorSubject<State>;
   discoveryState: BehaviorSubject<State>;
@@ -33,6 +33,7 @@ export interface IConnectionProvider {
   startListening();
   stopListening();
 
+  resetDevices();
   searchDevices(duration: number);
 
   connect(to: Device);
