@@ -1,0 +1,30 @@
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 6000px;
+}
+
+.carousel-wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  color: rgb(155, 160, 160);
+}
+
+.carousel-inner {
+  height: 90vh;
+}
+
+.carousel-btn-wrapper {
+  height: 10vh;
+}
+
+.carousel-btn {
+  width: 33.33%;
+}
+
+.carousel-inner {
+  display: flex;
+}

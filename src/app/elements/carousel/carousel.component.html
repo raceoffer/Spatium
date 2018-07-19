@@ -1,0 +1,18 @@
+<section class="carousel-wrapper" [ngStyle]="carouselWrapperStyle" (swipeLeft)="next()" (swipeRight)="prev()">
+  <ul class="carousel-inner" #carousel >
+    <li *ngFor="let item of items;" class="carousel-item">
+      <ng-container [ngTemplateOutlet]="item.tpl"></ng-container>
+    </li>
+  </ul>
+  <div class="carousel-btn-wrapper">
+    <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left">
+      < PREV
+    </button>
+    <button (click)="skip()" mat-button class="carousel-btn carousel-btn-skip">
+      SKIP
+    </button>
+    <button (click)="next()" mat-button class="carousel-btn carousel-btn-right">
+      NEXT >
+    </button>
+  </div>
+</section>
