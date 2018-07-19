@@ -9,6 +9,7 @@ import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { SocketClientService } from './socketclient.service';
 import { SocketServerService } from './socketserver.service';
+import { distinctUntilChanged, skip } from 'rxjs/internal/operators';
 
 declare const cordova;
 declare const navigator;
@@ -119,6 +120,11 @@ export class ZeroconfService implements IConnectionProvider {
         }
       });
     });
+
+    this.deviceState.pipe(
+      distinctUntilChanged(),
+      skip(1)
+    ).subscribe(async () => await this.discoveryService.reset());
   }
 
   public async reset() {

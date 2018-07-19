@@ -41,7 +41,7 @@ export class SocketServerService {
 
             this.connectedDevice.next(new Device(
               ProviderType.ZEROCONF,
-              match.length > 1 ? decodeURI(match[1]) : 'Unknown',
+              (match && match.length) > 1 ? decodeURI(match[1]) : 'Unknown',
               null,
               conn.remoteAddr
             ));

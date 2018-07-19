@@ -190,9 +190,7 @@ export class ConnectionProviderService implements IConnectionProvider {
 
   public async searchDevices(duration = 10 * 1000) {
     await Promise.all(
-      Array.from(this.providers.getValue().values()).filter(
-        provider => provider.service.deviceState.getValue() === State.Started
-      ).map(
+      Array.from(this.providers.getValue().values()).map(
         provider => provider.service.searchDevices(duration)
       )
     );
