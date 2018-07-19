@@ -22,6 +22,7 @@
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
+    "cordova-ios": "^4.5.4",
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
@@ -82,7 +83,8 @@
     "platforms": [
       "browser",
       "windows",
-      "android"
+      "android",
+      "ios"
     ]
   },
   "devDependencies": {
