@@ -90,27 +90,6 @@ export class DDSService {
     );
   }
 
-  // public sponsorStore(id, data: any) {
-  //   const httpOptions = {
-  //     headers: new HttpHeaders({
-  //       'Content-Type': 'application/x-www-form-urlencoded',
-  //       'X-Auth-Key': this.secret,
-  //       'Access-Control-Allow-Origin': '*',
-  //     })
-  //   };
-
-  //   const body = new HttpParams()
-  //     .set('data', '0x' + data.toString('hex'));
-
-  //   const url = this.sponsor + '/storage/' + id.toString('hex');
-
-  //   return this.http.post(
-  //     url,
-  //     body,
-  //     httpOptions
-  //   );
-  // }
-
   public sponsorFeedback(data: FormData) {
     let XHR = new XMLHttpRequest();
     XHR.open('POST', this.sponsor + '/feedback');
