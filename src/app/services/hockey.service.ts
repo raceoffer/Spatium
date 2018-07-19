@@ -9,7 +9,7 @@ export class HockeyService {
   get appId(): string {
     switch (this.deviceService.platform) {
       case Platform.Android:
-        return '6a66e9dc6499491187e1bb8c3bfeced9';
+        return '6b6ba70293374813adb0f550308a7cf8';
       case Platform.Windows:
         return 'e5c2e9e03a00418fb37a77c2fc291c51';
       case Platform.IOS:
