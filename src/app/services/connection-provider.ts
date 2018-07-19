@@ -180,6 +180,14 @@ export class ConnectionProviderService implements IConnectionProvider {
     );
   }
 
+  public async resetDevices() {
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).map(
+        provider => provider.service.resetDevices()
+      )
+    );
+  }
+
   public async searchDevices(duration = 10 * 1000) {
     await Promise.all(
       Array.from(this.providers.getValue().values()).filter(

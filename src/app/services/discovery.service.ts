@@ -94,13 +94,17 @@ export class DiscoveryService {
     });
   }
 
+  async resetDevices() {
+    this.devices.next(new Map<string, Device>());
+  }
+
   async searchDevices(duration: number) {
     if (this.discovering.getValue() !== State.Stopped) {
       return;
     }
 
-    this.devices.next(new Map<string, Device>());
     this.discovering.next(State.Starting);
+    this.devices.next(new Map<string, Device>());
 
     cordova.plugins.zeroconf.watch('_spatium._tcp.', 'local.',
       result => this.ngZone.run(() => {

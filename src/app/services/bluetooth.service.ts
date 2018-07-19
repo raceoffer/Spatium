@@ -232,9 +232,13 @@ export class BluetoothService implements IConnectionProvider {
     }
   }
 
+  async resetDevices() {
+    this.devices.next(new Map<string, Device>());
+  }
+
   async searchDevices(duration: number) {
     if (this.searchState.getValue() !== State.Stopped) {
-      console.log('Trying to atsrt search while not finished');
+      console.log('Trying to tssrt search while not finished');
       return;
     }
 

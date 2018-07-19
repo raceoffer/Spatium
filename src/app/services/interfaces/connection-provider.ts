@@ -33,6 +33,7 @@ export interface IConnectionProvider {
   startListening();
   stopListening();
 
+  resetDevices();
   searchDevices(duration: number);
 
   connect(to: Device);

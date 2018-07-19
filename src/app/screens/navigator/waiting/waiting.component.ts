@@ -93,6 +93,7 @@ export class WaitingComponent implements OnInit {
   }
 
   async startDiscovery() {
+    await this.connectionProviderService.resetDevices();
     await this.connectionProviderService.searchDevices();
   }
 

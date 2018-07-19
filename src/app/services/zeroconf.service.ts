@@ -255,6 +255,10 @@ export class ZeroconfService implements IConnectionProvider {
 
   // Client interface
 
+  public async resetDevices() {
+    await this.discoveryService.resetDevices();
+  }
+
   public async searchDevices(duration: number) {
     await this.discoveryService.searchDevices(duration);
   }
