@@ -37,7 +37,7 @@ export class SocketServerService {
           } else {
             this.currentPeer.next(conn.uuid);
 
-            const match = conn.resource.match(/^\/\?name=([^\s&]*)/);
+            const match = conn.resource.match(/^\/?\??name=([^\s&]*)/);
 
             this.connectedDevice.next(new Device(
               ProviderType.ZEROCONF,
