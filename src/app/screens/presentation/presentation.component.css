@@ -1,3 +1,16 @@
+.welcome-title{
+  font-family: Roboto-Bold;
+  font-size: 40px;
+  color: rgb(34, 119, 186);
+  border-bottom: 1px solid rgb(155, 160, 160);
+  width: 100%;
+}
+
+.welcome-text{
+  color: rgb(55, 55, 65);
+  font-size: 20px;
+}
+
 .item {
   width: 100vw;
   height: 100vh;

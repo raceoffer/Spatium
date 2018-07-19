@@ -1,5 +1,24 @@
 <div fxLayout="column" fxLayoutAlign="start center">
   <carousel (close)="onBack()">
+    <ng-container>
+      <ng-container *carouselItem>
+        <div class="item" fxLayout="column" fxLayoutAlign="center start">
+          <div class="welcome-title">
+            <p>Welcome<br>to Spatium</p>
+          </div>
+          <div class="welcome-text">
+            <p>
+              The most secure crypto wallet for over 100 coins and tokens.
+            </p>
+          </div>
+          <div class="welcome-text">
+            <p>
+              There are two modes currently available: <b>Wallet mode</b> and <b>Confirmation mode.</b>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
     <ng-container *ngFor="let item of items;">
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="start center">

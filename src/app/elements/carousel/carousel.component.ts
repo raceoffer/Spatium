@@ -1,20 +1,21 @@
+import { animate, AnimationBuilder, AnimationFactory, AnimationPlayer, style } from '@angular/animations';
 import {
-  EventEmitter,
   Component,
   ContentChildren,
   Directive,
   ElementRef,
+  EventEmitter,
   Input,
   OnInit,
+  Output,
   QueryList,
   ViewChild,
-  ViewChildren,
-  Output
+  ViewChildren
 } from '@angular/core';
-import { CarouselItemDirective } from './carousel-item.directive';
-import { animate, AnimationBuilder, AnimationFactory, AnimationPlayer, style } from '@angular/animations';
 import { NgTouch } from 'angular-touch';
+import { CarouselItemDirective } from '../../directives/carousel-item.directive';
 import { NavigationService } from '../../services/navigation.service';
+import { BehaviorSubject } from "rxjs/Rx";
 
 @Directive({
   selector: '.carousel-item'
@@ -30,14 +31,24 @@ export class CarouselItemElement {
   styleUrls: ['./carousel.component.css']
 })
 export class CarouselComponent implements OnInit {
+  @ContentChildren(CarouselItemDirective) items: QueryList<CarouselItemDirective>;
+  @Input() timing = '250ms ease-in';
+  @Output() close: EventEmitter<any> = new EventEmitter<any>();
+  public carouselWrapperStyle = {}
+
+  @ViewChildren(CarouselItemElement, {read: ElementRef}) private itemsElements: QueryList<ElementRef>;
+  @ViewChild('carousel') private carousel: ElementRef;
   private subscriptions = [];
-  constructor(
-    private builder : AnimationBuilder,
-    private readonly navigationService: NavigationService
-    ) {
+  private player: AnimationPlayer;
+  private itemWidth: number;
+  currentSlide = new BehaviorSubject<number>(0);
+
+  constructor(private builder: AnimationBuilder,
+              private readonly navigationService: NavigationService) {
   }
 
   ngOnInit() {
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async (e) => {
         this.prev();
@@ -45,46 +56,28 @@ export class CarouselComponent implements OnInit {
     );
   }
 
-  @ContentChildren(CarouselItemDirective) items : QueryList<CarouselItemDirective>;
-  @ViewChildren(CarouselItemElement, { read: ElementRef }) private itemsElements : QueryList<ElementRef>;
-  @ViewChild('carousel') private carousel : ElementRef;
-  @Input() timing = '250ms ease-in';
-
-  @Output() close: EventEmitter<any> = new EventEmitter<any>();
-
-  private player : AnimationPlayer;
-  private itemWidth : number;
-  private currentSlide = 0;
-  carouselWrapperStyle = {}
-
   next() {
-    if( this.currentSlide + 1 === this.items.length ) {
+    if (this.currentSlide.getValue() + 1 === this.items.length) {
       this.skip();
       return;
     }
 
-    this.currentSlide = (this.currentSlide + 1) % this.items.length;
-    const offset = this.currentSlide * this.itemWidth;
-    const animation : AnimationFactory = this.buildAnimation(offset);
+    this.currentSlide.next( (this.currentSlide.getValue() + 1) % this.items.length);
+    const offset = this.currentSlide.getValue() * this.itemWidth;
+    const animation: AnimationFactory = this.buildAnimation(offset);
     this.player = animation.create(this.carousel.nativeElement);
     this.player.play();
   }
 
-  private buildAnimation(offset) {
-    return this.builder.build([
-      animate(this.timing, style({ transform: `translateX(-${offset}px)` }))
-    ]);
-  }
-
   prev() {
-    if( this.currentSlide === 0 ) {
+    if (this.currentSlide.getValue() === 0) {
       return;
     }
 
-    this.currentSlide = ((this.currentSlide - 1) + this.items.length) % this.items.length;
-    const offset = this.currentSlide * this.itemWidth;
+    this.currentSlide.next(((this.currentSlide.getValue() - 1) + this.items.length) % this.items.length);
+    const offset = this.currentSlide.getValue() * this.itemWidth;
 
-    const animation : AnimationFactory = this.buildAnimation(offset);
+    const animation: AnimationFactory = this.buildAnimation(offset);
     this.player = animation.create(this.carousel.nativeElement);
     this.player.play();
   }
@@ -105,5 +98,11 @@ export class CarouselComponent implements OnInit {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  private buildAnimation(offset) {
+    return this.builder.build([
+      animate(this.timing, style({transform: `translateX(-${offset}px)`}))
+    ]);
   }
 }

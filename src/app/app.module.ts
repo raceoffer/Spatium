@@ -31,7 +31,9 @@ import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { CarouselItemDirective } from './directives/carousel-item.directive';
 import { EqualToDirective } from './directives/equal-to.directive';
+import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/bluetooth.component';
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
 import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
@@ -113,8 +115,6 @@ import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
-import { CarouselItemDirective } from './elements/carousel/carousel-item.directive';
-import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 
 @NgModule({
   declarations: [

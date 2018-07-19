@@ -1,18 +1,29 @@
 <section class="carousel-wrapper" [ngStyle]="carouselWrapperStyle" (swipeLeft)="next()" (swipeRight)="prev()">
-  <ul class="carousel-inner" #carousel >
+  <ul class="carousel-inner" #carousel>
     <li *ngFor="let item of items;" class="carousel-item">
       <ng-container [ngTemplateOutlet]="item.tpl"></ng-container>
     </li>
   </ul>
-  <div class="carousel-btn-wrapper">
-    <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left">
-      < PREV
-    </button>
-    <button (click)="skip()" mat-button class="carousel-btn carousel-btn-skip">
-      SKIP
-    </button>
-    <button (click)="next()" mat-button class="carousel-btn carousel-btn-right">
-      NEXT >
-    </button>
+  <div class="carousel-btn-wrapper" fxLayout="row" fxLayoutAlign="space-around center">
+    <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
+      <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left" *ngIf="(currentSlide | async) !== 0">
+        < PREV
+      </button>
+    </div>
+    <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
+      <button (click)="skip()" mat-button class="carousel-btn carousel-btn-skip" *ngIf="(currentSlide | async) !== 0">
+        SKIP
+      </button>
+    </div>
+    <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
+      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" *ngIf="(currentSlide | async) !== 0">
+        NEXT >
+      </button>
+      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" color="accent" style="color: white;" *ngIf="(currentSlide | async) === 0">
+        NEXT >
+      </button>
+    </div>
+  </div>
+  <div class="circle" *ngIf="(currentSlide | async) === 0" >
   </div>
 </section>
