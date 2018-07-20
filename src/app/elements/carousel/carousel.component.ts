@@ -13,9 +13,11 @@ import {
   ViewChildren
 } from '@angular/core';
 import { NgTouch } from 'angular-touch';
+import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CarouselItemDirective } from '../../directives/carousel-item.directive';
 import { NavigationService } from '../../services/navigation.service';
-import { BehaviorSubject } from "rxjs/Rx";
+import { toBehaviourSubject } from '../../utils/transformers';
 
 @Directive({
   selector: '.carousel-item'
@@ -34,14 +36,14 @@ export class CarouselComponent implements OnInit {
   @ContentChildren(CarouselItemDirective) items: QueryList<CarouselItemDirective>;
   @Input() timing = '250ms ease-in';
   @Output() close: EventEmitter<any> = new EventEmitter<any>();
-  public carouselWrapperStyle = {}
-
+  public carouselWrapperStyle = {};
+  currentSlide = new BehaviorSubject<number>(0);
+  isMiddle: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map((currentSlide) => ((currentSlide !== 0) && (currentSlide + 1 !== this.items.length)))), false);
   @ViewChildren(CarouselItemElement, {read: ElementRef}) private itemsElements: QueryList<ElementRef>;
   @ViewChild('carousel') private carousel: ElementRef;
   private subscriptions = [];
   private player: AnimationPlayer;
   private itemWidth: number;
-  currentSlide = new BehaviorSubject<number>(0);
 
   constructor(private builder: AnimationBuilder,
               private readonly navigationService: NavigationService) {
@@ -62,7 +64,7 @@ export class CarouselComponent implements OnInit {
       return;
     }
 
-    this.currentSlide.next( (this.currentSlide.getValue() + 1) % this.items.length);
+    this.currentSlide.next((this.currentSlide.getValue() + 1) % this.items.length);
     const offset = this.currentSlide.getValue() * this.itemWidth;
     const animation: AnimationFactory = this.buildAnimation(offset);
     this.player = animation.create(this.carousel.nativeElement);
@@ -91,7 +93,7 @@ export class CarouselComponent implements OnInit {
       this.itemWidth = this.itemsElements.first.nativeElement.getBoundingClientRect().width;
       this.carouselWrapperStyle = {
         width: `${this.itemWidth}px`
-      }
+      };
     });
   }
 

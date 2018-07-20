@@ -11,6 +11,19 @@
   font-size: 20px;
 }
 
+.final-icon{
+  height: 200px;
+  width: 200px;
+  font-size: 200px;
+  color: rgb(34, 119, 186);
+}
+
+.final-text{
+  color: rgb(55, 55, 65);
+  font-size: 20px;
+  text-align: center;
+}
+
 .item {
   width: 100vw;
   height: 100vh;
