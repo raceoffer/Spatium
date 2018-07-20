@@ -26,9 +26,12 @@
 
 .item {
   width: 100vw;
-  height: 100vh;
-  padding: 24px;
+  height: 100%;
+  padding: 24px 24px 0px 24px;
+}
 
+.item .description {
+  text-align: justify;
 }
 
 .item .item-title{

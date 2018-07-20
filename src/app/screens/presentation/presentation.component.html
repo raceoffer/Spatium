@@ -4,7 +4,7 @@
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="center start">
           <div class="welcome-title">
-            <p>Welcome<br>to Spatium</p>
+            <p>Welcome<br>to SPATIUM</p>
           </div>
           <div class="welcome-text">
             <p>
@@ -12,21 +12,16 @@
             </p>
           </div>
           <div class="welcome-text">
-            <p>
-              There are two modes currently available: <b>Wallet mode</b> and <b>Confirmation mode.</b>
-            </p>
+            <p>SPATIUM requires at least two devices to ensure your assets safety: one in <b>Wallet mode</b> and another in <b>Confirmation mode.</b>
           </div>
         </div>
       </ng-container>
     </ng-container>
     <ng-container *ngFor="let item of items;">
       <ng-container *carouselItem>
-        <div class="item" fxLayout="column" fxLayoutAlign="start center">
-          <div class="item-title">{{item.title}}</div>
+        <div class="item" fxLayout="column" fxLayoutAlign="space-between center">
+          <p class="description" [innerHTML]="item.description"></p>
           <img class="item-image" src="{{item.image}}" alt="{{item.title}}">
-          <p class="description">
-            {{item.description}}
-          </p>
         </div>
       </ng-container>
     </ng-container>
@@ -40,7 +35,7 @@
 
           <div class="final-text">
             <p>
-              You are all set up.<br>Enjoy using your Spatium wallet.
+              You are all set up.<br>Enjoy using your SPATIUM wallet.
             </p>
           </div>
         </div>

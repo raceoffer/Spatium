@@ -38,7 +38,8 @@ export class CarouselComponent implements OnInit {
   @Output() close: EventEmitter<any> = new EventEmitter<any>();
   public carouselWrapperStyle = {};
   currentSlide = new BehaviorSubject<number>(0);
-  isMiddle: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map((currentSlide) => ((currentSlide !== 0) && (currentSlide + 1 !== this.items.length)))), false);
+  isFirst: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map(currentSlide => currentSlide === 0)), false);
+  isLast: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map((currentSlide) => ((currentSlide !== 0) && (currentSlide + 1 === this.items.length)))), false);
   @ViewChildren(CarouselItemElement, {read: ElementRef}) private itemsElements: QueryList<ElementRef>;
   @ViewChild('carousel') private carousel: ElementRef;
   private subscriptions = [];

@@ -6,24 +6,27 @@
   </ul>
   <div class="carousel-btn-wrapper" fxLayout="row" fxLayoutAlign="space-around center">
     <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
-      <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left" *ngIf="(isMiddle | async)">
+      <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left" *ngIf="!(isFirst | async) && !(isLast | async)">
         < PREV
       </button>
     </div>
     <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
-      <button (click)="skip()" mat-button class="carousel-btn carousel-btn-skip" *ngIf="(isMiddle | async)">
+      <button (click)="skip()" mat-button class="carousel-btn carousel-btn-skip" *ngIf="!(isFirst | async) && !(isLast | async)">
         SKIP
       </button>
     </div>
     <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
-      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" *ngIf="(isMiddle | async)">
+      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" *ngIf="!(isFirst | async) && !(isLast | async)">
         NEXT >
       </button>
-      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" color="accent" style="color: white;" *ngIf="!(isMiddle | async)">
+      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" color="accent" style="color: white;" *ngIf="(isFirst | async)">
         NEXT >
+      </button>
+      <button (click)="next()" mat-button class="carousel-btn carousel-btn-right" color="accent" style="color: white;" *ngIf="(isLast | async)">
+        FINISH >
       </button>
     </div>
   </div>
-  <div class="circle" *ngIf="!(isMiddle | async)" >
+  <div class="circle" *ngIf="(isFirst | async) || (isLast | async)" >
   </div>
 </section>
