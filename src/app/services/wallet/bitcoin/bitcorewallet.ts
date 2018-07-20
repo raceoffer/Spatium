@@ -3,7 +3,7 @@ import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../connection-provider';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { LoggerService } from '../../logger.service';
-import { Balance, HistoryEntry, Status } from '../currencywallet';
+import { Balance, HistoryEntry, Status, getRandomDelay } from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class BitcoreWallet extends EcdsaCurrencyWallet {
@@ -66,11 +66,11 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
       catchError(e => of(null)));
 
     this.address.next(this.wallet.address);
-    this.routineTimerSub = timer(1000).pipe(
+    this.routineTimerSub = timer(getRandomDelay()).pipe(
       mergeMap(() =>
         request().pipe(
           expand(() =>
-            timer(20000).pipe(
+            timer(60000).pipe(
               mergeMap(() => request())
             )
           )
