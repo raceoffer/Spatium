@@ -43,6 +43,10 @@ export class Balance {
               public unconfirmed: any) {}
 }
 
+export function getRandomDelay(min: number = 1000, max: number = 5000) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 export abstract class CurrencyWallet {
   public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
 
