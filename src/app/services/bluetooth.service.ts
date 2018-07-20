@@ -113,10 +113,9 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   async startServer() {

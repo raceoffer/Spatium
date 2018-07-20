@@ -128,11 +128,9 @@ export class ZeroconfService implements IConnectionProvider {
   }
 
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopServer(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   public async startServer() {
