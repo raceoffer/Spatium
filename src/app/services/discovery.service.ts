@@ -25,24 +25,22 @@ export class DiscoveryService {
     return await new Promise((resolve, reject) => cordova.plugins.deviceName.get(resolve, reject));
   }
 
-  async getDeviceIp() {
-    return (await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject)) as any).ip;
-  }
-
   async reset() {
     return await new Promise((resolve, reject) => cordova.plugins.zeroconf.reInit(resolve, reject));
   }
 
-  async startAdvertising() {
+  async startAdvertising(address, port) {
     if (this.advertising.getValue() !== State.Stopped) {
       return;
     }
 
     this.advertising.next(State.Starting);
 
+    await this.reset();
+
     let hasErrors = false;
 
-    const [hostname, name, ip] = await Promise.all([
+    const [hostname, name] = await Promise.all([
       this.getHostName().catch((e) => {
         console.log(e);
         hasErrors = true;
@@ -50,18 +48,14 @@ export class DiscoveryService {
       this.getDeviceName().catch((e) => {
         console.log(e);
         hasErrors = true;
-      }),
-      this.getDeviceIp().catch((e) => {
-        console.log(e);
-        hasErrors = true;
       })
     ]);
 
     if (!hasErrors) {
       return await new Promise((resolve, reject) => {
-        cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
+        cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, port, {
           name: name,
-          ip: ip
+          ip: address
         }, () => this.ngZone.run(() => {
           this.advertising.next(State.Started);
           resolve();
@@ -120,7 +114,8 @@ export class DiscoveryService {
             ProviderType.ZEROCONF,
             service.txtRecord.name,
             null,
-            service.txtRecord.ip
+            service.txtRecord.ip,
+            service.port
           ));
 
           this.devices.next(devices);
