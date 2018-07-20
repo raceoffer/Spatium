@@ -1,6 +1,6 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet" [class.scroll]="isWindows">
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="toggleNavigation()">
+    <button mat-icon-button class="menu-button" (click)="toggleNavigation()">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -26,7 +26,7 @@
   </mat-toolbar>
 
   <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
-    <button mat-icon-button (click)="toggleSearch(false)">
+    <button mat-icon-button class="back-button" (click)="toggleSearch(false)">
       <mat-icon>arrow_back</mat-icon>
     </button>
 
