@@ -36,25 +36,15 @@ export class DiscoveryService {
 
     this.advertising.next(State.Starting);
 
-    await this.reset();
+    try {
+      await this.reset();
 
-    let hasErrors = false;
+      const hostname = await this.getHostName();
+      const deviceName = await this.getDeviceName();
 
-    const [hostname, name] = await Promise.all([
-      this.getHostName().catch((e) => {
-        console.log(e);
-        hasErrors = true;
-      }),
-      this.getDeviceName().catch((e) => {
-        console.log(e);
-        hasErrors = true;
-      })
-    ]);
-
-    if (!hasErrors) {
       return await new Promise((resolve, reject) => {
         cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, port, {
-          name: name,
+          name: deviceName,
           ip: address
         }, () => this.ngZone.run(() => {
           this.advertising.next(State.Started);
@@ -65,9 +55,9 @@ export class DiscoveryService {
           reject(error);
         }));
       });
-    } else {
+    } catch (e) {
       this.advertising.next(State.Stopped);
-      return;
+      throw e;
     }
   }
 
