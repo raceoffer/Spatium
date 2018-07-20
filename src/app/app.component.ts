@@ -16,37 +16,11 @@ declare const navigator: any;
 export class AppComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
-  @HostListener('document:click', ['$event'])
-  onClick(ev: MouseEvent) {
-    this.onActivity();
-  }
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(ev: MouseEvent) {
-    this.onActivity();
-  }
-  @HostListener('document:mousedown', ['$event'])
-  onMouseDown(ev: MouseEvent) {
-    this.onActivity();
-  }
-  @HostListener('document:keyup', ['$event'])
-  onKeyUp(ev: KeyboardEvent) {
-    this.onActivity();
-  }
-  @HostListener('document:keypress', ['$event'])
-  onKeyPress(ev: KeyboardEvent) {
-    this.onActivity();
-  }
-  @HostListener('document:scroll', ['$event'])
-  onScroll(ev: UIEvent) {
-    this.onActivity();
-  }
-
   constructor(
     private readonly fs: FileService,
     private readonly logger: LoggerService,
     private readonly deviceService: DeviceService,
-    private readonly hockeyService: HockeyService,
-    private readonly activityService: ActivityService
+    private readonly hockeyService: HockeyService
   ) { }
 
   async ngOnInit() {
@@ -64,10 +38,6 @@ export class AppComponent implements OnInit, OnDestroy {
     if (lastLogData) {
       hockeyapp.addMetaData(null, null, lastLogData);
     }
-  }
-
-  onActivity() {
-    this.activityService.onActivity();
   }
 
   ngOnDestroy() {
