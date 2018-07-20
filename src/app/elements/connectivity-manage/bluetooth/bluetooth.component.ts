@@ -31,6 +31,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
   public discoveryState = this.bt.discoveryState;
 
   public toggled = new BehaviorSubject<boolean>(false);
+  public waiting = new BehaviorSubject<boolean>(false);
 
   public cancelSubject = new Subject<boolean>();
 
@@ -107,15 +108,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
   async toggle(event) {
     if (event.checked) {
       this.toggled.next(true);
-
-      if (this.deviceState.getValue() === State.Stopped) {
-        if (!await requestDialog('The application wants to enable Bluetooth')) {
-          this.toggled.next(false);
-          return;
-        }
-
-        await this.bt.enable();
-      }
+      this.waiting.next(true);
 
       // Well, now sit down and listen to daddy:
       // - Right after we've initiated enabling of the BT
@@ -125,9 +118,12 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
       // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
       // - So, here's the story, thank you for your attention
       if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
+        this.waiting.next(false);
         this.toggled.next(false);
         return;
       }
+
+      this.waiting.next(false);
 
       if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
         await this.bt.startListening();
@@ -144,6 +140,12 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
       try {
         await this.bt.disconnect();
       } catch (ignored) {}
+    }
+  }
+
+  async enableBluetooth() {
+    if (await requestDialog('The application wants to enable Bluetooth')) {
+      await this.bt.enable();
     }
   }
 
