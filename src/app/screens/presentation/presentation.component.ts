@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationService } from '../../services/navigation.service';
-
-declare const NativeStorage: any;
+import { setValue } from '../../utils/storage';
 
 @Component({
   selector: 'app-presentation',
@@ -63,7 +62,7 @@ export class PresentationComponent implements OnInit {
   }
 
   async onBack() {
-    NativeStorage.setItem('presentation', 'viewed');
+    await setValue('presentation', 'viewed');
     this.navigationService.back();
   }
 }

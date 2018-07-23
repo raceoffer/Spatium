@@ -1,17 +1,16 @@
 import { AfterViewInit, Component, HostBinding, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
+import { LoginComponent as LoginInput } from '../../inputs/login/login.component';
 import { AuthService, IdFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
-import { LoginComponent as LoginInput } from "../../inputs/login/login.component";
+import { checkNfc, Type } from '../../utils/nfc';
+import { removeValue } from '../../utils/storage';
 
 declare const cordova: any;
-declare const NativeStorage: any;
-
-import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
-import { checkNfc, Type } from "../../utils/nfc";
 
 export enum State {
   Empty,
@@ -40,25 +39,20 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public isNfcAvailable = false;
   public isCameraAvailable = false;
-
-  private subscriptions = [];
-  private cameraChangesCallbackId: number;
-
   @ViewChild(LoginInput) public loginComponent: LoginInput;
-
   public delayed = null;
   public generating = null;
   public valid = null;
+  private subscriptions = [];
+  private cameraChangesCallbackId: number;
 
-  constructor(
-    private readonly router: Router,
-    private readonly authService: AuthService,
-    private readonly notification: NotificationService,
-    private readonly dds: DDSService,
-    private readonly navigationService: NavigationService,
-    private readonly workerService: WorkerService,
-    private readonly ngZone: NgZone,
-  ) {}
+  constructor(private readonly router: Router,
+              private readonly authService: AuthService,
+              private readonly notification: NotificationService,
+              private readonly dds: DDSService,
+              private readonly navigationService: NavigationService,
+              private readonly workerService: WorkerService,
+              private readonly ngZone: NgZone,) {}
 
   async ngOnInit() {
     this.subscriptions.push(
@@ -109,7 +103,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         let bytes = null;
         try {
           bytes = Buffer.from(input, 'hex');
-        } catch (e) {}
+        } catch (e) {
+        }
         if (input && bytes) {
           login = await tryUnpackLogin(bytes, this.workerService.worker);
         }
@@ -149,13 +144,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (exists) {
         this.buttonState = State.Exists;
-      } else if (type === IdFactor.Login){
+      } else if (type === IdFactor.Login) {
         this.buttonState = State.New;
       } else {
         this.buttonState = State.Empty;
         this.notification.show('A Spatium identifier was not found in the storage. Please, sign in with login');
       }
-    } catch(e) {
+    } catch (e) {
       this.notification.show('The storage is unavailable');
       this.buttonState = State.Error;
     }
@@ -170,7 +165,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBack() {
-    NativeStorage.remove('startPath');
+    await removeValue('startPath');
     await this.router.navigate(['/start']);
   }
 }
