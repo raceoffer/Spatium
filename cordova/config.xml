@@ -26,6 +26,7 @@
         <content src="index.html" />
     </platform>
     <platform name="ios">
+        <preference name="Orientation" value="portrait" />
         <edit-config file="*-Info.plist" mode="merge" overwrite="true" target="NSPhotoLibraryUsageDescription">
             <string>This app requires photo library access to save QR codes.</string>
         </edit-config>
@@ -139,6 +140,7 @@
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
     <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#c136ce846f2daf12280fc4b8a2fc31f15d9acc72" />
+    <plugin name="cordova-open-native-settings" spec="^1.5.1" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^6.3.0" />
