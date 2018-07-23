@@ -27,12 +27,9 @@
 }
 
 .logo {
-  width: 40%;
-  max-width: 50%;
-  height: 75%;
-  background-position: center !important;
-  background-size: contain !important;
-  background-repeat: no-repeat;
+  max-width: 35%;
+  max-height: 75%;
+  margin-left: 35px;
 }
 
 .sym {
@@ -100,7 +97,7 @@
 .wallet-description {
   height:100%;
   width: 50%;
-  padding-left: 10px;
+  padding-left: 40px;
   overflow: hidden;
   white-space: normal;
   text-align: left;
