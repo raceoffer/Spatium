@@ -26,8 +26,6 @@ export class StartComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    NativeStorage.remove('startPath');
-
     NativeStorage.getItem('presentation',
       (value) => {},
       (error) => this.ngZone.run(async () => {
@@ -58,6 +56,12 @@ export class StartComponent implements OnInit, OnDestroy {
       const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
     }
+
+    NativeStorage.getItem('startPath',
+      (value) => this.ngZone.run(async () => {
+        await this.router.navigate([value]);
+      })
+    );
   }
 
   ngOnDestroy() {

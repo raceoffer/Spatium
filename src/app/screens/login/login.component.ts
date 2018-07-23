@@ -8,6 +8,7 @@ import { WorkerService } from '../../services/worker.service';
 import { LoginComponent as LoginInput } from "../../inputs/login/login.component";
 
 declare const cordova: any;
+declare const NativeStorage: any;
 
 import { randomBytes, tryUnpackLogin } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from "../../utils/nfc";
@@ -169,6 +170,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBack() {
+    NativeStorage.remove('startPath');
     await this.router.navigate(['/start']);
   }
 }

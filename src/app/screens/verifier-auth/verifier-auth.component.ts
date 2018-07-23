@@ -6,6 +6,8 @@ import { KeyChainService } from '../../services/keychain.service';
 import { FileService } from '../../services/file.service';
 import { NotificationService } from '../../services/notification.service';
 
+declare const NativeStorage: any;
+
 @Component({
   selector: 'app-verifier-auth',
   templateUrl: './verifier-auth.component.html',
@@ -47,6 +49,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   }
 
   public async onBack() {
+    NativeStorage.remove('startPath');
     await this.router.navigate(['/start']);
   }
 
