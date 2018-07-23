@@ -4,6 +4,10 @@ const fs = require('fs'),
   xml2js = require('xml2js');
 
 module.exports = function (context) {
+  if (!context.cmdLine.includes('packageCertificateKeyFile')) {
+    return;
+  }
+
   const basePath = context.opts.projectRoot;
 
   const config = basePath + '/config.xml',
