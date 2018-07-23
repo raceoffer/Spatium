@@ -44,7 +44,8 @@ const appRoutes: Routes = [{
 }, {
   path: 'verifier',
   component: VerifierComponent
-}];
+}
+];
 
 @NgModule({
   imports: [

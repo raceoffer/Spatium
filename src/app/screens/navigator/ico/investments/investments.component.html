@@ -6,7 +6,7 @@
   (backClicked)="onBack()"></app-toolbar>
 
 <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!selector && !investor">
-  <button mat-icon-button (click)="onBack()">
+  <button mat-icon-button class="back-button" (click)="onBack()">
     <mat-icon>arrow_back</mat-icon>
   </button>
 

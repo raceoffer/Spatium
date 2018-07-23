@@ -28,6 +28,7 @@
     "@ionic-native/core": "^4.2.0",
     "@ionic-native/http": "^4.7.0",
     "ajv": "^6.0.0",
+    "angular-touch": "^1.7.2",
     "angular2-qrcode": "^2.0.1",
     "base-58": "0.0.1",
     "cashaddrjs": "^0.2.8",
