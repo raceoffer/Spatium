@@ -15,9 +15,31 @@ export class SocketServerService {
 
   public connectedDevice = new BehaviorSubject<Device>(null);
 
+  public port = 3445;
+
   private currentPeer = new BehaviorSubject<string>(null);
 
   constructor(private ngZone: NgZone) {}
+
+  public async getIpv4Address() {
+    return new Promise<string>((resolve, reject) => {
+      cordova.plugins.wsserver.getInterfaces(
+        interfaces => {
+          if (interfaces.hasOwnProperty('wlan0')) {
+            const wlan0 = interfaces.wlan0;
+            if (wlan0.hasOwnProperty('ipv4Addresses')) {
+              const ipv4Addresses = wlan0.ipv4Addresses;
+              if (ipv4Addresses.length > 0) {
+                resolve(ipv4Addresses[0]);
+              }
+            }
+          }
+          reject(new Error('No valid interfaces found'));
+        },
+        reject
+      );
+    });
+  }
 
   public async start() {
     if (this.state.getValue() !== State.Stopped) {
@@ -27,7 +49,7 @@ export class SocketServerService {
     this.state.next(State.Starting);
 
     return await new Promise((resolve, reject) =>
-      cordova.plugins.wsserver.start(3445, {
+      cordova.plugins.wsserver.start(this.port, {
         onFailure: () => this.ngZone.run(() => {
           this.state.next(State.Stopped);
         }),
@@ -43,7 +65,8 @@ export class SocketServerService {
               ProviderType.ZEROCONF,
               (match && (match.length > 1)) ? decodeURI(match[1]) : 'Unknown',
               null,
-              conn.remoteAddr
+              conn.remoteAddr,
+              this.port
             ));
             this.connectionState.next(ConnectionState.Connected);
           }
@@ -59,7 +82,8 @@ export class SocketServerService {
           }
         }),
         tcpNoDelay: true
-      }, () => this.ngZone.run(() => {
+      }, (addr, port) => this.ngZone.run(() => {
+        this.port = port;
         this.state.next(State.Started);
         resolve();
       }), reason => this.ngZone.run(() => {
