@@ -31,12 +31,16 @@ import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { CarouselItemDirective } from './directives/carousel-item.directive';
 import { EqualToDirective } from './directives/equal-to.directive';
+import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/bluetooth.component';
+import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
 import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
+import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
 import { GraphicKeyComponent } from './inputs/graphic-key/graphic-key.component';
 import { LoginComponent } from './inputs/login/login.component';
@@ -75,26 +79,32 @@ import { SendTransactionComponent } from './screens/navigator/send-transaction/s
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
 import { WaitingComponent } from './screens/navigator/waiting/waiting.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
+import { PresentationComponent } from './screens/presentation/presentation.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { SecretExportComponent } from './screens/secret-export/secret-export.component';
 import { SecretImportComponent } from './screens/secret-import/secret-import.component';
 import { StartComponent } from './screens/start/start.component';
+import { CreateComponent } from './screens/verifier-auth/create/create.component';
+import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
+import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
+import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
+import { SyncronizationComponent } from './screens/verifier/syncronization/syncronization.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { VerifyTransactionComponent } from './screens/verifier/verify-transaction/verify-transaction.component';
 import { ActivityService } from './services/activity.service';
 import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { ConnectionProviderService } from './services/connection-provider';
-import { ZeroconfService } from './services/zeroconf.service';
 import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
-import { ICOService } from './services/ico.service';
 import { DeviceService } from './services/device.service';
 import { DiscoveryService } from './services/discovery.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
+import { ICOService } from './services/ico.service';
+import { IpfsService } from './services/ipfs.service';
 import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
 import { NavigationService } from './services/navigation.service';
@@ -104,14 +114,7 @@ import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
-import { IpfsService } from './services/ipfs.service';
-import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
-import { CreateComponent } from './screens/verifier-auth/create/create.component';
-import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.component';
-import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
-import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
-import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
-import { SyncronizationComponent } from './screens/verifier/syncronization/syncronization.component';
+import { ZeroconfService } from './services/zeroconf.service';
 
 @NgModule({
   declarations: [
@@ -176,7 +179,11 @@ import { SyncronizationComponent } from './screens/verifier/syncronization/syncr
     VerifierSettingsComponent,
     TileCoinComponent,
     ConnectivityManageComponent,
-    SyncronizationComponent
+    SyncronizationComponent,
+    CarouselComponent,
+    CarouselItemDirective,
+    CarouselItemElement,
+    PresentationComponent,
   ],
   imports: [
     OverlayModule,
@@ -272,7 +279,8 @@ import { SyncronizationComponent } from './screens/verifier/syncronization/syncr
     VerifierSettingsComponent,
     ZeroconfComponent,
     BluetoothComponent,
-    SyncronizationComponent
+    SyncronizationComponent,
+    PresentationComponent
   ]
 })
 
