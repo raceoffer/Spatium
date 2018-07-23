@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -16,7 +16,7 @@ enum State {
   templateUrl: './verify-transaction.component.html',
   styleUrls: ['./verify-transaction.component.css']
 })
-export class VerifyTransactionComponent implements OnInit, OnDestroy {
+export class VerifyTransactionComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   public address;
@@ -47,10 +47,12 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly wallet: WalletService,
     private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly changeDetector: ChangeDetectorRef
   ) { }
 
   async ngOnInit() {
+    console.log('verify-transaction ngOnInit')
     this.state = State.Preparing;
 
     this.currentInfo = await this.currencyService.getInfo(this.currentCoin);
@@ -105,5 +107,14 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
   public onBack() {
     this.navigationService.back();
+  }
+
+  ngAfterViewInit() {
+    console.log('verify-transaction ngAfterViewInit');
+    this.changeDetector.detectChanges();
+    // this.changeDetector.detach();
+    // this.subscriptions.push(interval(1000).subscribe(() => {
+    //   this.changeDetector.detectChanges();
+    // }));
   }
 }

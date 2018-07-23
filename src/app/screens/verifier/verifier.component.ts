@@ -93,6 +93,10 @@ export class VerifierComponent implements OnDestroy {
   );
   private subscriptions = [];
 
+  public coin: any;
+  public transaction: any;
+  public shouldDisplayVerifyTransaction = false;
+
   constructor(
     private readonly router: Router,
     private readonly wallet: WalletService,
@@ -199,21 +203,44 @@ export class VerifierComponent implements OnDestroy {
   }
 
   public onTransaction(coin, transaction) {
-    const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
-    componentRef.instance.currentCoin = coin;
-    componentRef.instance.transaction = transaction;
-    componentRef.instance.confirm.subscribe(async () => {
-      this.navigationService.acceptOverlay();
-      await this.confirm(coin);
-    });
-    componentRef.instance.decline.subscribe(async () => {
-      this.navigationService.acceptOverlay();
-      await this.decline(coin);
-    });
-    componentRef.instance.cancelled.subscribe(async () => {
-      this.navigationService.acceptOverlay();
-      await this.decline(coin);
-    });
+    this.shouldDisplayVerifyTransaction = true;
+
+    this.coin = coin;
+    this.transaction = transaction;
+
+    // const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
+    // componentRef.instance.currentCoin = coin;
+    // componentRef.instance.transaction = transaction;
+    // componentRef.instance.confirm.subscribe(async () => {
+    //   this.navigationService.acceptOverlay();
+    //   await this.confirm(coin);
+    // });
+    // componentRef.instance.decline.subscribe(async () => {
+    //   this.navigationService.acceptOverlay();
+    //   await this.decline(coin);
+    // });
+    // componentRef.instance.cancelled.subscribe(async () => {
+    //   this.navigationService.acceptOverlay();
+    //   await this.decline(coin);
+    // });
+  }
+
+  public async confirmTransaction() {
+    // this.navigationService.acceptOverlay();
+      await this.confirm(this.coin);
+      this.shouldDisplayVerifyTransaction = false;
+  }
+
+  public async declineTransaction() {
+    // this.navigationService.acceptOverlay();
+      await this.decline(this.coin);
+      this.shouldDisplayVerifyTransaction = false;
+  }
+
+  public async cancelledTransaction() {
+    // this.navigationService.acceptOverlay();
+      await this.decline(this.coin);
+      this.shouldDisplayVerifyTransaction = false;
   }
 
   public async onExport() {
