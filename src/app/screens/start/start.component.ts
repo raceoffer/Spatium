@@ -1,8 +1,9 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { DeviceService, Platform } from '../../services/device.service';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService, Position } from '../../services/navigation.service';
 import { PresentationComponent } from '../presentation/presentation.component';
+import { NavbarComponent } from '../../modals/navbar/navbar.component';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -18,10 +19,12 @@ export class StartComponent implements OnInit, OnDestroy {
   public isWindows = null;
   private subscriptions = [];
 
-  constructor(private readonly deviceService: DeviceService,
-              private readonly router: Router,
-              private readonly ngZone: NgZone,
-              private readonly navigationService: NavigationService) {}
+  constructor(
+    private readonly deviceService: DeviceService,
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly navigationService: NavigationService
+  ) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
@@ -31,7 +34,7 @@ export class StartComponent implements OnInit, OnDestroy {
     NativeStorage.getItem('presentation',
       (value) => {},
       (error) => this.ngZone.run(async () => {
-        const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
+        const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
       })
     );
 

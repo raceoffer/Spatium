@@ -4,15 +4,16 @@ import { map } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
-import { NavigationService } from '../../../services/navigation.service';
+import { NavigationService , Position } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from '../currency/currency.component';
 import { WaitingComponent } from '../waiting/waiting.component';
-import { Router } from "@angular/router";
-import { FeedbackComponent } from "../../feedback/feedback.component";
-import { SettingsComponent } from "../settings/settings.component";
+import { Router } from '@angular/router';
+import { FeedbackComponent } from '../../feedback/feedback.component';
+import { SettingsComponent } from '../settings/settings.component';
+import { NavbarComponent } from '../../../modals/navbar/navbar.component';
 
 declare const navigator: any;
 
@@ -58,8 +59,6 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
       await this.router.navigate(['/start']);
     }
   }];
-
-  @ViewChild('sidenav') sidenav;
 
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
@@ -154,7 +153,19 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
   }
 
   public toggleNavigation() {
-    this.sidenav.toggle();
+    const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
+    componentRef.instance.current = this.current;
+    componentRef.instance.navLinks = this.navLinks;
+
+    componentRef.instance.clicked.subscribe(async navLink => {
+      this.navigationService.acceptOverlay();
+
+      await navLink.clicked();
+    });
+
+    componentRef.instance.closed.subscribe(() => {
+      this.navigationService.cancelOverlay();
+    });
   }
 
   ngAfterViewInit() {

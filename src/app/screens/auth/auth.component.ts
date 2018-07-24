@@ -17,12 +17,12 @@ import * as $ from 'jquery';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthFactor, AuthService, IdFactor } from '../../services/auth.service';
 import { KeyChainService } from '../../services/keychain.service';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { DDSService } from '../../services/dds.service';
-import { BehaviorSubject } from "rxjs/index";
-import { PasswordAuthFactorComponent } from "../authorization-factors/password-auth-factor/password-auth-factor.component";
-import { PincodeAuthFactorComponent } from "../authorization-factors/pincode-auth-factor/pincode-auth-factor.component";
+import { BehaviorSubject } from 'rxjs/index';
+import { PasswordAuthFactorComponent } from '../authorization-factors/password-auth-factor/password-auth-factor.component';
+import { PincodeAuthFactorComponent } from '../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
 import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
 import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
 import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
@@ -140,7 +140,7 @@ export class AuthComponent implements OnDestroy {
   }
 
   openFactorDialog() {
-    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, Position.Center);
     componentRef.instance.factors = Array.from(this.authService.getAuthFactors(true, true).values());
 
     componentRef.instance.selected.subscribe(result => {

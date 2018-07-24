@@ -1,0 +1,17 @@
+<mat-toolbar color="primary" class="custom">
+  <button mat-icon-button class="hide-sidenav-button">
+    <mat-icon class="size-30 color-custom" (click)="onClose()">clear</mat-icon>
+  </button>
+  <div class="nav-logo-text"></div>
+</mat-toolbar>
+<mat-nav-list *ngFor="let navLink of navLinks">
+  <a
+    mat-list-item
+    class="main-nav-list-custom"
+    [class.disabled]="!navLink.clicked"
+    [class.selected]="navLink.name === current"
+    (click)="onClicked(navLink)"
+    [ngClass]="navLink.class">
+    {{ navLink.name }}
+  </a>
+</mat-nav-list>

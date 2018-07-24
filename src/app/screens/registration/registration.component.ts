@@ -21,7 +21,7 @@ import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-facto
 import { AuthService, AuthFactor } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
 import { KeyChainService } from '../../services/keychain.service';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 
@@ -111,7 +111,7 @@ export class RegistrationComponent implements OnDestroy {
   }
 
   openFactorDialog() {
-    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, Position.Center);
     componentRef.instance.factors = Array.from(this.authService.getAuthFactors(true, true).values());
 
     componentRef.instance.selected.subscribe(result => {
