@@ -75,8 +75,7 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/verifier-auth']);
   }
 
-  eventOnBackClicked(e) {
-    e.preventDefault();
+  eventOnBackClicked() {
     navigator.app.exitApp();
   }
 }
