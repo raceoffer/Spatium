@@ -5,7 +5,7 @@ import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged,
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
 import { Status } from '../../services/wallet/currencywallet';
@@ -19,6 +19,7 @@ import { VerifyTransactionComponent } from './verify-transaction/verify-transact
 import { toBehaviourSubject } from '../../utils/transformers';
 import { ConnectionState, State } from '../../services/primitives/state';
 import { SyncronizationComponent } from './syncronization/syncronization.component';
+import { NavbarComponent } from '../../modals/navbar/navbar.component';
 
 declare const window: any;
 
@@ -78,8 +79,6 @@ export class VerifierComponent implements OnDestroy {
   public providersArray = toBehaviourSubject(this.connectionProviderService.providers.pipe(
     map(providers => Array.from(providers.values()))
   ), []);
-
-  @ViewChild('sidenav') sidenav;
 
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
@@ -191,7 +190,18 @@ export class VerifierComponent implements OnDestroy {
   }
 
   public toggleNavigation() {
-    this.sidenav.toggle();
+    const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
+    componentRef.instance.navLinks = this.navLinks;
+
+    componentRef.instance.clicked.subscribe(async navLink => {
+      this.navigationService.acceptOverlay();
+
+      await navLink.clicked();
+    });
+
+    componentRef.instance.closed.subscribe(() => {
+      this.navigationService.cancelOverlay();
+    });
   }
 
   public openFeedback() {
