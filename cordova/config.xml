@@ -26,7 +26,14 @@
         <content src="index.html" />
     </platform>
     <platform name="ios">
-        <preference name="Orientation" value="portrait" />
+        <config-file parent="UISupportedInterfaceOrientations" platform="ios" target="*-Info.plist">
+            <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationPortraitUpsideDown</string>
+            </array>
+        </config-file>
+    </platform>
+    <platform name="ios">
         <edit-config file="*-Info.plist" mode="merge" overwrite="true" target="NSPhotoLibraryUsageDescription">
             <string>This app requires photo library access to save QR codes.</string>
         </edit-config>
