@@ -52,8 +52,8 @@ export class StartComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async (e) => {
-        await this.eventOnBackClicked(e);
+      this.navigationService.backEvent.subscribe(async () => {
+        await this.eventOnBackClicked();
       })
     );
 
