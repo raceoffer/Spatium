@@ -19,7 +19,7 @@ import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-fa
 import { AuthService, AuthFactor, IdFactor } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { KeyChainService } from '../../../services/keychain.service';
-import { NavigationService } from '../../../services/navigation.service';
+import { NavigationService, Position } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WorkerService } from '../../../services/worker.service';
 
@@ -107,7 +107,7 @@ export class FactorNodeComponent implements OnDestroy {
   }
 
   public openIdFactorDialog() {
-    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, Position.Center);
     componentRef.instance.factors = Array.from(this.authService.getIdFactors(false, true).values());
 
     componentRef.instance.selected.subscribe(result => {
@@ -139,13 +139,13 @@ export class FactorNodeComponent implements OnDestroy {
 
   public setIdFactor(factor) {
     this.idFactor.next(factor);
-	
-	this.factors.next([]);
-	this.factorItems = [];
+
+    this.factors.next([]);
+    this.factorItems = [];
   }
 
   public openFactorDialog() {
-    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, false);
+    const componentRef = this.navigationService.pushOverlay(DialogFactorsComponent, Position.Center);
     componentRef.instance.factors = Array.from(this.authService.getAuthFactors(true, true).values());
 
     componentRef.instance.selected.subscribe(result => {
