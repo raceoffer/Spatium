@@ -2,7 +2,6 @@ import {Injectable, NgZone} from '@angular/core';
 import { DeviceService } from './device.service';
 import pull from 'lodash/pull';
 
-declare const nfc: any;
 declare const cordova: any;
 
 import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
