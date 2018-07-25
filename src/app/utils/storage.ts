@@ -12,3 +12,9 @@ export async function setValue(name: string, value: any) {
   });
 }
 
+export async function removeValue(name: string) {
+  return new Promise<boolean>((resolve, reject) => {
+    NativeStorage.remove(name, resolve, reject);
+  });
+}
+
