@@ -96,13 +96,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
     this.cancel();
 
-    try {
-      await this.bt.stopServer();
-    } catch (ignored) {}
-
-    try {
-      await this.bt.disconnect();
-    } catch (ignored) {}
+    await this.bt.reset();
   }
 
   async toggle(event) {
@@ -133,13 +127,8 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
       this.cancel();
 
-      try {
-        await this.bt.stopListening();
-      } catch (ignored) {}
-
-      try {
-        await this.bt.disconnect();
-      } catch (ignored) {}
+      await this.bt.stopListening();
+      await this.bt.disconnect();
     }
   }
 

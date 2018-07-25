@@ -60,7 +60,7 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
         if (device !== null) {
           await this.plugin.startReading();
-          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
           this.connectionState.next(ConnectionState.Connected);
         } else {
           this.connectedDevice.next(null);
@@ -113,10 +113,9 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   async startServer() {
@@ -253,7 +252,7 @@ export class BluetoothService implements IConnectionProvider {
     const mapped = new Map<string, Device>();
     for (const device of paired) {
       if (device.hasOwnProperty('address')) {
-        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
       }
     }
 
