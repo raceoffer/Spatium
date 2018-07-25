@@ -28,12 +28,14 @@ export class StartComponent implements OnInit, OnDestroy {
 
     NativeStorage.remove('startPath');
 
-    NativeStorage.getItem('presentation',
-      (value) => {},
-      (error) => this.ngZone.run(async () => {
-        const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
-      })
-    );
+    if (this.deviceService.platform === Platform.Android) {
+      NativeStorage.getItem('presentation',
+        (value) => {},
+        (error) => this.ngZone.run(async () => {
+          const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
+        })
+      );
+    }
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
