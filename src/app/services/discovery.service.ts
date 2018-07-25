@@ -90,6 +90,8 @@ export class DiscoveryService {
       return;
     }
 
+    await this.reset();
+
     this.discovering.next(State.Starting);
     this.devices.next(new Map<string, Device>());
 
