@@ -25,12 +25,14 @@ export class SocketServerService {
     return new Promise<string>((resolve, reject) => {
       cordova.plugins.wsserver.getInterfaces(
         interfaces => {
-          if (interfaces.hasOwnProperty('wlan0')) {
-            const wlan0 = interfaces.wlan0;
-            if (wlan0.hasOwnProperty('ipv4Addresses')) {
-              const ipv4Addresses = wlan0.ipv4Addresses;
-              if (ipv4Addresses.length > 0) {
-                resolve(ipv4Addresses[0]);
+          for (const interfaceName in interfaces) {
+            if (interfaces.hasOwnProperty(interfaceName)) {
+              const iface = interfaces[interfaceName];
+              if (iface.hasOwnProperty('ipv4Addresses')) {
+                const ipv4Addresses = iface.ipv4Addresses;
+                if (ipv4Addresses.length > 0) {
+                  resolve(ipv4Addresses[0]);
+                }
               }
             }
           }
