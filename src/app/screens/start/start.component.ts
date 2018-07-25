@@ -25,13 +25,15 @@ export class StartComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
-
-    try {
-      const presentation = await getValue('presentation');
-    } catch (ignored) {
-      this.ngZone.run(async () => {
-        const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
-      });
+    
+    if (this.deviceService.platform === Platform.Android) {
+      try {
+        const presentation = await getValue('presentation');
+      } catch (ignored) {
+        this.ngZone.run(async () => {
+          const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
+        });
+      }
     }
 
     this.ready = true;

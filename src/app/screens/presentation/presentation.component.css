@@ -30,6 +30,10 @@
   padding: 24px 24px 0px 24px;
 }
 
+.item .description-container {
+  height: 30%;
+}
+
 .item .description {
   text-align: justify;
 }
@@ -42,5 +46,5 @@
 }
 
 .item .item-image {
-  width: 60%;
+  height: 70%;
 }

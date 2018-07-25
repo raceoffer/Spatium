@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutAlign="start center">
+<div jinj>
   <carousel (close)="onBack()">
     <ng-container>
       <ng-container *carouselItem>
@@ -12,7 +12,8 @@
             </p>
           </div>
           <div class="welcome-text">
-            <p>SPATIUM requires at least two devices to ensure your assets safety: one in <b>Wallet mode</b> and another in <b>Confirmation mode.</b>
+            <p>SPATIUM requires at least two devices to ensure your assets safety: one in <b>Wallet mode</b> and another
+              in <b>Confirmation mode.</b>
           </div>
         </div>
       </ng-container>
@@ -20,7 +21,9 @@
     <ng-container *ngFor="let item of items;">
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="space-between center">
-          <p class="description" [innerHTML]="item.description"></p>
+          <div class="description-container" fxLayout="column" fxLayoutAlign="center center">
+            <p class="description" [innerHTML]="item.description"></p>
+          </div>
           <img class="item-image" src="{{item.image}}" alt="{{item.title}}">
         </div>
       </ng-container>
