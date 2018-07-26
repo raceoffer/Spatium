@@ -4,6 +4,12 @@ import { DeviceService } from './device.service';
 import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 
+export enum Position {
+  Fullscreen,
+  Center,
+  Left
+}
+
 @Injectable()
 export class NavigationService {
   private backSubject: Subject<any> = new Subject<any>();
@@ -47,15 +53,23 @@ export class NavigationService {
     }
   }
 
-  public pushOverlay(ComponentType, fullscreen = true): ComponentRef<typeof ComponentType> {
+  public pushOverlay(ComponentType, position = Position.Fullscreen): ComponentRef<typeof ComponentType> {
     const config = new OverlayConfig();
 
-    if (fullscreen) {
+    switch (position) {
+    case Position.Fullscreen:
       config.height = '100%';
       config.width = '100%';
-    } else {
+      break;
+    case Position.Center:
       config.hasBackdrop = true;
       config.positionStrategy = this.overlay.position().global().centerHorizontally().centerVertically();
+      break;
+    case Position.Left:
+      config.hasBackdrop = true;
+      config.height = '100%';
+      config.positionStrategy = this.overlay.position().global().left();
+      break;
     }
 
     const overlayRef = this.overlay.create(config);

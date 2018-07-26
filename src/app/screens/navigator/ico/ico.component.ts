@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { IcoDetailsComponent } from './ico-details/ico-details.component';
-import { NavigationService } from '../../../services/navigation.service';
+import { NavigationService, Position } from '../../../services/navigation.service';
 import { IpfsService } from '../../../services/ipfs.service';
 import { ICOService, IcoCampaign } from '../../../services/ico.service';
 import { NewIcoComponent } from './new-ico/new-ico.component';
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { SettingsComponent } from '../settings/settings.component';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { DeviceService, Platform } from '../../../services/device.service';
+import { NavbarComponent } from '../../../modals/navbar/navbar.component';
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -57,11 +58,9 @@ export class IcoComponent implements OnInit {
     }
   }];
 
-  @ViewChild('sidenav') sidenav;
-
   public title = 'ICO';
   public titles: BehaviorSubject<any> = new BehaviorSubject<any>([]);
-  public filtredTitles: BehaviorSubject<any> = new BehaviorSubject<any>([]);;
+  public filtredTitles: BehaviorSubject<any> = new BehaviorSubject<any>([]);
   private _filterValue = '';
   public cols: any = Math.ceil(window.innerWidth / 350);
   public isSearch = false;
@@ -74,7 +73,7 @@ export class IcoComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    let campaings = await this.icoService.getCampaignList();
+    const campaings = await this.icoService.getCampaignList();
 
     this.titles.next(campaings.map(function (value, index) {
       return {
@@ -121,7 +120,19 @@ export class IcoComponent implements OnInit {
   }
 
   public toggleNavigation() {
-    this.sidenav.toggle();
+    const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
+    componentRef.instance.current = this.current;
+    componentRef.instance.navLinks = this.navLinks;
+
+    componentRef.instance.clicked.subscribe(async navLink => {
+      this.navigationService.acceptOverlay();
+
+      await navLink.clicked();
+    });
+
+    componentRef.instance.closed.subscribe(() => {
+      this.navigationService.cancelOverlay();
+    });
   }
 
   onResize(): void {
@@ -170,7 +181,7 @@ export class IcoComponent implements OnInit {
   }
 
   async getLogo(tile) {
-    if (tile.logo || tile.logo.length == 0) {
+    if (tile.logo || tile.logo.length === 0) {
       return tile.logo;
     }
 
@@ -178,7 +189,7 @@ export class IcoComponent implements OnInit {
     console.log(tile.title);
     console.log(logo);
     if (logo && logo.length > 0) {
-      let src = "data:image/png;base64," + logo[0].content.toString('base64');
+      const src = 'data:image/png;base64,' + logo[0].content.toString('base64');
       tile.logo = src;
       return src;
     }
@@ -186,4 +197,3 @@ export class IcoComponent implements OnInit {
   }
 
 }
-

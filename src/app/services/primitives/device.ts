@@ -5,10 +5,16 @@ export class Device {
               public name: string,
               public macAddress: string = null,
               public ip: string = null,
+              public port: number = null,
               public paired: boolean = false) { }
 
   public static equals(x: Device, y: Device): boolean {
-    return x.provider === y.provider && x.name === y.name && x.macAddress === y.macAddress && x.ip === y.ip && x.paired === y.paired;
+    return x.provider === y.provider &&
+           x.name === y.name &&
+           x.macAddress === y.macAddress &&
+           x.ip === y.ip &&
+           x.port === y.port &&
+           x.paired === y.paired;
   }
 
   public static merge(x: Device, y: Device): Device {
@@ -17,6 +23,7 @@ export class Device {
       y.name || x.name,
       y.macAddress || x.macAddress,
       y.ip || x.ip,
+      y.port || x.port,
       y.paired
     );
   }

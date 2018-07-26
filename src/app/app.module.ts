@@ -38,7 +38,6 @@ import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/blu
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
 import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
-import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
@@ -115,6 +114,7 @@ import { SocketServerService } from './services/socketserver.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
+import { NavbarComponent } from './modals/navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -143,7 +143,6 @@ import { ZeroconfService } from './services/zeroconf.service';
     CurrencyComponent,
     CurrencySettingsComponent,
     DeleteSecretComponent,
-    MainDrawerComponent,
     SecretExportComponent,
     SecretImportComponent,
     SettingsComponent,
@@ -184,6 +183,7 @@ import { ZeroconfService } from './services/zeroconf.service';
     CarouselItemDirective,
     CarouselItemElement,
     PresentationComponent,
+    NavbarComponent,
   ],
   imports: [
     OverlayModule,
@@ -280,7 +280,8 @@ import { ZeroconfService } from './services/zeroconf.service';
     ZeroconfComponent,
     BluetoothComponent,
     SyncronizationComponent,
-    PresentationComponent
+    PresentationComponent,
+    NavbarComponent
   ]
 })
 

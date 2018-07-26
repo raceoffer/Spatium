@@ -1,5 +1,6 @@
 /* windows specific styles */
 
-.back-button {
+.back-button,
+.menu-button {
   bottom: 3px;
 }
