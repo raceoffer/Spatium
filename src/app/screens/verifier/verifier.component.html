@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!shouldDisplayVerifyTransaction">
+<mat-toolbar color="primary" class="header-toolbar shadow">
     <button mat-icon-button (click)="toggleNavigation()">
       <mat-icon>menu</mat-icon>
     </button>
@@ -10,7 +10,7 @@
     <mat-icon *ngIf="(fullySync | async)">sync</mat-icon>
     <mat-icon *ngIf="(partiallySync | async)">sync_problem</mat-icon>
   </mat-toolbar>
-<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" [style.display]="shouldDisplayVerifyTransaction? 'none': 'inherit'">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-sidenav-container class="content">
     <app-main-drawer
       #sidenav
@@ -32,12 +32,3 @@
     </div>
   </mat-sidenav-container>
 </div>
-<app-verify-transaction  *ngIf="shouldDisplayVerifyTransaction"
-  [currentCoin]="coin" 
-  [transaction]="transaction"
-  (confirm)="confirmTransaction()"
-  (decline)="declineTransaction()"
-  (cancelled)="cancelledTransaction()"
-
-  >
-</app-verify-transaction>
