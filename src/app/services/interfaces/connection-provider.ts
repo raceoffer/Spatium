@@ -8,6 +8,8 @@ export enum ProviderType {
 }
 
 export interface IConnectionProvider {
+  supported: BehaviorSubject<boolean>;
+
   deviceState: BehaviorSubject<State>;
 
   connectionState: BehaviorSubject<ConnectionState>;
