@@ -1,11 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, timer } from 'rxjs';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { toBehaviourSubject } from '../utils/transformers';
+import { filter, mapTo, takeUntil } from "rxjs/internal/operators";
 
 declare const cordova: any;
 declare const navigator: any;
@@ -276,16 +277,23 @@ export class BluetoothService implements IConnectionProvider {
       throw e;
     }
 
-    await timer(duration).toPromise();
+    // Schedule automatic stopping of the discovery
+    if (await timer(duration).pipe(
+      mapTo(true), // Return true if the time has passed
+      takeUntil(this.searchState.pipe( // And break if the discovery has stopped by itself
+        filter(state => state !== State.Started)
+      ))
+    ).toPromise()) { // Now remember that we've considered the timeout to be true?
+      this.searchState.next(State.Stopping);
 
-    this.searchState.next(State.Stopping);
-
-    try {
-      await this.plugin.cancelDiscovery();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to cancel discovery', e);
-      this.searchState.next(State.Started);
-      throw e;
+      try {
+        await this.plugin.cancelDiscovery();
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to cancel discovery', e);
+        // We are used to revert the state back to Started but it showed that it leads to errors
+        this.searchState.next(State.Stopped);
+        throw e;
+      }
     }
   }
 
@@ -299,14 +307,23 @@ export class BluetoothService implements IConnectionProvider {
       return;
     }
 
-    this.deviceState.next(State.Starting);
+    if (this.deviceService.platform === Platform.Android) {
+      this.deviceState.next(State.Starting);
 
-    try {
-      await this.plugin.enable();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to enable BT', e);
-      this.deviceState.next(State.Stopped);
-      throw e;
+      try {
+        await this.plugin.enable();
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to enable BT', e);
+        this.deviceState.next(State.Stopped);
+        throw e;
+      }
+    } else {
+      try {
+        await this.plugin.enable();
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to enable BT', e);
+        throw e;
+      }
     }
   }
 }
