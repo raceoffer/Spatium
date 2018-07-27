@@ -138,9 +138,9 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
-    <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#c136ce846f2daf12280fc4b8a2fc31f15d9acc72" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^6.3.0" />
     <engine name="ios" spec="^4.5.4" />
+    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#e75fbd6f073ebcd168704b30772a07e0aaab63ac" />
 </widget>
