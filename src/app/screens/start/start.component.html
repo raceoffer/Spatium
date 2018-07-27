@@ -1,22 +1,30 @@
 <div fxLayout="column" fxLayoutAlign="start center" class="box">
   <app-logo-block style="margin-top: 56px;"></app-logo-block>
-
-  <div class="width-button-container margin93" fxLayout="column" fxLayoutAlign="start center">
+  <div class="select-mode-button-container" fxLayout="column" fxLayoutAlign="start center">
     <button
       mat-raised-button
-      color="accent"
-      class="width-button color"
+      class="select-mode-button"
       (click)="onOpenClicked()"
       *ngIf="ready">
-      Wallet mode
+        <div class="select-mode-button-title">
+          Wallet mode
+        </div>
+        <p>
+          Open your wallet, reflect the balance and transaction history, initiate transactions.
+          Transactions will be confirmed on another device. Internet access is required.
+        </p>
     </button>
     <button
       mat-raised-button
-      color="accent"
-      class="width-button color"
+      class="select-mode-button"
       (click)="onConnectClicked()"
       *ngIf="ready && isWindows !== true">
-      Confirmation mode
+        <div class="select-mode-button-title">
+            Confirmation mode
+        </div>
+        <p>
+          Confirm the transactions on this device. To&nbsp;improve security, you can operate this device offline.
+        </p>
     </button>
   </div>
 </div>

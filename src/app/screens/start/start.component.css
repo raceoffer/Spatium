@@ -17,3 +17,32 @@
 .progress.buttons-progress {
   position: initial;
 }
+
+.select-mode-button-container {
+  height: 100%;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.select-mode-button {
+  width: calc(100% - 48px);
+  height: 50%;
+  background-color: #fff;
+  white-space: normal;
+  line-height: 24px;
+  overflow: hidden;
+  margin-bottom: 24px !important;
+  color: rgb(155, 160, 160);
+  text-align: left;
+}
+
+.select-mode-button-title {
+  margin: 8px 0;
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.select-mode-button p {
+  font-size: 14px;
+}

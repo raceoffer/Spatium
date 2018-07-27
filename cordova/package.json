@@ -1,7 +1,7 @@
 {
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
@@ -22,11 +22,12 @@
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
+    "cordova-ios": "^4.5.4",
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-badge": "^0.8.7",
-    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
+    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#c136ce846f2daf12280fc4b8a2fc31f15d9acc72",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
     "cordova-plugin-device-name": "^1.3.3",
@@ -46,7 +47,8 @@
     "cordova.plugins.diagnostic": "^4.0.8",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5"
+    "phonegap-plugin-mobile-accessibility": "^1.0.5",
+    "xml2js": "^0.4.19"
   },
   "cordova": {
     "plugins": {
@@ -62,7 +64,6 @@
         "ANDROID_SUPPORT_V4_VERSION": "27.+"
       },
       "cordova-plugin-device": {},
-      "cordova-plugin-bluetooth": {},
       "phonegap-nfc": {},
       "Canvas2ImagePlugin": {},
       "cordova-plugin-camera-info": {},
@@ -76,12 +77,14 @@
       "cordova.plugins.diagnostic": {},
       "cocoon-cordova-labs-wkwebview-engine-localhost": {},
       "CordovaClipboard": {},
-      "cordova-plugin-nativestorage": {}
+      "cordova-plugin-nativestorage": {},
+      "cordova-plugin-bluetooth": {}
     },
     "platforms": [
       "browser",
       "windows",
-      "android"
+      "android",
+      "ios"
     ]
   },
   "devDependencies": {

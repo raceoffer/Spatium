@@ -8,7 +8,7 @@ import { NavigationService } from '../../../../services/navigation.service';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../../utils/transformers';
-import { IcoDetailsComponent } from '../ico-details/ico-details.component';
+import { DeviceService, Platform } from '../../../../services/device.service';
 
 @Component({
   selector: 'app-whitelist',
@@ -27,11 +27,14 @@ export class WhitelistComponent implements OnInit, OnDestroy {
   cols: any = Math.ceil(window.innerWidth / 350);
   synchronizing = this.wallet.synchronizing;
 
+  public isWindows;
+
   private balanceInfo: any = {};
 
   constructor(private readonly wallet: WalletService,
               private readonly navigationService: NavigationService,
               private readonly currency: CurrencyService,
+              private readonly device: DeviceService,
               private readonly notification: NotificationService) {
     this.coins = [
       {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC, chosen: false},
@@ -40,6 +43,7 @@ export class WhitelistComponent implements OnInit, OnDestroy {
       {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC, chosen: false},
       {title: 'Bitcoin Test', symbols: 'BTC_test', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test, chosen: false},
     ];
+    this.isWindows = (this.device.platform === Platform.Windows);
   }
 
   ngOnInit() {

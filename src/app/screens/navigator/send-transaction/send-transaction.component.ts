@@ -14,6 +14,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
+import { ConnectionState } from "../../../services/primitives/state";
 
 declare const cordova: any;
 
@@ -65,6 +66,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feeUsdFocused = false;
   public feePriceFocused = false;
   public feePriceUsdFocused = false;
+  public disable = false;
 
   accountPh = 'Account';
   receiverPh = 'Recipient';
@@ -90,7 +92,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public allowFeeConfiguration = false;
 
-  public connected = this.connectionProviderService.connected;
+  public connected = toBehaviourSubject(this.connectionProviderService.connectionState.pipe(
+    map(state => state === ConnectionState.Connected),
+    distinctUntilChanged()
+  ), false);
 
   public currencyWallet: CurrencyWallet = null;
 
@@ -434,6 +439,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         map(phase => phase === Phase.Creation)
       ).subscribe((creation) => {
         if (creation) {
+          this.disable = false;
           this.receiverField.enable();
           this.amountField.enable();
           this.amountUsdField.enable();
@@ -443,6 +449,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           this.feePriceField.enable();
           this.feePriceUsdField.enable();
         } else {
+          this.disable = true;
           this.receiverField.disable();
           this.amountField.disable();
           this.amountUsdField.disable();

@@ -10,8 +10,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import {
   deriveAesKey,
   encrypt,
-  decrypt,
-  randomBytes
+  decrypt
 } from 'crypto-core-async/lib/utils';
 import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
 import {
@@ -145,7 +144,7 @@ export class ChangePincodeComponent implements OnInit {
 
        const aesKey = await deriveAesKey(Buffer.from(pincode, 'utf-8'), this.workerService.worker);
 
-       const seed = await randomBytes(64, this.workerService.worker);
+       const seed = this.seed.getValue();
 
        const encryptedSeed = (await encrypt(seed, aesKey, this.workerService.worker)).toString('hex');
 

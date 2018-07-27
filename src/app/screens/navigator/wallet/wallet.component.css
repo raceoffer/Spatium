@@ -8,29 +8,6 @@ input:focus:-moz-placeholder { color: rgb(155, 160, 160); } /* FF 4-18 */
 input:focus::-moz-placeholder { color: rgb(155, 160, 160); } /* FF 19+ */
 input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
 
-.grid-item {
-  height: 100%;
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  text-align: center;
-  font-size: 14px;
-}
-
-.block {
-  height: 100%;
-  width: 100%;
-  background-color: white;
-  border-radius: 4px;
-}
-
-.block:disabled,
-.block[disabled] {
-  filter: grayscale(100%);
-  opacity: 0.5;
-
-}
-
 .block:disabled .logo,
 .block[disabled] .logo {
   opacity: 0.5;
@@ -41,16 +18,12 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   max-width: 50%;
   height: 75%;
   background-position: center !important;
-  background-size: contain !important;
+  background-size: 100% 100% !important;
   background-repeat: no-repeat;
 }
 
 .sym {
   font-family: 'Roboto-Medium';
-  height: 50%;
-  display: block;
-  vertical-align: bottom;
-  line-height: 56px;
 }
 
 .balance {
@@ -65,12 +38,6 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
 .title {
   font-size: 12px;
   line-height: 14px;
-  height: 50%;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  margin-top: 10%;
 }
 
 .half-height {
@@ -86,37 +53,20 @@ input:focus:-ms-input-placeholder { color: rgb(155, 160, 160); } /* IE 10+ */
   max-height: 60% !important;
 }
 
-.block {
-  overflow: hidden;
-}
-
 .erc20 {
-  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xLjUgMTcuNCAyMCAyMCI+PHBhdGggZmlsbD0iI2NlY2VjZSIgZD0iTS0xLjUgMTcuNGgyMHYyMGwtMjAtMjB6Ii8+PHBhdGggZmlsbD0ibm9uZSIgZD0iTS0zLjUtMi42aDI0djI0aC0yNHYtMjR6Ii8+PC9zdmc+);
-  width: 25%;
-  height: 100%;
-  position: absolute;
-  right: 0;
-  top: 0;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 8%;
+  background-position: left 5% bottom 25%;
 }
 
-.erc20 .ethereum {
-  background-position: top 5% right 20%;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  background-repeat: no-repeat;
-  background-size: 25%;
-  right: 0;
-  top: 0;
+.scroll {
+  overflow-y: scroll;
 }
 
-.wallet-description {
-  height:100%;
-  width: 50%;
-  padding-left: 10px;
-  overflow: hidden;
-  white-space: normal;
-  text-align: left;
+.windows {
+  width: calc(100% - 16px);
+}
+
+.win-logo {
+  height: 85px !important;
 }

@@ -1,0 +1,9 @@
+/* android specific styles */
+
+.header-toolbar > button {
+    top: 2px;
+}
+
+.hide-sidenav-button {
+    top: 3px;
+}

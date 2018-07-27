@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
-import { NavigationService } from '../../services/navigation.service';
 import { DeviceService, Platform } from '../../services/device.service';
-import { ActivityService } from "../../services/activity.service";
+import { NavigationService } from '../../services/navigation.service';
+import { getValue, setValue } from '../../utils/storage';
+import { PresentationComponent } from '../presentation/presentation.component';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -13,19 +14,27 @@ declare const Windows: any;
   styleUrls: ['./start.component.css']
 })
 export class StartComponent implements OnInit, OnDestroy {
-  private subscriptions = [];
-
   public ready = false;
   public isWindows = null;
+  private subscriptions = [];
 
-  constructor(
-    private readonly deviceService: DeviceService,
-    private readonly router: Router,
-    private readonly navigationService: NavigationService
-  ) {}
+  constructor(private readonly deviceService: DeviceService,
+              private readonly router: Router,
+              private readonly ngZone: NgZone,
+              private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
+    
+    if (this.deviceService.platform === Platform.Android) {
+      try {
+        const presentation = await getValue('presentation');
+      } catch (ignored) {
+        this.ngZone.run(async () => {
+          const componentRef = this.navigationService.pushOverlay(PresentationComponent, true);
+        });
+      }
+    }
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
@@ -41,14 +50,23 @@ export class StartComponent implements OnInit, OnDestroy {
     }
 
     this.subscriptions.push(
-      this.navigationService.backEvent.subscribe(async () => {
-        await this.onBack();
+      this.navigationService.backEvent.subscribe(async (e) => {
+        await this.eventOnBackClicked(e);
       })
     );
 
     if (this.isWindows) {
       const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
+    }
+
+    try {
+      const startPath = await getValue('startPath');
+      this.ngZone.run(async () => {
+        await this.router.navigate([startPath]);
+      });
+    } catch (e) {
+
     }
   }
 
@@ -58,14 +76,17 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onOpenClicked() {
+    await setValue('startPath', '/login');
     await this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {
+    await setValue('startPath', '/verifier-auth');
     await this.router.navigate(['/verifier-auth']);
   }
 
-  onBack() {
+  eventOnBackClicked(e) {
+    e.preventDefault();
     navigator.app.exitApp();
   }
 }

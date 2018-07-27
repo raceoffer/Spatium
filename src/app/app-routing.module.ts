@@ -5,10 +5,10 @@ import { LoginComponent } from './screens/login/login.component';
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { RegistrationComponent } from './screens/registration/registration.component';
 import { StartComponent } from './screens/start/start.component';
-import { VerifierAuthComponent } from "./screens/verifier-auth/verifier-auth.component";
-import { VerifierComponent } from "./screens/verifier/verifier.component";
-import { WalletComponent } from "./screens/navigator/wallet/wallet.component";
-import { IcoComponent } from "./screens/navigator/ico/ico.component";
+import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
+import { VerifierComponent } from './screens/verifier/verifier.component';
+import { WalletComponent } from './screens/navigator/wallet/wallet.component';
+import { IcoComponent } from './screens/navigator/ico/ico.component';
 
 const appRoutes: Routes = [{
   path: '',
@@ -44,7 +44,8 @@ const appRoutes: Routes = [{
 }, {
   path: 'verifier',
   component: VerifierComponent
-}];
+}
+];
 
 @NgModule({
   imports: [

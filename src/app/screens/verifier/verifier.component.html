@@ -7,59 +7,27 @@
 
     <span class="spacer"></span>
 
-    <mat-icon *ngIf="!(synchronizing | async) && (fullySync | async)">sync</mat-icon>
-    <mat-icon *ngIf="!(synchronizing | async) && (partiallySync | async)">sync_problem</mat-icon>
+    <mat-icon *ngIf="(fullySync | async)">sync</mat-icon>
+    <mat-icon *ngIf="(partiallySync | async)">sync_problem</mat-icon>
   </mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <mat-sidenav-container class="content">
     <app-main-drawer
       #sidenav
-      [navLinks]="navLinks"
-      [current]="current">
+      [navLinks]="navLinks">
     </app-main-drawer>
 
     <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
-      <mat-progress-bar
-        mode="determinate"
-        color="accent"
-        [value]="(progress | async)"
-        *ngIf="(synchronizing | async)"
-        style="width: 100%; position: fixed; z-index: 2;">
-      </mat-progress-bar>
-
       <div
         fxLayout="column"
         fxLayoutAlign="start center"
-        class="box"
-        *ngIf="!(synchronizing | async)">
+        class="box">
 
         <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-          <app-confirmation-bluetooth-manage *ngIf="!isiOS"></app-confirmation-bluetooth-manage>
-          <app-confirmation-zeroconf-manage></app-confirmation-zeroconf-manage>
-        </mat-nav-list>
-
-        <div
-          class="width-button-container content"
-          fxLayout="column"
-          fxLayoutAlign="center center"
-          *ngIf="(ready | async)">
-          <div class="verify-transaction-text">
-            <span>Awaiting connection from the main device.</span>
+          <div *ngFor="let provider of (providersArray | async)">
+            <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
           </div>
-        </div>
-      </div>
-
-      <div fxLayout="column" fxLayoutAlign="start start" class="box" *ngIf="(synchronizing | async)">
-        <mat-list class="list">
-          <mat-list-item *ngFor="let coin of synchedCoins">
-            <span *ngIf="coin.status === coinStatusType.Synchronizing || coinStatusType.Ready">
-              Syncing {{ coin.name }}...&nbsp;
-            </span>
-            <span *ngIf="coin.status === coinStatusType.Ready">
-              done
-            </span>
-          </mat-list-item>
-        </mat-list>
+        </mat-nav-list>
       </div>
     </div>
   </mat-sidenav-container>

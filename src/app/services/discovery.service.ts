@@ -1,9 +1,8 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { BehaviorSubject, Observable, timer } from 'rxjs';
-import { distinctUntilChanged, skip } from 'rxjs/internal/operators';
-import { ProviderType } from './connection-provider';
-import { Device, equals } from './primitives/device';
+import { BehaviorSubject, timer } from 'rxjs';
+import { ProviderType } from './interfaces/connection-provider';
+import { Device } from './primitives/device';
 import { State } from './primitives/state';
 
 declare const cordova: any;
@@ -15,9 +14,6 @@ export class DiscoveryService {
   public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
 
   public devices: BehaviorSubject<Map<string, Device>> = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
-  public devicesChanged: Observable<Map<string, Device>> = this.devices.pipe(
-    distinctUntilChanged(equals),
-    skip(1));
 
   constructor(private ngZone: NgZone) {}
 
@@ -31,6 +27,10 @@ export class DiscoveryService {
 
   async getDeviceIp() {
     return (await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject)) as any).ip;
+  }
+
+  async reset() {
+    return await new Promise((resolve, reject) => cordova.plugins.zeroconf.reInit(resolve, reject));
   }
 
   async startAdvertising() {
@@ -75,7 +75,6 @@ export class DiscoveryService {
       this.advertising.next(State.Stopped);
       return;
     }
-
   }
 
   async stopAdvertising() {
@@ -98,13 +97,17 @@ export class DiscoveryService {
     });
   }
 
+  async resetDevices() {
+    this.devices.next(new Map<string, Device>());
+  }
+
   async searchDevices(duration: number) {
     if (this.discovering.getValue() !== State.Stopped) {
       return;
     }
 
-    this.devices.next(new Map<string, Device>());
     this.discovering.next(State.Starting);
+    this.devices.next(new Map<string, Device>());
 
     cordova.plugins.zeroconf.watch('_spatium._tcp.', 'local.',
       result => this.ngZone.run(() => {
