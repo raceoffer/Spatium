@@ -16,6 +16,8 @@ declare const navigator;
 
 @Injectable()
 export class ZeroconfService implements IConnectionProvider {
+  public supported = new BehaviorSubject<boolean>(true);
+
   public deviceState = new BehaviorSubject<State>(State.Stopped);
 
   public connectionState = toBehaviourSubject(

@@ -30,18 +30,19 @@
     <div class="connect-div" *ngIf="(disabledProviders | async).length > 0">
       <span class="message">Cannot find a device?</span>
       <div *ngFor="let provider of (disabledProviders | async)">
+		<span class="message" *ngIf="!(provider.service.supported | async)">Connect a {{ provider.name }} device</span>
         <button
           mat-button
           color="accent"
           (click)="enableProvider(provider)"
-          *ngIf="(provider.service.deviceState | async) === stateType.Stopped">
+          *ngIf="(provider.service.supported | async) && (provider.service.deviceState | async) === stateType.Stopped">
           Enable {{ provider.name }}
         </button>
         <button
           mat-button
           color="accent"
           (click)="enableProvider(provider)"
-          *ngIf="(provider.service.deviceState | async) === stateType.Starting">
+          *ngIf="(provider.service.supported | async) && (provider.service.deviceState | async) === stateType.Starting">
           {{ provider.name }} settings
         </button>
       </div>
