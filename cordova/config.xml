@@ -112,6 +112,10 @@
         <splash src="res/screen/windows/SplashScreenPhone.png" target="SplashScreenPhone" />
     </platform>
     <preference name="AlternateContentSrc" value="http://localhost:0" />
+    <engine name="browser" spec="^5.0.2" />
+    <engine name="windows" spec="^6.0.0" />
+    <engine name="android" spec="^6.3.0" />
+    <engine name="ios" spec="^4.5.4" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-vibration" spec="^3.1.0" />
@@ -138,9 +142,5 @@
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
-    <engine name="browser" spec="^5.0.2" />
-    <engine name="windows" spec="^6.0.0" />
-    <engine name="android" spec="^6.3.0" />
-    <engine name="ios" spec="^4.5.4" />
-    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#e75fbd6f073ebcd168704b30772a07e0aaab63ac" />
+    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7d86cfd40a0bbe6923351a6cc9da267b9f6fe707" />
 </widget>
