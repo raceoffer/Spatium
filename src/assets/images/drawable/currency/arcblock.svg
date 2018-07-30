@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="22.391687mm"
+   height="25.855083mm"
+   viewBox="0 0 22.391687 25.855083"
+   version="1.1"
+   id="svg6092"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="arcblock.svg">
+  <defs
+     id="defs6086">
+    <style
+       id="style6637">.cls-1{fill:url(#New_Gradient_Swatch_2);}.cls-2{fill:#8998f4;}</style>
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       y2="70.540001"
+       x2="218.36"
+       y1="70.540001"
+       x1="133.73"
+       id="New_Gradient_Swatch_2">
+      <stop
+         id="stop6639"
+         stop-color="#3effff"
+         offset="0" />
+      <stop
+         id="stop6641"
+         stop-color="#8998f4"
+         offset="0.99" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.959798"
+     inkscape:cx="60.806713"
+     inkscape:cy="8.571395"
+     inkscape:document-units="mm"
+     inkscape:current-layer="g6679"
+     showgrid="false"
+     inkscape:pagecheckerboard="true"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1858"
+     inkscape:window-height="1057"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata6089">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(31.411522,-128.38029)">
+    <g
+       id="g6679"
+       transform="matrix(0.26458333,0,0,0.26458333,-49.329105,128.38029)">
+      <g
+         data-name="&lt;Group&gt;"
+         id="_Group_">
+        <path
+           transform="translate(-66.01,-21.68)"
+           d="M 176,21.68 133.73,46.11 V 95 L 176,119.4 218.36,95 V 46.11 Z m -1.93,45.51 -5.48,-3.19 5.52,-9.57 z m -1.93,3.35 -11,6.38 5.52,-9.57 z m 1.93,3.35 V 90.51 L 159.72,82.2 Z m 3.87,0 14.39,8.31 -14.33,8.31 z m 1.93,-3.35 5.52,-3.19 5.61,9.57 z M 178,67.19 V 54.44 L 183.5,64 Z M 178,46.7 V 27.26 l 34.58,20 -25.73,14.81 z m -3.87,0 -8.87,15.36 -25.73,-14.84 34.58,-20 z m -10.8,18.71 -8.87,15.37 -16.84,9.72 V 50.57 Z m -7.46,19 18.24,10.59 v 18.85 l -34.58,-20 z M 178,95 l 18.26,-10.54 16.33,9.43 -34.58,20 z M 197.67,80.81 188.8,65.45 214.51,50.6 v 39.91 z"
+           class="cls-1"
+           data-name="&lt;Compound Path&gt;"
+           id="_Compound_Path_"
+           inkscape:connector-curvature="0"
+           style="fill:url(#New_Gradient_Swatch_2)" />
+      </g>
+    </g>
+  </g>
+</svg>

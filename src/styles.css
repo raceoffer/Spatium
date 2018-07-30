@@ -31,451 +31,451 @@ app-root {
 /* Currencies */
 
 .bitcoin {
-  background: url(assets/images/drawable/currency/bitcoin.svg);
+  content: url(assets/images/drawable/currency/bitcoin.svg);
 }
 
 .ethereum {
-  background: url(assets/images/drawable/currency/ethereum.svg);
+  content: url(assets/images/drawable/currency/ethereum.svg);
 }
 
 .ripple {
-  background: url(assets/images/drawable/currency/ripple.svg);
+  content: url(assets/images/drawable/currency/ripple.svg);
 }
 
 .bitcoin-cash {
-  background: url(assets/images/drawable/currency/bitcoin-cash.svg);
+  content: url(assets/images/drawable/currency/bitcoin-cash.svg);
 }
 
 .cardano {
-  background: url(assets/images/drawable/currency/cardano.svg);
+  content: url(assets/images/drawable/currency/cardano.svg);
 }
 
 .neo {
-  background: url(assets/images/drawable/currency/neo.svg);
+  content: url(assets/images/drawable/currency/neo.svg);
 }
 
 .litecoin {
-  background: url(assets/images/drawable/currency/litecoin.svg);
+  content: url(assets/images/drawable/currency/litecoin.svg);
 }
 
 .stellar {
-  background: url(assets/images/drawable/currency/stellar.svg);
+  content: url(assets/images/drawable/currency/stellar.svg);
 }
 
 .eos {
-  background: url(assets/images/drawable/currency/eos.svg);
+  content: url(assets/images/drawable/currency/eos.svg);
 }
 
 .nem {
-  background: url(assets/images/drawable/currency/nem.svg);
+  content: url(assets/images/drawable/currency/nem.svg);
 }
 
 .tron {
-  background: url(assets/images/drawable/currency/tron.svg);
+  content: url(assets/images/drawable/currency/tron.svg);
 }
 
 .veChain {
-  background: url(assets/images/drawable/currency/ven.svg);
+  content: url(assets/images/drawable/currency/ven.svg);
 }
 
 .icon {
-  background: url(assets/images/drawable/currency/icon.svg);
+  content: url(assets/images/drawable/currency/icon.svg);
 }
 
 .omiseGO {
-  background: url(assets/images/drawable/currency/omisego.svg);
+  content: url(assets/images/drawable/currency/omisego.svg);
 }
 
 .binanceCoin {
-  background: url(assets/images/drawable/currency/binance-coin.svg);
+  content: url(assets/images/drawable/currency/binance-coin.svg);
 }
 
 .digixDAO {
-  background: url(assets/images/drawable/currency/digix-dao.svg);
+  content: url(assets/images/drawable/currency/digix-dao.svg);
 }
 
 .populous {
-  background: url(assets/images/drawable/currency/populous.svg);
+  content: url(assets/images/drawable/currency/populous.svg);
 }
 
 .rchain {
-  background: url(assets/images/drawable/currency/rchain.svg);
+  content: url(assets/images/drawable/currency/rchain.svg);
 }
 
 .maker {
-  background: url(assets/images/drawable/currency/maker.svg);
+  content: url(assets/images/drawable/currency/maker.svg);
 }
 
 .aeternity {
-  background: url(assets/images/drawable/currency/aeternity.svg);
+  content: url(assets/images/drawable/currency/aeternity.svg);
 }
 
 .augur {
-   background: url(assets/images/drawable/currency/augur.svg);
+  content: url(assets/images/drawable/currency/augur.svg);
  }
 
 .status {
-  background: url(assets/images/drawable/currency/status.svg);
+  content: url(assets/images/drawable/currency/status.svg);
 }
 
 .bytom {
-   background: url(assets/images/drawable/currency/bytom.svg);
+  content: url(assets/images/drawable/currency/bytom.svg);
  }
 
 .aion {
-  background: url(assets/images/drawable/currency/aion.svg);
+  content: url(assets/images/drawable/currency/aion.svg);
 }
 
 .waltonchain {
-  background: url(assets/images/drawable/currency/waltonchain.svg);
+  content: url(assets/images/drawable/currency/waltonchain.svg);
 }
 
 .ox {
-  background: url(assets/images/drawable/currency/0x.svg);
+  content: url(assets/images/drawable/currency/0x.svg);
 }
 
 .zilliqa {
-  background: url(assets/images/drawable/currency/zilliqa.svg);
+  content: url(assets/images/drawable/currency/zilliqa.svg);
 }
 
 .kuCoinShares {
-  background: url(assets/images/drawable/currency/kuCoinShares.svg);
+  content: url(assets/images/drawable/currency/kuCoinShares.svg);
 }
 
 .veritaseum {
-  background: url(assets/images/drawable/currency/veritaseum.svg);
+  content: url(assets/images/drawable/currency/veritaseum.svg);
 }
 
 .qash {
-  background: url(assets/images/drawable/currency/qash.svg);
+  content: url(assets/images/drawable/currency/qash.svg);
 }
 
 .loopring {
-  background: url(assets/images/drawable/currency/loopring.svg);
+  content: url(assets/images/drawable/currency/loopring.svg);
 }
 
 .ethos {
-  background: url(assets/images/drawable/currency/ethos.svg);
+  content: url(assets/images/drawable/currency/ethos.svg);
 }
 
 .golem {
-  background: url(assets/images/drawable/currency/golem.svg);
+  content: url(assets/images/drawable/currency/golem.svg);
 }
 
 .nebulas {
-  background: url(assets/images/drawable/currency/nebulas.svg);
+  content: url(assets/images/drawable/currency/nebulas.svg);
 }
 
 .dragonchain {
-  background: url(assets/images/drawable/currency/dragonchain.svg);
+  content: url(assets/images/drawable/currency/dragonchain.svg);
 }
 
 .basicAttentionToken {
-  background: url(assets/images/drawable/currency/basicAttentionToken.svg);
+  content: url(assets/images/drawable/currency/basicAttentionToken.svg);
 }
 
 .revain {
-  background: url(assets/images/drawable/currency/revain.svg);
+  content: url(assets/images/drawable/currency/revain.svg);
 }
 
 .funFair {
-  background: url(assets/images/drawable/currency/funfair.svg);
+  content: url(assets/images/drawable/currency/funfair.svg);
 }
 
 .kyberNetwork {
-  background: url(assets/images/drawable/currency/kyberNetwork.svg);
+  content: url(assets/images/drawable/currency/kyberNetwork.svg);
 }
 
 .iostoken {
-  background: url(assets/images/drawable/currency/iostoken.svg);
+  content: url(assets/images/drawable/currency/iostoken.svg);
 }
 
 .aelf {
-  background: url(assets/images/drawable/currency/aelf.svg);
+  content: url(assets/images/drawable/currency/aelf.svg);
 }
 
 .requestNetwork {
-  background: url(assets/images/drawable/currency/requestNetwork.svg);
+  content: url(assets/images/drawable/currency/requestNetwork.svg);
 }
 
 .salt {
-  background: url(assets/images/drawable/currency/salt.svg);
+  content: url(assets/images/drawable/currency/salt.svg);
 }
 
 .chainLink {
-  background: url(assets/images/drawable/currency/chainLink.svg);
+  content: url(assets/images/drawable/currency/chainLink.svg);
 }
 
 .polymath {
-  background: url(assets/images/drawable/currency/polymath.svg);
+  content: url(assets/images/drawable/currency/polymath.svg);
 }
 
 .powerLedger {
-  background: url(assets/images/drawable/currency/powerLedger.svg);
+  content: url(assets/images/drawable/currency/powerLedger.svg);
 }
 
 .kin {
-  background: url(assets/images/drawable/currency/kin.svg);
+  content: url(assets/images/drawable/currency/kin.svg);
 }
 
 .dentacoin {
-  background: url(assets/images/drawable/currency/dentacoin.svg);
+  content: url(assets/images/drawable/currency/dentacoin.svg);
 }
 
 .nucleusVision {
-  /*background: url(assets/images/drawable/currency/nucleusVision.svg);*/
+  /*content: url(assets/images/drawable/currency/nucleusVision.svg);*/
 }
 
 .bancor {
-  background: url(assets/images/drawable/currency/bancor.svg);
+  content: url(assets/images/drawable/currency/bancor.svg);
 }
 
 .tenx {
-  background: url(assets/images/drawable/currency/tenx.svg);
+  content: url(assets/images/drawable/currency/tenx.svg);
 }
 
 .enigma {
-  background: url(assets/images/drawable/currency/enigma.svg);
+  content: url(assets/images/drawable/currency/enigma.svg);
 }
 
 .cindicator {
-  background: url(assets/images/drawable/currency/cindicator.svg);
+  content: url(assets/images/drawable/currency/cindicator.svg);
 }
 
 .aragon {
-  background: url(assets/images/drawable/currency/aragon.svg);
+  content: url(assets/images/drawable/currency/aragon.svg);
 }
 
 .storj {
-  background: url(assets/images/drawable/currency/storj.svg);
+  content: url(assets/images/drawable/currency/storj.svg);
 }
 
 .nuls {
-  background: url(assets/images/drawable/currency/nuls.svg);
+  content: url(assets/images/drawable/currency/nuls.svg);
 }
 
 .iconomi {
-  background: url(assets/images/drawable/currency/iconomi.svg);
+  content: url(assets/images/drawable/currency/iconomi.svg);
 }
 
 .dent {
-  background: url(assets/images/drawable/currency/dent.svg);
+  content: url(assets/images/drawable/currency/dent.svg);
 }
 
 .storm {
-  background: url(assets/images/drawable/currency/storm.svg);
+  content: url(assets/images/drawable/currency/storm.svg);
 }
 
 .pillar {
-  background: url(assets/images/drawable/currency/pillar.svg);
+  content: url(assets/images/drawable/currency/pillar.svg);
 }
 
 .metal {
-  background: url(assets/images/drawable/currency/metal.svg);
+  content: url(assets/images/drawable/currency/metal.svg);
 }
 
 .quantstamp {
-  background: url(assets/images/drawable/currency/quantstamp.svg);
+  content: url(assets/images/drawable/currency/quantstamp.svg);
 }
 
 .substratum {
-  background: url(assets/images/drawable/currency/substratum.svg);
+  content: url(assets/images/drawable/currency/substratum.svg);
 }
 
 .gnosis {
-  background: url(assets/images/drawable/currency/gnosis.svg);
+  content: url(assets/images/drawable/currency/gnosis.svg);
 }
 
 .sirinLabsToken {
-  background: url(assets/images/drawable/currency/sirinLabsToken.svg);
+  content: url(assets/images/drawable/currency/sirinLabsToken.svg);
 }
 
 .decentraland {
-  background: url(assets/images/drawable/currency/decentraland.svg);
+  content: url(assets/images/drawable/currency/decentraland.svg);
 }
 
 .genesisVision {
-  background: url(assets/images/drawable/currency/genesisVision.svg);
+  content: url(assets/images/drawable/currency/genesisVision.svg);
 }
 
 .civic {
-  background: url(assets/images/drawable/currency/civic.svg);
+  content: url(assets/images/drawable/currency/civic.svg);
 }
 
 .dynamicTradingRights {
-  background: url(assets/images/drawable/currency/dynamicTradingRights.svg);
+  content: url(assets/images/drawable/currency/dynamicTradingRights.svg);
 }
 
 .enjinCoin {
-  /*background: url(assets/images/drawable/currency/enjinCoin.svg);*/
+  content: url(assets/images/drawable/currency/enjinCoin.svg);
 }
 
 .singularityNET {
-  background: url(assets/images/drawable/currency/singularityNET.svg);
+  content: url(assets/images/drawable/currency/singularityNET.svg);
 }
 
 .thetaToken {
-  background: url(assets/images/drawable/currency/thetaToken.svg);
+  content: url(assets/images/drawable/currency/thetaToken.svg);
 }
 
 .monaco {
-  background: url(assets/images/drawable/currency/monaco.svg);
+  content: url(assets/images/drawable/currency/monaco.svg);
 }
 
 .santimentNetworkToken {
-  background: url(assets/images/drawable/currency/santimentNetworkToken.svg);
+  content: url(assets/images/drawable/currency/santimentNetworkToken.svg);
 }
 
 .iExecRLC {
-  background: url(assets/images/drawable/currency/iExecRLC.svg);
+  content: url(assets/images/drawable/currency/iExecRLC.svg);
 }
 
 .raidenNetworkToken {
-  background: url(assets/images/drawable/currency/raidenNetworkToken.svg);
+  content: url(assets/images/drawable/currency/raidenNetworkToken.svg);
 }
 
 .timeNewBank {
-  background: url(assets/images/drawable/currency/timeNewBank.svg);
+  content: url(assets/images/drawable/currency/timeNewBank.svg);
 }
 
 .genaroNetwork {
-  background: url(assets/images/drawable/currency/genaroNetwork.svg);
+  content: url(assets/images/drawable/currency/genaroNetwork.svg);
 }
 
 .credits {
-  /*background: url(assets/images/drawable/currency/credits.svg);*/
+  /*content: url(assets/images/drawable/currency/credits.svg);*/
 }
 
 .wax {
-  background: url(assets/images/drawable/currency/wax.svg);
+  content: url(assets/images/drawable/currency/wax.svg);
 }
 
 .poet {
-  background: url(assets/images/drawable/currency/poet.svg);
+  content: url(assets/images/drawable/currency/poet.svg);
 }
 
 .biboxToken {
-  background: url(assets/images/drawable/currency/biboxToken.svg);
+  content: url(assets/images/drawable/currency/biboxToken.svg);
 }
 
 .arcblock {
-  /*background: url(assets/images/drawable/currency/arcblock.svg);*/
+  content: url(assets/images/drawable/currency/arcblock.svg);
 }
 
 .xpa {
-  background: url(assets/images/drawable/currency/xpa.svg);
+  content: url(assets/images/drawable/currency/xpa.svg);
 }
 
 .highPerformanceBlockchain {
-  background: url(assets/images/drawable/currency/highPerformanceBlockchain.svg);
+  content: url(assets/images/drawable/currency/highPerformanceBlockchain.svg);
 }
 
 .dew {
-  background: url(assets/images/drawable/currency/dew.svg);
+  content: url(assets/images/drawable/currency/dew.svg);
 }
 
 .payPie {
-  background: url(assets/images/drawable/currency/payPie.svg);
+  content: url(assets/images/drawable/currency/payPie.svg);
 }
 
 .oyster {
-  background: url(assets/images/drawable/currency/oyster.svg);
+  content: url(assets/images/drawable/currency/oyster.svg);
 }
 
 .edgeless {
-  background: url(assets/images/drawable/currency/edgeless.svg);
+  content: url(assets/images/drawable/currency/edgeless.svg);
 }
 
 .envion {
-  background: url(assets/images/drawable/currency/envion.svg);
+  content: url(assets/images/drawable/currency/envion.svg);
 }
 
 .fusion {
-  /*background: url(assets/images/drawable/currency/fusion.svg);*/
+  content: url(assets/images/drawable/currency/fusion.svg);
 }
 
 .cube {
-  /*background: url(assets/images/drawable/currency/cube.svg);*/
+  /*content: url(assets/images/drawable/currency/cube.svg);*/
 }
 
 .sophiaTX {
-  background: url(assets/images/drawable/currency/sophiaTX.svg);
+  content: url(assets/images/drawable/currency/sophiaTX.svg);
 }
 
 .adEx {
-  background: url(assets/images/drawable/currency/adEx.svg);
+  content: url(assets/images/drawable/currency/adEx.svg);
 }
 
 .mediShares {
-  background: url(assets/images/drawable/currency/mediShares.svg);
+  content: url(assets/images/drawable/currency/mediShares.svg);
 }
 
 .ethLend {
-  background: url(assets/images/drawable/currency/ethLend.svg);
+  content: url(assets/images/drawable/currency/ethLend.svg);
 }
 
 .ost {
-  background: url(assets/images/drawable/currency/ost.svg);
+  content: url(assets/images/drawable/currency/ost.svg);
 }
 
 .bluzelle {
-  background: url(assets/images/drawable/currency/bluzelle.svg);
+  content: url(assets/images/drawable/currency/bluzelle.svg);
 }
 
 .crypto20 {
-  /*background: url(assets/images/drawable/currency/crypto20.svg);*/
+  /*content: url(assets/images/drawable/currency/crypto20.svg);*/
 }
 
 .iotChain {
-  /*background: url(assets/images/drawable/currency/iotChain.svg);*/
+  /*content: url(assets/images/drawable/currency/iotChain.svg);*/
 }
 
 .leadcoin {
-  /*background: url(assets/images/drawable/currency/leadcoin.svg);*/
+  /*content: url(assets/images/drawable/currency/leadcoin.svg);*/
 }
 
 .eidoo {
-  background: url(assets/images/drawable/currency/eidoo.svg);
+  content: url(assets/images/drawable/currency/eidoo.svg);
 }
 
 .blockv {
-  /*background: url(assets/images/drawable/currency/blockv.svg);*/
+  content: url(assets/images/drawable/currency/blockv.svg);
 }
 
 .cyberMiles {
-  /*background: url(assets/images/drawable/currency/cyberMiles.svg);*/
+  /*content: url(assets/images/drawable/currency/cyberMiles.svg);*/
 }
 
 .ripioCreditNetwork {
-  background: url(assets/images/drawable/currency/ripioCreditNetwork.svg);
+  content: url(assets/images/drawable/currency/ripioCreditNetwork.svg);
 }
 
 .telcoin {
-  background: url(assets/images/drawable/currency/telcoin.svg);
+  content: url(assets/images/drawable/currency/telcoin.svg);
 }
 
 .vibe {
-  background: url(assets/images/drawable/currency/vibe.svg);
+  content: url(assets/images/drawable/currency/vibe.svg);
 }
 
 .sonm {
-  background: url(assets/images/drawable/currency/sonm.svg);
+  content: url(assets/images/drawable/currency/sonm.svg);
 }
 
 .loomNetwork {
-  background: url(assets/images/drawable/currency/loomNetwork.svg);
+  content: url(assets/images/drawable/currency/loomNetwork.svg);
 }
 
 .taas {
-  background: url(assets/images/drawable/currency/taas.svg);
+  content: url(assets/images/drawable/currency/taas.svg);
 }
 
 .wings {
-  background: url(assets/images/drawable/currency/wings.svg);
+  content: url(assets/images/drawable/currency/wings.svg);
 }
 
 .сonsensus {
-  background: url(assets/images/drawable/currency/consensus.svg);
+  content: url(assets/images/drawable/currency/consensus.svg);
 }
 
 .currency-component {
