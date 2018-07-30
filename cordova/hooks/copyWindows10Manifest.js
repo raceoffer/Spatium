@@ -27,6 +27,12 @@ module.exports = function (context) {
       if (err) throw new Error(err);
 
       const version = json.widget.$.version;
+      const versionComponents = version.split('.');
+      const normalizedVersionComponents = [0, 0, 0, 0];
+      for (let i = 0; i < Math.min(versionComponents.length, 3); i++) {
+        normalizedVersionComponents[i] = versionComponents[i];
+      }
+      const normalizedVersion = normalizedVersionComponents.join('.');
 
       fs.readFile(sourceFile, 'utf-8', function (err, data) {
         if (err) throw new Error(err);
@@ -34,7 +40,7 @@ module.exports = function (context) {
         parseString(data, function (err, json) {
           if (err) throw new Error(err);
 
-          json.Package.Identity[0].$.Version = version;
+          json.Package.Identity[0].$.Version = normalizedVersion;
 
           const builder = new xml2js.Builder();
           const xml = builder.buildObject(json);

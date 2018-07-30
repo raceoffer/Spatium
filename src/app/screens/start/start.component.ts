@@ -2,12 +2,12 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService, Position } from '../../services/navigation.service';
+import { getValue, setValue } from '../../utils/storage';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
 
 declare const navigator: any;
 declare const Windows: any;
-declare const NativeStorage: any;
 
 @Component({
   selector: 'app-start',
@@ -29,14 +29,15 @@ export class StartComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    NativeStorage.remove('startPath');
-
-    NativeStorage.getItem('presentation',
-      (value) => {},
-      (error) => this.ngZone.run(async () => {
+    if (this.deviceService.platform === Platform.Android) {
+      try {
+        const presentation = await getValue('presentation');
+      } catch (ignored) {
+        this.ngZone.run(async () => {
         const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
-      })
-    );
+        });
+      }
+    }
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;
@@ -61,6 +62,15 @@ export class StartComponent implements OnInit, OnDestroy {
       const currentView = Windows.UI.Core.SystemNavigationManager.getForCurrentView();
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
     }
+
+    try {
+      const startPath = await getValue('startPath');
+      this.ngZone.run(async () => {
+        await this.router.navigate([startPath]);
+      });
+    } catch (e) {
+
+  }
   }
 
   ngOnDestroy() {
@@ -69,12 +79,12 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onOpenClicked() {
-    NativeStorage.setItem('startPath', '/login');
+    await setValue('startPath', '/login');
     await this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {
-    NativeStorage.setItem('startPath', '/verifier-auth');
+    await setValue('startPath', '/verifier-auth');
     await this.router.navigate(['/verifier-auth']);
   }
 

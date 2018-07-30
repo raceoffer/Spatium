@@ -1,4 +1,4 @@
-<section class="carousel-wrapper" [ngStyle]="carouselWrapperStyle" (swipeLeft)="next()" (swipeRight)="prev()">
+<section class="carousel-wrapper" [ngStyle]="carouselWrapperStyle" (swipeLeft)="next()" (swipeRight)="prev()" (window:resize)="onResize()">
   <ul class="carousel-inner" #carousel>
     <li *ngFor="let item of items;" class="carousel-item">
       <ng-container [ngTemplateOutlet]="item.tpl"></ng-container>

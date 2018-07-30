@@ -1,13 +1,14 @@
 .connect-div {
   padding-top: 10px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
   line-height: 36px;
   opacity: 0.5;
   font-size: 12px;
-  float: right;
 }
 
 .connect-div button {

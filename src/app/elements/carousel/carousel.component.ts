@@ -1,11 +1,12 @@
 import { animate, AnimationBuilder, AnimationFactory, AnimationPlayer, style } from '@angular/animations';
 import {
+  AfterViewInit,
   Component,
   ContentChildren,
   Directive,
   ElementRef,
   EventEmitter,
-  Input,
+  Input, OnDestroy,
   OnInit,
   Output,
   QueryList,
@@ -32,7 +33,7 @@ export class CarouselItemElement {
   templateUrl: './carousel.component.html',
   styleUrls: ['./carousel.component.css']
 })
-export class CarouselComponent implements OnInit {
+export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @ContentChildren(CarouselItemDirective) items: QueryList<CarouselItemDirective>;
   @Input() timing = '250ms ease-in';
   @Output() close: EventEmitter<any> = new EventEmitter<any>();
@@ -87,6 +88,22 @@ export class CarouselComponent implements OnInit {
 
   skip() {
     this.close.emit();
+  }
+
+  async onResize() {
+    this.itemWidth = this.itemsElements.first.nativeElement.getBoundingClientRect().width;
+
+    const offset = this.currentSlide.getValue() * this.itemWidth;
+
+    const animation: AnimationFactory = this.buildAnimation(offset);
+    this.player = animation.create(this.carousel.nativeElement);
+    this.player.play();
+
+    this.player.onDone(() => {
+      this.carouselWrapperStyle = {
+        width: `${this.itemWidth}px`,
+      };
+    });
   }
 
   ngAfterViewInit() {

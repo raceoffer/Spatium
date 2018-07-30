@@ -45,6 +45,14 @@ function mergeConnectionStates(states: [ConnectionState]): ConnectionState {
 export class ConnectionProviderService implements IConnectionProvider {
   public providers = new BehaviorSubject<Map<ProviderType, Provider>>(new Map<ProviderType, Provider>());
 
+  public supported = toBehaviourSubject(this.providers.pipe(
+    map(providers => {
+      return Array.from(providers.values()).map(provider => provider.service.supported);
+    }),
+    mergeMap(states => combineLatest(states)),
+    map(booleans => booleans.some(t => t))
+  ), false);
+  
   public deviceState = toBehaviourSubject(this.providers.pipe(
     map(providers => {
       return Array.from(providers.values()).map(provider => provider.service.deviceState);
