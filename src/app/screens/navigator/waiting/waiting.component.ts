@@ -71,7 +71,7 @@ export class WaitingComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    await timer(1000).toPromise();
+    await timer(500).toPromise();
     await this.connectionProviderService.searchDevices();
   }
 
