@@ -26,6 +26,14 @@
         <content src="index.html" />
     </platform>
     <platform name="ios">
+        <config-file parent="UISupportedInterfaceOrientations" platform="ios" target="*-Info.plist">
+            <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationPortraitUpsideDown</string>
+            </array>
+        </config-file>
+    </platform>
+    <platform name="ios">
         <edit-config file="*-Info.plist" mode="merge" overwrite="true" target="NSPhotoLibraryUsageDescription">
             <string>This app requires photo library access to save QR codes.</string>
         </edit-config>
@@ -143,4 +151,5 @@
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
     <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7d86cfd40a0bbe6923351a6cc9da267b9f6fe707" />
+    <plugin name="cordova-open-native-settings" spec="^1.5.1" />
 </widget>
