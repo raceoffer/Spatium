@@ -27,7 +27,7 @@ export class SocketClientService {
 
     const name = await this.getDeviceName();
 
-    const socket = new WebSocket('ws://' + device.ip + ':3445/?name=' + name);
+    const socket = new WebSocket('ws://' + device.ip + ':' + device.port + '/?name=' + name);
     socket.onopen = () => this.ngZone.run(() => {
       this.state.next(ConnectionState.Connected);
       this.connectedDevice.next(device);

@@ -12,6 +12,8 @@ declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
+  public supported = new BehaviorSubject<boolean>(false);
+
   public deviceState = new BehaviorSubject<State>(State.Stopped);
   public connectionState = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
@@ -53,14 +55,18 @@ export class BluetoothService implements IConnectionProvider {
     this.deviceService.deviceReady().then(() => {
       this.plugin = cordova.plugins.bluetooth;
 
-      this.plugin.setStateCallback(state => {
+      this.plugin.setStateCallback(state => this.ngZone.run(() => {
         this.deviceState.next(state);
-      });
+      }));
+	  
+	  this.plugin.setSupportedCallback(supported => this.ngZone.run(() => {
+		this.supported.next(supported);
+	  }));
 
       this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
         if (device !== null) {
           await this.plugin.startReading();
-          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
           this.connectionState.next(ConnectionState.Connected);
         } else {
           this.connectedDevice.next(null);
@@ -97,6 +103,10 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin.setMessageCallback(message => this.ngZone.run(() => {
         this.message.next(message);
       }));
+	  
+	  this.plugin.getSupported().then(supported => this.ngZone.run(() => {
+		this.supported.next(supported);
+	  }));
 
       this.plugin.getState().then(state => this.ngZone.run(() => {
         this.deviceState.next(state);
@@ -113,10 +123,9 @@ export class BluetoothService implements IConnectionProvider {
   }
 
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   async startServer() {
@@ -253,7 +262,7 @@ export class BluetoothService implements IConnectionProvider {
     const mapped = new Map<string, Device>();
     for (const device of paired) {
       if (device.hasOwnProperty('address')) {
-        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
       }
     }
 

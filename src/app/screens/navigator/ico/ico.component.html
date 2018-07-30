@@ -31,30 +31,24 @@
     </button>
   </mat-toolbar>
 
-  <mat-sidenav-container class="content">
-    <app-main-drawer #sidenav [navLinks]="navLinks" [current]="current"></app-main-drawer>
+  <div class="content" (window:resize)="onResize()">
+    <mat-grid-list [cols]="cols" rowHeight="4:3">
+      <mat-grid-tile
+        *ngFor="let tile of (filtredTitles | async)"
+        [colspan]="tile.cols"
+        [rowspan]="tile.rows">
 
-    <div (window:resize)="onResize()">
-      <mat-grid-list [cols]="cols" rowHeight="4:3">
-        <mat-grid-tile
-          *ngFor="let tile of (filtredTitles | async)"
-          [colspan]="tile.cols"
-          [rowspan]="tile.rows">
-
-          <div class="grid-item">
-            <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
-              <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
-                <img class="logo" [src]="'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo'">
-                <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
-                  <span class="title">{{ tile.title }}</span>
-                </div>
+        <div class="grid-item">
+          <button mat-button class="block" style="padding: 0px;" (click)='onTileClicked(tile)'>
+            <div class="div-height"  fxLayout="row" fxLayoutAlign="center center" >
+              <img class="logo" [src]="'http://ipfs.io/ipfs/' + tile.ipfsHash + '/logo'">
+              <div fxLayout="column" fxLayoutAlign="center start" class="tile-inf">
+                <span class="title">{{ tile.title }}</span>
               </div>
-            </button>
-          </div>
-        </mat-grid-tile>
-      </mat-grid-list>
-    </div>
-  </mat-sidenav-container>
+            </div>
+          </button>
+        </div>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
 </div>
-
-

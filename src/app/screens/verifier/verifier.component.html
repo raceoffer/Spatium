@@ -11,24 +11,9 @@
     <mat-icon *ngIf="(partiallySync | async)">sync_problem</mat-icon>
   </mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
-  <mat-sidenav-container class="content">
-    <app-main-drawer
-      #sidenav
-      [navLinks]="navLinks">
-    </app-main-drawer>
-
-    <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
-      <div
-        fxLayout="column"
-        fxLayoutAlign="start center"
-        class="box">
-
-        <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-          <div *ngFor="let provider of (providersArray | async)">
-            <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
-          </div>
-        </mat-nav-list>
-      </div>
+  <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
+    <div *ngFor="let provider of (providersArray | async)">
+      <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
     </div>
-  </mat-sidenav-container>
+  </mat-nav-list>
 </div>
