@@ -53,11 +53,10 @@ export class SocketClientService {
       });
     });
     socket.onmessage = (event) => this.ngZone.run(() => {
-      if (event.data === '__keep-alive__') {
-        this.keepAlive.next();
-        return;
+      this.keepAlive.next();
+      if (event.data !== '__keep-alive__') {
+        this.message.next(event.data);
       }
-      this.message.next(event.data);
     });
     socket.onclose = () => this.ngZone.run(() => {
       this.connectedDevice.next(null);
