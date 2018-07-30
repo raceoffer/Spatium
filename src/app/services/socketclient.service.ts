@@ -35,7 +35,7 @@ export class SocketClientService {
       this.state.next(ConnectionState.Connected);
       this.connectedDevice.next(device);
 
-      interval(2000).pipe(
+      interval(1000).pipe(
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
