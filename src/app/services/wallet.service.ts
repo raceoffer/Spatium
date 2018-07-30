@@ -265,6 +265,7 @@ export class WalletService {
         if (!await requestDialog('You are about to connect with another device. This will undo current synchronization progress. Are you sure?')) {
           console.log('Rejected to change session');
           this.synchronizatonStatus.next(SyncStatus.None);
+          await this.connectionProviderService.disconnect();
           return;
         } else {
           await this.reset();
