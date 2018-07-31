@@ -1,9 +1,9 @@
-import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, OnDestroy, ViewChild } from '@angular/core';
-import { combineLatest, interval } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, HostBinding, OnDestroy } from '@angular/core';
+import { combineLatest, BehaviorSubject } from 'rxjs';
+import { map, debounceTime } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
-import { Coin, KeyChainService, TokenEntry } from '../../../services/keychain.service';
+import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
 import { NavigationService , Position } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
 import { requestDialog } from '../../../utils/dialog';
@@ -14,15 +14,17 @@ import { Router } from '@angular/router';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
+import { FormControl } from '@angular/forms';
 
 declare const navigator: any;
 
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
-  styleUrls: ['./wallet.component.css']
+  styleUrls: ['./wallet.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WalletComponent implements OnDestroy, AfterViewInit {
+export class WalletComponent implements OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   public current = 'Wallet';
@@ -69,22 +71,46 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
 
   public title = 'Wallet';
   public isSearch = false;
-  public filteredTitles = [];
 
-  public staticTitles: any = [
-    {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC},
-    {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH},
-    {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH},
-    {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC},
-    {title: 'NEM', symbols: 'XEM', cols: 1, rows: 1, logo: 'nem', coin: Coin.NEM},
-    {title: 'Cardano', symbols: 'ADA', cols: 1, rows: 1, logo: 'cardano'},
-    {title: 'NEO', symbols: 'NEO', cols: 1, rows: 1, logo: 'neo'},
-    {title: 'Ripple', symbols: 'XRP', cols: 1, rows: 1, logo: 'ripple'},
-    {title: 'Stellar', symbols: 'XLM', cols: 1, rows: 1, logo: 'stellar'},
+  public staticCoins: Array<Coin|Token> = [
+    Coin.BTC,
+    Coin.BCH,
+    Coin.ETH,
+    Coin.LTC,
+    Coin.NEM,
+    Coin.ADA,
+    Coin.NEO,
+    Coin.XRP,
+    Coin.XLM
   ];
 
-  public titles: any = [];
-  private tileBalanceInfo = {};
+  public tileModel = new Map<Coin | Token, any>();
+
+  public filterControl = new FormControl();
+
+  public tiles = new BehaviorSubject<Array<Coin | Token>>([]);
+  public filter = toBehaviourSubject(this.filterControl.valueChanges.pipe(
+    debounceTime(300)
+  ), '');
+  public filteredTiles = toBehaviourSubject(combineLatest([
+    this.tiles,
+    this.filter
+  ]).pipe(
+    map(([tiles, filter]) => {
+      if (filter.length > 0) {
+        return tiles.filter(
+          t => {
+            const model = this.tileModel.get(t);
+            return model.title.toUpperCase().includes(filter.toUpperCase()) ||
+                   model.symbols.includes(filter.toUpperCase());
+          }
+        );
+      } else {
+        return tiles;
+      }
+    })
+  ), []);
+
   private subscriptions = [];
 
   constructor(
@@ -93,63 +119,31 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     private readonly currency: CurrencyService,
     private readonly wallet: WalletService,
     private readonly device: DeviceService,
-    private readonly router: Router,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly router: Router
   ) {
-    const titles = this.staticTitles;
+    const tiles = [];
 
-    keychain.topTokens.forEach((tokenInfo) => {
-      titles.push(WalletComponent.tokenEntry(tokenInfo));
+    this.staticCoins.forEach(coin => tiles.push(coin));
+
+    keychain.topTokens.forEach(tokenInfo => tiles.push(tokenInfo.token));
+
+    tiles.push(Coin.BTC_test);
+
+    tiles.forEach(tile => {
+      this.tileModel.set(tile, this.getTileModel(tile));
     });
 
-    titles.push(
-      {title: 'Bitcoin Test', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test}
-    );
+    this.tiles.next(tiles);
 
-    this.titles = titles;
-
-    this.filteredTitles = this.titles;
     this.isWindows = (this.device.platform === Platform.Windows);
   }
 
-  private _filterValue = '';
-
-  get filterValue() {
-    return this._filterValue;
-  }
-
-  set filterValue(newUserName) {
-    this._filterValue = newUserName;
-    if (this._filterValue.length > 0) {
-      this.filteredTitles = this.titles.filter(
-        t => (
-          t.title.toUpperCase().includes(this._filterValue.toUpperCase()) ||
-          t.symbols.includes(this._filterValue.toUpperCase())
-        )
-      );
-    } else {
-      this.filteredTitles = this.titles;
-    }
-  }
-
-  public static tokenEntry(tokenInfo: TokenEntry) {
-    return {
-      title: tokenInfo.name,
-      symbols: tokenInfo.ico,
-      logo: tokenInfo.className,
-      cols: 1,
-      rows: 1,
-      coin: tokenInfo.token,
-      erc20: true,
-    };
-  }
-
   public openSettings() {
-    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
+    this.navigationService.pushOverlay(SettingsComponent);
   }
 
   public openFeedback() {
-    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
+    this.navigationService.pushOverlay(FeedbackComponent);
   }
 
   public toggleNavigation() {
@@ -168,19 +162,12 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    this.changeDetector.detach();
-    this.subscriptions.push(interval(1000).subscribe(() => {
-      this.changeDetector.detectChanges();
-    }));
-  }
-
   onResize(): void {
     this.cols = Math.ceil(window.innerWidth / 350);
   }
 
   public clearFilterValue() {
-    this.filterValue = '';
+    this.filterControl.setValue('');
   }
 
   public ngOnDestroy() {
@@ -188,7 +175,7 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     this.subscriptions = [];
   }
 
-  public async onTileClicked(coin: Coin) {
+  public async onTileClicked(coin: Coin | Token) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
     componentRef.instance.currency = coin;
   }
@@ -198,16 +185,9 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     this.clearFilterValue();
   }
 
-  public async onBackClicked() {
-    if (this.isSearch) {
-      this.filterValue = '';
-      this.isSearch = false;
-    }
-  }
-
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connectedEvent.subscribe(device => {
+    componentRef.instance.connectedEvent.subscribe(ignored => {
       this.navigationService.acceptOverlay();
     });
   }
@@ -218,25 +198,33 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  public getTileBalanceInfo(coin: any) {
-    if (coin === undefined || coin === null) {
+  public getTileModel(currency: Coin | Token) {
+    if (currency === undefined || currency === null) {
       return undefined;
     }
 
-    if (this.tileBalanceInfo[coin] !== undefined) {
-      return this.tileBalanceInfo[coin];
-    }
+    const currencyInfo = this.currency.getInfo(currency);
 
-    const currencyInfo = this.currency.getInfo(coin);
-    const currencyWallet = this.wallet.currencyWallets.get(coin);
+    const tileModel: any = {
+      title: currencyInfo.name,
+      symbols: currencyInfo.symbol,
+      logo: currencyInfo.icon,
+      coin: currency,
+      erc20: currency in Token
+    };
 
-    const balanceUnconfirmed = toBehaviourSubject(
-      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
-      null);
+    if (this.wallet.currencyWallets.has(currency)) {
+      const currencyWallet = this.wallet.currencyWallets.get(currency);
 
-    this.tileBalanceInfo[coin] = {
-      balance: balanceUnconfirmed,
-      balanceUSD: toBehaviourSubject(combineLatest([
+      const balanceUnconfirmed = toBehaviourSubject(
+        currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
+        null);
+
+      tileModel.implemented = true;
+      tileModel.status = currencyWallet.status;
+      tileModel.balanceStatus = currencyWallet.balanceStatus;
+      tileModel.balance = balanceUnconfirmed;
+      tileModel.balanceUSD = toBehaviourSubject(combineLatest([
         balanceUnconfirmed,
         currencyInfo.rate
       ]).pipe(map(
@@ -246,9 +234,9 @@ export class WalletComponent implements OnDestroy, AfterViewInit {
           }
           return balance * rate;
         }
-      )), null)
-    };
+      )), null);
+    }
 
-    return this.tileBalanceInfo[coin];
+    return tileModel;
   }
 }

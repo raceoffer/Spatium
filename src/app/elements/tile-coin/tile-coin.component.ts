@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@angular/core';
 import { getCurrencyLogo } from '../../utils/currency-icon';
+import { BalanceStatus, Status } from '../../services/wallet/currencywallet';
 
 @Component({
   selector: 'app-tile-coin',
@@ -9,23 +10,23 @@ import { getCurrencyLogo } from '../../utils/currency-icon';
 export class TileCoinComponent implements OnInit {
   @HostBinding('class') classes = 'tile-coin';
 
-  @Input() coin: any = {};
-  @Input() balanceInfo: any = {};
-  @Input() synchronizing = false;
+  @Input() tileModel: any = {};
 
-  @Output() onClicked: EventEmitter<any> = new EventEmitter<any>();
+  @Output() clicked: EventEmitter<any> = new EventEmitter<any>();
 
   logo = '';
+  public stateType = Status;
+  public balanceStateType = BalanceStatus;
   ethereum = '';
 
   constructor() { }
 
   ngOnInit() {
     this.ethereum = getCurrencyLogo('ethereum');
-    this.logo = getCurrencyLogo(this.coin.logo);
+    this.logo = getCurrencyLogo(this.tileModel.logo);
   }
 
-  onClick(coin) {
-    this.onClicked.emit(coin);
+  onClick() {
+    this.clicked.next(this.tileModel.coin);
   }
 }
