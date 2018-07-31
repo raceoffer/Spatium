@@ -94,11 +94,10 @@ export class SocketServerService {
           }
         }),
         onMessage: (conn, msg) => this.ngZone.run(() => {
-          if (msg === '__keep-alive__') {
-            this.keepAlive.next();
-            return;
+          this.keepAlive.next();
+          if (msg !== '__keep-alive__') {
+            this.message.next(msg);
           }
-          this.message.next(msg);
         }),
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {

@@ -7,22 +7,29 @@
   (settingsClicked) = "onSettingsClicked()"></app-toolbar>
 
 <div class="currency-component box" [ngClass]="{'windows' : isWindows(), 'with-transactions': ((transactions | async) !== null)}" fxLayout="column" fxLayoutAlign="start center">
-  <mat-progress-bar mode="indeterminate" color="accent"
-                    style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(((walletAddress | async) === null) ||
-                    ((balanceCurrencyUnconfirmed | async) === null) ||
-                    ((balanceUsdUnconfirmed | async) === null))"></mat-progress-bar>
+  <mat-progress-bar
+    mode="indeterminate"
+    color="accent"
+    style="width: 100%; position: fixed; z-index: 2;"
+    *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing ||
+           (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading">
+  </mat-progress-bar>
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
-        <span class="label full-width-label">{{ accountLabel }}</span>
+        <span class="label full-width-label">Account</span>
       </td>
     </tr>
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <div class="field auto-height">
-          <div *ngIf="(walletAddress | async) !== null">{{ walletAddress | async }}</div>
-          <div *ngIf="(walletAddress | async) === null">Loading&hellip;</div>
+          <div *ngIf="(currencyWallet?.status | async) === statusType.Ready">{{ walletAddress | async }}</div>
+          <div *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing">Synchronizing</div>
+          <div *ngIf="(currencyWallet?.status | async) === statusType.None ||
+                      (currencyWallet?.status | async) === statusType.Cancelled ||
+                      (currencyWallet?.status | async) === statusType.Failed">
+            Not synched
+          </div>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
@@ -34,20 +41,28 @@
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
       </td>
       <td class="left">
-        <span class="label" style="margin-left: 5px;">{{ usdTitle }}</span>
+        <span class="label" style="margin-left: 5px;">USD</span>
       </td>
     </tr>
     <tr>
       <td class="right">
         <div class="field disable">
-          <span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">{{ balanceCurrencyUnconfirmed | async }}</span>
-          <span *ngIf="(balanceCurrencyUnconfirmed | async) === null">Loading&hellip;</span>
+          <span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">
+            {{ balanceCurrencyUnconfirmed | async }}
+          </span>
+          <span *ngIf="(balanceCurrencyUnconfirmed | async) === null">
+            {{ (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ? 'Loading' : '' }}
+          </span>
         </div>
       </td>
       <td class="left">
         <div class="field disable">
-          <span *ngIf="(balanceUsdUnconfirmed | async) !== null">{{ balanceUsdUnconfirmed | async }}</span>
-          <span *ngIf="(balanceUsdUnconfirmed | async) === null">Loading&hellip;</span>
+          <span *ngIf="(balanceUsdUnconfirmed | async) !== null">
+            {{ balanceUsdUnconfirmed | async }}
+          </span>
+          <span *ngIf="(balanceUsdUnconfirmed | async) === null">
+            {{ (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ? 'Loading' : '' }}
+          </span>
         </div>
       </td>
     </tr>
@@ -55,6 +70,11 @@
                (balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async)">
       <td class="right">
         <span class="label" style="margin-left: 5px;">Unconfirmed balance</span>
+      </td>
+    </tr>
+    <tr *ngIf="(currencyWallet?.balanceStatus | async) === balanceStatusType.Error">
+      <td class="right">
+        <span class="label" style="margin-left: 5px;">Outdated balance</span>
       </td>
     </tr>
   </table>
@@ -83,9 +103,9 @@
     </mat-list>
     <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
          *ngIf="((transactions | async) === null) &&
-          ((walletAddress | async) !== null) &&
-          ((balanceCurrencyUnconfirmed | async) !== null) &&
-          ((balanceUsdUnconfirmed | async) !== null)">
+                ((walletAddress | async) !== null) &&
+                ((balanceCurrencyUnconfirmed | async) !== null) &&
+                ((balanceUsdUnconfirmed | async) !== null)">
       <mat-spinner
         color="accent"
         [diameter]="50"
@@ -96,7 +116,7 @@
 
   <div class="footer text-center">
     <button mat-raised-button color="accent" class="width-button-full color full-width" (click)="send()">
-      {{ sendLabel }}
+      Send
     </button>
   </div>
 </div>

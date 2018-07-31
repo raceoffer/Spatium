@@ -35,7 +35,7 @@ export class SocketClientService {
       this.state.next(ConnectionState.Connected);
       this.connectedDevice.next(device);
 
-      interval(2000).pipe(
+      interval(1000).pipe(
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
@@ -53,11 +53,10 @@ export class SocketClientService {
       });
     });
     socket.onmessage = (event) => this.ngZone.run(() => {
-      if (event.data === '__keep-alive__') {
-        this.keepAlive.next();
-        return;
+      this.keepAlive.next();
+      if (event.data !== '__keep-alive__') {
+        this.message.next(event.data);
       }
-      this.message.next(event.data);
     });
     socket.onclose = () => this.ngZone.run(() => {
       this.connectedDevice.next(null);
