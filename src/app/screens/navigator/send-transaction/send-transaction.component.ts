@@ -9,7 +9,7 @@ import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
-import { CurrencyWallet } from '../../../services/wallet/currencywallet';
+import { BalanceStatus, CurrencyWallet, Status } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
@@ -38,6 +38,8 @@ enum Fee {
 export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
   public phaseType = Phase; // for template
+  public statusType = Status;
+  public balanceStatusType = BalanceStatus;
 
   public receiverField = new FormControl();
 

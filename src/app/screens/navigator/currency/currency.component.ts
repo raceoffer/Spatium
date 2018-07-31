@@ -6,13 +6,16 @@ import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { WalletService } from '../../../services/wallet.service';
-import { CurrencyWallet, HistoryEntry, TransactionType } from '../../../services/wallet/currencywallet';
+import {
+  BalanceStatus, CurrencyWallet, HistoryEntry, Status,
+  TransactionType
+} from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
+import { DeviceService, Platform } from '../../../services/device.service';
 
 declare const cordova: any;
-declare const device: any;
 
 @Component({
   selector: 'app-currency',
@@ -29,9 +32,10 @@ declare const device: any;
 })
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
-  public usdTitle = 'USD';
 
   public txType = TransactionType;
+  public statusType = Status;
+  public balanceStatusType = BalanceStatus;
 
   @Input() public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -46,14 +50,14 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
 
-  public accountLabel = 'Account';
-  public sendLabel = 'Send';
-
   private subscriptions = [];
 
-  constructor(private readonly wallet: WalletService,
-              private readonly currencyService: CurrencyService,
-              private readonly navigationService: NavigationService) {}
+  constructor(
+    private readonly wallet: WalletService,
+    private readonly currencyService: CurrencyService,
+    private readonly navigationService: NavigationService,
+    private readonly deviceService: DeviceService
+  ) {}
 
   async ngOnInit() {
     this.currencyInfo = await this.currencyService.getInfo(this.currency);
@@ -69,25 +73,29 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.confirmed) : null)),
       null);
 
-    this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest(
+    this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest([
       this.balanceCurrencyUnconfirmed,
-      this.currencyInfo.rate,
-      (balance, rate) => {
+      this.currencyInfo.rate
+    ]).pipe(
+      map(([balance, rate]) => {
         if (rate === null || balance === null) {
           return null;
         }
         return balance * rate;
-      }), null);
+      })
+    ), null);
 
-    this.balanceUsdConfirmed = toBehaviourSubject(combineLatest(
+    this.balanceUsdConfirmed = toBehaviourSubject(combineLatest([
       this.balanceCurrencyConfirmed,
-      this.currencyInfo.rate,
-      (balance, rate) => {
+      this.currencyInfo.rate
+    ]).pipe(
+      map(([balance, rate]) => {
         if (rate === null || balance === null) {
           return null;
         }
         return balance * rate;
-      }), null);
+      })
+    ), null);
 
     this.transactions = toBehaviourSubject(
       from(this.currencyWallet.listTransactionHistory()),
@@ -117,7 +125,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   }
 
   isWindows(): boolean {
-    return device.platform === 'windows';
+    return this.deviceService.platform === Platform.Windows;
   }
 
   async onSettingsClicked() {
