@@ -46,13 +46,6 @@
   color: #2277ba;
 }
 
-.balanceUSD {
-  line-height: 20px;
-}
-
-.sync-in-progress {
-}
-
 .title {
   font-size: 12px;
   line-height: 14px;
@@ -68,7 +61,7 @@
   height: 40%;
   border-top: 1px solid #f1f2f4;
   font-size: 12px;
-  line-height: 16px;
+  line-height: 18px;
   padding-top: 5px;
 }
 
@@ -112,11 +105,19 @@
   background-color: rgba(128,189,255, 0.5);
 }
 
-.warning {
+.warning-box {
+  display: table;
   position: absolute;
-  right: 3px;
-  top: 3px;
+  right: -20px;
+  height: 100%;
+  padding-bottom: 5px;
+}
+
+.warning {
+  vertical-align: middle;
+  display: table-cell;
   width: 14px;
   height: 14px;
   font-size: 14px;
+  color: rgb(255, 204, 0);
 }

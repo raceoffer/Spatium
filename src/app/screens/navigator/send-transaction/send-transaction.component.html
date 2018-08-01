@@ -1,8 +1,9 @@
 <app-toolbar
-  [label] = "titile +' '+currencyInfo?.name"
+  [label] = "'Transfer ' + currencyInfo?.name"
   [isColored] = "true"
   [isShadowed] = "true"
-  (backClicked) = "onBack()"></app-toolbar>
+  (backClicked) = "onBack()">
+</app-toolbar>
 
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
   <mat-progress-bar
@@ -11,18 +12,33 @@
     style="width: 100%; position: fixed; z-index: 2;"
     *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing">
   </mat-progress-bar>
+
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
-        <span class="label full-width-label">{{ accountPh }}</span>
+        <span class="label full-width-label">Account</span>
       </td>
     </tr>
+
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <mat-form-field class="wallet-address-field field by-content" color="accent" fxLayout="column" fxLayoutAlign="center center">
-          <textarea readonly matInput mat-autosize="true" [value]="(address | async)" *ngIf="(currencyWallet?.status | async) === statusType.Ready"></textarea>
-          <textarea readonly matInput mat-autosize="true" value="Synchronizing" *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing"></textarea>
-          <textarea readonly matInput mat-autosize="true" value="Not synched" *ngIf="(currencyWallet?.status | async) === statusType.None || (currencyWallet?.status | async) === statusType.Cancelled || (currencyWallet?.status | async) === statusType.Failed"></textarea>
+          <textarea
+            readonly
+            matInput
+            mat-autosize="true"
+            [value]="(currencyWallet?.address | async)"
+            *ngIf="(currencyWallet?.status | async) === statusType.Ready">
+          </textarea>
+
+          <textarea
+            readonly
+            matInput
+            mat-autosize="true"
+            [value]="(currencyWallet?.status | async) !== statusType.Ready ? 'Synchronizing' : 'Not synched'"
+            *ngIf="(currencyWallet?.status | async) !== statusType.Ready">
+          </textarea>
+
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
@@ -31,14 +47,17 @@
     </tr>
     <tr>
       <td colspan="2">
-        <span class="label full-width-label">{{ receiverPh }}</span>
+        <span class="label full-width-label">Recipient</span>
       </td>
     </tr>
     <tr>
       <td colspan="2">
-        <mat-form-field class="field by-content" style="margin-bottom: 13px;" color="accent"
-                        fxLayout="column" fxLayoutAlign="center center"
-            [ngClass]="{'error': !(validReceiver | async) }">
+        <mat-form-field
+          class="field by-content"
+          style="margin-bottom: 13px;"
+          color="accent"
+          fxLayout="column" fxLayoutAlign="center center"
+          [ngClass]="{ 'error': !(validReceiver | async) }">
           <textarea
             matInput
             mat-autosize="true"
@@ -46,6 +65,7 @@
             (blur)="setReceiverFocused(false)"
             (focus)="setReceiverFocused(true)">
           </textarea>
+
           <button [disabled]="disable" id="paste" mat-button matSuffix mat-icon-button (click)="paste()">
             <mat-icon>content_paste</mat-icon>
           </button>
@@ -56,6 +76,7 @@
       <td class="right">
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
       </td>
+
       <td class="left">
         <span class="label" style="margin-left: 5px;">USD</span>
       </td>
@@ -78,47 +99,55 @@
       <td class="left">
         <div class="field" style="margin-bottom: 13px;">
           <span>
-            <input matInput
-                   [formControl]="amountUsdField"
-                   type="number"
-                   ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
-                   step="0.01"
-                   (blur)="setAmountUsdFocused(false)"
-                   (focus)="setAmountUsdFocused(true)">
+            <input
+              matInput
+              [formControl]="amountUsdField"
+              type="number"
+              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
+              step="0.01"
+              (blur)="setAmountUsdFocused(false)"
+              (focus)="setAmountUsdFocused(true)">
           </span>
         </div>
       </td>
     </tr>
+
     <tr>
       <td colspan="2">
-        <span class="label full-width-label">{{ stFee }}</span>
+        <span class="label full-width-label">Transaction fee</span>
       </td>
     </tr>
+
     <tr *ngIf="allowFeeConfiguration">
       <td colspan="2">
         <div class="field" style="margin-bottom: 13px;">
           <mat-select [formControl]="feeTypeField">
             <mat-option [value]="feeType.Manual">
-              {{ stManual }}
+              Manual
             </mat-option>
+
             <mat-option [value]="feeType.Normal">
-              {{ stNormal }}
+              Normal (0-1 hour)
             </mat-option>
+
             <mat-option [value]="feeType.Economy">
-              {{ stEconomy }}
+              Economy (1-24 hours)
             </mat-option>
           </mat-select>
         </div>
       </td>
     </tr>
+
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
         <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
       </td>
+
       <td class="left">
         <span class="label" style="margin-left: 5px;">USD</span>
       </td>
     </tr>
+
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
@@ -210,7 +239,7 @@
     <tr>
       <td colspan="2">
         <div style="padding-bottom: 13px;">
-          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFeeField">{{ stFeeOriginRecipient }}</mat-checkbox>
+          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFeeField">Subtract fee</mat-checkbox>
         </div>
       </td>
     </tr>
@@ -219,32 +248,67 @@
   <div class="full-width">
     <div style=" bottom: 23px;
         width: 100%;">
-      <span style="font-family: 'Roboto-Medium'; font-size: 15px" *ngIf="(phase | async) === phaseType.Confirmation">{{ stAwaitConfirm }}</span>
-      <mat-progress-bar mode="indeterminate"
-                        color="accent"
-                        style="width: 100%; margin: 5px 0"
-                        *ngIf="(phase | async) === phaseType.Confirmation"></mat-progress-bar>
-    </div>
-    <span *ngIf="(phase | async) === phaseType.Sending"
-          style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;" class="green-color">{{ stSigningResult }}
-    </span>
-    <span *ngIf="(requiredFilled | async) && !(sufficientBalance | async)"
-          style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient funds
-    </span>
-    <span *ngIf="(requiredFilled | async) && (sufficientBalance | async) && !(sufficientValue | async)"
-          style="font-size: 15px; display: inline-flex; align-items: center;">Insufficient amount
-    </span>
-    <span *ngIf="(requiredFilled | async) && (sufficientBalance | async) && (sufficientValue | async) && !(validReceiver | async)"
-          style="font-size: 15px; display: inline-flex; align-items: center;">Invalid recipient address
-    </span>
-    <mat-progress-bar mode="determinate" value="100" color="accent" style="width: 100%; margin: 5px 0"
-                        *ngIf="(phase | async) === phaseType.Sending"></mat-progress-bar>
+      <span style="font-family: 'Roboto-Medium'; font-size: 15px" *ngIf="(phase | async) === phaseType.Confirmation">
+        Confirm on the second device
+      </span>
 
-    <button *ngIf="(phase | async) === phaseType.Creation" mat-raised-button color="accent" class="width-button-full color" (click)="startSigning()" [disabled]="!(valid | async)">
-      {{ stTransfer }}
+      <mat-progress-bar
+        mode="indeterminate"
+        color="accent"
+        style="width: 100%; margin: 5px 0"
+        *ngIf="(phase | async) === phaseType.Confirmation">
+      </mat-progress-bar>
+    </div>
+
+    <span
+      *ngIf="(phase | async) === phaseType.Sending"
+      style="font-family: 'Roboto-Medium'; font-size: 15px; display: inline-flex; align-items: center;"
+      class="green-color">
+      Transaction is signed
+    </span>
+
+    <span
+      *ngIf="(requiredFilled | async) && !(sufficientBalance | async)"
+      style="font-size: 15px; display: inline-flex; align-items: center;">
+      Insufficient funds
+    </span>
+
+    <span
+      *ngIf="(requiredFilled | async) && (sufficientBalance | async) && !(sufficientValue | async)"
+      style="font-size: 15px; display: inline-flex; align-items: center;">
+      Insufficient amount
+    </span>
+
+    <span
+      *ngIf="(requiredFilled | async) && (sufficientBalance | async) && (sufficientValue | async) && !(validReceiver | async)"
+      style="font-size: 15px; display: inline-flex; align-items: center;">
+      Invalid recipient address
+    </span>
+
+    <mat-progress-bar
+      mode="determinate"
+      value="100"
+      color="accent"
+      style="width: 100%; margin: 5px 0"
+      *ngIf="(phase | async) === phaseType.Sending">
+    </mat-progress-bar>
+
+    <button
+      *ngIf="(phase | async) === phaseType.Creation"
+      mat-raised-button
+      color="accent"
+      class="width-button-full color"
+      (click)="startSigning()"
+      [disabled]="!(valid | async)">
+      Sign transaction
     </button>
-    <button *ngIf="(phase | async) === phaseType.Sending" mat-raised-button color="accent" class="width-button-full color" (click)="sendTransaction()">
-      {{ stSend }}
+    <button
+      *ngIf="(phase | async) === phaseType.Sending"
+      mat-raised-button
+      color="accent"
+      class="width-button-full color"
+      (click)="sendTransaction()">
+      Send transaction
     </button>
   </div>
 </div>
