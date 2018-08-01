@@ -505,7 +505,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(ignored => {
+    componentRef.instance.connectedEvent.subscribe(ignored => {
       this.navigationService.acceptOverlay();
     });
   }
