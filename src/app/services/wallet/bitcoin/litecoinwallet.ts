@@ -4,13 +4,15 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { BitcoreWallet } from './bitcorewallet';
 
 export class LitecoinWallet extends BitcoreWallet {
-  constructor(endpoint: string,
-              network: string,
-              keychain: KeyChainService,
-              account: number,
-              messageSubject: any,
-              connectionProviderService: ConnectionProviderService,
-              worker: any) {
+  constructor(
+    endpoint: string,
+    network: string,
+    keychain: KeyChainService,
+    account: number,
+    messageSubject: any,
+    connectionProviderService: ConnectionProviderService,
+    worker: any
+  ) {
     super(
       LitecoinTransaction,
       CoreLitecoinWallet,

@@ -8,7 +8,11 @@ export enum Coin {
   LTC = 2,
   NEM = 43,
   ETH = 60,
-  BCH = 145
+  XRP = 144,
+  BCH = 145,
+  XLM = 148,
+  NEO = 888,
+  ADA = 1815
 }
 
 export enum Token {

@@ -13,6 +13,12 @@ export enum Status {
   Ready
 }
 
+export enum BalanceStatus {
+  None = 0,
+  Loading,
+  Error
+}
+
 export enum TransactionType {
   In,
   Out
@@ -48,48 +54,51 @@ export function getRandomDelay(min: number = 1000, max: number = 5000) {
 }
 
 export abstract class CurrencyWallet {
-  public status: BehaviorSubject<Status> = new BehaviorSubject<Status>(Status.None);
+  public status = new BehaviorSubject<Status>(Status.None);
 
-  public synchronizing: BehaviorSubject<boolean> = toBehaviourSubject(
+  public synchronizing = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.Synchronizing)
     ), false);
 
-  public ready: BehaviorSubject<boolean> = toBehaviourSubject(
+  public ready = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.Ready)
     ), false);
 
-  public none: BehaviorSubject<boolean> = toBehaviourSubject(
+  public none = toBehaviourSubject(
     this.status.pipe(
       map(status => status === Status.None)
     ), true);
 
-  public statusChanged: Observable<Status> = this.status.pipe(skip(1), distinctUntilChanged());
+  public statusChanged = this.status.pipe(skip(1), distinctUntilChanged());
 
-  public synchronizingEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
-  public cancelledEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
-  public failedEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
-  public readyEvent: Observable<any> = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
+  public synchronizingEvent = this.statusChanged.pipe(filter(status => status === Status.Synchronizing), mapTo(null));
+  public cancelledEvent = this.statusChanged.pipe(filter(status => status === Status.Cancelled), mapTo(null));
+  public failedEvent = this.statusChanged.pipe(filter(status => status === Status.Failed), mapTo(null));
+  public readyEvent = this.statusChanged.pipe(filter(status => status === Status.Ready), mapTo(null));
 
-  public startVerifyEvent: Subject<any> = new Subject<any>();
-  public verifyEvent: Subject<any> = new Subject<any>();
-  public signedEvent: Subject<any> = new Subject<any>();
-  public acceptedEvent: Subject<any> = new Subject<any>();
-  public rejectedEvent: Subject<any> = new Subject<any>();
+  public startVerifyEvent = new Subject<any>();
+  public verifyEvent = new Subject<any>();
+  public signedEvent = new Subject<any>();
+  public acceptedEvent = new Subject<any>();
+  public rejectedEvent = new Subject<any>();
 
-  public syncProgress: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+  public syncProgress = new BehaviorSubject<number>(0);
 
-  public address: BehaviorSubject<string> = new BehaviorSubject<string>(null);
-  public balance: BehaviorSubject<Balance> = new BehaviorSubject<Balance>(null);
+  public address = new BehaviorSubject<string>(null);
+  public balance = new BehaviorSubject<Balance>(null);
+  public balanceStatus = new BehaviorSubject<BalanceStatus>(BalanceStatus.None);
 
-  constructor(protected network: string,
-              protected keychain: KeyChainService,
-              protected currency: Coin,
-              protected account: number,
-              protected messageSubject: any,
-              protected connectionProviderService: ConnectionProviderService,
-              protected worker: any) {
+  constructor(
+    protected network: string,
+    protected keychain: KeyChainService,
+    protected currency: Coin,
+    protected account: number,
+    protected messageSubject: any,
+    protected connectionProviderService: ConnectionProviderService,
+    protected worker: any
+  ) {
     this.synchronizingEvent.subscribe(() => this.syncProgress.next(0));
 
     this.messageSubject.pipe(
@@ -132,7 +141,13 @@ export abstract class CurrencyWallet {
 
   public abstract async finishSync(data: any);
 
-  public abstract async reset();
+  public async reset() {
+    this.address.next(null);
+    this.status.next(Status.None);
+
+    this.balance.next(null);
+    this.balanceStatus.next(BalanceStatus.None);
+  }
 
   public currencyCode(): Coin | Token {
     return this.currency;
