@@ -5,9 +5,12 @@
   (backClicked) = "onBack()"></app-toolbar>
 
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
-  <mat-progress-bar mode="indeterminate" color="accent"
-                    style="width: 100%; position: fixed; z-index: 2;"
-                    *ngIf="(address | async) === null"></mat-progress-bar>
+  <mat-progress-bar
+    mode="indeterminate"
+    color="accent"
+    style="width: 100%; position: fixed; z-index: 2;"
+    *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing">
+  </mat-progress-bar>
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
@@ -17,8 +20,9 @@
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <mat-form-field class="wallet-address-field field by-content" color="accent" fxLayout="column" fxLayoutAlign="center center">
-          <textarea readonly matInput mat-autosize="true" [value]="address | async" *ngIf="(address | async) !== null"></textarea>
-          <textarea readonly matInput mat-autosize="true" value="Loading&hellip;" *ngIf="(address | async) === null"></textarea>
+          <textarea readonly matInput mat-autosize="true" [value]="(address | async)" *ngIf="(currencyWallet?.status | async) === statusType.Ready"></textarea>
+          <textarea readonly matInput mat-autosize="true" value="Synchronizing" *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing"></textarea>
+          <textarea readonly matInput mat-autosize="true" value="Not synched" *ngIf="(currencyWallet?.status | async) === statusType.None || (currencyWallet?.status | async) === statusType.Cancelled || (currencyWallet?.status | async) === statusType.Failed"></textarea>
           <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>

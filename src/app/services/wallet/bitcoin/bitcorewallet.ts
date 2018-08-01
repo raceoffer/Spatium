@@ -1,25 +1,27 @@
 import { from, of, timer } from 'rxjs';
-import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
+import { catchError, expand, map, mergeMap, tap, filter } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../connection-provider';
 import { Coin, KeyChainService } from '../../keychain.service';
 import { LoggerService } from '../../logger.service';
-import { Balance, HistoryEntry, Status, getRandomDelay } from '../currencywallet';
+import { Balance, HistoryEntry, Status, getRandomDelay, BalanceStatus } from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class BitcoreWallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
 
-  constructor(private Transaction: any,
-              private Wallet: any,
-              private endpoint: string,
-              network: string,
-              keychain: KeyChainService,
-              coin: Coin,
-              account: number,
-              messageSubject: any,
-              connectionProviderService: ConnectionProviderService,
-              worker: any) {
+  constructor(
+    private Transaction: any,
+    private Wallet: any,
+    private endpoint: string,
+    network: string,
+    keychain: KeyChainService,
+    coin: Coin,
+    account: number,
+    messageSubject: any,
+    connectionProviderService: ConnectionProviderService,
+    worker: any
+  ) {
     super(
       network,
       keychain,
@@ -62,8 +64,18 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    const request = () => from(this.wallet.getBalance()).pipe(
-      catchError(e => of(null)));
+    const request = () => {
+      this.balanceStatus.next(BalanceStatus.Loading);
+      return from(this.wallet.getBalance()).pipe(
+        tap(() => {
+          this.balanceStatus.next(BalanceStatus.None);
+        }),
+        catchError(e => {
+          this.balanceStatus.next(BalanceStatus.Error);
+          return of(null);
+        })
+      );
+    };
 
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(getRandomDelay()).pipe(
@@ -76,7 +88,7 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
           )
         )
       ),
-      filter(r => r),
+      filter(r => !!r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed

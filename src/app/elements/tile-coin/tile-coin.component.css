@@ -50,6 +50,9 @@
   line-height: 20px;
 }
 
+.sync-in-progress {
+}
+
 .title {
   font-size: 12px;
   line-height: 14px;
@@ -107,4 +110,13 @@
 
 .block.colored {
   background-color: rgba(128,189,255, 0.5);
+}
+
+.warning {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
 }

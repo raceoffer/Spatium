@@ -16,14 +16,16 @@ export class Info {
   gasRate: BehaviorSubject<number>;
   icon: string = null;
 
-  constructor(name: string,
-              symbol: string,
-              gasPrice: number,
-              gasPriceLow: number,
-              gasUnit: string,
-              rate: BehaviorSubject<number>,
-              gasRate?: BehaviorSubject<number>,
-              icon?: string) {
+  constructor(
+    name: string,
+    symbol: string,
+    gasPrice: number,
+    gasPriceLow: number,
+    gasUnit: string,
+    rate: BehaviorSubject<number>,
+    gasRate?: BehaviorSubject<number>,
+    icon?: string
+  ) {
     this.name = name;
     this.symbol = symbol;
     this.gasPrice = gasPrice;
@@ -180,6 +182,66 @@ export class CurrencyService {
       null,
       'nem'
     )],
+    [Coin.ADA, new Info(
+      'Cardano',
+      'ADA',
+      50000,
+      30000,
+      'ADA/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('ADA') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'cardano'
+    )],
+    [Coin.NEO, new Info(
+      'NEO',
+      'NEO',
+      50000,
+      30000,
+      'NEO/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('NEO') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'neo'
+    )],
+    [Coin.XRP, new Info(
+      'Ripple',
+      'XRP',
+      50000,
+      30000,
+      'XRP/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('XRP') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'ripple'
+    )],
+    [Coin.XLM, new Info(
+      'Stellar',
+      'XLM',
+      50000,
+      30000,
+      'XLM/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('XLM') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'stellar'
+    )]
   ]);
 
   constructor(
