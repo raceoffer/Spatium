@@ -4,7 +4,6 @@ import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { getValue, setValue } from '../../utils/storage';
 import { PresentationComponent } from '../presentation/presentation.component';
-import { NavbarComponent } from '../../modals/navbar/navbar.component';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -31,11 +30,9 @@ export class StartComponent implements OnInit, OnDestroy {
 
     if (this.deviceService.platform === Platform.Android) {
       try {
-        const presentation = await getValue('presentation');
+        await getValue('presentation');
       } catch (ignored) {
-        this.ngZone.run(async () => {
-        const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
-        });
+        this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
       }
     }
 
@@ -70,7 +67,7 @@ export class StartComponent implements OnInit, OnDestroy {
       });
     } catch (e) {
 
-  }
+    }
   }
 
   ngOnDestroy() {
