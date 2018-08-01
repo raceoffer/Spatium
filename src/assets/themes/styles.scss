@@ -1032,6 +1032,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   line-height: 40px;
   caret-color: #2277ba;
   color: #373741 !important;
+  text-overflow: ellipsis;
 }
 
 .currency-component .mat-form-field-underline {

@@ -80,6 +80,7 @@ textarea.mat-input-element {
   word-break: break-all;
   box-sizing: border-box;
   position: relative;
+  font-family: 'Roboto-Light';
 }
 
 button.wallet-address-button {

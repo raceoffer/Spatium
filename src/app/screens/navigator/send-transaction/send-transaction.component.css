@@ -18,6 +18,11 @@ input.mat-input-element{
 
 textarea.mat-input-element{
   resize: none;
+  font-family: 'Roboto-Light';
+}
+
+textarea.mat-input-element:disabled {
+  color: #373741;
 }
 
 .estimating {
