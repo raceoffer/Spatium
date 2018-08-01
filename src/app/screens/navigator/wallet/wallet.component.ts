@@ -136,6 +136,14 @@ export class WalletComponent implements OnDestroy {
     this.tiles.next(tiles);
 
     this.isWindows = (this.device.platform === Platform.Windows);
+
+    this.subscriptions.push(
+      this.navigationService.backEvent.subscribe(() => {
+        if (this.isSearch) {
+          this.toggleSearch(false);
+        }
+      })
+    );
   }
 
   public openSettings() {
