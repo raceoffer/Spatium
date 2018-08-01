@@ -70,24 +70,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feePriceUsdFocused = false;
   public disable = false;
 
-  accountPh = 'Account';
-  receiverPh = 'Recipient';
-
-  titile = 'Transfer';
-
-  stAwaitConfirm = 'Confirm on the second device';
-  stSigningResult = 'Transaction is signed';
-
-  stTransfer = 'Sign transaction';
-  stSend = 'Send transaction';
-
-  stFee = 'Transaction fee';
-  stManual = 'Manual';
-  stNormal = 'Normal (0-1 hour)';
-  stEconomy = 'Economy (1-24 hours)';
-
-  stFeeOriginRecipient = 'Subtract fee';
-
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
   public isToken = false;

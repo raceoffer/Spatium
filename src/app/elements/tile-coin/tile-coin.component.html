@@ -14,41 +14,37 @@
       *ngIf="(tileModel.status | async) === stateType.Ready"
       class="half-height"
       fxLayout="column"
-      fxLayoutAlign="center center"
-      style="position: relative;">
+      fxLayoutAlign="center center">
+      <div
+        fxLayout="column"
+        fxLayoutAlign="center center"
+        style="position: relative; height: 100%;">
 
-      <span class="balance" *ngIf="(tileModel.balance | async) !== null">
-        {{ (tileModel.balance | async)?.toFixed(6) * 1 }} {{ tileModel.symbols }}
-      </span>
+        <span class="balance" *ngIf="(tileModel.balance | async) !== null">
+          {{ (tileModel.balance | async)?.toFixed(6) * 1 }} {{ tileModel.symbols }}
+        </span>
 
-      <span class="balanceUSD" *ngIf="(tileModel.balanceUSD | async) !== null">
-        {{ (tileModel.balanceUSD | async)?.toFixed(6) * 1 }} USD
-      </span>
+        <span class="balanceUSD" *ngIf="(tileModel.balanceUSD | async) !== null">
+          {{ (tileModel.balanceUSD | async)?.toFixed(6) * 1 }} USD
+        </span>
 
-      <span class="sync-in-progress" *ngIf="(tileModel.balance | async) === null">
-        Loading balance
-      </span>
+        <span class="sync-in-progress" *ngIf="(tileModel.balance | async) === null">
+          Loading
+        </span>
 
-      <mat-icon *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning">warning</mat-icon>
+        <div *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning-box">
+          <mat-icon class="warning">warning</mat-icon>
+        </div>
+      </div>
     </div>
     <div
-      *ngIf="(tileModel.status | async) === stateType.Synchronizing"
+      *ngIf="(tileModel.status | async) !== stateType.Ready"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
 
       <span class="sync-in-progress">
-        Synchronizing
-      </span>
-    </div>
-    <div
-      *ngIf="(tileModel.status | async) === stateType.None"
-      class="half-height"
-      fxLayout="column"
-      fxLayoutAlign="center center">
-
-      <span class="sync-in-progress">
-        Not synced
+        {{ (tileModel.status | async) === stateType.Synchronizing ? 'Syncing' : 'Not synced' }}
       </span>
     </div>
   </button>
