@@ -23,14 +23,21 @@
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
         <div class="field auto-height">
-          <div *ngIf="(currencyWallet?.status | async) === statusType.Ready">{{ walletAddress | async }}</div>
-          <div *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing">Synchronizing</div>
-          <div *ngIf="(currencyWallet?.status | async) === statusType.None ||
-                      (currencyWallet?.status | async) === statusType.Cancelled ||
-                      (currencyWallet?.status | async) === statusType.Failed">
-            Not synched
+          <div *ngIf="(currencyWallet?.status | async) === statusType.Ready">
+            {{ walletAddress | async }}
           </div>
-          <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
+
+          <div *ngIf="(currencyWallet?.status | async) !== statusType.Ready">
+            {{ (currencyWallet?.status | async) === statusType.Synchronizing ? 'Syncing' : 'Not synced' }}
+          </div>
+
+          <button
+            *ngIf="(currencyWallet?.status | async) === statusType.Ready"
+            id="copy"
+            class="wallet-address-button"
+            mat-icon-button
+            matSuffix
+            (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
         </div>
@@ -51,7 +58,7 @@
             {{ balanceCurrencyUnconfirmed | async }}
           </span>
           <span *ngIf="(balanceCurrencyUnconfirmed | async) === null">
-            {{ (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ? 'Loading' : '' }}
+            {{ (currencyWallet?.status | async) === statusType.Ready ? 'Loading' : '' }}
           </span>
         </div>
       </td>
@@ -61,20 +68,23 @@
             {{ balanceUsdUnconfirmed | async }}
           </span>
           <span *ngIf="(balanceUsdUnconfirmed | async) === null">
-            {{ (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ? 'Loading' : '' }}
+           {{ (currencyWallet?.status | async) === statusType.Ready ? 'Loading' : '' }}
           </span>
         </div>
       </td>
     </tr>
     <tr *ngIf="(balanceCurrencyUnconfirmed | async) !== null &&
-               (balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async)">
-      <td class="right">
-        <span class="label" style="margin-left: 5px;">Unconfirmed balance</span>
+               (balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async) &&
+               (currencyWallet?.balanceStatus | async) !== balanceStatusType.Error">
+      <td colspan="2" fxLayout="row" style="width: 100%">
+        <mat-icon class="info">info</mat-icon>
+        <span class="label" style="margin-left: 5px; line-height: 20px">Unconfirmed balance</span>
       </td>
     </tr>
     <tr *ngIf="(currencyWallet?.balanceStatus | async) === balanceStatusType.Error">
-      <td class="right">
-        <span class="label" style="margin-left: 5px;">Outdated balance</span>
+      <td colspan="2" fxLayout="row" style="width: 100%">
+        <mat-icon class="warning">warning</mat-icon>
+        <span class="label" style="margin-left: 5px; line-height: 20px">Outdated balance</span>
       </td>
     </tr>
   </table>

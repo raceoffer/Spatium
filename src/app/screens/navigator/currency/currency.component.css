@@ -89,6 +89,22 @@ button.wallet-address-button {
   transform: translate(0, -50%);
 }
 
+.info {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: #2277ba;
+}
+
+.warning {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: rgb(255, 204, 0);
+}
+
 .windows.box .content {
   max-height: none;
 }

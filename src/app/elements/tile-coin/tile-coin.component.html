@@ -29,7 +29,7 @@
         </span>
 
         <span class="sync-in-progress" *ngIf="(tileModel.balance | async) === null">
-          Loading balance
+          Loading
         </span>
 
         <div *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning-box">
@@ -38,23 +38,13 @@
       </div>
     </div>
     <div
-      *ngIf="(tileModel.status | async) === stateType.Synchronizing"
+      *ngIf="(tileModel.status | async) !== stateType.Ready"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
 
       <span class="sync-in-progress">
-        Synchronizing
-      </span>
-    </div>
-    <div
-      *ngIf="(tileModel.status | async) === stateType.None"
-      class="half-height"
-      fxLayout="column"
-      fxLayoutAlign="center center">
-
-      <span class="sync-in-progress">
-        Not synced
+        {{ (tileModel.status | async) === stateType.Synchronizing ? 'Syncing' : 'Not synced' }}
       </span>
     </div>
   </button>
