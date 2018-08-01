@@ -1,9 +1,9 @@
 import { ERC20Wallet as CoreERC20Wallet, EthereumTransaction } from 'crypto-core-async';
 import { from, of, timer } from 'rxjs';
-import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
+import { catchError, expand, map, mergeMap, tap, filter } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../connection-provider';
 import { Coin, KeyChainService, Token } from '../../keychain.service';
-import { Balance, CurrencyWallet, Status, getRandomDelay } from '../currencywallet';
+import { Balance, CurrencyWallet, Status, getRandomDelay, BalanceStatus } from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class ERC20Wallet extends EcdsaCurrencyWallet {
@@ -11,16 +11,18 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
 
   private routineTimerSub: any = null;
 
-  constructor(private endpoint: string,
-              network: string,
-              keychain: KeyChainService,
-              account: number,
-              messageSubject: any,
-              connectionProviderService: ConnectionProviderService,
-              worker: any,
-              private token: Token,
-              private contractAddress: string,
-              private decimals: number = 18) {
+  constructor(
+    private endpoint: string,
+    network: string,
+    keychain: KeyChainService,
+    account: number,
+    messageSubject: any,
+    connectionProviderService: ConnectionProviderService,
+    worker: any,
+    private token: Token,
+    private contractAddress: string,
+    private decimals: number = 18
+  ) {
     super(network, keychain, Coin.ETH, account, messageSubject, connectionProviderService, worker);
   }
 
@@ -63,8 +65,18 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    const request = () => from(this.wallet.getBalance()).pipe(
-      catchError(e => of(null)));
+    const request = () => {
+      this.balanceStatus.next(BalanceStatus.Loading);
+      return from(this.wallet.getBalance()).pipe(
+        tap(() => {
+          this.balanceStatus.next(BalanceStatus.None);
+        }),
+        catchError(e => {
+          this.balanceStatus.next(BalanceStatus.Error);
+          return of(null);
+        })
+      );
+    };
 
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(getRandomDelay()).pipe(
@@ -77,7 +89,7 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
           )
         )
       ),
-      filter(r => r),
+      filter(r => !!r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed
@@ -99,8 +111,18 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
       endpoint: this.endpoint,
     });
 
-    const request = () => from(this.wallet.getBalance()).pipe(
-      catchError(e => of(null)));
+    const request = () => {
+      this.balanceStatus.next(BalanceStatus.Loading);
+      return from(this.wallet.getBalance()).pipe(
+        tap(() => {
+          this.balanceStatus.next(BalanceStatus.None);
+        }),
+        catchError(e => {
+          this.balanceStatus.next(BalanceStatus.Error);
+          return of(null);
+        })
+      );
+    };
 
     this.address.next(this.wallet.address);
     this.routineTimerSub = timer(getRandomDelay()).pipe(
@@ -113,7 +135,7 @@ export class ERC20Wallet extends EcdsaCurrencyWallet {
           )
         )
       ),
-      filter(r => r),
+      filter(r => !!r),
       map((balance: any) => new Balance(
         balance.confirmed,
         balance.unconfirmed

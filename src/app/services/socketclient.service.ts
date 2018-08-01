@@ -1,7 +1,8 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState } from './primitives/state';
 import { Device } from './primitives/device';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
 
 declare const cordova: any;
 
@@ -13,6 +14,8 @@ export class SocketClientService {
   public connectedDevice = new BehaviorSubject<Device>(null);
 
   private socket: BehaviorSubject<WebSocket> = new BehaviorSubject<WebSocket>(null);
+
+  private keepAlive = new Subject<any>();
 
   constructor(private ngZone: NgZone) {}
 
@@ -31,8 +34,30 @@ export class SocketClientService {
     socket.onopen = () => this.ngZone.run(() => {
       this.state.next(ConnectionState.Connected);
       this.connectedDevice.next(device);
+
+      interval(1000).pipe(
+        takeUntil(this.state.pipe(
+          filter(state => state !== ConnectionState.Connected)
+        ))
+      ).subscribe(() => {
+        this.send('__keep-alive__');
+      });
+
+      this.keepAlive.pipe(
+        debounceTime(3000),
+        takeUntil(this.state.pipe(
+          filter(state => state !== ConnectionState.Connected)
+        ))
+      ).subscribe(() => {
+        this.disconnect();
+      });
     });
-    socket.onmessage = (event) => this.ngZone.run(() => this.message.next(event.data));
+    socket.onmessage = (event) => this.ngZone.run(() => {
+      this.keepAlive.next();
+      if (event.data !== '__keep-alive__') {
+        this.message.next(event.data);
+      }
+    });
     socket.onclose = () => this.ngZone.run(() => {
       this.connectedDevice.next(null);
       this.state.next(ConnectionState.None);

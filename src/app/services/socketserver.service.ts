@@ -1,8 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState, State } from './primitives/state';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
 
 declare const cordova: any;
 
@@ -18,6 +19,8 @@ export class SocketServerService {
   public port = 3445;
 
   private currentPeer = new BehaviorSubject<string>(null);
+
+  private keepAlive = new Subject<any>();
 
   constructor(private ngZone: NgZone) {}
 
@@ -71,10 +74,30 @@ export class SocketServerService {
               this.port
             ));
             this.connectionState.next(ConnectionState.Connected);
+
+            interval(1000).pipe(
+              takeUntil(this.connectionState.pipe(
+                filter(state => state !== ConnectionState.Connected)
+              ))
+            ).subscribe(() => {
+              this.send('__keep-alive__');
+            });
+
+            this.keepAlive.pipe(
+              debounceTime(3000),
+              takeUntil(this.connectionState.pipe(
+                filter(state => state !== ConnectionState.Connected)
+              ))
+            ).subscribe(() => {
+              this.disconnect();
+            });
           }
         }),
         onMessage: (conn, msg) => this.ngZone.run(() => {
-          this.message.next(msg);
+          this.keepAlive.next();
+          if (msg !== '__keep-alive__') {
+            this.message.next(msg);
+          }
         }),
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {

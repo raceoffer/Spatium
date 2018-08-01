@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
-import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
+import { combineLatest, Subject, BehaviorSubject, timer } from 'rxjs';
 import { map, distinctUntilChanged, mergeMap, mapTo } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../../services/connection-provider';
 import { NavigationService } from '../../../services/navigation.service';
@@ -71,6 +71,7 @@ export class WaitingComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    await timer(500).toPromise();
     await this.connectionProviderService.searchDevices();
   }
 

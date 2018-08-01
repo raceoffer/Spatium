@@ -22,7 +22,8 @@
     "cordova-android": "^6.3.0",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
-    "cordova-ios": "^4.5.4",
+    "cordova-ios": "^4.5.5",
+    "cordova-open-native-settings": "^1.5.1",
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
@@ -78,7 +79,8 @@
       "cocoon-cordova-labs-wkwebview-engine-localhost": {},
       "CordovaClipboard": {},
       "cordova-plugin-nativestorage": {},
-      "cordova-plugin-bluetooth": {}
+      "cordova-plugin-bluetooth": {},
+      "cordova-open-native-settings": {}
     },
     "platforms": [
       "browser",
