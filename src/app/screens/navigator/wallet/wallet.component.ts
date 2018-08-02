@@ -5,7 +5,7 @@ import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
 import { NavigationService , Position } from '../../../services/navigation.service';
-import { WalletService } from '../../../services/wallet.service';
+import { SyncStatus, WalletService } from '../../../services/wallet.service';
 import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencyComponent } from '../currency/currency.component';
@@ -62,6 +62,9 @@ export class WalletComponent implements OnDestroy {
     }
   }];
 
+  public statusType = SyncStatus;
+
+  public status = this.wallet.synchronizatonStatus;
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
 
