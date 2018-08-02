@@ -1,7 +1,7 @@
 <div class="grid-item">
   <button mat-button class="block" style="padding: 0px;" [class.colored]="tileModel.chosen" [disabled]="!tileModel.implemented" (click)='onClick()'>
     <div class="erc20" *ngIf="tileModel.erc20">
-      <img class="ethereum" src="{{ethereum}}">
+      <img class="ethereum" src="{{ ethereum }}">
     </div>
     <div class="div-height" fxLayout="row" fxLayoutAlign="center center" >
       <img class="logo" src="{{logo}}">
@@ -18,7 +18,7 @@
       <div
         fxLayout="column"
         fxLayoutAlign="center center"
-        style="position: relative; height: 100%;">
+        style="position: relative;">
 
         <span class="balance" *ngIf="(tileModel.balance | async) !== null">
           {{ (tileModel.balance | async)?.toFixed(6) * 1 }} {{ tileModel.symbols }}
@@ -32,9 +32,7 @@
           Loading
         </span>
 
-        <div *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning-box">
-          <mat-icon class="warning">warning</mat-icon>
-        </div>
+        <mat-icon *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning">warning</mat-icon>
       </div>
     </div>
     <div

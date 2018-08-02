@@ -14,10 +14,11 @@ export class TileCoinComponent implements OnInit {
 
   @Output() clicked: EventEmitter<any> = new EventEmitter<any>();
 
-  logo = '';
   public stateType = Status;
   public balanceStateType = BalanceStatus;
-  ethereum = '';
+
+  public logo = '';
+  public ethereum = '';
 
   constructor() { }
 
