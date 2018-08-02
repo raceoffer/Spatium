@@ -1,4 +1,3 @@
-import { animate, AnimationBuilder, AnimationFactory, AnimationPlayer, style } from '@angular/animations';
 import {
   AfterViewInit,
   Component,
@@ -9,9 +8,7 @@ import {
   Input, OnDestroy,
   OnInit,
   Output,
-  QueryList,
-  ViewChild,
-  ViewChildren
+  QueryList
 } from '@angular/core';
 import { NgTouch } from 'angular-touch';
 import { BehaviorSubject } from 'rxjs';
@@ -31,25 +28,17 @@ export class CarouselItemElement {
   selector: 'carousel',
   exportAs: 'carousel',
   templateUrl: './carousel.component.html',
-  styleUrls: ['./carousel.component.css']
+  styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @ContentChildren(CarouselItemDirective) items: QueryList<CarouselItemDirective>;
-  @Input() timing = '250ms ease-in';
   @Output() close: EventEmitter<any> = new EventEmitter<any>();
-  public carouselWrapperStyle = {};
   currentSlide = new BehaviorSubject<number>(0);
   isFirst: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map(currentSlide => currentSlide === 0)), false);
   isLast: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map((currentSlide) => ((currentSlide !== 0) && (currentSlide + 1 === this.items.length)))), false);
-  @ViewChildren(CarouselItemElement, {read: ElementRef}) private itemsElements: QueryList<ElementRef>;
-  @ViewChild('carousel') private carousel: ElementRef;
   private subscriptions = [];
-  private player: AnimationPlayer;
-  private itemWidth: number;
 
-  constructor(private builder: AnimationBuilder,
-              private readonly navigationService: NavigationService) {
-  }
+  constructor(private el: ElementRef, private readonly navigationService: NavigationService) { }
 
   ngOnInit() {
 
@@ -65,64 +54,46 @@ export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
       this.skip();
       return;
     }
-
-    this.currentSlide.next((this.currentSlide.getValue() + 1) % this.items.length);
-    const offset = this.currentSlide.getValue() * this.itemWidth;
-    const animation: AnimationFactory = this.buildAnimation(offset);
-    this.player = animation.create(this.carousel.nativeElement);
-    this.player.play();
+    this.setNewSlide((this.currentSlide.getValue() + 1) % this.items.length, 'next');
   }
 
   prev() {
     if (this.currentSlide.getValue() === 0) {
       return;
     }
-
-    this.currentSlide.next(((this.currentSlide.getValue() - 1) + this.items.length) % this.items.length);
-    const offset = this.currentSlide.getValue() * this.itemWidth;
-
-    const animation: AnimationFactory = this.buildAnimation(offset);
-    this.player = animation.create(this.carousel.nativeElement);
-    this.player.play();
+    this.setNewSlide((this.currentSlide.getValue() - 1) % this.items.length, 'prev');
   }
 
   skip() {
     this.close.emit();
   }
 
-  async onResize() {
-    this.itemWidth = this.itemsElements.first.nativeElement.getBoundingClientRect().width;
+  public setNewSlide(newSlide: number, direction: string): void {
+    const currentSlide = this.el.nativeElement.querySelector(`[data-slide="${this.currentSlide.getValue()}"]`);
+    const nextSlide = this.el.nativeElement.querySelector(`[data-slide="${newSlide}"]`);
 
-    const offset = this.currentSlide.getValue() * this.itemWidth;
+    this.animate(currentSlide, nextSlide, direction);
 
-    const animation: AnimationFactory = this.buildAnimation(offset);
-    this.player = animation.create(this.carousel.nativeElement);
-    this.player.play();
+    this.currentSlide.next(newSlide);
+  }
 
-    this.player.onDone(() => {
-      this.carouselWrapperStyle = {
-        width: `${this.itemWidth}px`,
-      };
+  private animate(currentSlide: HTMLElement, nextSlide: HTMLElement, direction: string): void {
+    currentSlide.className = nextSlide.className = 'carousel-item';
+    this.toggleClass(`carousel-item--hidden-slide-${direction}`, currentSlide);
+    this.toggleClass(`carousel-item--show-slide-${direction}`, nextSlide);
+  }
+
+  private toggleClass(className: string, ...elements): void {
+    elements.forEach((element) => {
+      element.classList.toggle(className);
     });
   }
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.itemWidth = this.itemsElements.first.nativeElement.getBoundingClientRect().width;
-      this.carouselWrapperStyle = {
-        width: `${this.itemWidth}px`
-      };
-    });
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-  }
-
-  private buildAnimation(offset) {
-    return this.builder.build([
-      animate(this.timing, style({transform: `translateX(-${offset}px)`}))
-    ]);
   }
 }

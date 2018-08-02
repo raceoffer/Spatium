@@ -18,23 +18,21 @@ export class StartComponent implements OnInit, OnDestroy {
   public isWindows = null;
   private subscriptions = [];
 
-  constructor(
-    private readonly deviceService: DeviceService,
-    private readonly router: Router,
-    private readonly ngZone: NgZone,
-    private readonly navigationService: NavigationService
-  ) {}
+  constructor(private readonly deviceService: DeviceService,
+              private readonly router: Router,
+              private readonly ngZone: NgZone,
+              private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    if (this.deviceService.platform === Platform.Android) {
+    // if (this.deviceService.platform === Platform.Android) {
       try {
         await getValue('presentation');
       } catch (ignored) {
         this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
       }
-    }
+    // }
 
     this.ready = true;
     this.isWindows = this.deviceService.platform === Platform.Windows;

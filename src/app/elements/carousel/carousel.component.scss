@@ -1,10 +1,3 @@
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 6000px;
-}
-
 .carousel-wrapper {
   overflow: hidden;
   width: 100%;
@@ -15,20 +8,19 @@ ul {
 
 .carousel-inner {
   height: 90vh;
+  width: 100vw;
+  display: flex;
 }
 
 .carousel-btn-wrapper {
   height: 10vh;
+  width: 100%;
   position: relative;
   z-index: 2;
 }
 
 .carousel-btn {
   width: 33.33%;
-}
-
-.carousel-inner {
-  display: flex;
 }
 
 .circle {
@@ -41,3 +33,65 @@ ul {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.carousel-item {
+  position: absolute;
+  width: 100%;
+  height: 90vh;
+  top: 0;
+  left: 0;
+
+  &--hidden-initial {
+    display: none;
+  }
+
+  // Animation Slide
+
+  &--hidden-slide-next {
+    left: -100%;
+    transition: left 250ms ease-in;
+  }
+
+  &--hidden-slide-prev {
+    left: 100%;
+    transition: left 250ms ease-in;
+  }
+
+  @keyframes next-overlap {
+    0% {
+      left: 99%;
+    }
+
+    100% {
+      left: 0;
+    }
+  }
+
+  @keyframes prev-overlap {
+    0% {
+      left: -99%;
+    }
+
+    100% {
+      left: 0;
+    }
+  }
+
+  &--show-slide-next {
+    animation: next-overlap 250ms 1 ease-in;
+    -webkit-animation: next-overlap 250ms 1 ease-in;
+    -moz-animation: next-overlap 250ms 1 ease-in;
+    -ms-animation: next-overlap 250ms 1 ease-in;
+    -o-animation: next-overlap 250ms 1 ease-in;
+  }
+
+  &--show-slide-prev {
+    animation: prev-overlap 250ms 1 ease-in;
+    -webkit-animation: prev-overlap 250ms 1 ease-in;
+    -moz-animation: prev-overlap 250ms 1 ease-in;
+    -ms-animation: prev-overlap 250ms 1 ease-in;
+    -o-animation: prev-overlap 250ms 1 ease-in;
+  }
+
+}
+
