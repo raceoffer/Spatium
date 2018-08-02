@@ -39,9 +39,11 @@ export interface IConnectionProvider {
   searchDevices(duration: number);
 
   connect(to: Device);
-  disconnect(): void;
+  disconnect();
 
-  send(message: any): void;
+  refreshConnection();
 
-  enableDiscovery(): void;
+  send(message: string);
+
+  enableDiscovery();
 }

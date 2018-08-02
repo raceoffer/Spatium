@@ -3,7 +3,7 @@ import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState, State } from './primitives/state';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
-import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, map, pairwise } from 'rxjs/operators';
 
 declare const cordova: any;
 
@@ -75,20 +75,20 @@ export class SocketServerService {
             ));
             this.connectionState.next(ConnectionState.Connected);
 
-            interval(1000).pipe(
+            interval(3000).pipe(
               takeUntil(this.connectionState.pipe(
                 filter(state => state !== ConnectionState.Connected)
               ))
             ).subscribe(() => {
-              this.send('__keep-alive__');
+              this.refreshConnection();
             });
-
             this.keepAlive.pipe(
-              debounceTime(3000),
+              debounceTime(10000),
               takeUntil(this.connectionState.pipe(
                 filter(state => state !== ConnectionState.Connected)
               ))
             ).subscribe(() => {
+              console.log('Server Keep-Alive failed');
               this.disconnect();
             });
           }
@@ -101,6 +101,7 @@ export class SocketServerService {
         }),
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {
+            console.log('Server received disconnect');
             this.connectionState.next(ConnectionState.None);
             this.connectedDevice.next(null);
             this.currentPeer.next(null);
@@ -139,7 +140,13 @@ export class SocketServerService {
       return;
     }
 
+    console.log('Server called disconnect');
+
     cordova.plugins.wsserver.close({uuid: this.currentPeer.getValue()});
+  }
+
+  public refreshConnection() {
+    this.send('__keep-alive__');
   }
 
   public send(message: string): void {

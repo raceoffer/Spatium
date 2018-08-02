@@ -75,7 +75,7 @@ export class BluetoothService implements IConnectionProvider {
               filter(state => state !== ConnectionState.Connected)
             ))
           ).subscribe(async () => {
-            await this.send('__keep-alive__');
+            await this.refreshConnection();
           });
         } else {
           this.connectedDevice.next(null);
@@ -205,6 +205,10 @@ export class BluetoothService implements IConnectionProvider {
       this.listeningState.next(State.Started);
       throw e;
     }
+  }
+
+  public async refreshConnection() {
+    await this.send('__keep-alive__');
   }
 
   async connect(device: Device) {

@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState } from './primitives/state';
 import { Device } from './primitives/device';
-import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, map, pairwise } from 'rxjs/operators';
 
 declare const cordova: any;
 
@@ -35,20 +35,20 @@ export class SocketClientService {
       this.state.next(ConnectionState.Connected);
       this.connectedDevice.next(device);
 
-      interval(1000).pipe(
+      interval(3000).pipe(
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
       ).subscribe(() => {
-        this.send('__keep-alive__');
+        this.refreshConnection();
       });
-
       this.keepAlive.pipe(
-        debounceTime(3000),
+        debounceTime(10000),
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
       ).subscribe(() => {
+        console.log('Client Keep-Alive failed');
         this.disconnect();
       });
     });
@@ -59,6 +59,7 @@ export class SocketClientService {
       }
     });
     socket.onclose = () => this.ngZone.run(() => {
+      console.log('Client received disconnect');
       this.connectedDevice.next(null);
       this.state.next(ConnectionState.None);
     });
@@ -76,7 +77,13 @@ export class SocketClientService {
       return;
     }
 
+    console.log('Client called disconnect');
+
     this.socket.getValue().close();
+  }
+
+  public refreshConnection() {
+    this.send('__keep-alive__');
   }
 
   public send(message: string): void {
