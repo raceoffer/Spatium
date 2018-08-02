@@ -1,12 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, timer } from 'rxjs';
+import { BehaviorSubject, combineLatest, interval, Subject, timer } from 'rxjs';
 import { DeviceService, Platform } from './device.service';
 import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { toBehaviourSubject } from '../utils/transformers';
-import { filter, mapTo, takeUntil } from "rxjs/internal/operators";
+import { filter, mapTo, takeUntil } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const navigator: any;
@@ -59,16 +59,24 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin.setStateCallback(state => this.ngZone.run(() => {
         this.deviceState.next(state);
       }));
-	  
-	  this.plugin.setSupportedCallback(supported => this.ngZone.run(() => {
-		this.supported.next(supported);
-	  }));
+
+      this.plugin.setSupportedCallback(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
+      }));
 
       this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
         if (device !== null) {
           await this.plugin.startReading();
           this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
           this.connectionState.next(ConnectionState.Connected);
+
+          interval(1000).pipe(
+            takeUntil(this.connectionState.pipe(
+              filter(state => state !== ConnectionState.Connected)
+            ))
+          ).subscribe(async () => {
+            await this.send('__keep-alive__');
+          });
         } else {
           this.connectedDevice.next(null);
           this.connectionState.next(ConnectionState.None);
@@ -102,12 +110,14 @@ export class BluetoothService implements IConnectionProvider {
       }));
 
       this.plugin.setMessageCallback(message => this.ngZone.run(() => {
-        this.message.next(message);
+        if (message !== '__keep-alive__') {
+          this.message.next(message);
+        }
       }));
-	  
-	  this.plugin.getSupported().then(supported => this.ngZone.run(() => {
-		this.supported.next(supported);
-	  }));
+
+      this.plugin.getSupported().then(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
+      }));
 
       this.plugin.getState().then(state => this.ngZone.run(() => {
         this.deviceState.next(state);
