@@ -2,9 +2,9 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
 import { stringify } from 'flatted/esm';
+import { DeviceService } from "./device.service";
 
 declare const cordova: any;
-declare const device: any;
 declare const window: any;
 declare const hockeyapp: any;
 
@@ -26,7 +26,8 @@ export class LoggerService {
   private logBuffer = '';
 
 
-  constructor(private readonly fs: FileService) {
+  constructor(private readonly fs: FileService,
+              private readonly ds: DeviceService) {
     console.debug = this.proxy(console, console.debug, '[DEBUG]', LoggerLevels.DEBUG);
     console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
@@ -86,7 +87,7 @@ export class LoggerService {
 
     if (typeof obj === 'string') {
       return obj;
-    } 
+    }
 
     if (obj.constructor && obj.constructor.name === 'DebugContext_') {
       return 'DebugContext_';
@@ -110,11 +111,11 @@ export class LoggerService {
     this.sessionlogName = this.fs.logFileName(datelog);
     this.sessionlogPath = await this.fs.getLogPath();
 
-    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, '');
+    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.ds.getDeviceInfoString());
   }
 
   async logBufferToLog() {
-    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
+    await this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
     this.logBuffer = null;
   }
 

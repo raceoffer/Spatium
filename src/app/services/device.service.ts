@@ -44,4 +44,12 @@ export class DeviceService {
       first(),
     ).toPromise();
   }
+
+  public getDeviceInfoString() {
+    let result = 'Device: ' + device.manufacturer.toString() + ' ' + device.model.toString() + '\n';
+    result = result + 'Platform: ' + device.platform.toString() + ' ' + device.version.toString() + '\n';
+    result = result + 'Cordova: ' + device.cordova.toString() + '\n\n';
+
+    return result;
+  }
 }
