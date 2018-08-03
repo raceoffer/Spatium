@@ -4,7 +4,6 @@ import { ConnectionState, State } from './primitives/state';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
 import { filter, takeUntil, debounceTime } from 'rxjs/operators';
-import { requestDialog } from '../utils/dialog';
 
 declare const cordova: any;
 
@@ -21,7 +20,6 @@ export class SocketServerService {
 
   private currentPeer = new BehaviorSubject<string>(null);
 
-  private dialogShown = false;
   private keepAlive = new Subject<any>();
 
   constructor(private ngZone: NgZone) {}
@@ -92,16 +90,7 @@ export class SocketServerService {
               ))
             ).subscribe(async () => {
               console.log('Server Keep-Alive failed');
-              if (!this.dialogShown) {
-                this.dialogShown = true;
-                if (await requestDialog('Main app is not responding', 'WAIT', 'DISCONNECT')) {
-                  this.keepAlive.next();
-                  this.dialogShown = false;
-                } else {
-                  this.disconnect();
-                  this.dialogShown = false;
-                }
-              }
+              this.disconnect();
             });
           }
         }),

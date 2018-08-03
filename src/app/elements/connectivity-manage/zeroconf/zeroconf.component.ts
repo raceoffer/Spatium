@@ -110,7 +110,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
       this.waiting.next(true);
 
       // now try to start server once again in case it has failed o start once
-      if (this.serverState.getValue() === State.Stopped || this.serverState.getValue() === State.Stopping) {
+      if (this.serverState.getValue() !== State.Started) {
         await this.zeroconf.startServer();
       }
 

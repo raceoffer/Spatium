@@ -3,7 +3,6 @@ import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState } from './primitives/state';
 import { Device } from './primitives/device';
 import { filter, takeUntil, debounceTime } from 'rxjs/operators';
-import { requestDialog } from '../utils/dialog';
 
 declare const cordova: any;
 
@@ -17,7 +16,6 @@ export class SocketClientService {
   private socket: BehaviorSubject<WebSocket> = new BehaviorSubject<WebSocket>(null);
 
   private keepAlive = new Subject<any>();
-  private dialogShown = false;
 
   constructor(private ngZone: NgZone) {}
 
@@ -49,18 +47,9 @@ export class SocketClientService {
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
-      ).subscribe(async () => {
+      ).subscribe(() => {
         console.log('Client Keep-Alive failed');
-        if (!this.dialogShown) {
-          this.dialogShown = true;
-          if (requestDialog('Verifier app is not responding', 'WAIT', 'DISCONNECT')) {
-            this.keepAlive.next();
-            this.dialogShown = false;
-          } else {
-            this.disconnect();
-            this.dialogShown = false;
-          }
-        }
+        this.disconnect();
       });
     });
     socket.onmessage = (event) => this.ngZone.run(() => {
