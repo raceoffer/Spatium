@@ -2,7 +2,8 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState } from './primitives/state';
 import { Device } from './primitives/device';
-import { filter, takeUntil, debounceTime, map, pairwise } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { requestDialog } from '../utils/dialog';
 
 declare const cordova: any;
 
@@ -47,9 +48,13 @@ export class SocketClientService {
         takeUntil(this.state.pipe(
           filter(state => state !== ConnectionState.Connected)
         ))
-      ).subscribe(() => {
+      ).subscribe(async () => {
         console.log('Client Keep-Alive failed');
-        this.disconnect();
+        if (requestDialog('Verifier app is not responding', 'WAIT', 'DISCONNECT')) {
+          this.keepAlive.next();
+        } else {
+          this.disconnect();
+        }
       });
     });
     socket.onmessage = (event) => this.ngZone.run(() => {

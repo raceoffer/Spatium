@@ -3,7 +3,8 @@ import { BehaviorSubject, Subject, interval } from 'rxjs';
 import { ConnectionState, State } from './primitives/state';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
-import { filter, takeUntil, debounceTime, map, pairwise } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { requestDialog } from '../utils/dialog';
 
 declare const cordova: any;
 
@@ -87,9 +88,13 @@ export class SocketServerService {
               takeUntil(this.connectionState.pipe(
                 filter(state => state !== ConnectionState.Connected)
               ))
-            ).subscribe(() => {
+            ).subscribe(async () => {
               console.log('Server Keep-Alive failed');
-              this.disconnect();
+              if (await requestDialog('Main app is not responding', 'WAIT', 'DISCONNECT')) {
+                this.keepAlive.next();
+              } else {
+                this.disconnect();
+              }
             });
           }
         }),
