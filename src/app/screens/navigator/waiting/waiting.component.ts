@@ -22,10 +22,7 @@ export class WaitingComponent implements OnInit, OnDestroy {
 
   public ready = new BehaviorSubject<boolean>(false);
 
-  public discovering = toBehaviourSubject(this.connectionProviderService.searchState.pipe(
-    map(state => state !== State.Stopped),
-    distinctUntilChanged()
-  ), false);
+  public searchState = this.connectionProviderService.searchState;
 
   public connecting = toBehaviourSubject(this.connectionProviderService.connectionState.pipe(
     map(state => state === ConnectionState.Connecting),

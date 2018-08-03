@@ -21,6 +21,7 @@ export class SocketServerService {
 
   private currentPeer = new BehaviorSubject<string>(null);
 
+  private dialogShown = false;
   private keepAlive = new Subject<any>();
 
   constructor(private ngZone: NgZone) {}
@@ -91,10 +92,15 @@ export class SocketServerService {
               ))
             ).subscribe(async () => {
               console.log('Server Keep-Alive failed');
-              if (await requestDialog('Main app is not responding', 'WAIT', 'DISCONNECT')) {
-                this.keepAlive.next();
-              } else {
-                this.disconnect();
+              if (!this.dialogShown) {
+                this.dialogShown = true;
+                if (await requestDialog('Main app is not responding', 'WAIT', 'DISCONNECT')) {
+                  this.keepAlive.next();
+                  this.dialogShown = false;
+                } else {
+                  this.disconnect();
+                  this.dialogShown = false;
+                }
               }
             });
           }

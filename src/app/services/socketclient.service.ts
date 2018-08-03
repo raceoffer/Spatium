@@ -17,6 +17,7 @@ export class SocketClientService {
   private socket: BehaviorSubject<WebSocket> = new BehaviorSubject<WebSocket>(null);
 
   private keepAlive = new Subject<any>();
+  private dialogShown = false;
 
   constructor(private ngZone: NgZone) {}
 
@@ -50,10 +51,15 @@ export class SocketClientService {
         ))
       ).subscribe(async () => {
         console.log('Client Keep-Alive failed');
-        if (requestDialog('Verifier app is not responding', 'WAIT', 'DISCONNECT')) {
-          this.keepAlive.next();
-        } else {
-          this.disconnect();
+        if (!this.dialogShown) {
+          this.dialogShown = true;
+          if (requestDialog('Verifier app is not responding', 'WAIT', 'DISCONNECT')) {
+            this.keepAlive.next();
+            this.dialogShown = false;
+          } else {
+            this.disconnect();
+            this.dialogShown = false;
+          }
         }
       });
     });
@@ -77,7 +83,7 @@ export class SocketClientService {
     this.state.next(ConnectionState.Connecting);
   }
 
-  public disconnect(): void {
+  public disconnect() {
     if (this.state.getValue() !== ConnectionState.Connected) {
       return;
     }
