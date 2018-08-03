@@ -218,6 +218,20 @@ export class ConnectionProviderService implements IConnectionProvider {
     );
   }
 
+  public async cancelSearch() {
+    if (this.searchState.getValue() !== State.Started) {
+      console.log('Trying to cancel search while not serching');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.searchState.getValue() === State.Started
+      ).map(
+        provider => provider.service.cancelSearch()
+      )
+    );
+  }
+
   public async connect(device: Device) {
     if (this.connectionState.getValue() !== ConnectionState.None) {
       console.log('Trying to connect while still connected');

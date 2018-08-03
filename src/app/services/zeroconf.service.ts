@@ -269,6 +269,10 @@ export class ZeroconfService implements IConnectionProvider {
     await this.discoveryService.searchDevices(duration);
   }
 
+  public async cancelSearch() {
+    await this.discoveryService.cancelSearch();
+  }
+
   public async connect(device: Device) {
     if (device.ip != null) {
       await this.socketClientService.connect(device);

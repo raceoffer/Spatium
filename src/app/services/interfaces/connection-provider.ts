@@ -37,6 +37,7 @@ export interface IConnectionProvider {
 
   resetDevices();
   searchDevices(duration: number);
+  cancelSearch();
 
   connect(to: Device);
   disconnect();

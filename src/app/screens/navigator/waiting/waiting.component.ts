@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, OnDestroy, OnInit, Output } from '@angular/core';
 import { combineLatest, Subject, BehaviorSubject, timer } from 'rxjs';
 import { map, distinctUntilChanged, mergeMap, mapTo } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../../services/connection-provider';
@@ -17,8 +17,10 @@ declare const cordova: any;
   templateUrl: './waiting.component.html',
   styleUrls: ['./waiting.component.css']
 })
-export class WaitingComponent implements OnInit {
+export class WaitingComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
+
+  public ready = new BehaviorSubject<boolean>(false);
 
   public discovering = toBehaviourSubject(this.connectionProviderService.searchState.pipe(
     map(state => state !== State.Stopped),
@@ -71,8 +73,14 @@ export class WaitingComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    await this.connectionProviderService.resetDevices();
     await timer(500).toPromise();
+    this.ready.next(true);
     await this.connectionProviderService.searchDevices();
+  }
+
+  async ngOnDestroy() {
+    await this.connectionProviderService.cancelSearch();
   }
 
   async connectTo(device) {
@@ -81,6 +89,7 @@ export class WaitingComponent implements OnInit {
     }
 
     try {
+      await this.connectionProviderService.cancelSearch();
       await this.connectionProviderService.disconnect();
       await this.connectionProviderService.connect(device);
 
