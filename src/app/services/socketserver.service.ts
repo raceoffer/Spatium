@@ -56,7 +56,8 @@ export class SocketServerService {
 
     return await new Promise((resolve, reject) =>
       cordova.plugins.wsserver.start(this.port, {
-        onFailure: () => this.ngZone.run(() => {
+        onFailure: (addr, port, reason) => this.ngZone.run(() => {
+          console.log('Stopped listening on %s:%d. Reason: %s', addr, port, reason);
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
