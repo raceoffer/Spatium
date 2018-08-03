@@ -15,6 +15,8 @@ import { FeedbackComponent } from '../../feedback/feedback.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
 import { FormControl } from '@angular/forms';
+import { ConnectionProviderService } from "../../../services/connection-provider";
+import { ConnectionState } from "../../../services/primitives/state";
 
 declare const navigator: any;
 
@@ -68,6 +70,8 @@ export class WalletComponent implements OnDestroy {
   public synchronizing = this.wallet.synchronizing;
   public partiallySync = this.wallet.partiallySync;
 
+  public connectionState = this.connectionProvider.connectionState;
+
   public isWindows;
 
   public cols: any = Math.ceil(window.innerWidth / 350);
@@ -120,6 +124,7 @@ export class WalletComponent implements OnDestroy {
     private readonly keychain: KeyChainService,
     private readonly navigationService: NavigationService,
     private readonly currency: CurrencyService,
+    private readonly connectionProvider: ConnectionProviderService,
     private readonly wallet: WalletService,
     private readonly device: DeviceService,
     private readonly router: Router
@@ -203,8 +208,12 @@ export class WalletComponent implements OnDestroy {
     });
   }
 
-  public async cancelSync() {
-    if (await requestDialog('Syncronize with another device')) {
+  public async onConnect() {
+    if (this.connectionState.getValue() !== ConnectionState.None) {
+      if (await requestDialog('Syncronize with another device')) {
+        await this.openConnectOverlay();
+      }
+    } else {
       await this.openConnectOverlay();
     }
   }

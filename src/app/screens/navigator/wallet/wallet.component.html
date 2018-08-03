@@ -12,15 +12,15 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
+    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
       <mat-icon>sync</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="openConnectOverlay()" *ngIf="(status | async) === statusType.None && (partiallySync | async)">
+    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && (partiallySync | async)">
       <mat-icon>sync_problem</mat-icon>
     </button>
 
-    <button mat-icon-button (click)="cancelSync()" *ngIf="(status | async) !== statusType.None">
+    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) !== statusType.None">
       <mat-icon class="sync">sync</mat-icon>
     </button>
   </mat-toolbar>
