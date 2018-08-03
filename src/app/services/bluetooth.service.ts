@@ -75,7 +75,7 @@ export class BluetoothService implements IConnectionProvider {
               filter(state => state !== ConnectionState.Connected)
             ))
           ).subscribe(async () => {
-            await this.send('__keep-alive__');
+            await this.refreshConnection();
           });
         } else {
           this.connectedDevice.next(null);
@@ -207,6 +207,10 @@ export class BluetoothService implements IConnectionProvider {
     }
   }
 
+  public async refreshConnection() {
+    await this.send('__keep-alive__');
+  }
+
   async connect(device: Device) {
     if (this.connectionState.getValue() !== ConnectionState.None) {
       console.log('Trying to connect while not disconnected');
@@ -258,7 +262,7 @@ export class BluetoothService implements IConnectionProvider {
 
   async searchDevices(duration: number) {
     if (this.searchState.getValue() !== State.Stopped) {
-      console.log('Trying to stsrt search while not finished');
+      console.log('Trying to start search while not finished');
       return;
     }
 
@@ -294,16 +298,25 @@ export class BluetoothService implements IConnectionProvider {
         filter(state => state !== State.Started)
       ))
     ).toPromise()) { // Now remember that we've considered the timeout to be true?
-      this.searchState.next(State.Stopping);
+      await this.cancelSearch();
+    }
+  }
 
-      try {
-        await this.plugin.cancelDiscovery();
-      } catch (e) {
-        LoggerService.nonFatalCrash('Failed to cancel discovery', e);
-        // We are used to revert the state back to Started but it showed that it leads to errors
-        this.searchState.next(State.Stopped);
-        throw e;
-      }
+  async cancelSearch() {
+    if (this.searchState.getValue() !== State.Started) {
+      console.log('Trying to start search while not finished');
+      return;
+    }
+
+    this.searchState.next(State.Stopping);
+
+    try {
+      await this.plugin.cancelDiscovery();
+    } catch (e) {
+      LoggerService.nonFatalCrash('Failed to cancel discovery', e);
+      // We are used to revert the state back to Started but it showed that it leads to errors
+      this.searchState.next(State.Stopped);
+      throw e;
     }
   }
 

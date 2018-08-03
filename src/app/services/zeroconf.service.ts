@@ -269,6 +269,10 @@ export class ZeroconfService implements IConnectionProvider {
     await this.discoveryService.searchDevices(duration);
   }
 
+  public async cancelSearch() {
+    await this.discoveryService.cancelSearch();
+  }
+
   public async connect(device: Device) {
     if (device.ip != null) {
       await this.socketClientService.connect(device);
@@ -283,7 +287,15 @@ export class ZeroconfService implements IConnectionProvider {
     this.socketServerService.disconnect();
   }
 
-  public send(message: any): void {
+  public refreshConnection() {
+    if (this.socketServerService.connectionState.getValue() === ConnectionState.Connected) {
+      this.socketServerService.refreshConnection();
+    } else {
+      this.socketClientService.refreshConnection();
+    }
+  }
+
+  public send(message: string) {
     // in order to prevent a mess we always send messages to the server if it's connected
     if (this.socketServerService.connectionState.getValue() === ConnectionState.Connected) {
       this.socketServerService.send(message);
