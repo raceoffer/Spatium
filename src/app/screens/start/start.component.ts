@@ -4,6 +4,7 @@ import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { getValue, setValue } from '../../utils/storage';
 import { PresentationComponent } from '../presentation/presentation.component';
+import { KeyChainService } from '../../services/keychain.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -16,10 +17,12 @@ declare const Windows: any;
 export class StartComponent implements OnInit, OnDestroy {
   public ready = false;
   public isWindows = null;
+  private buffer = null;
   private subscriptions = [];
 
   constructor(
     private readonly deviceService: DeviceService,
+    private readonly keyChainService: KeyChainService,
     private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly navigationService: NavigationService
@@ -51,7 +54,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
-        await this.eventOnBackClicked();
+        navigator.app.exitApp();
       })
     );
 
@@ -60,14 +63,15 @@ export class StartComponent implements OnInit, OnDestroy {
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
     }
 
+    this.buffer = Buffer;
+    this.keyChainService.reset();
+
     try {
       const startPath = await getValue('startPath');
       this.ngZone.run(async () => {
         await this.router.navigate([startPath]);
       });
-    } catch (e) {
-
-    }
+    } catch (e) {}
   }
 
   ngOnDestroy() {
@@ -83,9 +87,5 @@ export class StartComponent implements OnInit, OnDestroy {
   async onConnectClicked() {
     await setValue('startPath', '/verifier-auth');
     await this.router.navigate(['/verifier-auth']);
-  }
-
-  eventOnBackClicked() {
-    navigator.app.exitApp();
   }
 }
