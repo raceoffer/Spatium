@@ -35,11 +35,16 @@
             readonly
             matInput
             mat-autosize="true"
-            [value]="(currencyWallet?.status | async) !== statusType.Ready ? 'Synchronizing' : 'Not synched'"
+            [value]="(currencyWallet?.status | async) === statusType.Synchronizing ? 'Synchronizing' : 'Not synched'"
             *ngIf="(currencyWallet?.status | async) !== statusType.Ready">
           </textarea>
 
-          <button id="copy" class="wallet-address-button" mat-icon-button matSuffix (click)="copy()">
+          <button
+            id="copy"
+            class="wallet-address-button"
+            mat-icon-button matSuffix
+            *ngIf="(currencyWallet?.status | async) === statusType.Ready"
+            (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
         </mat-form-field>

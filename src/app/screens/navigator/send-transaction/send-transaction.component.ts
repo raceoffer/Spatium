@@ -14,7 +14,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
-import { ConnectionState } from "../../../services/primitives/state";
+import { ConnectionState } from '../../../services/primitives/state';
 
 declare const cordova: any;
 
@@ -545,7 +545,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   paste() {
     cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
       if (text !== '') {
-        this.receiver.next(text);
+        this.receiverField.setValue(text, {emitEvent: true});
       }
     }), e => console.log(e));
   }
