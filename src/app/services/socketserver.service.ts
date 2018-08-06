@@ -126,6 +126,8 @@ export class SocketServerService {
 
     this.state.next(State.Stopping);
 
+    this.disconnect();
+
     return new Promise((resolve, reject) =>
       cordova.plugins.wsserver.stop(() => this.ngZone.run(() => {
         this.state.next(State.Stopped);
@@ -136,7 +138,7 @@ export class SocketServerService {
       })));
   }
 
-  public disconnect(): void {
+  public disconnect() {
     if (this.connectionState.getValue() !== ConnectionState.Connected) {
       return;
     }
@@ -144,6 +146,11 @@ export class SocketServerService {
     console.log('Server called disconnect');
 
     cordova.plugins.wsserver.close({uuid: this.currentPeer.getValue()});
+
+    console.log('Server performed disconnect itself');
+    this.connectionState.next(ConnectionState.None);
+    this.connectedDevice.next(null);
+    this.currentPeer.next(null);
   }
 
   public refreshConnection() {
