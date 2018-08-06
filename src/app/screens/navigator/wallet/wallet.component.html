@@ -1,44 +1,44 @@
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
+  <button mat-icon-button (click)="toggleNavigation()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span style="position: relative; top: 2px;">{{ title }} </span>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button (click)="toggleSearch(true)">
+    <mat-icon>search</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
+    <mat-icon>sync</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && (partiallySync | async)">
+    <mat-icon>sync_problem</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) !== statusType.None">
+    <mat-icon class="sync">sync</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
+  <button mat-icon-button class="back-button" (click)="toggleSearch(false)">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
+    <input type="text" placeholder="Search" name="UserName" [formControl]="filterControl" [autofocus]>
+  </div>
+
+  <button mat-button mat-icon-button (click)="clearFilterValue()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet" [class.scroll]="isWindows">
-  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
-    <button mat-icon-button (click)="toggleNavigation()">
-      <mat-icon>menu</mat-icon>
-    </button>
-
-    <span style="position: relative; top: 2px;">{{ title }} </span>
-
-    <span class="spacer"></span>
-
-    <button mat-icon-button (click)="toggleSearch(true)">
-      <mat-icon>search</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
-      <mat-icon>sync</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && (partiallySync | async)">
-      <mat-icon>sync_problem</mat-icon>
-    </button>
-
-    <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) !== statusType.None">
-      <mat-icon class="sync">sync</mat-icon>
-    </button>
-  </mat-toolbar>
-
-  <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
-    <button mat-icon-button class="back-button" (click)="toggleSearch(false)">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-
-    <div class="spatium-textfield search-wallet entry spacer" style="display: flex; position: relative;">
-      <input type="text" placeholder="Search" name="UserName" [formControl]="filterControl" [autofocus]>
-    </div>
-
-    <button mat-button mat-icon-button (click)="clearFilterValue()">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-toolbar>
-
   <div class='content' (window:resize)="onResize()">
     <mat-grid-list cols="{{cols}}" rowHeight="4:3" [class.windows]="isWindows">
       <mat-grid-tile

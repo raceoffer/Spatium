@@ -15,8 +15,8 @@ import { FeedbackComponent } from '../../feedback/feedback.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
 import { FormControl } from '@angular/forms';
-import { ConnectionProviderService } from "../../../services/connection-provider";
-import { ConnectionState } from "../../../services/primitives/state";
+import { ConnectionProviderService } from '../../../services/connection-provider';
+import { ConnectionState } from '../../../services/primitives/state';
 
 declare const navigator: any;
 
