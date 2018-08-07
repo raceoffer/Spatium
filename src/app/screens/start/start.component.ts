@@ -5,6 +5,7 @@ import { NavigationService, Position } from '../../services/navigation.service';
 import { getValue, setValue } from '../../utils/storage';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { KeyChainService } from '../../services/keychain.service';
+import { LoggerService } from '../../services/logger.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -22,6 +23,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly deviceService: DeviceService,
+    private readonly logger: LoggerService,
     private readonly keyChainService: KeyChainService,
     private readonly router: Router,
     private readonly ngZone: NgZone,

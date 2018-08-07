@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from "rxjs/index";
-import { distinctUntilChanged, filter, mapTo, skip } from "rxjs/internal/operators";
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, mapTo, skip } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const device: any;
@@ -9,12 +9,6 @@ declare const Buffer: any;
 
 @Injectable()
 export class FileService {
-  public hasLogFile: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  public hasLogFileChanged: Observable<boolean> = this.hasLogFile.pipe(skip(1), distinctUntilChanged());
-  public createLogFileEvent: Observable<any> = this.hasLogFileChanged.pipe(filter(hasLogFile => hasLogFile), mapTo(null));
-
-  constructor() { }
-
   safeFileName(text: string): string {
     return Buffer.from(text, 'utf-8').toString('base64') + '.store';
   }
@@ -24,47 +18,42 @@ export class FileService {
   }
 
   async writeFile(filename, content) {
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
         fs.root.getFile(filename, {create: true}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
             const tdata = new Blob([content], {type: 'text/plain'});
+            fileWriter.onwrite = resolve;
+            fileWriter.onerror = reject;
             fileWriter.write(tdata);
-            resolve();
-          });
-        });
-      });
+          }, reject);
+        }, reject);
+      }, reject);
     });
   }
 
-  async writeFileLog(path, filename, content) {
-    await new Promise((resolve, reject) => {
-      window.resolveLocalFileSystemURL(path, dirEntry => {
-        dirEntry.getFile(filename, {create: true}, fileEntry => {
-          fileEntry.createWriter(fileWriter => {
-            const tdata = new Blob([content], {type: 'text/plain'});
-            fileWriter.write(tdata);
-            resolve();
-            this.hasLogFile.next(true);
-          }, (e) => { });
-        }, (e) => { });
-      }, (e) => { });
-    })
+  async createFile(filename) {
+    return await new Promise((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        fs.root.getFile(filename, {create: true}, fileEntry => resolve(fileEntry.fullPath), reject);
+      }, reject);
+    });
   }
 
-  async writeToFileLog(path, filename, content) {
-    await new Promise((resolve, reject) => {
-      window.resolveLocalFileSystemURL(path, dirEntry => {
-        dirEntry.getFile(filename, {create: false}, fileEntry => {
+  async writeToFile(filename, content) {
+    return await new Promise((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        fs.root.getFile(filename, {create: false}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
             const tdata = new Blob([content], {type: 'text/plain'});
+            fileWriter.onwrite = resolve;
+            fileWriter.onerror = reject;
             fileWriter.seek(fileWriter.length);
             fileWriter.write(tdata);
-            resolve();
-          }, (e) => { });
-        }, (e) => { });
-      }, (e) => { });
-    })
+          }, reject);
+        }, reject);
+      }, reject);
+    });
   }
 
   async readFile(filename): Promise<string> {
@@ -105,30 +94,24 @@ export class FileService {
   }
 
   async deleteOldLogFiles() {
-    const time: number = 24 * 60 * 60 * 1000; // 24h
-    const date: number = new Date().getTime();
+    const time = 24 * 60 * 60 * 1000; // 24h
+    const date = new Date().getTime();
 
-    window.resolveLocalFileSystemURL(await this.getLogPath(),
-      function (fileSystem) {
-        const reader = fileSystem.createReader();
-        reader.readEntries(
-          function (entries) {
-            entries
-              .filter(entry => entry.isFile)
-              .filter(entry => entry.name.includes('log_'))
-              .forEach(entry => {
-                entry.file(f => {
-                  let diff = date - f.lastModifiedDate;
-                  if (diff > time) {
-                    entry.remove();
-                  }
-                });
-              });
-          },
-          function (e) { }
-        );
-      }, function (e) {}
-    );
+    return await new Promise((resolve, reject) => {
+      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
+        const reader = fs.root.createReader();
+        reader.readEntries(entries => entries
+          .filter(entry => entry.isFile)
+          .filter(entry => entry.name.includes('log_'))
+          .forEach(entry => {
+            entry.file(f => {
+              if (date - f.lastModifiedDate > time) {
+                entry.remove();
+              }
+            });
+          }), reject);
+      }, reject);
+    });
   }
 
   async listFiles(): Promise<Array<string>> {
@@ -141,15 +124,6 @@ export class FileService {
             .map(entry => entry.name);
           resolve(fileNames);
         }, reject);
-      }, reject);
-    });
-  }
-
-  async getLogPath(): Promise<string> {
-    return await new Promise<string>((resolve, reject) => {
-      window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
-        const path = fs.root.nativeURL;
-        resolve(path);
       }, reject);
     });
   }
