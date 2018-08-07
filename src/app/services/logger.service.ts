@@ -2,9 +2,9 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
 import { stringify } from 'flatted/esm';
+import { DeviceService } from './device.service';
 
 declare const cordova: any;
-declare const device: any;
 declare const window: any;
 declare const hockeyapp: any;
 
@@ -22,14 +22,20 @@ export class LoggerService {
 
   private logLevel = LoggerLevels.LOG;
   private sessionlogName = '';
-  private logBuffer = '';
+  private logBuffer = [];
 
-  constructor(private readonly fs: FileService) {
-    console.debug = this.proxy(console, console.debug, '[DEBUG]', LoggerLevels.DEBUG);
+
+  constructor(private readonly fs: FileService,
+              private readonly ds: DeviceService) {
+    // console.debug for console (not in file)
     console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
     console.warn = this.proxy(console, console.warn, '[WARN]', LoggerLevels.WARN);
     console.error = this.proxy(console, console.error, '[ERROR]', LoggerLevels.ERROR);
+  }
+
+  get logFileName(): string {
+    return this.sessionlogName;
   }
 
   public static log(message, data) {
@@ -62,17 +68,11 @@ export class LoggerService {
 
       try {
         if ((level.valueOf() >= this.logLevel.valueOf())) {
-          if (this.logBuffer != null) {
-            this.logBuffer = this.logBuffer + textForLogger;
-            await this.fs.writeToFile(this.sessionlogName, this.logBuffer);
-            this.logBuffer = null;
-          } else {
-            await this.fs.writeToFile(this.sessionlogName, textForLogger);
-          }
-        } else {
-          this.logBuffer = this.logBuffer + textForLogger;
+          this.logBuffer.push(textForLogger);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.debug(e);
+      }
     };
   }
 
@@ -108,6 +108,22 @@ export class LoggerService {
     this.sessionlogName = this.fs.logFileName(datelog);
 
     await this.fs.createFile(this.sessionlogName);
+    let buffer = [];
+    buffer = buffer.concat(appInfo);
+    buffer = buffer.concat(deviceInfo);
+
+    const deviceInfo = await this.ds.getDeviceInfo();
+    const appInfo = await this.ds.getAppInfo();
+  }
+
+  async logBufferToLog() {
+    const buffer = this.logBuffer;
+    this.logBuffer = [];
+    this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, buffer)
+      .then(() => this.logBufferToLog(), () => {
+        this.logBuffer = buffer.concat(this.logBuffer);
+        this.logBufferToLog();
+      });
   }
 
   async getLogData(): Promise<string> {
@@ -124,10 +140,6 @@ export class LoggerService {
     } else {
       return null;
     }
-  }
-
-  get logFileName(): string {
-    return this.sessionlogName;
   }
 
   async deleteOldLogFiles() {

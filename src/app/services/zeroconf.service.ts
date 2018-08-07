@@ -97,6 +97,7 @@ export class ZeroconfService implements IConnectionProvider {
 
   private interruptServerSubject = new Subject<any>();
   private interruptListeningSubject = new Subject<any>();
+  private connectionType: any;
 
   constructor(
     private readonly socketClientService: SocketClientService,
@@ -108,12 +109,22 @@ export class ZeroconfService implements IConnectionProvider {
       this.refreshTimer.subscribe(async () => {
         try {
           if (await this.checkWiFiState()) {
+            if (this.connectionType !== navigator.connection.type) {
+              this.connectionType = navigator.connection.type;
+              console.log('Connection type changed on:', this.connectionType);
+              console.log('ip', await this.socketServerService.getIpv4Address());
+            }
+
             if (navigator.connection.type === 'wifi') {
               this.deviceState.next(State.Started);
             } else {
               this.deviceState.next(State.Starting);
             }
           } else {
+            if (this.connectionType !== null) {
+              this.connectionType = null;
+              console.log('Connection type changed on: none');
+            }
             this.deviceState.next(State.Stopped);
           }
         } catch (error) {
