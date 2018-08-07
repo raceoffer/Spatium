@@ -42,29 +42,37 @@ export class FileService {
       window.resolveLocalFileSystemURL(path, dirEntry => {
         dirEntry.getFile(filename, {create: true}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
-            const tdata = new Blob([content], {type: 'text/plain'});
+            const tdata = new Blob(content, {type: 'text/plain'});
+            fileWriter.seek(fileWriter.length);
             fileWriter.write(tdata);
-            resolve();
-            this.hasLogFile.next(true);
-          }, (e) => { });
-        }, (e) => { });
-      }, (e) => { });
-    })
+            fileWriter.onwrite = function(evt) {
+              resolve();
+            };
+          }, (e) => {console.debug(e); reject(); });
+        }, (e) => {console.debug(e); reject(); });
+      }, (e) => {console.debug(e); reject(); });
+    });
   }
 
-  async writeToFileLog(path, filename, content) {
+  async writeToFileLog(path, filename, content: any[]) {
     await new Promise((resolve, reject) => {
       window.resolveLocalFileSystemURL(path, dirEntry => {
         dirEntry.getFile(filename, {create: false}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
-            const tdata = new Blob([content], {type: 'text/plain'});
-            fileWriter.seek(fileWriter.length);
-            fileWriter.write(tdata);
-            resolve();
-          }, (e) => { });
-        }, (e) => { });
-      }, (e) => { });
-    })
+            if (content.length > 0) {
+              const tdata = new Blob(content, {type: 'text/plain'});
+              fileWriter.seek(fileWriter.length);
+              fileWriter.write(tdata);
+              fileWriter.onwriteend = function(evt) {
+                resolve();
+              };
+            } else {
+              resolve();
+            }
+          }, (e) => {console.debug(e); reject(); });
+        }, (e) => {console.debug(e); reject(); });
+      }, (e) => {console.debug(e); reject(); });
+    });
   }
 
   async readFile(filename): Promise<string> {

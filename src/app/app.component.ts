@@ -12,36 +12,23 @@ declare const navigator: any;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
-  private subscriptions = [];
+export class AppComponent implements OnInit {
 
-  constructor(
-    private readonly fs: FileService,
-    private readonly logger: LoggerService,
-    private readonly deviceService: DeviceService,
-    private readonly hockeyService: HockeyService
-  ) { }
+
+  constructor(private readonly logger: LoggerService,
+              private readonly deviceService: DeviceService,
+              private readonly hockeyService: HockeyService) { }
 
   async ngOnInit() {
-    await this.deviceService.deviceReady();
+    this.deviceService.deviceReady().then(async () => {
+      hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
 
-    this.subscriptions.push(
-      this.fs.createLogFileEvent.subscribe(async () => {
-        await this.logger.logBufferToLog();
-      }));
-
-
-    hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
-    const lastLogData = await this.logger.getLastLogData();
-    await this.logger.createSessionLog();
-    await this.logger.deleteOldLogFiles();
-    if (lastLogData) {
-      hockeyapp.addMetaData(null, null, lastLogData);
-    }
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
+      const lastLogData = await this.logger.getLastLogData();
+      await this.logger.createSessionLog();
+      await this.logger.deleteOldLogFiles();
+      if (lastLogData) {
+        hockeyapp.addMetaData(null, null, lastLogData);
+      }
+    });
   }
 }

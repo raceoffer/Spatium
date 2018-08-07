@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
 import { stringify } from 'flatted/esm';
-import { DeviceService } from "./device.service";
+import { DeviceService } from './device.service';
 
 declare const cordova: any;
 declare const window: any;
@@ -23,16 +23,20 @@ export class LoggerService {
   private logLevel = LoggerLevels.LOG;
   private sessionlogPath = '';
   private sessionlogName = '';
-  private logBuffer = '';
+  private logBuffer = [];
 
 
   constructor(private readonly fs: FileService,
               private readonly ds: DeviceService) {
-    console.debug = this.proxy(console, console.debug, '[DEBUG]', LoggerLevels.DEBUG);
+    // console.debug for console (not in file)
     console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
     console.warn = this.proxy(console, console.warn, '[WARN]', LoggerLevels.WARN);
     console.error = this.proxy(console, console.error, '[ERROR]', LoggerLevels.ERROR);
+  }
+
+  get logFileName(): string {
+    return this.sessionlogName;
   }
 
   public static log(message, data) {
@@ -64,20 +68,13 @@ export class LoggerService {
       textForLogger = textForLogger + '\n';
 
       try {
-        if ((level.valueOf() >= this.logLevel.valueOf()) && this.fs.hasLogFile.getValue()) {
-          if (this.logBuffer != null) {
-            this.logBuffer = this.logBuffer + textForLogger;
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
-            this.logBuffer = null;
-          } else {
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, textForLogger);
-          }
-        } else {
-          this.logBuffer = this.logBuffer + textForLogger;
+        if ((level.valueOf() >= this.logLevel.valueOf())) {
+          this.logBuffer.push(textForLogger);
         }
       } catch (e) {
+        console.debug(e);
       }
-    }
+    };
   }
 
   convertToString(obj) {
@@ -111,12 +108,25 @@ export class LoggerService {
     this.sessionlogName = this.fs.logFileName(datelog);
     this.sessionlogPath = await this.fs.getLogPath();
 
-    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.ds.getDeviceInfoString());
+    const appInfo = await this.ds.getAppInfo();
+    const deviceInfo = await this.ds.getDeviceInfo();
+
+    let buffer = [];
+    buffer = buffer.concat(appInfo);
+    buffer = buffer.concat(deviceInfo);
+
+    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, buffer);
+    await this.logBufferToLog();
   }
 
   async logBufferToLog() {
-    await this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
-    this.logBuffer = null;
+    const buffer = this.logBuffer;
+    this.logBuffer = [];
+    this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, buffer)
+      .then(() => this.logBufferToLog(), () => {
+        this.logBuffer = buffer.concat(this.logBuffer);
+        this.logBufferToLog();
+      });
   }
 
   async getLogData(): Promise<string> {
@@ -134,10 +144,6 @@ export class LoggerService {
     else {
       return null;
     }
-  }
-
-  get logFileName(): string {
-    return this.sessionlogName;
   }
 
   async deleteOldLogFiles() {

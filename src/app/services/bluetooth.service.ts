@@ -130,7 +130,13 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin.getDiscoverable().then(discoverable => this.ngZone.run(() => {
         this.discoveryState.next(discoverable ? State.Started : State.Stopped);
       }));
+
+      this.logPaired();
     });
+  }
+
+  async logPaired () {
+    console.log('Bluetooth list paired devices ', await this.plugin.listPairedDevices());
   }
 
   public async reset() {
