@@ -55,6 +55,16 @@ export class LoggerService {
 
       this.busySubject.next(false);
     });
+
+    window.onerror = message => {
+      const datePipe = new DatePipe('en-US');
+      const format = 'yyyy-MM-ddTHH:mm:ss.SSS z';
+
+      const datelog = datePipe.transform(new Date(), format);
+      const log = '[' + datelog + '] ' + '[ERROR]' + message;
+
+      this.logSubject.next(log);
+    };
   }
 
   get logFileName(): string {
