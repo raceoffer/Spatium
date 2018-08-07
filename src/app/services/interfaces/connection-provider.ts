@@ -37,11 +37,14 @@ export interface IConnectionProvider {
 
   resetDevices();
   searchDevices(duration: number);
+  cancelSearch();
 
   connect(to: Device);
-  disconnect(): void;
+  disconnect();
 
-  send(message: any): void;
+  refreshConnection();
 
-  enableDiscovery(): void;
+  send(message: string);
+
+  enableDiscovery();
 }

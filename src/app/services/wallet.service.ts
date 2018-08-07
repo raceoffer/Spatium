@@ -381,6 +381,18 @@ export class WalletService {
 
   public async cancelSync() {
     this.cancelSubject.next(true);
+
+    for (const wallet of Array.from(this.coinWallets.values())) {
+      if (!wallet.ready.getValue()) {
+        await wallet.reset();
+      }
+    }
+    for (const wallet of Array.from(this.tokenWallets.values())) {
+      if (!wallet.ready.getValue()) {
+        await wallet.reset();
+      }
+    }
+
     this.synchronizatonStatus.next(SyncStatus.None);
   }
 

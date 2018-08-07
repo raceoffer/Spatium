@@ -23,13 +23,13 @@ import { DDSService } from '../../services/dds.service';
 import { BehaviorSubject } from 'rxjs/index';
 import { PasswordAuthFactorComponent } from '../authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from '../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
-import { GraphicKeyAuthFactorComponent } from "../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component";
-import { FileAuthFactorComponent } from "../authorization-factors/file-auth-factor/file-auth-factor.component";
-import { QrAuthFactorComponent } from "../authorization-factors/qr-auth-factor/qr-auth-factor.component";
-import { NfcAuthFactorComponent } from "../authorization-factors/nfc-auth-factor/nfc-auth-factor.component";
-import { toBehaviourSubject } from "../../utils/transformers";
-import { map } from "rxjs/operators";
-import { DefaultAuthFactorComponent } from "../authorization-factors/default-auth-factor/default-auth-factor.component";
+import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
+import { FileAuthFactorComponent } from '../authorization-factors/file-auth-factor/file-auth-factor.component';
+import { QrAuthFactorComponent } from '../authorization-factors/qr-auth-factor/qr-auth-factor.component';
+import { NfcAuthFactorComponent } from '../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
+import { toBehaviourSubject } from '../../utils/transformers';
+import { map } from 'rxjs/operators';
+import { DefaultAuthFactorComponent } from '../authorization-factors/default-auth-factor/default-auth-factor.component';
 
 export enum State {
   Loading,
@@ -120,7 +120,7 @@ export class AuthComponent implements OnDestroy {
       }
     } catch (e) {
       this.state = State.Error;
-      this.notification.show('Failed to fetch an authorization tree from the storage.')
+      this.notification.show('Failed to fetch an authorization tree from the storage');
     }
   }
 
@@ -221,7 +221,7 @@ export class AuthComponent implements OnDestroy {
       } else {
         throw new Error('Unknown error');
       }
-    } catch(e) {
+    } catch (e) {
       if (this.type === IdFactor.Login && !this.advanced && this.factors.getValue().length === 0) {
         this.opendDefaultFactorOverlay();
       }

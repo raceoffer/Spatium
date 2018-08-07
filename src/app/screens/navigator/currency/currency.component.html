@@ -84,7 +84,7 @@
     <tr *ngIf="(currencyWallet?.balanceStatus | async) === balanceStatusType.Error">
       <td colspan="2" fxLayout="row" style="width: 100%">
         <mat-icon class="warning">warning</mat-icon>
-        <span class="label" style="margin-left: 5px; line-height: 20px">Outdated balance</span>
+        <span class="label" style="margin-left: 5px; line-height: 20px">{{ (balanceCurrencyUnconfirmed | async) !== null ? 'Outdated balance' : 'Failed to fetch balance' }}</span>
       </td>
     </tr>
   </table>

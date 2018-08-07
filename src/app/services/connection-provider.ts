@@ -52,7 +52,7 @@ export class ConnectionProviderService implements IConnectionProvider {
     mergeMap(states => combineLatest(states)),
     map(booleans => booleans.some(t => t))
   ), false);
-  
+
   public deviceState = toBehaviourSubject(this.providers.pipe(
     map(providers => {
       return Array.from(providers.values()).map(provider => provider.service.deviceState);
@@ -196,10 +196,38 @@ export class ConnectionProviderService implements IConnectionProvider {
     );
   }
 
+  public async refreshConnection() {
+    if (this.connectionState.getValue() !== ConnectionState.Connected) {
+      console.log('Trying to refresh while not connected');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.connectionState.getValue() === ConnectionState.Connected
+      ).map(
+        provider => provider.service.refreshConnection()
+      )
+    );
+  }
+
   public async searchDevices(duration = 10 * 1000) {
     await Promise.all(
       Array.from(this.providers.getValue().values()).map(
         provider => provider.service.searchDevices(duration)
+      )
+    );
+  }
+
+  public async cancelSearch() {
+    if (this.searchState.getValue() !== State.Started) {
+      console.log('Trying to cancel search while not serching');
+    }
+
+    await Promise.all(
+      Array.from(this.providers.getValue().values()).filter(
+        provider => provider.service.searchState.getValue() === State.Started
+      ).map(
+        provider => provider.service.cancelSearch()
       )
     );
   }

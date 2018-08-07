@@ -55,7 +55,8 @@ export class SocketServerService {
 
     return await new Promise((resolve, reject) =>
       cordova.plugins.wsserver.start(this.port, {
-        onFailure: () => this.ngZone.run(() => {
+        onFailure: (addr, port, reason) => this.ngZone.run(() => {
+          console.log('Stopped listening on %s:%d. Reason: %s', addr, port, reason);
           this.state.next(State.Stopped);
         }),
         onOpen: conn => this.ngZone.run(() => {
@@ -75,20 +76,20 @@ export class SocketServerService {
             ));
             this.connectionState.next(ConnectionState.Connected);
 
-            interval(1000).pipe(
+            interval(3000).pipe(
               takeUntil(this.connectionState.pipe(
                 filter(state => state !== ConnectionState.Connected)
               ))
             ).subscribe(() => {
-              this.send('__keep-alive__');
+              this.refreshConnection();
             });
-
             this.keepAlive.pipe(
-              debounceTime(3000),
+              debounceTime(10000),
               takeUntil(this.connectionState.pipe(
                 filter(state => state !== ConnectionState.Connected)
               ))
-            ).subscribe(() => {
+            ).subscribe(async () => {
+              console.log('Server Keep-Alive failed');
               this.disconnect();
             });
           }
@@ -101,6 +102,7 @@ export class SocketServerService {
         }),
         onClose: (conn) => this.ngZone.run(() => {
           if (this.currentPeer.getValue() === conn.uuid) {
+            console.log('Server received disconnect');
             this.connectionState.next(ConnectionState.None);
             this.connectedDevice.next(null);
             this.currentPeer.next(null);
@@ -124,6 +126,8 @@ export class SocketServerService {
 
     this.state.next(State.Stopping);
 
+    this.disconnect();
+
     return new Promise((resolve, reject) =>
       cordova.plugins.wsserver.stop(() => this.ngZone.run(() => {
         this.state.next(State.Stopped);
@@ -134,12 +138,23 @@ export class SocketServerService {
       })));
   }
 
-  public disconnect(): void {
+  public disconnect() {
     if (this.connectionState.getValue() !== ConnectionState.Connected) {
       return;
     }
 
+    console.log('Server called disconnect');
+
     cordova.plugins.wsserver.close({uuid: this.currentPeer.getValue()});
+
+    console.log('Server performed disconnect itself');
+    this.connectionState.next(ConnectionState.None);
+    this.connectedDevice.next(null);
+    this.currentPeer.next(null);
+  }
+
+  public refreshConnection() {
+    this.send('__keep-alive__');
   }
 
   public send(message: string): void {

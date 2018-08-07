@@ -852,6 +852,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .wallet {
   max-width: 100% !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .box .header{

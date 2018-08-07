@@ -4,6 +4,7 @@ import { BehaviorSubject, timer } from 'rxjs';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
 import { State } from './primitives/state';
+import { filter, mapTo, takeUntil } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const window: any;
@@ -118,9 +119,24 @@ export class DiscoveryService {
 
     await timer(duration).toPromise();
 
+    if (await timer(duration).pipe(
+        mapTo(true), // Return true if the time has passed
+        takeUntil(this.discovering.pipe( // And break if the discovery has stopped by itself
+          filter(state => state !== State.Started)
+        ))
+      ).toPromise()) { // Now remember that we've considered the timeout to be true?
+      await this.cancelSearch();
+    }
+  }
+
+  async cancelSearch() {
+    if (this.discovering.getValue() !== State.Started) {
+      return;
+    }
+
     this.discovering.next(State.Stopping);
 
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       cordova.plugins.zeroconf.close(
         () => this.ngZone.run(() => {
           this.discovering.next(State.Stopped);

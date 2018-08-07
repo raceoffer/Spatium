@@ -4,7 +4,7 @@ import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { getValue, setValue } from '../../utils/storage';
 import { PresentationComponent } from '../presentation/presentation.component';
-import { NavbarComponent } from '../../modals/navbar/navbar.component';
+import { KeyChainService } from '../../services/keychain.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -17,10 +17,12 @@ declare const Windows: any;
 export class StartComponent implements OnInit, OnDestroy {
   public ready = false;
   public isWindows = null;
+  private buffer = null;
   private subscriptions = [];
 
   constructor(
     private readonly deviceService: DeviceService,
+    private readonly keyChainService: KeyChainService,
     private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly navigationService: NavigationService
@@ -29,14 +31,10 @@ export class StartComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    if (this.deviceService.platform === Platform.Android) {
-      try {
-        const presentation = await getValue('presentation');
-      } catch (ignored) {
-        this.ngZone.run(async () => {
-        const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
-        });
-      }
+    try {
+      await getValue('presentation');
+    } catch (ignored) {
+      this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
     }
 
     this.ready = true;
@@ -54,7 +52,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
-        await this.eventOnBackClicked();
+        navigator.app.exitApp();
       })
     );
 
@@ -63,15 +61,16 @@ export class StartComponent implements OnInit, OnDestroy {
       currentView.appViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.collapsed;
     }
 
+    this.buffer = Buffer;
+    this.keyChainService.reset();
+
     try {
       const startPath = await getValue('startPath');
       this.ngZone.run(async () => {
         await this.router.navigate([startPath]);
       });
-    } catch (e) {
-
-  }
-  }
+    } catch (e) {}
+    }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
@@ -87,8 +86,4 @@ export class StartComponent implements OnInit, OnDestroy {
     await setValue('startPath', '/verifier-auth');
     await this.router.navigate(['/verifier-auth']);
   }
-
-  eventOnBackClicked() {
-    navigator.app.exitApp();
   }
-}
