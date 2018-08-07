@@ -50,20 +50,15 @@ export class DeviceService {
   async getAppInfo() {
     const result = [];
 
-    cordova.getAppVersion.getAppName().then(function(name) {
-      result.push(name + '\n');
-    });
+    await navigator.appInfo.getAppInfo(function(appInfo) {
+      console.debug(appInfo);
+      result.push('Identifier: ' + appInfo.identifier + '\n');
+      result.push('Version: ' + appInfo.version + '\n');
+      result.push('Build: ' + appInfo.build + '\n\n');
 
-    cordova.getAppVersion.getPackageName().then(function(pkgname) {
-      result.push(pkgname + '\n');
-    });
-
-    cordova.getAppVersion.getVersionCode().then(function(version) {
-      result.push('Version code: ' + version + '\n');
-    });
-
-    cordova.getAppVersion.getVersionNumber().then(function(versionNumber) {
-      result.push('Version number: ' + versionNumber + '\n\n');
+      console.debug(result);
+    }, function(err) {
+      console.error(err);
     });
 
     return result;

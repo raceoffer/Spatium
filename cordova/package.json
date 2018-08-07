@@ -27,7 +27,7 @@
     "cordova-plugin-add-swift-support": "^1.7.2",
     "cordova-plugin-advanced-http": "^1.11.1",
     "cordova-plugin-android-permissions": "^1.0.0",
-    "cordova-plugin-app-version": "^0.1.9",
+    "cordova-plugin-appinfo": "^2.1.2",
     "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
@@ -82,7 +82,7 @@
       "cordova-plugin-bluetooth": {},
       "cordova-open-native-settings": {},
       "cordova-plugin-zeroconf": {},
-      "cordova-plugin-app-version": {}
+      "cordova-plugin-appinfo": {}
     },
     "platforms": [
       "browser",
