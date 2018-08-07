@@ -61,7 +61,7 @@ export class LoggerService {
       const format = 'yyyy-MM-ddTHH:mm:ss.SSS z';
 
       const datelog = datePipe.transform(new Date(), format);
-      const log = '[' + datelog + '] ' + '[ERROR]' + message;
+      const log = '[' + datelog + '] ' + '[UNCAUGHT ERROR] ' + message + '\n';
 
       this.logSubject.next(log);
     };
