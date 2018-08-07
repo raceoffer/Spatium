@@ -22,8 +22,8 @@ export class FileService {
       window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
         fs.root.getFile(filename, {create: true}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
-            const tdata = new Blob([content], {type: 'text/plain'});
-            fileWriter.onwrite = resolve;
+            const tdata = new Blob(Array.isArray(content) ? constent : [content], {type: 'text/plain'});
+            fileWriter.onwriteend = resolve;
             fileWriter.onerror = reject;
             fileWriter.write(tdata);
           }, reject);
@@ -45,8 +45,8 @@ export class FileService {
       window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, fs => {
         fs.root.getFile(filename, {create: false}, fileEntry => {
           fileEntry.createWriter(fileWriter => {
-            const tdata = new Blob([content], {type: 'text/plain'});
-            fileWriter.onwrite = resolve;
+            const tdata = new Blob(Array.isArray(content) ? constent : [content], {type: 'text/plain'});
+            fileWriter.onwriteend = resolve;
             fileWriter.onerror = reject;
             fileWriter.seek(fileWriter.length);
             fileWriter.write(tdata);

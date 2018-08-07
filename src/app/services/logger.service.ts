@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
 import { stringify } from 'flatted/esm';
 import { DeviceService } from './device.service';
+import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
+import { buffer, filter } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const window: any;
@@ -19,19 +21,40 @@ export enum LoggerLevels {
 
 @Injectable()
 export class LoggerService {
-
   private logLevel = LoggerLevels.LOG;
+
   private sessionlogName = '';
-  private logBuffer = [];
 
+  private busySubject = new BehaviorSubject<boolean>(true);
+  private logSubject = new Subject<string>();
+  private logBuffer = this.logSubject.pipe(
+    buffer(combineLatest(
+      this.logSubject,
+      this.busySubject
+    ).pipe(
+      filter(([newMessage, busy]) => {
+        return !busy;
+      })
+    )),
+    filter(strings => strings.length > 0)
+  );
 
-  constructor(private readonly fs: FileService,
-              private readonly ds: DeviceService) {
-    // console.debug for console (not in file)
+  constructor(
+    private readonly fs: FileService,
+    private readonly ds: DeviceService
+  ) {
     console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
     console.warn = this.proxy(console, console.warn, '[WARN]', LoggerLevels.WARN);
     console.error = this.proxy(console, console.error, '[ERROR]', LoggerLevels.ERROR);
+
+    this.logBuffer.subscribe(async (strings) => {
+      this.busySubject.next(true);
+
+      await this.fs.writeToFile(this.sessionlogName, strings);
+
+      this.busySubject.next(false);
+    });
   }
 
   get logFileName(): string {
@@ -60,15 +83,14 @@ export class LoggerService {
       method.apply(context, text);
 
       let textForLogger = text[0];
-      let i;
-      for (i = 1; i < text.length; i++) {
+      for (let i = 1; i < text.length; i++) {
         textForLogger = textForLogger + ' ' + this.convertToString(text[i]);
       }
       textForLogger = textForLogger + '\n';
 
       try {
         if ((level.valueOf() >= this.logLevel.valueOf())) {
-          this.logBuffer.push(textForLogger);
+          this.logSubject.next(textForLogger);
         }
       } catch (e) {
         console.debug(e);
@@ -107,23 +129,22 @@ export class LoggerService {
 
     this.sessionlogName = this.fs.logFileName(datelog);
 
-    await this.fs.createFile(this.sessionlogName);
-    let buffer = [];
-    buffer = buffer.concat(appInfo);
-    buffer = buffer.concat(deviceInfo);
+    let info = [];
+    try {
+      const deviceInfo = await this.ds.getDeviceInfo();
+      info = info.concat(deviceInfo);
 
-    const deviceInfo = await this.ds.getDeviceInfo();
-    const appInfo = await this.ds.getAppInfo();
-  }
+      const appInfo = await this.ds.getAppInfo();
+      info = info.concat(appInfo);
+    } catch (e) {
+      console.debug(e);
+    }
 
-  async logBufferToLog() {
-    const buffer = this.logBuffer;
-    this.logBuffer = [];
-    this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, buffer)
-      .then(() => this.logBufferToLog(), () => {
-        this.logBuffer = buffer.concat(this.logBuffer);
-        this.logBufferToLog();
-      });
+    // Write the header
+    await this.fs.writeFile(this.sessionlogName, info);
+
+    // Mark logging ready
+    this.busySubject.next(false);
   }
 
   async getLogData(): Promise<string> {

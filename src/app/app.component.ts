@@ -13,21 +13,23 @@ declare const navigator: any;
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-
-
-  constructor(private readonly logger: LoggerService,
-              private readonly deviceService: DeviceService,
-              private readonly hockeyService: HockeyService) { }
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly deviceService: DeviceService,
+    private readonly hockeyService: HockeyService
+  ) { }
 
   async ngOnInit() {
-    this.deviceService.deviceReady().then(async () => {
-      hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
+    await this.deviceService.deviceReady();
 
-      const lastLogData = await this.logger.getLastLogData();
-      await this.logger.createSessionLog();
-      await this.logger.deleteOldLogFiles();
-      }
-        hockeyapp.addMetaData(null, null, lastLogData);
-      if (lastLogData) {
+    hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
+
+    const lastLogData = await this.logger.getLastLogData();
+    await this.logger.createSessionLog();
+    await this.logger.deleteOldLogFiles();
+
+    if (lastLogData) {
+      hockeyapp.addMetaData(null, null, lastLogData);
+    }
   }
 }
