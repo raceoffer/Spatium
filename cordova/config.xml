@@ -32,6 +32,12 @@
                 <string>UIInterfaceOrientationPortraitUpsideDown</string>
             </array>
         </custom-config-file>
+        <custom-config-file mode="replace" parent="UISupportedInterfaceOrientations~ipad" target="*-Info.plist">
+            <array>
+                <string>UIInterfaceOrientationPortrait</string>
+                <string>UIInterfaceOrientationPortraitUpsideDown</string>
+            </array>
+        </custom-config-file>
         <custom-config-file mode="replace" parent="NSPhotoLibraryUsageDescription" target="*-Info.plist">
             <string>This app requires photo library access to save QR codes.</string>
         </custom-config-file>
