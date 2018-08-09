@@ -33,10 +33,8 @@ export class StartComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    try {
-      await getValue('presentation');
-    } catch (ignored) {
-      this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
+    if(!getValue('presentation.viewed')) {
+	  this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
     }
 
     this.ready = true;
@@ -66,13 +64,13 @@ export class StartComponent implements OnInit, OnDestroy {
     this.buffer = Buffer;
     this.keyChainService.reset();
 
-    try {
-      const startPath = await getValue('startPath');
+    const startPath = getValue('startPath');
+    if (startPath) {
       this.ngZone.run(async () => {
         await this.router.navigate([startPath]);
       });
-    } catch (e) {}
     }
+  }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
@@ -80,12 +78,12 @@ export class StartComponent implements OnInit, OnDestroy {
   }
 
   async onOpenClicked() {
-    await setValue('startPath', '/login');
+    setValue('startPath', '/login');
     await this.router.navigate(['/login']);
   }
 
   async onConnectClicked() {
-    await setValue('startPath', '/verifier-auth');
+    setValue('startPath', '/verifier-auth');
     await this.router.navigate(['/verifier-auth']);
   }
   }

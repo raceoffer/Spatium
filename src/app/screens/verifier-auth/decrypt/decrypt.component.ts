@@ -47,9 +47,10 @@ export class DecryptComponent implements OnInit {
   async ngOnInit() {
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
-    try {
-      this.touchEnabled.next(await getValue('fingerprintEnabled'));
-    } catch (ignored) {
+    const stored = getValue('fingerprint.enabled');
+    if (typeof(stored) === "boolean") {
+      this.touchEnabled.next(stored);
+    } else {
       this.touchEnabled.next(true);
     }
   }

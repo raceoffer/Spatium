@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
+import { getValue, setValue } from '../utils/storage';
 
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -309,7 +310,7 @@ export class CurrencyService {
     let jsonSettings: any;
     const settings: CurrencySettings = new CurrencySettings(currency);
 
-    jsonSettings = localStorage.getItem('settings.currency');
+    jsonSettings = getValue('settings.currency');
     if (jsonSettings) {
       jsonSettings = JSON.parse(jsonSettings)[currency];
     }
@@ -324,9 +325,9 @@ export class CurrencyService {
   }
 
   public saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items: any = localStorage.getItem('settings.currency');
+    let items: any = getValue('settings.currency');
     items = items ? JSON.parse(items) : {};
     items[currency] = settings;
-    localStorage.setItem('settings.currency', JSON.stringify(items));
+    setValue('settings.currency', JSON.stringify(items));
   }
 }
