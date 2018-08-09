@@ -111,8 +111,7 @@ export class ZeroconfService implements IConnectionProvider {
           if (await this.checkWiFiState()) {
             if (this.connectionType !== navigator.connection.type) {
               this.connectionType = navigator.connection.type;
-              console.log('Connection type changed on:', this.connectionType);
-              console.log('ip', await this.socketServerService.getIpv4Address());
+              console.log('Connection type changed to:', this.connectionType);
             }
 
             if (navigator.connection.type === 'wifi') {
