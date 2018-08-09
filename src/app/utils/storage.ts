@@ -1,20 +1,11 @@
-declare const NativeStorage: any;
-
-export async function getValue(name: string) {
-  return new Promise<any>((resolve, reject) => {
-    NativeStorage.getItem(name, resolve, reject);
-  });
+export function getValue(name: string) {
+  return JSON.parse(localStorage.getItem(name));
 }
 
-export async function setValue(name: string, value: any) {
-  return new Promise<boolean>((resolve, reject) => {
-    NativeStorage.setItem(name, value, resolve, reject);
-  });
+export function setValue(name: string, value: any) {
+  return localStorage.setItem(name, JSON.stringify(value));
 }
 
-export async function removeValue(name: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    NativeStorage.remove(name, resolve, reject);
-  });
+export function removeValue(name: string) {
+  return localStorage.removeItem(name);
 }
-

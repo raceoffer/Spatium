@@ -21,9 +21,10 @@ export class SettingsComponent implements OnInit {
   async ngOnInit() {
     this.fingerprintAvailable = await checkAvailable();
     if (this.fingerprintAvailable) {
-      try {
-        this.fingerprintEnabled = await getValue('fingerprintEnabled');
-      } catch (ignored) {}
+      const stored = getValue('fingerprint.enabled');
+      if (typeof(stored) === "boolean") {
+        this.fingerprintEnabled = stored;
+      }
     } else {
       this.fingerprintEnabled = false;
     }
@@ -34,6 +35,6 @@ export class SettingsComponent implements OnInit {
   }
 
   async onFingerprintChanged(change: any) {
-    await setValue('fingerprintEnabled', change.checked);
+    setValue('fingerprint.enabled', change.checked);
   }
 }

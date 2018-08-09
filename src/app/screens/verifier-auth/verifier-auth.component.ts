@@ -44,7 +44,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   }
 
   public async onBack() {
-    await removeValue('startPath');
+    removeValue('startPath');
     await this.router.navigate(['/start']);
   }
 

@@ -151,7 +151,6 @@
     <plugin name="cordova.plugins.diagnostic" spec="^4.0.8" />
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
-    <plugin name="cordova-plugin-nativestorage" spec="^2.3.1" />
     <plugin name="cordova-open-native-settings" spec="^1.5.1" />
     <plugin name="cordova-plugin-zeroconf" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-zeroconf.git#716660c7554028849c03d9a8050a7f84b8d9faa5" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />

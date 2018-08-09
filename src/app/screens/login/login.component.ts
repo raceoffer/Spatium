@@ -165,7 +165,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBack() {
-    await removeValue('startPath');
+    removeValue('startPath');
     await this.router.navigate(['/start']);
   }
 }

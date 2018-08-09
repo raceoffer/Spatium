@@ -62,7 +62,7 @@ export class PresentationComponent implements OnInit {
   }
 
   async onBack() {
-    await setValue('presentation', 'viewed');
+    setValue('presentation.viewed', true);
     this.navigationService.back();
   }
 }
