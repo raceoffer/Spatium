@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, HostBinding, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { combineLatest, BehaviorSubject } from 'rxjs';
-import { map, debounceTime } from 'rxjs/operators';
+import { map, debounceTime, take, filter } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
@@ -26,7 +26,7 @@ declare const navigator: any;
   styleUrls: ['./wallet.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WalletComponent implements OnDestroy {
+export class WalletComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
 
   public current = 'Wallet';
@@ -128,12 +128,19 @@ export class WalletComponent implements OnDestroy {
     private readonly wallet: WalletService,
     private readonly device: DeviceService,
     private readonly router: Router
-  ) {
+  ) {}
+
+  public async ngOnInit() {
+    await this.wallet.ready.pipe(
+      filter(ready => ready),
+      take(1)
+    ).toPromise();
+
     const tiles = [];
 
     this.staticCoins.forEach(coin => tiles.push(coin));
 
-    keychain.topTokens.forEach(tokenInfo => tiles.push(tokenInfo.token));
+    this.keychain.topTokens.forEach(tokenInfo => tiles.push(tokenInfo.token));
 
     tiles.push(Coin.BTC_test);
 
