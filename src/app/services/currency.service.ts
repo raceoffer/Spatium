@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
-import { getValue, setValue } from '../utils/storage';
+import { StorageService } from './storage.service';
 
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -247,7 +247,8 @@ export class CurrencyService {
 
   constructor(
     private readonly keychain: KeyChainService,
-    private readonly currencyPriceService: CurrencyPriceService
+    private readonly currencyPriceService: CurrencyPriceService,
+    private readonly storage: StorageService
   ) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
@@ -296,8 +297,8 @@ export class CurrencyService {
     return servers;
   }
 
-  public getApiServer(currency: Coin | Token): string {
-    const settings = this.getSettings(currency);
+  public async getApiServer(currency: Coin | Token) {
+    const settings = await this.getSettings(currency);
 
     if (settings && settings.serverName === CurrencyServerName.Custom && settings.serverUrl) {
       return settings.serverUrl;
@@ -306,13 +307,13 @@ export class CurrencyService {
     return this.getAvailableApiServers(currency).get(settings ? settings.serverName : CurrencyServerName.Spatium);
   }
 
-  public getSettings(currency: Coin | Token): CurrencySettings {
+  public async getSettings(currency: Coin | Token) {
     let jsonSettings: any;
     const settings: CurrencySettings = new CurrencySettings(currency);
 
-    jsonSettings = getValue('settings.currency');
+    jsonSettings = await this.storage.getValue('settings.currency');
     if (jsonSettings) {
-      jsonSettings = JSON.parse(jsonSettings)[currency];
+      jsonSettings = jsonSettings[currency];
     }
 
     if (!jsonSettings) {
@@ -324,10 +325,10 @@ export class CurrencyService {
     return settings;
   }
 
-  public saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items: any = getValue('settings.currency');
+  public async saveSettings(currency: Coin | Token, settings: CurrencySettings) {
+    let items: any = await this.storage.getValue('settings.currency');
     items = items ? JSON.parse(items) : {};
     items[currency] = settings;
-    setValue('settings.currency', JSON.stringify(items));
+    await this.storage.setValue('settings.currency', items);
   }
 }

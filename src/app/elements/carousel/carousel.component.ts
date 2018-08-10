@@ -32,7 +32,8 @@ export class CarouselItemElement {
 })
 export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @ContentChildren(CarouselItemDirective) items: QueryList<CarouselItemDirective>;
-  @Output() close: EventEmitter<any> = new EventEmitter<any>();
+  @Output() skipped: EventEmitter<any> = new EventEmitter<any>();
+  @Output() finished: EventEmitter<any> = new EventEmitter<any>();
   currentSlide = new BehaviorSubject<number>(0);
   isFirst: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map(currentSlide => currentSlide === 0)), false);
   isLast: BehaviorSubject<boolean> = toBehaviourSubject(this.currentSlide.pipe(map((currentSlide) => ((currentSlide !== 0) && (currentSlide + 1 === this.items.length)))), false);
@@ -51,7 +52,7 @@ export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   next() {
     if (this.currentSlide.getValue() + 1 === this.items.length) {
-      this.skip();
+      this.finished.emit();
       return;
     }
     this.setNewSlide((this.currentSlide.getValue() + 1) % this.items.length, 'next');
@@ -65,7 +66,7 @@ export class CarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   skip() {
-    this.close.emit();
+    this.skipped.emit();
   }
 
   public setNewSlide(newSlide: number, direction: string): void {

@@ -113,6 +113,7 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
+import { StorageService } from './services/storage.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
@@ -244,7 +245,8 @@ import { NavbarComponent } from './modals/navbar/navbar.component';
     SocketServerService,
     SocketClientService,
     ZeroconfService,
-    ConnectionProviderService
+    ConnectionProviderService,
+    StorageService
   ],
   bootstrap: [
     AppComponent
@@ -285,7 +287,8 @@ import { NavbarComponent } from './modals/navbar/navbar.component';
     BluetoothComponent,
     SyncronizationComponent,
     PresentationComponent,
-    NavbarComponent
+    NavbarComponent,
+    BackupComponent
   ]
 })
 

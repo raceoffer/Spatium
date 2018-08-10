@@ -1,6 +1,6 @@
 import { Component, OnInit, HostBinding } from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
-import { getValue, setValue } from '../../../utils/storage';
+import { StorageService } from '../../../services/storage.service';
 import { checkAvailable } from '../../../utils/fingerprint';
 
 @Component({
@@ -15,15 +15,16 @@ export class SettingsComponent implements OnInit {
   public fingerprintAvailable = true;
 
   constructor(
-    private readonly navigationService: NavigationService) {
-  }
+    private readonly navigationService: NavigationService,
+    private readonly storage: StorageService
+  ) {}
 
   async ngOnInit() {
     this.fingerprintAvailable = await checkAvailable();
     if (this.fingerprintAvailable) {
-      const stored = getValue('fingerprint.enabled');
-      if (typeof(stored) === "boolean") {
-        this.fingerprintEnabled = stored;
+      const stored = await this.storage.getValue('fingerprint.enabled');
+      if (stored !== null) {
+        this.fingerprintEnabled = stored as boolean;
       }
     } else {
       this.fingerprintEnabled = false;
@@ -35,6 +36,6 @@ export class SettingsComponent implements OnInit {
   }
 
   async onFingerprintChanged(change: any) {
-    setValue('fingerprint.enabled', change.checked);
+    await this.storage.setValue('fingerprint.enabled', change.checked);
   }
 }
