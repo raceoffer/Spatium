@@ -14,7 +14,7 @@ import { FileService } from '../../../services/file.service';
 import { SecretImportComponent } from '../../secret-import/secret-import.component';
 import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
 import { NotificationService } from '../../../services/notification.service';
-import { getValue } from '../../../utils/storage';
+import { StorageService } from '../../../services/storage.service';
 
 @Component({
   selector: 'app-create',
@@ -39,15 +39,16 @@ export class CreateComponent implements OnInit {
     private readonly navigationService: NavigationService,
     private readonly fs: FileService,
     private readonly workerService: WorkerService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly storage: StorageService
   ) { }
 
   async ngOnInit() {
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
-    const stored = getValue('fingerprint.enabled');
-    if (typeof(stored) === "boolean") {
-      this.touchEnabled.next(stored);
+    const stored = await this.storage.getValue('fingerprint.enabled');
+    if (stored !== null) {
+      this.touchEnabled.next(stored as boolean);
     } else {
       this.touchEnabled.next(true);
     }

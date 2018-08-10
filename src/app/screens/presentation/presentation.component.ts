@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { NavigationService } from '../../services/navigation.service';
-import { setValue } from '../../utils/storage';
+import { Component, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-presentation',
   templateUrl: './presentation.component.html',
   styleUrls: ['./presentation.component.css']
 })
-export class PresentationComponent implements OnInit {
-
-  items = [
+export class PresentationComponent {
+  public items = [
     {
       description: 'Choose the <b>Wallet mode</b> to manage your crypto assets. Device in this mode is used as a main device.',
       image: 'assets/images/assistent-slides/2.png'
@@ -54,15 +51,21 @@ export class PresentationComponent implements OnInit {
       description: 'There you can either confirm or decline the transaction, which cannot be signed without participation of both devices.',
       image: 'assets/images/assistent-slides/12.png'
     },
-  ]
+  ];
 
-  constructor(private readonly navigationService: NavigationService) { }
+  public finished = new EventEmitter<any>();
+  public skipped = new EventEmitter<any>();
+  public cancelled = new EventEmitter<any>();
 
-  ngOnInit() {
+  public cancel() {
+    this.cancelled.next();
   }
 
-  async onBack() {
-    setValue('presentation.viewed', true);
-    this.navigationService.back();
+  public finish() {
+    this.finished.next();
+  }
+
+  public skip() {
+    this.skipped.next();
   }
 }

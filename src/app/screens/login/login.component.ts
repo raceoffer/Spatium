@@ -8,7 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 import { checkNfc, Type } from '../../utils/nfc';
-import { removeValue } from '../../utils/storage';
+import { StorageService } from '../../services/storage.service';
 
 declare const cordova: any;
 
@@ -46,13 +46,16 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscriptions = [];
   private cameraChangesCallbackId: number;
 
-  constructor(private readonly router: Router,
-              private readonly authService: AuthService,
-              private readonly notification: NotificationService,
-              private readonly dds: DDSService,
-              private readonly navigationService: NavigationService,
-              private readonly workerService: WorkerService,
-              private readonly ngZone: NgZone,) {}
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService,
+    private readonly notification: NotificationService,
+    private readonly dds: DDSService,
+    private readonly navigationService: NavigationService,
+    private readonly workerService: WorkerService,
+    private readonly ngZone: NgZone,
+    private readonly storage: StorageService
+  ) {}
 
   async ngOnInit() {
     this.subscriptions.push(
@@ -165,7 +168,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async onBack() {
-    removeValue('startPath');
+    try {
+      await this.storage.removeValue('startPath');
+    } catch (e) {
+      console.log(e);
+    }
     await this.router.navigate(['/start']);
   }
 }
