@@ -92,7 +92,7 @@ export class CurrencyService {
     ])]
   ]);
 
-  private readonly staticInfo = new Map<Coin | Token, Info>([
+  private readonly staticInfo = new Map<Coin | Token | number, Info>([
     [Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
@@ -250,8 +250,16 @@ export class CurrencyService {
     private readonly currencyPriceService: CurrencyPriceService,
     private readonly storage: StorageService
   ) {
-    keychain.topTokens.forEach((tokenInfo) => {
+    this.keychain.topTokens.getValue().forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
+    });
+
+    this.keychain.topTokensChanged.subscribe(() => {
+      this.keychain.topTokens.getValue().forEach(tokenInfo => {
+        if (!this.staticInfo.get(tokenInfo.token)) {
+          this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
+        }
+      });
     });
 
     this.currencyPriceService.getPrices();
