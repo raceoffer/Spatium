@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { combineLatest, BehaviorSubject } from 'rxjs';
-import { map, debounceTime, take, filter } from 'rxjs/operators';
+import { map, debounceTime } from 'rxjs/operators';
 import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
@@ -103,13 +103,13 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.tiles,
     this.filter
   ]).pipe(
-    map(([tiles, filter]) => {
-      if (filter.length > 0) {
+    map(([tiles, filterValue]) => {
+      if (filterValue.length > 0) {
         return tiles.filter(
           t => {
             const model = this.tileModel.get(t);
-            return model.title.toUpperCase().includes(filter.toUpperCase()) ||
-                   model.symbols.includes(filter.toUpperCase());
+            return model.title.toUpperCase().includes(filterValue.toUpperCase()) ||
+                   model.symbols.includes(filterValue.toUpperCase());
           }
         );
       } else {
@@ -131,10 +131,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   ) {}
 
   public async ngOnInit() {
-    await this.wallet.ready.pipe(
-      filter(ready => ready),
-      take(1)
-    ).toPromise();
+    await this.wallet.walletReady();
 
     const tiles = [];
 

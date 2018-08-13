@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CompoundKeyEcdsa } from 'crypto-core-async';
 import { sha256 } from 'crypto-core-async/lib/utils';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subject, timer } from 'rxjs';
-import { filter, map, mapTo, take, takeUntil } from 'rxjs/operators';
+import { filter, map, mapTo, take, takeUntil, first } from 'rxjs/operators';
 import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject } from '../utils/transformers';
 import { ConnectionProviderService } from './connection-provider';
@@ -193,6 +193,13 @@ export class WalletService {
     });
 
     this.ready.next(true);
+  }
+
+  public walletReady() {
+    return this.ready.pipe(
+      filter(ready => ready),
+      first(),
+    ).toPromise();
   }
 
   public async reset() {

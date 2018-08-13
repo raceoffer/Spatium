@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, ViewChild } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
@@ -8,8 +8,7 @@ import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WalletService } from '../../services/wallet.service';
-import { Status } from '../../services/wallet/currencywallet';
-import { deleteTouch } from '../../utils/fingerprint';
+import { checkAvailable, checkExisting, deleteTouch } from '../../utils/fingerprint';
 import { DeleteSecretComponent } from '../delete-secret/delete-secret.component';
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { SecretExportComponent } from '../secret-export/secret-export.component';
@@ -28,7 +27,7 @@ declare const window: any;
   templateUrl: './verifier.component.html',
   styleUrls: ['./verifier.component.css']
 })
-export class VerifierComponent implements OnDestroy {
+export class VerifierComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component';
   public navLinks = [{
     name: 'Export secret',
@@ -62,7 +61,7 @@ export class VerifierComponent implements OnDestroy {
     }
   }];
 
-  public currencyWallets = this.wallet.currencyWallets;
+  public currencyWallets = null;
 
   public ready = toBehaviourSubject(this.connectionProviderService.listeningState.pipe(
     map(state => state === State.Started),
@@ -100,7 +99,13 @@ export class VerifierComponent implements OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly fs: FileService
-  ) {
+  ) {}
+
+  async ngOnInit() {
+    await this.wallet.walletReady();
+
+    this.currencyWallets = this.wallet.currencyWallets;
+
     this.subscriptions.push(
       this.connectionProviderService.connectionState.pipe(
         map(state => state === ConnectionState.Connected),
@@ -205,7 +210,7 @@ export class VerifierComponent implements OnDestroy {
   }
 
   public openFeedback() {
-    const componentRef = this.navigationService.pushOverlay(FeedbackComponent);
+    this.navigationService.pushOverlay(FeedbackComponent);
   }
 
   public onTransaction(coin, transaction) {
@@ -244,7 +249,7 @@ export class VerifierComponent implements OnDestroy {
     componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
-      if (await this.checkAvailable() && await this.checkExisting()) {
+      if (await checkAvailable() && await checkExisting()) {
         await deleteTouch();
       }
 
@@ -265,18 +270,6 @@ export class VerifierComponent implements OnDestroy {
   }
 
   public onSettings() {
-    const componentRef = this.navigationService.pushOverlay(SettingsComponent);
-  }
-
-  public async checkAvailable() {
-    return new Promise<boolean>((resolve, ignored) => {
-      window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
-    });
-  }
-
-  public async checkExisting() {
-    return new Promise<boolean>((resolve, ignored) => {
-      window.plugins.touchid.has('spatium', () => resolve(true), () => resolve(false));
-    });
+    this.navigationService.pushOverlay(SettingsComponent);
   }
 }
