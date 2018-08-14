@@ -27,6 +27,7 @@
 .select-mode-button {
   width: calc(100% - 48px);
   height: 50%;
+  max-height: 200px;
   background-color: #fff;
   white-space: normal;
   line-height: 24px;

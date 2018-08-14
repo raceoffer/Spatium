@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CompoundKeyEcdsa } from 'crypto-core-async';
 import { sha256 } from 'crypto-core-async/lib/utils';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subject, timer } from 'rxjs';
-import { filter, map, mapTo, take, takeUntil } from 'rxjs/operators';
+import { filter, map, mapTo, take, takeUntil, first } from 'rxjs/operators';
 import { requestDialog } from '../utils/dialog';
 import { toBehaviourSubject } from '../utils/transformers';
 import { ConnectionProviderService } from './connection-provider';
@@ -85,10 +85,14 @@ export class WalletService {
     private readonly keychain: KeyChainService,
     private readonly workerService: WorkerService
   ) {
+    this.init();
+  }
+
+  private async init() {
     this.coinWallets.set(
       Coin.BTC_test,
       new BitcoinWallet(
-        currencyService.getApiServer(Coin.BTC_test),
+        await this.currencyService.getApiServer(Coin.BTC_test),
         'testnet',
         this.keychain,
         1,
@@ -99,7 +103,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BTC,
       new BitcoinWallet(
-        currencyService.getApiServer(Coin.BTC),
+        await this.currencyService.getApiServer(Coin.BTC),
         'main',
         this.keychain,
         1,
@@ -110,7 +114,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.BCH,
       new BitcoinCashWallet(
-        currencyService.getApiServer(Coin.BCH),
+        await this.currencyService.getApiServer(Coin.BCH),
         'main',
         this.keychain,
         1,
@@ -121,7 +125,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.LTC,
       new LitecoinWallet(
-        currencyService.getApiServer(Coin.LTC),
+        await this.currencyService.getApiServer(Coin.LTC),
         'main',
         this.keychain,
         1,
@@ -132,7 +136,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.ETH,
       new EthereumWallet(
-        currencyService.getApiServer(Coin.ETH),
+        await this.currencyService.getApiServer(Coin.ETH),
         'main',
         this.keychain,
         1,
@@ -143,7 +147,7 @@ export class WalletService {
     this.coinWallets.set(
       Coin.NEM,
       new NemWallet(
-        currencyService.getApiServer(Coin.NEM),
+        await this.currencyService.getApiServer(Coin.NEM),
         'main',
         this.keychain,
         1,
@@ -152,9 +156,9 @@ export class WalletService {
         this.workerService.worker
       ));
 
-    keychain.topTokens.forEach((tokenInfo) => {
-      this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
-    });
+    for (const tokenInfo of Array.from(this.keychain.topTokens)) {
+      await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
+    }
 
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
@@ -191,6 +195,13 @@ export class WalletService {
     this.ready.next(true);
   }
 
+  public walletReady() {
+    return this.ready.pipe(
+      filter(ready => ready),
+      first(),
+    ).toPromise();
+  }
+
   public async reset() {
     if (this.status.getValue() === WalletStatus.None) {
       return;
@@ -208,7 +219,7 @@ export class WalletService {
     }
   }
 
-  public setProgress(value: number): void {
+  public setProgress(value: number) {
     this.syncProgress.next(Math.min(100, Math.max(0, Math.round(100 * value))));
   }
 
@@ -265,6 +276,7 @@ export class WalletService {
         if (!await requestDialog('You are about to connect with another device. This will undo current synchronization progress. Are you sure?')) {
           console.log('Rejected to change session');
           this.synchronizatonStatus.next(SyncStatus.None);
+          await this.connectionProviderService.disconnect();
           return;
         } else {
           await this.reset();
@@ -380,14 +392,26 @@ export class WalletService {
 
   public async cancelSync() {
     this.cancelSubject.next(true);
+
+    for (const wallet of Array.from(this.coinWallets.values())) {
+      if (!wallet.ready.getValue()) {
+        await wallet.reset();
+      }
+    }
+    for (const wallet of Array.from(this.tokenWallets.values())) {
+      if (!wallet.ready.getValue()) {
+        await wallet.reset();
+      }
+    }
+
     this.synchronizatonStatus.next(SyncStatus.None);
   }
 
-  createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
+  public async createTokenWallet(token: Token, contractAddress: string, decimals: number = 18, network: string = 'main') {
     this.tokenWallets.set(
       token,
       new ERC20Wallet(
-        this.currencyService.getApiServer(Coin.ETH),
+        await this.currencyService.getApiServer(Coin.ETH),
         network,
         this.keychain,
         1,

@@ -3,6 +3,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { IdFactor } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
+import { StorageService } from '../../services/storage.service';
 
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from '../../utils/nfc';
@@ -19,7 +20,6 @@ import { PincodeComponent } from '../../inputs/pincode/pincode.component';
 import { FileService } from '../../services/file.service';
 import { checkAvailable, checkExisting, saveTouchPassword } from '../../utils/fingerprint';
 import { BehaviorSubject } from 'rxjs';
-import { getValue } from '../../utils/storage';
 
 enum State {
   Empty,
@@ -67,7 +67,8 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly fs: FileService,
     private readonly ngZone: NgZone,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly storage: StorageService
   ) { }
 
   async ngOnInit() {
@@ -75,9 +76,11 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     this.cameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
-    try {
-      this.touchEnabled.next(await getValue('fingerprintEnabled'));
-    } catch (ignored) {
+
+    const stored = await this.storage.getValue('fingerprint.enabled');
+    if (stored !== null) {
+      this.touchEnabled.next(stored as boolean);
+    } else {
       this.touchEnabled.next(true);
     }
 

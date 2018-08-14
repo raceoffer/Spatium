@@ -9,12 +9,12 @@ import { Coin, Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WalletService } from '../../../services/wallet.service';
-import { CurrencyWallet } from '../../../services/wallet/currencywallet';
+import { BalanceStatus, CurrencyWallet, Status } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
-import { ConnectionState } from "../../../services/primitives/state";
+import { ConnectionState } from '../../../services/primitives/state';
 
 declare const cordova: any;
 
@@ -38,6 +38,8 @@ enum Fee {
 export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
   public phaseType = Phase; // for template
+  public statusType = Status;
+  public balanceStatusType = BalanceStatus;
 
   public receiverField = new FormControl();
 
@@ -67,24 +69,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feePriceFocused = false;
   public feePriceUsdFocused = false;
   public disable = false;
-
-  accountPh = 'Account';
-  receiverPh = 'Recipient';
-
-  titile = 'Transfer';
-
-  stAwaitConfirm = 'Confirm on the second device';
-  stSigningResult = 'Transaction is signed';
-
-  stTransfer = 'Sign transaction';
-  stSend = 'Send transaction';
-
-  stFee = 'Transaction fee';
-  stManual = 'Manual';
-  stNormal = 'Normal (0-1 hour)';
-  stEconomy = 'Economy (1-24 hours)';
-
-  stFeeOriginRecipient = 'Subtract fee';
 
   public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -521,7 +505,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connected.subscribe(ignored => {
+    componentRef.instance.connectedEvent.subscribe(ignored => {
       this.navigationService.acceptOverlay();
     });
   }
@@ -561,7 +545,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   paste() {
     cordova.plugins.clipboard.paste(text => this.ngZone.run(() => {
       if (text !== '') {
-        this.receiver.next(text);
+        this.receiverField.setValue(text, {emitEvent: true});
       }
     }), e => console.log(e));
   }

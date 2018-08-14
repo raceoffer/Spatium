@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
-import { ActivityService } from '../../services/activity.service';
 import { ConnectionProviderService } from '../../services/connection-provider';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -35,8 +34,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly connectionProviderService: ConnectionProviderService,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService,
-    private readonly activityService: ActivityService
+    private readonly notification: NotificationService
   ) {
     this.subscriptions.push(
       this.connectionProviderService.connectionState.pipe(

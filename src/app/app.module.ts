@@ -1,5 +1,7 @@
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClientModule } from '@angular/common/http';
+import { HttpModule } from '@angular/http';
+import { NativeHttpWrapper } from 'ionic-native-http-angular-wrapper';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -38,7 +40,6 @@ import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/blu
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
 import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
-import { MainDrawerComponent } from './elements/main-drawer/main-drawer.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
 import { ToolbarComponent } from './elements/toolbar/toolbar.component';
@@ -112,9 +113,11 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
+import { StorageService } from './services/storage.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
+import { NavbarComponent } from './modals/navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -143,7 +146,6 @@ import { ZeroconfService } from './services/zeroconf.service';
     CurrencyComponent,
     CurrencySettingsComponent,
     DeleteSecretComponent,
-    MainDrawerComponent,
     SecretExportComponent,
     SecretImportComponent,
     SettingsComponent,
@@ -184,11 +186,14 @@ import { ZeroconfService } from './services/zeroconf.service';
     CarouselItemDirective,
     CarouselItemElement,
     PresentationComponent,
+    NavbarComponent,
   ],
   imports: [
     OverlayModule,
     FormsModule,
     HttpClientModule,
+    HttpModule,
+    NativeHttpWrapper,
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,
@@ -240,7 +245,8 @@ import { ZeroconfService } from './services/zeroconf.service';
     SocketServerService,
     SocketClientService,
     ZeroconfService,
-    ConnectionProviderService
+    ConnectionProviderService,
+    StorageService
   ],
   bootstrap: [
     AppComponent
@@ -280,7 +286,9 @@ import { ZeroconfService } from './services/zeroconf.service';
     ZeroconfComponent,
     BluetoothComponent,
     SyncronizationComponent,
-    PresentationComponent
+    PresentationComponent,
+    NavbarComponent,
+    BackupComponent
   ]
 })
 

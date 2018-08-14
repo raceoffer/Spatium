@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
+import { StorageService } from './storage.service';
 
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -16,14 +17,16 @@ export class Info {
   gasRate: BehaviorSubject<number>;
   icon: string = null;
 
-  constructor(name: string,
-              symbol: string,
-              gasPrice: number,
-              gasPriceLow: number,
-              gasUnit: string,
-              rate: BehaviorSubject<number>,
-              gasRate?: BehaviorSubject<number>,
-              icon?: string) {
+  constructor(
+    name: string,
+    symbol: string,
+    gasPrice: number,
+    gasPriceLow: number,
+    gasUnit: string,
+    rate: BehaviorSubject<number>,
+    gasRate?: BehaviorSubject<number>,
+    icon?: string
+  ) {
     this.name = name;
     this.symbol = symbol;
     this.gasPrice = gasPrice;
@@ -180,11 +183,72 @@ export class CurrencyService {
       null,
       'nem'
     )],
+    [Coin.ADA, new Info(
+      'Cardano',
+      'ADA',
+      50000,
+      30000,
+      'ADA/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('ADA') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'cardano'
+    )],
+    [Coin.NEO, new Info(
+      'NEO',
+      'NEO',
+      50000,
+      30000,
+      'NEO/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('NEO') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'neo'
+    )],
+    [Coin.XRP, new Info(
+      'Ripple',
+      'XRP',
+      50000,
+      30000,
+      'XRP/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('XRP') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'ripple'
+    )],
+    [Coin.XLM, new Info(
+      'Stellar',
+      'XLM',
+      50000,
+      30000,
+      'XLM/tx',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('XLM') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'stellar'
+    )]
   ]);
 
   constructor(
     private readonly keychain: KeyChainService,
-    private readonly currencyPriceService: CurrencyPriceService
+    private readonly currencyPriceService: CurrencyPriceService,
+    private readonly storage: StorageService
   ) {
     keychain.topTokens.forEach((tokenInfo) => {
       this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
@@ -233,8 +297,8 @@ export class CurrencyService {
     return servers;
   }
 
-  public getApiServer(currency: Coin | Token): string {
-    const settings = this.getSettings(currency);
+  public async getApiServer(currency: Coin | Token) {
+    const settings = await this.getSettings(currency);
 
     if (settings && settings.serverName === CurrencyServerName.Custom && settings.serverUrl) {
       return settings.serverUrl;
@@ -243,13 +307,13 @@ export class CurrencyService {
     return this.getAvailableApiServers(currency).get(settings ? settings.serverName : CurrencyServerName.Spatium);
   }
 
-  public getSettings(currency: Coin | Token): CurrencySettings {
+  public async getSettings(currency: Coin | Token) {
     let jsonSettings: any;
     const settings: CurrencySettings = new CurrencySettings(currency);
 
-    jsonSettings = localStorage.getItem('settings.currency');
+    jsonSettings = await this.storage.getValue('settings.currency');
     if (jsonSettings) {
-      jsonSettings = JSON.parse(jsonSettings)[currency];
+      jsonSettings = jsonSettings[currency];
     }
 
     if (!jsonSettings) {
@@ -261,10 +325,10 @@ export class CurrencyService {
     return settings;
   }
 
-  public saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items: any = localStorage.getItem('settings.currency');
+  public async saveSettings(currency: Coin | Token, settings: CurrencySettings) {
+    let items: any = await this.storage.getValue('settings.currency');
     items = items ? JSON.parse(items) : {};
     items[currency] = settings;
-    localStorage.setItem('settings.currency', JSON.stringify(items));
+    await this.storage.setValue('settings.currency', items);
   }
 }

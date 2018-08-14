@@ -4,6 +4,7 @@ import { BehaviorSubject, timer } from 'rxjs';
 import { ProviderType } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
 import { State } from './primitives/state';
+import { filter, mapTo, takeUntil } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const window: any;
@@ -25,43 +26,27 @@ export class DiscoveryService {
     return await new Promise((resolve, reject) => cordova.plugins.deviceName.get(resolve, reject));
   }
 
-  async getDeviceIp() {
-    return (await new Promise((resolve, reject) => window.networkinterface.getWiFiIPAddress(resolve, reject)) as any).ip;
-  }
-
   async reset() {
     return await new Promise((resolve, reject) => cordova.plugins.zeroconf.reInit(resolve, reject));
   }
 
-  async startAdvertising() {
+  async startAdvertising(address, port) {
     if (this.advertising.getValue() !== State.Stopped) {
       return;
     }
 
     this.advertising.next(State.Starting);
 
-    let hasErrors = false;
+    try {
+      await this.reset();
 
-    const [hostname, name, ip] = await Promise.all([
-      this.getHostName().catch((e) => {
-        console.log(e);
-        hasErrors = true;
-      }),
-      this.getDeviceName().catch((e) => {
-        console.log(e);
-        hasErrors = true;
-      }),
-      this.getDeviceIp().catch((e) => {
-        console.log(e);
-        hasErrors = true;
-      })
-    ]);
+      const hostname = await this.getHostName();
+      const deviceName = await this.getDeviceName();
 
-    if (!hasErrors) {
       return await new Promise((resolve, reject) => {
-        cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, 3445, {
-          name: name,
-          ip: ip
+        cordova.plugins.zeroconf.register('_spatium._tcp.', 'local.', hostname, port, {
+          name: deviceName,
+          ip: address
         }, () => this.ngZone.run(() => {
           this.advertising.next(State.Started);
           resolve();
@@ -71,9 +56,9 @@ export class DiscoveryService {
           reject(error);
         }));
       });
-    } else {
+    } catch (e) {
       this.advertising.next(State.Stopped);
-      return;
+      throw e;
     }
   }
 
@@ -106,6 +91,8 @@ export class DiscoveryService {
       return;
     }
 
+    await this.reset();
+
     this.discovering.next(State.Starting);
     this.devices.next(new Map<string, Device>());
 
@@ -120,7 +107,8 @@ export class DiscoveryService {
             ProviderType.ZEROCONF,
             service.txtRecord.name,
             null,
-            service.txtRecord.ip
+            service.txtRecord.ip,
+            service.port
           ));
 
           this.devices.next(devices);
@@ -131,9 +119,24 @@ export class DiscoveryService {
 
     await timer(duration).toPromise();
 
+    if (await timer(duration).pipe(
+        mapTo(true), // Return true if the time has passed
+        takeUntil(this.discovering.pipe( // And break if the discovery has stopped by itself
+          filter(state => state !== State.Started)
+        ))
+      ).toPromise()) { // Now remember that we've considered the timeout to be true?
+      await this.cancelSearch();
+    }
+  }
+
+  async cancelSearch() {
+    if (this.discovering.getValue() !== State.Started) {
+      return;
+    }
+
     this.discovering.next(State.Stopping);
 
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       cordova.plugins.zeroconf.close(
         () => this.ngZone.run(() => {
           this.discovering.next(State.Stopped);

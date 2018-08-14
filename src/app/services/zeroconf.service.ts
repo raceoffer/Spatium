@@ -16,6 +16,8 @@ declare const navigator;
 
 @Injectable()
 export class ZeroconfService implements IConnectionProvider {
+  public supported = new BehaviorSubject<boolean>(true);
+
   public deviceState = new BehaviorSubject<State>(State.Stopped);
 
   public connectionState = toBehaviourSubject(
@@ -95,6 +97,7 @@ export class ZeroconfService implements IConnectionProvider {
 
   private interruptServerSubject = new Subject<any>();
   private interruptListeningSubject = new Subject<any>();
+  private connectionType: any;
 
   constructor(
     private readonly socketClientService: SocketClientService,
@@ -106,12 +109,21 @@ export class ZeroconfService implements IConnectionProvider {
       this.refreshTimer.subscribe(async () => {
         try {
           if (await this.checkWiFiState()) {
+            if (this.connectionType !== navigator.connection.type) {
+              this.connectionType = navigator.connection.type;
+              console.log('Connection type changed to:', this.connectionType);
+            }
+
             if (navigator.connection.type === 'wifi') {
               this.deviceState.next(State.Started);
             } else {
               this.deviceState.next(State.Starting);
             }
           } else {
+            if (this.connectionType !== null) {
+              this.connectionType = null;
+              console.log('Connection type changed on: none');
+            }
             this.deviceState.next(State.Stopped);
           }
         } catch (error) {
@@ -128,11 +140,9 @@ export class ZeroconfService implements IConnectionProvider {
   }
 
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopServer(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   public async startServer() {
@@ -206,16 +216,14 @@ export class ZeroconfService implements IConnectionProvider {
     switch (this.listeningState.getValue()) {
       case State.Stopped:
         console.log('Starting listening from stopped state');
-        await this.discoveryService.reset();
-        await this.discoveryService.startAdvertising();
+        await this.discoveryService.startAdvertising(await this.socketServerService.getIpv4Address(), this.socketServerService.port);
         break;
       case State.Stopping:
         console.log('Starting listening from stopping state, waiting for being stopped');
         this.listeningStateScheduled.next(true);
         if (await waitForSubject(this.listeningState, State.Stopped, this.interruptListeningSubject)) {
           console.log('Starting listening after it has been stopped (awaited)');
-          await this.discoveryService.reset();
-          await this.discoveryService.startAdvertising();
+          await this.discoveryService.startAdvertising(await this.socketServerService.getIpv4Address(), this.socketServerService.port);
         } else {
           console.log('Scheduled listening start was canceled');
         }
@@ -271,6 +279,10 @@ export class ZeroconfService implements IConnectionProvider {
     await this.discoveryService.searchDevices(duration);
   }
 
+  public async cancelSearch() {
+    await this.discoveryService.cancelSearch();
+  }
+
   public async connect(device: Device) {
     if (device.ip != null) {
       await this.socketClientService.connect(device);
@@ -285,7 +297,15 @@ export class ZeroconfService implements IConnectionProvider {
     this.socketServerService.disconnect();
   }
 
-  public send(message: any): void {
+  public refreshConnection() {
+    if (this.socketServerService.connectionState.getValue() === ConnectionState.Connected) {
+      this.socketServerService.refreshConnection();
+    } else {
+      this.socketClientService.refreshConnection();
+    }
+  }
+
+  public send(message: string) {
     // in order to prevent a mess we always send messages to the server if it's connected
     if (this.socketServerService.connectionState.getValue() === ConnectionState.Connected) {
       this.socketServerService.send(message);

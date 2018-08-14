@@ -2,9 +2,11 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { FileService } from './file.service';
 import { stringify } from 'flatted/esm';
+import { DeviceService } from './device.service';
+import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
+import { buffer, filter } from 'rxjs/operators';
 
 declare const cordova: any;
-declare const device: any;
 declare const window: any;
 declare const hockeyapp: any;
 
@@ -19,19 +21,44 @@ export enum LoggerLevels {
 
 @Injectable()
 export class LoggerService {
-
   private logLevel = LoggerLevels.LOG;
-  private sessionlogPath = '';
+
   private sessionlogName = '';
-  private logBuffer = '';
 
+  private busySubject = new BehaviorSubject<boolean>(true);
+  private logSubject = new Subject<string>();
+  private logBuffer = this.logSubject.pipe(
+    buffer(combineLatest(
+      this.logSubject,
+      this.busySubject
+    ).pipe(
+      filter(([newMessage, busy]) => {
+        return !busy;
+      })
+    )),
+    filter(strings => strings.length > 0)
+  );
 
-  constructor(private readonly fs: FileService) {
-    console.debug = this.proxy(console, console.debug, '[DEBUG]', LoggerLevels.DEBUG);
+  constructor(
+    private readonly fs: FileService,
+    private readonly ds: DeviceService
+  ) {
     console.log = this.proxy(console, console.log, '[LOG]', LoggerLevels.LOG);
     console.info = this.proxy(console, console.info, '[INFO]', LoggerLevels.INFO);
     console.warn = this.proxy(console, console.warn, '[WARN]', LoggerLevels.WARN);
     console.error = this.proxy(console, console.error, '[ERROR]', LoggerLevels.ERROR);
+
+    this.logBuffer.subscribe(async (strings) => {
+      this.busySubject.next(true);
+
+      await this.fs.writeToFile(this.sessionlogName, strings);
+
+      this.busySubject.next(false);
+    });
+  }
+
+  get logFileName(): string {
+    return this.sessionlogName;
   }
 
   public static log(message, data) {
@@ -48,7 +75,7 @@ export class LoggerService {
     const datePipe = new DatePipe('en-US');
     const format = 'yyyy-MM-ddTHH:mm:ss.SSS z';
 
-    return (...args) => {
+    return async (...args) => {
       const datelog = datePipe.transform(new Date(), format);
       const log = '[' + datelog + '] ' + message;
       const text = [log].concat(args);
@@ -56,27 +83,19 @@ export class LoggerService {
       method.apply(context, text);
 
       let textForLogger = text[0];
-      var i;
-      for (i = 1; i < text.length; i++) {
+      for (let i = 1; i < text.length; i++) {
         textForLogger = textForLogger + ' ' + this.convertToString(text[i]);
       }
       textForLogger = textForLogger + '\n';
 
       try {
-        if ((level.valueOf() >= this.logLevel.valueOf()) && this.fs.hasLogFile.getValue()) {
-          if (this.logBuffer != null) {
-            this.logBuffer = this.logBuffer + textForLogger;
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
-            this.logBuffer = null;
-          } else {
-            this.fs.writeToFileLog(this.sessionlogPath, this.sessionlogName, textForLogger);
-          }
-        } else {
-          this.logBuffer = this.logBuffer + textForLogger;
+        if ((level.valueOf() >= this.logLevel.valueOf())) {
+          this.logSubject.next(textForLogger);
         }
       } catch (e) {
+        console.debug(e);
       }
-    }
+    };
   }
 
   convertToString(obj) {
@@ -86,7 +105,7 @@ export class LoggerService {
 
     if (typeof obj === 'string') {
       return obj;
-    } 
+    }
 
     if (obj.constructor && obj.constructor.name === 'DebugContext_') {
       return 'DebugContext_';
@@ -107,15 +126,25 @@ export class LoggerService {
     const datePipe = new DatePipe('en-US');
     const format = 'yyyy-MM-ddTHH-mm-ss';
     const datelog = datePipe.transform(new Date(), format);
+
     this.sessionlogName = this.fs.logFileName(datelog);
-    this.sessionlogPath = await this.fs.getLogPath();
 
-    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, '');
-  }
+    let info = [];
+    try {
+      const deviceInfo = await this.ds.getDeviceInfo();
+      info = info.concat(deviceInfo);
 
-  async logBufferToLog() {
-    await this.fs.writeFileLog(this.sessionlogPath, this.sessionlogName, this.logBuffer);
-    this.logBuffer = null;
+      const appInfo = await this.ds.getAppInfo();
+      info = info.concat(appInfo);
+    } catch (e) {
+      console.debug(e);
+    }
+
+    // Write the header
+    await this.fs.writeFile(this.sessionlogName, info);
+
+    // Mark logging ready
+    this.busySubject.next(false);
   }
 
   async getLogData(): Promise<string> {
@@ -129,14 +158,9 @@ export class LoggerService {
       .pop();
     if (lastLogFileName) {
       return await this.fs.readFile(lastLogFileName);
-    }
-    else {
+    } else {
       return null;
     }
-  }
-
-  get logFileName(): string {
-    return this.sessionlogName;
   }
 
   async deleteOldLogFiles() {

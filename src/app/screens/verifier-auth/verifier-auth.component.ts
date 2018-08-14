@@ -4,7 +4,7 @@ import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { removeValue } from '../../utils/storage';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-verifier-auth',
@@ -17,11 +17,14 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   public ready = false;
   private subscriptions = [];
 
-  constructor(private readonly navigationService: NavigationService,
-              private readonly router: Router,
-              private readonly keychain: KeyChainService,
-              private readonly fs: FileService,
-              private readonly notification: NotificationService) {
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly router: Router,
+    private readonly keychain: KeyChainService,
+    private readonly fs: FileService,
+    private readonly notification: NotificationService,
+    private readonly storage: StorageService
+  ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBack();
@@ -44,7 +47,11 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   }
 
   public async onBack() {
-    await removeValue('startPath');
+    try {
+      await this.storage.removeValue('startPath');
+    } catch (e) {
+      console.log(e);
+    }
     await this.router.navigate(['/start']);
   }
 

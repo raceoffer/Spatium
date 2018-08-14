@@ -36,7 +36,10 @@ export class QrWriterComponent implements AfterViewInit {
 
         this.saved.next(this.value);
       } catch (ignored) {
-        this.notification.show('Failed to save the QR image')
+        const message = this.deviceService.platform === Platform.IOS ? 
+          "To grant Spatium permission to save Qr codes, go to Settings -> Spatium -> Allow Spatium to access Photos" :
+          'Failed to save the QR image';
+        this.notification.show(message);
       }
     }
   }

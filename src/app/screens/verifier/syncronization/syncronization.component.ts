@@ -25,10 +25,12 @@ export class SyncronizationComponent implements OnInit, OnDestroy {
   constructor(
     private readonly navigationService: NavigationService,
     private readonly currencyService: CurrencyService,
-    private readonly wallet: WalletService) {
-  }
+    private readonly wallet: WalletService
+  ) {}
 
   public async ngOnInit() {
+    await this.wallet.walletReady();
+
     for (const wallet of Array.from(this.wallet.coinWallets.values())) {
       this.subscriptions.push(
         wallet.status.subscribe(() => {

@@ -1,7 +1,7 @@
-import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { NotificationService } from '../../../../services/notification.service';
-import { Coin } from '../../../../services/keychain.service';
+import { Coin, Token } from '../../../../services/keychain.service';
 import { WalletService } from '../../../../services/wallet.service';
 import { CurrencyService } from '../../../../services/currency.service';
 import { NavigationService } from '../../../../services/navigation.service';
@@ -15,43 +15,36 @@ import { DeviceService, Platform } from '../../../../services/device.service';
   templateUrl: './whitelist.component.html',
   styleUrls: ['./whitelist.component.css']
 })
-export class WhitelistComponent implements OnInit, OnDestroy {
+export class WhitelistComponent {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public project: any = null;
-  title: string = 'Whitelist';
+
+  title = 'Whitelist';
   coins: any;
   confirmed_coins: any = [];
   chosencoins: any = [];
-  next: boolean = false;
-  cols: any = Math.ceil(window.innerWidth / 350);
-  synchronizing = this.wallet.synchronizing;
+  next = false;
 
-  public isWindows;
+  cols = Math.ceil(window.innerWidth / 350);
 
-  private balanceInfo: any = {};
+  public isWindows = false;
 
-  constructor(private readonly wallet: WalletService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly device: DeviceService,
-              private readonly notification: NotificationService) {
+  constructor(
+    private readonly wallet: WalletService,
+    private readonly navigationService: NavigationService,
+    private readonly currency: CurrencyService,
+    private readonly device: DeviceService,
+    private readonly notification: NotificationService
+  ) {
     this.coins = [
-      {title: 'Bitcoin', symbols: 'BTC', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC, chosen: false},
-      {title: 'Bitcoin Cash', symbols: 'BCH', cols: 1, rows: 1, logo: 'bitcoin-cash', coin: Coin.BCH, chosen: false},
-      {title: 'Ethereum', symbols: 'ETH', cols: 1, rows: 1, logo: 'ethereum', coin: Coin.ETH, chosen: false},
-      {title: 'Litecoin', symbols: 'LTC', cols: 1, rows: 1, logo: 'litecoin', coin: Coin.LTC, chosen: false},
-      {title: 'Bitcoin Test', symbols: 'BTC_test', cols: 1, rows: 1, logo: 'bitcoin', coin: Coin.BTC_test, chosen: false},
+      Coin.BTC,
+      Coin.BCH,
+      Coin.ETH,
+      Coin.LTC,
+      Coin.BTC_test
     ];
     this.isWindows = (this.device.platform === Platform.Windows);
-  }
-
-  ngOnInit() {
-
-  }
-
-  ngOnDestroy() {
-
   }
 
   async onBack() {
@@ -64,31 +57,39 @@ export class WhitelistComponent implements OnInit, OnDestroy {
     }
   }
 
-  getBalance(coin: any) {
-    this.balanceInfo[coin] = this.getTileBalanceInfo(coin);
+  getBalance(coin: Coin | Token) {
+    const currencyWallet = this.wallet.currencyWallets.get(coin);
 
-    return (!!this.balanceInfo[coin].balance.value) ? this.balanceInfo[coin].balance.value.toFixed(6) : 0;
+    return (!!currencyWallet.balance.getValue().unconfirmed) ? currencyWallet.balance.getValue().unconfirmed.toFixed(6) : 0;
   }
 
-  public getTileBalanceInfo(coin: any) {
-    if (coin === undefined || coin === null) {
+  public getTileModel(currency: Coin | Token) {
+    if (currency === undefined || currency === null) {
       return undefined;
     }
 
-    if (this.balanceInfo[coin] !== undefined) {
-      return this.balanceInfo[coin];
-    }
+    const currencyInfo = this.currency.getInfo(currency);
 
-    const currencyInfo = this.currency.getInfo(coin);
-    const currencyWallet = this.wallet.currencyWallets.get(coin);
+    const tileModel: any = {
+      title: currencyInfo.name,
+      symbols: currencyInfo.symbol,
+      logo: currencyInfo.icon,
+      coin: currency,
+      erc20: currency in Token
+    };
 
-    const balanceUnconfirmed = toBehaviourSubject(
-      currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
-      null);
+    if (this.wallet.currencyWallets.has(currency)) {
+      const currencyWallet = this.wallet.currencyWallets.get(currency);
 
-    this.balanceInfo[coin] = {
-      balance: balanceUnconfirmed,
-      balanceUSD: toBehaviourSubject(combineLatest([
+      const balanceUnconfirmed = toBehaviourSubject(
+        currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
+        null);
+
+      tileModel.implemented = true;
+      tileModel.status = currencyWallet.status;
+      tileModel.balanceStatus = currencyWallet.balanceStatus;
+      tileModel.balance = balanceUnconfirmed;
+      tileModel.balanceUSD = toBehaviourSubject(combineLatest([
         balanceUnconfirmed,
         currencyInfo.rate
       ]).pipe(map(
@@ -98,10 +99,10 @@ export class WhitelistComponent implements OnInit, OnDestroy {
           }
           return balance * rate;
         }
-      )), null)
-    };
+      )), null);
+    }
 
-    return this.balanceInfo[coin];
+    return tileModel;
   }
 
   click(coin) {
@@ -116,7 +117,7 @@ export class WhitelistComponent implements OnInit, OnDestroy {
       }
     });
     if (this.chosencoins.length === 0) {
-      this.notification.show("Choose at least one coin");
+      this.notification.show('Choose at least one coin');
     } else {
       console.log(e);
       this.next = !this.next;
@@ -124,8 +125,8 @@ export class WhitelistComponent implements OnInit, OnDestroy {
   }
 
   verifyAmount(e, coin) {
-    if (coin.amount > +this.getBalance(coin.coin)) {
-      this.notification.show("Insufficient funds");
+    if (coin.amount > + this.getBalance(coin.coin)) {
+      this.notification.show('Insufficient funds');
     } else {
       // do nothing
     }

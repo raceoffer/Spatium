@@ -1,5 +1,5 @@
-<div jinj>
-  <carousel (close)="onBack()">
+<div>
+  <carousel (skipped)="skip()" (finished)="finish()">
     <ng-container>
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="center start">

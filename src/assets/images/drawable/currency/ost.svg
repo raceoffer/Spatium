@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -9,169 +7,79 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="8.3661604mm"
-   height="12.072768mm"
-   viewBox="0 0 8.3661611 12.072768"
+   viewBox="0 0 31.620135 45.629359"
    version="1.1"
-   id="svg8"
-   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
-   sodipodi:docname="ost.svg">
-  <defs
-     id="defs2">
-    <filter
-       filterUnits="objectBoundingBox"
-       y="-0.092"
-       x="-0.032000002"
-       width="1.064"
-       id="a">
-      <feOffset
-         id="feOffset28"
-         result="shadowOffsetOuter1"
-         in="SourceAlpha"
-         dy="1" />
-      <feGaussianBlur
-         id="feGaussianBlur30"
-         stdDeviation="4"
-         result="shadowBlurOuter1"
-         in="shadowOffsetOuter1" />
-      <feColorMatrix
-         id="feColorMatrix32"
-         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0"
-         result="shadowMatrixOuter1"
-         in="shadowBlurOuter1" />
-      <feMerge
-         id="feMerge38">
-        <feMergeNode
-           id="feMergeNode34"
-           in="shadowMatrixOuter1" />
-        <feMergeNode
-           id="feMergeNode36"
-           in="SourceGraphic" />
-      </feMerge>
-    </filter>
-    <text
-       font-size="36"
-       id="c"
-       style="font-size:36px;font-family:PingFangTC-Regular, 'PingFang TC';fill:#ffffff">
-      <tspan
-         id="tspan41"
-         y="109"
-         x="400.14801">2.0</tspan>
-    </text>
-    <filter
-       filterUnits="objectBoundingBox"
-       y="-0.07"
-       x="-0.10399999"
-       height="1.22"
-       width="1.2080001"
-       id="b">
-      <feOffset
-         id="feOffset44"
-         result="shadowOffsetOuter1"
-         in="SourceAlpha"
-         dy="2" />
-      <feGaussianBlur
-         id="feGaussianBlur46"
-         stdDeviation="1.5"
-         result="shadowBlurOuter1"
-         in="shadowOffsetOuter1" />
-      <feColorMatrix
-         id="feColorMatrix48"
-         values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"
-         in="shadowBlurOuter1" />
-    </filter>
-    <style
-       id="style353">.cls-1{fill:#34445b;}.cls-2{fill:#84d1d4;}</style>
-  </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="5.6"
-     inkscape:cx="77.036874"
-     inkscape:cy="28.254843"
-     inkscape:document-units="mm"
-     inkscape:current-layer="Group-2"
-     showgrid="false"
-     inkscape:pagecheckerboard="true"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0"
-     inkscape:window-width="1858"
-     inkscape:window-height="1057"
-     inkscape:window-x="54"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+   id="svg20"
+   sodipodi:docname="ost.svg"
+   width="31.620134"
+   height="45.62936"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)">
   <metadata
-     id="metadata5">
+     id="metadata24">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title>ost-kit-brand-menu</dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1858"
+     inkscape:window-height="1057"
+     id="namedview22"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="3.409142"
+     inkscape:cx="5.6672031"
+     inkscape:cy="13.576524"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Group-2" />
+  <defs
+     id="defs4">
+    <style
+       id="style2">.cls-1{fill:#34445b;}.cls-2{fill:#84d1d4;}</style>
+  </defs>
+  <title
+     id="title6">ost-kit-brand-menu</title>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-74.293591,-205.75692)">
+     id="Layer_2"
+     data-name="Layer 2"
+     transform="translate(-58.364933,0.01316387)">
     <g
-       transform="matrix(0.26458333,0,0,0.26458333,-86.544913,76.791072)"
-       id="XPA_desktop"
-       style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1">
+       id="Layer_1-2"
+       data-name="Layer 1">
       <g
-         transform="translate(-240,1)"
-         id="kv">
+         id="ostKYC-mobile---Menu-Opened">
         <g
-           id="g63"
-           transform="translate(868.47458,444.34074)"
-           style="fill:none;fill-rule:evenodd">
+           id="Group-54">
           <g
-             id="g55"
-             transform="translate(8,6)"
-             style="fill:#fefefe;filter:url(#a)">
+             id="ost-kyc-brand-copy">
             <g
-               id="g331"
-               transform="translate(-1.3700385,37.234389)">
-              <g
-                 id="g319" />
-              <g
-                 data-name="Layer 2"
-                 id="Layer_2"
-                 transform="translate(-85.575909,-1.1319855)">
-                <g
-                   data-name="Layer 1"
-                   id="Layer_1-2">
-                  <g
-                     id="ostKYC-mobile---Menu-Opened">
-                    <g
-                       id="Group-54">
-                      <g
-                         id="ost-kyc-brand-copy">
-                        <g
-                           id="Group-2">
-                          <path
-                             d="m 75.83,14.12 4,-6.19 c 2.169324,0.4755205 4.310715,-0.907181 4.77,-3.08 1.113333,-5.23999769 -6.746667,-6.9099977 -7.86,-1.67 -0.234304,1.1223055 0.02424,2.2911987 0.71,3.21 L 72.5,14.1 c -8.35842,0.89055 -14.558685,8.166419 -14.112422,16.557099 0.446247,8.390368 7.382569,14.959098 15.787422,14.959098 8.404853,0 15.341175,-6.56873 15.787422,-14.959098 C 90.408685,22.266419 84.20842,14.99055 75.85,14.1 Z M 74,38.06 C 67.289449,38.012333 63.380658,30.462387 67.214755,24.95514 71.048853,19.447892 79.486135,20.493175 81.86,26.77 79.226591,23.363757 73.790061,24.84492 73.247556,29.115576 72.70505,33.386232 77.598577,36.179632 81,33.54 c 0.318119,-0.239093 0.600907,-0.521881 0.84,-0.84 -1.227143,3.256792 -4.359901,5.398576 -7.84,5.36 z"
-                             class="cls-1"
-                             data-name="ost logo"
-                             id="ost_logo"
-                             inkscape:connector-curvature="0"
-                             style="fill:#34445b"
-                             sodipodi:nodetypes="ccccccssscccscsccc" />
-                        </g>
-                      </g>
-                    </g>
-                  </g>
-                </g>
-              </g>
+               id="Group-2">
+              <path
+                 id="ost_logo"
+                 data-name="ost logo"
+                 class="cls-1"
+                 d="m 75.83,14.12 4,-6.19 c 2.169324,0.4755205 4.310715,-0.907181 4.77,-3.08 1.113333,-5.23999769 -6.746667,-6.9099977 -7.86,-1.67 -0.234304,1.1223055 0.02424,2.2911987 0.71,3.21 L 72.5,14.1 c -8.35842,0.89055 -14.558685,8.166419 -14.112422,16.557099 0.446247,8.390368 7.382569,14.959098 15.787422,14.959098 8.404853,0 15.341175,-6.56873 15.787422,-14.959098 C 90.408685,22.266419 84.20842,14.99055 75.85,14.1 Z M 74,38.06 C 67.289449,38.012333 63.380658,30.462387 67.214755,24.95514 71.048853,19.447892 79.486135,20.493175 81.86,26.77 79.226591,23.363757 73.790061,24.84492 73.247556,29.115576 72.70505,33.386232 77.598577,36.179632 81,33.54 c 0.318119,-0.239093 0.600907,-0.521881 0.84,-0.84 -1.227143,3.256792 -4.359901,5.398576 -7.84,5.36 z"
+                 inkscape:connector-curvature="0"
+                 style="fill:#34445b"
+                 sodipodi:nodetypes="ccccccssscccscsccc" />
             </g>
           </g>
         </g>

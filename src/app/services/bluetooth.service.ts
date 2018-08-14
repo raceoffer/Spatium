@@ -1,17 +1,20 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, timer } from 'rxjs';
-import { DeviceService } from './device.service';
+import { BehaviorSubject, combineLatest, interval, Subject, timer } from 'rxjs';
+import { DeviceService, Platform } from './device.service';
 import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { toBehaviourSubject } from '../utils/transformers';
+import { filter, mapTo, takeUntil } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const navigator: any;
 
 @Injectable()
 export class BluetoothService implements IConnectionProvider {
+  public supported = new BehaviorSubject<boolean>(false);
+
   public deviceState = new BehaviorSubject<State>(State.Stopped);
   public connectionState = new BehaviorSubject<ConnectionState>(ConnectionState.None);
 
@@ -53,15 +56,27 @@ export class BluetoothService implements IConnectionProvider {
     this.deviceService.deviceReady().then(() => {
       this.plugin = cordova.plugins.bluetooth;
 
-      this.plugin.setStateCallback(state => {
+      this.plugin.setStateCallback(state => this.ngZone.run(() => {
         this.deviceState.next(state);
-      });
+      }));
+
+      this.plugin.setSupportedCallback(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
+      }));
 
       this.plugin.setConnectedCallback(device => this.ngZone.run(async () => {
         if (device !== null) {
           await this.plugin.startReading();
-          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+          this.connectedDevice.next(new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
           this.connectionState.next(ConnectionState.Connected);
+
+          interval(1000).pipe(
+            takeUntil(this.connectionState.pipe(
+              filter(state => state !== ConnectionState.Connected)
+            ))
+          ).subscribe(async () => {
+            await this.refreshConnection();
+          });
         } else {
           this.connectedDevice.next(null);
           this.connectionState.next(ConnectionState.None);
@@ -95,7 +110,13 @@ export class BluetoothService implements IConnectionProvider {
       }));
 
       this.plugin.setMessageCallback(message => this.ngZone.run(() => {
-        this.message.next(message);
+        if (message !== '__keep-alive__') {
+          this.message.next(message);
+        }
+      }));
+
+      this.plugin.getSupported().then(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
       }));
 
       this.plugin.getState().then(state => this.ngZone.run(() => {
@@ -109,14 +130,19 @@ export class BluetoothService implements IConnectionProvider {
       this.plugin.getDiscoverable().then(discoverable => this.ngZone.run(() => {
         this.discoveryState.next(discoverable ? State.Started : State.Stopped);
       }));
+
+      this.logPaired();
     });
   }
 
+  async logPaired () {
+    console.log('Bluetooth list paired devices ', await this.plugin.listPairedDevices());
+  }
+
   public async reset() {
-    await Promise.all([
-      this.disconnect(),
-      this.stopListening()
-    ]);
+    await this.stopListening();
+    await this.disconnect();
+    await this.stopServer();
   }
 
   async startServer() {
@@ -187,6 +213,10 @@ export class BluetoothService implements IConnectionProvider {
     }
   }
 
+  public async refreshConnection() {
+    await this.send('__keep-alive__');
+  }
+
   async connect(device: Device) {
     if (this.connectionState.getValue() !== ConnectionState.None) {
       console.log('Trying to connect while not disconnected');
@@ -238,7 +268,7 @@ export class BluetoothService implements IConnectionProvider {
 
   async searchDevices(duration: number) {
     if (this.searchState.getValue() !== State.Stopped) {
-      console.log('Trying to stsrt search while not finished');
+      console.log('Trying to start search while not finished');
       return;
     }
 
@@ -253,7 +283,7 @@ export class BluetoothService implements IConnectionProvider {
     const mapped = new Map<string, Device>();
     for (const device of paired) {
       if (device.hasOwnProperty('address')) {
-        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, true));
+        mapped.set(device.address, new Device(ProviderType.BLUETOOTH, device.name, device.address, null, null, true));
       }
     }
 
@@ -267,7 +297,22 @@ export class BluetoothService implements IConnectionProvider {
       throw e;
     }
 
-    await timer(duration).toPromise();
+    // Schedule automatic stopping of the discovery
+    if (await timer(duration).pipe(
+      mapTo(true), // Return true if the time has passed
+      takeUntil(this.searchState.pipe( // And break if the discovery has stopped by itself
+        filter(state => state !== State.Started)
+      ))
+    ).toPromise()) { // Now remember that we've considered the timeout to be true?
+      await this.cancelSearch();
+    }
+  }
+
+  async cancelSearch() {
+    if (this.searchState.getValue() !== State.Started) {
+      console.log('Trying to start search while not finished');
+      return;
+    }
 
     this.searchState.next(State.Stopping);
 
@@ -275,7 +320,8 @@ export class BluetoothService implements IConnectionProvider {
       await this.plugin.cancelDiscovery();
     } catch (e) {
       LoggerService.nonFatalCrash('Failed to cancel discovery', e);
-      this.searchState.next(State.Started);
+      // We are used to revert the state back to Started but it showed that it leads to errors
+      this.searchState.next(State.Stopped);
       throw e;
     }
   }
@@ -290,14 +336,23 @@ export class BluetoothService implements IConnectionProvider {
       return;
     }
 
-    this.deviceState.next(State.Starting);
+    if (this.deviceService.platform === Platform.Android) {
+      this.deviceState.next(State.Starting);
 
-    try {
-      await this.plugin.enable();
-    } catch (e) {
-      LoggerService.nonFatalCrash('Failed to enable BT', e);
-      this.deviceState.next(State.Stopped);
-      throw e;
+      try {
+        await this.plugin.enable();
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to enable BT', e);
+        this.deviceState.next(State.Stopped);
+        throw e;
+      }
+    } else {
+      try {
+        await this.plugin.enable();
+      } catch (e) {
+        LoggerService.nonFatalCrash('Failed to enable BT', e);
+        throw e;
+      }
     }
   }
 }

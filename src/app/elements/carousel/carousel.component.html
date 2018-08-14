@@ -1,9 +1,12 @@
-<section class="carousel-wrapper" [ngStyle]="carouselWrapperStyle" (swipeLeft)="next()" (swipeRight)="prev()" (window:resize)="onResize()">
-  <ul class="carousel-inner" #carousel>
-    <li *ngFor="let item of items;" class="carousel-item">
+<section class="carousel-wrapper" (swipeLeft)="next()" (swipeRight)="prev()">
+  <div class="carousel-inner">
+    <div *ngFor="let item of items; let i = index" class="carousel-item"
+        [class.carousel-item--hidden-initial]="i !== 0"
+        [attr.data-slide]="i">
       <ng-container [ngTemplateOutlet]="item.tpl"></ng-container>
-    </li>
-  </ul>
+    </div>
+  </div>
+
   <div class="carousel-btn-wrapper" fxLayout="row" fxLayoutAlign="space-around center">
     <div class="carousel-btn" fxLayout="row" fxLayoutAlign="space-around center">
       <button (click)="prev()" mat-button class="carousel-btn carousel-btn-left" *ngIf="!(isFirst | async) && !(isLast | async)">

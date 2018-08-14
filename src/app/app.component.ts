@@ -12,11 +12,8 @@ declare const navigator: any;
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
-  private subscriptions = [];
-
+export class AppComponent implements OnInit {
   constructor(
-    private readonly fs: FileService,
     private readonly logger: LoggerService,
     private readonly deviceService: DeviceService,
     private readonly hockeyService: HockeyService
@@ -25,22 +22,14 @@ export class AppComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    this.subscriptions.push(
-      this.fs.createLogFileEvent.subscribe(async () => {
-        await this.logger.logBufferToLog();
-      }));
+    hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
 
     const lastLogData = await this.logger.getLastLogData();
     await this.logger.createSessionLog();
     await this.logger.deleteOldLogFiles();
-    hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
+
     if (lastLogData) {
       hockeyapp.addMetaData(null, null, lastLogData);
     }
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
   }
 }

@@ -80,6 +80,7 @@ textarea.mat-input-element {
   word-break: break-all;
   box-sizing: border-box;
   position: relative;
+  font-family: 'Roboto-Light';
 }
 
 button.wallet-address-button {
@@ -87,6 +88,22 @@ button.wallet-address-button {
   top: 50%;
   right: 0;
   transform: translate(0, -50%);
+}
+
+.info {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: #2277ba;
+}
+
+.warning {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: rgb(255, 204, 0);
 }
 
 .windows.box .content {

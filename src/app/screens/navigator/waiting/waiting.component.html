@@ -13,7 +13,7 @@
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="(connecting | async)">
+    *ngIf="(connecting | async) || (searchState | async) === stateType.Stopping">
   </mat-progress-bar>
 
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
@@ -30,27 +30,28 @@
     <div class="connect-div" *ngIf="(disabledProviders | async).length > 0">
       <span class="message">Cannot find a device?</span>
       <div *ngFor="let provider of (disabledProviders | async)">
+		<span class="message" *ngIf="!(provider.service.supported | async)">Connect a {{ provider.name }} device</span>
         <button
           mat-button
           color="accent"
           (click)="enableProvider(provider)"
-          *ngIf="(provider.service.deviceState | async) === stateType.Stopped">
+          *ngIf="(provider.service.supported | async) && (provider.service.deviceState | async) === stateType.Stopped">
           Enable {{ provider.name }}
         </button>
         <button
           mat-button
           color="accent"
           (click)="enableProvider(provider)"
-          *ngIf="(provider.service.deviceState | async) === stateType.Starting">
+          *ngIf="(provider.service.supported | async) && (provider.service.deviceState | async) === stateType.Starting">
           {{ provider.name }} settings
         </button>
       </div>
     </div>
 
     <div style="width: 100%; text-align: center; padding: 5px 0px;">
-      <button mat-icon-button (click)="startDiscovery()" [disabled]="(connecting | async) || (discovering | async)">
-        <mat-icon class="button-imitator-large" *ngIf="!(discovering | async)">sync</mat-icon>
-        <mat-icon class="button-imitator-large sync" *ngIf="discovering | async">sync</mat-icon>
+      <button mat-icon-button (click)="startDiscovery()" [disabled]="(connecting | async) || (searchState | async) !== stateType.Stopped || !(ready | async)">
+        <mat-icon class="button-imitator-large" *ngIf="(searchState | async) === stateType.Stopped || (searchState | async) === stateType.Stopping">sync</mat-icon>
+        <mat-icon class="button-imitator-large sync" *ngIf="(searchState | async) === stateType.Started || (searchState | async) === stateType.Starting">sync</mat-icon>
       </button>
     </div>
   </div>
