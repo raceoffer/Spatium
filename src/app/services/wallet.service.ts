@@ -192,10 +192,11 @@ export class WalletService {
       this.cancelSubject.next(true);
     });
 
-    this.keychain.topTokensChanged.subscribe(() => {
+    this.keychain.topTokens.subscribe(() => {
       this.keychain.topTokens.getValue().forEach(async (tokenInfo) => {
         if (!this.tokenWallets.get(tokenInfo.token)) {
           await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
+          this.currencyWallets.set(tokenInfo.token, this.tokenWallets.get(tokenInfo.token));
         }
       });
     });

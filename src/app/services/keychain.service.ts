@@ -132,21 +132,23 @@ export class TokenEntry {
   decimals: number;
   network: string;
 
-  private customStartId = 56249;
+  private static tokenKeys = Object.values(Token).filter(t => typeof Token[t] === 'number');
+  private static tokenValues = TokenEntry.tokenKeys.map(k => parseInt(Token[k]));
+  private static customStartId = Math.max(...TokenEntry.tokenValues) + 1;
 
-  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string = 'no-image',
+  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string,
               decimals: number = 18, network: string = 'main') {
     if (token == null) {
-      this.token = this.customStartId;
-      this.customStartId++;
+      this.token = TokenEntry.customStartId;
+      TokenEntry.customStartId++;
     } else {
       this.token = token;
     }
     this.name = name;
     this.ico = ico;
     this.contractAddress = contractAddress;
-    this.className = className;
-    this.decimals = decimals;
+    this.className = className || 'no-image';
+    this.decimals = decimals || 18;
     this.network = network;
   }
 }
@@ -259,11 +261,6 @@ export class KeyChainService {
     new TokenEntry(Token.CONSENSUS, 'Consensus', 'SEN', '0xd53370acf66044910bb49cbcfe8f3cd020337f60', 'сonsensus', 18)
   ]);
 
-  public topTokensChanged: Observable<TokenEntry[]> = this.topTokens
-    .pipe(
-      distinctUntilChanged((a, b) => a.length === b.length),
-      skip(1)
-    );
   private _seed: any = null;
   private keyChain: any = null;
 

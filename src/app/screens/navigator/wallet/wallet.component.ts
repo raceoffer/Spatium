@@ -92,11 +92,11 @@ export class WalletComponent implements OnInit, OnDestroy {
     Coin.XLM
   ];
 
-  public tileModel = new Map<Coin | Token | number, any>();
+  public tileModel = new Map<Coin | Token, any>();
 
   public filterControl = new FormControl();
 
-  public tiles = new BehaviorSubject<Array<Coin | Token | number>>([]);
+  public tiles = new BehaviorSubject<Array<Coin | Token>>([]);
   public filter = toBehaviourSubject(this.filterControl.valueChanges.pipe(
     debounceTime(300)
   ), '');
@@ -156,19 +156,6 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    this.keychain.topTokensChanged.subscribe(() => {
-      tiles = this.tiles.getValue();
-
-      this.keychain.topTokens.getValue().forEach(tokenInfo => {
-        if (!this.tileModel.get(tokenInfo.token)) {
-          tiles.unshift(tokenInfo.token);
-          this.tileModel.set(tokenInfo.token, this.getTileModel(tokenInfo.token));
-        }
-      });
-
-      this.tiles.next(tiles);
-    });
   }
 
   public openSettings() {
@@ -220,6 +207,11 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public addToken() {
     const componentRef = this.navigationService.pushOverlay(AddTokenComponent);
+    componentRef.instance.createdEvent.subscribe(tokenInfo => {
+      this.tiles.next([tokenInfo.token].concat(this.tiles.getValue()));
+      this.tileModel.set(tokenInfo.token, this.getTileModel(tokenInfo.token));
+      this.navigationService.acceptOverlay();
+    });
   }
 
   public async openConnectOverlay() {
@@ -251,7 +243,7 @@ export class WalletComponent implements OnInit, OnDestroy {
       symbols: currencyInfo.symbol,
       logo: currencyInfo.icon,
       coin: currency,
-      erc20: (currency in Token) ? true : (isNaN(currency))
+      erc20: this.wallet.tokenWallets.get(currency)
     };
 
     if (this.wallet.currencyWallets.has(currency)) {

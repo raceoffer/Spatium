@@ -250,11 +250,7 @@ export class CurrencyService {
     private readonly currencyPriceService: CurrencyPriceService,
     private readonly storage: StorageService
   ) {
-    this.keychain.topTokens.getValue().forEach((tokenInfo) => {
-      this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
-    });
-
-    this.keychain.topTokensChanged.subscribe(() => {
+    this.keychain.topTokens.subscribe(() => {
       this.keychain.topTokens.getValue().forEach(tokenInfo => {
         if (!this.staticInfo.get(tokenInfo.token)) {
           this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
