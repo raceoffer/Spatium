@@ -5,7 +5,7 @@
   [hasSettings] = "false"
   (backClicked) = "onBack()"></app-toolbar>
 
-<div class="currency-component box" [ngClass]="{'windows' : isWindows()}" fxLayout="column" fxLayoutAlign="start center">
+<div class="currency-component box" [ngClass]="{'windows' : isWindows()}" fxLayout="column" fxLayoutAlign="start center" [formGroup]="tokenForm">
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
     <tr>
       <td colspan="2">
@@ -21,29 +21,7 @@
           fxLayout="column" fxLayoutAlign="center center">
           <input matInput [formControl]="nameField">
 
-          <button [disabled]="disable" mat-button matSuffix mat-icon-button (click)="paste(nameField)">
-            <mat-icon>content_paste</mat-icon>
-          </button>
-        </mat-form-field>
-      </td>
-    </tr>
-
-    <tr>
-      <td colspan="2">
-        <span class="label full-width-label">Ticker symbol</span>
-      </td>
-    </tr>
-    <tr>
-      <td  colspan="2">
-        <mat-form-field
-          class="field by-content"
-          style="margin-bottom: 13px;"
-          color="accent"
-          fxLayout="column" fxLayoutAlign="center center"
-          [ngClass]="{'error': tickerField.invalid}">
-          <input matInput [formControl]="tickerField">
-
-          <button [disabled]="disable" mat-button matSuffix mat-icon-button (click)="paste(tickerField)">
+          <button [disabled]="isSaving" mat-button matSuffix mat-icon-button (click)="paste(nameField)">
             <mat-icon>content_paste</mat-icon>
           </button>
         </mat-form-field>
@@ -71,7 +49,35 @@
             (focus)="setReceiverFocused(true)">
           </textarea>
 
-          <button [disabled]="disable" mat-button matSuffix mat-icon-button (click)="paste(addressField)">
+          <button [disabled]="isSaving" mat-button matSuffix mat-icon-button (click)="paste(addressField)">
+            <mat-icon>content_paste</mat-icon>
+          </button>
+        </mat-form-field>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <span class="label full-width-label">Ticker symbol</span>
+      </td>
+    </tr>
+    <tr>
+      <td  colspan="2">
+        <mat-form-field
+          class="field by-content"
+          style="margin-bottom: 13px;"
+          color="accent"
+          fxLayout="column" fxLayoutAlign="center center"
+          [ngClass]="{'error': tickerField.invalid}">
+          <textarea
+            matInput
+            mat-autosize="true"
+            [formControl]="tickerField"
+            (blur)="setReceiverFocused(false)"
+            (focus)="setReceiverFocused(true)">
+          </textarea>
+
+          <button [disabled]="isSaving" mat-button matSuffix mat-icon-button (click)="paste(tickerField)">
             <mat-icon>content_paste</mat-icon>
           </button>
         </mat-form-field>
@@ -101,6 +107,6 @@
   </table>
 
   <div class="full-width" style="border: none; padding: 0px;">
-    <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="saveNewToken()" [disabled]="isSaving" >Add token</button>
+    <button type="button" mat-raised-button color="accent" class="width-button-full color" (click)="saveNewToken()" [disabled]="tokenForm.invalid || isSaving" >Add token</button>
   </div>
 </div>

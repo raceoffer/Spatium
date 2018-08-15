@@ -1,5 +1,5 @@
-import { Component, HostBinding, NgZone, OnInit } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
+import { Component, EventEmitter, HostBinding, NgZone, OnInit, Output } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { KeyChainService, TokenEntry } from '../../../services/keychain.service';
@@ -15,13 +15,21 @@ declare const cordova: any;
 export class AddTokenComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  title = 'Add new token';
+  @Output() public createdEvent = new EventEmitter<any>();
 
-  public nameField = new FormControl();
-  public tickerField = new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]);
-  public addressField = new FormControl('', [Validators.required, Validators.pattern('^(0x){1}[0-9a-fA-F]{40}$')]);
-  public decimalsField = new FormControl(0);
+  title = 'Add a new token';
 
+  public nameField = new FormControl('', Validators.required);
+  public addressField = new FormControl('', Validators.compose([Validators.required, Validators.pattern('^(0x){1}[0-9a-fA-F]{40}$')]));
+  public tickerField = new FormControl('', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(3)]));
+  public decimalsField = new FormControl();
+  public tokenForm = new FormGroup({
+    name: this.nameField,
+    ticker: this.tickerField,
+    address: this.addressField,
+    decimals: this.decimalsField
+  });
+  
   public receiverFocused = false;
   public disable = false;
   public validReceiver: BehaviorSubject<boolean> = null;
@@ -33,8 +41,7 @@ export class AddTokenComponent implements OnInit {
               private readonly navigationService: NavigationService,
               private readonly keyChainService: KeyChainService) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   onBack() {
     this.navigationService.back();
@@ -57,17 +64,16 @@ export class AddTokenComponent implements OnInit {
   }
 
   async saveNewToken() {
-    const temp = new TokenEntry(
+    const token = new TokenEntry(
       null,
       this.nameField.value,
       this.tickerField.value,
       this.addressField.value,
       null,
-      this.decimalsField.value,
-      null);
+      this.decimalsField.value);
 
-    await this.keyChainService.addCustomToken(temp);
-
+    await this.keyChainService.addCustomToken(token);
+    this.createdEvent.emit(token);
   }
 
 }
