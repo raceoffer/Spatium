@@ -1,10 +1,9 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { FormControl, Validators } from "@angular/forms";
-import { DDSService } from "../../services/dds.service";
 import { AuthService } from "../../services/auth.service";
 
 import { BehaviorSubject } from "rxjs";
-import { debounceTime, distinctUntilChanged, map, tap } from "rxjs/operators";
+import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
 
 export enum State {
   Updating,
@@ -27,26 +26,42 @@ export class LoginComponent implements OnDestroy{
 
   public valid = new BehaviorSubject<boolean>(false);
   public delayed = new BehaviorSubject<boolean>(false);
-  public generating = new BehaviorSubject<boolean>(false);
 
   @Output() login = new EventEmitter<string>();
 
   private subscriptions = [];
+  private loginGenerated = false;
+
+  private generateLoginStream = this.loginControl.valueChanges.pipe(
+    distinctUntilChanged(),
+    filter(() => this.loginGenerated),
+    map(value => value ? value : ''),
+  );
+  private manualLoginInputStream = this.loginControl.valueChanges.pipe(
+    distinctUntilChanged(),
+    filter(() => !this.loginGenerated),
+    map(value => value ? value : ''),
+    tap(() => this.delayed.next(true)),
+    debounceTime(1000),
+    tap(() => this.delayed.next(false)),
+  );
 
   constructor(
     private readonly authService: AuthService,
-    private readonly ddsService: DDSService
   ) {
+
     this.subscriptions.push(
-      this.loginControl.valueChanges.pipe(
-        map(value => value ? value : ''),
-        tap(() => this.delayed.next(true)),
-        debounceTime(1000)
-      ).subscribe(value => {
-        this.delayed.next(false);
+      this.manualLoginInputStream.subscribe(value => {
         this.valid.next(this.loginControl.valid);
         this.login.next(value);
-      })
+      }),
+
+      this.generateLoginStream.subscribe(value => {
+        this.loginControl.enable();
+        this.loginGenerated = false;
+        this.valid.next(this.loginControl.valid);
+        this.login.next(value);
+      }),
     );
 
     this.subscriptions.push(
@@ -70,25 +85,17 @@ export class LoginComponent implements OnDestroy{
 
   removeFocus(event) { event.target.blur(); }
 
-  async generateNewLogin() {
+  generateNewLogin() {
     try {
       this.state.next(State.Updating);
-      this.generating.next(true);
+      let login = this.authService.makeNewLogin(10);
 
-      let login = null;
-      do {
-        login = this.authService.makeNewLogin(10);
-      } while (await this.ddsService.exists(
-        await this.authService.toId(login.toLowerCase())
-      ));
-
+      this.loginGenerated = true;
       this.loginControl.setValue(login);
 
       this.state.next(State.Ready);
     } catch(e) {
       this.state.next(State.Error);
-    } finally {
-      this.generating.next(false);
     }
   }
 }
