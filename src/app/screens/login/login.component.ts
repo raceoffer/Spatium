@@ -41,7 +41,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public isCameraAvailable = false;
   @ViewChild(LoginInput) public loginComponent: LoginInput;
   public delayed = null;
-  public generating = null;
   public valid = null;
   private subscriptions = [];
   private cameraChangesCallbackId: number;
@@ -74,7 +73,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.delayed = this.loginComponent.delayed;
-    this.generating = this.loginComponent.generating;
     this.valid = this.loginComponent.valid;
   }
 
@@ -138,11 +136,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async checkLogin(type: IdFactor, login: string) {
-    const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
-
     try {
       this.buttonState = State.Updating;
-
+      const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
       const exists = await this.dds.exists(id);
 
       if (exists) {

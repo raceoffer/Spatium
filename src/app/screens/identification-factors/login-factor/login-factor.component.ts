@@ -17,7 +17,6 @@ export class LoginFactorComponent implements AfterViewInit {
   @ViewChild(LoginComponent) public loginComponent: LoginComponent;
 
   public delayed = null;
-  public generating = null;
   public valid = null;
 
   public input = '';
@@ -26,7 +25,6 @@ export class LoginFactorComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.delayed = this.loginComponent.delayed;
-    this.generating = this.loginComponent.generating;
     this.valid = this.loginComponent.valid;
   }
 
