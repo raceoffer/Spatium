@@ -1,22 +1,23 @@
 import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
-import { combineLatest, BehaviorSubject } from 'rxjs';
-import { map, debounceTime } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { debounceTime, map } from 'rxjs/operators';
+import { NavbarComponent } from '../../../modals/navbar/navbar.component';
+import { ConnectionProviderService } from '../../../services/connection-provider';
 import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
-import { NavigationService , Position } from '../../../services/navigation.service';
+import { NavigationService, Position } from '../../../services/navigation.service';
+import { ConnectionState } from '../../../services/primitives/state';
 import { SyncStatus, WalletService } from '../../../services/wallet.service';
 import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { FeedbackComponent } from '../../feedback/feedback.component';
+import { AddTokenComponent } from '../add-token/add-token.component';
 import { CurrencyComponent } from '../currency/currency.component';
+import { SettingsComponent } from '../settings/settings.component';
 import { WaitingComponent } from '../waiting/waiting.component';
 import { Router } from '@angular/router';
-import { FeedbackComponent } from '../../feedback/feedback.component';
-import { SettingsComponent } from '../settings/settings.component';
-import { NavbarComponent } from '../../../modals/navbar/navbar.component';
-import { FormControl } from '@angular/forms';
-import { ConnectionProviderService } from '../../../services/connection-provider';
-import { ConnectionState } from '../../../services/primitives/state';
 
 declare const navigator: any;
 
@@ -79,7 +80,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   public title = 'Wallet';
   public isSearch = false;
 
-  public staticCoins: Array<Coin|Token> = [
+  public staticCoins: Array<Coin | Token> = [
     Coin.BTC,
     Coin.BCH,
     Coin.ETH,
@@ -120,24 +121,23 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly keychain: KeyChainService,
-    private readonly navigationService: NavigationService,
-    private readonly currency: CurrencyService,
-    private readonly connectionProvider: ConnectionProviderService,
-    private readonly wallet: WalletService,
-    private readonly device: DeviceService,
+  constructor(private readonly keychain: KeyChainService,
+              private readonly navigationService: NavigationService,
+              private readonly currency: CurrencyService,
+              private readonly connectionProvider: ConnectionProviderService,
+              private readonly wallet: WalletService,
+              private readonly device: DeviceService,
     private readonly router: Router
   ) {}
 
   public async ngOnInit() {
     await this.wallet.walletReady();
 
-    const tiles = [];
+    let tiles = [];
 
     this.staticCoins.forEach(coin => tiles.push(coin));
 
-    this.keychain.topTokens.forEach(tokenInfo => tiles.push(tokenInfo.token));
+    this.keychain.topTokens.getValue().forEach(tokenInfo => tiles.push(tokenInfo.token));
 
     tiles.push(Coin.BTC_test);
 
@@ -205,6 +205,15 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.clearFilterValue();
   }
 
+  public addToken() {
+    const componentRef = this.navigationService.pushOverlay(AddTokenComponent);
+    componentRef.instance.createdEvent.subscribe(tokenInfo => {
+      this.tiles.next([tokenInfo.token].concat(this.tiles.getValue()));
+      this.tileModel.set(tokenInfo.token, this.getTileModel(tokenInfo.token));
+      this.navigationService.acceptOverlay();
+    });
+  }
+
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
     componentRef.instance.connectedEvent.subscribe(ignored => {
@@ -222,7 +231,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getTileModel(currency: Coin | Token) {
+  public getTileModel(currency: Coin | Token | number) {
     if (currency === undefined || currency === null) {
       return undefined;
     }
@@ -234,7 +243,7 @@ export class WalletComponent implements OnInit, OnDestroy {
       symbols: currencyInfo.symbol,
       logo: currencyInfo.icon,
       coin: currency,
-      erc20: currency in Token
+      erc20: this.wallet.tokenWallets.get(currency)
     };
 
     if (this.wallet.currencyWallets.has(currency)) {

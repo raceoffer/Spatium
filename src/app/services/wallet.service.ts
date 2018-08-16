@@ -156,9 +156,9 @@ export class WalletService {
         this.workerService.worker
       ));
 
-    for (const tokenInfo of Array.from(this.keychain.topTokens)) {
+    this.keychain.topTokens.getValue().forEach(async (tokenInfo) => {
       await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
-    }
+    });
 
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
@@ -190,6 +190,15 @@ export class WalletService {
       // pop the queue
       this.messageSubject.next({});
       this.cancelSubject.next(true);
+    });
+
+    this.keychain.topTokens.subscribe(() => {
+      this.keychain.topTokens.getValue().forEach(async (tokenInfo) => {
+        if (!this.tokenWallets.get(tokenInfo.token)) {
+          await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
+          this.currencyWallets.set(tokenInfo.token, this.tokenWallets.get(tokenInfo.token));
+        }
+      });
     });
 
     this.ready.next(true);

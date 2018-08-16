@@ -118,6 +118,7 @@ import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
+import { AddTokenComponent } from './screens/navigator/add-token/add-token.component';
 
 @NgModule({
   declarations: [
@@ -187,6 +188,7 @@ import { NavbarComponent } from './modals/navbar/navbar.component';
     CarouselItemElement,
     PresentationComponent,
     NavbarComponent,
+    AddTokenComponent
   ],
   imports: [
     OverlayModule,
