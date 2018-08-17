@@ -290,7 +290,8 @@ import { AddTokenComponent } from './screens/navigator/add-token/add-token.compo
     SyncronizationComponent,
     PresentationComponent,
     NavbarComponent,
-    BackupComponent
+    BackupComponent,
+    AddTokenComponent,
   ]
 })
 
