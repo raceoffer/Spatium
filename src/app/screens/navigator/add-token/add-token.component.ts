@@ -21,7 +21,7 @@ export class AddTokenComponent implements OnInit {
 
   public nameField = new FormControl('', Validators.required);
   public addressField = new FormControl('', Validators.compose([Validators.required, Validators.pattern('^(0x){1}[0-9a-fA-F]{40}$')]));
-  public tickerField = new FormControl('', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(3)]));
+  public tickerField = new FormControl('', Validators.compose([Validators.required, Validators.minLength(1), Validators.maxLength(9)]));
   public decimalsField = new FormControl();
   public tokenForm = new FormGroup({
     name: this.nameField,
