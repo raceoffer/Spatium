@@ -172,6 +172,18 @@ export class VerifierComponent implements OnInit, OnDestroy {
           this.onTransaction(coin, transaction);
         })
       );
+
+      this.subscriptions.push(
+        this.notification.confirm.subscribe(async () => {
+          this.confirm(coin);
+        })
+      );
+
+      this.subscriptions.push(
+        this.notification.decline.subscribe(async () => {
+          this.decline(coin);
+        })
+      );
     });
   }
 
