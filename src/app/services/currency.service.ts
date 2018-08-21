@@ -47,6 +47,8 @@ export enum CurrencyServerName {
   Infura = 'mainnet.infura.io',
   Litecore = 'insight.litecore.io',
   Native = 'Nem native',
+  Neoscan = 'neoscan.io',
+  TestNeoscan = 'neoscan-testnet.io',
 }
 
 export class CurrencySettings {
@@ -54,11 +56,20 @@ export class CurrencySettings {
   serverUrl: string;
 
   constructor(currency: Coin | Token = null) {
-    // Nem do not have a spatium provider yet
-    if (currency === Coin.NEM) {
-      this.serverName = CurrencyServerName.Native;
-    } else {
-      this.serverName = CurrencyServerName.Spatium;
+    // Nem and Neo do not have a spatium provider yet
+    switch (currency) {
+      case Coin.NEM:
+        this.serverName = CurrencyServerName.Native;
+        break;
+      case Coin.NEO:
+        this.serverName = CurrencyServerName.Neoscan;
+        break;
+      case Coin.NEO_test:
+        this.serverName = CurrencyServerName.TestNeoscan;
+        break;
+      default:
+        this.serverName = CurrencyServerName.Spatium;
+        break;
     }
   }
 }
@@ -89,6 +100,12 @@ export class CurrencyService {
     ])],
     [Coin.NEM, new Map<string, string>([
       [CurrencyServerName.Native, 'http://hugealice3.nem.ninja']
+    ])],
+    [Coin.NEO, new Map<string, string>([
+      [CurrencyServerName.Neoscan, 'https://api.neoscan.io/api/main_net/v1']
+    ])],
+    [Coin.NEO_test, new Map<string, string>([
+      [CurrencyServerName.TestNeoscan, 'https://api.neoscan.io/api/test_net/v1']
     ])]
   ]);
 
@@ -201,9 +218,24 @@ export class CurrencyService {
     [Coin.NEO, new Info(
       'NEO',
       'NEO',
-      50000,
-      30000,
-      'NEO/tx',
+      0,
+      0,
+      'NEO/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('NEO') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'neo'
+    )],
+    [Coin.NEO_test, new Info(
+      'NEO test',
+      'NEO',
+      0,
+      0,
+      'NEO/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.pipe(
           map(ac => ac.get('NEO') || null),

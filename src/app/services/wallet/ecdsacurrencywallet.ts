@@ -12,19 +12,23 @@ export abstract class EcdsaCurrencyWallet extends CurrencyWallet {
   protected syncSession: SyncSession = null;
   protected signSession: SignSession = null;
 
+  private readonly curve: string = null;
+
   constructor(network: string,
               keychain: KeyChainService,
               currency: Coin,
               account: number,
               messageSubject: any,
               connectionProviderService: ConnectionProviderService,
-              worker: any) {
+              worker: any,
+              curve?: string) {
     super(network, keychain, currency, account, messageSubject, connectionProviderService, worker);
+    this.curve = curve || 'secp256k1';
   }
 
   public async sync(options: any) {
     this.compoundKey = await CompoundKeyEcdsa.fromOptions({
-      curve: 'secp256k1',
+      curve: this.curve,
       secret: this.keychain.getCoinSecret(this.currency, this.account),
       paillierKeys: options.paillierKeys
     }, this.worker);
