@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
-    "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git",
+    "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git#b3384e0e302e60d7c46056f8c73d167b7f68db2f",
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "ajv": "^6.0.0",
     "cocoon-cordova-labs-local-webserver": "^2.4.1",
