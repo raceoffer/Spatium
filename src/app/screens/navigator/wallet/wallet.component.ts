@@ -86,8 +86,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     Coin.ETH,
     Coin.LTC,
     Coin.NEM,
-    Coin.ADA,
     Coin.NEO,
+    Coin.ADA,
     Coin.XRP,
     Coin.XLM
   ];
@@ -140,6 +140,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.keychain.topTokens.getValue().forEach(tokenInfo => tiles.push(tokenInfo.token));
 
     tiles.push(Coin.BTC_test);
+    tiles.push(Coin.NEO_test);
 
     tiles.forEach(tile => {
       this.tileModel.set(tile, this.getTileModel(tile));

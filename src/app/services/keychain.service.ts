@@ -13,7 +13,8 @@ export enum Coin {
   BCH = 145,
   XLM = 148,
   NEO = 888,
-  ADA = 1815
+  ADA = 1815,
+  NEO_test = 889
 }
 
 export enum Token {
