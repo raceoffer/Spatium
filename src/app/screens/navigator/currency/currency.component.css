@@ -27,6 +27,7 @@ input.mat-input-element{
 
 .transaction-list {
   text-align: left;
+  width: 100%;
 }
 
 .transaction-amount {
@@ -114,3 +115,12 @@ button.wallet-address-button {
   margin-top: 130px;
 }
 
+.scroll {
+  overflow-y: scroll;
+  height: 100%;
+}
+
+html, body
+{
+    height: 100%;
+}

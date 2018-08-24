@@ -1,5 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnDestroy, OnInit, HostListener, ViewChild, Inject, AfterViewInit, ChangeDetectorRef, ElementRef, NgZone } from '@angular/core';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrencyService, Info } from '../../../services/currency.service';
@@ -14,6 +14,8 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
 import { DeviceService, Platform } from '../../../services/device.service';
+import { DOCUMENT } from '@angular/platform-browser';
+import * as $ from 'jquery';
 
 declare const cordova: any;
 
@@ -30,12 +32,15 @@ declare const cordova: any;
     ])
   ]
 })
+
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   public txType = TransactionType;
   public statusType = Status;
   public balanceStatusType = BalanceStatus;
+  
+  @ViewChild('transactionList') transactionList: ElementRef;
 
   @Input() public currency: Coin | Token = null;
   public currencyInfo: Info = null;
@@ -49,17 +54,29 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
 
   public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
+  public isLoadingTransactions: boolean = false;
 
   private subscriptions = [];
+
+  private transactionsCount = 0;
+  private isHistoryLoaded: boolean = false;
 
   constructor(
     private readonly wallet: WalletService,
     private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
-    private readonly deviceService: DeviceService
+    private readonly deviceService: DeviceService,
+    @Inject(DOCUMENT) private document: Document,
+    private ngZone: NgZone,
   ) {}
 
   async ngOnInit() {
+    $('#transactionList').scroll(() => {    
+      if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
+          this.loadMore();
+        }
+    });
+
     this.currencyInfo = await this.currencyService.getInfo(this.currency);
 
     this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
@@ -98,16 +115,37 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     ), null);
 
     this.transactions = toBehaviourSubject(
-      from(this.currencyWallet.listTransactionHistory()),
+      from(this.currencyWallet.listTransactionHistory(0, 10)),
       null);
 
     this.subscriptions.push(
       this.currencyWallet.readyEvent.subscribe(() => {
         this.transactions = toBehaviourSubject(
-          from(this.currencyWallet.listTransactionHistory()),
+          from(this.currencyWallet.listTransactionHistory(0, 10)),
           null);
       })
     );
+
+    this.transactionsCount += 10;
+  }
+
+  async loadMore() {
+    if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
+      this.isLoadingTransactions = true;
+
+      let oldList = this.transactions.getValue();
+      let newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount, this.transactionsCount + 10);
+
+      if (newList.length > 0)
+        oldList.push.apply(oldList, newList);
+      if (newList.length < 10)
+        this.isHistoryLoaded = true;
+
+      this.isLoadingTransactions = false;
+      this.transactions.next(oldList);
+
+      this.transactionsCount += 10;
+    }
   }
 
   ngOnDestroy() {
