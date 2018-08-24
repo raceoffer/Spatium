@@ -20,7 +20,7 @@ import {
   getTouchPassword,
   saveTouchPassword
 } from '../../../utils/fingerprint';
-import { StorageService } from '../../../services/storage.service';
+import { SettingsService } from '../../../services/settings.service';
 
 declare const Buffer: any;
 declare const window: any;
@@ -84,14 +84,14 @@ export class ChangePincodeComponent implements OnInit {
     private readonly workerService: WorkerService,
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {}
 
   async ngOnInit() {
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
-    const stored = await this.storage.getValue('fingerprint.enabled');
+    const stored = await this.settings.fingerprintEnabled();
     if (stored !== null) {
       this.touchEnabled.next(stored as boolean);
     } else {

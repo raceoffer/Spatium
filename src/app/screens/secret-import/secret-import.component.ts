@@ -3,7 +3,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { IdFactor } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
-import { StorageService } from '../../services/storage.service';
+import { SettingsService } from '../../services/settings.service';
 
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from '../../utils/nfc';
@@ -68,7 +68,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     private readonly fs: FileService,
     private readonly ngZone: NgZone,
     private readonly workerService: WorkerService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) { }
 
   async ngOnInit() {
@@ -77,7 +77,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
 
-    const stored = await this.storage.getValue('fingerprint.enabled');
+    const stored = await this.settings.fingerprintEnabled();
     if (stored !== null) {
       this.touchEnabled.next(stored as boolean);
     } else {
