@@ -153,7 +153,6 @@
     <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7d86cfd40a0bbe6923351a6cc9da267b9f6fe707" />
     <plugin name="cordova-plugin-zeroconf" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-zeroconf.git#716660c7554028849c03d9a8050a7f84b8d9faa5" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
-    <plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^6.3.0" />

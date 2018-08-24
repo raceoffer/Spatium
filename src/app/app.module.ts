@@ -113,7 +113,7 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
-import { StorageService } from './services/storage.service';
+import { SettingsService } from './services/settings.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
@@ -248,7 +248,7 @@ import { AddTokenComponent } from './screens/navigator/add-token/add-token.compo
     SocketClientService,
     ZeroconfService,
     ConnectionProviderService,
-    StorageService
+    SettingsService,
   ],
   bootstrap: [
     AppComponent

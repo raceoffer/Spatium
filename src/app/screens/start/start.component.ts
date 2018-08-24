@@ -2,7 +2,7 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService, Position } from '../../services/navigation.service';
-import { StorageService } from '../../services/storage.service';
+import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { KeyChainService } from '../../services/keychain.service';
 import { LoggerService } from '../../services/logger.service';
@@ -28,13 +28,13 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly ngZone: NgZone,
     private readonly navigationService: NavigationService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {}
 
   public async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    const viewed = await this.storage.getValue('presentation.viewed') as boolean;
+    const viewed = await this.settings.presentationViewed();
     if (!viewed) {
       this.openPresentation();
     }
@@ -66,7 +66,7 @@ export class StartComponent implements OnInit, OnDestroy {
     this.buffer = Buffer;
     this.keyChainService.reset();
 
-    const startPath = await this.storage.getValue('startPath');
+    const startPath = await this.settings.startPath();
     if (startPath !== null) {
       await this.router.navigate([startPath as string]);
     }
@@ -81,17 +81,17 @@ export class StartComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
     componentRef.instance.finished.subscribe(async () => {
       this.navigationService.acceptOverlay();
-      await this.storage.setValue('presentation.viewed', true);
+      await this.settings.setPresentationViewed(true);
     });
     componentRef.instance.skipped.subscribe(async () => {
       this.navigationService.acceptOverlay();
-      await this.storage.setValue('presentation.viewed', true);
+      await this.settings.setPresentationViewed(true);
     });
   }
 
   public async onOpenClicked() {
     try {
-      await this.storage.setValue('startPath', '/login');
+      await this.settings.setStartPath('/login');
     } catch (e) {
       console.log(e);
     }
@@ -100,7 +100,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   public async onConnectClicked() {
     try {
-      await this.storage.setValue('startPath', '/verifier-auth');
+      await this.settings.setStartPath('/verifier-auth');
     } catch (e) {
       console.log(e);
     }

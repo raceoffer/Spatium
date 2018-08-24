@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
-import { StorageService } from './storage.service';
+import { SettingsService } from './settings.service';
 
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -280,7 +280,7 @@ export class CurrencyService {
   constructor(
     private readonly keychain: KeyChainService,
     private readonly currencyPriceService: CurrencyPriceService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {
     this.keychain.topTokens.subscribe(() => {
       this.keychain.topTokens.getValue().forEach(tokenInfo => {
@@ -347,7 +347,7 @@ export class CurrencyService {
     let jsonSettings: any;
     const settings: CurrencySettings = new CurrencySettings(currency);
 
-    jsonSettings = await this.storage.getValue('settings.currency');
+    jsonSettings = await this.settings.settingsCurrency();
     if (jsonSettings) {
       jsonSettings = jsonSettings[currency];
     }
@@ -362,9 +362,9 @@ export class CurrencyService {
   }
 
   public async saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items: any = await this.storage.getValue('settings.currency');
+    let items: any = await this.settings.settingsCurrency();
     items = items ? JSON.parse(items) : {};
     items[currency] = settings;
-    await this.storage.setValue('settings.currency', items);
+    await this.settings.setSettingsCurrency(items);
   }
 }
