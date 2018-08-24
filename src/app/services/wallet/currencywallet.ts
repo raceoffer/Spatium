@@ -167,7 +167,7 @@ export abstract class CurrencyWallet {
 
   public abstract async verifySignature();
 
-  public abstract async listTransactionHistory();
+  public abstract async listTransactionHistory(to, from);
 
   public abstract async createTransaction(address: string, value: any, fee?: any);
 
