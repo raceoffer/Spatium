@@ -33,7 +33,7 @@
     "base-58": "0.0.1",
     "cashaddrjs": "^0.2.8",
     "core-js": "^2.4.1",
-    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#b4173387475db760d45a819ce6470044d1f6358a",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#47fc0a460d78466f616c0b7cb729e0f2e3f9e302",
     "flatted": "^0.2.2",
     "hammerjs": "^2.0.8",
     "ionic-native-http-angular-wrapper": "git+https://github.com/CaspianTechnologies/ionic-native-http-angular-wrapper.git#ca80bfdcf5eb5c38e617fe7f63fa6a2665d9e021",
