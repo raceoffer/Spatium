@@ -363,7 +363,7 @@ export class CurrencyService {
 
   public async saveSettings(currency: Coin | Token, settings: CurrencySettings) {
     let items: any = await this.settings.settingsCurrency();
-    items = items ? JSON.parse(items) : {};
+    items = items ? items : {};
     items[currency] = settings;
     await this.settings.setSettingsCurrency(items);
   }
