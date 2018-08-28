@@ -11,7 +11,13 @@ export class SettingsService {
     settingsCurrency: null,
   };
 
+  private settings = {};
+
   constructor(private readonly fs: FileService) {
+  }
+
+  async initializeSettings()  {
+    this.settings = await this.getSettings();
   }
 
   async presentationViewed(): Promise<boolean> {
@@ -47,14 +53,12 @@ export class SettingsService {
   }
 
   private async getValue(key: string): Promise<any> {
-    let settings = await this.getSettings();
-    return settings[key];
+    return this.settings[key];
   }
 
   private async setValue(key: string, value: any) {
-    let settings = await this.getSettings();
-    settings[key] = value;
-    return this.fs.writeFile(this.settingsFileName, JSON.stringify(settings));
+    this.settings[key] = value;
+    return await this.fs.writeFile(this.settingsFileName, JSON.stringify(this.settings));
   }
 
   private async getSettings() {

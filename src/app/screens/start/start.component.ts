@@ -34,6 +34,8 @@ export class StartComponent implements OnInit, OnDestroy {
   public async ngOnInit() {
     await this.deviceService.deviceReady();
 
+    await this.settings.initializeSettings();
+
     const viewed = await this.settings.presentationViewed();
     if (!viewed) {
       this.openPresentation();
