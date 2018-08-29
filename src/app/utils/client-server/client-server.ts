@@ -14,10 +14,15 @@ export enum ErrorCode {
 
 export class Client {
   private root: Root;
+
+  private Request: any;
+  private Response: any;
+  private Error: any;
+
   private requestQueue = [];
   private responseAccumulator = Buffer.alloc(0);
 
-  private static bufferUUID() {
+  private static bufferUUID(): Buffer {
     const uuidArray = [];
     uuid(undefined, uuidArray);
     return Buffer.from(uuidArray);
@@ -25,6 +30,10 @@ export class Client {
 
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
+
+    this.Request = this.root.lookupType('Request');
+    this.Response = this.root.lookupType('Response');
+    this.Error = this.root.lookupType('Error');
 
     this.socket.data.subscribe(async (data) => {
       await this.handleData(data);
@@ -40,15 +49,13 @@ export class Client {
   }
 
   public async request(data: Buffer): Promise<Buffer> {
-    const Request = this.root.lookupType('Request');
-
     if (this.socket.state.getValue() !== State.Opened) {
       throw new Error('Request failed: Not connected');
     }
 
     const id = Client.bufferUUID();
 
-    const message = new Buffer(Request.encodeDelimited({
+    const message = new Buffer(this.Request.encodeDelimited({
       id: id,
       data: data
     }).finish());
@@ -61,8 +68,6 @@ export class Client {
   }
 
   private async handleData(data: Buffer): Promise<void> {
-    const Response = this.root.lookupType('Response');
-
     this.responseAccumulator = Buffer.concat([this.responseAccumulator, data]);
 
     const reader = Reader.create(this.responseAccumulator);
@@ -71,6 +76,7 @@ export class Client {
     let lastPos = 0;
 
     try {
+      // noinspection InfiniteLoopJS
       while (true) {
         const packet = reader.bytes();
         lastPos = reader.pos;
@@ -81,7 +87,7 @@ export class Client {
     this.responseAccumulator = this.responseAccumulator.slice(lastPos);
 
     for (let i = 0; i < packets.length; ++i) {
-      const packet: any = Response.decode(packets[i]);
+      const packet: any = this.Response.decode(packets[i]);
 
       await this.handleResponse(packet);
     }
@@ -107,8 +113,7 @@ export class Client {
   }
 
   private decodeError(data: Buffer): string {
-    const Error = this.root.lookupType('Error');
-    const error: any = Error.decode(data);
+    const error: any = this.Error.decode(data);
     return error.message;
   }
 
@@ -123,12 +128,21 @@ export class Client {
 
 export class Server {
   private root: Root;
+
+  private Request: any;
+  private Response: any;
+  private Error: any;
+
   private responseAccumulator = Buffer.alloc(0);
 
-  private requestHandler: (data: Buffer) => Buffer = null;
+  private requestHandler: (data: Buffer) => any = null;
 
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
+
+    this.Request = this.root.lookupType('Request');
+    this.Response = this.root.lookupType('Response');
+    this.Error = this.root.lookupType('Error');
 
     this.socket.data.subscribe(async (data) => {
       await this.handleData(data);
@@ -143,13 +157,11 @@ export class Server {
     });
   }
 
-  public setRequestHandler(handler: (data: Buffer) => Buffer): void {
+  public setRequestHandler(handler: (data: Buffer) => any): void {
     this.requestHandler = handler;
   }
 
   private async handleData(data: Buffer): Promise<void> {
-    const Request = this.root.lookupType('Request');
-
     this.responseAccumulator = Buffer.concat([this.responseAccumulator, data]);
 
     const reader = Reader.create(this.responseAccumulator);
@@ -158,6 +170,7 @@ export class Server {
     let lastPos = 0;
 
     try {
+      // noinspection InfiniteLoopJS
       while (true) {
         const packet = reader.bytes();
         lastPos = reader.pos;
@@ -169,9 +182,9 @@ export class Server {
 
     for (let i = 0; i < packets.length; ++i) {
       try {
-        const packet: any = Request.decode(packets[i]);
+        const request = this.Request.decode(packets[i]);
 
-        await this.handleRequest(packet);
+        await this.handleRequest(request);
       } catch (ignored) {} // Suddenly, if we cannot decode the packet, we cannot send a proper response
     }
   }
@@ -181,7 +194,7 @@ export class Server {
     const data = new Buffer(request.data);
     if (this.requestHandler) {
       try {
-        const response = this.requestHandler(data);
+        const response = await this.requestHandler(data);
         await this.respond(id, ErrorCode.None, response);
       } catch (e) {
         await this.respond(id, ErrorCode.RuntimeError, this.encodeError(e.message ? e.message : e.toString()));
@@ -192,16 +205,13 @@ export class Server {
   }
 
   private encodeError(message: string): Buffer {
-    const Error = this.root.lookupType('Error');
-    return new Buffer(Error.encode({
+    return new Buffer(this.Error.encode({
       message: message
     }).finish());
   }
 
   private async respond(id: Buffer, error: ErrorCode, data: Buffer): Promise<void> {
-    const Response = this.root.lookupType('Response');
-
-    const message = new Buffer(Response.encodeDelimited({
+    const message = new Buffer(this.Response.encodeDelimited({
       id: id,
       error: error,
       data: data

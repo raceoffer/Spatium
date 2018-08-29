@@ -118,6 +118,7 @@ import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
+import { RPCServerService } from './services/rpc/rpc-server.service';
 
 @NgModule({
   declarations: [
@@ -246,7 +247,8 @@ import { NavbarComponent } from './modals/navbar/navbar.component';
     SocketClientService,
     ZeroconfService,
     ConnectionProviderService,
-    StorageService
+    StorageService,
+    RPCServerService
   ],
   bootstrap: [
     AppComponent
