@@ -206,15 +206,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.clearFilterValue();
   }
 
-  public addToken() {
-    const componentRef = this.navigationService.pushOverlay(AddTokenComponent);
-    componentRef.instance.createdEvent.subscribe(tokenInfo => {
-      this.tiles.next([tokenInfo.token].concat(this.tiles.getValue()));
-      this.tileModel.set(tokenInfo.token, this.getTileModel(tokenInfo.token));
-      this.navigationService.acceptOverlay();
-    });
-  }
-
   public async openConnectOverlay() {
     const componentRef = this.navigationService.pushOverlay(WaitingComponent);
     componentRef.instance.connectedEvent.subscribe(ignored => {
