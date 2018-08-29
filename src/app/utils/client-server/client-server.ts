@@ -1,58 +1,9 @@
-import { Socket, State } from './socket';
 import { Reader, Root } from 'protobufjs';
 import { v4 as uuid } from 'uuid';
 import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
+import { Socket, State } from '../sockets/socket';
 
-const abi = {
-  'nested': {
-    'Request': {
-      'fields': {
-        'id': {
-          'type': 'bytes',
-          'id': 1
-        },
-        'data': {
-          'type': 'bytes',
-          'id': 2
-        }
-      }
-    },
-    'Response': {
-      'fields': {
-        'id': {
-          'type': 'bytes',
-          'id': 1
-        },
-        'error': {
-          'type': 'ErrorCode',
-          'id': 2
-        },
-        'data': {
-          'type': 'bytes',
-          'id': 3
-        }
-      },
-      'nested': {
-        'ErrorCode': {
-          'values': {
-            'NONE': 0,
-            'BAD_REQUEST': 1,
-            'NOT_LISTENING': 2,
-            'RUNTIME_ERROR': 3
-          }
-        }
-      }
-    },
-    'Error': {
-      'fields': {
-        'message': {
-          'type': 'string',
-          'id': 1
-        }
-      }
-    }
-  }
-};
+import { abi } from './protocol';
 
 export enum ErrorCode {
   None = 0,
