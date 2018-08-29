@@ -39,10 +39,12 @@
     "ionic-native-http-angular-wrapper": "git+https://github.com/CaspianTechnologies/ionic-native-http-angular-wrapper.git#ca80bfdcf5eb5c38e617fe7f63fa6a2665d9e021",
     "jquery": "^3.2.1",
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",
+    "protobufjs": "^6.8.8",
     "rxjs": "^6.1.0",
     "rxjs-compat": "^6.2.0",
     "text-encoding": "^0.6.4",
     "tslint-angular": "^1.1.2",
+    "uuid": "^3.3.2",
     "wallet-address-validator": "^0.1.7",
     "zone.js": "^0.8.26"
   },
