@@ -25,12 +25,7 @@ export const abi = {
       }
     },
     'CapabilitiesRequest': {
-      'fields': {
-        'token': {
-          'type': 'string',
-          'id': 1
-        }
-      }
+      'fields': {}
     },
     'CapabilitiesResponse': {
       'fields': {

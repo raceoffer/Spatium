@@ -40,6 +40,10 @@ export class DeviceService {
       }, false);
   }
 
+  public async appInfo() {
+    return await new Promise((resolve, reject) => navigator.appInfo.getAppInfo(resolve, reject));
+  }
+
   public deviceReady() {
     return this.ready.pipe(
       filter(ready => ready),

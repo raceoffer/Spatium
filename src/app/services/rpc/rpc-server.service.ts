@@ -2,27 +2,7 @@ import { Injectable } from '@angular/core';
 import { Root } from 'protobufjs';
 
 import { abi } from './protocol';
-
-const Api = {
-  Capabilities: function (request) {
-    if (request.token !== 'ahsgdfahsgdf') {
-      throw new Error('Invalid token');
-    }
-
-    return {
-      appVersionMajor: 0,
-      appVersionMinor: 16,
-      appVersionPatch: 16,
-      supportedProtocolVersions: [1, 2, 3]
-    };
-  },
-  Handshake: function (request) {
-    return {
-      known: new Buffer(request.sessionId).equals(Buffer.from('ffffaadd', 'hex')),
-      sessionId: Buffer.from('ffaadd00', 'hex')
-    };
-  }
-};
+import { DeviceService } from '../device.service';
 
 @Injectable()
 export class RPCServerService {
@@ -30,7 +10,26 @@ export class RPCServerService {
   private RpcCall: any;
   private RpcService: any;
 
-  constructor() {
+  private api = {
+    Capabilities: async () => {
+      const appInfo: any = await this.deviceService.appInfo();
+      const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
+      return {
+        appVersionMajor: version[1],
+        appVersionMinor: version[2],
+        appVersionPatch: version[3],
+        supportedProtocolVersions: [1]
+      };
+    },
+    Handshake: function (request) {
+      return {
+        known: new Buffer(request.sessionId).equals(Buffer.from('ffffaadd', 'hex')),
+        sessionId: Buffer.from('ffaadd00', 'hex')
+      };
+    }
+  };
+
+  constructor(private readonly deviceService: DeviceService) {
     this.root = Root.fromJSON(abi);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
@@ -47,8 +46,8 @@ export class RPCServerService {
 
     const request = RequestType.decode(rpcCall.data);
 
-    if (Object.keys(Api).includes(rpcCall.method)) {
-      const response = await Api[rpcCall.method](request);
+    if (Object.keys(this.api).includes(rpcCall.method)) {
+      const response = await this.api[rpcCall.method](request);
 
       return new Buffer(ResponseType.encode(response).finish());
     } else {
