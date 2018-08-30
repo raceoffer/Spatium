@@ -5,6 +5,8 @@ import { abi } from './protocol';
 import { DeviceService } from '../device.service';
 import { VerifierService } from '../verifier.service';
 
+import { PedersenParameters, PedersenCommitment, SchnorrProof, Convert } from 'crypto-core-async';
+
 @Injectable()
 export class RPCServerService {
   private root: Root;
@@ -30,6 +32,25 @@ export class RPCServerService {
     ClearSession: async (request) => {
       return {
         existing: await this.verifierService.clearSession(new Buffer(request.sessionId))
+      };
+    },
+    SyncStatus: async (request) => {
+      return {
+        statuses: await this.verifierService.syncStatus(new Buffer(request.sessionId))
+      };
+    },
+    StartSync: async (request) => {
+      const r = await this.verifierService.startSync(
+        new Buffer(request.sessionId),
+        request.currencyId, {
+          params: PedersenParameters.fromJSON(request.params),
+          i: PedersenCommitment.fromJSON(request.i)
+        }
+      );
+
+      return {
+        Q: Convert.encodePoint(r.Q),
+        proof: r.proof.toJSON()
       };
     }
   };
