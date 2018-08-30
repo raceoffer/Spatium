@@ -18,9 +18,13 @@ export const abi = {
           'requestType': 'CapabilitiesRequest',
           'responseType': 'CapabilitiesResponse'
         },
-        'Handshake': {
-          'requestType': 'HandshakeRequest',
-          'responseType': 'HandshakeResponse'
+        'RegisterSession': {
+          'requestType': 'RegisterSessionRequest',
+          'responseType': 'RegisterSessionResponse'
+        },
+        'ClearSession': {
+          'requestType': 'ClearSessionRequest',
+          'responseType': 'ClearSessionResponse'
         }
       }
     },
@@ -48,7 +52,7 @@ export const abi = {
         }
       }
     },
-    'HandshakeRequest': {
+    'RegisterSessionRequest': {
       'fields': {
         'sessionId': {
           'type': 'bytes',
@@ -56,15 +60,27 @@ export const abi = {
         }
       }
     },
-    'HandshakeResponse': {
+    'RegisterSessionResponse': {
       'fields': {
-        'known': {
+        'existing': {
           'type': 'bool',
           'id': 1
-        },
+        }
+      }
+    },
+    'ClearSessionRequest': {
+      'fields': {
         'sessionId': {
           'type': 'bytes',
-          'id': 2
+          'id': 1
+        }
+      }
+    },
+    'ClearSessionResponse': {
+      'fields': {
+        'existing': {
+          'type': 'bool',
+          'id': 1
         }
       }
     }

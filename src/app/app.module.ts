@@ -119,6 +119,7 @@ import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
 import { RPCServerService } from './services/rpc/rpc-server.service';
+import { VerifierService } from './services/verifier.service';
 
 @NgModule({
   declarations: [
@@ -248,7 +249,8 @@ import { RPCServerService } from './services/rpc/rpc-server.service';
     ZeroconfService,
     ConnectionProviderService,
     StorageService,
-    RPCServerService
+    RPCServerService,
+    VerifierService
   ],
   bootstrap: [
     AppComponent

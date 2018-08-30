@@ -3,6 +3,7 @@ import { Root } from 'protobufjs';
 
 import { abi } from './protocol';
 import { DeviceService } from '../device.service';
+import { VerifierService } from '../verifier.service';
 
 @Injectable()
 export class RPCServerService {
@@ -21,15 +22,22 @@ export class RPCServerService {
         supportedProtocolVersions: [1]
       };
     },
-    Handshake: function (request) {
+    RegisterSession: async (request) => {
       return {
-        known: new Buffer(request.sessionId).equals(Buffer.from('ffffaadd', 'hex')),
-        sessionId: Buffer.from('ffaadd00', 'hex')
+        existing: await this.verifierService.registerSession(new Buffer(request.sessionId))
+      };
+    },
+    ClearSession: async (request) => {
+      return {
+        existing: await this.verifierService.clearSession(new Buffer(request.sessionId))
       };
     }
   };
 
-  constructor(private readonly deviceService: DeviceService) {
+  constructor(
+    private readonly deviceService: DeviceService,
+    private readonly verifierService: VerifierService
+  ) {
     this.root = Root.fromJSON(abi);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
