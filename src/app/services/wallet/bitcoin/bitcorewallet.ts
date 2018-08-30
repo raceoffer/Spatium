@@ -5,10 +5,13 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { LoggerService } from '../../logger.service';
 import { Balance, HistoryEntry, Status, getRandomDelay, BalanceStatus } from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
+import * as $ from 'jquery';
 
 export class BitcoreWallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
+  private timeEnd: any = null;
+  private transactionList: HistoryEntry[] = null;
 
   constructor(
     private Transaction: any,
@@ -103,8 +106,61 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
       return null;
     }
 
-    const txs = await this.wallet.getTransactions(to, from);
-    return txs.map(tx => HistoryEntry.fromJSON(tx));
+    if (this.transactionList === null) {
+      const txs = await this.wallet.getTransactions(to, from);
+      let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+      this.transactionList = txsMapped;  
+    }
+    else if (from === 0) {
+      const txs = await this.wallet.getTransactions(to, from);
+      let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+      if (txsMapped.length > 0) {
+        if (txsMapped.slice(-1)[0].time <= this.transactionList[0].time) {
+          let timeEnd = this.transactionList[0].time;
+          let filtered = $.grep(txsMapped, function( item: HistoryEntry, index) {
+            return ( item.time > timeEnd);
+          });
+
+          this.transactionList.unshift.apply(this.transactionList, filtered);
+        }
+        else {
+          this.timeEnd = this.transactionList[0].time;
+          this.transactionList.unshift.apply(this.transactionList, txsMapped);       
+        }   
+      }
+    }
+    else {
+      if (this.timeEnd !== null && this.timeEnd < to) {
+        const txs = await this.wallet.getTransactions(to, from);
+        let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+        if (txsMapped.slice(-1)[0].time <= this.transactionList[0].time) {
+          let timeEnd = this.transactionList[0].time;
+          let filtered = $.grep(txsMapped, function( item: HistoryEntry, index) {
+            return ( item.time > timeEnd);
+          });
+
+          Array.prototype.splice.apply(this.transactionList, [to,0].concat(filtered));
+          this.timeEnd = null;
+        }
+        else {
+          Array.prototype.splice.apply(this.transactionList, [to,0].concat(txsMapped));
+        }   
+      }
+      else if (this.transactionList.length < to) {
+        const txs = await this.wallet.getTransactions(to, from);
+        let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+        this.transactionList.push.apply(this.transactionList, txsMapped);
+      }
+    }
+
+    if (this.transactionList.length >= to) {
+      return this.transactionList.slice(from, to);
+    } else {
+      return this.transactionList;
+    }
   }
 
   public async createTransaction(address: string,

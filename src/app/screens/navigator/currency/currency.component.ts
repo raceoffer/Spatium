@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, Input, OnDestroy, OnInit, HostListener, ViewChild, Inject, AfterViewInit, ChangeDetectorRef, ElementRef, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CurrencyService, Info } from '../../../services/currency.service';
 import { Coin, Token } from '../../../services/keychain.service';
@@ -55,12 +55,13 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
   public isLoadingTransactions: boolean = false;
+  public isUpdatingTransactions: boolean = false;
 
   private subscriptions = [];
 
   private transactionsCount = 0;
   private isHistoryLoaded: boolean = false;
-
+  
   constructor(
     private readonly wallet: WalletService,
     private readonly currencyService: CurrencyService,
@@ -115,18 +116,22 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     ), null);
 
     this.transactions = toBehaviourSubject(
-      from(this.currencyWallet.listTransactionHistory(0, 10)),
+      from(this.currencyWallet.listTransactionHistory(10, 0)),
       null);
 
     this.subscriptions.push(
       this.currencyWallet.readyEvent.subscribe(() => {
         this.transactions = toBehaviourSubject(
-          from(this.currencyWallet.listTransactionHistory(0, 10)),
+          from(this.currencyWallet.listTransactionHistory(10, 0)),
           null);
       })
     );
 
     this.transactionsCount += 10;
+
+    interval(10000).subscribe(async () => {
+      await this.updateTransactions();
+    });
   }
 
   async loadMore() {
@@ -134,7 +139,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       this.isLoadingTransactions = true;
 
       let oldList = this.transactions.getValue();
-      let newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount, this.transactionsCount + 10);
+      let newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount + 10, this.transactionsCount);
 
       if (newList.length > 0)
         oldList.push.apply(oldList, newList);
@@ -173,5 +178,33 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onBack() {
     this.navigationService.back();
+  }
+
+  async updateTransactions(to=10, from=0) {
+    if (this.currencyWallet !== null && this.transactions.getValue() !== null && !this.isUpdatingTransactions) {
+      this.isUpdatingTransactions = true;
+
+      let oldList = this.transactions.getValue();
+      let newList = await this.currencyWallet.listTransactionHistory(to, from);
+
+      if (newList !== null && newList.length > 0) {
+        if (newList.slice(-1)[0].time <= oldList[0].time) {
+          let timeEnd = oldList[0].time;
+          let filtered = $.grep(newList, function( item: HistoryEntry, index) {
+            return ( item.time > timeEnd);
+          });
+
+          oldList.unshift.apply(oldList, filtered);
+          this.transactions.next(oldList);
+        } else {
+          oldList.unshift.apply(oldList, newList);
+          this.transactions.next(oldList);
+
+          this.updateTransactions(to + 10, from + 10);
+        }
+      }
+      
+      this.isUpdatingTransactions = false;
+    }
   }
 }
