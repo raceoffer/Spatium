@@ -35,8 +35,8 @@ export class FileInfo {
 @Injectable()
 
 export class IpfsService {
-  private host: string = '185.219.80.169';
-  private port: string = '5001';
+  private host = '185.219.80.169';
+  private port = '5001';
 
   private ipfs: any = window.IpfsApi(this.host, this.port, {protocol: 'http'});
 
