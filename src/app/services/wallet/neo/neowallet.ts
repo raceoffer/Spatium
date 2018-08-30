@@ -3,7 +3,7 @@ import { from, of, timer } from 'rxjs';
 import { catchError, expand, filter, map, mergeMap } from 'rxjs/operators';
 import { ConnectionProviderService } from '../../connection-provider';
 import { Coin, KeyChainService } from '../../keychain.service';
-import { Balance, Status, getRandomDelay } from '../currencywallet';
+import {Balance, Status, getRandomDelay, HistoryEntry} from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
 
 export class NeoWallet extends EcdsaCurrencyWallet {
@@ -89,9 +89,13 @@ export class NeoWallet extends EcdsaCurrencyWallet {
     );
   }
 
-  public async listTransactionHistory() {
-    await timer(1000).toPromise();
-    return [];
+  public async listTransactionHistory(to, from) {
+    if (this.wallet === null) {
+      return null;
+    }
+
+    const txs = await this.wallet.getTransactions(to, from);
+    return txs.map(tx => HistoryEntry.fromJSON(tx));
   }
 
   public async pushTransaction() {
