@@ -50,16 +50,15 @@ export class DeviceService {
   async getAppInfo() {
     const result = [];
 
-    await navigator.appInfo.getAppInfo(function(appInfo) {
-      console.debug(appInfo);
-      result.push('Identifier: ' + appInfo.identifier + '\n');
-      result.push('Version: ' + appInfo.version + '\n');
-      result.push('Build: ' + appInfo.build + '\n\n');
+    try {
+      result.push('Identifier: ' + navigator.appInfo.identifier + '\n');
+      result.push('Version: ' + navigator.appInfo.version + '\n');
+      result.push('Build: ' + navigator.appInfo.build + '\n\n');
 
       console.debug(result);
-    }, function(err) {
+    } catch (err) {
       console.error(err);
-    });
+    }
 
     return result;
   }

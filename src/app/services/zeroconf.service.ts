@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, interval, merge, Subject } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 import { toBehaviourSubject, toReplaySubject, waitForSubject } from '../utils/transformers';
-import { DeviceService } from './device.service';
+import { DeviceService, Platform } from './device.service';
 import { DiscoveryService } from './discovery.service';
 import { IConnectionProvider } from './interfaces/connection-provider';
 import { Device } from './primitives/device';
@@ -112,6 +112,9 @@ export class ZeroconfService implements IConnectionProvider {
             if (this.connectionType !== navigator.connection.type) {
               this.connectionType = navigator.connection.type;
               console.log('Connection type changed to:', this.connectionType);
+              this.deviceService.platform !== Platform.Windows ?
+                console.log('ip', await this.socketServerService.getIpv4Address()) :
+                console.log('getting ip on Windows is not implemented');
             }
 
             if (navigator.connection.type === 'wifi') {
@@ -122,7 +125,7 @@ export class ZeroconfService implements IConnectionProvider {
           } else {
             if (this.connectionType !== null) {
               this.connectionType = null;
-              console.log('Connection type changed on: none');
+              console.log('Connection type changed to: none');
             }
             this.deviceState.next(State.Stopped);
           }
