@@ -11,10 +11,6 @@
     <mat-icon>search</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="addToken()">
-    <mat-icon>add</mat-icon>
-  </button>
-
   <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
     <mat-icon>sync</mat-icon>
   </button>

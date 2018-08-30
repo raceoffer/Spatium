@@ -72,8 +72,8 @@ export class AddTokenComponent implements OnInit {
       null,
       this.decimalsField.value);
 
-    await this.keyChainService.addCustomToken(token);
-    this.createdEvent.emit(token);
+    //await this.keyChainService.addCustomToken(token);
+    //this.createdEvent.emit(token);
   }
 
 }
