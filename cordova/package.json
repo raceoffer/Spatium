@@ -90,7 +90,7 @@
     ]
   },
   "devDependencies": {
-    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#2a041f2651bb18b6db12ab38b05fd9823691ef7a",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#852de92da124d3c862abcfce499eefadcbbebcfc",
     "webpack": "^4.12.0",
     "webpack-cli": "^2.1.5"
   }
