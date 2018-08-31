@@ -1,4 +1,5 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Http, Headers, RequestOptionsArgs } from '@angular/http';
+import { HttpWrapper } from "ionic-native-http-angular-wrapper";
 import { Injectable } from '@angular/core';
 import { WorkerService } from './worker.service';
 
@@ -46,7 +47,7 @@ export class DDSService {
   private secret = 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs';
 
   constructor(
-    private readonly http: HttpClient,
+    private readonly http: HttpWrapper,
     private readonly workerService: WorkerService
   ) {
     this.dds = DDS.fromOptions({
@@ -73,16 +74,15 @@ export class DDSService {
 
   public sponsorStore(id, data: any) {
     const url = this.sponsor + '/storage/' + id.toString('hex');
-    const body = new HttpParams()
-      .set('data', '0x' + data.toString('hex'));
-    const httpOptions = {
-      headers: new HttpHeaders({
+    const body = {'data': '0x' + data.toString('hex')}
+
+    let httpOptions: RequestOptionsArgs = {
+      headers: new Headers({
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Auth-Key': this.secret,
         'Access-Control-Allow-Origin': '*',
       })
-    };
-
+    }
     return this.http.post(
       url,
       body,
