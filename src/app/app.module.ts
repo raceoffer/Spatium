@@ -1,5 +1,7 @@
 import { OverlayModule } from '@angular/cdk/overlay';
 import { HttpClientModule } from '@angular/common/http';
+import { HttpModule } from '@angular/http';
+import { NativeHttpWrapper } from 'ionic-native-http-angular-wrapper';
 import { NgModule } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -192,6 +194,8 @@ import { AddTokenComponent } from './screens/navigator/add-token/add-token.compo
     OverlayModule,
     FormsModule,
     HttpClientModule,
+    HttpModule,
+    NativeHttpWrapper,
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserModule,

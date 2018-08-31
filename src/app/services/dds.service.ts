@@ -1,9 +1,12 @@
+import { Headers } from '@angular/http';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpWrapper } from "ionic-native-http-angular-wrapper";
 import { Injectable } from '@angular/core';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
 import { getAccountSecret } from 'crypto-core-async/lib/utils';
+import { DeviceService, Platform } from './device.service';
 
 export class DDSAccount {
   public address: string = this.account.address;
@@ -42,11 +45,13 @@ export class DDSAccount {
 export class DDSService {
   private dds: any = null;
   private network = 'main'; // 'main'; | 'testnet';
-  private sponsor = 'https://kong.spatium.net/sponsor';
+  private sponsor = 'http://185.219.80.169:8080/sponsor';
   private secret = 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs';
 
   constructor(
-    private readonly http: HttpClient,
+    private readonly httpWrapper: HttpWrapper,
+    private readonly httpAngular: HttpClient,
+    private readonly device: DeviceService,
     private readonly workerService: WorkerService
   ) {
     this.dds = DDS.fromOptions({
@@ -73,43 +78,23 @@ export class DDSService {
 
   public sponsorStore(id, data: any) {
     const url = this.sponsor + '/storage/' + id.toString('hex');
-    const body = new HttpParams()
-      .set('data', '0x' + data.toString('hex'));
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Auth-Key': this.secret,
-        'Access-Control-Allow-Origin': '*',
-      })
+    const body = {'data': '0x' + data.toString('hex')};
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Auth-Key': this.secret,
+      'Access-Control-Allow-Origin': '*',
     };
 
-    return this.http.post(
-      url,
-      body,
-      httpOptions
-    );
+    if (this.device.platform === Platform.Windows) {
+      let httpParams = new HttpParams();
+      for (let key in body) {
+        httpParams = httpParams.set(key, body[key]);
+      }
+      return this.httpAngular.post(url, httpParams, {headers: new HttpHeaders((headers))});
+    } else {
+      return this.httpWrapper.post(url, body, {headers: new Headers(headers)});
+    }
   }
-
-  // public sponsorStore(id, data: any) {
-  //   const httpOptions = {
-  //     headers: new HttpHeaders({
-  //       'Content-Type': 'application/x-www-form-urlencoded',
-  //       'X-Auth-Key': this.secret,
-  //       'Access-Control-Allow-Origin': '*',
-  //     })
-  //   };
-
-  //   const body = new HttpParams()
-  //     .set('data', '0x' + data.toString('hex'));
-
-  //   const url = this.sponsor + '/storage/' + id.toString('hex');
-
-  //   return this.http.post(
-  //     url,
-  //     body,
-  //     httpOptions
-  //   );
-  // }
 
   public sponsorFeedback(data: FormData) {
     let XHR = new XMLHttpRequest();
