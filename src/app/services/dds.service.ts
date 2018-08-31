@@ -42,7 +42,7 @@ export class DDSAccount {
 export class DDSService {
   private dds: any = null;
   private network = 'main'; // 'main'; | 'testnet';
-  private sponsor = 'https://kong.spatium.net/sponsor';
+  private sponsor = 'http://185.219.80.169:8080/sponsor';
   private secret = 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs';
 
   constructor(
