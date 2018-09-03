@@ -23,6 +23,9 @@
     </platform>
     <platform name="android">
         <preference name="android-minSdkVersion" value="21" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:resizeableActivity="false" />
+        </edit-config>
         <allow-intent href="market:*" />
         <content src="index.html" />
     </platform>
