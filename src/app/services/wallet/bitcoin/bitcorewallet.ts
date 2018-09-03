@@ -98,12 +98,12 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
     this.status.next(Status.Ready);
   }
 
-  public async listTransactionHistory() {
+  public async listTransactionHistory(to, from) {
     if (this.wallet === null) {
       return null;
     }
 
-    const txs = await this.wallet.getTransactions();
+    const txs = await this.wallet.getTransactions(to, from);
     return txs.map(tx => HistoryEntry.fromJSON(tx));
   }
 

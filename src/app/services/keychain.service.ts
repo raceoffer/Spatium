@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-
 import { KeyChain } from 'crypto-core-async';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged, skip } from 'rxjs/operators';
 
 export enum Coin {
   BTC = 0,
@@ -12,7 +13,8 @@ export enum Coin {
   BCH = 145,
   XLM = 148,
   NEO = 888,
-  ADA = 1815
+  ADA = 1815,
+  NEO_test = 889
 }
 
 export enum Token {
@@ -123,7 +125,7 @@ export enum Token {
 }
 
 export class TokenEntry {
-  token: Token;
+  token: Token | number;
   name: string;
   ico: string;
   contractAddress: string;
@@ -131,20 +133,30 @@ export class TokenEntry {
   decimals: number;
   network: string;
 
-  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string, decimals: number = 18, network: string = 'main') {
-    this.token = token;
+  private static tokenKeys = Object.values(Token).filter(t => typeof Token[t] === 'number');
+  private static tokenValues = TokenEntry.tokenKeys.map(k => parseInt(Token[k]));
+  private static customStartId = Math.max(...TokenEntry.tokenValues) + 1;
+
+  constructor(token: Token, name: string, ico: string, contractAddress: string, className: string,
+              decimals: number = 18, network: string = 'main') {
+    if (token == null) {
+      this.token = TokenEntry.customStartId;
+      TokenEntry.customStartId++;
+    } else {
+      this.token = token;
+    }
     this.name = name;
     this.ico = ico;
     this.contractAddress = contractAddress;
-    this.className = className;
-    this.decimals = decimals;
+    this.className = className || 'no-image';
+    this.decimals = decimals || 18;
     this.network = network;
   }
 }
 
 @Injectable()
 export class KeyChainService {
-  public readonly topTokens = [
+  public topTokens = new BehaviorSubject<TokenEntry[]>([
     new TokenEntry(Token.EOS, 'EOS', 'EOS', '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0', 'eos', 18),
     new TokenEntry(Token.TRON, 'TRON', 'TRX', '0xf230b790e05390fc8295f4d3f60332c93bed42e2', 'tron', 6),
     new TokenEntry(Token.VECHAIN, 'VeChain', 'VEN', '0xd850942ef8811f2a866692a623011bde52a462c1', 'veChain', 18),
@@ -248,7 +260,8 @@ export class KeyChainService {
     new TokenEntry(Token.TAAS, 'TaaS', 'TAAS', '0xe7775a6e9bcf904eb39da2b68c5efb4f9360e08c', 'taas', 6),
     new TokenEntry(Token.WINGS, 'Wings', 'WINGS', '0x667088b212ce3d06a1b553a7221E1fD19000d9aF', 'wings', 18),
     new TokenEntry(Token.CONSENSUS, 'Consensus', 'SEN', '0xd53370acf66044910bb49cbcfe8f3cd020337f60', 'сonsensus', 18)
-  ];
+  ]);
+
   private _seed: any = null;
   private keyChain: any = null;
 
@@ -273,5 +286,9 @@ export class KeyChainService {
 
   getCoinSecret(coin: Coin, account: number) {
     return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
+  }
+
+  addCustomToken(token: TokenEntry) {
+    this.topTokens.next([token].concat(this.topTokens.getValue()));
   }
 }

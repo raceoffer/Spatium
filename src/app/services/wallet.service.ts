@@ -15,6 +15,7 @@ import { CurrencyWallet } from './wallet/currencywallet';
 import { ERC20Wallet } from './wallet/ethereum/erc20wallet';
 import { EthereumWallet } from './wallet/ethereum/ethereumwallet';
 import { NemWallet } from './wallet/nem/nemwallet';
+import { NeoWallet } from './wallet/neo/neowallet';
 import { WorkerService } from './worker.service';
 
 declare const navigator: any;
@@ -155,10 +156,32 @@ export class WalletService {
         this.connectionProviderService,
         this.workerService.worker
       ));
+    this.coinWallets.set(
+      Coin.NEO,
+      new NeoWallet(
+        await this.currencyService.getApiServer(Coin.NEO),
+        'main',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.connectionProviderService,
+        this.workerService.worker
+      ));
+    this.coinWallets.set(
+      Coin.NEO_test,
+      new NeoWallet(
+        await this.currencyService.getApiServer(Coin.NEO_test),
+        'testnet',
+        this.keychain,
+        1,
+        this.messageSubject,
+        this.connectionProviderService,
+        this.workerService.worker
+      ));
 
-    for (const tokenInfo of Array.from(this.keychain.topTokens)) {
+    this.keychain.topTokens.getValue().forEach(async (tokenInfo) => {
       await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
-    }
+    });
 
     for (const coin of Array.from(this.coinWallets.keys())) {
       this.currencyWallets.set(coin, this.coinWallets.get(coin));
@@ -190,6 +213,15 @@ export class WalletService {
       // pop the queue
       this.messageSubject.next({});
       this.cancelSubject.next(true);
+    });
+
+    this.keychain.topTokens.subscribe(() => {
+      this.keychain.topTokens.getValue().forEach(async (tokenInfo) => {
+        if (!this.tokenWallets.get(tokenInfo.token)) {
+          await this.createTokenWallet(tokenInfo.token, tokenInfo.contractAddress, tokenInfo.decimals, tokenInfo.network);
+          this.currencyWallets.set(tokenInfo.token, this.tokenWallets.get(tokenInfo.token));
+        }
+      });
     });
 
     this.ready.next(true);
