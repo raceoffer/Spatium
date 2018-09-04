@@ -30,7 +30,8 @@ export class HistoryEntry {
               public to: string,
               public amount: number,
               public confirmed: boolean,
-              public time: number) {}
+              public time: number,
+              public blockhash: string) {}
 
   static fromJSON(json) {
     return new HistoryEntry(
@@ -39,7 +40,8 @@ export class HistoryEntry {
       json.to,
       json.amount,
       json.confirmed,
-      json.time
+      json.time,
+      json.blockhash
     );
   }
 }
@@ -89,6 +91,8 @@ export abstract class CurrencyWallet {
   public address = new BehaviorSubject<string>(null);
   public balance = new BehaviorSubject<Balance>(null);
   public balanceStatus = new BehaviorSubject<BalanceStatus>(BalanceStatus.None);
+
+  public isHistoryLoaded = false;
 
   constructor(
     protected network: string,
