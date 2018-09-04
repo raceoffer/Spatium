@@ -4,14 +4,13 @@
   </button>
   <div class="nav-logo-text"></div>
 </mat-toolbar>
-<mat-nav-list *ngFor="let navLink of navLinks">
-  <a
-    mat-list-item
-    class="main-nav-list-custom"
-    [class.disabled]="!navLink.clicked"
-    [class.selected]="navLink.name === current"
-    (click)="onClicked(navLink)"
-    [ngClass]="navLink.class">
-    {{ navLink.name }}
-  </a>
+<mat-nav-list>
+  <mat-list-item *ngFor="let navLink of navLinks"
+                 class="main-nav-list-custom"
+                 [class.disabled]="!navLink.clicked"
+                 [class.selected]="navLink.name === current"
+                 (click)="onClicked(navLink)"
+                 [ngClass]="navLink.class">
+    <a [innerHtml]="navLink.name"></a>
+  </mat-list-item>
 </mat-nav-list>

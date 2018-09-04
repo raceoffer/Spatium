@@ -31,10 +31,8 @@
   cursor: default;
 }
 
-.ico::after {
-  position: absolute;
-  content: 'demo';
-  margin-top: -38px;
-  margin-left: 46px;
-  font-size: 10px;
+:host ::ng-deep .sup {
+  position: relative;
+  bottom: 7px;
+  font-size: 12px;
 }
