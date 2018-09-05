@@ -1,7 +1,7 @@
 import { Root } from 'protobufjs';
 import { Client } from '../../utils/client-server/client-server';
 
-import { abi } from './protocol';
+import * as abi from './rpc-protocol.json';
 
 export class RPCClient {
   private root: Root;
@@ -13,7 +13,7 @@ export class RPCClient {
   private _api: any;
 
   constructor(private client: Client) {
-    this.root = Root.fromJSON(abi);
+    this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
 

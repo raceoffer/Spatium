@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Root } from 'protobufjs';
 
-import { abi } from './protocol';
+import * as abi from './rpc-protocol.json';
 import { DeviceService } from '../device.service';
 import { VerifierService } from '../verifier.service';
 
-import { PedersenParameters, PedersenCommitment, SchnorrProof, Convert } from 'crypto-core-async';
+import {
+  EcdsaInitialCommitment,
+  EcdsaInitialDecommitment,
+  EcdsaResponseCommitment,
+  EcdsaResponseDecommitment
+} from 'crypto-core-async';
 
 @Injectable()
 export class RPCServerService {
@@ -40,26 +45,54 @@ export class RPCServerService {
       };
     },
     StartSync: async (request) => {
-      const r = await this.verifierService.startSync(
+      const initialData = await this.verifierService.startSync(
         new Buffer(request.sessionId),
-        request.currencyId, {
-          params: PedersenParameters.fromJSON(request.params),
-          i: PedersenCommitment.fromJSON(request.i)
-        }
+        request.currencyId,
+        EcdsaInitialCommitment.fromJSON(request.initialCommitment)
       );
 
       return {
-        Q: Convert.encodePoint(r.Q),
-        proof: r.proof.toJSON()
+        initialData: initialData.toJSON()
       };
-    }
+    },
+    SyncReveal: async (request) => {
+      const challengeCommitment = await this.verifierService.syncReveal(
+        new Buffer(request.sessionId),
+        request.currencyId,
+        EcdsaInitialDecommitment.fromJSON(request.initialDecommitment)
+      );
+
+      return {
+        challengeCommitment: challengeCommitment.toJSON()
+      };
+    },
+    SyncResponse: async (request) => {
+      const challengeDecommitment = await this.verifierService.syncResponse(
+        new Buffer(request.sessionId),
+        request.currencyId,
+        EcdsaResponseCommitment.fromJSON(request.responseCommitment)
+      );
+
+      return {
+        challengeDecommitment: challengeDecommitment.toJSON()
+      };
+    },
+    SyncFinalize: async (request) => {
+      await this.verifierService.syncFinalize(
+        new Buffer(request.sessionId),
+        request.currencyId,
+        EcdsaResponseDecommitment.fromJSON(request.responseDecommitment)
+      );
+
+      return {};
+    },
   };
 
   constructor(
     private readonly deviceService: DeviceService,
     private readonly verifierService: VerifierService
   ) {
-    this.root = Root.fromJSON(abi);
+    this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
   }

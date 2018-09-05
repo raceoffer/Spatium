@@ -13,13 +13,12 @@ import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { RPCClient } from '../../services/rpc/rpc-client';
 
 import {
-  PedersenParameters,
-  PedersenCommitment,
-  SchnorrProof,
-  Convert,
-  CompoundKeyEcdsa,
   KeyChain,
-  PaillierProover
+  DistributedEcdsaKey,
+  EcdsaInitialData,
+  EcdsaChallengeCommitment,
+  EcdsaChallengeDecommitment,
+  Curve
 } from 'crypto-core-async';
 
 declare const navigator: any;
@@ -175,35 +174,68 @@ export class StartComponent implements OnInit, OnDestroy {
 
     console.log(syncStatusResponse);
 
-    const seed = Buffer.from('9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d', 'hex');
+    const seed = Buffer.from(
+      '9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d',
+      'hex'
+    );
 
     const keyChain = KeyChain.fromSeed(seed);
 
     const initiatorPrivateBytes = keyChain.getAccountSecret(60, 0);
 
-    const paillierKeys = await CompoundKeyEcdsa.generatePaillierKeys();
+    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
 
-    const initiator = await CompoundKeyEcdsa.fromOptions({
-      curve: 'secp256k1',
+    const distributedKey = await DistributedEcdsaKey.fromOptions({
+      curve: Curve.secp256k1,
       secret: initiatorPrivateBytes,
-      paillierKeys
+      localPaillierPublicKey: publicKey,
+      localPaillierSecretKey: secretKey,
     });
 
-    const proover = await initiator.startSyncSession();
+    const syncSession = await distributedKey.startSyncSession();
 
-    const initialCommitment = await proover.createInitialCommitment();
+    const initialCommitment = await syncSession.createInitialCommitment();
 
     const startSyncResponse = await this.rpcClient.api.startSync({
       sessionId: Buffer.from('ffffaadd', 'hex'),
       currencyId: 'asdakljsdlkasj',
-      params: initialCommitment.params.toJSON(),
-      i: initialCommitment.i.toJSON()
+      initialCommitment: initialCommitment.toJSON()
     });
 
-    console.log({
-      Q: Convert.decodePoint(initiator.crypto, startSyncResponse.Q),
-      proof: SchnorrProof.fromJSON(startSyncResponse.proof)
+    const initiaalData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
+
+    const initialDecommitment = await syncSession.processInitialData(initiaalData);
+
+    const syncRevealResponse = await this.rpcClient.api.syncReveal({
+      sessionId: Buffer.from('ffffaadd', 'hex'),
+      currencyId: 'asdakljsdlkasj',
+      initialDecommitment: initialDecommitment.toJSON()
     });
+
+    const challengeCommitment = EcdsaChallengeCommitment.fromJSON(syncRevealResponse.challengeCommitment);
+
+    const responseCommitment = await syncSession.processChallengeCommitment(challengeCommitment);
+
+    const syncResponseResponse = await this.rpcClient.api.syncResponse({
+      sessionId: Buffer.from('ffffaadd', 'hex'),
+      currencyId: 'asdakljsdlkasj',
+      responseCommitment: responseCommitment.toJSON()
+    });
+
+    const challengeDecommitment = EcdsaChallengeDecommitment.fromJSON(syncResponseResponse.challengeDecommitment);
+
+    const { responseDecommitment, syncData } = await syncSession.processChallengeDecommitment(challengeDecommitment);
+
+    const syncFinalizeResponse = await this.rpcClient.api.syncFinalize({
+      sessionId: Buffer.from('ffffaadd', 'hex'),
+      currencyId: 'asdakljsdlkasj',
+      responseDecommitment: responseDecommitment.toJSON()
+    });
+    console.log(syncFinalizeResponse);
+
+    await distributedKey.importSyncData(syncData);
+
+    console.log(distributedKey.compoundPublic());
 
     const clearResponse = await this.rpcClient.api.clearSession({ sessionId: Buffer.from('ffffaadd', 'hex') });
 
