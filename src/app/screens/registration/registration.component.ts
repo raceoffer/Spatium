@@ -65,7 +65,9 @@ export class RegistrationComponent implements OnDestroy {
   public factorItems = [];
 
   public password = '';
+  public passwordClass = 'caret-center';
   public confirmPassword = '';
+  public confirmPasswordClass = 'caret-center';
 
   stWarning =
     'Your funds safety depends on the strongness of the authorization factors. ' +
@@ -102,6 +104,26 @@ export class RegistrationComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  onPasswordChange(newValue) {
+    if (!newValue) {
+      this.passwordClass = 'caret-center';
+      this.password = '';
+    } else {
+      this.passwordClass = '';
+      this.password = newValue;
+    }
+  }
+
+  onConfirmPasswordChange(newValue) {
+    if (!newValue) {
+      this.confirmPasswordClass = 'caret-center';
+      this.confirmPassword = '';
+    } else {
+      this.confirmPasswordClass = '';
+      this.confirmPassword = newValue;
+    }
   }
 
   goBottom() {

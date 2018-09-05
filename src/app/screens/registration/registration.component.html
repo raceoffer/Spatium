@@ -22,7 +22,9 @@
         <input
           type="password"
           placeholder="Password"
-          [(ngModel)]="password"
+          [ngModel]="password"
+          (ngModelChange)="onPasswordChange($event)"
+          [class]="passwordClass"
           name="password"
           required
           minlength="1"
@@ -35,7 +37,9 @@
         <input
           type="password"
           placeholder="Confirm password"
-          [(ngModel)]="confirmPassword"
+          [ngModel]="confirmPassword"
+          (ngModelChange)="onConfirmPasswordChange($event)"
+          [class]="confirmPasswordClass"
           name="confirmPassword"
           equal-to="password"
           [disabled]="uploading"
