@@ -16,7 +16,8 @@ export enum State {
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnDestroy{
+export class LoginComponent implements OnDestroy {
+  public caretClass = 'caret-center';
   public stateType = State;
   public state = new BehaviorSubject<State>(State.Ready);
 
@@ -40,7 +41,15 @@ export class LoginComponent implements OnDestroy{
   private manualLoginInputStream = this.loginControl.valueChanges.pipe(
     distinctUntilChanged(),
     filter(() => !this.loginGenerated),
-    map(value => value ? value : ''),
+    map((value) => {
+      if (!value) {
+        this.caretClass = 'caret-center';
+        return '';
+      } else {
+        this.caretClass = '';
+        return value;
+      }
+    }),
     tap(() => this.delayed.next(true)),
     debounceTime(1000),
     tap(() => this.delayed.next(false)),
