@@ -4,7 +4,7 @@ import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { StorageService } from '../../services/storage.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-verifier-auth',
@@ -23,7 +23,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
     private readonly keychain: KeyChainService,
     private readonly fs: FileService,
     private readonly notification: NotificationService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -48,7 +48,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
 
   public async onBack() {
     try {
-      await this.storage.removeValue('startPath');
+      await this.settings.setStartPath(null);
     } catch (e) {
       console.log(e);
     }

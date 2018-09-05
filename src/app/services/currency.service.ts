@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as bsHelper from '../utils/transformers';
 import { Coin, KeyChainService, Token, TokenEntry } from './keychain.service';
 import { CurrencyPriceService } from './price.service';
-import { StorageService } from './storage.service';
+import { SettingsService } from './settings.service';
 
 import { map, distinctUntilChanged } from 'rxjs/operators';
 
@@ -47,6 +47,8 @@ export enum CurrencyServerName {
   Infura = 'mainnet.infura.io',
   Litecore = 'insight.litecore.io',
   Native = 'Nem native',
+  Neoscan = 'neoscan.io',
+  TestNeoscan = 'neoscan-testnet.io',
 }
 
 export class CurrencySettings {
@@ -54,11 +56,20 @@ export class CurrencySettings {
   serverUrl: string;
 
   constructor(currency: Coin | Token = null) {
-    // Nem do not have a spatium provider yet
-    if (currency === Coin.NEM) {
-      this.serverName = CurrencyServerName.Native;
-    } else {
-      this.serverName = CurrencyServerName.Spatium;
+    // Nem and Neo do not have a spatium provider yet
+    switch (currency) {
+      case Coin.NEM:
+        this.serverName = CurrencyServerName.Native;
+        break;
+      case Coin.NEO:
+        this.serverName = CurrencyServerName.Neoscan;
+        break;
+      case Coin.NEO_test:
+        this.serverName = CurrencyServerName.TestNeoscan;
+        break;
+      default:
+        this.serverName = CurrencyServerName.Spatium;
+        break;
     }
   }
 }
@@ -89,10 +100,16 @@ export class CurrencyService {
     ])],
     [Coin.NEM, new Map<string, string>([
       [CurrencyServerName.Native, 'http://hugealice3.nem.ninja']
+    ])],
+    [Coin.NEO, new Map<string, string>([
+      [CurrencyServerName.Neoscan, 'https://api.neoscan.io/api/main_net/v1']
+    ])],
+    [Coin.NEO_test, new Map<string, string>([
+      [CurrencyServerName.TestNeoscan, 'https://api.neoscan.io/api/test_net/v1']
     ])]
   ]);
 
-  private readonly staticInfo = new Map<Coin | Token, Info>([
+  private readonly staticInfo = new Map<Coin | Token | number, Info>([
     [Coin.BTC, new Info(
       'Bitcoin',
       'BTC',
@@ -201,9 +218,24 @@ export class CurrencyService {
     [Coin.NEO, new Info(
       'NEO',
       'NEO',
-      50000,
-      30000,
-      'NEO/tx',
+      0,
+      0,
+      'NEO/gas',
+      bsHelper.toBehaviourSubject(
+        this.currencyPriceService.availableCurrencies.pipe(
+          map(ac => ac.get('NEO') || null),
+          distinctUntilChanged()
+        ),
+        null),
+      null,
+      'neo'
+    )],
+    [Coin.NEO_test, new Info(
+      'NEO test',
+      'NEO',
+      0,
+      0,
+      'NEO/gas',
       bsHelper.toBehaviourSubject(
         this.currencyPriceService.availableCurrencies.pipe(
           map(ac => ac.get('NEO') || null),
@@ -248,10 +280,14 @@ export class CurrencyService {
   constructor(
     private readonly keychain: KeyChainService,
     private readonly currencyPriceService: CurrencyPriceService,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {
-    keychain.topTokens.forEach((tokenInfo) => {
-      this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
+    this.keychain.topTokens.subscribe(() => {
+      this.keychain.topTokens.getValue().forEach(tokenInfo => {
+        if (!this.staticInfo.get(tokenInfo.token)) {
+          this.staticInfo.set(tokenInfo.token, this.getTokenInfo(tokenInfo));
+        }
+      });
     });
 
     this.currencyPriceService.getPrices();
@@ -311,7 +347,7 @@ export class CurrencyService {
     let jsonSettings: any;
     const settings: CurrencySettings = new CurrencySettings(currency);
 
-    jsonSettings = await this.storage.getValue('settings.currency');
+    jsonSettings = await this.settings.settingsCurrency();
     if (jsonSettings) {
       jsonSettings = jsonSettings[currency];
     }
@@ -326,9 +362,9 @@ export class CurrencyService {
   }
 
   public async saveSettings(currency: Coin | Token, settings: CurrencySettings) {
-    let items: any = await this.storage.getValue('settings.currency');
-    items = items ? JSON.parse(items) : {};
+    let items: any = await this.settings.settingsCurrency();
+    items = items ? items : {};
     items[currency] = settings;
-    await this.storage.setValue('settings.currency', items);
+    await this.settings.setSettingsCurrency(items);
   }
 }

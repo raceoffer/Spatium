@@ -1,17 +1,10 @@
 import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import { from, of } from 'rxjs';
+import { catchError, mapTo } from 'rxjs/operators';
 import { DDSAccount, DDSService } from '../../services/dds.service';
-import { NotificationService } from '../../services/notification.service';
-import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
+import { NotificationService } from '../../services/notification.service';
 
-import { Observable, from, of } from 'rxjs';
-import { mapTo, catchError } from 'rxjs/operators';
-
-
-
-
-declare const Utils: any;
 declare const cordova: any;
 
 enum SyncState {
@@ -27,32 +20,23 @@ enum SyncState {
 })
 export class BackupComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'overlay-background';
-
-  private subscriptions = [];
-  private account: DDSAccount = null;
-
   public address = '';
   public balance = 0.0;
   public comission = null;
   public enough = false;
-
   public gasPrice: number = this.dds.toWei('5', 'gwei');
-
   public syncStateType = SyncState;
   public syncState: SyncState = SyncState.Ready;
-
   public saving = false;
-
   @Input() public id: any = null;
   @Input() public data: any = null;
-
   @Output() success: EventEmitter<any> = new EventEmitter<any>();
-  @Output() back: EventEmitter<any> = new EventEmitter<any>();
+  private subscriptions = [];
+  private account: DDSAccount = null;
 
-  constructor(
-    private readonly dds: DDSService,
-    private readonly notification: NotificationService
-  ) {}
+  constructor(private readonly dds: DDSService,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService) {}
 
   async ngOnInit() {
     this.account = await this.dds.getStoreAccount(this.id);
@@ -67,7 +51,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   async onBack() {
-    this.back.next();
+    this.navigationService.back();
   }
 
   async updateBalance() {
@@ -82,7 +66,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   getQrCodeText() {
-      return `etherium:${this.address}?value=${this.comission}`;
+    return `etherium:${this.address}?value=${this.comission}`;
   }
 
   copy() {
@@ -93,15 +77,18 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.saving = true;
     from(this.account.store(this.id, this.data, this.gasPrice)).pipe(
       mapTo(true),
-      catchError(ignored => { console.log(ignored); return of(false); })
+      catchError(ignored => {
+        console.log(ignored);
+        return of(false);
+      })
     ).subscribe(async (success) => {
-        if (!success) {
-          this.saving = false;
-          this.notification.show('Failed to upload the secret');
-          return;
-        }
+      if (!success) {
+        this.saving = false;
+        this.notification.show('Failed to upload the secret');
+        return;
+      }
 
-        this.success.emit();
+      this.success.emit();
     });
   }
 }

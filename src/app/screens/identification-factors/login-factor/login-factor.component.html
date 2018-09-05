@@ -23,7 +23,7 @@
     class="width-button color"
     (click)="onSubmit()"
     [disabled]="!(valid | async)"
-    *ngIf="!(generating | async) && !(delayed | async)">
+    *ngIf="!(delayed | async)">
     Continue
   </button>
   <button
@@ -32,7 +32,7 @@
     color="accent"
     class="width-button color"
     disabled
-    *ngIf="(generating | async) || (delayed | async)">
+    *ngIf="(delayed | async)">
     <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
   </button>
 </div>

@@ -8,7 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 import { checkNfc, Type } from '../../utils/nfc';
-import { StorageService } from '../../services/storage.service';
+import { SettingsService } from '../../services/settings.service';
 
 declare const cordova: any;
 
@@ -41,7 +41,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public isCameraAvailable = false;
   @ViewChild(LoginInput) public loginComponent: LoginInput;
   public delayed = null;
-  public generating = null;
   public valid = null;
   private subscriptions = [];
   private cameraChangesCallbackId: number;
@@ -54,7 +53,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly workerService: WorkerService,
     private readonly ngZone: NgZone,
-    private readonly storage: StorageService
+    private readonly settings: SettingsService,
   ) {}
 
   async ngOnInit() {
@@ -74,7 +73,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.delayed = this.loginComponent.delayed;
-    this.generating = this.loginComponent.generating;
     this.valid = this.loginComponent.valid;
   }
 
@@ -138,11 +136,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async checkLogin(type: IdFactor, login: string) {
-    const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
-
     try {
       this.buttonState = State.Updating;
-
+      const id = await this.authService.toId(type === IdFactor.Login ? login.toLowerCase() : login);
       const exists = await this.dds.exists(id);
 
       if (exists) {
@@ -169,7 +165,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onBack() {
     try {
-      await this.storage.removeValue('startPath');
+      await this.settings.setStartPath(null);
     } catch (e) {
       console.log(e);
     }

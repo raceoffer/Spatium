@@ -113,11 +113,12 @@ import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService } from './services/price.service';
 import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
-import { StorageService } from './services/storage.service';
+import { SettingsService } from './services/settings.service';
 import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
 import { ZeroconfService } from './services/zeroconf.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
+import { AddTokenComponent } from './screens/navigator/add-token/add-token.component';
 import { RPCServerService } from './services/rpc/rpc-server.service';
 import { VerifierService } from './services/verifier.service';
 
@@ -189,6 +190,7 @@ import { VerifierService } from './services/verifier.service';
     CarouselItemElement,
     PresentationComponent,
     NavbarComponent,
+    AddTokenComponent
   ],
   imports: [
     OverlayModule,
@@ -248,7 +250,7 @@ import { VerifierService } from './services/verifier.service';
     SocketClientService,
     ZeroconfService,
     ConnectionProviderService,
-    StorageService,
+    SettingsService,
     RPCServerService,
     VerifierService
   ],
@@ -292,7 +294,8 @@ import { VerifierService } from './services/verifier.service';
     SyncronizationComponent,
     PresentationComponent,
     NavbarComponent,
-    BackupComponent
+    BackupComponent,
+    AddTokenComponent,
   ]
 })
 
