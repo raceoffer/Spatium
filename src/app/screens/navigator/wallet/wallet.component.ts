@@ -39,8 +39,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }, {
     name: 'Exchange'
   }, {
-    name: 'ICO',
-    class: 'ico',
+    name: 'ICO <span class="sup">demo</span>',
     clicked: async () => {
       await this.router.navigate(['/navigator', {outlets: {navigator: ['ico']}}]);
     }
