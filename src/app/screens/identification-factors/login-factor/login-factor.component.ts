@@ -24,8 +24,10 @@ export class LoginFactorComponent implements AfterViewInit {
   constructor(private readonly navigationService: NavigationService) {}
 
   ngAfterViewInit() {
-    this.delayed = this.loginComponent.delayed;
-    this.valid = this.loginComponent.valid;
+    Promise.resolve(null).then(() => {
+      this.delayed = this.loginComponent.delayed;
+      this.valid = this.loginComponent.valid;
+    });
   }
 
   public cancel() {
@@ -45,5 +47,11 @@ export class LoginFactorComponent implements AfterViewInit {
       type: IdFactor.Login,
       value: this.input
     });
+  }
+
+  public get isValid(): boolean {
+    const valid = this.valid ? this.valid.getValue() : false;
+    const hasValue = !!this.input;
+    return valid && hasValue;
   }
 }
