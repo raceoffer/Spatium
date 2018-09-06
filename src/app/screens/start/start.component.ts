@@ -101,9 +101,11 @@ export class StartComponent implements OnInit, OnDestroy {
     console.log('Rpc started');
   }
 
-  public ngOnDestroy() {
+  public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+
+    await this.rpc.stop();
   }
 
   public openPresentation() {
@@ -146,7 +148,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
     console.log(capabilities);
 
-    const seedHash = await Utils.sha256(this.keyChainService.seed);
+    const seedHash = await Utils.randomBytes(32);
 
     const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
 
