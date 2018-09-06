@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { DistributedEcdsaKeyShard, Curve } from 'crypto-core-async';
-import { CurrencyInfoService, CurrencyId } from './currencyinfo.service';
+import { DistributedEcdsaKeyShard, BitcoreEntropyCommitment, BitcoreEntropyDecommitment } from 'crypto-core-async';
+import { CurrencyInfoService, CurrencyId, Cryptosystem } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
 
 export enum SyncState {
@@ -13,9 +13,7 @@ export enum SyncState {
 }
 
 export class Currency {
-  private _state: SyncState = SyncState.None;
-  private _distributedKeyShard: any;
-  private _syncSessionShard: any;
+  protected _state: SyncState = SyncState.None;
 
   public get id(): CurrencyId {
     return this._id;
@@ -26,17 +24,33 @@ export class Currency {
   }
 
   public constructor(
-    private readonly _id: CurrencyId,
-    private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService
+    protected readonly _id: CurrencyId,
+    protected readonly _currencyInfoService: CurrencyInfoService,
+    protected readonly _keyChainService: KeyChainService
   ) {}
+}
+
+export class EcdsaCurrency extends Currency {
+  private _distributedKeyShard: any;
+  private _syncSessionShard: any;
+
+  private _signSessions = new Map<string, any>();
+
+  public constructor(
+    _id: CurrencyId,
+    _currencyInfoService: CurrencyInfoService,
+    _keyChainService: KeyChainService
+  ) {
+    super(_id, _currencyInfoService, _keyChainService);
+  }
 
   public async startSync(initialCommitment: any): Promise<any> {
-    const derivationNumber = this._currencyInfoService.currencyInfo(this.id).derivationNumber;
-    const privateBytes = this._keyChainService.privateBytes(derivationNumber, 0);
+    const currecyInfo = this._currencyInfoService.currencyInfo(this.id);
+
+    const privateBytes = this._keyChainService.privateBytes(60, 1);
 
     this._distributedKeyShard = await DistributedEcdsaKeyShard.fromOptions({
-      curve: Curve.secp256k1,
+      curve: currecyInfo.curve,
       secret: privateBytes
     });
 
@@ -86,6 +100,42 @@ export class Currency {
 
     return;
   }
+
+  public async startSign(signSessionId: string, transactionBytes: Buffer, entropyCommitmentBytes: Buffer): Promise<Buffer> {
+    if (this._state !== SyncState.Finalized) {
+      throw new Error('Invalid session state');
+    }
+
+    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
+
+    const transaction = await currencyInfo.transactionType.fromBytes(transactionBytes);
+
+    const signSessionShard = await transaction.startSignSessionShard(this._distributedKeyShard);
+
+    const entropyCommitment = BitcoreEntropyCommitment.fromBytes(entropyCommitmentBytes);
+
+    const entropyData = await signSessionShard.processEntropyCommitment(entropyCommitment);
+
+    this._signSessions.set(signSessionId, signSessionShard);
+
+    return entropyData.toBytes();
+  }
+
+  public async signReveal(signSessionId: string, entropyDecommitmentBytes: Buffer): Promise<Buffer> {
+    if (!this._signSessions.has(signSessionId)) {
+      throw new Error('Invalid session state');
+    }
+
+    const signSessionShard = this._signSessions.get(signSessionId);
+
+    const entropyDecommitment = BitcoreEntropyDecommitment.fromBytes(entropyDecommitmentBytes);
+
+    const partialSignature = signSessionShard.processEntropyDecommitment(entropyDecommitment);
+
+    this._signSessions.delete(signSessionId);
+
+    return partialSignature.toBytes();
+  }
 }
 
 export class DeviceSession {
@@ -105,6 +155,20 @@ export class DeviceSession {
     private readonly _keyChainService: KeyChainService
   ) {}
 
+  private safeGetEcdsa(currencyId) {
+    if (!this._currencies.has(currencyId)) {
+      throw new Error('Sync session not started');
+    }
+
+    const currency = this._currencies.get(currencyId);
+
+    if (!(currency instanceof EcdsaCurrency)) {
+      throw new Error('Invalid cryptosystem for this currency');
+    }
+
+    return currency as EcdsaCurrency;
+  }
+
   public async syncState(currencyId: CurrencyId): Promise<SyncState> {
     if (!this._currencies.has(currencyId)) {
       return SyncState.None;
@@ -122,42 +186,53 @@ export class DeviceSession {
     });
   }
 
-  public async startSync(currencyId: CurrencyId, initialCommitment: any): Promise<any> {
-    const currency = new Currency(currencyId, this._currencyInfoService, this._keyChainService);
+  public async startEcdsaSync(currencyId: CurrencyId, initialCommitment: any): Promise<any> {
+    const currecyInfo = this._currencyInfoService.currencyInfo(currencyId);
+
+    if (currecyInfo.cryptosystem !== Cryptosystem.Ecdsa) {
+      throw new Error('Invalid cryptosystem for this currency');
+    }
+
+    const currency = new EcdsaCurrency(currencyId, this._currencyInfoService, this._keyChainService);
 
     this._currencies.set(currencyId, currency);
 
     return await currency.startSync(initialCommitment);
   }
 
-  public async syncReveal(currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
-    if (!this._currencies.has(currencyId)) {
-      throw new Error('Sync session not started');
-    }
-
-    const currency = this._currencies.get(currencyId);
+  public async ecdsaSyncReveal(currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
+    const currency = this.safeGetEcdsa(currencyId);
 
     return await currency.syncReveal(initialDecommitment);
   }
 
-  public async syncResponse(currencyId: CurrencyId, responseCommitment: any): Promise<any> {
-    if (!this._currencies.has(currencyId)) {
-      throw new Error('Sync session not started');
-    }
-
-    const currency = this._currencies.get(currencyId);
+  public async ecdsaSyncResponse(currencyId: CurrencyId, responseCommitment: any): Promise<any> {
+    const currency = this.safeGetEcdsa(currencyId);
 
     return await currency.syncResponse(responseCommitment);
   }
 
-  public async syncFinalize(currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
-    if (!this._currencies.has(currencyId)) {
-      throw new Error('Sync session not started');
-    }
-
-    const currency = this._currencies.get(currencyId);
+  public async ecdsaSyncFinalize(currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
+    const currency = this.safeGetEcdsa(currencyId);
 
     return await currency.syncFinalize(responseDecommitment);
+  }
+
+  public async startEcdsaSign(
+    currencyId: CurrencyId,
+    signSessionId: string,
+    transactionBytes: Buffer,
+    entropyCommitmentBytes: Buffer
+  ): Promise<Buffer> {
+    const currency = this.safeGetEcdsa(currencyId);
+
+    return await currency.startSign(signSessionId, transactionBytes, entropyCommitmentBytes);
+  }
+
+  public async ecdsaSignReveal(currencyId: CurrencyId, signSessionId: string, entropyDecommitmentBytes: Buffer): Promise<Buffer> {
+    const currency = this.safeGetEcdsa(currencyId);
+
+    return await currency.signReveal(signSessionId, entropyDecommitmentBytes);
   }
 }
 
@@ -214,35 +289,62 @@ export class VerifierService {
     return await this.sessions.get(sessionId).syncStatus();
   }
 
-  public async startSync(sessionId: string, currencyId: CurrencyId, initialCommitment: any): Promise<any> {
+  public async startEcdsaSync(sessionId: string, currencyId: CurrencyId, initialCommitment: any): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).startSync(currencyId, initialCommitment);
+    return await this.sessions.get(sessionId).startEcdsaSync(currencyId, initialCommitment);
   }
 
-  public async syncReveal(sessionId: string, currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
+  public async ecdsaSyncReveal(sessionId: string, currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).syncReveal(currencyId, initialDecommitment);
+    return await this.sessions.get(sessionId).ecdsaSyncReveal(currencyId, initialDecommitment);
   }
 
-  public async syncResponse(sessionId: string, currencyId: CurrencyId, responseCommitment: any): Promise<any> {
+  public async ecdsaSyncResponse(sessionId: string, currencyId: CurrencyId, responseCommitment: any): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).syncResponse(currencyId, responseCommitment);
+    return await this.sessions.get(sessionId).ecdsaSyncResponse(currencyId, responseCommitment);
   }
 
-  public async syncFinalize(sessionId: string, currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
+  public async ecdsaSyncFinalize(sessionId: string, currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).syncFinalize(currencyId, responseDecommitment);
+    return await this.sessions.get(sessionId).ecdsaSyncFinalize(currencyId, responseDecommitment);
+  }
+
+  public async startEcdsaSign(
+    sessionId: string,
+    currencyId: CurrencyId,
+    signSessionId: string,
+    transactionBytes: Buffer,
+    entropyCommitmentBytes: Buffer
+  ): Promise<Buffer> {
+    if (!this.sessions.has(sessionId)) {
+      throw new Error('Unknown session id');
+    }
+
+    return await this.sessions.get(sessionId).startEcdsaSign(currencyId, signSessionId, transactionBytes, entropyCommitmentBytes);
+  }
+
+  public async ecdsaSignReveal(
+    sessionId: string,
+    currencyId: CurrencyId,
+    signSessionId: string,
+    entropyDecommitmentBytes: Buffer
+  ): Promise<Buffer> {
+    if (!this.sessions.has(sessionId)) {
+      throw new Error('Unknown session id');
+    }
+
+    return await this.sessions.get(sessionId).ecdsaSignReveal(currencyId, signSessionId, entropyDecommitmentBytes);
   }
 }

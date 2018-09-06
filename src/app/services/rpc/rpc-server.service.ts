@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { EcdsaInitialCommitment, EcdsaInitialDecommitment, EcdsaResponseCommitment, EcdsaResponseDecommitment } from 'crypto-core-async';
+import {
+  EcdsaInitialCommitment,
+  EcdsaInitialDecommitment,
+  EcdsaResponseCommitment,
+  EcdsaResponseDecommitment,
+  EcdsaEntropyCommitment,
+  EcdsaEntropyDecommitment
+} from 'crypto-core-async';
 import { Root } from 'protobufjs';
 import { DeviceService } from '../device.service';
 import { VerifierService } from '../verifier.service';
@@ -50,8 +57,8 @@ export class RPCServerService {
         status: await this.verifierService.syncState(request.sessionId, request.currencyId)
       };
     },
-    async StartSync(request) {
-      const initialData = await this.verifierService.startSync(
+    async StartEcdsaSync(request) {
+      const initialData = await this.verifierService.startEcdsaSync(
         request.sessionId,
         request.currencyId,
         EcdsaInitialCommitment.fromJSON(request.initialCommitment)
@@ -61,8 +68,8 @@ export class RPCServerService {
         initialData: initialData.toJSON()
       };
     },
-    async SyncReveal(request) {
-      const challengeCommitment = await this.verifierService.syncReveal(
+    async EcdsaSyncReveal(request) {
+      const challengeCommitment = await this.verifierService.ecdsaSyncReveal(
         request.sessionId,
         request.currencyId,
         EcdsaInitialDecommitment.fromJSON(request.initialDecommitment)
@@ -72,8 +79,8 @@ export class RPCServerService {
         challengeCommitment: challengeCommitment.toJSON()
       };
     },
-    async SyncResponse(request) {
-      const challengeDecommitment = await this.verifierService.syncResponse(
+    async EcdsaSyncResponse(request) {
+      const challengeDecommitment = await this.verifierService.ecdsaSyncResponse(
         request.sessionId,
         request.currencyId,
         EcdsaResponseCommitment.fromJSON(request.responseCommitment)
@@ -83,8 +90,8 @@ export class RPCServerService {
         challengeDecommitment: challengeDecommitment.toJSON()
       };
     },
-    async SyncFinalize(request) {
-      await this.verifierService.syncFinalize(
+    async EcdsaSyncFinalize(request) {
+      await this.verifierService.ecdsaSyncFinalize(
         request.sessionId,
         request.currencyId,
         EcdsaResponseDecommitment.fromJSON(request.responseDecommitment)
@@ -92,6 +99,31 @@ export class RPCServerService {
 
       return {};
     },
+    async StartEcdsaSign(request) {
+      const entropyDataBytes = await this.verifierService.startEcdsaSign(
+        request.sessionId,
+        request.currencyId,
+        request.signSessionId,
+        new Buffer(request.transactionBytes),
+        new Buffer(request.entropyCommitmentBytes)
+      );
+
+      return {
+        entropyDataBytes
+      };
+    },
+    async EcdsaSignReveal(request) {
+      const partialSignatureBytes = await this.verifierService.ecdsaSignReveal(
+        request.sessionId,
+        request.currencyId,
+        request.signSessionId,
+        new Buffer(request.entropyDecommitmentBytes)
+      );
+
+      return {
+        partialSignatureBytes
+      };
+    }
   };
 
   private _plainServerSocket: PlainServerSocket = null;

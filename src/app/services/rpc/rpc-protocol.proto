@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "distributedsyncsession.proto";
+import "distributedsignsession.proto";
 
 // Internal message representing an rpc call
 message RpcCall {
@@ -14,10 +15,12 @@ service RpcService {
   rpc ClearSession (ClearSessionRequest) returns (ClearSessionResponse);
   rpc SyncStatus (SyncStatusRequest) returns (SyncStatusResponse);
   rpc SyncState (SyncStateRequest) returns (SyncStateResponse);
-  rpc StartSync (StartSyncRequest) returns (StartSyncResponse);
-  rpc SyncReveal (SyncRevealRequest) returns (SyncRevealResponse);
-  rpc SyncResponse (SyncResponseRequest) returns (SyncResponseResponse);
-  rpc SyncFinalize (SyncFinalizeRequest) returns (SyncFinalizeResponse);
+  rpc StartEcdsaSync (StartEcdsaSyncRequest) returns (StartEcdsaSyncResponse);
+  rpc EcdsaSyncReveal (EcdsaSyncRevealRequest) returns (EcdsaSyncRevealResponse);
+  rpc EcdsaSyncResponse (EcdsaSyncResponseRequest) returns (EcdsaSyncResponseResponse);
+  rpc EcdsaSyncFinalize (EcdsaSyncFinalizeRequest) returns (EcdsaSyncFinalizeResponse);
+  rpc StartEcdsaSign (StartEcdsaSignRequest) returns (StartEcdsaSignResponse);
+  rpc EcdsaSignReveal (EcdsaSignRevealRequest) returns (EcdsaSignRevealResponse);
 }
 
 message CapabilitiesRequest {
@@ -75,41 +78,64 @@ message SyncStateResponse {
   SyncState status = 1;
 }
 
-message StartSyncRequest {
+message StartEcdsaSyncRequest {
   string session_id = 1;
   int32 currency_id = 2;
-  EcdsaInitialCommitment initialCommitment = 3;
+  EcdsaInitialCommitment initial_commitment = 3;
 }
 
-message StartSyncResponse {
-  EcdsaInitialData initialData = 1;
+message StartEcdsaSyncResponse {
+  EcdsaInitialData initial_data = 1;
 }
 
-message SyncRevealRequest {
+message EcdsaSyncRevealRequest {
   string session_id = 1;
   int32 currency_id = 2;
-  EcdsaInitialDecommitment initialDecommitment = 3;
+  EcdsaInitialDecommitment initial_decommitment = 3;
 }
 
-message SyncRevealResponse {
-  EcdsaChallengeCommitment challengeCommitment = 1;
+message EcdsaSyncRevealResponse {
+  EcdsaChallengeCommitment challenge_commitment = 1;
 }
 
-message SyncResponseRequest {
+message EcdsaSyncResponseRequest {
   string session_id = 1;
   int32 currency_id = 2;
-  EcdsaResponseCommitment responseCommitment = 3;
+  EcdsaResponseCommitment response_commitment = 3;
 }
 
-message SyncResponseResponse {
-  EcdsaChallengeDecommitment challengeDecommitment = 1;
+message EcdsaSyncResponseResponse {
+  EcdsaChallengeDecommitment challenge_decommitment = 1;
 }
 
-message SyncFinalizeRequest {
+message EcdsaSyncFinalizeRequest {
   string session_id = 1;
   int32 currency_id = 2;
-  EcdsaResponseDecommitment responseDecommitment = 3;
+  EcdsaResponseDecommitment response_decommitment = 3;
 }
 
-message SyncFinalizeResponse {
+message EcdsaSyncFinalizeResponse {
+}
+
+message StartEcdsaSignRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string sign_session_id = 3;
+  bytes transaction_bytes = 4;
+  bytes entropy_commitment_bytes = 5;
+}
+
+message StartEcdsaSignResponse {
+  bytes entropy_data_bytes = 2;
+}
+
+message EcdsaSignRevealRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string sign_session_id = 3;
+  bytes entropy_decommitment_bytes = 4;
+}
+
+message EcdsaSignRevealResponse {
+  bytes partial_signature_bytes = 1;
 }

@@ -1,4 +1,12 @@
 import { Injectable } from '@angular/core';
+import {
+  Curve,
+  BitcoinTransaction,
+  LitecoinTransaction,
+  BitcoinCashTransaction,
+  EthereumTransaction,
+  NeoTransaction
+} from 'crypto-core-async';
 
 export enum CurrencyId {
   Bitcoin,
@@ -13,12 +21,20 @@ export enum CurrencyId {
   NeoTest
 }
 
+export enum Cryptosystem {
+  Ecdsa,
+  Eddsa
+}
+
 export class CurrencyInfo {
   constructor(
     private _id: CurrencyId,
     private _derivationNumber: number,
     private _name: string,
-    private _ticker: string
+    private _ticker: string,
+    private _cryptosystem: Cryptosystem,
+    private _curve: any,
+    private _transactionType: any
   ) {}
 
   get id(): CurrencyId {
@@ -36,6 +52,18 @@ export class CurrencyInfo {
   get ticker(): string {
     return this._ticker;
   }
+
+  get cryptosystem(): Cryptosystem {
+    return this._cryptosystem;
+  }
+
+  get curve(): any {
+    return this._curve;
+  }
+
+  get transactionType(): any {
+    return this._transactionType;
+  }
 }
 
 @Injectable()
@@ -45,61 +73,91 @@ export class CurrencyInfoService {
       CurrencyId.Bitcoin,
       0,
       'Bitcoin',
-      'BTC'
+      'BTC',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      BitcoinTransaction
     )],
     [CurrencyId.BitcoinTest, new CurrencyInfo(
       CurrencyId.BitcoinTest,
       1,
       'Bitcoin Test',
-      'BTC'
+      'BTC',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      BitcoinTransaction
     )],
     [CurrencyId.Litecoin, new CurrencyInfo(
       CurrencyId.Litecoin,
       2,
       'Litecoin',
-      'LTC'
+      'LTC',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      LitecoinTransaction
     )],
     [CurrencyId.LitecoinTest, new CurrencyInfo(
       CurrencyId.LitecoinTest,
       1,
       'Bitcoin Test',
-      'LTC'
+      'LTC',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      LitecoinTransaction
     )],
     [CurrencyId.BitcoinCash, new CurrencyInfo(
       CurrencyId.BitcoinCash,
       145,
       'Bitcoin Cash',
-      'BCH'
+      'BCH',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      BitcoinCashTransaction
     )],
     [CurrencyId.BitcoinCashTest, new CurrencyInfo(
       CurrencyId.BitcoinCashTest,
       1,
       'Bitcoin Cash Test',
-      'BCH'
+      'BCH',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      BitcoinCashTransaction
     )],
     [CurrencyId.Ethereum, new CurrencyInfo(
       CurrencyId.Ethereum,
       60,
       'Ethereum',
-      'ETH'
+      'ETH',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      EthereumTransaction
     )],
     [CurrencyId.EthereumTest, new CurrencyInfo(
       CurrencyId.EthereumTest,
       1,
       'Ethereum Test',
-      'ETH'
+      'ETH',
+      Cryptosystem.Ecdsa,
+      Curve.secp256k1,
+      EthereumTransaction
     )],
     [CurrencyId.Neo, new CurrencyInfo(
       CurrencyId.Neo,
       888,
       'Neo',
-      'NEO'
+      'NEO',
+      Cryptosystem.Ecdsa,
+      Curve.p256,
+      NeoTransaction
     )],
     [CurrencyId.NeoTest, new CurrencyInfo(
       CurrencyId.NeoTest,
       1,
       'Neo Test',
-      'NEO'
+      'NEO',
+      Cryptosystem.Ecdsa,
+      Curve.p256,
+      NeoTransaction
     )]
   ]);
 
