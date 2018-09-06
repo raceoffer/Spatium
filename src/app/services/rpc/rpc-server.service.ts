@@ -1,16 +1,14 @@
 import { Injectable } from '@angular/core';
+import { EcdsaInitialCommitment, EcdsaInitialDecommitment, EcdsaResponseCommitment, EcdsaResponseDecommitment } from 'crypto-core-async';
 import { Root } from 'protobufjs';
-
-import * as abi from './rpc-protocol.json';
 import { DeviceService } from '../device.service';
 import { VerifierService } from '../verifier.service';
 
-import {
-  EcdsaInitialCommitment,
-  EcdsaInitialDecommitment,
-  EcdsaResponseCommitment,
-  EcdsaResponseDecommitment
-} from 'crypto-core-async';
+import * as abi from './rpc-protocol.json';
+import { Server } from '../../utils/client-server/client-server';
+import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
+import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
+import { State, Socket } from '../../utils/sockets/socket';
 
 @Injectable()
 export class RPCServerService {
@@ -19,7 +17,10 @@ export class RPCServerService {
   private RpcService: any;
 
   private api = {
-    Capabilities: async () => {
+    verifierService: this._verifierService,
+    deviceService: this._deviceService,
+
+    async Capabilities() {
       const appInfo: any = await this.deviceService.appInfo();
       const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
       return {
@@ -29,24 +30,29 @@ export class RPCServerService {
         supportedProtocolVersions: [1]
       };
     },
-    RegisterSession: async (request) => {
+    async RegisterSession(request) {
       return {
-        existing: await this.verifierService.registerSession(new Buffer(request.sessionId))
+        existing: await this.verifierService.registerSession(request.sessionId)
       };
     },
-    ClearSession: async (request) => {
+    async ClearSession(request) {
       return {
-        existing: await this.verifierService.clearSession(new Buffer(request.sessionId))
+        existing: await this.verifierService.clearSession(request.sessionId)
       };
     },
-    SyncStatus: async (request) => {
+    async SyncStatus(request) {
       return {
-        statuses: await this.verifierService.syncStatus(new Buffer(request.sessionId))
+        statuses: await this.verifierService.syncStatus(request.sessionId)
       };
     },
-    StartSync: async (request) => {
+    async SyncState(request) {
+      return {
+        status: await this.verifierService.syncState(request.sessionId, request.currencyId)
+      };
+    },
+    async StartSync(request) {
       const initialData = await this.verifierService.startSync(
-        new Buffer(request.sessionId),
+        request.sessionId,
         request.currencyId,
         EcdsaInitialCommitment.fromJSON(request.initialCommitment)
       );
@@ -55,9 +61,9 @@ export class RPCServerService {
         initialData: initialData.toJSON()
       };
     },
-    SyncReveal: async (request) => {
+    async SyncReveal(request) {
       const challengeCommitment = await this.verifierService.syncReveal(
-        new Buffer(request.sessionId),
+        request.sessionId,
         request.currencyId,
         EcdsaInitialDecommitment.fromJSON(request.initialDecommitment)
       );
@@ -66,9 +72,9 @@ export class RPCServerService {
         challengeCommitment: challengeCommitment.toJSON()
       };
     },
-    SyncResponse: async (request) => {
+    async SyncResponse(request) {
       const challengeDecommitment = await this.verifierService.syncResponse(
-        new Buffer(request.sessionId),
+        request.sessionId,
         request.currencyId,
         EcdsaResponseCommitment.fromJSON(request.responseCommitment)
       );
@@ -77,9 +83,9 @@ export class RPCServerService {
         challengeDecommitment: challengeDecommitment.toJSON()
       };
     },
-    SyncFinalize: async (request) => {
+    async SyncFinalize(request) {
       await this.verifierService.syncFinalize(
-        new Buffer(request.sessionId),
+        request.sessionId,
         request.currencyId,
         EcdsaResponseDecommitment.fromJSON(request.responseDecommitment)
       );
@@ -88,13 +94,37 @@ export class RPCServerService {
     },
   };
 
+  private _plainServerSocket: PlainServerSocket = null;
+  private _servers = new Set<Server>();
+
   constructor(
-    private readonly deviceService: DeviceService,
-    private readonly verifierService: VerifierService
+    private readonly _deviceService: DeviceService,
+    private readonly _verifierService: VerifierService
   ) {
     this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
+
+    this._deviceService.deviceReady().then(() => {
+      this._plainServerSocket = new PlainServerSocket();
+      this._plainServerSocket.opened.subscribe(async (socket: Socket) => {
+        const server = new Server(socket);
+
+        socket.state.pipe(
+          distinctUntilChanged(),
+          skip(1),
+          filter(state => [State.Closing, State.Closed].includes(state))
+        ).subscribe(() => {
+          this._servers.delete(server);
+        });
+
+        server.setRequestHandler(async (data) => {
+          return await this.handleRequest(data);
+        });
+
+        this._servers.add(server);
+      });
+    });
   }
 
   public async handleRequest(data: Buffer): Promise<Buffer> {
@@ -115,5 +145,19 @@ export class RPCServerService {
     } else {
       throw new Error('Method not supported');
     }
+  }
+
+  public async start(iface: string, port: number): Promise<void> {
+    return await this._plainServerSocket.start(iface, port);
+  }
+
+  public async stop(): Promise<void> {
+    for (const server of Array.from(this._servers.values())) {
+      await server.close();
+    }
+
+    this._servers.clear();
+
+    return await this._plainServerSocket.stop();
   }
 }

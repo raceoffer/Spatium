@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import {
-  KeyChain,
-  DistributedEcdsaKeyShard,
-  Curve
-} from 'crypto-core-async';
+import { DistributedEcdsaKeyShard, Curve } from 'crypto-core-async';
+import { CurrencyInfoService, CurrencyId } from './currencyinfo.service';
+import { KeyChainService } from './keychain.service';
 
 export enum SyncState {
   None = 0,
@@ -14,18 +12,12 @@ export enum SyncState {
   Finalized = 4,
 }
 
-const seed = Buffer.from(
-  '9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d',
-  'hex'
-);
-
 export class Currency {
-  private readonly _id: string;
   private _state: SyncState = SyncState.None;
   private _distributedKeyShard: any;
   private _syncSessionShard: any;
 
-  public get id(): string {
+  public get id(): CurrencyId {
     return this._id;
   }
 
@@ -33,18 +25,19 @@ export class Currency {
     return this._state;
   }
 
-  public constructor(id: string) {
-    this._id = id;
-  }
+  public constructor(
+    private readonly _id: CurrencyId,
+    private readonly _currencyInfoService: CurrencyInfoService,
+    private readonly _keyChainService: KeyChainService
+  ) {}
 
   public async startSync(initialCommitment: any): Promise<any> {
-    const keyChain = KeyChain.fromSeed(seed);
-
-    const verifierPrivateBytes = keyChain.getAccountSecret(61, 0);
+    const derivationNumber = this._currencyInfoService.currencyInfo(this.id).derivationNumber;
+    const privateBytes = this._keyChainService.privateBytes(derivationNumber, 0);
 
     this._distributedKeyShard = await DistributedEcdsaKeyShard.fromOptions({
       curve: Curve.secp256k1,
-      secret: verifierPrivateBytes
+      secret: privateBytes
     });
 
     this._syncSessionShard = await this._distributedKeyShard.startSyncSession();
@@ -96,10 +89,9 @@ export class Currency {
 }
 
 export class DeviceSession {
-  private readonly _id: Buffer;
-  private _currencies = new Map<string, Currency>();
+  private _currencies = new Map<CurrencyId, Currency>();
 
-  public get id(): Buffer {
+  public get id(): string {
     return this._id;
   }
 
@@ -107,20 +99,39 @@ export class DeviceSession {
     return Array.from(this._currencies.values());
   }
 
-  public constructor(id: Buffer) {
-    this._id = id;
+  public constructor(
+    private readonly _id: string,
+    private readonly _currencyInfoService: CurrencyInfoService,
+    private readonly _keyChainService: KeyChainService
+  ) {}
+
+  public async syncState(currencyId: CurrencyId): Promise<SyncState> {
+    if (!this._currencies.has(currencyId)) {
+      return SyncState.None;
+    }
+
+    return this._currencies.get(currencyId).state;
   }
 
-  public async startSync(currencyId: string, initialCommitment: any): Promise<any> {
-    const currency = new Currency(currencyId);
+  public async syncStatus(): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
+    return Array.from(this._currencies.values()).map((currency) => {
+      return {
+        currencyId: currency.id,
+        state: currency.state
+      };
+    });
+  }
+
+  public async startSync(currencyId: CurrencyId, initialCommitment: any): Promise<any> {
+    const currency = new Currency(currencyId, this._currencyInfoService, this._keyChainService);
 
     this._currencies.set(currencyId, currency);
 
     return await currency.startSync(initialCommitment);
   }
 
-  public async syncReveal(currencyId: string, initialDecommitment: any): Promise<any> {
-    if (!this._currencies.get(currencyId)) {
+  public async syncReveal(currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
+    if (!this._currencies.has(currencyId)) {
       throw new Error('Sync session not started');
     }
 
@@ -129,8 +140,8 @@ export class DeviceSession {
     return await currency.syncReveal(initialDecommitment);
   }
 
-  public async syncResponse(currencyId: string, responseCommitment: any): Promise<any> {
-    if (!this._currencies.get(currencyId)) {
+  public async syncResponse(currencyId: CurrencyId, responseCommitment: any): Promise<any> {
+    if (!this._currencies.has(currencyId)) {
       throw new Error('Sync session not started');
     }
 
@@ -139,8 +150,8 @@ export class DeviceSession {
     return await currency.syncResponse(responseCommitment);
   }
 
-  public async syncFinalize(currencyId: string, responseDecommitment: any): Promise<any> {
-    if (!this._currencies.get(currencyId)) {
+  public async syncFinalize(currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
+    if (!this._currencies.has(currencyId)) {
       throw new Error('Sync session not started');
     }
 
@@ -154,20 +165,21 @@ export class DeviceSession {
 export class VerifierService {
   private sessions = new Map<string, DeviceSession>();
 
-  public constructor() {}
+  public constructor(
+    private readonly _currencyInfoService: CurrencyInfoService,
+    private readonly _keyChainService: KeyChainService
+  ) {}
 
   /**
    * Checks if this session Id is registered and registers it otherwise
    * @param sessionId session Id of the main device
    */
-  public async registerSession(sessionId: Buffer): Promise<boolean> {
-    const stringId = sessionId.toString('hex');
-
-    if (this.sessions.has(stringId)) {
+  public async registerSession(sessionId: string): Promise<boolean> {
+    if (this.sessions.has(sessionId)) {
       return true;
     }
 
-    this.sessions.set(stringId, new DeviceSession(sessionId));
+    this.sessions.set(sessionId, new DeviceSession(sessionId, this._currencyInfoService, this._keyChainService));
 
     return false;
   }
@@ -176,70 +188,61 @@ export class VerifierService {
    * Checks if this session Id is registered and removes it
    * @param sessionId session Id of the main device
    */
-  public async clearSession(sessionId: Buffer): Promise<boolean> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async clearSession(sessionId: string): Promise<boolean> {
+    if (!this.sessions.has(sessionId)) {
       return false;
     }
 
-    this.sessions.delete(stringId);
+    this.sessions.delete(sessionId);
 
     return true;
   }
 
-  public async syncStatus(sessionId: Buffer): Promise<Array<{ currencyId: string, state: SyncState }>> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async syncState(sessionId: string, currencyId: CurrencyId): Promise<SyncState> {
+    if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return this.sessions.get(stringId).currencies.map((currency: Currency) => {
-      return {
-        currencyId: currency.id,
-        state: currency.state
-      };
-    });
+    return await this.sessions.get(sessionId).syncState(currencyId);
   }
 
-  public async startSync(sessionId: Buffer, currencyId: string, initialCommitment: any): Promise<any> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async syncStatus(sessionId: string): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
+    if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(stringId).startSync(currencyId, initialCommitment);
+    return await this.sessions.get(sessionId).syncStatus();
   }
 
-  public async syncReveal(sessionId: Buffer, currencyId: string, initialDecommitment: any): Promise<any> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async startSync(sessionId: string, currencyId: CurrencyId, initialCommitment: any): Promise<any> {
+    if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(stringId).syncReveal(currencyId, initialDecommitment);
+    return await this.sessions.get(sessionId).startSync(currencyId, initialCommitment);
   }
 
-  public async syncResponse(sessionId: Buffer, currencyId: string, responseCommitment: any): Promise<any> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async syncReveal(sessionId: string, currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
+    if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(stringId).syncResponse(currencyId, responseCommitment);
+    return await this.sessions.get(sessionId).syncReveal(currencyId, initialDecommitment);
   }
 
-  public async syncFinalize(sessionId: Buffer, currencyId: string, responseDecommitment: any): Promise<any> {
-    const stringId = sessionId.toString('hex');
-
-    if (!this.sessions.has(stringId)) {
+  public async syncResponse(sessionId: string, currencyId: CurrencyId, responseCommitment: any): Promise<any> {
+    if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(stringId).syncFinalize(currencyId, responseDecommitment);
+    return await this.sessions.get(sessionId).syncResponse(currencyId, responseCommitment);
+  }
+
+  public async syncFinalize(sessionId: string, currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
+    if (!this.sessions.has(sessionId)) {
+      throw new Error('Unknown session id');
+    }
+
+    return await this.sessions.get(sessionId).syncFinalize(currencyId, responseDecommitment);
   }
 }

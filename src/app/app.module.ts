@@ -121,6 +121,7 @@ import { NavbarComponent } from './modals/navbar/navbar.component';
 import { AddTokenComponent } from './screens/navigator/add-token/add-token.component';
 import { RPCServerService } from './services/rpc/rpc-server.service';
 import { VerifierService } from './services/verifier.service';
+import { CurrencyInfoService } from './services/currencyinfo.service';
 
 @NgModule({
   declarations: [
@@ -252,7 +253,8 @@ import { VerifierService } from './services/verifier.service';
     ConnectionProviderService,
     SettingsService,
     RPCServerService,
-    VerifierService
+    VerifierService,
+    CurrencyInfoService
   ],
   bootstrap: [
     AppComponent

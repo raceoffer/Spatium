@@ -12,14 +12,17 @@ import { Client, Server } from '../../utils/client-server/client-server';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { RPCClient } from '../../services/rpc/rpc-client';
 
+import uuid from 'uuid/v5';
+
 import {
-  KeyChain,
+  Utils,
   DistributedEcdsaKey,
   EcdsaInitialData,
   EcdsaChallengeCommitment,
   EcdsaChallengeDecommitment,
   Curve
 } from 'crypto-core-async';
+import { CurrencyInfoService, CurrencyId } from '../../services/currencyinfo.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -35,22 +38,14 @@ export class StartComponent implements OnInit, OnDestroy {
   private buffer = null;
   private subscriptions = [];
 
-  private serverSocket = null;
-  private serverClientSocket = null;
-  private clientSocket = null;
-
-  private server: Server = null;
-  private client: Client = null;
-
-  private rpcClient: RPCClient = null;
-
   constructor(
     private readonly deviceService: DeviceService,
-    private readonly keyChainService: KeyChainService,
     private readonly router: Router,
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
-    private readonly rpc: RPCServerService
+    private readonly rpc: RPCServerService,
+    private readonly keyChainService: KeyChainService,
+    private readonly currencyInfoService: CurrencyInfoService
   ) {}
 
   public async ngOnInit() {
@@ -59,30 +54,6 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.settings.initializeSettings();
 
     const viewed = await this.settings.presentationViewed();
-    this.serverSocket = new PlainServerSocket();
-    this.clientSocket = new PlainSocket();
-
-    this.client = new Client(this.clientSocket);
-
-    this.rpcClient = new RPCClient(this.client);
-
-    this.clientSocket.state.subscribe(state => console.log('Client State ', state));
-    this.clientSocket.data.subscribe((data) => {
-      console.log('Client data', data);
-    });
-
-    this.serverSocket.opened.subscribe(async (socket) => {
-      this.serverClientSocket = socket;
-      this.server = new Server(this.serverClientSocket);
-      this.serverClientSocket.state.subscribe(state => console.log('Server State ', state));
-      this.serverClientSocket.data.subscribe((data) => {
-        console.log('Server data', data);
-      });
-
-      this.server.setRequestHandler(async (data) => {
-        return await this.rpc.handleRequest(data);
-      });
-    });
 
     if (!viewed) {
       this.openPresentation();
@@ -119,6 +90,15 @@ export class StartComponent implements OnInit, OnDestroy {
     if (startPath !== null) {
       await this.router.navigate([startPath as string]);
     }
+
+    this.keyChainService.seed = Buffer.from(
+      '9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d',
+      'hex'
+    );
+
+    await this.rpc.start('0.0.0.0', 5666);
+
+    console.log('Rpc started');
   }
 
   public ngOnDestroy() {
@@ -156,38 +136,43 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/verifier-auth']);
   }
 
-  public async test1() {
-    await this.serverSocket.start('0.0.0.0', 5666);
-    await this.clientSocket.open('127.0.0.1', 5666);
-  }
+  public async test() {
+    const socket = new PlainSocket();
+    const rpcClient = new RPCClient(new Client(socket));
 
-  public async test2() {
-    const capabilities = await this.rpcClient.api.capabilities({});
+    await socket.open('127.0.0.1', 5666);
+
+    const capabilities = await rpcClient.api.capabilities({});
 
     console.log(capabilities);
 
-    const registerResponse = await this.rpcClient.api.registerSession({ sessionId: Buffer.from('ffffaadd', 'hex') });
+    const seedHash = await Utils.sha256(this.keyChainService.seed);
+
+    const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
+
+    const sessionId = uuid(seedHash.toJSON().data, serviceId);
+
+    console.log(sessionId);
+
+    const registerResponse = await rpcClient.api.registerSession({ sessionId });
 
     console.log(registerResponse);
 
-    const syncStatusResponse = await this.rpcClient.api.syncStatus({ sessionId: Buffer.from('ffffaadd', 'hex') });
+    const syncStatusResponse = await rpcClient.api.syncStatus({ sessionId });
 
     console.log(syncStatusResponse);
 
-    const seed = Buffer.from(
-      '9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d',
-      'hex'
-    );
+    const currencyId = CurrencyId.Bitcoin;
 
-    const keyChain = KeyChain.fromSeed(seed);
+    const derivationNumber = this.currencyInfoService.currencyInfo(currencyId).derivationNumber;
 
-    const initiatorPrivateBytes = keyChain.getAccountSecret(60, 0);
+    const privateBytes = this.keyChainService.privateBytes(derivationNumber, 0);
 
     const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
 
     const distributedKey = await DistributedEcdsaKey.fromOptions({
       curve: Curve.secp256k1,
-      secret: initiatorPrivateBytes,
+      secret: privateBytes,
       localPaillierPublicKey: publicKey,
       localPaillierSecretKey: secretKey,
     });
@@ -196,39 +181,42 @@ export class StartComponent implements OnInit, OnDestroy {
 
     const initialCommitment = await syncSession.createInitialCommitment();
 
-    const startSyncResponse = await this.rpcClient.api.startSync({
-      sessionId: Buffer.from('ffffaadd', 'hex'),
-      currencyId: 'asdakljsdlkasj',
+    const startSyncResponse = await rpcClient.api.startSync({
+      sessionId,
+      currencyId,
       initialCommitment: initialCommitment.toJSON()
     });
+    console.log(startSyncResponse);
 
     const initiaalData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
 
     const initialDecommitment = await syncSession.processInitialData(initiaalData);
 
-    const syncRevealResponse = await this.rpcClient.api.syncReveal({
-      sessionId: Buffer.from('ffffaadd', 'hex'),
-      currencyId: 'asdakljsdlkasj',
+    const syncRevealResponse = await rpcClient.api.syncReveal({
+      sessionId,
+      currencyId,
       initialDecommitment: initialDecommitment.toJSON()
     });
+    console.log(syncRevealResponse);
 
     const challengeCommitment = EcdsaChallengeCommitment.fromJSON(syncRevealResponse.challengeCommitment);
 
     const responseCommitment = await syncSession.processChallengeCommitment(challengeCommitment);
 
-    const syncResponseResponse = await this.rpcClient.api.syncResponse({
-      sessionId: Buffer.from('ffffaadd', 'hex'),
-      currencyId: 'asdakljsdlkasj',
+    const syncResponseResponse = await rpcClient.api.syncResponse({
+      sessionId,
+      currencyId,
       responseCommitment: responseCommitment.toJSON()
     });
+    console.log(syncResponseResponse);
 
     const challengeDecommitment = EcdsaChallengeDecommitment.fromJSON(syncResponseResponse.challengeDecommitment);
 
     const { responseDecommitment, syncData } = await syncSession.processChallengeDecommitment(challengeDecommitment);
 
-    const syncFinalizeResponse = await this.rpcClient.api.syncFinalize({
-      sessionId: Buffer.from('ffffaadd', 'hex'),
-      currencyId: 'asdakljsdlkasj',
+    const syncFinalizeResponse = await rpcClient.api.syncFinalize({
+      sessionId,
+      currencyId,
       responseDecommitment: responseDecommitment.toJSON()
     });
     console.log(syncFinalizeResponse);
@@ -237,8 +225,14 @@ export class StartComponent implements OnInit, OnDestroy {
 
     console.log(distributedKey.compoundPublic());
 
-    const clearResponse = await this.rpcClient.api.clearSession({ sessionId: Buffer.from('ffffaadd', 'hex') });
+    const syncStateResponse = await rpcClient.api.syncState({ sessionId, currencyId });
+
+    console.log(syncStateResponse);
+
+    const clearResponse = await rpcClient.api.clearSession({ sessionId });
 
     console.log(clearResponse);
+
+    await rpcClient.close();
   }
 }

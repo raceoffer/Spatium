@@ -291,4 +291,19 @@ export class KeyChainService {
   addCustomToken(token: TokenEntry) {
     this.topTokens.next([token].concat(this.topTokens.getValue()));
   }
+
+  // new api
+
+  get seed() {
+    return Buffer.from(this._seed);
+  }
+
+  set seed(seed) {
+    this._seed = Buffer.from(seed);
+    this.keyChain = this._seed ? KeyChain.fromSeed(Buffer.from(seed)) : null;
+  }
+
+  privateBytes(coin: number, account: number) {
+    return this.keyChain ? this.keyChain.getAccountSecret(coin, account) : null;
+  }
 }

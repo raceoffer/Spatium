@@ -1,5 +1,5 @@
 import { Reader, Root } from 'protobufjs';
-import { v4 as uuid } from 'uuid';
+import uuid from 'uuid/v4';
 import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
 import { Socket, State } from '../sockets/socket';
 
@@ -22,6 +22,8 @@ export class Client {
   private requestQueue = [];
   private responseAccumulator = Buffer.alloc(0);
 
+  public state = this.socket.state;
+
   private static bufferUUID(): Buffer {
     const uuidArray = [];
     uuid(undefined, uuidArray);
@@ -39,7 +41,7 @@ export class Client {
       await this.handleData(data);
     });
 
-    this.socket.state.pipe(
+    this.state.pipe(
       distinctUntilChanged(),
       skip(1),
       filter(state => [State.Closing, State.Closed].includes(state))
@@ -65,6 +67,10 @@ export class Client {
     return await new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
       this.requestQueue.push({ id, resolve, reject });
     });
+  }
+
+  public async close(): Promise<void> {
+    return await this.socket.close();
   }
 
   private async handleData(data: Buffer): Promise<void> {
@@ -137,6 +143,8 @@ export class Server {
 
   private requestHandler: (data: Buffer) => any = null;
 
+  public state = this.socket.state;
+
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
 
@@ -148,7 +156,7 @@ export class Server {
       await this.handleData(data);
     });
 
-    this.socket.state.pipe(
+    this.state.pipe(
       distinctUntilChanged(),
       skip(1),
       filter(state => [State.Closing, State.Closed].includes(state))
@@ -159,6 +167,10 @@ export class Server {
 
   public setRequestHandler(handler: (data: Buffer) => any): void {
     this.requestHandler = handler;
+  }
+
+  public async close(): Promise<void> {
+    return await this.socket.close();
   }
 
   private async handleData(data: Buffer): Promise<void> {

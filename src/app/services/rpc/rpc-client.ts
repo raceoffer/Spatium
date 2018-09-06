@@ -10,6 +10,8 @@ export class RPCClient {
 
   private rpcService: any;
 
+  public state = this.client.state;
+
   private _api: any;
 
   constructor(private client: Client) {
@@ -48,5 +50,9 @@ export class RPCClient {
 
   public async request(method: string, data: any): Promise<any> {
     return await this.rpcService[method](data);
+  }
+
+  public async close(): Promise<void> {
+    return await this.client.close();
   }
 }

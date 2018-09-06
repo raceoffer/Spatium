@@ -30,6 +30,10 @@
           "requestType": "SyncStatusRequest",
           "responseType": "SyncStatusResponse"
         },
+        "SyncState": {
+          "requestType": "SyncStateRequest",
+          "responseType": "SyncStateResponse"
+        },
         "StartSync": {
           "requestType": "StartSyncRequest",
           "responseType": "StartSyncResponse"
@@ -75,7 +79,7 @@
     "RegisterSessionRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         }
       }
@@ -91,7 +95,7 @@
     "ClearSessionRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         }
       }
@@ -104,10 +108,19 @@
         }
       }
     },
+    "SyncState": {
+      "values": {
+        "NONE": 0,
+        "STARTED": 1,
+        "REVEALED": 2,
+        "RESPONDED": 3,
+        "FINALIZED": 4
+      }
+    },
     "SyncStatusRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         }
       }
@@ -121,15 +134,6 @@
         }
       },
       "nested": {
-        "SyncState": {
-          "values": {
-            "NONE": 0,
-            "STARTED": 1,
-            "REVEALED": 2,
-            "RESPONDED": 3,
-            "FINALIZED": 4
-          }
-        },
         "SyncStatus": {
           "fields": {
             "currencyId": {
@@ -144,14 +148,34 @@
         }
       }
     },
-    "StartSyncRequest": {
+    "SyncStateRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         },
         "currencyId": {
+          "type": "int32",
+          "id": 2
+        }
+      }
+    },
+    "SyncStateResponse": {
+      "fields": {
+        "status": {
+          "type": "SyncState",
+          "id": 1
+        }
+      }
+    },
+    "StartSyncRequest": {
+      "fields": {
+        "sessionId": {
           "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
           "id": 2
         },
         "initialCommitment": {
@@ -171,11 +195,11 @@
     "SyncRevealRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         },
         "currencyId": {
-          "type": "string",
+          "type": "int32",
           "id": 2
         },
         "initialDecommitment": {
@@ -195,11 +219,11 @@
     "SyncResponseRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         },
         "currencyId": {
-          "type": "string",
+          "type": "int32",
           "id": 2
         },
         "responseCommitment": {
@@ -219,11 +243,11 @@
     "SyncFinalizeRequest": {
       "fields": {
         "sessionId": {
-          "type": "bytes",
+          "type": "string",
           "id": 1
         },
         "currencyId": {
-          "type": "string",
+          "type": "int32",
           "id": 2
         },
         "responseDecommitment": {
