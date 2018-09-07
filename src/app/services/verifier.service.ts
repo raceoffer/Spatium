@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { DistributedEcdsaKeyShard, BitcoreEntropyCommitment, BitcoreEntropyDecommitment } from 'crypto-core-async';
+import { DistributedEcdsaKeyShard } from 'crypto-core-async';
 import { CurrencyInfoService, CurrencyId, Cryptosystem } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
 
@@ -101,40 +101,32 @@ export class EcdsaCurrency extends Currency {
     return;
   }
 
-  public async startSign(signSessionId: string, transactionBytes: Buffer, entropyCommitmentBytes: Buffer): Promise<Buffer> {
+  public async startSign(signSessionId: string, transaction: any, entropyCommitment: any): Promise<any> {
     if (this._state !== SyncState.Finalized) {
       throw new Error('Invalid session state');
     }
 
-    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
-
-    const transaction = await currencyInfo.transactionType.fromBytes(transactionBytes);
-
     const signSessionShard = await transaction.startSignSessionShard(this._distributedKeyShard);
-
-    const entropyCommitment = BitcoreEntropyCommitment.fromBytes(entropyCommitmentBytes);
 
     const entropyData = await signSessionShard.processEntropyCommitment(entropyCommitment);
 
     this._signSessions.set(signSessionId, signSessionShard);
 
-    return entropyData.toBytes();
+    return entropyData;
   }
 
-  public async signReveal(signSessionId: string, entropyDecommitmentBytes: Buffer): Promise<Buffer> {
+  public async signReveal(signSessionId: string, entropyDecommitment: any): Promise<any> {
     if (!this._signSessions.has(signSessionId)) {
       throw new Error('Invalid session state');
     }
 
     const signSessionShard = this._signSessions.get(signSessionId);
 
-    const entropyDecommitment = BitcoreEntropyDecommitment.fromBytes(entropyDecommitmentBytes);
-
     const partialSignature = signSessionShard.processEntropyDecommitment(entropyDecommitment);
 
     this._signSessions.delete(signSessionId);
 
-    return partialSignature.toBytes();
+    return partialSignature;
   }
 }
 
@@ -221,18 +213,18 @@ export class DeviceSession {
   public async startEcdsaSign(
     currencyId: CurrencyId,
     signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitmentBytes: Buffer
-  ): Promise<Buffer> {
+    transaction: any,
+    entropyCommitment: any
+  ): Promise<any> {
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.startSign(signSessionId, transactionBytes, entropyCommitmentBytes);
+    return await currency.startSign(signSessionId, transaction, entropyCommitment);
   }
 
-  public async ecdsaSignReveal(currencyId: CurrencyId, signSessionId: string, entropyDecommitmentBytes: Buffer): Promise<Buffer> {
+  public async ecdsaSignReveal(currencyId: CurrencyId, signSessionId: string, entropyDecommitment: any): Promise<any> {
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.signReveal(signSessionId, entropyDecommitmentBytes);
+    return await currency.signReveal(signSessionId, entropyDecommitment);
   }
 }
 
@@ -325,26 +317,26 @@ export class VerifierService {
     sessionId: string,
     currencyId: CurrencyId,
     signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitmentBytes: Buffer
-  ): Promise<Buffer> {
+    transaction: any,
+    entropyCommitment: any
+  ): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).startEcdsaSign(currencyId, signSessionId, transactionBytes, entropyCommitmentBytes);
+    return await this.sessions.get(sessionId).startEcdsaSign(currencyId, signSessionId, transaction, entropyCommitment);
   }
 
   public async ecdsaSignReveal(
     sessionId: string,
     currencyId: CurrencyId,
     signSessionId: string,
-    entropyDecommitmentBytes: Buffer
-  ): Promise<Buffer> {
+    entropyDecommitment: any
+  ): Promise<any> {
     if (!this.sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).ecdsaSignReveal(currencyId, signSessionId, entropyDecommitmentBytes);
+    return await this.sessions.get(sessionId).ecdsaSignReveal(currencyId, signSessionId, entropyDecommitment);
   }
 }

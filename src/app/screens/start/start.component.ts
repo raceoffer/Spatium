@@ -16,18 +16,18 @@ import uuid from 'uuid/v5';
 import {
   Utils,
   DistributedEcdsaKey,
-  EcdsaInitialData,
-  EcdsaChallengeCommitment,
-  EcdsaChallengeDecommitment,
-  BitcoreEntropyData,
-  BitcorePartialSignature,
   BitcoinWallet,
-  BitcoinTransaction
+  BitcoinTransaction,
+  Marshal
 } from 'crypto-core-async';
-import { CurrencyInfoService, CurrencyId } from '../../services/currencyinfo.service';
+import { CurrencyId } from '../../services/currencyinfo.service';
+import { SyncService, EcdsaCurrency } from '../../services/sync.service';
+import { SyncState } from '../../services/verifier.service';
 
 declare const navigator: any;
 declare const Windows: any;
+
+const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
 
 @Component({
   selector: 'app-start',
@@ -40,6 +40,12 @@ export class StartComponent implements OnInit, OnDestroy {
   private buffer = null;
   private subscriptions = [];
 
+  private socket: PlainSocket;
+  private rpcClient: RPCClient;
+  private sessionId: string;
+  private paillierPublicKey: any;
+  private paillierSecretKey: any;
+
   constructor(
     private readonly deviceService: DeviceService,
     private readonly router: Router,
@@ -47,7 +53,7 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly settings: SettingsService,
     private readonly rpc: RPCServerService,
     private readonly keyChainService: KeyChainService,
-    private readonly currencyInfoService: CurrencyInfoService
+    private readonly syncService: SyncService
   ) {}
 
   public async ngOnInit() {
@@ -98,6 +104,17 @@ export class StartComponent implements OnInit, OnDestroy {
       'hex'
     );
 
+    const seedHash = await Utils.sha256(this.keyChainService.seed);
+
+    this.sessionId = uuid(seedHash.toJSON().data, serviceId);
+
+    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
+
+    this.paillierPublicKey = publicKey;
+    this.paillierSecretKey = secretKey;
+
+    console.log(this.sessionId);
+
     await this.rpc.start('0.0.0.0', 5666);
 
     console.log('Rpc started');
@@ -108,6 +125,7 @@ export class StartComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.rpc.stop();
+    console.log('Rpc stopped');
   }
 
   public openPresentation() {
@@ -140,102 +158,58 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/verifier-auth']);
   }
 
-  public async test() {
-    const socket = new PlainSocket();
-    const rpcClient = new RPCClient(new Client(socket));
+  public async connect() {
+    console.log('connect()');
+    this.socket = new PlainSocket();
+    this.rpcClient = new RPCClient(new Client(this.socket));
 
-    await socket.open('127.0.0.1', 5666);
+    await this.socket.open('127.0.0.1', 5666);
 
-    const capabilities = await rpcClient.api.capabilities({});
+    const capabilities = await this.rpcClient.api.capabilities({});
 
     console.log(capabilities);
 
-    const seedHash = await Utils.randomBytes(32);
+    console.log('Connected');
+  }
 
-    const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
+  public async sync() {
+    console.log('sync()');
 
-    const sessionId = uuid(seedHash.toJSON().data, serviceId);
+    await this.syncService.sync(
+      this.sessionId,
+      this.paillierPublicKey,
+      this.paillierSecretKey,
+      this.rpcClient
+    );
 
-    console.log(sessionId);
+    console.log('Synchronized');
+  }
 
-    const registerResponse = await rpcClient.api.registerSession({ sessionId });
+  public async syncBitcoinTest() {
+    console.log('syncBitcoinTest()');
 
-    console.log(registerResponse);
+    this.syncService.forceCurrency(CurrencyId.BitcoinTest);
 
-    const syncStatusResponse = await rpcClient.api.syncStatus({ sessionId });
+    console.log('Bumped');
+  }
 
-    console.log(syncStatusResponse);
+  public async signBitcoinTest() {
+    console.log('signBitcoinTest()');
+    const bitcoin = this.syncService.currency(CurrencyId.BitcoinTest) as EcdsaCurrency;
 
-    const currencyId = CurrencyId.BitcoinTest;
+    console.log(await bitcoin.distributedKey.compoundPublic());
 
-    const currencyInfo = this.currencyInfoService.currencyInfo(currencyId);
-
-    const privateBytes = this.keyChainService.privateBytes(60, 0);
-
-    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
-
-    const distributedKey = await DistributedEcdsaKey.fromOptions({
-      curve: currencyInfo.curve,
-      secret: privateBytes,
-      localPaillierPublicKey: publicKey,
-      localPaillierSecretKey: secretKey,
-    });
-
-    const syncSession = await distributedKey.startSyncSession();
-
-    const initialCommitment = await syncSession.createInitialCommitment();
-
-    const startSyncResponse = await rpcClient.api.startEcdsaSync({
-      sessionId,
-      currencyId,
-      initialCommitment: initialCommitment.toJSON()
-    });
-    console.log(startSyncResponse);
-
-    const initiaalData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
-
-    const initialDecommitment = await syncSession.processInitialData(initiaalData);
-
-    const syncRevealResponse = await rpcClient.api.ecdsaSyncReveal({
-      sessionId,
-      currencyId,
-      initialDecommitment: initialDecommitment.toJSON()
-    });
-    console.log(syncRevealResponse);
-
-    const challengeCommitment = EcdsaChallengeCommitment.fromJSON(syncRevealResponse.challengeCommitment);
-
-    const responseCommitment = await syncSession.processChallengeCommitment(challengeCommitment);
-
-    const syncResponseResponse = await rpcClient.api.ecdsaSyncResponse({
-      sessionId,
-      currencyId,
-      responseCommitment: responseCommitment.toJSON()
-    });
-    console.log(syncResponseResponse);
-
-    const challengeDecommitment = EcdsaChallengeDecommitment.fromJSON(syncResponseResponse.challengeDecommitment);
-
-    const { responseDecommitment, syncData } = await syncSession.processChallengeDecommitment(challengeDecommitment);
-
-    const syncFinalizeResponse = await rpcClient.api.ecdsaSyncFinalize({
-      sessionId,
-      currencyId,
-      responseDecommitment: responseDecommitment.toJSON()
-    });
-    console.log(syncFinalizeResponse);
-
-    await distributedKey.importSyncData(syncData);
-
-    console.log(await distributedKey.compoundPublic());
-
-    const syncStateResponse = await rpcClient.api.syncState({ sessionId, currencyId });
+    const syncStateResponse = await this.rpcClient.api.syncState({ sessionId: this.sessionId, currencyId: bitcoin.id });
 
     console.log(syncStateResponse);
 
+    if (syncStateResponse.state !== SyncState.Finalized) {
+      throw new Error('Not synced');
+    }
+
     const btcWallet = BitcoinWallet.fromOptions({
       network: BitcoinWallet.Testnet,
-      point: await distributedKey.compoundPublic(),
+      point: await bitcoin.distributedKey.compoundPublic(),
       endpoint: 'https://test-insight.bitpay.com/api'
     });
 
@@ -243,35 +217,38 @@ export class StartComponent implements OnInit, OnDestroy {
 
     const tx = await btcWallet.prepareTransaction(await BitcoinTransaction.create(), btcWallet.address, btcWallet.toInternal(0.01));
 
-    const distributedSignSession = await tx.startSignSession(distributedKey);
+    const distributedSignSession = await tx.startSignSession(bitcoin.distributedKey);
 
     const entropyCommitment = await distributedSignSession.createEntropyCommitment();
 
-    const transactionBytes = tx.toBytes();
-    const signSessionId = uuid(transactionBytes.toJSON().data, serviceId);
+    const transactionBytes = Marshal.encode(tx);
 
-    const startSignResponse = await rpcClient.api.startEcdsaSign({
-      sessionId,
-      currencyId,
+    const txId = await Utils.randomBytes(32);
+
+    const signSessionId = uuid(txId.toJSON().data, serviceId);
+
+    const startSignResponse = await this.rpcClient.api.startEcdsaSign({
+      sessionId: this.sessionId,
+      currencyId: bitcoin.id,
       signSessionId,
       transactionBytes,
-      entropyCommitmentBytes: entropyCommitment.toBytes()
+      entropyCommitmentBytes: Marshal.encode(entropyCommitment)
     });
     console.log(startSignResponse);
 
-    const entropyData = BitcoreEntropyData.fromBytes(startSignResponse.entropyDataBytes);
+    const entropyData = Marshal.decode(startSignResponse.entropyDataBytes);
 
     const entropyDecommitment = await distributedSignSession.processEntropyData(entropyData);
 
-    const signRevealResponse = await rpcClient.api.ecdsaSignReveal({
-      sessionId,
-      currencyId,
+    const signRevealResponse = await this.rpcClient.api.ecdsaSignReveal({
+      sessionId: this.sessionId,
+      currencyId: bitcoin.id,
       signSessionId,
-      entropyDecommitmentBytes: entropyDecommitment.toBytes()
+      entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
     });
     console.log(signRevealResponse);
 
-    const partialSignature = BitcorePartialSignature.fromBytes(signRevealResponse.partialSignatureBytes);
+    const partialSignature = Marshal.decode(signRevealResponse.partialSignatureBytes);
 
     const signature = await distributedSignSession.finalizeSignature(partialSignature);
 
@@ -279,10 +256,17 @@ export class StartComponent implements OnInit, OnDestroy {
 
     console.log(await tx.verify());
 
-    const clearResponse = await rpcClient.api.clearSession({ sessionId });
+    console.log('Signed');
+  }
+
+  public async disconnect() {
+    console.log('disconnect()');
+    const clearResponse = await this.rpcClient.api.clearSession({ sessionId: this.sessionId });
 
     console.log(clearResponse);
 
-    await rpcClient.close();
+    await this.rpcClient.close();
+
+    console.log('Disconnected');
   }
 }

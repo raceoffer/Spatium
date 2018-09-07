@@ -3,6 +3,36 @@
   <div class="select-mode-button-container" fxLayout="column" fxLayoutAlign="start center">
     <button
       mat-raised-button
+      style="height: 50px; margin: 5px;"
+      (click)="connect()">
+      Connect
+    </button>
+    <button
+      mat-raised-button
+      style="height: 50px; margin: 5px;"
+      (click)="sync()">
+      Sync
+    </button>
+    <button
+      mat-raised-button
+      style="height: 50px; margin: 5px;"
+      (click)="syncBitcoinTest()">
+      SyncBitcoinTest
+    </button>
+    <button
+      mat-raised-button
+      style="height: 50px; margin: 5px;"
+      (click)="signBitcoinTest()">
+      SignBitcoinTest
+    </button>
+    <button
+      mat-raised-button
+      style="height: 50px; margin: 5px;"
+      (click)="disconnect()">
+      Disconnect
+    </button>
+    <!-- <button
+      mat-raised-button
       class="select-mode-button"
       (click)="onOpenClicked()"
       *ngIf="ready">
@@ -24,13 +54,6 @@
         <p>
           Confirm the transactions on this device. To&nbsp;improve security, you can operate this device offline.
         </p>
-    </button>
-    <div fxLayout="row" fxLayoutAlign="senter center">
-      <button
-        mat-raised-button
-        (click)="test()">
-        Test
-      </button>
-    </div>
+    </button> -->
   </div>
 </div>

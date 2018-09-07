@@ -63,7 +63,7 @@ message SyncStatusRequest {
 
 message SyncStatusResponse {
   message SyncStatus {
-    string currency_id = 1;
+    int32 currency_id = 1;
     SyncState state = 2;
   }
   repeated SyncStatus statuses = 1;
@@ -75,7 +75,7 @@ message SyncStateRequest {
 }
 
 message SyncStateResponse {
-  SyncState status = 1;
+  SyncState state = 1;
 }
 
 message StartEcdsaSyncRequest {

@@ -122,6 +122,7 @@ import { AddTokenComponent } from './screens/navigator/add-token/add-token.compo
 import { RPCServerService } from './services/rpc/rpc-server.service';
 import { VerifierService } from './services/verifier.service';
 import { CurrencyInfoService } from './services/currencyinfo.service';
+import { SyncService } from './services/sync.service';
 
 @NgModule({
   declarations: [
@@ -254,7 +255,8 @@ import { CurrencyInfoService } from './services/currencyinfo.service';
     SettingsService,
     RPCServerService,
     VerifierService,
-    CurrencyInfoService
+    CurrencyInfoService,
+    SyncService
   ],
   bootstrap: [
     AppComponent

@@ -145,7 +145,7 @@
         "SyncStatus": {
           "fields": {
             "currencyId": {
-              "type": "string",
+              "type": "int32",
               "id": 1
             },
             "state": {
@@ -170,7 +170,7 @@
     },
     "SyncStateResponse": {
       "fields": {
-        "status": {
+        "state": {
           "type": "SyncState",
           "id": 1
         }

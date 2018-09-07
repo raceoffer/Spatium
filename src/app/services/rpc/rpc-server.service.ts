@@ -4,8 +4,7 @@ import {
   EcdsaInitialDecommitment,
   EcdsaResponseCommitment,
   EcdsaResponseDecommitment,
-  EcdsaEntropyCommitment,
-  EcdsaEntropyDecommitment
+  Marshal
 } from 'crypto-core-async';
 import { Root } from 'protobufjs';
 import { DeviceService } from '../device.service';
@@ -54,7 +53,7 @@ export class RPCServerService {
     },
     async SyncState(request) {
       return {
-        status: await this.verifierService.syncState(request.sessionId, request.currencyId)
+        state: await this.verifierService.syncState(request.sessionId, request.currencyId)
       };
     },
     async StartEcdsaSync(request) {
@@ -100,28 +99,28 @@ export class RPCServerService {
       return {};
     },
     async StartEcdsaSign(request) {
-      const entropyDataBytes = await this.verifierService.startEcdsaSign(
+      const entropyData = await this.verifierService.startEcdsaSign(
         request.sessionId,
         request.currencyId,
         request.signSessionId,
-        new Buffer(request.transactionBytes),
-        new Buffer(request.entropyCommitmentBytes)
+        Marshal.decode(request.transactionBytes),
+        Marshal.decode(request.entropyCommitmentBytes)
       );
 
       return {
-        entropyDataBytes
+        entropyDataBytes: Marshal.encode(entropyData)
       };
     },
     async EcdsaSignReveal(request) {
-      const partialSignatureBytes = await this.verifierService.ecdsaSignReveal(
+      const partialSignature = await this.verifierService.ecdsaSignReveal(
         request.sessionId,
         request.currencyId,
         request.signSessionId,
-        new Buffer(request.entropyDecommitmentBytes)
+        Marshal.decode(request.entropyDecommitmentBytes)
       );
 
       return {
-        partialSignatureBytes
+        partialSignatureBytes: Marshal.encode(partialSignature)
       };
     }
   };
