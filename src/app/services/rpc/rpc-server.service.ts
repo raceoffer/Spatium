@@ -103,7 +103,7 @@ export class RPCServerService {
         request.sessionId,
         request.currencyId,
         request.signSessionId,
-        Marshal.decode(request.transactionBytes),
+        new Buffer(request.transactionBytes),
         Marshal.decode(request.entropyCommitmentBytes)
       );
 

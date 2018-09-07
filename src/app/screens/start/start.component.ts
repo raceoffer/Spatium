@@ -23,6 +23,7 @@ import {
 import { CurrencyId } from '../../services/currencyinfo.service';
 import { SyncService, EcdsaCurrency } from '../../services/sync.service';
 import { SyncState } from '../../services/verifier.service';
+import { WorkerService } from '../../services/worker.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -53,7 +54,8 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly settings: SettingsService,
     private readonly rpc: RPCServerService,
     private readonly keyChainService: KeyChainService,
-    private readonly syncService: SyncService
+    private readonly syncService: SyncService,
+    private readonly workerService: WorkerService
   ) {}
 
   public async ngOnInit() {
@@ -215,13 +217,17 @@ export class StartComponent implements OnInit, OnDestroy {
 
     console.log(btcWallet.address);
 
-    const tx = await btcWallet.prepareTransaction(await BitcoinTransaction.create(), btcWallet.address, btcWallet.toInternal(0.01));
+    const tx = await btcWallet.prepareTransaction(
+      await BitcoinTransaction.create(this.workerService.worker),
+      btcWallet.address,
+      btcWallet.toInternal(0.01)
+    );
 
     const distributedSignSession = await tx.startSignSession(bitcoin.distributedKey);
 
     const entropyCommitment = await distributedSignSession.createEntropyCommitment();
 
-    const transactionBytes = Marshal.encode(tx);
+    const transactionBytes = await tx.toBytes();
 
     const txId = await Utils.randomBytes(32);
 

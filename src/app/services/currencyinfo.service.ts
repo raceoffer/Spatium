@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Curve } from 'crypto-core-async';
+import {
+  Curve,
+  BitcoinTransaction,
+  LitecoinTransaction,
+  BitcoinCashTransaction,
+  EthereumTransaction,
+  NeoTransaction
+} from 'crypto-core-async';
 
 export enum CurrencyId {
   Bitcoin,
@@ -26,7 +33,8 @@ export class CurrencyInfo {
     private _name: string,
     private _ticker: string,
     private _cryptosystem: Cryptosystem,
-    private _curve: any
+    private _curve: any,
+    private _transactionType: any
   ) {}
 
   get id(): CurrencyId {
@@ -52,6 +60,10 @@ export class CurrencyInfo {
   get curve(): any {
     return this._curve;
   }
+
+  get transactionType(): any {
+    return this._transactionType;
+  }
 }
 
 @Injectable()
@@ -63,7 +75,8 @@ export class CurrencyInfoService {
       'Bitcoin',
       'BTC',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      BitcoinTransaction
     )],
     [CurrencyId.BitcoinTest, new CurrencyInfo(
       CurrencyId.BitcoinTest,
@@ -71,7 +84,8 @@ export class CurrencyInfoService {
       'Bitcoin Test',
       'BTC',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      BitcoinTransaction
     )],
     [CurrencyId.Litecoin, new CurrencyInfo(
       CurrencyId.Litecoin,
@@ -79,7 +93,8 @@ export class CurrencyInfoService {
       'Litecoin',
       'LTC',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      LitecoinTransaction
     )],
     [CurrencyId.LitecoinTest, new CurrencyInfo(
       CurrencyId.LitecoinTest,
@@ -87,7 +102,8 @@ export class CurrencyInfoService {
       'Litecoin Test',
       'LTC',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      LitecoinTransaction
     )],
     [CurrencyId.BitcoinCash, new CurrencyInfo(
       CurrencyId.BitcoinCash,
@@ -95,7 +111,8 @@ export class CurrencyInfoService {
       'Bitcoin Cash',
       'BCH',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      BitcoinCashTransaction
     )],
     [CurrencyId.BitcoinCashTest, new CurrencyInfo(
       CurrencyId.BitcoinCashTest,
@@ -103,7 +120,8 @@ export class CurrencyInfoService {
       'Bitcoin Cash Test',
       'BCH',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      BitcoinCashTransaction
     )],
     [CurrencyId.Ethereum, new CurrencyInfo(
       CurrencyId.Ethereum,
@@ -111,7 +129,8 @@ export class CurrencyInfoService {
       'Ethereum',
       'ETH',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      EthereumTransaction
     )],
     [CurrencyId.EthereumTest, new CurrencyInfo(
       CurrencyId.EthereumTest,
@@ -119,7 +138,8 @@ export class CurrencyInfoService {
       'Ethereum Test',
       'ETH',
       Cryptosystem.Ecdsa,
-      Curve.secp256k1
+      Curve.secp256k1,
+      EthereumTransaction
     )],
     [CurrencyId.Neo, new CurrencyInfo(
       CurrencyId.Neo,
@@ -127,7 +147,8 @@ export class CurrencyInfoService {
       'Neo',
       'NEO',
       Cryptosystem.Ecdsa,
-      Curve.p256
+      Curve.p256,
+      NeoTransaction
     )],
     [CurrencyId.NeoTest, new CurrencyInfo(
       CurrencyId.NeoTest,
@@ -135,7 +156,8 @@ export class CurrencyInfoService {
       'Neo Test',
       'NEO',
       Cryptosystem.Ecdsa,
-      Curve.p256
+      Curve.p256,
+      NeoTransaction
     )]
   ]);
 

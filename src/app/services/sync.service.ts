@@ -12,6 +12,7 @@ import {
 import { ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
 import { waitFiorPromise } from '../utils/transformers';
 import { RPCClient } from './rpc/rpc-client';
+import { WorkerService } from './worker.service';
 
 export class EcdsaCurrency extends Currency {
   private _distributedKey: any;
@@ -26,10 +27,11 @@ export class EcdsaCurrency extends Currency {
     private _sessionId: string,
     private _paillierPublicKey: any,
     private _paillierSecretKey: any,
-    _currencyInfoService: CurrencyInfoService,
-    _keyChainService: KeyChainService
+    private readonly _currencyInfoService: CurrencyInfoService,
+    private readonly _keyChainService: KeyChainService,
+    private readonly _workerService: WorkerService
   ) {
-    super(_id, _currencyInfoService, _keyChainService);
+    super(_id);
   }
 
   public async sync(rpcClient: RPCClient): Promise<boolean> {
@@ -42,7 +44,7 @@ export class EcdsaCurrency extends Currency {
       secret: privateBytes,
       localPaillierPublicKey: this._paillierPublicKey,
       localPaillierSecretKey: this._paillierSecretKey,
-    });
+    }, this._workerService.worker);
 
     const syncSession = await this._distributedKey.startSyncSession();
 
@@ -58,7 +60,7 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this._state = SyncState.Started;
+    this.state.next(SyncState.Started);
 
     const initiaalData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
 
@@ -74,7 +76,7 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this._state = SyncState.Revealed;
+    this.state.next(SyncState.Revealed);
 
     const challengeCommitment = EcdsaChallengeCommitment.fromJSON(syncRevealResponse.challengeCommitment);
 
@@ -90,7 +92,7 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this._state = SyncState.Responded;
+    this.state.next(SyncState.Responded);
 
     const challengeDecommitment = EcdsaChallengeDecommitment.fromJSON(syncResponseResponse.challengeDecommitment);
 
@@ -106,7 +108,7 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this._state = SyncState.Finalized;
+    this.state.next(SyncState.Finalized);
 
     await this._distributedKey.importSyncData(syncData);
 
@@ -134,7 +136,8 @@ export class SyncService {
 
   constructor(
     private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService
+    private readonly _keyChainService: KeyChainService,
+    private readonly _workerService: WorkerService
   ) {}
 
   public async sync(
@@ -160,7 +163,9 @@ export class SyncService {
 
       console.log('Remote synched currencies:', remoteSyncedCurrencies);
 
-      const localSynchedCurrencies = Array.from(this._currencies.keys());
+      const localSynchedCurrencies = Array.from(this._currencies.values())
+        .filter(c => c.state.getValue() === SyncState.Finalized)
+        .map(c => c.id);
 
       console.log('Local synched currencies:', localSynchedCurrencies);
 
@@ -180,8 +185,11 @@ export class SyncService {
           paillierPublicKey,
           paillierSecretKey,
           this._currencyInfoService,
-          this._keyChainService
+          this._keyChainService,
+          this._workerService,
         );
+
+        this._currencies.set(currencyId, currency);
 
         const cancelSubscription = this._cancelSubject.subscribe(() => currency.cancel());
 
@@ -196,7 +204,6 @@ export class SyncService {
           if (position !== -1) {
             this._syncQueue.splice(position, 1);
           }
-          this._currencies.set(currencyId, currency);
         } else {
           console.log('Cancelled syncing', this._currencyInfoService.currencyInfo(currencyId).name);
         }
@@ -216,5 +223,9 @@ export class SyncService {
 
       this._cancelSubject.next();
     }
+  }
+
+  public cancel() {
+
   }
 }
