@@ -17,7 +17,16 @@ export class NeoWallet extends EcdsaCurrencyWallet {
               messageSubject: any,
               connectionProviderService: ConnectionProviderService,
               worker: any) {
-    super(network, keychain, Coin.NEO, account, messageSubject, connectionProviderService, worker, 'p256');
+    super(
+      network,
+      keychain,
+      network === 'main' ? Coin.NEO : Coin.NEO_test,
+      account,
+      messageSubject,
+      connectionProviderService,
+      worker,
+      'p256'
+    );
   }
 
   public async reset() {
@@ -102,8 +111,6 @@ export class NeoWallet extends EcdsaCurrencyWallet {
 
     if (this.signSession.transaction) {
       const raw = await this.signSession.transaction.toRaw();
-      console.log("pushTransaction");
-      console.log(raw);
       await this.wallet.sendSignedTransaction(raw);
     }
   }

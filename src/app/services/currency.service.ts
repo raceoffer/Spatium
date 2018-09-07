@@ -76,7 +76,7 @@ export class CurrencySettings {
 
 @Injectable()
 export class CurrencyService {
-  private readonly spatiumBaseUrl = 'http://185.219.80.169:8080';
+  private readonly spatiumBaseUrl = 'https://api.spatium.net';
   private readonly currencyApiServers = new Map<Coin | Token, Map<string, string>>([
     [Coin.BTC, new Map<string, string>([
       [CurrencyServerName.Spatium, `${this.spatiumBaseUrl}/api/bitcoin/mainnet/insights`],

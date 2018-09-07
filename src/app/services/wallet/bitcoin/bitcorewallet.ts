@@ -5,10 +5,13 @@ import { Coin, KeyChainService } from '../../keychain.service';
 import { LoggerService } from '../../logger.service';
 import { Balance, HistoryEntry, Status, getRandomDelay, BalanceStatus } from '../currencywallet';
 import { EcdsaCurrencyWallet } from '../ecdsacurrencywallet';
+import * as $ from 'jquery';
 
 export class BitcoreWallet extends EcdsaCurrencyWallet {
   private wallet: any = null;
   private routineTimerSub: any = null;
+  private timeEnd: any = null;
+  private transactionList: HistoryEntry[] = null;
 
   constructor(
     private Transaction: any,
@@ -102,9 +105,61 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
     if (this.wallet === null) {
       return null;
     }
+    if (this.transactionList !== null)
+      console.log("cached: " + this.transactionList.length);
 
-    const txs = await this.wallet.getTransactions(to, from);
-    return txs.map(tx => HistoryEntry.fromJSON(tx));
+    if (this.transactionList === null) {
+      const txs = await this.wallet.getTransactions(to, from);
+      let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+      this.transactionList = txsMapped;  
+    }
+    else if (from === 0) {
+      const txs = await this.wallet.getTransactions(to, from);
+      let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+      if (txsMapped.length > 0) {
+        if (txsMapped.slice(-1)[0].time <= this.transactionList[0].time) {
+          let timeEnd = this.transactionList[0].time;
+          let filtered = txsMapped.filter(item => (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash)));
+
+          this.transactionList.unshift.apply(this.transactionList, filtered);
+        }
+        else {
+          this.timeEnd = this.transactionList[0].time;
+          this.transactionList.unshift.apply(this.transactionList, txsMapped);       
+        }   
+      }
+    }
+    else {
+      if (this.timeEnd !== null) {
+        const txs = await this.wallet.getTransactions(to, from);
+        let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+        if (txsMapped.slice(-1)[0].time <= this.transactionList[0].time) {
+          let timeEnd = this.transactionList[0].time;
+          let filtered = txsMapped.filter(item => (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash)));
+
+          Array.prototype.splice.apply(this.transactionList, [to,0].concat(filtered));
+          this.timeEnd = null;
+        }
+        else {
+          Array.prototype.splice.apply(this.transactionList, [to,0].concat(txsMapped));
+        }   
+      }
+      else if (this.transactionList.length < to && !this.isHistoryLoaded) {
+        const txs = await this.wallet.getTransactions(to, from);
+        let txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+        let filtered = txsMapped.filter(item => (this.transactionHashNotInList(item.blockhash)));
+        this.transactionList.push.apply(this.transactionList, filtered);
+      }
+    }
+
+    if (this.transactionList.length >= to) {
+      return this.transactionList.slice(from, to);
+    } else {
+      return this.transactionList.slice(from);
+    }
   }
 
   public async createTransaction(address: string,
@@ -131,5 +186,13 @@ export class BitcoreWallet extends EcdsaCurrencyWallet {
         LoggerService.nonFatalCrash('Failed to push transaction', e);
       }
     }
+  }
+
+  public transactionHashNotInList(blockhash: string) : boolean {
+    for (var i = 0; i<this.transactionList.length; i++)
+      if (this.transactionList[i].blockhash === blockhash)
+        return false;
+
+    return true;
   }
 }

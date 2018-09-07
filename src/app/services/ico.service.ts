@@ -9,7 +9,7 @@ export class ICOService {
   contractAddress = '0xec373b3f9637eff1a774e1fff916b54794fbd5a9';
 
   constructor() {
-      this.web3 = new web3( new web3.providers.HttpProvider('http://185.219.80.169:8080/api/etherium/testnet/infura') );
+      this.web3 = new web3( new web3.providers.HttpProvider('https://api.spatium.net/api/etherium/testnet/infura') );
   }
 
   public async getCampaignList() {

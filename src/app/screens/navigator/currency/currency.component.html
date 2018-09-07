@@ -12,7 +12,8 @@
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
     *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing ||
-           (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading">
+           (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ||
+           (isUpdatingTransactions === true)">
   </mat-progress-bar>
   <div class="scroll full-width" id="transactionList" #transactionList>
     <table class="two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px; width: 100%">
