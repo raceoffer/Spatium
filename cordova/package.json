@@ -1,7 +1,7 @@
 {
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "SocketsForCordova": "file:../../sockets-for-cordova",
     "ajv": "^6.0.0",
+    "android-versions": "^1.3.0",
     "cocoon-cordova-labs-local-webserver": "^2.4.1",
     "cocoon-cordova-labs-wkwebview-engine-localhost": "^0.5.1",
     "cocoon-cordova-plugin-wkwebview-engine": "^1.1.1",

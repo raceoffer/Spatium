@@ -1,12 +1,9 @@
-import { Headers } from '@angular/http';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { HttpWrapper } from "ionic-native-http-angular-wrapper";
 import { Injectable } from '@angular/core';
 import { WorkerService } from './worker.service';
 
 import { DDS } from 'crypto-core-async';
 import { getAccountSecret } from 'crypto-core-async/lib/utils';
-import { DeviceService, Platform } from './device.service';
 
 export class DDSAccount {
   public address: string = this.account.address;
@@ -45,13 +42,11 @@ export class DDSAccount {
 export class DDSService {
   private dds: any = null;
   private network = 'main'; // 'main'; | 'testnet';
-  private sponsor = 'http://185.219.80.169:8080/sponsor';
+  private sponsor = 'https://sponsor.spatium.net';
   private secret = 'fhppcTnjSTkISRoJqq7jKOjUoR8nlfZs';
 
   constructor(
-    private readonly httpWrapper: HttpWrapper,
     private readonly httpAngular: HttpClient,
-    private readonly device: DeviceService,
     private readonly workerService: WorkerService
   ) {
     this.dds = DDS.fromOptions({
@@ -85,15 +80,11 @@ export class DDSService {
       'Access-Control-Allow-Origin': '*',
     };
 
-    if (this.device.platform === Platform.Windows) {
-      let httpParams = new HttpParams();
-      for (let key in body) {
-        httpParams = httpParams.set(key, body[key]);
-      }
-      return this.httpAngular.post(url, httpParams, {headers: new HttpHeaders((headers))});
-    } else {
-      return this.httpWrapper.post(url, body, {headers: new Headers(headers)});
+    let httpParams = new HttpParams();
+    for (let key in body) {
+      httpParams = httpParams.set(key, body[key]);
     }
+    return this.httpAngular.post(url, httpParams, {headers: new HttpHeaders((headers))});
   }
 
   public sponsorFeedback(data: FormData) {

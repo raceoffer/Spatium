@@ -80,6 +80,10 @@ export class NavigationService {
       this.cancelOverlay();
     });
 
+    const elements: any = document.getElementsByClassName('cdk-overlay-container');
+    elements[0].style.cssText += ';-webkit-transform: rotateZ(0deg) !important';
+    elements[0].style.cssText += ';-webkit-transform: none !important';
+
     this.overlayStack.push([ overlayRef, componentRef ]);
 
     return componentRef;

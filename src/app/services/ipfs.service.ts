@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import ipfsAPI from 'ipfs-api';
 
 declare const window;
 
@@ -38,7 +39,7 @@ export class IpfsService {
   private host: string = '185.219.80.169';
   private port: string = '5001';
 
-  private ipfs: any = window.IpfsApi(this.host, this.port, {protocol: 'http'});
+  private ipfs: any = ipfsAPI(this.host, this.port, {protocol: 'http'});
 
   constructor() {}
 
