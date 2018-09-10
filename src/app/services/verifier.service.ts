@@ -5,7 +5,6 @@ import { KeyChainService } from './keychain.service';
 import { BehaviorSubject } from 'rxjs';
 import { WorkerService } from './worker.service';
 
-
 export enum SyncState {
   None = 0,
   Started = 1,
@@ -14,7 +13,7 @@ export enum SyncState {
   Finalized = 4,
 }
 
-export class Currency {
+export abstract class Currency {
   public state = new BehaviorSubject<SyncState>(SyncState.None);
 
   public get id(): CurrencyId {
@@ -24,6 +23,8 @@ export class Currency {
   public constructor(
     protected readonly _id: CurrencyId,
   ) {}
+
+  public abstract compoundPublic(): any;
 }
 
 export class EcdsaCurrency extends Currency {
@@ -31,6 +32,10 @@ export class EcdsaCurrency extends Currency {
   private _syncSessionShard: any;
 
   private _signSessions = new Map<string, any>();
+
+  public compoundPublic(): any {
+    return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
+  }
 
   public constructor(
     _id: CurrencyId,

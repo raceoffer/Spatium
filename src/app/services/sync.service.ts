@@ -10,7 +10,7 @@ import {
   EcdsaChallengeDecommitment
 } from 'crypto-core-async';
 import { ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
-import { waitFiorPromise } from '../utils/transformers';
+import { waitFiorPromise, waitForSubject } from '../utils/transformers';
 import { RPCClient } from './rpc/rpc-client';
 import { WorkerService } from './worker.service';
 
@@ -20,6 +20,10 @@ export class EcdsaCurrency extends Currency {
 
   public get distributedKey(): any {
     return this._distributedKey;
+  }
+
+  public compoundPublic(): any {
+    return this._distributedKey ? this._distributedKey.compoundPublic() : null;
   }
 
   public constructor(
@@ -108,9 +112,9 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this.state.next(SyncState.Finalized);
-
     await this._distributedKey.importSyncData(syncData);
+
+    this.state.next(SyncState.Finalized);
 
     return true;
   }
@@ -127,11 +131,14 @@ export class SyncService {
   private _currencies = new Map<CurrencyId, Currency>();
 
   private _cancelSubject = new Subject<any>();
+  private _cancelled = false;
 
   public synchronizing = new BehaviorSubject<boolean>(false);
 
+  public currencyEvent = new Subject<CurrencyId>();
+
   public currency(currencyId: CurrencyId): Currency {
-    return this._currencies.get(currencyId);
+    return this._currencies.has(currencyId) ? this._currencies.get(currencyId) : null;
   }
 
   constructor(
@@ -153,6 +160,8 @@ export class SyncService {
     this.synchronizing.next(true);
 
     try {
+      this._cancelled = false;
+
       await rpcClient.api.registerSession({ sessionId });
 
       const syncStatusResponse = await rpcClient.api.syncStatus({ sessionId });
@@ -175,7 +184,7 @@ export class SyncService {
 
       this._syncQueue = this._currencyInfoService.syncOrder.filter(x => !commonSynchedCurrencies.includes(x));
 
-      while (this._syncQueue.length > 0) {
+      while (this._syncQueue.length > 0 && !this._cancelled) {
         console.log('Sync queue', this._syncQueue);
         const currencyId = this._syncQueue[0];
 
@@ -190,6 +199,8 @@ export class SyncService {
         );
 
         this._currencies.set(currencyId, currency);
+
+        this.currencyEvent.next(currencyId);
 
         const cancelSubscription = this._cancelSubject.subscribe(() => currency.cancel());
 
@@ -225,7 +236,14 @@ export class SyncService {
     }
   }
 
-  public cancel() {
+  public async cancel() {
+    if (this.synchronizing.getValue()) {
+      throw new Error('Not synchronizing');
+    }
 
+    this._cancelled = true;
+    this._cancelSubject.next();
+
+    await waitForSubject(this.synchronizing, false);
   }
 }

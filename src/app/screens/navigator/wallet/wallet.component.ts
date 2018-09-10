@@ -1,25 +1,33 @@
 import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, combineLatest } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
-import { ConnectionProviderService } from '../../../services/connection-provider';
-import { CurrencyService } from '../../../services/currency.service';
 import { DeviceService, Platform } from '../../../services/device.service';
-import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
-import { ConnectionState } from '../../../services/primitives/state';
-import { SyncStatus, WalletService } from '../../../services/wallet.service';
-import { requestDialog } from '../../../utils/dialog';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
-import { AddTokenComponent } from '../add-token/add-token.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { WaitingComponent } from '../waiting/waiting.component';
 import { Router } from '@angular/router';
+import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
+import { SyncService } from '../../../services/sync.service';
+import { Tile } from '../../../elements/tile-coin/tile-coin.component';
+import { BalanceService } from '../../../services/balance.service';
+import { RPCServerService } from '../../../services/rpc/rpc-server.service';
+import { KeyChainService } from '../../../services/keychain.service';
 
-declare const navigator: any;
+import uuid from 'uuid/v5';
+
+import {
+  Utils,
+  DistributedEcdsaKey
+} from 'crypto-core-async';
+import { PlainSocket } from '../../../utils/sockets/plainsocket';
+import { RPCClient } from '../../../services/rpc/rpc-client';
+import { Client } from '../../../utils/client-server/client-server';
+
+const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
 
 @Component({
   selector: 'app-wallet',
@@ -64,14 +72,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }];
 
-  public statusType = SyncStatus;
-
-  public status = this.wallet.synchronizatonStatus;
-  public synchronizing = this.wallet.synchronizing;
-  public partiallySync = this.wallet.partiallySync;
-
-  public connectionState = this.connectionProvider.connectionState;
-
   public isWindows;
 
   public cols: any = Math.ceil(window.innerWidth / 350);
@@ -79,75 +79,81 @@ export class WalletComponent implements OnInit, OnDestroy {
   public title = 'Wallet';
   public isSearch = false;
 
-  public staticCoins: Array<Coin | Token> = [
-    Coin.BTC,
-    Coin.BCH,
-    Coin.ETH,
-    Coin.LTC,
-    Coin.NEM,
-    Coin.NEO,
-    Coin.ADA,
-    Coin.XRP,
-    Coin.XLM
-  ];
-
-  public tileModel = new Map<Coin | Token, any>();
-
   public filterControl = new FormControl();
-
-  public tiles = new BehaviorSubject<Array<Coin | Token>>([]);
   public filter = toBehaviourSubject(this.filterControl.valueChanges.pipe(
     debounceTime(300)
   ), '');
-  public filteredTiles = toBehaviourSubject(combineLatest([
-    this.tiles,
-    this.filter
-  ]).pipe(
-    map(([tiles, filterValue]) => {
+
+  public tiles = new Array<Tile>();
+
+  public filteredTiles = toBehaviourSubject(this.filter.pipe(
+    map((filterValue) => {
       if (filterValue.length > 0) {
-        return tiles.filter(
-          t => {
-            const model = this.tileModel.get(t);
-            return model.title.toUpperCase().includes(filterValue.toUpperCase()) ||
-                   model.symbols.includes(filterValue.toUpperCase());
-          }
-        );
+        return this.tiles.filter(t => {
+          return t.currencyInfo.name.toUpperCase().includes(filterValue.toUpperCase()) ||
+                 t.currencyInfo.ticker.toUpperCase().includes(filterValue.toUpperCase());
+        });
       } else {
-        return tiles;
+        return this.tiles;
       }
     })
   ), []);
 
+  private socket: PlainSocket;
+  private rpcClient: RPCClient;
+  private sessionId: string;
+  private paillierPublicKey: any;
+  private paillierSecretKey: any;
+
   private subscriptions = [];
 
-  constructor(private readonly keychain: KeyChainService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly connectionProvider: ConnectionProviderService,
-              private readonly wallet: WalletService,
-              private readonly device: DeviceService,
-    private readonly router: Router
-  ) {}
+  constructor(
+    private readonly router: Router,
+    private readonly deviceService: DeviceService,
+    private readonly navigationService: NavigationService,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly balanceService: BalanceService,
+    private readonly syncService: SyncService,
+    private readonly rpcService: RPCServerService,
+    private readonly keyChainService: KeyChainService
+  ) {
+    this.tiles.push(
+      ... [
+        CurrencyId.Bitcoin,
+        CurrencyId.Litecoin,
+        CurrencyId.BitcoinCash,
+        CurrencyId.Ethereum,
+        CurrencyId.Neo
+      ].map((currencyId) => {
+        return Tile.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+      })
+    );
+
+    const ethereumInfo = this.currencyInfoService.currencyInfo(CurrencyId.Ethereum);
+
+    this.tiles.push(
+      ... ethereumInfo.tokens.map((tokenInfo) => {
+        return Tile.fromToken(ethereumInfo, tokenInfo);
+      })
+    );
+
+    this.tiles.push(
+      ... [
+        CurrencyId.BitcoinTest,
+        CurrencyId.LitecoinTest,
+        CurrencyId.BitcoinCashTest,
+        CurrencyId.EthereumTest,
+        CurrencyId.NeoTest
+      ].map((currencyId) => {
+        return Tile.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+      })
+    );
+  }
 
   public async ngOnInit() {
-    await this.wallet.walletReady();
+    await this.deviceService.deviceReady();
 
-    let tiles = [];
-
-    this.staticCoins.forEach(coin => tiles.push(coin));
-
-    this.keychain.topTokens.getValue().forEach(tokenInfo => tiles.push(tokenInfo.token));
-
-    tiles.push(Coin.BTC_test);
-    tiles.push(Coin.NEO_test);
-
-    tiles.forEach(tile => {
-      this.tileModel.set(tile, this.getTileModel(tile));
-    });
-
-    this.tiles.next(tiles);
-
-    this.isWindows = (this.device.platform === Platform.Windows);
+    this.isWindows = (this.deviceService.platform === Platform.Windows);
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(() => {
@@ -156,14 +162,25 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    await this.balanceService.start();
+    await this.rpcService.start('0.0.0.0', 5666);
+
+    const seedHash = await Utils.sha256(this.keyChainService.seed);
+
+    this.sessionId = uuid(seedHash.toJSON().data, serviceId);
+
+    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
+
+    this.paillierPublicKey = publicKey;
+    this.paillierSecretKey = secretKey;
+
+    console.log(this.sessionId);
   }
 
-  public openSettings() {
-    this.navigationService.pushOverlay(SettingsComponent);
-  }
-
-  public openFeedback() {
-    this.navigationService.pushOverlay(FeedbackComponent);
+  public ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public toggleNavigation() {
@@ -182,7 +199,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     });
   }
 
-  onResize(): void {
+  public onResize() {
     this.cols = Math.ceil(window.innerWidth / 350);
   }
 
@@ -190,77 +207,51 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.filterControl.setValue('');
   }
 
-  public ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  public async onTileClicked(coin: Coin | Token) {
-    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
-    componentRef.instance.currency = coin;
-  }
-
   public toggleSearch(value) {
     this.isSearch = value;
     this.clearFilterValue();
   }
 
+  public openCurrencyOverlay(currency) {
+    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
+    componentRef.instance.currency = currency;
+  }
+
+  public openSettings() {
+    this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+  public openFeedback() {
+    this.navigationService.pushOverlay(FeedbackComponent);
+  }
+
   public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connectedEvent.subscribe(ignored => {
-      this.navigationService.acceptOverlay();
-    });
+    // if (this.connectionState.getValue() === ConnectionState.None || await requestDialog('Syncronize with another device')) {
+      const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+      componentRef.instance.connectedEvent.subscribe(ignored => {
+        this.navigationService.acceptOverlay();
+      });
+    // }
   }
 
-  public async onConnect() {
-    if (this.connectionState.getValue() !== ConnectionState.None) {
-      if (await requestDialog('Syncronize with another device')) {
-        await this.openConnectOverlay();
-      }
-    } else {
-      await this.openConnectOverlay();
-    }
-  }
+  public async sync() {
+    console.log('sync()');
 
-  public getTileModel(currency: Coin | Token | number) {
-    if (currency === undefined || currency === null) {
-      return undefined;
-    }
+    this.socket = new PlainSocket();
+    this.rpcClient = new RPCClient(new Client(this.socket));
 
-    const currencyInfo = this.currency.getInfo(currency);
+    await this.socket.open('127.0.0.1', 5666);
 
-    const tileModel: any = {
-      title: currencyInfo.name,
-      symbols: currencyInfo.symbol,
-      logo: currencyInfo.icon,
-      coin: currency,
-      erc20: this.wallet.tokenWallets.get(currency)
-    };
+    const capabilities = await this.rpcClient.api.capabilities({});
+    console.log(capabilities);
 
-    if (this.wallet.currencyWallets.has(currency)) {
-      const currencyWallet = this.wallet.currencyWallets.get(currency);
+    await this.syncService.sync(
+      this.sessionId,
+      this.paillierPublicKey,
+      this.paillierSecretKey,
+      this.rpcClient
+    );
 
-      const balanceUnconfirmed = toBehaviourSubject(
-        currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
-        null);
-
-      tileModel.implemented = true;
-      tileModel.status = currencyWallet.status;
-      tileModel.balanceStatus = currencyWallet.balanceStatus;
-      tileModel.balance = balanceUnconfirmed;
-      tileModel.balanceUSD = toBehaviourSubject(combineLatest([
-        balanceUnconfirmed,
-        currencyInfo.rate
-      ]).pipe(map(
-        ([balance, rate]) => {
-          if (rate === null || balance === null) {
-            return null;
-          }
-          return balance * rate;
-        }
-      )), null);
-    }
-
-    return tileModel;
+    console.log('Synchronized');
   }
 }

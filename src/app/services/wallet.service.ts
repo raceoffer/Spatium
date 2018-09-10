@@ -18,8 +18,6 @@ import { NemWallet } from './wallet/nem/nemwallet';
 import { NeoWallet } from './wallet/neo/neowallet';
 import { WorkerService } from './worker.service';
 
-declare const navigator: any;
-
 export enum WalletStatus {
   None = 0,
   Partially,

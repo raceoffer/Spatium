@@ -11,17 +11,17 @@
     <mat-icon>search</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && !(partiallySync | async)">
+  <button mat-icon-button (click)="sync()">
     <mat-icon>sync</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) === statusType.None && (partiallySync | async)">
+  <!-- <button mat-icon-button (click)="openConnectOverlay()">
     <mat-icon>sync_problem</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="onConnect()" *ngIf="(status | async) !== statusType.None">
+  <button mat-icon-button (click)="openConnectOverlay()">
     <mat-icon class="sync">sync</mat-icon>
-  </button>
+  </button> -->
 </mat-toolbar>
 
 <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
@@ -46,8 +46,8 @@
         [colspan]="1"
         [rowspan]="1">
         <app-tile-coin
-          [tileModel]="tileModel.get(tile)"
-          (clicked)="onTileClicked(tile)">
+          [tile]="tile"
+          (clicked)="openCurrencyOverlay(tile)">
         </app-tile-coin>
       </mat-grid-tile>
     </mat-grid-list>

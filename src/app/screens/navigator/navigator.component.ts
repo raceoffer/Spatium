@@ -1,21 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
-import { ConnectionProviderService } from '../../services/connection-provider';
+import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { WalletService } from '../../services/wallet.service';
 import { WaitingComponent } from './waiting/waiting.component';
-import { ConnectionState } from '../../services/primitives/state';
 
 @Component({
   selector: 'app-navigator',
   templateUrl: './navigator.component.html',
   styleUrls: ['./navigator.component.css']
 })
-export class NavigatorComponent implements OnInit, OnDestroy {
+export class NavigatorComponent implements OnDestroy {
   private subscriptions = [];
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
@@ -29,32 +26,11 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   );
 
   constructor(
-    private readonly wallet: WalletService,
-    private readonly keychain: KeyChainService,
+    private readonly keyChain: KeyChainService,
     private readonly router: Router,
-    private readonly connectionProviderService: ConnectionProviderService,
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService
   ) {
-    this.subscriptions.push(
-      this.connectionProviderService.connectionState.pipe(
-        map(state => state === ConnectionState.Connected),
-        distinctUntilChanged(),
-        skip(1)
-      ).subscribe(async (connected) => {
-        if (connected) {
-          await this.wallet.startHandshake();
-          await this.wallet.startSync();
-        } else {
-          await this.wallet.cancelSync();
-        }
-      }));
-
-    this.subscriptions.push(
-      this.wallet.cancelEvent.subscribe(async () => {
-        await this.connectionProviderService.disconnect();
-      }));
-
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.back.next();
@@ -75,10 +51,13 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     );
   }
 
-  async ngOnInit() {
-    if (this.connectionProviderService.connectionState.getValue() === ConnectionState.None) {
-      await this.openConnectOverlay();
-    }
+  public async ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
+
+    this.navigationService.clearOverlayStack();
+
+    await this.keyChain.reset();
   }
 
   public async openConnectOverlay() {
@@ -86,16 +65,5 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     componentRef.instance.connectedEvent.subscribe(() => {
       this.navigationService.acceptOverlay();
     });
-  }
-
-  public async ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-
-    this.navigationService.clearOverlayStack();
-
-    await this.wallet.reset();
-    await this.keychain.reset();
-    await this.connectionProviderService.reset();
   }
 }
