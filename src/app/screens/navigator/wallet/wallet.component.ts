@@ -12,10 +12,7 @@ import { WaitingComponent } from '../waiting/waiting.component';
 import { Router } from '@angular/router';
 import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
-import { Tile } from '../../../elements/tile-coin/tile-coin.component';
 import { KeyChainService } from '../../../services/keychain.service';
-
-import uuid from 'uuid/v5';
 
 import {
   Utils,
@@ -26,6 +23,7 @@ import { PlainSocket } from '../../../utils/sockets/plainsocket';
 import { RPCClient } from '../../../services/rpc/rpc-client';
 import { Client } from '../../../utils/client-server/client-server';
 import { uuidFrom } from '../../../utils/uuid';
+import { CurrencyModel } from '../../../services/wallet/wallet';
 
 @Component({
   selector: 'app-wallet',
@@ -82,7 +80,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     debounceTime(300)
   ), '');
 
-  public tiles = new Array<Tile>();
+  public tiles = new Array<CurrencyModel>();
 
   public filteredTiles = toBehaviourSubject(this.filter.pipe(
     map((filterValue) => {
@@ -121,14 +119,14 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.Ethereum,
         CurrencyId.Neo
       ].map((currencyId) => {
-        return Tile.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+        return CurrencyModel.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
       })
     );
 
     for (const tile of this.tiles.slice(0)) {
       this.tiles.push(
         ... tile.currencyInfo.tokens.map((tokenInfo) => {
-          return Tile.fromToken(tile.currencyInfo, tokenInfo);
+          return CurrencyModel.fromToken(tile.currencyInfo, tokenInfo);
         })
       );
     }
@@ -141,7 +139,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.EthereumTest,
         CurrencyId.NeoTest
       ].map((currencyId) => {
-        return Tile.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+        return CurrencyModel.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
       })
     );
   }
@@ -205,9 +203,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.clearFilterValue();
   }
 
-  public openCurrencyOverlay(tile) {
+  public openCurrencyOverlay(entry) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
-    componentRef.instance.tile = tile;
+    componentRef.instance.entry = entry;
   }
 
   public openSettings() {

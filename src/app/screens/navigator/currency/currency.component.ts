@@ -2,20 +2,20 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, ElementRef, HostBinding, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 import * as $ from 'jquery';
-import { BehaviorSubject, of, timer, from, interval } from 'rxjs';
+import { BehaviorSubject, of, timer, from, interval, combineLatest } from 'rxjs';
 import { map, filter, mergeMap } from 'rxjs/operators';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { Tile, TileType } from '../../../elements/tile-coin/tile-coin.component';
 import { SyncState, Currency } from '../../../services/verifier.service';
 import { BalanceStatus, BalanceService, Balance } from '../../../services/balance.service';
 import { CurrencyInfoService, ApiServer } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
 import { PriceService } from '../../../services/price.service';
 import { uuidFrom } from '../../../utils/uuid';
+import { CurrencyModel, Wallet } from '../../../services/wallet/wallet';
 
 export enum TransactionType {
   In,
@@ -69,27 +69,14 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   @ViewChild('transactionList') transactionList: ElementRef;
 
-  @Input() public tile: Tile = null;
+  @Input() public model: CurrencyModel = null;
 
-  public model: {
-    name: string,
-    ticker: string
-  } = null;
+  public wallet: Wallet;
 
-  public currency: BehaviorSubject<Currency>;
-  public state: BehaviorSubject<SyncState>;
-  public balanceWatcher: BehaviorSubject<{
-    id: string,
-    balanceSubject: BehaviorSubject<Balance>,
-    statusSubject: BehaviorSubject<BalanceStatus>,
-    wallet: any
-  }>;
-  public address: BehaviorSubject<string>;
   public balanceUnconfirmed: BehaviorSubject<number>;
   public balanceConfirmed: BehaviorSubject<number>;
   public balanceUSDUnconfirmed: BehaviorSubject<number>;
   public balanceUSDConfirmed: BehaviorSubject<number>;
-  public balanceStatus: BehaviorSubject<BalanceStatus>;
 
   // public transactionArray = [];
   // public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
@@ -116,20 +103,29 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    switch (this.tile.type) {
-      case TileType.Coin:
-        this.model = {
-          name: this.tile.currencyInfo.name,
-          ticker: this.tile.currencyInfo.ticker
-        };
-        break;
-      case TileType.Token:
-        this.model = {
-          name: this.tile.tokenInfo.name,
-          ticker: this.tile.tokenInfo.ticker
-        };
-        break;
-    }
+    this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
+
+    this.balanceUnconfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceUnconfirmed,
+      this.wallet.wallet
+    ]).pipe(
+      map(([balanceUnconfirmed, wallet]) => balanceUnconfirmed ? wallet.fromInternal(balanceUnconfirmed) : null)
+    ), null);
+
+    this.balanceConfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceConfirmed,
+      this.wallet.wallet
+    ]).pipe(
+      map(([balanceConfirmed, wallet]) => balanceConfirmed ? wallet.fromInternal(balanceConfirmed) : null)
+    ), null);
+
+    this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
+      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.wallet.ticker) : null)
+    ), null);
+
+    this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
+      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.wallet.ticker) : null)
+    ), null);
 
     // $('#transactionList').scroll(() => {
     //   if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
@@ -137,100 +133,16 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     //     }
     // });
 
-    this.currency = toBehaviourSubject(this.syncService.currencyEvent.pipe(
-      filter(currencyId => currencyId === this.tile.currencyInfo.id),
-      map(currencyId => this.syncService.currency(currencyId))
-    ), this.syncService.currency(this.tile.currencyInfo.id));
-
-    this.state = toBehaviourSubject(this.currency.pipe(
-      mergeMap(currency => currency ? currency.state : of(SyncState.None))
-    ), SyncState.None);
-
-    this.balanceWatcher = toBehaviourSubject(this.state.pipe(
-      filter(state => state === SyncState.Finalized),
-      mergeMap(async () => {
-        let watcherId;
-
-        const network = this.tile.currencyInfo.network;
-        const endpoint = this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium);
-        const point = await this.currency.getValue().compoundPublic();
-
-        switch (this.tile.type) {
-          case TileType.Coin:
-            watcherId = uuidFrom(this.tile.currencyInfo.id.toString());
-            if (!this.balanceService.hasWatcher(watcherId)) {
-              const currencyWallet = this.tile.currencyInfo.walletType.fromOptions({
-                network,
-                point,
-                endpoint
-              });
-
-              this.balanceService.registerWatcher(watcherId, currencyWallet);
-              this.balanceService.forceCurrency(watcherId);
-            }
-            break;
-          case TileType.Token:
-            watcherId = uuidFrom(this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString());
-            if (!this.balanceService.hasWatcher(watcherId)) {
-              const tokenWallet = this.tile.currencyInfo.tokenWalletType.fromOptions({
-                network,
-                point,
-                endpoint,
-                contractAddress: this.tile.tokenInfo.id,
-                decimals: this.tile.tokenInfo.decimals
-              });
-
-              this.balanceService.registerWatcher(watcherId, tokenWallet);
-            }
-            break;
-        }
-
-        return this.balanceService.watcher(watcherId);
-      })
-    ), null);
-
-    this.address = toBehaviourSubject(this.balanceWatcher.pipe(
-      map(watcher => watcher ? watcher.wallet.address : null)
-    ), null);
-
-    this.balanceUnconfirmed = toBehaviourSubject(this.balanceWatcher.pipe(
-      mergeMap(watcher => {
-        return watcher
-          ? watcher.balanceSubject.pipe(map(balance => balance ? watcher.wallet.fromInternal(balance.unconfirmed) : null))
-          : of(null);
-      })
-    ), null);
-
-    this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
-      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.model.ticker) : null)
-    ), null);
-
-    this.balanceConfirmed = toBehaviourSubject(this.balanceWatcher.pipe(
-      mergeMap(watcher => {
-        return watcher
-          ? watcher.balanceSubject.pipe(map(balance => balance ? watcher.wallet.fromInternal(balance.confirmed) : null))
-          : of(null);
-      })
-    ), null);
-
-    this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
-      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.model.ticker) : null)
-    ), null);
-
-    this.balanceStatus = toBehaviourSubject(this.balanceWatcher.pipe(
-      mergeMap(watcher => watcher ? watcher.statusSubject : of(BalanceStatus.None))
-    ), BalanceStatus.None);
-
     this.subscriptions.push(
-      timer(0, 3000).subscribe(() => {
-        const watcher = this.balanceWatcher.getValue();
-        if (watcher) {
-          this.balanceService.forceCurrency(watcher.id);
-        }
+      timer(0, 3000).pipe(
+        mergeMap(() => this.wallet.balanceWatcher),
+        filter(watcher => !!watcher)
+      ).subscribe((watcher) => {
+        this.balanceService.forceCurrency(watcher.id);
       })
     );
 
-    this.syncService.forceCurrency(this.tile.currencyInfo.id);
+    this.syncService.forceCurrency(this.model.currencyInfo.id);
 
     /** @todo Refactor the stuff below */
 
@@ -254,11 +166,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   send() {
     const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
-    overalyRef.instance.tile = this.tile;
+    overalyRef.instance.entry = this.model;
   }
 
   copy() {
-    cordova.plugins.clipboard.copy(this.address.getValue());
+    cordova.plugins.clipboard.copy(this.wallet.address.getValue());
   }
 
   isWindows(): boolean {
@@ -267,7 +179,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onSettingsClicked() {
     const componentRef = this.navigationService.pushOverlay(CurrencySettingsComponent);
-    componentRef.instance.tile = this.tile;
+    componentRef.instance.entry = this.model;
   }
 
   async onBack() {

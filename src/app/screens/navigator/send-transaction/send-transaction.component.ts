@@ -1,20 +1,20 @@
-import { Component, HostBinding, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, NgZone, OnDestroy, OnInit, Input } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import isNumber from 'lodash/isNumber';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, flatMap, filter, tap } from 'rxjs/operators';
-import { ConnectionProviderService } from '../../../services/connection-provider';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { Coin, Token } from '../../../services/keychain.service';
+import { BehaviorSubject, combineLatest, of } from 'rxjs';
+import { map, distinctUntilChanged, flatMap, filter, tap, mergeMap } from 'rxjs/operators';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { WalletService } from '../../../services/wallet.service';
-import { BalanceStatus, CurrencyWallet, Status } from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { WaitingComponent } from '../waiting/waiting.component';
 
 import BN from 'bn.js';
-import { ConnectionState } from '../../../services/primitives/state';
+import { SyncState, Currency } from '../../../services/verifier.service';
+import { BalanceStatus, Balance, BalanceService } from '../../../services/balance.service';
+import { SyncService } from '../../../services/sync.service';
+import { CurrencyInfoService, ApiServer } from '../../../services/currencyinfo.service';
+import { uuidFrom } from '../../../utils/uuid';
+import { Wallet, CurrencyModel } from '../../../services/wallet/wallet';
 
 declare const cordova: any;
 
@@ -37,8 +37,9 @@ enum Fee {
 })
 export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
+
   public phaseType = Phase; // for template
-  public statusType = Status;
+  public stateType = SyncState;
   public balanceStatusType = BalanceStatus;
 
   public receiverField = new FormControl();
@@ -70,27 +71,19 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public feePriceUsdFocused = false;
   public disable = false;
 
-  public currency: Coin | Token = null;
-  public currencyInfo: Info = null;
-  public isToken = false;
+  @Input() public model: CurrencyModel = null;
+
+  public wallet: Wallet;
 
   public allowFeeConfiguration = false;
 
-  public connected = toBehaviourSubject(this.connectionProviderService.connectionState.pipe(
-    map(state => state === ConnectionState.Connected),
-    distinctUntilChanged()
-  ), false);
-
-  public currencyWallet: CurrencyWallet = null;
-
-  public ethWallet = this.walletService.currencyWallets.get(Coin.ETH);
-  public ethBalance = toBehaviourSubject(
-    this.ethWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
-    null);
+  // public ethWallet = this.walletService.currencyWallets.get(Coin.ETH);
+  // public ethBalance = toBehaviourSubject(
+  //   this.ethWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
+  //   null);
 
   public fixedaddress: string = null;
-  public address: BehaviorSubject<string> = null;
-  public balance: BehaviorSubject<BN> = null;
+
   public receiver: BehaviorSubject<string> = null;
   public amount: BehaviorSubject<BN> = null;
   public fee: BehaviorSubject<BN> = null;
@@ -111,50 +104,34 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly connectionProviderService: ConnectionProviderService,
-              private readonly walletService: WalletService,
-              private readonly notification: NotificationService,
-              private readonly currencyService: CurrencyService,
-              private readonly navigationService: NavigationService) { }
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService,
+    private readonly syncService: SyncService,
+    private readonly balanceService: BalanceService,
+    private readonly currencyInfoService: CurrencyInfoService
+  ) { }
 
   async ngOnInit() {
-    this.currencyInfo = await this.currencyService.getInfo(this.currency);
-    this.isToken = this.currency in Token;
+    this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
 
-    this.ready = new BehaviorSubject<boolean>(false);
-
-    this.currencyWallet = this.walletService.currencyWallets.get(this.currency);
-    this.allowFeeConfiguration = !([Coin.NEM] as Array<Coin | Token>).includes(this.currency);
-
-    this.subscriptions.push(
-      this.currencyWallet.rejectedEvent.subscribe(async () => {
-        await this.rejected();
-      }));
-
-    this.subscriptions.push(
-      this.currencyWallet.signedEvent.subscribe(async () => {
-        await this.finalaized();
-      }));
-
-    this.address = this.currencyWallet.address;
-    this.balance = toBehaviourSubject(
-      this.currencyWallet.balance.pipe(map(balance => balance ? balance.unconfirmed : null)),
-      null);
+    this.allowFeeConfiguration = true;
 
     this.estimatedSize = toBehaviourSubject(
-      this.balance.pipe(
-        distinctUntilChanged(),
-        flatMap(async balance => {
+      combineLatest([
+        this.wallet.balanceUnconfirmed,
+        this.wallet.wallet
+      ]).pipe(
+        mergeMap(async ([balance, wallet]) => {
           if (balance === null || balance.eq(new BN())) {
             return 1;
           }
 
-          const testTx = await this.currencyWallet.createTransaction(
-            this.address.getValue(),
-            balance.div(new BN(2)));
-
-          return await testTx.estimateSize();
+          return await wallet.estimateTransaction(
+            wallet.address,
+            balance.div(new BN(2))
+          );
         }),
         tap(size => this.ready.next(size as boolean))
       ), 1);

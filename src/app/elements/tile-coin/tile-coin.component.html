@@ -1,17 +1,17 @@
 <div class="grid-item">
   <button mat-button class="block" style="padding: 0px;" (click)='onClick()'>
-    <div class="erc20" *ngIf="tile.type == tileType.Token">
-      <img class="ethereum" src="{{ currencyLogo }}">
+    <div class="erc20" *ngIf="entry.type == entryType.Token">
+      <img class="ethereum" src="{{ wallet.currencyLogo }}">
     </div>
     <div class="div-height" fxLayout="row" fxLayoutAlign="center center" >
-      <img class="logo" src="{{ model.logo }}">
+      <img class="logo" src="{{ wallet.logo }}">
       <div class="wallet-description">
-        <span class="sym">{{ model.ticker }}</span>
-        <span class="title">{{ model.name }}</span>
+        <span class="sym">{{ wallet.ticker }}</span>
+        <span class="title">{{ wallet.name }}</span>
       </div>
     </div>
     <div
-      *ngIf="(state | async) === stateType.Finalized"
+      *ngIf="(wallet.state | async) === stateType.Finalized"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
@@ -21,7 +21,7 @@
         style="position: relative;">
 
         <span class="balance" *ngIf="(balance | async) !== null">
-          {{ (balance | async)?.toFixed(6) * 1 }} {{ model.ticker }}
+          {{ (balance | async)?.toFixed(6) * 1 }} {{ wallet.ticker }}
         </span>
 
         <span class="balanceUSD" *ngIf="(balanceUSD | async) !== null">
@@ -36,13 +36,13 @@
       </div>
     </div>
     <div
-      *ngIf="(state | async) !== stateType.Finalized"
+      *ngIf="(wallet.state | async) !== stateType.Finalized"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
 
       <span class="sync-in-progress">
-        {{ (state | async) === stateType.None ? 'Not synced' : 'Syncing' }}
+        {{ (wallet.state | async) === stateType.None ? 'Not synced' : 'Syncing' }}
       </span>
     </div>
   </button>

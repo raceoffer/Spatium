@@ -1,5 +1,5 @@
 <app-toolbar
-  [label] = "'Transfer ' + currencyInfo?.name"
+  [label] = "'Transfer ' + wallet.name"
   [isColored] = "true"
   [isShadowed] = "true"
   (backClicked) = "onBack()">
@@ -10,7 +10,7 @@
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing">
+    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None)">
   </mat-progress-bar>
 
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
@@ -27,23 +27,23 @@
             readonly
             matInput
             mat-autosize="true"
-            [value]="(currencyWallet?.address | async)"
-            *ngIf="(currencyWallet?.status | async) === statusType.Ready">
+            [value]="(wallet.address | async)"
+            *ngIf="(wallet.state | async) === stateType.Finalized">
           </textarea>
 
           <textarea
             readonly
             matInput
             mat-autosize="true"
-            [value]="(currencyWallet?.status | async) === statusType.Synchronizing ? 'Synchronizing' : 'Not synched'"
-            *ngIf="(currencyWallet?.status | async) !== statusType.Ready">
+            [value]="(wallet.state | async) !== stateType.None ? 'Synchronizing' : 'Not synched'"
+            *ngIf="(wallet.state | async) !== stateType.Finalized">
           </textarea>
 
           <button
             id="copy"
             class="wallet-address-button"
             mat-icon-button matSuffix
-            *ngIf="(currencyWallet?.status | async) === statusType.Ready"
+            *ngIf="(wallet.state | async) === stateType.Finalized"
             (click)="copy()">
             <mat-icon>content_copy</mat-icon>
           </button>
@@ -79,7 +79,7 @@
     </tr>
     <tr>
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+        <span class="label" style="margin-left: 5px;">{{ wallet.ticker }}</span>
       </td>
 
       <td class="left">
@@ -145,7 +145,7 @@
 
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+        <span class="label" style="margin-left: 5px;">{{ wallet.ticker }}</span>
       </td>
 
       <td class="left">
@@ -158,7 +158,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (address | async) !== null"
+              *ngIf="(ready | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feeField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -167,7 +167,7 @@
               step="0.01"
               (blur)="setFeeFocused(false)"
               (focus)="setFeeFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (address | async) === null">
+            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
               Estimating...
             </span>
           </span>
@@ -177,7 +177,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (address | async) !== null"
+              *ngIf="(ready | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feeUsdField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -186,7 +186,7 @@
               step="0.01"
               (blur)="setFeeUsdFocused(false)"
               (focus)="setFeeUsdFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (address | async) === null">
+            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
               Estimating...
             </span>
           </span>
@@ -195,7 +195,7 @@
     </tr>
     <tr *ngIf="feeTypeField.value === feeType.Manual && allowFeeConfiguration">
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span>
+        <!-- <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span> -->
       </td>
       <td class="left">
         <span class="label" style="margin-left: 5px;">USD</span>
@@ -206,7 +206,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (address | async) !== null"
+              *ngIf="(ready | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feePriceField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -215,7 +215,7 @@
               step="0.01"
               (blur)="setFeePriceFocused(false)"
               (focus)="setFeePriceFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (address | async) === null">
+            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
               Estimating...
             </span>
           </span>
@@ -225,7 +225,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (address | async) !== null"
+              *ngIf="(ready | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feePriceUsdField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -234,7 +234,7 @@
               step="0.01"
               (blur)="setFeePriceUsdFocused(false)"
               (focus)="setFeePriceUsdFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (address | async) === null">
+            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
               Estimating...
             </span>
           </span>
