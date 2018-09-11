@@ -169,7 +169,7 @@ export class RPCServerService {
 
     const request = RequestType.decode(rpcCall.data);
 
-    console.log(requestTypeName, responseTypeName, data);
+    console.log(request);
 
     if (Object.keys(this.api).includes(rpcCall.method)) {
       const response = await this.api[rpcCall.method](request);

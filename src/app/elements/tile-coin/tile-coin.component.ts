@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { getCurrencyLogo, getTokenLogo } from '../../utils/currency-icon';
-import { CurrencyInfo, TokenInfo, CurrencyId } from '../../services/currencyinfo.service';
+import { CurrencyInfo, TokenInfo, CurrencyInfoService, ApiServer } from '../../services/currencyinfo.service';
 import { SyncService } from '../../services/sync.service';
 import { BehaviorSubject, of } from 'rxjs';
 import { SyncState, Currency } from '../../services/verifier.service';
@@ -9,10 +9,6 @@ import { toBehaviourSubject } from '../../utils/transformers';
 import { mergeMap, map, filter } from 'rxjs/operators';
 
 import uuid from 'uuid/v5';
-
-// temp
-import { CurrencyService, CurrencyServerName } from '../../services/currency.service';
-import { Coin } from '../../services/keychain.service';
 
 const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
 
@@ -49,31 +45,6 @@ export class Tile {
   }
 }
 
-const ttt = (currencyId: CurrencyId): Coin => {
-  switch (currencyId) {
-    case CurrencyId.Bitcoin:
-      return Coin.BTC;
-    case CurrencyId.BitcoinTest:
-      return Coin.BTC_test;
-    case CurrencyId.Litecoin:
-      return Coin.LTC;
-    case CurrencyId.LitecoinTest:
-      return Coin.BTC_test;
-    case CurrencyId.BitcoinCash:
-      return Coin.BCH;
-    case CurrencyId.BitcoinCashTest:
-      return Coin.BTC_test;
-    case CurrencyId.Ethereum:
-      return Coin.ETH;
-    case CurrencyId.EthereumTest:
-      return Coin.BTC_test;
-    case CurrencyId.Neo:
-      return Coin.NEO;
-    case CurrencyId.NeoTest:
-      return Coin.BTC_test;
-  }
-};
-
 @Component({
   selector: 'app-tile-coin',
   templateUrl: './tile-coin.component.html',
@@ -108,9 +79,9 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
+    private readonly currencyInfoService: CurrencyInfoService,
     private readonly syncService: SyncService,
-    private readonly balanceService: BalanceService,
-    private readonly currencyService: CurrencyService // temp
+    private readonly balanceService: BalanceService
   ) {}
 
   ngOnInit() {
@@ -134,7 +105,7 @@ export class TileCoinComponent implements OnInit, OnDestroy {
             wallet = this.tile.currencyInfo.walletType.fromOptions({
               network: this.tile.currencyInfo.network,
               point: await this.currency.getValue().compoundPublic(),
-              endpoint: this.currencyService.getAvailableApiServers(ttt(this.tile.currencyInfo.id)).get(CurrencyServerName.Spatium)
+              endpoint: this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium)
             });
             id = uuid(this.tile.type.toString() + this.tile.currencyInfo.id.toString(), serviceId);
             break;
@@ -144,7 +115,7 @@ export class TileCoinComponent implements OnInit, OnDestroy {
               point: await this.currency.getValue().compoundPublic(),
               contractAddress: this.tile.tokenInfo.id,
               decimals: this.tile.tokenInfo.decimals,
-              endpoint: this.currencyService.getAvailableApiServers(ttt(this.tile.currencyInfo.id)).get(CurrencyServerName.Spatium)
+              endpoint: this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium)
             });
             id = uuid(this.tile.type.toString() + this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString(), serviceId);
             break;

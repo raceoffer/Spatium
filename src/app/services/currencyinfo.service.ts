@@ -32,6 +32,15 @@ export enum Cryptosystem {
   Eddsa
 }
 
+export enum ApiServer {
+  Spatium,
+  BitPay,
+  Litecore,
+  Blockdozer,
+  Infura,
+  Neoscan
+}
+
 export class CurrencyInfo {
   public constructor(
     private _id: CurrencyId,
@@ -119,7 +128,7 @@ export class TokenInfo {
 
 @Injectable()
 export class CurrencyInfoService {
-  private _currencies = new Map<CurrencyId, CurrencyInfo>([
+  private readonly _currencies = new Map<CurrencyId, CurrencyInfo>([
     [CurrencyId.Bitcoin, new CurrencyInfo(
       CurrencyId.Bitcoin,
       0,
@@ -336,7 +345,7 @@ export class CurrencyInfoService {
     )]
   ]);
 
-  private _syncOrder = [
+  private readonly _syncOrder = [
     CurrencyId.Bitcoin,
     CurrencyId.Litecoin,
     CurrencyId.BitcoinCash,
@@ -349,12 +358,78 @@ export class CurrencyInfoService {
     CurrencyId.NeoTest
   ];
 
-  currencyInfo(id: CurrencyId): CurrencyInfo {
+  private readonly _apiBaseUrl = 'https://api.spatium.net';
+
+  private readonly _apiNames = new Map<ApiServer, string>([
+    [ApiServer.Spatium, 'Spatium'],
+    [ApiServer.BitPay, 'bitpay.com'],
+    [ApiServer.Litecore, 'litecore.io'],
+    [ApiServer.Blockdozer, 'blockdozer.com'],
+    [ApiServer.Infura, 'infura.io'],
+    [ApiServer.Neoscan, 'neoscan.io']
+  ]);
+
+  private readonly _apiServers = new Map<CurrencyId, Map<ApiServer, string>>([
+    [CurrencyId.Bitcoin, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/bitcoin/mainnet/insights`],
+      [ApiServer.BitPay, 'https://insight.bitpay.com/api']
+    ])],
+    [CurrencyId.Litecoin, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/lightcoin/mainnet/insights`],
+      [ApiServer.Litecore, 'https://insight.litecore.io/api']
+    ])],
+    [CurrencyId.BitcoinCash, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/bitcoincash/mainnet/insights`],
+      [ApiServer.Blockdozer, 'https://bch.blockdozer.com/insight-api'],
+      [ApiServer.BitPay, 'https://bch-insight.bitpay.com/api']
+    ])],
+    [CurrencyId.Ethereum, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/etherium/mainnet/infura`],
+      [ApiServer.Infura, 'https://mainnet.infura.io/dlYX0gLUjGGCk7IBFq2C']
+    ])],
+    [CurrencyId.Neo, new Map<ApiServer, string>([
+      [ApiServer.Neoscan, 'https://api.neoscan.io/api/main_net/v1']
+    ])],
+    [CurrencyId.BitcoinTest, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/bitcoin/testnet/insights`],
+      [ApiServer.BitPay, 'https://test-insight.bitpay.com/api']
+    ])],
+    [CurrencyId.LitecoinTest, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/lightcoin/testnet/insights`],
+      [ApiServer.Litecore, 'https://testnet.litecore.io/api']
+    ])],
+    [CurrencyId.BitcoinCashTest, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/bitcoincash/testnet/insights`],
+      [ApiServer.Blockdozer, 'https://tbch.blockdozer.com/insight-api'],
+      [ApiServer.BitPay, 'https://test-bch-insight.bitpay.com/api']
+    ])],
+    [CurrencyId.EthereumTest, new Map<ApiServer, string>([
+      [ApiServer.Spatium, `${this._apiBaseUrl}/api/etherium/testnet/infura`],
+      [ApiServer.Infura, 'https://rinkeby.infura.io/dlYX0gLUjGGCk7IBFq2C']
+    ])],
+    [CurrencyId.NeoTest, new Map<ApiServer, string>([
+      [ApiServer.Neoscan, 'https://api.neoscan.io/api/test_net/v1']
+    ])]
+  ]);
+
+  public currencyInfo(id: CurrencyId): CurrencyInfo {
     return this._currencies.get(id);
   }
 
-  get syncOrder(): CurrencyId[] {
+  public get syncOrder(): CurrencyId[] {
     return this._syncOrder;
+  }
+
+  public get apiBaseUrl(): string {
+    return this._apiBaseUrl;
+  }
+
+  public apiName(server: ApiServer): string {
+    return this._apiNames.get(server);
+  }
+
+  public apiServer(id: CurrencyId, server: ApiServer): string {
+    return this._apiServers.get(id).get(server);
   }
 }
 
