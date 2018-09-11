@@ -18,6 +18,7 @@ export enum BalanceStatus {
 @Injectable()
 export class BalanceService {
   private _watchers = new Map<string, {
+    id: string,
     balanceSubject: BehaviorSubject<Balance>,
     statusSubject: BehaviorSubject<BalanceStatus>,
     wallet: any
@@ -29,17 +30,32 @@ export class BalanceService {
 
   private _watcherQueue = new Array<string>();
 
-  public addWatcher(id: string, wallet: any): {
+  public registerWatcher(id: string, wallet: any): {
+    id: string,
     balanceSubject: BehaviorSubject<Balance>,
     statusSubject: BehaviorSubject<BalanceStatus>,
     wallet: any
   } {
     this._watchers.set(id, {
+      id,
       balanceSubject: new BehaviorSubject<Balance>(null),
       statusSubject: new BehaviorSubject<BalanceStatus>(BalanceStatus.None),
       wallet
     });
 
+    return this._watchers.get(id);
+  }
+
+  public hasWatcher(id: string): boolean {
+    return this._watchers.has(id);
+  }
+
+  public watcher(id: string): {
+    id: string,
+    balanceSubject: BehaviorSubject<Balance>,
+    statusSubject: BehaviorSubject<BalanceStatus>,
+    wallet: any
+  } {
     return this._watchers.get(id);
   }
 
@@ -71,7 +87,7 @@ export class BalanceService {
           await timer(200).toPromise();
         }
 
-        await timer(200).toPromise();
+        await timer(1000).toPromise();
       }
     } catch (e) {
       throw e;
@@ -107,5 +123,13 @@ export class BalanceService {
     this._cancelSubject.next();
 
     await waitForSubject(this._updating, false);
+  }
+
+  public async reset(): Promise<void> {
+    if (this._updating.getValue()) {
+      await this.stop();
+    }
+
+    this._watchers.clear();
   }
 }

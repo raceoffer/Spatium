@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject,  Observable, timer } from 'rxjs';
+import { BehaviorSubject, timer } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 interface CoinMarketCupResponse {
   id: string;
@@ -78,6 +79,7 @@ export class CurrencyPriceService {
           const availableCurrencies = new Map<string, number>();
 
           const data = result.body;
+          // tslint:disable-next-line:forin
           for (const k in data) {
             const tmp = data[k];
             const currencyName = tmp.symbol.toUpperCase();
@@ -100,4 +102,67 @@ export class CurrencyPriceService {
       });
   }
 
+}
+
+@Injectable()
+export class PriceService {
+  private _cryptowatUrl = 'https://api.cryptowat.ch/markets/prices';
+  private _coinmarketcapUrl = 'https://api.coinmarketcap.com/v1/ticker/?limit=10000';
+
+  private _requestTimer = timer(0, 5 * 60 * 1000);
+
+  private _prices = new Map<string, number>();
+
+  public price(ticker: string): number {
+    return this._prices.get(ticker.toUpperCase());
+  }
+
+  constructor(private http: HttpClient) {
+    this._requestTimer.subscribe(async () => {
+      await Promise.all([
+        this.getCryptowat(),
+        this.getCoinmarketcap()
+      ]);
+    });
+  }
+
+  async getCryptowat() {
+    const response = await this.http.get<any>(this._cryptowatUrl, {observe: 'response'}).pipe(
+      take(1)
+    ).toPromise();
+
+    if (response.status === 200) {
+      const data = response.body;
+
+      for (const entry in data.result) {
+        if (data.result.hasOwnProperty(entry) && entry.endsWith('usd')) {
+          const name = entry.split(':')[1].replace('usd', '').toUpperCase();
+          const price = +data.result[entry];
+
+          if (price !== null) {
+            this._prices.set(name, price);
+          }
+        }
+      }
+    }
+  }
+
+  async getCoinmarketcap() {
+    const response = await this.http.get<any[]>(this._coinmarketcapUrl, {observe: 'response'}).pipe(
+      take(1)
+    ).toPromise();
+
+    if (response.status === 200) {
+      const data = response.body;
+
+      for (const entry of data) {
+        const name = entry.symbol.toUpperCase();
+        const price = +entry.price_usd;
+
+        if (price !== null) {
+          this._prices.set(name, price);
+        }
+      }
+    }
+  }
 }

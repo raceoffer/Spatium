@@ -290,7 +290,7 @@ export class CurrencyService {
       });
     });
 
-    this.currencyPriceService.getPrices();
+    // this.currencyPriceService.getPrices();
   }
 
   public getInfo(currency: Coin | Token) {

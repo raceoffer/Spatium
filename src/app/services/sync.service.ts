@@ -9,6 +9,7 @@ import {
   EcdsaChallengeCommitment,
   EcdsaChallengeDecommitment
 } from 'crypto-core-async';
+
 import { ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
 import { waitFiorPromise, waitForSubject } from '../utils/transformers';
 import { RPCClient } from './rpc/rpc-client';
@@ -39,6 +40,7 @@ export class EcdsaCurrency extends Currency {
   }
 
   public async sync(rpcClient: RPCClient): Promise<boolean> {
+
     const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
 
     const privateBytes = this._keyChainService.privateBytes(60, 0);
@@ -54,6 +56,8 @@ export class EcdsaCurrency extends Currency {
 
     const initialCommitment = await syncSession.createInitialCommitment();
 
+    this.state.next(SyncState.Started);
+
     const startSyncResponse = await waitFiorPromise<any>(rpcClient.api.startEcdsaSync({
       sessionId: this._sessionId,
       currencyId: this.id,
@@ -64,11 +68,11 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this.state.next(SyncState.Started);
+    const initialData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
 
-    const initiaalData = EcdsaInitialData.fromJSON(startSyncResponse.initialData);
+    const initialDecommitment = await syncSession.processInitialData(initialData);
 
-    const initialDecommitment = await syncSession.processInitialData(initiaalData);
+    this.state.next(SyncState.Revealed);
 
     const syncRevealResponse = await waitFiorPromise<any>(rpcClient.api.ecdsaSyncReveal({
       sessionId: this._sessionId,
@@ -80,11 +84,11 @@ export class EcdsaCurrency extends Currency {
       return false;
     }
 
-    this.state.next(SyncState.Revealed);
-
     const challengeCommitment = EcdsaChallengeCommitment.fromJSON(syncRevealResponse.challengeCommitment);
 
     const responseCommitment = await syncSession.processChallengeCommitment(challengeCommitment);
+
+    this.state.next(SyncState.Responded);
 
     const syncResponseResponse = await waitFiorPromise<any>(rpcClient.api.ecdsaSyncResponse({
       sessionId: this._sessionId,
@@ -95,8 +99,6 @@ export class EcdsaCurrency extends Currency {
     if (!syncResponseResponse) {
       return false;
     }
-
-    this.state.next(SyncState.Responded);
 
     const challengeDecommitment = EcdsaChallengeDecommitment.fromJSON(syncResponseResponse.challengeDecommitment);
 
@@ -236,8 +238,8 @@ export class SyncService {
     }
   }
 
-  public async cancel() {
-    if (this.synchronizing.getValue()) {
+  public async cancel(): Promise<void> {
+    if (!this.synchronizing.getValue()) {
       throw new Error('Not synchronizing');
     }
 
@@ -245,5 +247,13 @@ export class SyncService {
     this._cancelSubject.next();
 
     await waitForSubject(this.synchronizing, false);
+  }
+
+  public async reset(): Promise<void> {
+    if (this.synchronizing.getValue()) {
+      await this.cancel();
+    }
+
+    this._currencies.clear();
   }
 }

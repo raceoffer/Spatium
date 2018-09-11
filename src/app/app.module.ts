@@ -108,7 +108,7 @@ import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
 import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
-import { CurrencyPriceService } from './services/price.service';
+import { CurrencyPriceService, PriceService } from './services/price.service';
 import { SocketClientService } from './services/socketclient.service';
 import { SocketServerService } from './services/socketserver.service';
 import { SettingsService } from './services/settings.service';
@@ -254,7 +254,8 @@ import { BalanceService } from './services/balance.service';
     VerifierService,
     CurrencyInfoService,
     SyncService,
-    BalanceService
+    BalanceService,
+    PriceService
   ],
   bootstrap: [
     AppComponent

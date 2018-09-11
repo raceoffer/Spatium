@@ -13,8 +13,6 @@ import { Router } from '@angular/router';
 import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
 import { Tile } from '../../../elements/tile-coin/tile-coin.component';
-import { BalanceService } from '../../../services/balance.service';
-import { RPCServerService } from '../../../services/rpc/rpc-server.service';
 import { KeyChainService } from '../../../services/keychain.service';
 
 import uuid from 'uuid/v5';
@@ -23,6 +21,7 @@ import {
   Utils,
   DistributedEcdsaKey
 } from 'crypto-core-async';
+
 import { PlainSocket } from '../../../utils/sockets/plainsocket';
 import { RPCClient } from '../../../services/rpc/rpc-client';
 import { Client } from '../../../utils/client-server/client-server';
@@ -112,9 +111,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly deviceService: DeviceService,
     private readonly navigationService: NavigationService,
     private readonly currencyInfoService: CurrencyInfoService,
-    private readonly balanceService: BalanceService,
     private readonly syncService: SyncService,
-    private readonly rpcService: RPCServerService,
     private readonly keyChainService: KeyChainService
   ) {
     this.tiles.push(
@@ -129,13 +126,13 @@ export class WalletComponent implements OnInit, OnDestroy {
       })
     );
 
-    const ethereumInfo = this.currencyInfoService.currencyInfo(CurrencyId.Ethereum);
-
-    this.tiles.push(
-      ... ethereumInfo.tokens.map((tokenInfo) => {
-        return Tile.fromToken(ethereumInfo, tokenInfo);
-      })
-    );
+    for (const tile of this.tiles.slice(0)) {
+      this.tiles.push(
+        ... tile.currencyInfo.tokens.map((tokenInfo) => {
+          return Tile.fromToken(tile.currencyInfo, tokenInfo);
+        })
+      );
+    }
 
     this.tiles.push(
       ... [
@@ -162,9 +159,6 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    await this.balanceService.start();
-    await this.rpcService.start('0.0.0.0', 5666);
 
     const seedHash = await Utils.sha256(this.keyChainService.seed);
 
@@ -212,9 +206,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.clearFilterValue();
   }
 
-  public openCurrencyOverlay(currency) {
+  public openCurrencyOverlay(tile) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
-    componentRef.instance.currency = currency;
+    componentRef.instance.tile = tile;
   }
 
   public openSettings() {

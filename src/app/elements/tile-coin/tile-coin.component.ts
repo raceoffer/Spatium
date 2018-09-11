@@ -7,12 +7,13 @@ import { SyncState, Currency } from '../../services/verifier.service';
 import { BalanceService, Balance, BalanceStatus } from '../../services/balance.service';
 import { toBehaviourSubject } from '../../utils/transformers';
 import { mergeMap, map, filter } from 'rxjs/operators';
+import { PriceService } from '../../services/price.service';
 
 import uuid from 'uuid/v5';
 
 const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
 
-enum TileType {
+export enum TileType {
   Coin,
   Token
 }
@@ -67,82 +68,31 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   public currency: BehaviorSubject<Currency>;
   public state: BehaviorSubject<SyncState>;
   public balanceWatcher: BehaviorSubject<{
+    id: string,
     balanceSubject: BehaviorSubject<Balance>,
     statusSubject: BehaviorSubject<BalanceStatus>,
     wallet: any
   }>;
-  public balance: BehaviorSubject<Balance>;
+  public balance: BehaviorSubject<number>;
+  public balanceUSD: BehaviorSubject<number>;
   public balanceStatus: BehaviorSubject<BalanceStatus>;
 
-  public model: any = null;
+  public model: {
+    name: string,
+    ticker: string,
+    logo: string
+  } = null;
 
   private subscriptions = [];
 
   constructor(
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly syncService: SyncService,
-    private readonly balanceService: BalanceService
+    private readonly balanceService: BalanceService,
+    private readonly priceService: PriceService
   ) {}
 
   ngOnInit() {
-    this.currency = toBehaviourSubject(this.syncService.currencyEvent.pipe(
-      filter(currencyId => currencyId === this.tile.currencyInfo.id),
-      map(currencyId => this.syncService.currency(currencyId))
-    ), this.syncService.currency(this.tile.currencyInfo.id));
-
-    this.state = toBehaviourSubject(this.currency.pipe(
-      mergeMap(currency => currency ? currency.state : of(SyncState.None))
-    ), SyncState.None);
-
-    this.balanceWatcher = toBehaviourSubject(this.state.pipe(
-      filter(state => state === SyncState.Finalized),
-      mergeMap(async () => {
-        let wallet;
-        let id;
-
-        switch (this.tile.type) {
-          case TileType.Coin:
-            wallet = this.tile.currencyInfo.walletType.fromOptions({
-              network: this.tile.currencyInfo.network,
-              point: await this.currency.getValue().compoundPublic(),
-              endpoint: this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium)
-            });
-            id = uuid(this.tile.type.toString() + this.tile.currencyInfo.id.toString(), serviceId);
-            break;
-          case TileType.Token:
-            wallet = this.tile.currencyInfo.walletType.fromOptions({
-              network: this.tile.currencyInfo.network,
-              point: await this.currency.getValue().compoundPublic(),
-              contractAddress: this.tile.tokenInfo.id,
-              decimals: this.tile.tokenInfo.decimals,
-              endpoint: this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium)
-            });
-            id = uuid(this.tile.type.toString() + this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString(), serviceId);
-            break;
-        }
-
-        const watcher = this.balanceService.addWatcher(id, wallet);
-
-        if (this.tile.type === TileType.Coin) {
-          this.balanceService.forceCurrency(id);
-        }
-
-        return watcher;
-      })
-    ), null);
-
-    this.balance = toBehaviourSubject(this.balanceWatcher.pipe(
-      mergeMap(watcher => {
-        return watcher
-          ? watcher.balanceSubject.pipe(map(balance => balance ? watcher.wallet.fromInternal(balance.unconfirmed) : null))
-          : of(null);
-      })
-    ), null);
-
-    this.balanceStatus = toBehaviourSubject(this.balanceWatcher.pipe(
-      mergeMap(watcher => watcher ? watcher.statusSubject : of(BalanceStatus.None))
-    ), BalanceStatus.None);
-
     this.currencyLogo = getCurrencyLogo(this.tile.currencyInfo.id);
 
     switch (this.tile.type) {
@@ -161,6 +111,74 @@ export class TileCoinComponent implements OnInit, OnDestroy {
         };
         break;
     }
+
+    this.currency = toBehaviourSubject(this.syncService.currencyEvent.pipe(
+      filter(currencyId => currencyId === this.tile.currencyInfo.id),
+      map(currencyId => this.syncService.currency(currencyId))
+    ), this.syncService.currency(this.tile.currencyInfo.id));
+
+    this.state = toBehaviourSubject(this.currency.pipe(
+      mergeMap(currency => currency ? currency.state : of(SyncState.None))
+    ), SyncState.None);
+
+    this.balanceWatcher = toBehaviourSubject(this.state.pipe(
+      filter(state => state === SyncState.Finalized),
+      mergeMap(async () => {
+        let watcherId;
+
+        const network = this.tile.currencyInfo.network;
+        const endpoint = this.currencyInfoService.apiServer(this.tile.currencyInfo.id, ApiServer.Spatium);
+        const point = await this.currency.getValue().compoundPublic();
+
+        switch (this.tile.type) {
+          case TileType.Coin:
+            watcherId = uuid(this.tile.currencyInfo.id.toString(), serviceId);
+            if (!this.balanceService.hasWatcher(watcherId)) {
+              const currencyWallet = this.tile.currencyInfo.walletType.fromOptions({
+                network,
+                point,
+                endpoint
+              });
+
+              this.balanceService.registerWatcher(watcherId, currencyWallet);
+              this.balanceService.forceCurrency(watcherId);
+            }
+            break;
+          case TileType.Token:
+            watcherId = uuid(this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString(), serviceId);
+            if (!this.balanceService.hasWatcher(watcherId)) {
+              const tokenWallet = this.tile.currencyInfo.tokenWalletType.fromOptions({
+                network,
+                point,
+                endpoint,
+                contractAddress: this.tile.tokenInfo.id,
+                decimals: this.tile.tokenInfo.decimals
+              });
+
+              this.balanceService.registerWatcher(watcherId, tokenWallet);
+            }
+            break;
+        }
+
+        return this.balanceService.watcher(watcherId);
+      })
+    ), null);
+
+    this.balance = toBehaviourSubject(this.balanceWatcher.pipe(
+      mergeMap(watcher => {
+        return watcher
+          ? watcher.balanceSubject.pipe(map(balance => balance ? watcher.wallet.fromInternal(balance.unconfirmed) : null))
+          : of(null);
+      })
+    ), null);
+
+    this.balanceUSD = toBehaviourSubject(this.balance.pipe(
+      map((balance) => balance !== null ? balance * this.priceService.price(this.model.ticker) : null)
+    ), null);
+
+    this.balanceStatus = toBehaviourSubject(this.balanceWatcher.pipe(
+      mergeMap(watcher => watcher ? watcher.statusSubject : of(BalanceStatus.None))
+    ), BalanceStatus.None);
   }
 
   public ngOnDestroy() {
