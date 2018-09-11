@@ -25,8 +25,7 @@ import {
 import { PlainSocket } from '../../../utils/sockets/plainsocket';
 import { RPCClient } from '../../../services/rpc/rpc-client';
 import { Client } from '../../../utils/client-server/client-server';
-
-const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
+import { uuidFrom } from '../../../utils/uuid';
 
 @Component({
   selector: 'app-wallet',
@@ -162,7 +161,7 @@ export class WalletComponent implements OnInit, OnDestroy {
 
     const seedHash = await Utils.sha256(this.keyChainService.seed);
 
-    this.sessionId = uuid(seedHash.toJSON().data, serviceId);
+    this.sessionId = uuidFrom(seedHash);
 
     const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
 

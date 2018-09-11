@@ -16,10 +16,7 @@ import { CurrencyInfoService, ApiServer } from '../../../services/currencyinfo.s
 import { SyncService } from '../../../services/sync.service';
 import { PriceService } from '../../../services/price.service';
 import { HistoryEntry } from '../../../services/wallet/currencywallet';
-
-import uuid from 'uuid/v5';
-
-const serviceId = '57b23ea7-26b9-47c4-bd90-eb0664df26a0';
+import { uuidFrom } from '../../../utils/uuid';
 
 declare const cordova: any;
 
@@ -132,7 +129,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
         switch (this.tile.type) {
           case TileType.Coin:
-            watcherId = uuid(this.tile.currencyInfo.id.toString(), serviceId);
+            watcherId = uuidFrom(this.tile.currencyInfo.id.toString());
             if (!this.balanceService.hasWatcher(watcherId)) {
               const currencyWallet = this.tile.currencyInfo.walletType.fromOptions({
                 network,
@@ -145,7 +142,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
             }
             break;
           case TileType.Token:
-            watcherId = uuid(this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString(), serviceId);
+            watcherId = uuidFrom(this.tile.currencyInfo.id.toString() + this.tile.tokenInfo.id.toString());
             if (!this.balanceService.hasWatcher(watcherId)) {
               const tokenWallet = this.tile.currencyInfo.tokenWalletType.fromOptions({
                 network,
