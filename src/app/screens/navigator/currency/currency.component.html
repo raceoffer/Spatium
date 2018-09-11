@@ -15,8 +15,7 @@
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="((state | async) !== stateType.Finalized && (state | async) !== stateType.None) ||
-           (isUpdatingTransactions === true)">
+    *ngIf="((state | async) !== stateType.Finalized && (state | async) !== stateType.None)">
   </mat-progress-bar>
 
   <div class="scroll full-width" id="transactionList" #transactionList>
@@ -110,7 +109,7 @@
           <span matLine class="transaction-amount"
                 [class.input]="transaction.type==txType.In"
                 [class.output]="transaction.type==txType.Out">
-            {{ currencyWallet.fromInternal(transaction.amount) }} {{ currencyInfo?.symbol }}
+            {{ (balanceWatcher | async).wallet.fromInternal(transaction.amount) }} {{ model.ticker }}
           </span>
           <span matLine class="transaction-time"
                 *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
@@ -121,10 +120,10 @@
       </mat-list>
       <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
           *ngIf="((transactions | async) === null) &&
-                  ((walletAddress | async) !== null) &&
-                  ((balanceCurrencyUnconfirmed | async) !== null) &&
-                  ((balanceUsdUnconfirmed | async) !== null) 
-                  || (isLoadingTransactions === true)">
+                  ((address | async) !== null) &&
+                  ((balanceUnconfirmed | async) !== null) &&
+                  ((balanceUSDUnconfirmed | async) !== null) ||
+                  (isLoadingTransactions === true)">
         <mat-spinner
           color="accent"
           [diameter]="50"

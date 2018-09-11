@@ -2,7 +2,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, ElementRef, HostBinding, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 import * as $ from 'jquery';
-import { BehaviorSubject, of, timer } from 'rxjs';
+import { BehaviorSubject, of, timer, from, interval } from 'rxjs';
 import { map, filter, mergeMap } from 'rxjs/operators';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
@@ -15,8 +15,35 @@ import { BalanceStatus, BalanceService, Balance } from '../../../services/balanc
 import { CurrencyInfoService, ApiServer } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
 import { PriceService } from '../../../services/price.service';
-import { HistoryEntry } from '../../../services/wallet/currencywallet';
 import { uuidFrom } from '../../../utils/uuid';
+
+export enum TransactionType {
+  In,
+  Out
+}
+
+export class HistoryEntry {
+  constructor(public type: TransactionType,
+              // tslint:disable-next-line:no-shadowed-variable
+              public from: string,
+              public to: string,
+              public amount: number,
+              public confirmed: boolean,
+              public time: number,
+              public blockhash: string) {}
+
+  static fromJSON(json) {
+    return new HistoryEntry(
+      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
+      json.from,
+      json.to,
+      json.amount,
+      json.confirmed,
+      json.time,
+      json.blockhash
+    );
+  }
+}
 
 declare const cordova: any;
 
@@ -33,11 +60,10 @@ declare const cordova: any;
     ])
   ]
 })
-
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  // public txType = TransactionType;
+  public txType = TransactionType;
   public stateType = SyncState;
   public balanceStatusType = BalanceStatus;
 
@@ -65,17 +91,19 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public balanceUSDConfirmed: BehaviorSubject<number>;
   public balanceStatus: BehaviorSubject<BalanceStatus>;
 
+  // public transactionArray = [];
   // public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
-  public isLoadingTransactions = false;
-  public isUpdatingTransactions = false;
+  // public isLoadingTransactions = false;
+  // public isUpdatingTransactions = false;
+  // public timeEnd = null;
+
+  // private transactionsCount = 0;
+  // private isHistoryLoaded = false;
+  // private step = 10;
+  // private unconfirmedList: Array<HistoryEntry> = [];
+  // private isFirstUpdate = true;
 
   private subscriptions = [];
-
-  private transactionsCount = 0;
-  private isHistoryLoaded = false;
-  private step = 10;
-  // private unconfirmedList: Array<HistoryEntry> = [];
-  private isFirstUpdate = true;
 
   constructor(
     private readonly navigationService: NavigationService,
@@ -193,48 +221,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       mergeMap(watcher => watcher ? watcher.statusSubject : of(BalanceStatus.None))
     ), BalanceStatus.None);
 
-    // this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest([
-    //   this.balanceCurrencyUnconfirmed,
-    //   this.currencyInfo.rate
-    // ]).pipe(
-    //   map(([balance, rate]) => {
-    //     if (rate === null || balance === null) {
-    //       return null;
-    //     }
-    //     return balance * rate;
-    //   })
-    // ), null);
-
-    // this.balanceUsdConfirmed = toBehaviourSubject(combineLatest([
-    //   this.balanceCurrencyConfirmed,
-    //   this.currencyInfo.rate
-    // ]).pipe(
-    //   map(([balance, rate]) => {
-    //     if (rate === null || balance === null) {
-    //       return null;
-    //     }
-    //     return balance * rate;
-    //   })
-    // ), null);
-
-    // this.transactions = toBehaviourSubject(
-    //   from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-    //   null);
-
-    // this.subscriptions.push(
-    //   this.currencyWallet.readyEvent.subscribe(() => {
-    //     this.transactions = toBehaviourSubject(
-    //       from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-    //       null);
-    //   })
-    // );
-
-    // this.transactionsCount += this.step;
-
-    // interval(10000).subscribe(async () => {
-    //   await this.updateTransactions();
-    // });
-
     this.subscriptions.push(
       timer(0, 3000).subscribe(() => {
         const watcher = this.balanceWatcher.getValue();
@@ -245,6 +231,20 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     );
 
     this.syncService.forceCurrency(this.tile.currencyInfo.id);
+
+    /** @todo Refactor the stuff below */
+
+    // this.transactions = toBehaviourSubject(this.balanceWatcher.pipe(
+    //   mergeMap(async () => {
+    //     return await this.listTransactionHistory(this.step, 0);
+    //   })
+    // ), null);
+
+    // this.transactionsCount += this.step;
+
+    // interval(10000).subscribe(async () => {
+    //   await this.updateTransactions();
+    // });
   }
 
   ngOnDestroy() {
@@ -274,11 +274,76 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     this.navigationService.back();
   }
 
+  /** @todo Refactor the stuff below */
+
+  // public async listTransactionHistory(listTo, listFrom) {
+  //   const wallet = this.balanceWatcher.getValue() ? this.balanceWatcher.getValue().wallet : null;
+  //   if (wallet === null) {
+  //     return null;
+  //   }
+
+  //   if (this.transactionArray !== null) {
+  //     console.log('cached: ' + this.transactionArray.length);
+  //   }
+
+  //   if (this.transactionArray === null) {
+  //     const txs = await wallet.getTransactions(listTo, listFrom);
+  //     const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+  //     this.transactionArray = txsMapped;
+  //   } else if (listFrom === 0) {
+  //     const txs = await wallet.getTransactions(listTo, listFrom);
+  //     const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+  //     if (txsMapped.length > 0) {
+  //       if (txsMapped.slice(-1)[0].time <= this.transactionArray[0].time) {
+  //         const timeEnd = this.transactionArray[0].time;
+  //         const filtered = txsMapped.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
+
+  //         this.transactionArray.unshift.apply(this.transactionArray, filtered);
+  //       } else {
+  //         this.timeEnd = this.transactionArray[0].time;
+  //         this.transactionArray.unshift.apply(this.transactionArray, txsMapped);
+  //       }
+  //     }
+  //   } else {
+  //     if (this.timeEnd !== null) {
+  //       const txs = await wallet.getTransactions(listTo, listFrom);
+  //       const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+
+  //       if (txsMapped.slice(-1)[0].time <= this.transactionArray[0].time) {
+  //         const timeEnd = this.transactionArray[0].time;
+  //         const filtered = txsMapped.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
+
+  //         Array.prototype.splice.apply(this.transactionArray, [listTo, 0].concat(filtered));
+  //         this.timeEnd = null;
+  //       } else {
+  //         Array.prototype.splice.apply(this.transactionArray, [listTo, 0].concat(txsMapped));
+  //       }
+  //     } else if (this.transactionArray.length < listTo && !this.isHistoryLoaded) {
+  //       const txs = await wallet.getTransactions(listTo, listFrom);
+  //       const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+  //       const filtered = txsMapped.filter(item => (this.transactionHashNotInList(item.blockhash)));
+  //       this.transactionArray.push.apply(this.transactionArray, filtered);
+  //     }
+  //   }
+
+  //   if (this.transactionArray.length >= listTo) {
+  //     return this.transactionArray.slice(listFrom, listTo);
+  //   } else {
+  //     return this.transactionArray.slice(listFrom);
+  //   }
+  // }
+
   // async loadMore() {
   //   if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
   //     this.isLoadingTransactions = true;
 
-  //     const newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount + this.step, this.transactionsCount);
+  //     const newList = await this.listTransactionHistory(this.transactionsCount + this.step, this.transactionsCount);
   //     const oldList = this.transactions.getValue();
 
   //     if (newList.length > 0) {
@@ -288,7 +353,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   //       this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
   //     }
   //     if (newList.length < this.step) {
-  //       this.currencyWallet.isHistoryLoaded = true;
   //       this.isHistoryLoaded = true;
   //       console.log('History loaded!');
   //     }
@@ -301,8 +365,13 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-  // async updateTransactions(to= this.step, from= 0) {
-  //   if (this.currencyWallet !== null && this.transactions.getValue() !== null && !this.isUpdatingTransactions && !this.isLoadingTransactions) {
+  // async updateTransactions(listTo = this.step, listFrom = 0) {
+  //   const wallet = this.balanceWatcher.getValue() ? this.balanceWatcher.getValue().wallet : null;
+  //   if (wallet !== null &&
+  //       this.transactions.getValue() !== null &&
+  //       !this.isUpdatingTransactions &&
+  //       !this.isLoadingTransactions
+  //   ) {
   //     this.isUpdatingTransactions = true;
 
   //     if (this.isFirstUpdate) {
@@ -311,7 +380,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   //       this.isFirstUpdate = false;
   //     }
 
-  //     const newList = await this.currencyWallet.listTransactionHistory(to, from);
+  //     const newList = await this.listTransactionHistory(listTo, listFrom);
 
   //     if (newList !== null && newList.length > 0) {
   //       this.checkUnconfirmed(newList);
@@ -320,7 +389,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   //       if (newList.slice(-1)[0].time <= oldList[0].time) {
   //         const timeEnd = oldList[0].time;
-  //         const filtered = newList.filter(item => (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash)));
+  //         const filtered = newList.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
 
   //         oldList.unshift.apply(oldList, filtered);
   //         this.transactions.next(oldList);
@@ -334,7 +405,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   //         const unconfirmed = newList.filter(item => item.confirmed === false);
   //         this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
 
-  //         this.updateTransactions(to + this.step, from + this.step);
+  //         this.updateTransactions(listTo + this.step, listFrom + this.step);
   //       }
   //     }
 

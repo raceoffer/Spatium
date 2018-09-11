@@ -128,7 +128,7 @@ export class EcdsaCurrency extends Currency {
 
 @Injectable()
 export class SyncService {
-  private _syncQueue: CurrencyId[];
+  private _syncQueue = [];
 
   private _currencies = new Map<CurrencyId, Currency>();
 
