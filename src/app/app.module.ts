@@ -89,7 +89,6 @@ import { DecryptComponent } from './screens/verifier-auth/decrypt/decrypt.compon
 import { VerifierAuthComponent } from './screens/verifier-auth/verifier-auth.component';
 import { ChangePincodeComponent } from './screens/verifier/change-pincode/change-pincode.component';
 import { SettingsComponent as VerifierSettingsComponent } from './screens/verifier/settings/verifier-settings.component';
-import { SyncronizationComponent } from './screens/verifier/syncronization/syncronization.component';
 import { VerifierComponent } from './screens/verifier/verifier.component';
 import { VerifyTransactionComponent } from './screens/verifier/verify-transaction/verify-transaction.component';
 import { ActivityService } from './services/activity.service';
@@ -186,7 +185,6 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     VerifierSettingsComponent,
     TileCoinComponent,
     ConnectivityManageComponent,
-    SyncronizationComponent,
     CarouselComponent,
     CarouselItemDirective,
     CarouselItemElement,
@@ -296,7 +294,6 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     VerifierSettingsComponent,
     ZeroconfComponent,
     BluetoothComponent,
-    SyncronizationComponent,
     PresentationComponent,
     NavbarComponent,
     BackupComponent,

@@ -7,9 +7,12 @@ declare const cordova: any;
 
 @Injectable()
 export class NotificationService {
-  public confirm: Subject<any> = new Subject<any>();
-  public decline: Subject<any> = new Subject<any>();
-  snackBarRef: MatSnackBarRef<any>;
+  public confirm: Subject<number> = new Subject<number>();
+  public decline: Subject<number> = new Subject<number>();
+
+  private baseId = 1;
+
+  private snackBarRef: MatSnackBarRef<any>;
 
   constructor(
     private readonly deviceService: DeviceService,
@@ -19,18 +22,20 @@ export class NotificationService {
     this.deviceService.deviceReady().then(() => {
       if (cordova.plugins.notification) {
         cordova.plugins.notification.local.on('confirm', (notification, eopts) => this.ngZone.run(() => {
-          this.confirm.next();
+          this.confirm.next(notification.id);
         }));
         cordova.plugins.notification.local.on('decline', (notification, eopts) => this.ngZone.run(() => {
-          this.decline.next();
+          this.decline.next(notification.id);
         }));
       }
     });
   }
 
-  public askConfirmation(title: string, text: string) {
+  public askConfirmation(title: string, text: string): number {
+    const id = this.baseId++;
     if (cordova.plugins.notification) {
       cordova.plugins.notification.local.schedule({
+        id: id,
         title: title,
         text: text,
         icon: 'res://icon',
@@ -42,11 +47,12 @@ export class NotificationService {
         ]
       });
     }
+    return id;
   }
 
-  public cancelConfirmation() {
+  public cancelConfirmation(id: number) {
     if (cordova.plugins.notification) {
-      cordova.plugins.notification.local.cancel(0);
+      cordova.plugins.notification.local.cancel(id);
     }
   }
 

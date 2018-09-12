@@ -8,6 +8,7 @@ import { CurrecnyModelType, CurrencyModel } from '../../../services/wallet/walle
 
 import BN from 'bn.js';
 import { PriceService } from '../../../services/price.service';
+import { filter } from 'rxjs/operators';
 
 enum State {
   None,
@@ -44,6 +45,8 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @Output() public decline = new EventEmitter<any>();
 
   private subscriptions = [];
+
+  private notificationId: number;
 
   constructor(
     private readonly navigationService: NavigationService,
@@ -92,9 +95,25 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
 
     this.state = State.Verifying;
 
-    this.notification.askConfirmation(
+    this.notificationId = this.notification.askConfirmation(
       'Confirm ' + this.model.name + ' transacton',
       this.value + ' ' + this.model.ticker + ' to ' + this.address
+    );
+
+    this.subscriptions.push(
+      this.notification.confirm.pipe(
+        filter((id) => id === this.notificationId)
+      ).subscribe(() => {
+        this.confirm.next();
+      })
+    );
+
+    this.subscriptions.push(
+      this.notification.decline.pipe(
+        filter((id) => id === this.notificationId)
+      ).subscribe(() => {
+        this.decline.next();
+      })
     );
   }
 
@@ -102,7 +121,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
 
-    await this.notification.cancelConfirmation();
+    await this.notification.cancelConfirmation(this.notificationId);
   }
 
   public cancel() {
