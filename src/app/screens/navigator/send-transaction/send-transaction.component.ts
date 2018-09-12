@@ -665,7 +665,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         throw new Error('Invalid signature');
       }
 
-      await wallet.sendSignedTransaction(this.signed.toRaw());
+      const raw = await this.signed.toRaw();
+
+      await wallet.sendSignedTransaction(raw);
 
       this.navigationService.back();
 
