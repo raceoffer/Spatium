@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { FormControl, Validators } from "@angular/forms";
-import { AuthService } from "../../services/auth.service";
-
-import { BehaviorSubject } from "rxjs";
+import { FormControl, Validators } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
+import { DeviceService, Platform } from '../../services/device.service';
 
 export enum State {
   Updating,
@@ -17,7 +17,7 @@ export enum State {
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnDestroy {
-  public caretClass = 'caret-center';
+  public caretClass = this.isWindows() ? 'caret-center' : '';
   public stateType = State;
   public state = new BehaviorSubject<State>(State.Ready);
 
@@ -43,7 +43,9 @@ export class LoginComponent implements OnDestroy {
     filter(() => !this.loginGenerated),
     map((value) => {
       if (!value) {
-        this.caretClass = 'caret-center';
+        if (this.isWindows()) {
+          this.caretClass = 'caret-center';
+        }
         return '';
       } else {
         this.caretClass = '';
@@ -55,9 +57,8 @@ export class LoginComponent implements OnDestroy {
     tap(() => this.delayed.next(false)),
   );
 
-  constructor(
-    private readonly authService: AuthService,
-  ) {
+  constructor(private readonly authService: AuthService,
+              private readonly deviceService: DeviceService) {
 
     this.subscriptions.push(
       this.manualLoginInputStream.subscribe(value => {
@@ -97,14 +98,18 @@ export class LoginComponent implements OnDestroy {
   generateNewLogin() {
     try {
       this.state.next(State.Updating);
-      let login = this.authService.makeNewLogin(10);
+      const login = this.authService.makeNewLogin(10);
 
       this.loginGenerated = true;
       this.loginControl.setValue(login);
 
       this.state.next(State.Ready);
-    } catch(e) {
+    } catch (e) {
       this.state.next(State.Error);
     }
+  }
+
+  isWindows(): boolean {
+    return this.deviceService.platform === Platform.Windows;
   }
 }
