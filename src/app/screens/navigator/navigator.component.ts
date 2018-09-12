@@ -10,8 +10,14 @@ import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SyncService } from '../../services/sync.service';
 import { WaitingComponent } from './waiting/waiting.component';
 
+import BN from 'bn.js';
+
 import { Utils, DistributedEcdsaKey } from 'crypto-core-async';
 import { uuidFrom } from '../../utils/uuid';
+import { VerifierService } from '../../services/verifier.service';
+import { CurrencyId } from '../../services/currencyinfo.service';
+import { CurrencyModel } from '../../services/wallet/wallet';
+import { VerifyTransactionComponent } from '../verifier/verify-transaction/verify-transaction.component';
 
 @Component({
   selector: 'app-navigator',
@@ -39,7 +45,8 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly balanceService: BalanceService,
     private readonly rpcService: RPCServerService,
     private readonly syncService: SyncService,
-    private readonly keyChainService: KeyChainService
+    private readonly keyChainService: KeyChainService,
+    private readonly verifierService: VerifierService
   ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -74,6 +81,11 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     console.log(this.keyChainService.sessionId);
 
     await this.balanceService.start();
+
+    this.verifierService.setAcceptHandler(
+      async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
+    );
+
     await this.rpcService.start('0.0.0.0', 5666);
   }
 
@@ -88,6 +100,30 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     await this.balanceService.reset();
     await this.syncService.reset();
     await this.rpcService.stop();
+  }
+
+  public async accept(sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN): Promise<boolean> {
+    return new Promise<boolean>((resolve, ignored) => {
+      const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
+      componentRef.instance.sessionId = sessionId;
+      componentRef.instance.model = model;
+      componentRef.instance.address = address;
+      componentRef.instance.valueInternal = value;
+      componentRef.instance.feeInternal = fee;
+
+      componentRef.instance.confirm.subscribe(async () => {
+        this.navigationService.acceptOverlay();
+        resolve(true);
+      });
+      componentRef.instance.decline.subscribe(async () => {
+        this.navigationService.acceptOverlay();
+        resolve(false);
+      });
+      componentRef.instance.cancelled.subscribe(async () => {
+        this.navigationService.acceptOverlay();
+        resolve(false);
+      });
+    });
   }
 
   public async openConnectOverlay() {

@@ -102,6 +102,7 @@ export class RPCServerService {
       const entropyData = await this.verifierService.startEcdsaSign(
         request.sessionId,
         request.currencyId,
+        request.tokenId,
         request.signSessionId,
         new Buffer(request.transactionBytes),
         Marshal.decode(request.entropyCommitmentBytes)

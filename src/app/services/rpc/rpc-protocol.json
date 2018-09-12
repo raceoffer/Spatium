@@ -277,17 +277,21 @@
           "type": "int32",
           "id": 2
         },
-        "signSessionId": {
+        "tokenId": {
           "type": "string",
           "id": 3
         },
+        "signSessionId": {
+          "type": "string",
+          "id": 4
+        },
         "transactionBytes": {
           "type": "bytes",
-          "id": 4
+          "id": 5
         },
         "entropyCommitmentBytes": {
           "type": "bytes",
-          "id": 5
+          "id": 6
         }
       }
     },

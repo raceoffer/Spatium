@@ -1,9 +1,13 @@
 import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { Coin, Token } from '../../../services/keychain.service';
+import { ApiServer, CurrencyInfoService } from '../../../services/currencyinfo.service';
+import { Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
-import { WalletService } from '../../../services/wallet.service';
+import { VerifierService } from '../../../services/verifier.service';
+import { CurrecnyModelType, CurrencyModel } from '../../../services/wallet/wallet';
+
+import BN from 'bn.js';
+import { PriceService } from '../../../services/price.service';
 
 enum State {
   None,
@@ -19,68 +23,78 @@ enum State {
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  public address;
-  public btc;
-  public usd;
+  @Input() public sessionId: string = null;
+  @Input() public model: CurrencyModel = null;
+  @Input() public address: string = null;
+  @Input() public valueInternal: BN = null;
+  @Input() public feeInternal: BN = null;
+
+  public parentModel: CurrencyModel = null;
+
+  public value;
   public fee;
+  public valueUsd;
   public feeUsd;
 
   public stateType: any = State;
   public state: State = State.None;
 
-  @Input() public currentCoin: Coin | Token = null;
-  @Input() public transaction = null;
-
-  @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
+  @Output() public cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() public confirm = new EventEmitter<any>();
   @Output() public decline = new EventEmitter<any>();
-
-  public currentInfo: Info = null;
-  public currencyWallets = this.wallet.currencyWallets;
-  public currentWallet = null;
-
-  public ethWallet = this.wallet.currencyWallets.get(Coin.ETH);
 
   private subscriptions = [];
 
   constructor(
-    private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService
-  ) { }
+    private readonly notification: NotificationService,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly verifierService: VerifierService,
+    private readonly priceService: PriceService
+  ) {}
 
   async ngOnInit() {
+    this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
+
     this.state = State.Preparing;
 
-    this.currentInfo = await this.currencyService.getInfo(this.currentCoin);
-    this.currentWallet = this.currencyWallets.get(this.currentCoin);
+    const currency = this.verifierService.session(this.sessionId).currency(this.model.currencyInfo.id);
 
-    if (!await this.transaction.validate(this.currentWallet.address.getValue())) {
-      this.state = State.None;
-      this.decline.next();
-      return;
+    const network = this.model.currencyInfo.network;
+    const endpoint = this.currencyInfoService.apiServer(this.model.currencyInfo.id, ApiServer.Spatium);
+    const point = await currency.compoundPublic();
+
+    const parentWallet = this.model.currencyInfo.walletType.fromOptions({
+      network,
+      point,
+      endpoint
+    });
+    let wallet = null;
+    switch (this.model.type) {
+      case CurrecnyModelType.Coin:
+        wallet = parentWallet;
+        break;
+      case CurrecnyModelType.Token:
+        wallet = this.model.currencyInfo.tokenWalletType.fromOptions({
+          network,
+          point,
+          endpoint,
+          contractAddress: this.model.tokenInfo.id,
+          decimals: this.model.tokenInfo.decimals
+        });
+        break;
     }
 
-    const outputs = await this.transaction.totalOutputs();
-
-    const fee = await this.transaction.estimateFee();
-
-    this.address = outputs.outputs[0].address;
-    this.btc = this.currentWallet.fromInternal(outputs.outputs[0].value);
-    this.usd = this.btc * this.currentInfo.rate.getValue();
-    if (this.currentCoin in Token) {
-      this.fee = this.ethWallet.fromInternal(fee);
-    } else {
-      this.fee = this.currentWallet.fromInternal(fee);
-    }
-    this.feeUsd = this.fee * this.currentInfo.gasRate.getValue();
+    this.value = wallet.fromInternal(this.valueInternal);
+    this.valueUsd = this.value * this.priceService.price(this.model.ticker);
+    this.fee = parentWallet.fromInternal(this.feeInternal);
+    this.feeUsd = this.fee * this.priceService.price(this.parentModel.ticker);
 
     this.state = State.Verifying;
 
     this.notification.askConfirmation(
-      'Confirm ' + this.currentInfo.name + ' transacton',
-      this.btc + ' ' + this.currentInfo.symbol + ' to ' + this.address
+      'Confirm ' + this.model.name + ' transacton',
+      this.value + ' ' + this.model.ticker + ' to ' + this.address
     );
   }
 

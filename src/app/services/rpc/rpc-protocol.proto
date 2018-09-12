@@ -120,9 +120,10 @@ message EcdsaSyncFinalizeResponse {
 message StartEcdsaSignRequest {
   string session_id = 1;
   int32 currency_id = 2;
-  string sign_session_id = 3;
-  bytes transaction_bytes = 4;
-  bytes entropy_commitment_bytes = 5;
+  string token_id = 3;
+  string sign_session_id = 4;
+  bytes transaction_bytes = 5;
+  bytes entropy_commitment_bytes = 6;
 }
 
 message StartEcdsaSignResponse {

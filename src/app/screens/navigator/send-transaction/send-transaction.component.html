@@ -145,7 +145,7 @@
 
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
+        <span class="label" style="margin-left: 5px;">{{ parentModel.ticker }}</span>
       </td>
 
       <td class="left">
@@ -195,7 +195,7 @@
     </tr>
     <tr *ngIf="feeTypeField.value === feeType.Manual && allowFeeConfiguration">
       <td class="right">
-        <!-- <span class="label" style="margin-left: 5px;">{{ currencyInfo?.gasUnit }}</span> -->
+        <span class="label" style="margin-left: 5px;">{{ parentModel.ticker }}</span>
       </td>
       <td class="left">
         <span class="label" style="margin-left: 5px;">USD</span>
@@ -227,7 +227,7 @@
             <input
               *ngIf="(ready | async) && (wallet.address | async) !== null"
               matInput
-              [formControl]="feePriceUsdField"
+              [formControl]="feePriceUsdField"hfjfjjf
               [readonly]="feeTypeField.value !== feeType.Manual"
               type="number"
               ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
