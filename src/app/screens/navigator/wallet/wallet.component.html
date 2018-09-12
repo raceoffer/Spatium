@@ -42,12 +42,12 @@
   <div class='content' (window:resize)="onResize()">
     <mat-grid-list cols="{{cols}}" rowHeight="4:3" [class.windows]="isWindows">
       <mat-grid-tile
-        *ngFor="let entry of (filteredTiles | async)"
+        *ngFor="let model of (filteredTiles | async)"
         [colspan]="1"
         [rowspan]="1">
         <app-tile-coin
-          [entry]="entry"
-          (clicked)="openCurrencyOverlay(entry)">
+          [model]="model"
+          (clicked)="openCurrencyOverlay(model)">
         </app-tile-coin>
       </mat-grid-tile>
     </mat-grid-list>

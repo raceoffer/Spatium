@@ -1,20 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { DeviceService, Platform } from '../../services/device.service';
+import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
-import { KeyChainService } from '../../services/keychain.service';
-
-import { PlainSocket } from '../../utils/sockets/plainsocket';
-import { Client } from '../../utils/client-server/client-server';
-import { RPCServerService } from '../../services/rpc/rpc-server.service';
-import { RPCClient } from '../../services/rpc/rpc-client';
-
-import { CurrencyId } from '../../services/currencyinfo.service';
-import { SyncService, EcdsaCurrency } from '../../services/sync.service';
-import { SyncState } from '../../services/verifier.service';
-import { WorkerService } from '../../services/worker.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -35,10 +25,7 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
-    private readonly rpc: RPCServerService,
-    private readonly keyChainService: KeyChainService,
-    private readonly syncService: SyncService,
-    private readonly workerService: WorkerService
+    private readonly keyChainService: KeyChainService
   ) {}
 
   public async ngOnInit() {
@@ -128,93 +115,4 @@ export class StartComponent implements OnInit, OnDestroy {
 
     await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
   }
-
-  // public async syncBitcoinTest() {
-  //   console.log('syncBitcoinTest()');
-
-  //   this.syncService.forceCurrency(CurrencyId.BitcoinTest);
-
-  //   console.log('Bumped');
-  // }
-
-  // public async signBitcoinTest() {
-  //   console.log('signBitcoinTest()');
-  //   const bitcoin = this.syncService.currency(CurrencyId.BitcoinTest) as EcdsaCurrency;
-
-  //   console.log(await bitcoin.distributedKey.compoundPublic());
-
-  //   const syncStateResponse = await this.rpcClient.api.syncState({ sessionId: this.sessionId, currencyId: bitcoin.id });
-
-  //   console.log(syncStateResponse);
-
-  //   if (syncStateResponse.state !== SyncState.Finalized) {
-  //     throw new Error('Not synced');
-  //   }
-
-  //   const btcWallet = BitcoinWallet.fromOptions({
-  //     network: BitcoinWallet.Testnet,
-  //     point: await bitcoin.distributedKey.compoundPublic(),
-  //     endpoint: 'https://test-insight.bitpay.com/api'
-  //   });
-
-  //   console.log(btcWallet.address);
-
-  //   const tx = await btcWallet.prepareTransaction(
-  //     await BitcoinTransaction.create(this.workerService.worker),
-  //     btcWallet.address,
-  //     btcWallet.toInternal(0.01)
-  //   );
-
-  //   const distributedSignSession = await tx.startSignSession(bitcoin.distributedKey);
-
-  //   const entropyCommitment = await distributedSignSession.createEntropyCommitment();
-
-  //   const transactionBytes = await tx.toBytes();
-
-  //   const txId = await Utils.randomBytes(32);
-
-  //   const signSessionId = uuid(txId.toJSON().data, serviceId);
-
-  //   const startSignResponse = await this.rpcClient.api.startEcdsaSign({
-  //     sessionId: this.sessionId,
-  //     currencyId: bitcoin.id,
-  //     signSessionId,
-  //     transactionBytes,
-  //     entropyCommitmentBytes: Marshal.encode(entropyCommitment)
-  //   });
-  //   console.log(startSignResponse);
-
-  //   const entropyData = Marshal.decode(startSignResponse.entropyDataBytes);
-
-  //   const entropyDecommitment = await distributedSignSession.processEntropyData(entropyData);
-
-  //   const signRevealResponse = await this.rpcClient.api.ecdsaSignReveal({
-  //     sessionId: this.sessionId,
-  //     currencyId: bitcoin.id,
-  //     signSessionId,
-  //     entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
-  //   });
-  //   console.log(signRevealResponse);
-
-  //   const partialSignature = Marshal.decode(signRevealResponse.partialSignatureBytes);
-
-  //   const signature = await distributedSignSession.finalizeSignature(partialSignature);
-
-  //   await tx.applySignature(signature);
-
-  //   console.log(await tx.verify());
-
-  //   console.log('Signed');
-  // }
-
-  // public async disconnect() {
-  //   console.log('disconnect()');
-  //   const clearResponse = await this.rpcClient.api.clearSession({ sessionId: this.sessionId });
-
-  //   console.log(clearResponse);
-
-  //   await this.rpcClient.close();
-
-  //   console.log('Disconnected');
-  // }
 }

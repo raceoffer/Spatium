@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { BehaviorSubject, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { CurrencyId } from './currencyinfo.service';
 
 interface CoinMarketCupResponse {
   id: string;
@@ -104,6 +105,12 @@ export class CurrencyPriceService {
 
 }
 
+export enum FeeLevel {
+  High,
+  Normal,
+  Low
+}
+
 @Injectable()
 export class PriceService {
   private _cryptowatUrl = 'https://api.cryptowat.ch/markets/prices';
@@ -112,9 +119,65 @@ export class PriceService {
   private _requestTimer = timer(0, 5 * 60 * 1000);
 
   private _prices = new Map<string, number>();
+  private _defaultfeePrice = new Map<CurrencyId, Map<FeeLevel, number>>([
+    [CurrencyId.Bitcoin, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.Litecoin, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.BitcoinCash, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.Ethereum, new Map<FeeLevel, number>([
+      [FeeLevel.High, 10000000000],
+      [FeeLevel.Normal, 5000000000],
+      [FeeLevel.Low, 2000000000]
+    ])],
+    [CurrencyId.Neo, new Map<FeeLevel, number>([
+      [FeeLevel.High, 0],
+      [FeeLevel.Normal, 0],
+      [FeeLevel.Low, 0]
+    ])],
+    [CurrencyId.BitcoinTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.LitecoinTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.BitcoinCashTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 200],
+      [FeeLevel.Normal, 100],
+      [FeeLevel.Low, 20]
+    ])],
+    [CurrencyId.EthereumTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 10000000000],
+      [FeeLevel.Normal, 5000000000],
+      [FeeLevel.Low, 2000000000]
+    ])],
+    [CurrencyId.NeoTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 0],
+      [FeeLevel.Normal, 0],
+      [FeeLevel.Low, 0]
+    ])]
+  ]);
 
   public price(ticker: string): number {
     return this._prices.get(ticker.toUpperCase());
+  }
+
+  public feePrice(currencyId: CurrencyId, feeLevel: FeeLevel): number {
+    return this._defaultfeePrice.get(currencyId).get(feeLevel);
   }
 
   constructor(private http: HttpClient) {

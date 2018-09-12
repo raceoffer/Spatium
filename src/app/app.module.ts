@@ -122,6 +122,7 @@ import { VerifierService } from './services/verifier.service';
 import { CurrencyInfoService } from './services/currencyinfo.service';
 import { SyncService } from './services/sync.service';
 import { BalanceService } from './services/balance.service';
+import { RPCConnectionService } from './services/rpc/rpc-connection.service';
 
 @NgModule({
   declarations: [
@@ -255,7 +256,8 @@ import { BalanceService } from './services/balance.service';
     CurrencyInfoService,
     SyncService,
     BalanceService,
-    PriceService
+    PriceService,
+    RPCConnectionService
   ],
   bootstrap: [
     AppComponent

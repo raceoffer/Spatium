@@ -1,13 +1,13 @@
 <div class="grid-item">
   <button mat-button class="block" style="padding: 0px;" (click)='onClick()'>
-    <div class="erc20" *ngIf="entry.type == entryType.Token">
-      <img class="ethereum" src="{{ wallet.currencyLogo }}">
+    <div class="erc20" *ngIf="model.type == modelType.Token">
+      <img class="ethereum" src="{{ model.currencyLogo }}">
     </div>
     <div class="div-height" fxLayout="row" fxLayoutAlign="center center" >
-      <img class="logo" src="{{ wallet.logo }}">
+      <img class="logo" src="{{ model.logo }}">
       <div class="wallet-description">
-        <span class="sym">{{ wallet.ticker }}</span>
-        <span class="title">{{ wallet.name }}</span>
+        <span class="sym">{{ model.ticker }}</span>
+        <span class="title">{{ model.name }}</span>
       </div>
     </div>
     <div
@@ -21,7 +21,7 @@
         style="position: relative;">
 
         <span class="balance" *ngIf="(balance | async) !== null">
-          {{ (balance | async)?.toFixed(6) * 1 }} {{ wallet.ticker }}
+          {{ (balance | async)?.toFixed(6) * 1 }} {{ model.ticker }}
         </span>
 
         <span class="balanceUSD" *ngIf="(balanceUSD | async) !== null">

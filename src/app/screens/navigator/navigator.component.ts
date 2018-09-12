@@ -1,15 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { BalanceService } from '../../services/balance.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { WaitingComponent } from './waiting/waiting.component';
-import { BalanceService } from '../../services/balance.service';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SyncService } from '../../services/sync.service';
-import { CurrencyInfoService } from '../../services/currencyinfo.service';
+import { WaitingComponent } from './waiting/waiting.component';
+
+import { Utils, DistributedEcdsaKey } from 'crypto-core-async';
+import { uuidFrom } from '../../utils/uuid';
 
 @Component({
   selector: 'app-navigator',
@@ -36,8 +38,8 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly notification: NotificationService,
     private readonly balanceService: BalanceService,
     private readonly rpcService: RPCServerService,
-    private readonly currencyInfoService: CurrencyInfoService,
-    private readonly syncService: SyncService
+    private readonly syncService: SyncService,
+    private readonly keyChainService: KeyChainService
   ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -60,6 +62,17 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }
 
   public async ngOnInit() {
+    const seedHash = await Utils.sha256(this.keyChainService.seed);
+
+    this.keyChainService.sessionId = uuidFrom(seedHash);
+
+    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
+
+    this.keyChainService.paillierPublicKey = publicKey;
+    this.keyChainService.paillierSecretKey = secretKey;
+
+    console.log(this.keyChainService.sessionId);
+
     await this.balanceService.start();
     await this.rpcService.start('0.0.0.0', 5666);
   }

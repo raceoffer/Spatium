@@ -1,5 +1,5 @@
 <app-toolbar
-  [label] = "'Transfer ' + wallet.name"
+  [label] = "'Transfer ' + model.name"
   [isColored] = "true"
   [isShadowed] = "true"
   (backClicked) = "onBack()">
@@ -79,7 +79,7 @@
     </tr>
     <tr>
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ wallet.ticker }}</span>
+        <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
       </td>
 
       <td class="left">
@@ -145,7 +145,7 @@
 
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
-        <span class="label" style="margin-left: 5px;">{{ wallet.ticker }}</span>
+        <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
       </td>
 
       <td class="left">

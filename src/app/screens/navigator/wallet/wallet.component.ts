@@ -12,18 +12,13 @@ import { WaitingComponent } from '../waiting/waiting.component';
 import { Router } from '@angular/router';
 import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
-import { KeyChainService } from '../../../services/keychain.service';
-
-import {
-  Utils,
-  DistributedEcdsaKey
-} from 'crypto-core-async';
 
 import { PlainSocket } from '../../../utils/sockets/plainsocket';
 import { RPCClient } from '../../../services/rpc/rpc-client';
 import { Client } from '../../../utils/client-server/client-server';
-import { uuidFrom } from '../../../utils/uuid';
 import { CurrencyModel } from '../../../services/wallet/wallet';
+import { KeyChainService } from '../../../services/keychain.service';
+import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 
 @Component({
   selector: 'app-wallet',
@@ -95,12 +90,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     })
   ), []);
 
-  private socket: PlainSocket;
-  private rpcClient: RPCClient;
-  private sessionId: string;
-  private paillierPublicKey: any;
-  private paillierSecretKey: any;
-
   private subscriptions = [];
 
   constructor(
@@ -109,7 +98,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly syncService: SyncService,
-    private readonly keyChainService: KeyChainService
+    private readonly keyChainService: KeyChainService,
+    private readonly connectionService: RPCConnectionService
   ) {
     this.tiles.push(
       ... [
@@ -119,7 +109,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.Ethereum,
         CurrencyId.Neo
       ].map((currencyId) => {
-        return CurrencyModel.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+        return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
       })
     );
 
@@ -139,7 +129,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.EthereumTest,
         CurrencyId.NeoTest
       ].map((currencyId) => {
-        return CurrencyModel.fromCurrency(this.currencyInfoService.currencyInfo(currencyId));
+        return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
       })
     );
   }
@@ -156,17 +146,6 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    const seedHash = await Utils.sha256(this.keyChainService.seed);
-
-    this.sessionId = uuidFrom(seedHash);
-
-    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
-
-    this.paillierPublicKey = publicKey;
-    this.paillierSecretKey = secretKey;
-
-    console.log(this.sessionId);
   }
 
   public ngOnDestroy() {
@@ -203,9 +182,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.clearFilterValue();
   }
 
-  public openCurrencyOverlay(entry) {
+  public openCurrencyOverlay(model) {
     const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
-    componentRef.instance.entry = entry;
+    componentRef.instance.model = model;
   }
 
   public openSettings() {
@@ -226,21 +205,16 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync() {
-    console.log('sync()');
+    await this.connectionService.connectPlain('127.0.0.1', 5666);
 
-    this.socket = new PlainSocket();
-    this.rpcClient = new RPCClient(new Client(this.socket));
-
-    await this.socket.open('127.0.0.1', 5666);
-
-    const capabilities = await this.rpcClient.api.capabilities({});
+    const capabilities = await this.connectionService.rpcClient.api.capabilities({});
     console.log(capabilities);
 
     await this.syncService.sync(
-      this.sessionId,
-      this.paillierPublicKey,
-      this.paillierSecretKey,
-      this.rpcClient
+      this.keyChainService.sessionId,
+      this.keyChainService.paillierPublicKey,
+      this.keyChainService.paillierSecretKey,
+      this.connectionService.rpcClient
     );
 
     console.log('Synchronized');

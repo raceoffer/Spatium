@@ -14,11 +14,27 @@ export enum CurrecnyModelType {
 }
 
 export class CurrencyModel {
-  private constructor(
-    private readonly _currencyInfo: CurrencyInfo,
-    private readonly _type: CurrecnyModelType,
-    private readonly _tokenInfo: TokenInfo
-  ) {}
+  private _currencyLogo: string;
+
+  private _name: string;
+  private _ticker: string;
+  private _logo: string;
+
+  public get currencyLogo(): string {
+    return this._currencyLogo;
+  }
+
+  public get name(): string {
+    return this._name;
+  }
+
+  public get ticker(): string {
+    return this._ticker;
+  }
+
+  public get logo(): string {
+    return this._logo;
+  }
 
   public get currencyInfo(): CurrencyInfo {
     return this._currencyInfo;
@@ -32,7 +48,28 @@ export class CurrencyModel {
     return this._tokenInfo;
   }
 
-  public static fromCurrency(currencyInfo: CurrencyInfo) {
+  private constructor(
+    private readonly _currencyInfo: CurrencyInfo,
+    private readonly _type: CurrecnyModelType,
+    private readonly _tokenInfo: TokenInfo
+  ) {
+    this._currencyLogo = getCurrencyLogo(this._currencyInfo.id);
+
+    switch (this._type) {
+      case CurrecnyModelType.Coin:
+        this._name = this._currencyInfo.name;
+        this._ticker = this._currencyInfo.ticker;
+        this._logo = this._currencyLogo;
+        break;
+      case CurrecnyModelType.Token:
+        this._name = this._tokenInfo.name;
+        this._ticker = this._tokenInfo.ticker;
+        this._logo = getTokenLogo(this._currencyInfo.id, this._tokenInfo.id);
+        break;
+    }
+  }
+
+  public static fromCoin(currencyInfo: CurrencyInfo) {
     return new CurrencyModel(currencyInfo, CurrecnyModelType.Coin, null);
   }
 
@@ -42,33 +79,12 @@ export class CurrencyModel {
 }
 
 export class Wallet {
-  public currencyLogo;
-
-  public name: string;
-  public ticker: string;
-  public logo: string;
-
   constructor(
     private readonly model: CurrencyModel,
     private readonly syncService: SyncService,
     private readonly balanceService: BalanceService,
     private readonly currencyInfoService: CurrencyInfoService
-  ) {
-    this.currencyLogo = getCurrencyLogo(this.model.currencyInfo.id);
-
-    switch (this.model.type) {
-      case CurrecnyModelType.Coin:
-        this.name = this.model.currencyInfo.name;
-        this.ticker = this.model.currencyInfo.ticker;
-        this.logo = this.currencyLogo;
-        break;
-      case CurrecnyModelType.Token:
-        this.name = this.model.tokenInfo.name;
-        this.ticker = this.model.tokenInfo.ticker;
-        this.logo = getTokenLogo(this.model.currencyInfo.id, this.model.tokenInfo.id);
-        break;
-    }
-  }
+  ) {}
 
   public currency = toBehaviourSubject(this.syncService.currencyEvent.pipe(
     filter((currencyId) => currencyId === this.model.currencyInfo.id),

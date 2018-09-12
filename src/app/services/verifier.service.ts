@@ -132,6 +132,8 @@ export class EcdsaCurrency extends Currency {
 
     this._signSessions.delete(signSessionId);
 
+    // const accepted = await this.
+
     return partialSignature;
   }
 }

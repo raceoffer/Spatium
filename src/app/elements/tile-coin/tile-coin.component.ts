@@ -51,7 +51,7 @@ export class TileCoinComponent implements OnInit, OnDestroy {
     ), null);
 
     this.balanceUSD = toBehaviourSubject(this.balance.pipe(
-      map((balance) => balance !== null ? balance * this.priceService.price(this.wallet.ticker) : null)
+      map((balance) => balance !== null ? balance * this.priceService.price(this.model.ticker) : null)
     ), null);
   }
 

@@ -2,19 +2,18 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, ElementRef, HostBinding, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 import * as $ from 'jquery';
-import { BehaviorSubject, of, timer, from, interval, combineLatest } from 'rxjs';
+import { BehaviorSubject, timer, combineLatest } from 'rxjs';
 import { map, filter, mergeMap } from 'rxjs/operators';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { SyncState, Currency } from '../../../services/verifier.service';
-import { BalanceStatus, BalanceService, Balance } from '../../../services/balance.service';
-import { CurrencyInfoService, ApiServer } from '../../../services/currencyinfo.service';
+import { SyncState } from '../../../services/verifier.service';
+import { BalanceStatus, BalanceService } from '../../../services/balance.service';
+import { CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
 import { PriceService } from '../../../services/price.service';
-import { uuidFrom } from '../../../utils/uuid';
 import { CurrencyModel, Wallet } from '../../../services/wallet/wallet';
 
 export enum TransactionType {
@@ -120,11 +119,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     ), null);
 
     this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
-      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.wallet.ticker) : null)
+      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.model.ticker) : null)
     ), null);
 
     this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
-      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.wallet.ticker) : null)
+      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.model.ticker) : null)
     ), null);
 
     // $('#transactionList').scroll(() => {
@@ -166,7 +165,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   send() {
     const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
-    overalyRef.instance.entry = this.model;
+    overalyRef.instance.model = this.model;
   }
 
   copy() {
