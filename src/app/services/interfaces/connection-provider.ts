@@ -4,7 +4,8 @@ import { ConnectionState, State } from '../primitives/state';
 
 export enum ProviderType {
   BLUETOOTH,
-  ZEROCONF
+  ZEROCONF,
+  SSDP
 }
 
 export interface IConnectionProvider {

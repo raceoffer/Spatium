@@ -99,6 +99,7 @@ import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
 import { DiscoveryService } from './services/discovery.service';
+import { SsdpService } from './services/ssdp.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
 import { ICOService } from './services/ico.service';
@@ -243,6 +244,7 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     ActivityService,
     ICOService,
     DiscoveryService,
+    SsdpService,
     IpfsService,
     SocketServerService,
     SocketClientService,
