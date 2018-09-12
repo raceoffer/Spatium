@@ -22,7 +22,7 @@
     color="accent"
     class="width-button color"
     (click)="onSubmit()"
-    [disabled]="!(valid | async)"
+    [disabled]="!isValid"
     *ngIf="!(delayed | async)">
     Continue
   </button>
