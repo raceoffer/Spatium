@@ -1,11 +1,11 @@
-import { SyncService } from '../sync.service';
-import { BalanceService, BalanceStatus } from '../balance.service';
-import { CurrencyInfoService, ApiServer, CurrencyInfo, TokenInfo } from '../currencyinfo.service';
-import { toBehaviourSubject } from '../../utils/transformers';
-import { filter, mergeMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { uuidFrom } from '../../utils/uuid';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { getCurrencyLogo, getTokenLogo } from '../../utils/currency-icon';
+import { toBehaviourSubject } from '../../utils/transformers';
+import { uuidFrom } from '../../utils/uuid';
+import { BalanceService, BalanceStatus } from '../balance.service';
+import { CurrencyInfo, CurrencyInfoService, TokenInfo } from '../currencyinfo.service';
+import { SyncService } from '../sync.service';
 
 export enum CurrecnyModelType {
   Coin,
@@ -108,7 +108,7 @@ export class Wallet {
       let watcherId;
 
       const network = this.model.currencyInfo.network;
-      const endpoint = this.currencyInfoService.apiServer(this.model.currencyInfo.id, ApiServer.Spatium);
+      const endpoint = await this.currencyInfoService.currentApiServer(this.model.currencyInfo.id);
       const point = await this.currency.getValue().compoundPublic();
 
       switch (this.model.type) {

@@ -414,6 +414,10 @@ export class CurrencyInfoService {
     ])]
   ]);
 
+  public constructor(
+    private readonly settingsService: SettingsService
+  ) {}
+
   public currencies(): Array<CurrencyId> {
     return Array.from(this._currencies.keys());
   }
@@ -440,6 +444,19 @@ export class CurrencyInfoService {
 
   public apiServers(id: CurrencyId): Map<ApiServer, string> {
     return this._apiServers.get(id);
+  }
+
+  public async currentApiServer(id: CurrencyId): Promise<string> {
+    const settings = await this.settingsService.currencySettings(id, {
+      apiServer: ApiServer.Spatium
+    }) as {
+      apiServer: ApiServer,
+      customApiServer: string
+    };
+
+    return settings.apiServer === ApiServer.Custom
+            ? settings.customApiServer
+            : this.apiServer(id, settings.apiServer);
   }
 }
 

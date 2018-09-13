@@ -1,10 +1,9 @@
-import {Component, OnInit, OnDestroy, HostBinding, Input} from '@angular/core';
+import {Component, OnInit, OnDestroy, HostBinding, Input, Output, EventEmitter} from '@angular/core';
 
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ApiServer, CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
 import { SettingsService } from '../../../services/settings.service';
-import { AotCompiler } from '@angular/compiler';
 
 @Component({
   selector: 'app-currency-settings',
@@ -15,6 +14,7 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Input() public currencyId: CurrencyId = null;
+  @Output() public saved = new EventEmitter<any>();
 
   public apiServerType = ApiServer;
 
@@ -58,8 +58,10 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
     }
 
     await this.settingsService.setCurrencySettings(this.currencyId, this.settings);
-    await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
-    await this.onBack();
+
+    await this.notificationService.show('The settings are saved.');
+
+    this.saved.next();
   }
 
   isValidServerUrl(url: string): boolean {

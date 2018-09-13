@@ -178,6 +178,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   async onSettingsClicked() {
     const componentRef = this.navigationService.pushOverlay(CurrencySettingsComponent);
     componentRef.instance.currencyId = this.model.currencyInfo.id;
+    componentRef.instance.saved.subscribe(() => {
+      this.navigationService.acceptOverlay();
+    });
   }
 
   async onBack() {
