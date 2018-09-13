@@ -68,10 +68,11 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   public async ngOnInit() {
     const seedHash = await Utils.sha256(this.keyChainService.seed);
 
-    this.keyChainService.sessionId = uuidFrom(seedHash);
-
     const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
 
+    const sessionId = uuidFrom(await Utils.sha256(Buffer.concat([seedHash, publicKey.toBytes()])));
+
+    this.keyChainService.sessionId = sessionId;
     this.keyChainService.paillierPublicKey = publicKey;
     this.keyChainService.paillierSecretKey = secretKey;
 
