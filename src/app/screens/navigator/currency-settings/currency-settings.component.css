@@ -9,6 +9,10 @@
     color: #2277ba;
 }
 
+.settings-block {
+  width: 100%;
+}
+
 .settings-block .text-field {
     height: 40px;
     line-height: 40px;

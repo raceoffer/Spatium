@@ -55,7 +55,7 @@ export class DeviceService {
 
   public deviceReady() {
     return this.ready.pipe(
-      filter(ready => ready),
+      filter(ready => !!ready),
       first(),
     ).toPromise();
   }

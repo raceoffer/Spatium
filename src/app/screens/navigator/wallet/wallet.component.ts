@@ -215,6 +215,8 @@ export class WalletComponent implements OnInit, OnDestroy {
       this.connectionService.rpcClient
     )) {
       console.log('Synchronized');
+    } else {
+      console.log('Synchronization canceled');
     }
   }
 }

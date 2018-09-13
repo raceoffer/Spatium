@@ -3,6 +3,8 @@ import {Component, OnInit, OnDestroy, HostBinding, Input} from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ApiServer, CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
+import { SettingsService } from '../../../services/settings.service';
+import { AotCompiler } from '@angular/compiler';
 
 @Component({
   selector: 'app-currency-settings',
@@ -14,9 +16,11 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
 
   @Input() public currencyId: CurrencyId = null;
 
+  public apiServerType = ApiServer;
+
   public currencyInfo: CurrencyInfo = null;
-  // public currencySettings: CurrencySettings = new CurrencySettings();
-  public apiServers: Map<ApiServer, string> = null;
+  public apiServers: Array<{ key: ApiServer, value: string }> = null;
+  public settings: { apiServer: ApiServer, customApiServer: string } = null;
 
   public customApiServerInvalid = false;
 
@@ -25,13 +29,21 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly navigationService: NavigationService,
-    private readonly notificationService: NotificationService
-  ) { }
+    private readonly notificationService: NotificationService,
+    private readonly settingsService: SettingsService
+  ) {}
 
   async ngOnInit() {
-    this.apiServers = await this.currencyInfoService.apiServers(this.currencyId);
+    this.apiServers =
+      Array.from(await this.currencyInfoService.apiServers(this.currencyId).keys())
+        .map((apiServer) => ({ key: apiServer, value: this.currencyInfoService.apiName(apiServer) }));
     this.currencyInfo = await this.currencyInfoService.currencyInfo(this.currencyId);
-    //  this.currencySettings = await this.currencyService.getSettings(this.currencyId);
+    this.settings = await this.settingsService.currencySettings(this.currencyId, {
+      apiServer: ApiServer.Spatium
+    }) as {
+      apiServer: ApiServer,
+      customApiServer: string
+    };
   }
 
   ngOnDestroy() {
@@ -39,20 +51,13 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  getApiServerKeys() {
-    if (this.apiServers == null) {
-      return [];
-    }
-    return Array.from(this.apiServers.keys());
-  }
-
   async onSaveClicked() {
-    // if (this.currencySettings.serverName === ApiServer.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
-    //   this.customApiServerInvalid = true;
-    //   return;
-    // }
+    if (this.settings.apiServer === ApiServer.Custom && !this.isValidServerUrl(this.settings.customApiServer)) {
+      this.customApiServerInvalid = true;
+      return;
+    }
 
-    // await this.currencyService.saveSettings(this.currency, this.currencySettings);
+    await this.settingsService.setCurrencySettings(this.currencyId, this.settings);
     await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
     await this.onBack();
   }

@@ -13,6 +13,7 @@ import {
   ERC20Wallet,
   NeoWallet
 } from 'crypto-core-async';
+import { SettingsService } from './settings.service';
 
 export enum CurrencyId {
   Bitcoin,
@@ -413,11 +414,15 @@ export class CurrencyInfoService {
     ])]
   ]);
 
+  public currencies(): Array<CurrencyId> {
+    return Array.from(this._currencies.keys());
+  }
+
   public currencyInfo(id: CurrencyId): CurrencyInfo {
     return this._currencies.get(id);
   }
 
-  public get syncOrder(): CurrencyId[] {
+  public get syncOrder(): Array<CurrencyId> {
     return this._syncOrder;
   }
 
