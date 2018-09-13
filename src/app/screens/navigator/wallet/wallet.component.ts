@@ -144,9 +144,11 @@ export class WalletComponent implements OnInit, OnDestroy {
     );
   }
 
-  public ngOnDestroy() {
+  public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+
+    await this.syncService.cancel();
   }
 
   public toggleNavigation() {
@@ -206,13 +208,13 @@ export class WalletComponent implements OnInit, OnDestroy {
     const capabilities = await this.connectionService.rpcClient.api.capabilities({});
     console.log(capabilities);
 
-    await this.syncService.sync(
+    if (await this.syncService.sync(
       this.keyChainService.sessionId,
       this.keyChainService.paillierPublicKey,
       this.keyChainService.paillierSecretKey,
       this.connectionService.rpcClient
-    );
-
-    console.log('Synchronized');
+    )) {
+      console.log('Synchronized');
+    }
   }
 }

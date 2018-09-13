@@ -155,7 +155,7 @@ export class SyncService {
     paillierPublicKey: any,
     paillierSecretKey: any,
     rpcClient: RPCClient
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (this.synchronizing.getValue()) {
       throw new Error('Already synchronizing');
     }
@@ -227,6 +227,8 @@ export class SyncService {
     } finally {
       this.synchronizing.next(false);
     }
+
+    return !this._cancelled;
   }
 
   public forceCurrency(currencyId: CurrencyId): void {
@@ -241,7 +243,7 @@ export class SyncService {
 
   public async cancel(): Promise<void> {
     if (!this.synchronizing.getValue()) {
-      throw new Error('Not synchronizing');
+      return;
     }
 
     this._cancelled = true;

@@ -70,9 +70,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
 
-    const sessionId = uuidFrom(await Utils.sha256(Buffer.concat([seedHash, publicKey.toBytes()])));
-
-    this.keyChainService.sessionId = sessionId;
+    this.keyChainService.sessionId = uuidFrom(await Utils.sha256(Buffer.concat([seedHash, publicKey.toBytes()])));
     this.keyChainService.paillierPublicKey = publicKey;
     this.keyChainService.paillierSecretKey = secretKey;
 
