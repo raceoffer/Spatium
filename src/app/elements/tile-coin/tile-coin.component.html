@@ -1,5 +1,5 @@
 <div class="grid-item">
-  <button mat-button class="block" style="padding: 0px;" (click)='onClick()'>
+  <button mat-button class="block" style="padding: 0px;" [class.colored]="_toggled" (click)='onClick()'>
     <div class="erc20" *ngIf="model.type == modelType.Token">
       <img class="ethereum" src="{{ model.currencyLogo }}">
     </div>

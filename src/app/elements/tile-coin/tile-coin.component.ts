@@ -5,8 +5,7 @@ import { BalanceService, BalanceStatus } from '../../services/balance.service';
 import { CurrencyInfoService } from '../../services/currencyinfo.service';
 import { PriceService } from '../../services/price.service';
 import { SyncService } from '../../services/sync.service';
-import { SyncState } from '../../services/verifier.service';
-import { CurrencyModel, CurrecnyModelType, Wallet } from '../../services/wallet/wallet';
+import { CurrencyModel, CurrecnyModelType, Wallet, SyncState } from '../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../utils/transformers';
 
 @Component({
@@ -17,9 +16,11 @@ import { toBehaviourSubject } from '../../utils/transformers';
 export class TileCoinComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'tile-coin';
 
+  @Input() toggle = false;
   @Input() model: CurrencyModel = null;
 
   @Output() clicked: EventEmitter<any> = new EventEmitter<any>();
+  @Output() toggled: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public stateType = SyncState;
   public modelType = CurrecnyModelType;
@@ -30,6 +31,8 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   public balance: BehaviorSubject<number>;
   public balanceUSD: BehaviorSubject<number>;
   public balanceStatus: BehaviorSubject<BalanceStatus>;
+
+  public _toggled = false;
 
   private subscriptions = [];
 
@@ -61,6 +64,11 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   }
 
   onClick() {
-    this.clicked.next(this.model);
+    if (this.toggle) {
+      this._toggled = !this._toggled;
+      this.toggled.next(this._toggled);
+    } else {
+      this.clicked.next();
+    }
   }
 }

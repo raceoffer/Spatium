@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CurrencyInfoService, CurrencyId } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
-import { Currency, SyncState } from './verifier.service';
+import { Currency } from './verifier.service';
 
 import {
   DistributedEcdsaKey,
@@ -14,6 +14,7 @@ import { ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
 import { waitFiorPromise, waitForSubject } from '../utils/transformers';
 import { RPCClient } from './rpc/rpc-client';
 import { WorkerService } from './worker.service';
+import { SyncState } from './wallet/wallet';
 
 export class EcdsaCurrency extends Currency {
   private _distributedKey: any;

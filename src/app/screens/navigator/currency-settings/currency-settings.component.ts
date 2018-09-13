@@ -1,9 +1,8 @@
 import {Component, OnInit, OnDestroy, HostBinding, Input} from '@angular/core';
 
-import { Coin, Token } from '../../../services/keychain.service';
-import { CurrencyService, Info, CurrencySettings, CurrencyServerName } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ApiServer, CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
 
 @Component({
   selector: 'app-currency-settings',
@@ -13,26 +12,26 @@ import { NotificationService } from '../../../services/notification.service';
 export class CurrencySettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  @Input() public currency: Coin | Token = null;
+  @Input() public currencyId: CurrencyId = null;
 
-  public currencyInfo: Info = null;
-  public currencySettings: CurrencySettings = new CurrencySettings();
-  public apiServers: Map<string, string> = null;
+  public currencyInfo: CurrencyInfo = null;
+  // public currencySettings: CurrencySettings = new CurrencySettings();
+  public apiServers: Map<ApiServer, string> = null;
 
   public customApiServerInvalid = false;
 
   private subscriptions = [];
 
   constructor(
-    private readonly currencyService: CurrencyService,
+    private readonly currencyInfoService: CurrencyInfoService,
     private readonly navigationService: NavigationService,
     private readonly notificationService: NotificationService
-    ) { }
+  ) { }
 
   async ngOnInit() {
-    this.apiServers = await this.currencyService.getAvailableApiServers(this.currency);
-    this.currencyInfo = await this.currencyService.getInfo(this.currency);
-    this.currencySettings = await this.currencyService.getSettings(this.currency);
+    this.apiServers = await this.currencyInfoService.apiServers(this.currencyId);
+    this.currencyInfo = await this.currencyInfoService.currencyInfo(this.currencyId);
+    //  this.currencySettings = await this.currencyService.getSettings(this.currencyId);
   }
 
   ngOnDestroy() {
@@ -48,12 +47,12 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
   }
 
   async onSaveClicked() {
-    if (this.currencySettings.serverName === CurrencyServerName.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
-      this.customApiServerInvalid = true;
-      return;
-    }
+    // if (this.currencySettings.serverName === ApiServer.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
+    //   this.customApiServerInvalid = true;
+    //   return;
+    // }
 
-    await this.currencyService.saveSettings(this.currency, this.currencySettings);
+    // await this.currencyService.saveSettings(this.currency, this.currencySettings);
     await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
     await this.onBack();
   }

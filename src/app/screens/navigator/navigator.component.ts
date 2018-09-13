@@ -1,5 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import BN from 'bn.js';
+import { DistributedEcdsaKey, Utils } from 'crypto-core-async';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
 import { BalanceService } from '../../services/balance.service';
@@ -8,16 +10,11 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SyncService } from '../../services/sync.service';
-import { WaitingComponent } from './waiting/waiting.component';
-
-import BN from 'bn.js';
-
-import { Utils, DistributedEcdsaKey } from 'crypto-core-async';
-import { uuidFrom } from '../../utils/uuid';
 import { VerifierService } from '../../services/verifier.service';
-import { CurrencyId } from '../../services/currencyinfo.service';
 import { CurrencyModel } from '../../services/wallet/wallet';
+import { uuidFrom } from '../../utils/uuid';
 import { VerifyTransactionComponent } from '../verifier/verify-transaction/verify-transaction.component';
+import { WaitingComponent } from './waiting/waiting.component';
 
 @Component({
   selector: 'app-navigator',

@@ -1,4 +1,7 @@
-import { ProviderType } from '../interfaces/connection-provider';
+export enum ProviderType {
+  BLUETOOTH,
+  WIFI
+}
 
 export class Device {
   constructor(public provider: ProviderType,

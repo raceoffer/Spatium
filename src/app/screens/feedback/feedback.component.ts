@@ -1,6 +1,6 @@
 import { Component, HostBinding, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { DDSService } from "../../services/dds.service";
+import { DDSService } from '../../services/dds.service';
 import { NavigationService } from '../../services/navigation.service';
 import { LoggerService } from '../../services/logger.service';
 import { FeedbackData, FeedbackDataFile } from '../../data/feedback-data';
@@ -27,7 +27,7 @@ export class FeedbackComponent implements OnInit {
   contactInfo = '';
   cols = 1;
   screenshotsPreview: FileInfo[] = [];
-  maximumScreenshots: number = 2;
+  maximumScreenshots = 2;
   sendLogs = true;
   sending = false;
   email = new FormControl('', [Validators.required, Validators.email]);
@@ -80,7 +80,7 @@ export class FeedbackComponent implements OnInit {
       reader.onload = (e) => {
         console.log(e.target);
         console.log('file:', );
-        const fileInfo: FileInfo = new FileInfo(file, (<FileReader>e.target).result);
+        const fileInfo: FileInfo = new FileInfo(file, (<FileReader>e.target).result as string);
         this.screenshotsPreview.push(fileInfo);
         console.log(this.screenshotsPreview);
       };

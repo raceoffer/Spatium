@@ -1,24 +1,20 @@
-import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
 import { debounceTime, map } from 'rxjs/operators';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
+import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { DeviceService, Platform } from '../../../services/device.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
+import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
+import { SyncService } from '../../../services/sync.service';
+import { CurrencyModel } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { WaitingComponent } from '../waiting/waiting.component';
-import { Router } from '@angular/router';
-import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
-import { SyncService } from '../../../services/sync.service';
-
-import { PlainSocket } from '../../../utils/sockets/plainsocket';
-import { RPCClient } from '../../../services/rpc/rpc-client';
-import { Client } from '../../../utils/client-server/client-server';
-import { CurrencyModel } from '../../../services/wallet/wallet';
-import { KeyChainService } from '../../../services/keychain.service';
-import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 
 @Component({
   selector: 'app-wallet',

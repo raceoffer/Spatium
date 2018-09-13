@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 // import ipfsAPI from 'ipfs-api';
 
-declare const window;
-
 export class File {
   path: string;
   content: Buffer;

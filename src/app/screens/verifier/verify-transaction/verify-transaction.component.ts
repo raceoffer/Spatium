@@ -1,6 +1,5 @@
 import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ApiServer, CurrencyInfoService } from '../../../services/currencyinfo.service';
-import { Token } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { VerifierService } from '../../../services/verifier.service';

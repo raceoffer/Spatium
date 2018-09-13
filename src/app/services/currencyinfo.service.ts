@@ -38,7 +38,8 @@ export enum ApiServer {
   Litecore,
   Blockdozer,
   Infura,
-  Neoscan
+  Neoscan,
+  Custom
 }
 
 export class CurrencyInfo {
@@ -430,6 +431,10 @@ export class CurrencyInfoService {
 
   public apiServer(id: CurrencyId, server: ApiServer): string {
     return this._apiServers.get(id).get(server);
+  }
+
+  public apiServers(id: CurrencyId): Map<ApiServer, string> {
+    return this._apiServers.get(id);
   }
 }
 

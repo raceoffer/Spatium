@@ -32,6 +32,7 @@ export class PresentationComponent {
       image: this.path + '6.png'
     },
     {
+      // tslint:disable-next-line:max-line-length
       description: 'By clicking on <b>Advanced security</b> you can protect your wallet with several authorization factors you choose instead of a simple password.',
       image: this.path + '7.png'
     },

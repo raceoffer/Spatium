@@ -4,13 +4,20 @@ import { CurrencyInfoService, ApiServer, CurrencyInfo, TokenInfo } from '../curr
 import { toBehaviourSubject } from '../../utils/transformers';
 import { filter, mergeMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { SyncState } from '../verifier.service';
 import { uuidFrom } from '../../utils/uuid';
 import { getCurrencyLogo, getTokenLogo } from '../../utils/currency-icon';
 
 export enum CurrecnyModelType {
   Coin,
   Token
+}
+
+export enum SyncState {
+  None,
+  Started,
+  Revealed,
+  Responded,
+  Finalized
 }
 
 export class CurrencyModel {

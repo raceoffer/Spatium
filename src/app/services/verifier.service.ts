@@ -6,15 +6,8 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import BN from 'bn.js';
-import { CurrencyModel } from './wallet/wallet';
 
-export enum SyncState {
-  None = 0,
-  Started = 1,
-  Revealed = 2,
-  Responded = 3,
-  Finalized = 4,
-}
+import { CurrencyModel, SyncState } from './wallet/wallet';
 
 export abstract class Currency {
   public state = new BehaviorSubject<SyncState>(SyncState.None);

@@ -9,12 +9,11 @@ import { NavigationService } from '../../../services/navigation.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { SyncState } from '../../../services/verifier.service';
 import { BalanceStatus, BalanceService } from '../../../services/balance.service';
 import { CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { SyncService } from '../../../services/sync.service';
 import { PriceService } from '../../../services/price.service';
-import { CurrencyModel, Wallet } from '../../../services/wallet/wallet';
+import { CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
 
 export enum TransactionType {
   In,

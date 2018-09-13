@@ -8,14 +8,15 @@
   <div class="inner" *ngIf="!next">
     <div class="info">Select the coins you wish to invest to the project</div>
 
-    <mat-grid-list cols="{{cols}}" rowHeight="4:3">
+    <mat-grid-list cols="{{ cols }}" rowHeight="4:3">
       <mat-grid-tile
-        *ngFor="let coin of coins"
+        *ngFor="let model of tiles"
         [colspan]="1"
         [rowspan]="1">
         <app-tile-coin
-          [model]="getTileModel(coin)"
-          (onClicked)="click(coin)">
+          [toggle]="true"
+          [model]="model"
+          (onToggled)="toggled(model, $event)">
         </app-tile-coin>
       </mat-grid-tile>
     </mat-grid-list>
@@ -25,20 +26,20 @@
   </div>
   <div class="inner" *ngIf="next">
     <div class="info">Enter amount of each coin you wish to invest</div>
-    <div *ngFor="let chosencoin of chosencoins" class="coin-field full-width">
+    <div *ngFor="let coin of chosenCoins" class="coin-field full-width">
       <div class="left-field">
-        <span class="label">{{chosencoin.title}}</span>
+        <span class="label">{{ coin.name }}</span>
         <div class="field" style="margin-bottom: 13px;">
           <span>
-            <input (focusout)="verifyAmount($event, chosencoin)" matInput [formControl]="chosencoin.amount" type="number"/>
+            <input (focusout)="verifyAmount($event, coin)" matInput [formControl]="chosencoin.amount" type="number"/>
           </span>
         </div>
       </div>
       <div class="right-field">
-        <span class="label">{{chosencoin.title}} balance</span>
+        <span class="label">{{ chosencoin.title }} balance</span>
         <div class="field disable" style="margin-bottom: 13px;">
           <span>
-            {{getBalance(chosencoin.coin) + ' ' + chosencoin.symbols}}
+            {{ getBalance(chosencoin.coin) + ' ' + chosencoin.symbols }}
           </span>
         </div>
       </div>

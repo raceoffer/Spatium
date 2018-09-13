@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, mapTo, skip } from 'rxjs/operators';
 
 declare const cordova: any;
 declare const device: any;

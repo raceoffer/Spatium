@@ -6,10 +6,6 @@ import { DeviceService } from './device.service';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { buffer, filter } from 'rxjs/operators';
 
-declare const cordova: any;
-declare const window: any;
-declare const hockeyapp: any;
-
 export enum LoggerLevels {
   ALL = 0,
   DEBUG,

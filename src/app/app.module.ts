@@ -94,8 +94,6 @@ import { VerifyTransactionComponent } from './screens/verifier/verify-transactio
 import { ActivityService } from './services/activity.service';
 import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
-import { ConnectionProviderService } from './services/connection-provider';
-import { CurrencyService } from './services/currency.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
 import { DiscoveryService } from './services/discovery.service';
@@ -108,12 +106,8 @@ import { LoggerService } from './services/logger.service';
 import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
 import { CurrencyPriceService, PriceService } from './services/price.service';
-import { SocketClientService } from './services/socketclient.service';
-import { SocketServerService } from './services/socketserver.service';
 import { SettingsService } from './services/settings.service';
-import { WalletService } from './services/wallet.service';
 import { WorkerService } from './services/worker.service';
-import { ZeroconfService } from './services/zeroconf.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
 import { AddTokenComponent } from './screens/navigator/add-token/add-token.component';
 import { RPCServerService } from './services/rpc/rpc-server.service';
@@ -228,7 +222,6 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
   providers: [
     DeviceService,
     WorkerService,
-    WalletService,
     CurrencyPriceService,
     BluetoothService,
     LoggerService,
@@ -237,17 +230,12 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     NotificationService,
     DDSService,
     KeyChainService,
-    CurrencyService,
     NavigationService,
     HockeyService,
     ActivityService,
     ICOService,
     DiscoveryService,
     IpfsService,
-    SocketServerService,
-    SocketClientService,
-    ZeroconfService,
-    ConnectionProviderService,
     SettingsService,
     RPCServerService,
     VerifierService,

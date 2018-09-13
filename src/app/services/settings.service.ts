@@ -65,7 +65,7 @@ export class SettingsService {
     let settings = null;
     try {
       settings = JSON.parse(await this.fs.readFile(this.settingsFileName));
-      if (!settings || typeof(settings) !== 'object') throw new Error('Invalid settings');
+      if (!settings || typeof(settings) !== 'object') { throw new Error('Invalid settings'); }
     } catch (e) {
       settings = {...this.defaultSettings};
     }

@@ -171,7 +171,7 @@ export class RegistrationComponent implements OnDestroy {
     componentRef.instance.submit.subscribe(async () => {
       this.navigationService.acceptOverlay();
 
-      this.keychain.setSeed(this.seed);
+      this.keychain.seed = this.seed;
 
       await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
     });
