@@ -77,6 +77,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
     deviceInfo: {
       name: string
     },
+    syncPercent: number,
     currencies: Array<{
       currencyId: CurrencyId,
       model: CurrencyModel,
@@ -119,7 +120,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
         let session = sessions.find((s) => s.sessionId === sessionId);
         if (!session) {
-          session = { sessionId, deviceInfo, currencies: [] };
+          session = { sessionId, deviceInfo, syncPercent: 0, currencies: [] };
           sessions.push(session);
         }
 
@@ -130,6 +131,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
         }
 
         currency.state = state;
+
+        session.syncPercent = Math.round(100 * session.currencies.reduce((sum, c) => sum + c.state, 0) / 40);
 
         return sessions;
       })
@@ -153,12 +156,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
       this.doubleBack.subscribe(async () => {
         this.notification.hide();
         await this.router.navigate(['/start']);
-      })
-    );
-
-    this.subscriptions.push(
-      this.sessions.subscribe((s) => {
-        console.log('', JSON.stringify(s));
       })
     );
 

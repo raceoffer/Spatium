@@ -18,9 +18,9 @@
           "requestType": "CapabilitiesRequest",
           "responseType": "CapabilitiesResponse"
         },
-        "RegisterSession": {
-          "requestType": "RegisterSessionRequest",
-          "responseType": "RegisterSessionResponse"
+        "Handshake": {
+          "requestType": "HandshakeRequest",
+          "responseType": "HandshakeResponse"
         },
         "ClearSession": {
           "requestType": "ClearSessionRequest",
@@ -96,7 +96,7 @@
         }
       }
     },
-    "RegisterSessionRequest": {
+    "HandshakeRequest": {
       "fields": {
         "sessionId": {
           "type": "string",
@@ -108,11 +108,15 @@
         }
       }
     },
-    "RegisterSessionResponse": {
+    "HandshakeResponse": {
       "fields": {
         "existing": {
           "type": "bool",
           "id": 1
+        },
+        "peerId": {
+          "type": "string",
+          "id": 2
         }
       }
     },

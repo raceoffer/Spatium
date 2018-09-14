@@ -10,12 +10,14 @@ import { NavigationService, Position } from '../../../services/navigation.servic
 import { Device } from '../../../services/primitives/device';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 import { SyncService } from '../../../services/sync.service';
-import { CurrencyModel } from '../../../services/wallet/wallet';
+import { CurrencyModel, SyncState } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
+import { requestDialog } from '../../../utils/dialog';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-wallet',
@@ -96,7 +98,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly syncService: SyncService,
     private readonly keyChainService: KeyChainService,
-    private readonly connectionService: RPCConnectionService
+    private readonly connectionService: RPCConnectionService,
+    private readonly notificationService: NotificationService
   ) {
     this.tiles.push(
       ... [
@@ -206,32 +209,74 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync(device: Device) {
-    await this.connectionService.connectPlain(device.ip, device.port);
+    try {
+      await this.connectionService.connectPlain(device.ip, device.port);
 
-    const capabilities = await this.connectionService.rpcClient.api.capabilities({});
-    console.log(capabilities);
+      const capabilities = await this.connectionService.rpcClient.api.capabilities({});
+      console.log(capabilities);
 
-    const appInfo: any = await this.deviceService.appInfo();
-    const deviceInfo: any = await this.deviceService.deviceInfo();
-    const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
+      const appInfo: any = await this.deviceService.appInfo();
+      const deviceInfo: any = await this.deviceService.deviceInfo();
+      const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
 
-    await this.connectionService.rpcClient.api.registerSession({
-      sessionId: this.keyChainService.sessionId,
-      deviceInfo: {
-        deviceName: deviceInfo.model,
-        appVersionMajor: version[1],
-        appVersionMinor: version[2],
-        appVersionPatch: version[3]
-      },
-    });
+      const handshakeResponse = await this.connectionService.rpcClient.api.handshake({
+        sessionId: this.keyChainService.sessionId,
+        deviceInfo: {
+          deviceName: deviceInfo.model,
+          appVersionMajor: version[1],
+          appVersionMinor: version[2],
+          appVersionPatch: version[3]
+        },
+      });
 
-    await this.syncService.sync(
-      this.keyChainService.sessionId,
-      this.keyChainService.paillierPublicKey,
-      this.keyChainService.paillierSecretKey,
-      this.connectionService.rpcClient
-    );
+      const peerId = handshakeResponse.peerId;
 
-    console.log('Synchronized');
+      if (!!this.syncService.currentPeerId && this.syncService.currentPeerId !== peerId) {
+        if (!await requestDialog(
+          'The remote device\'s peer id does not match the last session. The wallet will be synced from scratch. Continue?'
+        )) {
+          return;
+        }
+      }
+
+      const syncStatusResponse = await this.connectionService.rpcClient.api.syncStatus({
+        sessionId: this.keyChainService.sessionId
+      });
+
+      const remoteSyncedCurrencies = syncStatusResponse.statuses
+        .filter(status => status.state === SyncState.Finalized)
+        .map(status => status.currencyId);
+
+      console.log('Remote synched currencies:', remoteSyncedCurrencies);
+
+      const localSynchedCurrencies = this.syncService.currencies
+        .filter(c => c.state.getValue() === SyncState.Finalized)
+        .map(c => c.id);
+
+      console.log('Local synched currencies:', localSynchedCurrencies);
+
+      const unsyncedCurrencies = localSynchedCurrencies.filter(x => !remoteSyncedCurrencies.includes(x));
+
+      if (unsyncedCurrencies.length > 0) {
+        if (!await requestDialog(
+          'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced. Continue?'
+        )) {
+          return;
+        }
+      }
+
+      await this.syncService.sync(
+        peerId,
+        this.keyChainService.sessionId,
+        this.keyChainService.paillierPublicKey,
+        this.keyChainService.paillierSecretKey,
+        this.connectionService.rpcClient
+      );
+
+      console.log('Synchronized');
+    } catch (e) {
+      console.error(e);
+      this.notificationService.show('Synchronization error');
+    }
   }
 }

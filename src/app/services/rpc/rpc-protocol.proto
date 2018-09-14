@@ -11,7 +11,7 @@ message RpcCall {
 
 service RpcService {
   rpc Capabilities (CapabilitiesRequest) returns (CapabilitiesResponse);
-  rpc RegisterSession (RegisterSessionRequest) returns (RegisterSessionResponse);
+  rpc Handshake (HandshakeRequest) returns (HandshakeResponse);
   rpc ClearSession (ClearSessionRequest) returns (ClearSessionResponse);
   rpc SyncStatus (SyncStatusRequest) returns (SyncStatusResponse);
   rpc SyncState (SyncStateRequest) returns (SyncStateResponse);
@@ -38,13 +38,14 @@ message CapabilitiesResponse {
   DeviceInfo device_info = 2;
 }
 
-message RegisterSessionRequest {
+message HandshakeRequest {
   string session_id = 1;
   DeviceInfo device_info = 2;
 }
 
-message RegisterSessionResponse {
+message HandshakeResponse {
   bool existing = 1;
+  string peer_id = 2;
 }
 
 message ClearSessionRequest {

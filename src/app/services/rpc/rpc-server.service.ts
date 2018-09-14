@@ -4,7 +4,8 @@ import {
   EcdsaInitialDecommitment,
   EcdsaResponseCommitment,
   EcdsaResponseDecommitment,
-  Marshal
+  Marshal,
+  Utils
 } from 'crypto-core-async';
 import { Root } from 'protobufjs';
 import { DeviceService } from '../device.service';
@@ -15,6 +16,8 @@ import { Server } from '../../utils/client-server/client-server';
 import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
 import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
 import { State, Socket } from '../../utils/sockets/socket';
+import { KeyChainService } from '../keychain.service';
+import { uuidFrom } from '../../utils/uuid';
 
 @Injectable()
 export class RPCServerService {
@@ -25,6 +28,7 @@ export class RPCServerService {
   private api = {
     verifierService: this._verifierService,
     deviceService: this._deviceService,
+    keyChainService: this._keyChainService,
 
     async Capabilities() {
       const appInfo: any = await this.deviceService.appInfo();
@@ -40,9 +44,10 @@ export class RPCServerService {
         supportedProtocolVersions: [1]
       };
     },
-    async RegisterSession(request) {
+    async Handshake(request) {
       return {
-        existing: await this.verifierService.registerSession(request.sessionId, request.deviceInfo)
+        existing: await this.verifierService.registerSession(request.sessionId, request.deviceInfo),
+        peerId: uuidFrom(await Utils.sha256(this.keyChainService.seed))
       };
     },
     async ClearSession(request) {
@@ -135,7 +140,8 @@ export class RPCServerService {
 
   constructor(
     private readonly _deviceService: DeviceService,
-    private readonly _verifierService: VerifierService
+    private readonly _verifierService: VerifierService,
+    private readonly _keyChainService: KeyChainService
   ) {
     this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');

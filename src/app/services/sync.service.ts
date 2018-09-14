@@ -134,6 +134,7 @@ export class SyncService {
 
   private _cancelSubject = new Subject<any>();
   private _cancelled = false;
+  private _currentPeerId = null;
 
   public synchronizing = new BehaviorSubject<boolean>(false);
 
@@ -143,6 +144,14 @@ export class SyncService {
     return this._currencies.has(currencyId) ? this._currencies.get(currencyId) : null;
   }
 
+  public get currentPeerId(): string {
+    return this._currentPeerId;
+  }
+
+  public get currencies(): Array<Currency> {
+    return Array.from(this._currencies.values());
+  }
+
   constructor(
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
@@ -150,6 +159,7 @@ export class SyncService {
   ) {}
 
   public async sync(
+    peerId: string,
     sessionId: string,
     paillierPublicKey: any,
     paillierSecretKey: any,
@@ -158,6 +168,12 @@ export class SyncService {
     if (this.synchronizing.getValue()) {
       throw new Error('Already synchronizing');
     }
+
+    if (!!this.currentPeerId && this.currentPeerId !== peerId) {
+      await this.reset();
+    }
+
+    this._currentPeerId = peerId;
 
     this.synchronizing.next(true);
 
@@ -254,6 +270,14 @@ export class SyncService {
       await this.cancel();
     }
 
+    this._currentPeerId = null;
+
+    const currencies = Array.from(this._currencies.keys());
+
     this._currencies.clear();
+
+    for (const currencyId of currencies) {
+      this.currencyEvent.next(currencyId);
+    }
   }
 }
