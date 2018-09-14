@@ -1,0 +1,907 @@
+{
+  "nested": {
+    "RpcCall": {
+      "fields": {
+        "method": {
+          "type": "string",
+          "id": 1
+        },
+        "data": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "RpcService": {
+      "methods": {
+        "Capabilities": {
+          "requestType": "CapabilitiesRequest",
+          "responseType": "CapabilitiesResponse"
+        },
+        "Handshake": {
+          "requestType": "HandshakeRequest",
+          "responseType": "HandshakeResponse"
+        },
+        "ClearSession": {
+          "requestType": "ClearSessionRequest",
+          "responseType": "ClearSessionResponse"
+        },
+        "SyncStatus": {
+          "requestType": "SyncStatusRequest",
+          "responseType": "SyncStatusResponse"
+        },
+        "SyncState": {
+          "requestType": "SyncStateRequest",
+          "responseType": "SyncStateResponse"
+        },
+        "StartEcdsaSync": {
+          "requestType": "StartEcdsaSyncRequest",
+          "responseType": "StartEcdsaSyncResponse"
+        },
+        "EcdsaSyncReveal": {
+          "requestType": "EcdsaSyncRevealRequest",
+          "responseType": "EcdsaSyncRevealResponse"
+        },
+        "EcdsaSyncResponse": {
+          "requestType": "EcdsaSyncResponseRequest",
+          "responseType": "EcdsaSyncResponseResponse"
+        },
+        "EcdsaSyncFinalize": {
+          "requestType": "EcdsaSyncFinalizeRequest",
+          "responseType": "EcdsaSyncFinalizeResponse"
+        },
+        "StartEcdsaSign": {
+          "requestType": "StartEcdsaSignRequest",
+          "responseType": "StartEcdsaSignResponse"
+        },
+        "EcdsaSignReveal": {
+          "requestType": "EcdsaSignRevealRequest",
+          "responseType": "EcdsaSignRevealResponse"
+        }
+      }
+    },
+    "DeviceInfo": {
+      "fields": {
+        "deviceName": {
+          "type": "string",
+          "id": 1
+        },
+        "appVersionMajor": {
+          "type": "int32",
+          "id": 2
+        },
+        "appVersionMinor": {
+          "type": "int32",
+          "id": 3
+        },
+        "appVersionPatch": {
+          "type": "int32",
+          "id": 4
+        }
+      }
+    },
+    "CapabilitiesRequest": {
+      "fields": {}
+    },
+    "CapabilitiesResponse": {
+      "fields": {
+        "supportedProtocolVersions": {
+          "rule": "repeated",
+          "type": "int32",
+          "id": 1
+        },
+        "deviceInfo": {
+          "type": "DeviceInfo",
+          "id": 2
+        }
+      }
+    },
+    "HandshakeRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "deviceInfo": {
+          "type": "DeviceInfo",
+          "id": 2
+        }
+      }
+    },
+    "HandshakeResponse": {
+      "fields": {
+        "existing": {
+          "type": "bool",
+          "id": 1
+        },
+        "peerId": {
+          "type": "string",
+          "id": 2
+        }
+      }
+    },
+    "ClearSessionRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        }
+      }
+    },
+    "ClearSessionResponse": {
+      "fields": {
+        "existing": {
+          "type": "bool",
+          "id": 1
+        }
+      }
+    },
+    "SyncState": {
+      "values": {
+        "NONE": 0,
+        "STARTED": 1,
+        "REVEALED": 2,
+        "RESPONDED": 3,
+        "FINALIZED": 4
+      }
+    },
+    "SyncStatusRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        }
+      }
+    },
+    "SyncStatusResponse": {
+      "fields": {
+        "statuses": {
+          "rule": "repeated",
+          "type": "SyncStatus",
+          "id": 1
+        }
+      },
+      "nested": {
+        "SyncStatus": {
+          "fields": {
+            "currencyId": {
+              "type": "int32",
+              "id": 1
+            },
+            "state": {
+              "type": "SyncState",
+              "id": 2
+            }
+          }
+        }
+      }
+    },
+    "SyncStateRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        }
+      }
+    },
+    "SyncStateResponse": {
+      "fields": {
+        "state": {
+          "type": "SyncState",
+          "id": 1
+        }
+      }
+    },
+    "StartEcdsaSyncRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "initialCommitment": {
+          "type": "EcdsaInitialCommitment",
+          "id": 3
+        }
+      }
+    },
+    "StartEcdsaSyncResponse": {
+      "fields": {
+        "initialData": {
+          "type": "EcdsaInitialData",
+          "id": 1
+        }
+      }
+    },
+    "EcdsaSyncRevealRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "initialDecommitment": {
+          "type": "EcdsaInitialDecommitment",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaSyncRevealResponse": {
+      "fields": {
+        "challengeCommitment": {
+          "type": "EcdsaChallengeCommitment",
+          "id": 1
+        }
+      }
+    },
+    "EcdsaSyncResponseRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "responseCommitment": {
+          "type": "EcdsaResponseCommitment",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaSyncResponseResponse": {
+      "fields": {
+        "challengeDecommitment": {
+          "type": "EcdsaChallengeDecommitment",
+          "id": 1
+        }
+      }
+    },
+    "EcdsaSyncFinalizeRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "responseDecommitment": {
+          "type": "EcdsaResponseDecommitment",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaSyncFinalizeResponse": {
+      "fields": {}
+    },
+    "StartEcdsaSignRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "tokenId": {
+          "type": "string",
+          "id": 3
+        },
+        "signSessionId": {
+          "type": "string",
+          "id": 4
+        },
+        "transactionBytes": {
+          "type": "bytes",
+          "id": 5
+        },
+        "entropyCommitmentBytes": {
+          "type": "bytes",
+          "id": 6
+        }
+      }
+    },
+    "StartEcdsaSignResponse": {
+      "fields": {
+        "entropyDataBytes": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "EcdsaSignRevealRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "signSessionId": {
+          "type": "string",
+          "id": 3
+        },
+        "entropyDecommitmentBytes": {
+          "type": "bytes",
+          "id": 4
+        }
+      }
+    },
+    "EcdsaSignRevealResponse": {
+      "fields": {
+        "partialSignatureBytes": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "EcdsaInitialCommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "pedersenParameters": {
+          "type": "bytes",
+          "id": 2
+        },
+        "initialCommitment": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaInitialDecommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        },
+        "chiphertext": {
+          "type": "bytes",
+          "id": 3
+        },
+        "initialDecommitment": {
+          "type": "bytes",
+          "id": 4
+        },
+        "paillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 5
+        }
+      }
+    },
+    "EcdsaResponseCommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "responseCommitment": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "EcdsaResponseDecommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "responseDecommitment": {
+          "type": "bytes",
+          "id": 2
+        },
+        "response": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaSyncData": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "DistributedEcdsaSyncSession": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "localPrivateKey": {
+          "type": "bytes",
+          "id": 2
+        },
+        "alpha": {
+          "type": "bytes",
+          "id": 3
+        },
+        "remotePublicPoint": {
+          "type": "bytes",
+          "id": 4
+        },
+        "remotePedersenParameters": {
+          "type": "bytes",
+          "id": 5
+        },
+        "localChiphertext": {
+          "type": "bytes",
+          "id": 6
+        },
+        "localInitialDecommitment": {
+          "type": "bytes",
+          "id": 7
+        },
+        "remoteRevealCommitment": {
+          "type": "bytes",
+          "id": 8
+        },
+        "localResponseDecommitment": {
+          "type": "bytes",
+          "id": 9
+        },
+        "localPaillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 10
+        },
+        "localPaillierSecretKey": {
+          "type": "PaillierSecretKey",
+          "id": 11
+        },
+        "localPedersenScheme": {
+          "type": "PedersenScheme",
+          "id": 12
+        }
+      }
+    },
+    "EcdsaInitialData": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "pedersenParameters": {
+          "type": "bytes",
+          "id": 2
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 3
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 4
+        }
+      }
+    },
+    "EcdsaChallengeCommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "challenge": {
+          "type": "bytes",
+          "id": 2
+        },
+        "revealCommitment": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaChallengeDecommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "revealDecommitment": {
+          "type": "bytes",
+          "id": 2
+        },
+        "a": {
+          "type": "bytes",
+          "id": 3
+        },
+        "b": {
+          "type": "bytes",
+          "id": 4
+        }
+      }
+    },
+    "EcdsaShardSyncData": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        },
+        "ciphertext": {
+          "type": "bytes",
+          "id": 3
+        },
+        "paillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 4
+        }
+      }
+    },
+    "DistributedEcdsaSyncSessionShard": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "localPrivateKey": {
+          "type": "bytes",
+          "id": 2
+        },
+        "a": {
+          "type": "bytes",
+          "id": 3
+        },
+        "b": {
+          "type": "bytes",
+          "id": 4
+        },
+        "remotePublicPoint": {
+          "type": "bytes",
+          "id": 5
+        },
+        "remoteCiphertext": {
+          "type": "bytes",
+          "id": 6
+        },
+        "remotePedersenParameters": {
+          "type": "bytes",
+          "id": 7
+        },
+        "remoteInitialCommitment": {
+          "type": "bytes",
+          "id": 8
+        },
+        "localRevealDecommitment": {
+          "type": "bytes",
+          "id": 9
+        },
+        "remoteResponseCommitment": {
+          "type": "bytes",
+          "id": 10
+        },
+        "localPedersenScheme": {
+          "type": "PedersenScheme",
+          "id": 11
+        },
+        "remotePaillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 12
+        }
+      }
+    },
+    "EcdsaInitialCommitmentMessage": {
+      "fields": {
+        "paillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        },
+        "chiphertext": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaChallengeCommitmentMessage": {
+      "fields": {
+        "a": {
+          "type": "bytes",
+          "id": 1
+        },
+        "b": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "PaillierPublicKey": {
+      "fields": {
+        "bits": {
+          "type": "int32",
+          "id": 1
+        },
+        "n": {
+          "type": "bytes",
+          "id": 2
+        },
+        "n2": {
+          "type": "bytes",
+          "id": 3
+        },
+        "np1": {
+          "type": "bytes",
+          "id": 4
+        },
+        "rncache": {
+          "type": "bytes",
+          "id": 5
+        }
+      }
+    },
+    "PaillierSecretKey": {
+      "fields": {
+        "lambda": {
+          "type": "bytes",
+          "id": 1
+        },
+        "x": {
+          "type": "bytes",
+          "id": 2
+        },
+        "pubkey": {
+          "type": "PaillierPublicKey",
+          "id": 3
+        }
+      }
+    },
+    "PedersenScheme": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "a": {
+          "type": "bytes",
+          "id": 2
+        },
+        "h": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "SchnorrProof": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "t": {
+          "type": "bytes",
+          "id": 2
+        },
+        "c": {
+          "type": "bytes",
+          "id": 3
+        },
+        "s": {
+          "type": "bytes",
+          "id": 4
+        }
+      }
+    },
+    "EcdsaEntropyCommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "pedersenParameters": {
+          "type": "bytes",
+          "id": 2
+        },
+        "entropyCommitment": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaEntropyDecommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicEntropy": {
+          "type": "bytes",
+          "id": 2
+        },
+        "entropyDecommitment": {
+          "type": "bytes",
+          "id": 3
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 4
+        }
+      }
+    },
+    "EcdsaEntropyData": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicEntropy": {
+          "type": "bytes",
+          "id": 2
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaPartialSignature": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "partialSignature": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "EcdsaEntropyCommitmentMessage": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicEntropy": {
+          "type": "bytes",
+          "id": 2
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 3
+        }
+      }
+    },
+    "EcdsaSignature": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "compoundScalarEntropy": {
+          "type": "bytes",
+          "id": 2
+        },
+        "signature": {
+          "type": "bytes",
+          "id": 3
+        },
+        "recoveryParameter": {
+          "type": "int32",
+          "id": 4
+        }
+      }
+    },
+    "DistributedEcdsaSignSession": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "localPrivateKey": {
+          "type": "bytes",
+          "id": 2
+        },
+        "message": {
+          "type": "bytes",
+          "id": 3
+        },
+        "localPrivateEntropy": {
+          "type": "bytes",
+          "id": 4
+        },
+        "compoundPublicEntropy": {
+          "type": "bytes",
+          "id": 5
+        },
+        "compoundScalarEntropy": {
+          "type": "bytes",
+          "id": 6
+        },
+        "localEntropyDecommitment": {
+          "type": "bytes",
+          "id": 7
+        },
+        "localPaillierSecretKey": {
+          "type": "PaillierSecretKey",
+          "id": 8
+        },
+        "localSchnorrProof": {
+          "type": "SchnorrProof",
+          "id": 9
+        },
+        "localPedersenScheme": {
+          "type": "PedersenScheme",
+          "id": 10
+        }
+      }
+    },
+    "DistributedEcdsaSignSessionShard": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "localPrivateKey": {
+          "type": "bytes",
+          "id": 2
+        },
+        "message": {
+          "type": "bytes",
+          "id": 3
+        },
+        "remotePrivateCiphertext": {
+          "type": "bytes",
+          "id": 4
+        },
+        "localPrivateEntropy": {
+          "type": "bytes",
+          "id": 5
+        },
+        "compoundPublicEntropy": {
+          "type": "bytes",
+          "id": 6
+        },
+        "compoundScalarEntropy": {
+          "type": "bytes",
+          "id": 7
+        },
+        "remotePedersenParameters": {
+          "type": "bytes",
+          "id": 8
+        },
+        "remoteEntropyCommitment": {
+          "type": "bytes",
+          "id": 9
+        },
+        "remotePaillierPublicKey": {
+          "type": "PaillierPublicKey",
+          "id": 10
+        }
+      }
+    }
+  }
+}

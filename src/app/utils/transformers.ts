@@ -1,4 +1,4 @@
-import { Observable, BehaviorSubject, ReplaySubject, Subject, NEVER } from 'rxjs';
+import { Observable, BehaviorSubject, ReplaySubject, Subject, NEVER, from } from 'rxjs';
 import { distinctUntilChanged, filter, map, take, takeUntil } from 'rxjs/operators';
 
 export function toBehaviourSubject<T>(observable: Observable<T>, def: T): BehaviorSubject<T> {
@@ -22,6 +22,13 @@ export async function waitForSubject<T>(subject: BehaviorSubject<T>, state: T, u
     map(s => s === state),
     distinctUntilChanged(),
     filter(s => s),
+    take(1),
+    takeUntil(until || NEVER)
+  ).toPromise();
+}
+
+export async function waitFiorPromise<T>(promise: Promise<T>, until?: Subject<any>) {
+  return await from(promise).pipe(
     take(1),
     takeUntil(until || NEVER)
   ).toPromise();

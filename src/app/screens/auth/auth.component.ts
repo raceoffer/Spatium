@@ -251,7 +251,7 @@ export class AuthComponent implements OnDestroy {
       return;
     }
 
-    this.keyChain.setSeed(this.decryptedSeed);
+    this.keyChain.seed = this.decryptedSeed;
 
     await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
   }

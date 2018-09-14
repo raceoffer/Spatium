@@ -6,10 +6,6 @@ import { DeviceService } from './device.service';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { buffer, filter } from 'rxjs/operators';
 
-declare const cordova: any;
-declare const window: any;
-declare const hockeyapp: any;
-
 export enum LoggerLevels {
   ALL = 0,
   DEBUG,
@@ -129,13 +125,27 @@ export class LoggerService {
 
     this.sessionlogName = this.fs.logFileName(datelog);
 
-    let info = [];
+    const info = [];
     try {
-      const deviceInfo = await this.ds.getDeviceInfo();
-      info = info.concat(deviceInfo);
+      const deviceInfo = await this.ds.deviceInfo();
+      console.debug(deviceInfo);
 
-      const appInfo = await this.ds.getAppInfo();
-      info = info.concat(appInfo);
+      info.push('Device: ' + deviceInfo.manufacturer.toString() + ' ' + deviceInfo.model.toString() + '\n');
+      info.push('Platform: ' + deviceInfo.platform.toString() + ' ' + deviceInfo.version.toString() + '\n');
+      info.push('Cordova: ' + deviceInfo.cordova.toString() + '\n');
+      info.push('\n');
+    } catch (e) {
+      console.debug(e);
+    }
+
+    try {
+      const appInfo: any = await this.ds.appInfo();
+      console.debug(appInfo);
+
+      info.push('Identifier: ' + appInfo.identifier + '\n');
+      info.push('Version: ' + appInfo.version + '\n');
+      info.push('Build: ' + appInfo.build + '\n');
+      info.push('\n');
     } catch (e) {
       console.debug(e);
     }

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, filter } from 'rxjs/operators';
 
-declare const cordova: any;
 declare const device: any;
 declare const navigator: any;
 
@@ -40,37 +39,24 @@ export class DeviceService {
       }, false);
   }
 
+  public async appInfo() {
+    return await new Promise((resolve, reject) => navigator.appInfo.getAppInfo(resolve, reject));
+  }
+
+  public async deviceInfo() {
+    return {
+      manufacturer: device.manufacturer,
+      model: device.model,
+      platform: device.platform,
+      version: device.version,
+      cordova: device.cordova
+    };
+  }
+
   public deviceReady() {
     return this.ready.pipe(
-      filter(ready => ready),
+      filter(ready => !!ready),
       first(),
     ).toPromise();
   }
-
-  async getAppInfo() {
-    const result = [];
-
-    try {
-      result.push('Identifier: ' + navigator.appInfo.identifier + '\n');
-      result.push('Version: ' + navigator.appInfo.version + '\n');
-      result.push('Build: ' + navigator.appInfo.build + '\n\n');
-
-      console.debug(result);
-    } catch (err) {
-      console.error(err);
-    }
-
-    return result;
-  }
-
-  async getDeviceInfo() {
-    const result = [];
-
-    result.push('Device: ' + device.manufacturer.toString() + ' ' + device.model.toString() + '\n');
-    result.push('Platform: ' + device.platform.toString() + ' ' + device.version.toString() + '\n');
-    result.push('Cordova: ' + device.cordova.toString() + '\n\n');
-
-    return result;
-  }
-
 }

@@ -2,7 +2,7 @@ import {
   Component, ComponentFactoryResolver, ComponentRef, Input, OnDestroy, OnInit, Type, ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { ProviderType } from '../../services/interfaces/connection-provider';
+import { ProviderType } from '../../services/primitives/device';
 import { BluetoothComponent } from './bluetooth/bluetooth.component';
 import { ZeroconfComponent } from './zeroconf/zeroconf.component';
 import { IConnectivityManage } from './interface/connectivity-manage';
@@ -24,7 +24,7 @@ export class ConnectivityManageComponent implements OnInit, OnDestroy {
     switch (provderType) {
       case ProviderType.BLUETOOTH:
         return BluetoothComponent;
-      case ProviderType.ZEROCONF:
+      case ProviderType.WIFI:
         return ZeroconfComponent;
     }
   }

@@ -1,18 +1,17 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, combineLatest, interval, Subject, timer } from 'rxjs';
 import { DeviceService, Platform } from './device.service';
-import { IConnectionProvider, ProviderType } from './interfaces/connection-provider';
 import { LoggerService } from './logger.service';
 import { Device } from './primitives/device';
 import { ConnectionState, State } from './primitives/state';
 import { toBehaviourSubject } from '../utils/transformers';
 import { filter, mapTo, takeUntil } from 'rxjs/operators';
+import { ProviderType } from './primitives/device';
 
 declare const cordova: any;
-declare const navigator: any;
 
 @Injectable()
-export class BluetoothService implements IConnectionProvider {
+export class BluetoothService {
   public supported = new BehaviorSubject<boolean>(false);
 
   public deviceState = new BehaviorSubject<State>(State.Stopped);

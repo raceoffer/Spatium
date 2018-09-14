@@ -12,25 +12,25 @@
   </mat-toolbar-row>
 </mat-toolbar>
 <div class="currency-settings-component full-width" fxLayout="column" fxLayoutAlign="start center">
-    <div class="settings-block">
-        <div class="settings-field">
-            <label>API Server</label>
-            <mat-select class="select-field" [(ngModel)]="currencySettings.serverName">
-                <mat-option *ngFor="let serverName of getApiServerKeys()" [value]="serverName">
-                  {{ serverName }}
-                </mat-option>
-                <mat-option [value]="'Custom'">
-                  Custom
-                </mat-option>
-            </mat-select>
-        </div>
-        <div class="settings-field" *ngIf="currencySettings?.serverName == 'Custom'">
-            <label>Custom server url</label>
-            <input matInput placeholder="e.g. https://apiserver:port/api" class="text-field" [(ngModel)]="currencySettings.serverUrl">
-            <mat-error *ngIf="customApiServerInvalid">
-              Invalid URL
-            </mat-error>
-        </div>
-    </div>
+  <div class="settings-block">
+      <div class="settings-field">
+        <label>API Server</label>
+        <mat-select class="select-field" *ngIf="!!settings" [(ngModel)]="settings.apiServer">
+          <mat-option *ngFor="let apiServer of apiServers" [value]="apiServer.key">
+            {{ apiServer.value }}
+          </mat-option>
+          <mat-option [value]="apiServerType.Custom">
+            Custom
+          </mat-option>
+        </mat-select>
+      </div>
+      <div class="settings-field" *ngIf="!!settings && settings.apiServer === apiServerType.Custom">
+        <label>Custom server url</label>
+        <input matInput placeholder="e.g. https://apiserver:port/api" class="text-field" [(ngModel)]="settings.customApiServer">
+        <mat-error *ngIf="customApiServerInvalid">
+          Invalid URL
+        </mat-error>
+      </div>
+  </div>
 </div>
 

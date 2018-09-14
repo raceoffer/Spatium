@@ -81,14 +81,16 @@ export class DDSService {
     };
 
     let httpParams = new HttpParams();
-    for (let key in body) {
-      httpParams = httpParams.set(key, body[key]);
+    for (const key in body) {
+      if (body.hasOwnProperty(key)) {
+        httpParams = httpParams.set(key, body[key]);
+      }
     }
     return this.httpAngular.post(url, httpParams, {headers: new HttpHeaders((headers))});
   }
 
   public sponsorFeedback(data: FormData) {
-    let XHR = new XMLHttpRequest();
+    const XHR = new XMLHttpRequest();
     XHR.open('POST', this.sponsor + '/feedback');
     XHR.setRequestHeader('X-Auth-Key', this.secret);
     XHR.send(data);

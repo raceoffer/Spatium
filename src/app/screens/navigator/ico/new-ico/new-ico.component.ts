@@ -1,12 +1,10 @@
-import { Component, HostBinding, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, EventEmitter, HostBinding, OnInit, Output } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import {NavigationService} from '../../../../services/navigation.service';
-import { NotificationService } from '../../../../services/notification.service';
-import { IpfsService, File, FileInfo } from '../../../../services/ipfs.service';
-import { ICOService, IcoCampaign } from '../../../../services/ico.service';
 import { sha256 } from 'crypto-core-async/lib/utils';
-
-declare const window;
+import { IcoCampaign, ICOService } from '../../../../services/ico.service';
+import { File, IpfsService } from '../../../../services/ipfs.service';
+import { NavigationService } from '../../../../services/navigation.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-new-ico',
@@ -18,7 +16,7 @@ export class NewIcoComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Output() public created = new EventEmitter<IcoCampaign>();
-  
+
   public comp_name = new FormControl('', [Validators.required]);
   public ticker = new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]);
   public amount_emitted = new FormControl(0);
@@ -63,7 +61,7 @@ export class NewIcoComponent implements OnInit {
   logoFile: any;
   logoFileName: string;
 
-  isSaving: boolean = false;
+  isSaving = false;
 
   constructor(
     private readonly navigationService: NavigationService,
@@ -121,27 +119,36 @@ export class NewIcoComponent implements OnInit {
     this.errors = [];
     console.log(this.password.value);
 
-    if(!this.password.valid || (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() != '8dbeac44e0c26cec8af751817eef6be75b5fb179dc113a469c90858eb23358c6')
+    if (!this.password.valid ||
+      (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() !==
+        '8dbeac44e0c26cec8af751817eef6be75b5fb179dc113a469c90858eb23358c6') {
       this.errors.push('Wrong password');
-    if(!this.start_date.valid)
-      this.errors.push("Start date is required");
-    if(!this.end_date.valid)
-      this.errors.push("End date is required");
-    if(!this.ticker.valid)
-      this.errors.push("Ticker is invalid");
-    if(!this.address.valid)
-      this.errors.push("Address is invalid");
-    if(!this.comp_name.valid)
-      this.errors.push("Company name is invalid");
-      return this.errors.length > 0;
+    }
+    if (!this.start_date.valid) {
+      this.errors.push('Start date is required');
+    }
+    if (!this.end_date.valid) {
+    this.errors.push('End date is required');
+    }
+    if (!this.ticker.valid) {
+    this.errors.push('Ticker is invalid');
+    }
+    if (!this.address.valid) {
+    this.errors.push('Address is invalid');
+    }
+    if (!this.comp_name.valid) {
+    this.errors.push('Company name is invalid');
+    }
+    return this.errors.length > 0;
   }
 
   async saveNewICO() {
-    if(await this.checkErrors())
+    if (await this.checkErrors()) {
       return;
+    }
 
     this.isSaving = true;
-    let campaign = new IcoCampaign('', '', '');
+    const campaign = new IcoCampaign('', '', '');
     campaign.startDate = this.start_date.value;
     campaign.endDate = this.end_date.value;
     campaign.ticker = this.ticker.value;
@@ -152,19 +159,18 @@ export class NewIcoComponent implements OnInit {
     campaign.amountEmitted = this.amount_emitted.value;
     campaign.amountOffered = this.amount_offered.value;
 
-    let hash = await this.uploadFiles(campaign);
+    const hash = await this.uploadFiles(campaign);
 
     campaign.ipfsFolder = hash;
     try {
-      let result = await this.icoService.addCampaign(campaign);
+      const result = await this.icoService.addCampaign(campaign);
       console.log(result);
-  }
-    catch(e) {
+    } catch (e) {
       console.error(e);
       this.errors.push(e);
       this.isSaving = false;
       return;
-}
+    }
 
     this.created.emit(campaign);
     this.isSaving = false;
@@ -177,15 +183,15 @@ export class NewIcoComponent implements OnInit {
     try {
       uploadedFiles = await this.ipfsService.add(localFiles);
       console.log(uploadedFiles);
-      
+
       let folder;
       uploadedFiles.forEach(file => {
-        if (file.path == campaign.title) {
+        if (file.path === campaign.title) {
           folder = file.hash;
         }
       });
       return folder;
-    } catch(e) {
+    } catch (e) {
       // TODO show message to the user
       console.log(e);
       return '';
@@ -206,7 +212,7 @@ export class NewIcoComponent implements OnInit {
 
     return Promise.all([].map.call(files, function (file) {
       return new Promise(function (resolve, reject) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onloadend = function () {
           resolve(new File(file.name, Buffer.from(reader.result)));
         };

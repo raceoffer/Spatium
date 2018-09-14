@@ -10,7 +10,7 @@
     <mat-icon>arrow_back</mat-icon>
   </button>
 
-  <span>{{title}}</span>
+  <span>{{ title }}</span>
 
   <span class="spacer"></span>
 
@@ -26,7 +26,7 @@
   <mat-menu #validation>
     <mat-radio-group [(ngModel)]="filter_name[0]" class="filter-menu">
       <mat-radio-button *ngFor="let validation of validation_types" [value]="validation" (change)="filter(validation.criterion + ' && ' + filter_name[1].criterion)">
-        {{validation.name}}
+        {{ validation.name }}
       </mat-radio-button>
     </mat-radio-group>
   </mat-menu>
@@ -34,7 +34,7 @@
   <mat-menu #resolution>
     <mat-radio-group [(ngModel)]="filter_name[1]" class="filter-menu">
       <mat-radio-button *ngFor="let resolution of resolution_types" [value]="resolution" (change)="filter(resolution.criterion + ' && ' + filter_name[0].criterion)">
-        {{resolution.name}}
+        {{ resolution.name }}
       </mat-radio-button>
     </mat-radio-group>
   </mat-menu>
@@ -46,7 +46,7 @@
     <mat-icon>close</mat-icon>
   </button>
 
-  <span>{{'Selected(' + counter + ')'}}</span>
+  <span>{{ 'Selected(' + counter + ')' }}</span>
 
   <span class="spacer"></span>
 
@@ -90,7 +90,7 @@
           <div>
             <span
               class="transaction-amount">
-              {{transaction.amount}}
+              {{ transaction.amount }}
             </span>
             <span class="ticker">{{ transaction.symbol }}</span>
           </div>
@@ -98,7 +98,7 @@
             <div *ngIf="transaction.handled.type === 'approved'">
               <span
                 class="transaction-amount">
-                {{transaction.handled.amount}}
+                {{ transaction.handled.amount }}
               </span>
               <span class="ticker">{{ transaction.handled.ticker }}</span>
             </div>
@@ -132,7 +132,7 @@
           <div>
             <span
               class="transaction-amount">
-              {{transaction.amount}}
+              {{ transaction.amount }}
             </span>
             <span class="ticker">{{ transaction.symbol }}</span>
           </div>
@@ -140,7 +140,7 @@
             <div *ngIf="transaction.handled.type === 'approved'">
               <span
                 class="transaction-amount">
-                {{transaction.handled.amount}}
+                {{ transaction.handled.amount }}
               </span>
               <span class="ticker">{{ transaction.handled.ticker }}</span>
             </div>
@@ -170,12 +170,12 @@
         <span class="transaction-time"> {{ transaction.confirmations + " confirmations"}}</span>
       </div>
       <div class="row-elem">
-        <span class="label medium">{{!investor?'Received':'Sent'}}</span><br/>
+        <span class="label medium">{{ !investor ? 'Received' : 'Sent' }}</span><br/>
         <div style="display: inline-flex; align-items: center">
           <div class="logo {{transaction.coin}}" style="height: 30px"></div>
           <div class="price-label">
             <span class="transaction-amount" style="font-size: 20px !important">
-              {{transaction.amount}}
+              {{ transaction.amount }}
             </span>
             <span style="font-size: 14px; color: gray;"> {{ transaction.symbol }}</span>
           </div>

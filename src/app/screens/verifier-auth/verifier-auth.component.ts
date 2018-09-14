@@ -56,7 +56,7 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   }
 
   public async onCreated(seed) {
-    this.keychain.setSeed(seed);
+    this.keychain.seed = seed;
 
     this.notification.show('The secret successfully saved');
 
@@ -64,13 +64,13 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
   }
 
   public async onDecrypted(seed) {
-    this.keychain.setSeed(seed);
+    this.keychain.seed = seed;
 
     await this.router.navigate(['/verifier']);
   }
 
   public async onImported(seed) {
-    this.keychain.setSeed(seed);
+    this.keychain.seed = seed;
 
     this.notification.show('The secret successfully imported');
 

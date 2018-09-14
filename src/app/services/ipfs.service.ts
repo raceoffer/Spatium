@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import ipfsAPI from 'ipfs-api';
-
-declare const window;
+// import ipfsAPI from 'ipfs-api';
 
 export class File {
   path: string;
@@ -36,10 +34,10 @@ export class FileInfo {
 @Injectable()
 
 export class IpfsService {
-  private host: string = '185.219.80.169';
-  private port: string = '5001';
+  private host = '185.219.80.169';
+  private port = '5001';
 
-  private ipfs: any = ipfsAPI(this.host, this.port, {protocol: 'http'});
+  private ipfs: any = null; // ipfsAPI(this.host, this.port, {protocol: 'http'});
 
   constructor() {}
 

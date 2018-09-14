@@ -1,14 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DistributedEcdsaKey, Utils } from 'crypto-core-async';
 import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval, distinctUntilChanged, skip } from 'rxjs/operators';
-import { ConnectionProviderService } from '../../services/connection-provider';
+import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { BalanceService } from '../../services/balance.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { WalletService } from '../../services/wallet.service';
-import { WaitingComponent } from './waiting/waiting.component';
-import { ConnectionState } from '../../services/primitives/state';
+import { SyncService } from '../../services/sync.service';
+import { uuidFrom } from '../../utils/uuid';
+import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 
 @Component({
   selector: 'app-navigator',
@@ -29,32 +30,14 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   );
 
   constructor(
-    private readonly wallet: WalletService,
-    private readonly keychain: KeyChainService,
+    private readonly keyChain: KeyChainService,
     private readonly router: Router,
-    private readonly connectionProviderService: ConnectionProviderService,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService
+    private readonly notification: NotificationService,
+    private readonly balanceService: BalanceService,
+    private readonly syncService: SyncService,
+    private readonly keyChainService: KeyChainService
   ) {
-    this.subscriptions.push(
-      this.connectionProviderService.connectionState.pipe(
-        map(state => state === ConnectionState.Connected),
-        distinctUntilChanged(),
-        skip(1)
-      ).subscribe(async (connected) => {
-        if (connected) {
-          await this.wallet.startHandshake();
-          await this.wallet.startSync();
-        } else {
-          await this.wallet.cancelSync();
-        }
-      }));
-
-    this.subscriptions.push(
-      this.wallet.cancelEvent.subscribe(async () => {
-        await this.connectionProviderService.disconnect();
-      }));
-
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.back.next();
@@ -75,17 +58,18 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     );
   }
 
-  async ngOnInit() {
-    if (this.connectionProviderService.connectionState.getValue() === ConnectionState.None) {
-      await this.openConnectOverlay();
-    }
-  }
+  public async ngOnInit() {
+    const seedHash = await Utils.sha256(this.keyChainService.seed);
 
-  public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connectedEvent.subscribe(() => {
-      this.navigationService.acceptOverlay();
-    });
+    const { publicKey, secretKey } = await DistributedEcdsaKey.generatePaillierKeys();
+
+    this.keyChainService.sessionId = uuidFrom(await Utils.sha256(Buffer.concat([seedHash, publicKey.toBytes()])));
+    this.keyChainService.paillierPublicKey = publicKey;
+    this.keyChainService.paillierSecretKey = secretKey;
+
+    console.log(this.keyChainService.sessionId);
+
+    await this.balanceService.start();
   }
 
   public async ngOnDestroy() {
@@ -94,8 +78,16 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.navigationService.clearOverlayStack();
 
-    await this.wallet.reset();
-    await this.keychain.reset();
-    await this.connectionProviderService.reset();
+    await this.keyChain.reset();
+
+    await this.balanceService.reset();
+    await this.syncService.reset();
+  }
+
+  public async openConnectOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+    componentRef.instance.connectedEvent.subscribe(() => {
+      this.navigationService.acceptOverlay();
+    });
   }
 }

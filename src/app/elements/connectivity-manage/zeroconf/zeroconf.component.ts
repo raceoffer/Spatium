@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ZeroconfService } from '../../../services/zeroconf.service';
 import { IConnectivityManage } from '../interface/connectivity-manage';
 import { ConnectionState, State } from '../../../services/primitives/state';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -7,7 +6,6 @@ import { distinctUntilChanged, filter, map, skip } from 'rxjs/operators';
 import { requestDialog } from '../../../utils/dialog';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { waitForSubject } from '../../../utils/transformers';
-import { ConnectionProviderService } from '../../../services/connection-provider';
 
 declare const cordova: any;
 
@@ -20,18 +18,18 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
   public stateType = State;
   public connectionStateType = ConnectionState;
 
-  public connectedDevice = this.zeroconf.connectedDevice;
+  // public connectedDevice = this.zeroconf.connectedDevice;
 
-  public deviceState = this.zeroconf.deviceState;
-  public connectionState = this.zeroconf.connectionState;
-  public listeningState = this.zeroconf.listeningState;
-  public serverState = this.zeroconf.serverState;
+  // public deviceState = this.zeroconf.deviceState;
+  // public connectionState = this.zeroconf.connectionState;
+  // public listeningState = this.zeroconf.listeningState;
+  // public serverState = this.zeroconf.serverState;
 
-  public connectableState = this.zeroconf.connectableState;
+  // public connectableState = this.zeroconf.connectableState;
 
-  public connectableStateScheduled = this.zeroconf.connectableStateScheduled;
+  // public connectableStateScheduled = this.zeroconf.connectableStateScheduled;
 
-  public globalConnectionState = this.connectionProvider.connectionState;
+  // public globalConnectionState = this.connectionProvider.connectionState;
 
   public toggled = new BehaviorSubject<boolean>(false);
 
@@ -42,57 +40,57 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
   private subscriptions = [];
 
   constructor(
-    private readonly zeroconf: ZeroconfService,
+    // private readonly zeroconf: ZeroconfService,
     private readonly deviceService: DeviceService,
-    private readonly connectionProvider: ConnectionProviderService
+    // private readonly connectionProvider: ConnectionProviderService
   ) {
     super();
 
-    this.subscriptions.push(
-      this.connectionProvider.connectionState.pipe(
-        map(state => state === ConnectionState.Connected),
-        distinctUntilChanged(),
-        skip(1)
-      ).subscribe(async (connected) => {
-        if (connected) {
-          await this.zeroconf.stopListening();
-        } else if (this.toggled.getValue()) {
-          if (this.zeroconf.deviceState.getValue() === State.Started && this.toggled.getValue()) {
-            await this.zeroconf.startListening();
-          }
-        }
-      })
-    );
+    // this.subscriptions.push(
+    //   this.connectionProvider.connectionState.pipe(
+    //     map(state => state === ConnectionState.Connected),
+    //     distinctUntilChanged(),
+    //     skip(1)
+    //   ).subscribe(async (connected) => {
+    //     if (connected) {
+    //       await this.zeroconf.stopListening();
+    //     } else if (this.toggled.getValue()) {
+    //       if (this.zeroconf.deviceState.getValue() === State.Started && this.toggled.getValue()) {
+    //         await this.zeroconf.startListening();
+    //       }
+    //     }
+    //   })
+    // );
 
-    this.subscriptions.push(this.zeroconf.listeningState.pipe(
-      map(state => state === State.Stopped),
-      distinctUntilChanged(),
-      skip(1),
-      filter(s => s)
-    ).subscribe(async () => {
-      if (
-        this.toggled.getValue() &&
-        this.zeroconf.deviceState.getValue() === State.Started &&
-        this.connectionProvider.connectionState.getValue() === ConnectionState.None
-      ) {
-        await this.zeroconf.startListening();
-      }
-    }));
+    // this.subscriptions.push(this.zeroconf.listeningState.pipe(
+    //   map(state => state === State.Stopped),
+    //   distinctUntilChanged(),
+    //   skip(1),
+    //   filter(s => s)
+    // ).subscribe(async () => {
+    //   if (
+    //     this.toggled.getValue() &&
+    //     this.zeroconf.deviceState.getValue() === State.Started &&
+    //     this.connectionProvider.connectionState.getValue() === ConnectionState.None
+    //   ) {
+    //     await this.zeroconf.startListening();
+    //   }
+    // }));
 
-    this.subscriptions.push(
-      this.zeroconf.deviceState.pipe(
-        map(state => state !== State.Started),
-        distinctUntilChanged(),
-        skip(1),
-        filter(stopped => stopped)
-      ).subscribe(async () => {
-        await this.toggle({ checked: false });
-      })
-    );
+    // this.subscriptions.push(
+    //   this.zeroconf.deviceState.pipe(
+    //     map(state => state !== State.Started),
+    //     distinctUntilChanged(),
+    //     skip(1),
+    //     filter(stopped => stopped)
+    //   ).subscribe(async () => {
+    //     await this.toggle({ checked: false });
+    //   })
+    // );
   }
 
   async ngOnInit() {
-    await this.zeroconf.startServer();
+    // await this.zeroconf.startServer();
   }
 
   async ngOnDestroy() {
@@ -101,7 +99,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
     this.cancel();
 
-    await this.zeroconf.reset();
+    // await this.zeroconf.reset();
   }
 
   async toggle(event) {
@@ -110,34 +108,34 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
       this.waiting.next(true);
 
       // now try to start server once again in case it has failed o start once
-      if (this.serverState.getValue() !== State.Started) {
-        await this.zeroconf.startServer();
-      }
+      // if (this.serverState.getValue() !== State.Started) {
+      //   await this.zeroconf.startServer();
+      // }
 
-      if (!await waitForSubject(this.serverState, State.Started, this.cancelSubject)) {
-        this.waiting.next(false);
-        this.toggled.next(false);
-        return;
-      }
+      // if (!await waitForSubject(this.serverState, State.Started, this.cancelSubject)) {
+      //   this.waiting.next(false);
+      //   this.toggled.next(false);
+      //   return;
+      // }
 
-      if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
-        this.waiting.next(false);
-        this.toggled.next(false);
-        return;
-      }
+      // if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
+      //   this.waiting.next(false);
+      //   this.toggled.next(false);
+      //   return;
+      // }
 
-      this.waiting.next(false);
+      // this.waiting.next(false);
 
-      if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
-        await this.zeroconf.startListening();
-      }
+      // if (this.connectionProvider.connectionState.getValue() === ConnectionState.None) {
+      //   await this.zeroconf.startListening();
+      // }
     } else {
       this.toggled.next(false);
 
       this.cancel();
 
-      await this.zeroconf.stopListening();
-      await this.zeroconf.disconnect();
+      // await this.zeroconf.stopListening();
+      // await this.zeroconf.disconnect();
     }
   }
 
@@ -148,7 +146,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
   async enableWifi() {
     if (this.deviceService.platform === Platform.Android) {
       if (await requestDialog('The application wants to enable Wifi')) {
-        await this.zeroconf.enable();
+        // await this.zeroconf.enable();
       }
     } else {
       this.networkSettings();
@@ -157,7 +155,7 @@ export class ZeroconfComponent extends IConnectivityManage implements OnInit, On
 
   networkSettings() {
     if (this.deviceService.platform === Platform.IOS) {
-        cordova.plugins.settings.open("wifi", function() {
+        cordova.plugins.settings.open('wifi', function() {
           console.log('opened wifi settings');
       },
       function () {

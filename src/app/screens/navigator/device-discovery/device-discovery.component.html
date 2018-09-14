@@ -1,0 +1,26 @@
+<mat-toolbar color="primary" class="header-toolbar shadow">
+  <mat-toolbar-row>
+    <button mat-icon-button class="back-button" (click)="onBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span style="overflow: hidden; text-overflow: ellipsis;">Connect to a device</span>
+    <span class="spacer"></span>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
+  <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
+    <mat-nav-list style="width: 100%;">
+      <mat-list-item *ngFor="let device of (devices | async)" (click)="connectTo(device)">
+        <p class="list-name" mat-line>{{ device.name }}</p>
+        <p class="list-info" mat-line>{{ device.ip }}:{{ device.port }}</p>
+      </mat-list-item>
+    </mat-nav-list>
+  </div>
+
+  <div style="width: 100%; text-align: center; padding: 5px 0px;">
+    <button mat-icon-button (click)="startDiscovery()">
+      <mat-icon class="button-imitator-large">sync</mat-icon>
+    </button>
+  </div>
+</div>

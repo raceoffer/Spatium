@@ -1,11 +1,10 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { DeviceService, Platform } from '../../services/device.service';
+import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
-import { KeyChainService } from '../../services/keychain.service';
-import { LoggerService } from '../../services/logger.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -23,20 +22,18 @@ export class StartComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly deviceService: DeviceService,
-    private readonly logger: LoggerService,
-    private readonly keyChainService: KeyChainService,
     private readonly router: Router,
-    private readonly ngZone: NgZone,
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
+    private readonly keyChainService: KeyChainService
   ) {}
 
   public async ngOnInit() {
     await this.deviceService.deviceReady();
-
-    await this.settings.initializeSettings();
+    await this.settings.ready();
 
     const viewed = await this.settings.presentationViewed();
+
     if (!viewed) {
       this.openPresentation();
     }
@@ -74,7 +71,7 @@ export class StartComponent implements OnInit, OnDestroy {
     }
   }
 
-  public ngOnDestroy() {
+  public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

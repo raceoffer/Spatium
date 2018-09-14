@@ -1,21 +1,47 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, Input, OnDestroy, OnInit, HostListener, ViewChild, Inject, AfterViewInit, ChangeDetectorRef, ElementRef, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, from, interval } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { Coin, Token } from '../../../services/keychain.service';
+import { Component, ElementRef, HostBinding, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { DOCUMENT } from '@angular/platform-browser';
+import * as $ from 'jquery';
+import { BehaviorSubject, timer, combineLatest } from 'rxjs';
+import { map, filter, mergeMap } from 'rxjs/operators';
+import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
-import { WalletService } from '../../../services/wallet.service';
-import {
-  BalanceStatus, CurrencyWallet, HistoryEntry, Status,
-  TransactionType
-} from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { DeviceService, Platform } from '../../../services/device.service';
-import { DOCUMENT } from '@angular/platform-browser';
-import * as $ from 'jquery';
+import { BalanceStatus, BalanceService } from '../../../services/balance.service';
+import { CurrencyInfoService } from '../../../services/currencyinfo.service';
+import { SyncService } from '../../../services/sync.service';
+import { PriceService } from '../../../services/price.service';
+import { CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
+
+export enum TransactionType {
+  In,
+  Out
+}
+
+export class HistoryEntry {
+  constructor(public type: TransactionType,
+              // tslint:disable-next-line:no-shadowed-variable
+              public from: string,
+              public to: string,
+              public amount: number,
+              public confirmed: boolean,
+              public time: number,
+              public blockhash: string) {}
+
+  static fromJSON(json) {
+    return new HistoryEntry(
+      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
+      json.from,
+      json.to,
+      json.amount,
+      json.confirmed,
+      json.time,
+      json.blockhash
+    );
+  }
+}
 
 declare const cordova: any;
 
@@ -32,136 +58,103 @@ declare const cordova: any;
     ])
   ]
 })
-
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   public txType = TransactionType;
-  public statusType = Status;
+  public stateType = SyncState;
   public balanceStatusType = BalanceStatus;
-  
+
   @ViewChild('transactionList') transactionList: ElementRef;
 
-  @Input() public currency: Coin | Token = null;
-  public currencyInfo: Info = null;
+  @Input() public model: CurrencyModel = null;
 
-  public currencyWallet: CurrencyWallet = null;
+  public wallet: Wallet;
 
-  public walletAddress: BehaviorSubject<string> = null;
-  public balanceCurrencyConfirmed: BehaviorSubject<number> = null;
-  public balanceCurrencyUnconfirmed: BehaviorSubject<number> = null;
-  public balanceUsdConfirmed: BehaviorSubject<number> = null;
-  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
+  public balanceUnconfirmed: BehaviorSubject<number>;
+  public balanceConfirmed: BehaviorSubject<number>;
+  public balanceUSDUnconfirmed: BehaviorSubject<number>;
+  public balanceUSDConfirmed: BehaviorSubject<number>;
 
-  public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
-  public isLoadingTransactions: boolean = false;
-  public isUpdatingTransactions: boolean = false;
+  // public transactionArray = [];
+  // public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
+  // public isLoadingTransactions = false;
+  // public isUpdatingTransactions = false;
+  // public timeEnd = null;
+
+  // private transactionsCount = 0;
+  // private isHistoryLoaded = false;
+  // private step = 10;
+  // private unconfirmedList: Array<HistoryEntry> = [];
+  // private isFirstUpdate = true;
 
   private subscriptions = [];
 
-  private transactionsCount = 0;
-  private isHistoryLoaded: boolean = false;
-  private step = 10;
-  private unconfirmedList: Array<HistoryEntry> = [];
-  private isFirstUpdate: boolean = true;
-  
   constructor(
-    private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
     private readonly deviceService: DeviceService,
-    @Inject(DOCUMENT) private document: Document,
-    private ngZone: NgZone,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly syncService: SyncService,
+    private readonly balanceService: BalanceService,
+    private readonly priceService: PriceService,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   async ngOnInit() {
-    $('#transactionList').scroll(() => {    
-      if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
-          this.loadMore();
-        }
-    });
+    this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
 
-    this.currencyInfo = await this.currencyService.getInfo(this.currency);
-
-    this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
-
-    this.walletAddress = this.currencyWallet.address;
-
-    this.balanceCurrencyUnconfirmed = toBehaviourSubject(
-      this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.unconfirmed) : null)),
-      null);
-    this.balanceCurrencyConfirmed = toBehaviourSubject(
-      this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.confirmed) : null)),
-      null);
-
-    this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest([
-      this.balanceCurrencyUnconfirmed,
-      this.currencyInfo.rate
+    this.balanceUnconfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceUnconfirmed,
+      this.wallet.wallet
     ]).pipe(
-      map(([balance, rate]) => {
-        if (rate === null || balance === null) {
-          return null;
-        }
-        return balance * rate;
-      })
+      map(([balanceUnconfirmed, wallet]) => balanceUnconfirmed ? wallet.fromInternal(balanceUnconfirmed) : null)
     ), null);
 
-    this.balanceUsdConfirmed = toBehaviourSubject(combineLatest([
-      this.balanceCurrencyConfirmed,
-      this.currencyInfo.rate
+    this.balanceConfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceConfirmed,
+      this.wallet.wallet
     ]).pipe(
-      map(([balance, rate]) => {
-        if (rate === null || balance === null) {
-          return null;
-        }
-        return balance * rate;
-      })
+      map(([balanceConfirmed, wallet]) => balanceConfirmed ? wallet.fromInternal(balanceConfirmed) : null)
     ), null);
 
-    this.transactions = toBehaviourSubject(
-      from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-      null);
+    this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
+      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.model.ticker) : null)
+    ), null);
+
+    this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
+      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.model.ticker) : null)
+    ), null);
+
+    // $('#transactionList').scroll(() => {
+    //   if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
+    //       this.loadMore();
+    //     }
+    // });
 
     this.subscriptions.push(
-      this.currencyWallet.readyEvent.subscribe(() => {
-        this.transactions = toBehaviourSubject(
-          from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-          null);
+      timer(0, 3000).pipe(
+        mergeMap(() => this.wallet.balanceWatcher),
+        filter(watcher => !!watcher)
+      ).subscribe((watcher) => {
+        this.balanceService.forceCurrency(watcher.id);
       })
     );
 
-    this.transactionsCount += this.step;
+    this.syncService.forceCurrency(this.model.currencyInfo.id);
 
-    interval(10000).subscribe(async () => {
-      await this.updateTransactions();
-    });
-  }
+    /** @todo Refactor the stuff below */
 
-  async loadMore() {
-    if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
-      this.isLoadingTransactions = true;
+    // this.transactions = toBehaviourSubject(this.balanceWatcher.pipe(
+    //   mergeMap(async () => {
+    //     return await this.listTransactionHistory(this.step, 0);
+    //   })
+    // ), null);
 
-      let newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount + this.step, this.transactionsCount);
-      let oldList = this.transactions.getValue();
+    // this.transactionsCount += this.step;
 
-      if (newList.length > 0) {
-        oldList.push.apply(oldList, newList);
-
-        let unconfirmed = newList.filter(item => item.confirmed === false);
-        this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
-      }
-      if (newList.length < this.step) {
-        this.currencyWallet.isHistoryLoaded = true;
-        this.isHistoryLoaded = true;
-        console.log("History loaded!");
-      }
-
-      this.transactions.next(oldList);
-
-      this.transactionsCount += this.step;
-
-      this.isLoadingTransactions = false;
-    }
+    // interval(10000).subscribe(async () => {
+    //   await this.updateTransactions();
+    // });
   }
 
   ngOnDestroy() {
@@ -171,11 +164,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   send() {
     const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
-    overalyRef.instance.currency = this.currency;
+    overalyRef.instance.model = this.model;
   }
 
   copy() {
-    cordova.plugins.clipboard.copy(this.walletAddress.value);
+    cordova.plugins.clipboard.copy(this.wallet.address.getValue());
   }
 
   isWindows(): boolean {
@@ -184,79 +177,182 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onSettingsClicked() {
     const componentRef = this.navigationService.pushOverlay(CurrencySettingsComponent);
-    componentRef.instance.currency = this.currency;
+    componentRef.instance.currencyId = this.model.currencyInfo.id;
+    componentRef.instance.saved.subscribe(() => {
+      this.navigationService.acceptOverlay();
+    });
   }
 
   async onBack() {
     this.navigationService.back();
   }
 
-  async updateTransactions(to=this.step, from=0) {
-    if (this.currencyWallet !== null && this.transactions.getValue() !== null && !this.isUpdatingTransactions && !this.isLoadingTransactions) {
-      this.isUpdatingTransactions = true;
+  /** @todo Refactor the stuff below */
 
-      if (this.isFirstUpdate) {
-        let unconfirmed = this.transactions.getValue().filter(item => item.confirmed === false);
-        this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
-        this.isFirstUpdate = false;
-      }
+  // public async listTransactionHistory(listTo, listFrom) {
+  //   const wallet = this.balanceWatcher.getValue() ? this.balanceWatcher.getValue().wallet : null;
+  //   if (wallet === null) {
+  //     return null;
+  //   }
 
-      let newList = await this.currencyWallet.listTransactionHistory(to, from);   
+  //   if (this.transactionArray !== null) {
+  //     console.log('cached: ' + this.transactionArray.length);
+  //   }
 
-      if (newList !== null && newList.length > 0) {
-        this.checkUnconfirmed(newList);
+  //   if (this.transactionArray === null) {
+  //     const txs = await wallet.getTransactions(listTo, listFrom);
+  //     const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
 
-        let oldList = this.transactions.getValue();
+  //     this.transactionArray = txsMapped;
+  //   } else if (listFrom === 0) {
+  //     const txs = await wallet.getTransactions(listTo, listFrom);
+  //     const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
 
-        if (newList.slice(-1)[0].time <= oldList[0].time) {
-          let timeEnd = oldList[0].time;
-          let filtered = newList.filter(item => (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash)));
+  //     if (txsMapped.length > 0) {
+  //       if (txsMapped.slice(-1)[0].time <= this.transactionArray[0].time) {
+  //         const timeEnd = this.transactionArray[0].time;
+  //         const filtered = txsMapped.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
 
-          oldList.unshift.apply(oldList, filtered);
-          this.transactions.next(oldList);
+  //         this.transactionArray.unshift.apply(this.transactionArray, filtered);
+  //       } else {
+  //         this.timeEnd = this.transactionArray[0].time;
+  //         this.transactionArray.unshift.apply(this.transactionArray, txsMapped);
+  //       }
+  //     }
+  //   } else {
+  //     if (this.timeEnd !== null) {
+  //       const txs = await wallet.getTransactions(listTo, listFrom);
+  //       const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
 
-          let unconfirmed = filtered.filter(item => item.confirmed === false);
-          this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
-        } else {
-          oldList.unshift.apply(oldList, newList);
-          this.transactions.next(oldList);
+  //       if (txsMapped.slice(-1)[0].time <= this.transactionArray[0].time) {
+  //         const timeEnd = this.transactionArray[0].time;
+  //         const filtered = txsMapped.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
 
-          let unconfirmed = newList.filter(item => item.confirmed === false);
-          this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
+  //         Array.prototype.splice.apply(this.transactionArray, [listTo, 0].concat(filtered));
+  //         this.timeEnd = null;
+  //       } else {
+  //         Array.prototype.splice.apply(this.transactionArray, [listTo, 0].concat(txsMapped));
+  //       }
+  //     } else if (this.transactionArray.length < listTo && !this.isHistoryLoaded) {
+  //       const txs = await wallet.getTransactions(listTo, listFrom);
+  //       const txsMapped = txs.map(tx => HistoryEntry.fromJSON(tx));
+  //       const filtered = txsMapped.filter(item => (this.transactionHashNotInList(item.blockhash)));
+  //       this.transactionArray.push.apply(this.transactionArray, filtered);
+  //     }
+  //   }
 
-          this.updateTransactions(to + this.step, from + this.step);
-        }
-      }
-      
-      this.isUpdatingTransactions = false;
-    }
-  }
+  //   if (this.transactionArray.length >= listTo) {
+  //     return this.transactionArray.slice(listFrom, listTo);
+  //   } else {
+  //     return this.transactionArray.slice(listFrom);
+  //   }
+  // }
 
-  public transactionHashNotInList(blockhash: string) : boolean {
-    let transactionsList = this.transactions.getValue();
-    for (var i = 0; i < transactionsList.length; i++)
-      if (transactionsList[i].blockhash === blockhash)
-        return false;
+  // async loadMore() {
+  //   if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
+  //     this.isLoadingTransactions = true;
 
-    return true;
-  }
+  //     const newList = await this.listTransactionHistory(this.transactionsCount + this.step, this.transactionsCount);
+  //     const oldList = this.transactions.getValue();
 
-  public checkUnconfirmed(newList: Array<HistoryEntry>): void {
-    if (this.unconfirmedList.length > 0) {
-      let oldList = this.transactions.getValue();
-      let confirmedList = newList.filter(item => item.confirmed === true);
-      for (let confirmed of confirmedList) {
-        let unconfirmed = this.unconfirmedList.filter(item => item.blockhash === confirmed.blockhash);
-        if (unconfirmed.length > 0) {
-          let unconfirmedEntity = unconfirmed[0];
-          this.unconfirmedList.splice(this.unconfirmedList.indexOf(unconfirmedEntity), 1);
+  //     if (newList.length > 0) {
+  //       oldList.push.apply(oldList, newList);
 
-          let confirmedEntity = oldList.filter(item => item.blockhash === confirmed.blockhash)[0];
-          confirmedEntity.confirmed = true;
-          confirmedEntity.time = confirmed.time;
-        }
-      }
-      this.transactions.next(oldList);
-    }
-  }
+  //       const unconfirmed = newList.filter(item => item.confirmed === false);
+  //       this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
+  //     }
+  //     if (newList.length < this.step) {
+  //       this.isHistoryLoaded = true;
+  //       console.log('History loaded!');
+  //     }
+
+  //     this.transactions.next(oldList);
+
+  //     this.transactionsCount += this.step;
+
+  //     this.isLoadingTransactions = false;
+  //   }
+  // }
+
+  // async updateTransactions(listTo = this.step, listFrom = 0) {
+  //   const wallet = this.balanceWatcher.getValue() ? this.balanceWatcher.getValue().wallet : null;
+  //   if (wallet !== null &&
+  //       this.transactions.getValue() !== null &&
+  //       !this.isUpdatingTransactions &&
+  //       !this.isLoadingTransactions
+  //   ) {
+  //     this.isUpdatingTransactions = true;
+
+  //     if (this.isFirstUpdate) {
+  //       const unconfirmed = this.transactions.getValue().filter(item => item.confirmed === false);
+  //       this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
+  //       this.isFirstUpdate = false;
+  //     }
+
+  //     const newList = await this.listTransactionHistory(listTo, listFrom);
+
+  //     if (newList !== null && newList.length > 0) {
+  //       this.checkUnconfirmed(newList);
+
+  //       const oldList = this.transactions.getValue();
+
+  //       if (newList.slice(-1)[0].time <= oldList[0].time) {
+  //         const timeEnd = oldList[0].time;
+  //         const filtered = newList.filter(item =>
+  //           (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash))
+  //         );
+
+  //         oldList.unshift.apply(oldList, filtered);
+  //         this.transactions.next(oldList);
+
+  //         const unconfirmed = filtered.filter(item => item.confirmed === false);
+  //         this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
+  //       } else {
+  //         oldList.unshift.apply(oldList, newList);
+  //         this.transactions.next(oldList);
+
+  //         const unconfirmed = newList.filter(item => item.confirmed === false);
+  //         this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
+
+  //         this.updateTransactions(listTo + this.step, listFrom + this.step);
+  //       }
+  //     }
+
+  //     this.isUpdatingTransactions = false;
+  //   }
+  // }
+
+  // public transactionHashNotInList(blockhash: string): boolean {
+  //   const transactionsList = this.transactions.getValue();
+  //   for (let i = 0; i < transactionsList.length; i++) {
+  //     if (transactionsList[i].blockhash === blockhash) {
+  //       return false;
+  //     }
+  //   }
+
+  //   return true;
+  // }
+
+  // public checkUnconfirmed(newList: Array<HistoryEntry>): void {
+  //   if (this.unconfirmedList.length > 0) {
+  //     const oldList = this.transactions.getValue();
+  //     const confirmedList = newList.filter(item => item.confirmed === true);
+  //     for (const confirmed of confirmedList) {
+  //       const unconfirmed = this.unconfirmedList.filter(item => item.blockhash === confirmed.blockhash);
+  //       if (unconfirmed.length > 0) {
+  //         const unconfirmedEntity = unconfirmed[0];
+  //         this.unconfirmedList.splice(this.unconfirmedList.indexOf(unconfirmedEntity), 1);
+
+  //         const confirmedEntity = oldList.filter(item => item.blockhash === confirmed.blockhash)[0];
+  //         confirmedEntity.confirmed = true;
+  //         confirmedEntity.time = confirmed.time;
+  //       }
+  //     }
+  //     this.transactions.next(oldList);
+  //   }
+  // }
 }

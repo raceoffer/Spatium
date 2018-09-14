@@ -6,14 +6,12 @@
     <span>Confirmation mode</span>
 
     <span class="spacer"></span>
-
-    <mat-icon *ngIf="(fullySync | async)">sync</mat-icon>
-    <mat-icon *ngIf="(partiallySync | async)">sync_problem</mat-icon>
   </mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
-  <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-    <div *ngFor="let provider of (providersArray | async)">
-      <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
-    </div>
-  </mat-nav-list>
+  <div style="margin: 10px;" *ngFor="let session of (sessions | async)">
+    {{ session.deviceInfo.deviceName }}: {{ session.syncPercent.toString().padStart(3) }}% synchronization
+  </div>
+  <div style="margin: 10px;" *ngIf="(sessions | async).length === 0">
+    Ready to sync
+  </div>
 </div>
