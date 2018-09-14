@@ -1,42 +1,27 @@
-import {
-  Component,
-  ElementRef,
-  HostBinding,
-  OnDestroy,
-  ViewChild
-} from '@angular/core';
-import {
-  animate,
-  sequence,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, sequence, style, transition, trigger, } from '@angular/animations';
+import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { packTree, randomBytes } from 'crypto-core-async/lib/utils';
 import * as $ from 'jquery';
-
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { take, takeUntil, map } from 'rxjs/operators';
+import { catchError, mapTo } from 'rxjs/internal/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
-import { AuthService, AuthFactor } from '../../services/auth.service';
+import { AuthFactor, AuthService } from '../../services/auth.service';
 import { DDSService } from '../../services/dds.service';
+import { DeviceService, Platform } from '../../services/device.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
-
-import { packTree } from 'crypto-core-async/lib/utils';
+import { FileAuthFactorComponent } from '../authorization-factors/file-auth-factor/file-auth-factor.component';
+import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
+import { NfcAuthFactorComponent } from '../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
 import { PasswordAuthFactorComponent } from '../authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from '../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
-import { GraphicKeyAuthFactorComponent } from '../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
-import { FileAuthFactorComponent } from '../authorization-factors/file-auth-factor/file-auth-factor.component';
 import { QrAuthFactorComponent } from '../authorization-factors/qr-auth-factor/qr-auth-factor.component';
-import { NfcAuthFactorComponent } from '../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
-
-import { randomBytes } from 'crypto-core-async/lib/utils';
-import { RegistrationSuccessComponent } from '../registration-success/registration-success.component';
 import { BackupComponent } from '../backup/backup.component';
-import { catchError, mapTo } from 'rxjs/internal/operators';
+import { RegistrationSuccessComponent } from '../registration-success/registration-success.component';
 
 @Component({
   selector: 'app-registration',
@@ -65,7 +50,9 @@ export class RegistrationComponent implements OnDestroy {
   public factorItems = [];
 
   public password = '';
+  public passwordClass = this.isWindows() ? 'caret-center' : '';
   public confirmPassword = '';
+  public confirmPasswordClass = this.isWindows() ? 'caret-center' : '';
 
   stWarning =
     'Your funds safety depends on the strongness of the authorization factors. ' +
@@ -76,16 +63,15 @@ export class RegistrationComponent implements OnDestroy {
 
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute,
-    private readonly dds: DDSService,
-    private readonly keychain: KeyChainService,
-    private readonly notification: NotificationService,
-    private readonly authService: AuthService,
-    private readonly navigationService: NavigationService,
-    private readonly workerService: WorkerService
-  ) {
+  constructor(private readonly router: Router,
+              private readonly activatedRoute: ActivatedRoute,
+              private readonly dds: DDSService,
+              private readonly keychain: KeyChainService,
+              private readonly notification: NotificationService,
+              private readonly authService: AuthService,
+              private readonly navigationService: NavigationService,
+              private readonly workerService: WorkerService,
+              private readonly deviceService: DeviceService) {
     this.subscriptions.push(
       activatedRoute.paramMap.subscribe(async params => {
         this.login = params.get('login');
@@ -102,6 +88,30 @@ export class RegistrationComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  onPasswordChange(newValue) {
+    if (!newValue) {
+      if (this.isWindows()) {
+        this.passwordClass = 'caret-center';
+      }
+      this.password = '';
+    } else {
+      this.passwordClass = '';
+      this.password = newValue;
+    }
+  }
+
+  onConfirmPasswordChange(newValue) {
+    if (!newValue) {
+      if (this.isWindows()) {
+        this.confirmPasswordClass = 'caret-center';
+      }
+      this.confirmPassword = '';
+    } else {
+      this.confirmPasswordClass = '';
+      this.confirmPassword = newValue;
+    }
   }
 
   goBottom() {
@@ -136,15 +146,6 @@ export class RegistrationComponent implements OnDestroy {
       case AuthFactor.NFC:
         return this.openFactorOverlayOfType(NfcAuthFactorComponent);
     }
-  }
-
-  private openFactorOverlayOfType(componentType) {
-    const componentRef = this.navigationService.pushOverlay(componentType);
-
-    componentRef.instance.submit.subscribe(async (factor) => {
-      this.navigationService.acceptOverlay();
-      await this.addFactor(factor);
-    });
   }
 
   public openBackupOverlay(id, data) {
@@ -195,8 +196,8 @@ export class RegistrationComponent implements OnDestroy {
 
     const entry = this.authService.getAuthFactors(true, true).get(factor.type as AuthFactor);
     this.factorItems.push({
-        icon: entry.icon,
-        icon_asset: entry.icon_asset
+      icon: entry.icon,
+      icon_asset: entry.icon_asset
     });
 
     this.goBottom();
@@ -245,8 +246,8 @@ export class RegistrationComponent implements OnDestroy {
       const result = await this.dds.sponsorStore(id, data).pipe(
         take(1),
         takeUntil(this.cancel),
-        mapTo({ success: true }),
-        catchError(error => of({ success: false }))
+        mapTo({success: true}),
+        catchError(error => of({success: false}))
       ).toPromise();
 
       if (!result) {
@@ -264,5 +265,18 @@ export class RegistrationComponent implements OnDestroy {
     } finally {
       this.uploading = false;
     }
+  }
+
+  isWindows(): boolean {
+    return this.deviceService.platform === Platform.Windows;
+  }
+
+  private openFactorOverlayOfType(componentType) {
+    const componentRef = this.navigationService.pushOverlay(componentType);
+
+    componentRef.instance.submit.subscribe(async (factor) => {
+      this.navigationService.acceptOverlay();
+      await this.addFactor(factor);
+    });
   }
 }
