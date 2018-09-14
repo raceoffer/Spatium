@@ -547,24 +547,33 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   async startSigning() {
-    const receiver = this.receiver.getValue();
-    const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
-    // temporarily allow NEM to choose fee itself
-    const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
     try {
-      this.phase.next(Phase.Confirmation);
       if (this.connectionService.state.getValue() !== State.Opened) {
-        await this.connectionService.reconnect();
+        this.connectionService.reconnect();
       }
-      this.signed = await this.signEcdsa(receiver, value, fee);
 
-      if (!this.signed) {
+      const receiver = this.receiver.getValue();
+      const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
+      // temporarily allow NEM to choose fee itself
+      const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
+      try {
+        this.phase.next(Phase.Confirmation);
+        if (this.connectionService.state.getValue() !== State.Opened) {
+          await this.connectionService.reconnect();
+        }
+        this.signed = await this.signEcdsa(receiver, value, fee);
+
+        if (!this.signed) {
+          this.phase.next(Phase.Creation);
+        } else {
+          this.phase.next(Phase.Sending);
+        }
+      } catch (e) {
         this.phase.next(Phase.Creation);
-      } else {
-        this.phase.next(Phase.Sending);
       }
     } catch (e) {
-      this.phase.next(Phase.Creation);
+      console.error(e);
+      this.notification.show('Failed to sign a transaction');
     }
   }
 

@@ -174,6 +174,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
     await this.keychain.reset();
     await this.rpcService.stop();
+    await this.verifierService.reset();
     await this.ssdp.stop();
   }
 

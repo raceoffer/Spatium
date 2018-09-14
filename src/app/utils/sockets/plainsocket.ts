@@ -42,8 +42,8 @@ export class PlainSocket extends Socket {
   }
 
   public async close(): Promise<void> {
-    if (this.state.getValue() !== State.Opened) {
-      throw new Error('Failed to close a busy socket');
+    if (this.state.getValue() === State.Closed) {
+      return;
     }
 
     this.state.next(State.Closing);

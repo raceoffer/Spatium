@@ -21,11 +21,13 @@ export abstract class Currency {
   ) {}
 
   public abstract compoundPublic(): any;
+
+  public abstract async reset(): Promise<void>;
 }
 
 export class EcdsaCurrency extends Currency {
-  private _distributedKeyShard: any;
-  private _syncSessionShard: any;
+  private _distributedKeyShard: any = null;
+  private _syncSessionShard: any = null;
 
   private _signSessions = new Map<string, any>();
 
@@ -161,6 +163,13 @@ export class EcdsaCurrency extends Currency {
 
     return partialSignature;
   }
+
+  public async reset(): Promise<void> {
+    this.state.next(SyncState.None);
+    this._distributedKeyShard = null;
+    this._syncSessionShard = null;
+    this._signSessions.clear();
+  }
 }
 
 export class DeviceSession {
@@ -285,11 +294,21 @@ export class DeviceSession {
 
     return await currency.signReveal(signSessionId, entropyDecommitment);
   }
+
+  public async reset() {
+    const currencies = Array.from(this.currencies.values());
+
+    for (const currency of currencies) {
+      await currency.reset();
+    }
+
+    this._currencies.clear();
+  }
 }
 
 @Injectable()
 export class VerifierService {
-  private sessions = new Map<string, DeviceSession>();
+  private _sessions = new Map<string, DeviceSession>();
 
   public sessionEvent = new Subject<DeviceSession>();
 
@@ -302,7 +321,7 @@ export class VerifierService {
   }
 
   public session(sessionId: string): DeviceSession {
-    return this.sessions.get(sessionId);
+    return this._sessions.get(sessionId);
   }
 
   public constructor(
@@ -316,14 +335,14 @@ export class VerifierService {
    * @param sessionId session Id of the main device
    */
   public async registerSession(sessionId: string, deviceInfo: any): Promise<boolean> {
-    if (this.sessions.has(sessionId)) {
+    if (this._sessions.has(sessionId)) {
       return true;
     }
 
     const deviceSession = new DeviceSession(sessionId, deviceInfo, this._currencyInfoService, this._keyChainService, this._workerService);
     deviceSession.setAcceptHandler(this._acceptHandler);
 
-    this.sessions.set(sessionId, deviceSession);
+    this._sessions.set(sessionId, deviceSession);
 
     this.sessionEvent.next(deviceSession);
 
@@ -335,61 +354,63 @@ export class VerifierService {
    * @param sessionId session Id of the main device
    */
   public async clearSession(sessionId: string): Promise<boolean> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       return false;
     }
 
-    this.sessions.delete(sessionId);
+    this._sessions.get(sessionId).reset();
+
+    this._sessions.delete(sessionId);
 
     return true;
   }
 
   public async syncState(sessionId: string, currencyId: CurrencyId): Promise<SyncState> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).syncState(currencyId);
+    return await this._sessions.get(sessionId).syncState(currencyId);
   }
 
   public async syncStatus(sessionId: string): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).syncStatus();
+    return await this._sessions.get(sessionId).syncStatus();
   }
 
   public async startEcdsaSync(sessionId: string, currencyId: CurrencyId, initialCommitment: any): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).startEcdsaSync(currencyId, initialCommitment);
+    return await this._sessions.get(sessionId).startEcdsaSync(currencyId, initialCommitment);
   }
 
   public async ecdsaSyncReveal(sessionId: string, currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).ecdsaSyncReveal(currencyId, initialDecommitment);
+    return await this._sessions.get(sessionId).ecdsaSyncReveal(currencyId, initialDecommitment);
   }
 
   public async ecdsaSyncResponse(sessionId: string, currencyId: CurrencyId, responseCommitment: any): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).ecdsaSyncResponse(currencyId, responseCommitment);
+    return await this._sessions.get(sessionId).ecdsaSyncResponse(currencyId, responseCommitment);
   }
 
   public async ecdsaSyncFinalize(sessionId: string, currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).ecdsaSyncFinalize(currencyId, responseDecommitment);
+    return await this._sessions.get(sessionId).ecdsaSyncFinalize(currencyId, responseDecommitment);
   }
 
   public async startEcdsaSign(
@@ -400,11 +421,11 @@ export class VerifierService {
     transactionBytes: Buffer,
     entropyCommitment: any
   ): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).startEcdsaSign(currencyId, tokenId, signSessionId, transactionBytes, entropyCommitment);
+    return await this._sessions.get(sessionId).startEcdsaSign(currencyId, tokenId, signSessionId, transactionBytes, entropyCommitment);
   }
 
   public async ecdsaSignReveal(
@@ -413,10 +434,20 @@ export class VerifierService {
     signSessionId: string,
     entropyDecommitment: any
   ): Promise<any> {
-    if (!this.sessions.has(sessionId)) {
+    if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this.sessions.get(sessionId).ecdsaSignReveal(currencyId, signSessionId, entropyDecommitment);
+    return await this._sessions.get(sessionId).ecdsaSignReveal(currencyId, signSessionId, entropyDecommitment);
+  }
+
+  public async reset() {
+    const sessions = Array.from(this._sessions.values());
+
+    for (const session of sessions) {
+      await session.reset();
+    }
+
+    this._sessions.clear();
   }
 }
