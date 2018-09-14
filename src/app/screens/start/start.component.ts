@@ -105,13 +105,4 @@ export class StartComponent implements OnInit, OnDestroy {
     }
     await this.router.navigate(['/verifier-auth']);
   }
-
-  public async go() {
-    this.keyChainService.seed = Buffer.from(
-      '9ff992e811d4b2d2407ad33b263f567698c37bd6631bc0db90223ef10bce7dca28b8c670522667451430a1cb10d1d6b114234d1c2220b2f4229b00cadfc91c4d',
-      'hex'
-    );
-
-    await this.router.navigate(['/navigator', {outlets: {navigator: ['wallet']}}]);
-  }
 }
