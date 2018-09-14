@@ -58,26 +58,26 @@ export class EcdsaCurrency extends Currency {
     const address = outputs.outputs[0].address;
     const value = outputs.outputs[0].value;
 
-    const currecyInfo = this._currencyInfoService.currencyInfo(this.id);
+    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
 
     let model;
     if (tokenId) {
-      const tokenInfo = currecyInfo.tokens.find((info) => info.id === tokenId);
-      model = CurrencyModel.fromToken(currecyInfo, tokenInfo);
+      const tokenInfo = currencyInfo.tokens.find((info) => info.id === tokenId);
+      model = CurrencyModel.fromToken(currencyInfo, tokenInfo);
     } else {
-      model = CurrencyModel.fromCoin(currecyInfo);
+      model = CurrencyModel.fromCoin(currencyInfo);
     }
 
     return await this._acceptHandler(model, address, value, fee);
   }
 
   public async startSync(initialCommitment: any): Promise<any> {
-    const currecyInfo = this._currencyInfoService.currencyInfo(this.id);
+    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
 
-    const privateBytes = this._keyChainService.privateBytes(60, 1);
+    const privateBytes = this._keyChainService.privateBytes(currencyInfo.derivationNumber, 1);
 
     this._distributedKeyShard = await DistributedEcdsaKeyShard.fromOptions({
-      curve: currecyInfo.curve,
+      curve: currencyInfo.curve,
       secret: privateBytes
     }, this._workerService.worker);
 

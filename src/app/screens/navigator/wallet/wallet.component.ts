@@ -264,11 +264,9 @@ export class WalletComponent implements OnInit, OnDestroy {
       const unsyncedCurrencies = localSynchedCurrencies.filter(x => !remoteSyncedCurrencies.includes(x));
 
       if (unsyncedCurrencies.length > 0) {
-        if (!await requestDialog(
-          'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced. Continue?'
-        )) {
-          return;
-        }
+        this.notificationService.show(
+          'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced'
+        );
       }
 
       await this.syncService.sync(

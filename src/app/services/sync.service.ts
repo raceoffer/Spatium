@@ -17,7 +17,7 @@ import { WorkerService } from './worker.service';
 import { SyncState } from './wallet/wallet';
 
 export class EcdsaCurrency extends Currency {
-  private _distributedKey: any;
+  private _distributedKey: any = null;
   private _cancelSubject = new ReplaySubject<any>(1);
 
   public get distributedKey(): any {
@@ -43,7 +43,7 @@ export class EcdsaCurrency extends Currency {
   public async sync(rpcClient: RPCClient): Promise<boolean> {
     const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
 
-    const privateBytes = this._keyChainService.privateBytes(60, 0);
+    const privateBytes = this._keyChainService.privateBytes(currencyInfo.derivationNumber, 1);
 
     this._distributedKey = await DistributedEcdsaKey.fromOptions({
       curve: currencyInfo.curve,
@@ -123,6 +123,11 @@ export class EcdsaCurrency extends Currency {
 
   public cancel() {
     this._cancelSubject.next();
+  }
+
+  public async reset(): Promise<void> {
+    this.state.next(SyncState.None);
+    this._distributedKey = null;
   }
 }
 
