@@ -41,7 +41,6 @@ export class EcdsaCurrency extends Currency {
   }
 
   public async sync(rpcClient: RPCClient): Promise<boolean> {
-
     const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
 
     const privateBytes = this._keyChainService.privateBytes(60, 0);
@@ -164,8 +163,6 @@ export class SyncService {
 
     try {
       this._cancelled = false;
-
-      await rpcClient.api.registerSession({ sessionId });
 
       const syncStatusResponse = await rpcClient.api.syncStatus({ sessionId });
 

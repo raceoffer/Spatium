@@ -32,8 +32,6 @@ export class StartComponent implements OnInit, OnDestroy {
     await this.deviceService.deviceReady();
     await this.settings.ready();
 
-    console.log('Ready', this.settings);
-
     const viewed = await this.settings.presentationViewed();
 
     if (!viewed) {

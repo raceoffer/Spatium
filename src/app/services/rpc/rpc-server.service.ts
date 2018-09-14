@@ -28,17 +28,21 @@ export class RPCServerService {
 
     async Capabilities() {
       const appInfo: any = await this.deviceService.appInfo();
+      const deviceInfo: any = await this.deviceService.deviceInfo();
       const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
       return {
-        appVersionMajor: version[1],
-        appVersionMinor: version[2],
-        appVersionPatch: version[3],
+        deviceInfo: {
+          deviceName: deviceInfo.model,
+          appVersionMajor: version[1],
+          appVersionMinor: version[2],
+          appVersionPatch: version[3]
+        },
         supportedProtocolVersions: [1]
       };
     },
     async RegisterSession(request) {
       return {
-        existing: await this.verifierService.registerSession(request.sessionId)
+        existing: await this.verifierService.registerSession(request.sessionId, request.deviceInfo)
       };
     },
     async ClearSession(request) {

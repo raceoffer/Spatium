@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
+import { Subject, BehaviorSubject } from 'rxjs';
+import { bufferWhen, filter, map, skipUntil, timeInterval, withLatestFrom, mergeMap } from 'rxjs/operators';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
@@ -14,11 +14,13 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
-import { CurrencyModel } from '../../services/wallet/wallet';
+import { CurrencyModel, SyncState } from '../../services/wallet/wallet';
 
 import BN from 'bn.js';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { VerifierService } from '../../services/verifier.service';
+import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
+import { toBehaviourSubject } from '../../utils/transformers';
 
 @Component({
   selector: 'app-verifier',
@@ -70,6 +72,18 @@ export class VerifierComponent implements OnInit, OnDestroy {
     filter(emits => emits > 0)
   );
 
+  public sessions: BehaviorSubject<Array<{
+    sessionId: string,
+    deviceInfo: {
+      name: string
+    },
+    currencies: Array<{
+      currencyId: CurrencyId,
+      model: CurrencyModel,
+      state: SyncState
+    }>
+  }>>;
+
   private subscriptions = [];
 
   constructor(
@@ -79,8 +93,47 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly notification: NotificationService,
     private readonly rpcService: RPCServerService,
     private readonly verifierService: VerifierService,
+    private readonly currencyInfoService: CurrencyInfoService,
     private readonly fs: FileService
-  ) {}
+  ) {
+    this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
+      mergeMap((deviceSession) => deviceSession.currencyEvent.pipe(
+        map((currency) => ({
+          sessionId: deviceSession.id,
+          deviceInfo: deviceSession.deviceInfo,
+          currency: currency
+        }))
+      )),
+      mergeMap(({ sessionId, deviceInfo, currency }) => currency.state.pipe(
+        map((state) => ({
+          sessionId,
+          deviceInfo,
+          currencyId: currency.id,
+          model: CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currency.id)),
+          state
+        }))
+      )),
+      map(({ sessionId, deviceInfo, currencyId, model, state }) => {
+        const sessions = this.sessions.getValue();
+
+        let session = sessions.find((s) => s.sessionId === sessionId);
+        if (!session) {
+          session = { sessionId, deviceInfo, currencies: [] };
+          sessions.push(session);
+        }
+
+        let currency = session.currencies.find((c) => c.currencyId === currencyId);
+        if (!currency) {
+          currency = { currencyId, model, state: SyncState.None };
+          session.currencies.push(currency);
+        }
+
+        currency.state = state;
+
+        return sessions;
+      })
+    ), []);
+  }
 
   async ngOnInit() {
     this.subscriptions.push(
@@ -99,6 +152,12 @@ export class VerifierComponent implements OnInit, OnDestroy {
       this.doubleBack.subscribe(async () => {
         this.notification.hide();
         await this.router.navigate(['/start']);
+      })
+    );
+
+    this.subscriptions.push(
+      this.sessions.subscribe((s) => {
+        console.log('', JSON.stringify(s));
       })
     );
 

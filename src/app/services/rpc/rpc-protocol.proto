@@ -23,18 +23,24 @@ service RpcService {
   rpc EcdsaSignReveal (EcdsaSignRevealRequest) returns (EcdsaSignRevealResponse);
 }
 
+message DeviceInfo {
+  string device_name = 1;
+  int32 app_version_major = 2;
+  int32 app_version_minor = 3;
+  int32 app_version_patch = 4;
+}
+
 message CapabilitiesRequest {
 }
 
 message CapabilitiesResponse {
-  int32 app_version_major = 1;
-  int32 app_version_minor = 2;
-  int32 app_version_patch = 3;
-  repeated int32 supported_protocol_versions = 4;
+  repeated int32 supported_protocol_versions = 1;
+  DeviceInfo device_info = 2;
 }
 
 message RegisterSessionRequest {
   string session_id = 1;
+  DeviceInfo device_info = 2;
 }
 
 message RegisterSessionResponse {

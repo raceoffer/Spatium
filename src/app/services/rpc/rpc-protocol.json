@@ -60,27 +60,39 @@
         }
       }
     },
+    "DeviceInfo": {
+      "fields": {
+        "deviceName": {
+          "type": "string",
+          "id": 1
+        },
+        "appVersionMajor": {
+          "type": "int32",
+          "id": 2
+        },
+        "appVersionMinor": {
+          "type": "int32",
+          "id": 3
+        },
+        "appVersionPatch": {
+          "type": "int32",
+          "id": 4
+        }
+      }
+    },
     "CapabilitiesRequest": {
       "fields": {}
     },
     "CapabilitiesResponse": {
       "fields": {
-        "appVersionMajor": {
-          "type": "int32",
-          "id": 1
-        },
-        "appVersionMinor": {
-          "type": "int32",
-          "id": 2
-        },
-        "appVersionPatch": {
-          "type": "int32",
-          "id": 3
-        },
         "supportedProtocolVersions": {
           "rule": "repeated",
           "type": "int32",
-          "id": 4
+          "id": 1
+        },
+        "deviceInfo": {
+          "type": "DeviceInfo",
+          "id": 2
         }
       }
     },
@@ -89,6 +101,10 @@
         "sessionId": {
           "type": "string",
           "id": 1
+        },
+        "deviceInfo": {
+          "type": "DeviceInfo",
+          "id": 2
         }
       }
     },

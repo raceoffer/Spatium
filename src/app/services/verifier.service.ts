@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DistributedEcdsaKeyShard } from 'crypto-core-async';
 import { Cryptosystem, CurrencyId, CurrencyInfoService } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { WorkerService } from './worker.service';
 
 import BN from 'bn.js';
@@ -166,6 +166,8 @@ export class EcdsaCurrency extends Currency {
 export class DeviceSession {
   private _currencies = new Map<CurrencyId, Currency>();
 
+  public currencyEvent = new Subject<Currency>();
+
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
 
   public setAcceptHandler(
@@ -178,6 +180,10 @@ export class DeviceSession {
     return this._id;
   }
 
+  public get deviceInfo(): any {
+    return this._deviceInfo;
+  }
+
   public get currencies(): Array<Currency> {
     return Array.from(this._currencies.values());
   }
@@ -188,6 +194,7 @@ export class DeviceSession {
 
   public constructor(
     private readonly _id: string,
+    private readonly _deviceInfo: any,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
     private readonly _workerService: WorkerService
@@ -238,6 +245,8 @@ export class DeviceSession {
 
     this._currencies.set(currencyId, currency);
 
+    this.currencyEvent.next(currency);
+
     return await currency.startSync(initialCommitment);
   }
 
@@ -282,6 +291,8 @@ export class DeviceSession {
 export class VerifierService {
   private sessions = new Map<string, DeviceSession>();
 
+  public sessionEvent = new Subject<DeviceSession>();
+
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
 
   public setAcceptHandler(
@@ -304,15 +315,17 @@ export class VerifierService {
    * Checks if this session Id is registered and registers it otherwise
    * @param sessionId session Id of the main device
    */
-  public async registerSession(sessionId: string): Promise<boolean> {
+  public async registerSession(sessionId: string, deviceInfo: any): Promise<boolean> {
     if (this.sessions.has(sessionId)) {
       return true;
     }
 
-    const deviceSession = new DeviceSession(sessionId, this._currencyInfoService, this._keyChainService, this._workerService);
+    const deviceSession = new DeviceSession(sessionId, deviceInfo, this._currencyInfoService, this._keyChainService, this._workerService);
     deviceSession.setAcceptHandler(this._acceptHandler);
 
     this.sessions.set(sessionId, deviceSession);
+
+    this.sessionEvent.next(deviceSession);
 
     return false;
   }

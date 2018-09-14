@@ -208,6 +208,20 @@ export class WalletComponent implements OnInit, OnDestroy {
     const capabilities = await this.connectionService.rpcClient.api.capabilities({});
     console.log(capabilities);
 
+    const appInfo: any = await this.deviceService.appInfo();
+    const deviceInfo: any = await this.deviceService.deviceInfo();
+    const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
+
+    await this.connectionService.rpcClient.api.registerSession({
+      sessionId: this.keyChainService.sessionId,
+      deviceInfo: {
+        deviceName: deviceInfo.model,
+        appVersionMajor: version[1],
+        appVersionMinor: version[2],
+        appVersionPatch: version[3]
+      },
+    });
+
     if (await this.syncService.sync(
       this.keyChainService.sessionId,
       this.keyChainService.paillierPublicKey,

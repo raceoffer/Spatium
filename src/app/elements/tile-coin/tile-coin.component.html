@@ -32,7 +32,7 @@
           Loading
         </span>
 
-        <mat-icon *ngIf="(balanceStatus | async) === balanceStatusType.Error" class="warning">warning</mat-icon>
+        <mat-icon *ngIf="(wallet.balanceStatus | async) === balanceStatusType.Error" class="warning">warning</mat-icon>
       </div>
     </div>
     <div

@@ -30,7 +30,6 @@ export class TileCoinComponent implements OnInit, OnDestroy {
 
   public balance: BehaviorSubject<number>;
   public balanceUSD: BehaviorSubject<number>;
-  public balanceStatus: BehaviorSubject<BalanceStatus>;
 
   public _toggled = false;
 
