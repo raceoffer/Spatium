@@ -95,7 +95,6 @@ import { AuthService } from './services/auth.service';
 import { BluetoothService } from './services/bluetooth.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
-import { DiscoveryService } from './services/discovery.service';
 import { SsdpService } from './services/ssdp.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
@@ -235,7 +234,6 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     HockeyService,
     ActivityService,
     ICOService,
-    DiscoveryService,
     SsdpService,
     IpfsService,
     SettingsService,
