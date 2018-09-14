@@ -12,7 +12,6 @@ import { FeeLevel, PriceService } from '../../../services/price.service';
 import { SyncService, EcdsaCurrency } from '../../../services/sync.service';
 import { CurrecnyModelType, CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
-import { WaitingComponent } from '../waiting/waiting.component';
 import { WorkerService } from '../../../services/worker.service';
 import { Utils, Marshal } from 'crypto-core-async';
 import { uuidFrom } from '../../../utils/uuid';
@@ -641,13 +640,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     await tx.applySignature(signature);
 
     return tx;
-  }
-
-  public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connectedEvent.subscribe(ignored => {
-      this.navigationService.acceptOverlay();
-    });
   }
 
   async cancelTransaction() {

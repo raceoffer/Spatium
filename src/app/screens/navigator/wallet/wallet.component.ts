@@ -7,6 +7,7 @@ import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.
 import { DeviceService, Platform } from '../../../services/device.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
+import { Device } from '../../../services/primitives/device';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 import { SyncService } from '../../../services/sync.service';
 import { CurrencyModel } from '../../../services/wallet/wallet';
@@ -15,7 +16,6 @@ import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
-import { WaitingComponent } from '../waiting/waiting.component';
 
 @Component({
   selector: 'app-wallet',
@@ -143,6 +143,8 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.openDiscoveryOverlay();
   }
 
   public async ngOnDestroy() {
@@ -194,16 +196,42 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.navigationService.pushOverlay(FeedbackComponent);
   }
 
-  public async openConnectOverlay() {
-    // if (this.connectionState.getValue() === ConnectionState.None || await requestDialog('Syncronize with another device')) {
-      const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-      componentRef.instance.connectedEvent.subscribe(ignored => {
-        this.navigationService.acceptOverlay();
-      });
-    // }
+  public async openDiscoveryOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+    componentRef.instance.selected.subscribe(async (device) => {
+      this.navigationService.acceptOverlay();
+
+      await this.sync(device);
+    });
   }
 
-  public async sync() {
-    this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+  public async sync(device: Device) {
+    await this.connectionService.connectPlain(device.ip, device.port);
+
+    const capabilities = await this.connectionService.rpcClient.api.capabilities({});
+    console.log(capabilities);
+
+    const appInfo: any = await this.deviceService.appInfo();
+    const deviceInfo: any = await this.deviceService.deviceInfo();
+    const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
+
+    await this.connectionService.rpcClient.api.registerSession({
+      sessionId: this.keyChainService.sessionId,
+      deviceInfo: {
+        deviceName: deviceInfo.model,
+        appVersionMajor: version[1],
+        appVersionMinor: version[2],
+        appVersionPatch: version[3]
+      },
+    });
+
+    await this.syncService.sync(
+      this.keyChainService.sessionId,
+      this.keyChainService.paillierPublicKey,
+      this.keyChainService.paillierSecretKey,
+      this.connectionService.rpcClient
+    );
+
+    console.log('Synchronized');
   }
 }

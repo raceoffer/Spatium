@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import BN from 'bn.js';
 import { DistributedEcdsaKey, Utils } from 'crypto-core-async';
 import { Subject } from 'rxjs';
 import { bufferWhen, filter, map, skipUntil, timeInterval } from 'rxjs/operators';
@@ -8,12 +7,8 @@ import { BalanceService } from '../../services/balance.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
-import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SyncService } from '../../services/sync.service';
-import { VerifierService } from '../../services/verifier.service';
-import { CurrencyModel } from '../../services/wallet/wallet';
 import { uuidFrom } from '../../utils/uuid';
-import { VerifyTransactionComponent } from '../verifier/verify-transaction/verify-transaction.component';
 import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 
 @Component({
@@ -40,10 +35,8 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly balanceService: BalanceService,
-    private readonly rpcService: RPCServerService,
     private readonly syncService: SyncService,
-    private readonly keyChainService: KeyChainService,
-    private readonly verifierService: VerifierService
+    private readonly keyChainService: KeyChainService
   ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -77,12 +70,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     console.log(this.keyChainService.sessionId);
 
     await this.balanceService.start();
-
-    this.verifierService.setAcceptHandler(
-      async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
-    );
-
-    await this.rpcService.start('0.0.0.0', 5666);
   }
 
   public async ngOnDestroy() {
@@ -95,31 +82,6 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     await this.balanceService.reset();
     await this.syncService.reset();
-    await this.rpcService.stop();
-  }
-
-  public async accept(sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN): Promise<boolean> {
-    return new Promise<boolean>((resolve, ignored) => {
-      const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
-      componentRef.instance.sessionId = sessionId;
-      componentRef.instance.model = model;
-      componentRef.instance.address = address;
-      componentRef.instance.valueInternal = value;
-      componentRef.instance.feeInternal = fee;
-
-      componentRef.instance.confirm.subscribe(async () => {
-        this.navigationService.acceptOverlay();
-        resolve(true);
-      });
-      componentRef.instance.decline.subscribe(async () => {
-        this.navigationService.acceptOverlay();
-        resolve(false);
-      });
-      componentRef.instance.cancelled.subscribe(async () => {
-        this.navigationService.acceptOverlay();
-        resolve(false);
-      });
-    });
   }
 
   public async openConnectOverlay() {

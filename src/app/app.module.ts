@@ -76,7 +76,6 @@ import { WhitelistComponent } from './screens/navigator/ico/whitelist/whitelist.
 import { NavigatorComponent } from './screens/navigator/navigator.component';
 import { SendTransactionComponent } from './screens/navigator/send-transaction/send-transaction.component';
 import { SettingsComponent } from './screens/navigator/settings/settings.component';
-import { WaitingComponent } from './screens/navigator/waiting/waiting.component';
 import { WalletComponent } from './screens/navigator/wallet/wallet.component';
 import { PresentationComponent } from './screens/presentation/presentation.component';
 import { RegistrationSuccessComponent } from './screens/registration-success/registration-success.component';
@@ -124,7 +123,6 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     AppComponent,
     NavigatorComponent,
     StartComponent,
-    WaitingComponent,
     SendTransactionComponent,
     VerifyTransactionComponent,
     PincodeAuthFactorComponent,
@@ -267,7 +265,6 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     QrFactorComponent,
     CurrencyComponent,
     CurrencySettingsComponent,
-    WaitingComponent,
     SendTransactionComponent,
     SecretImportComponent,
     SecretExportComponent,
