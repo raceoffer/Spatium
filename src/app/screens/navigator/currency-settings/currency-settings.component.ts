@@ -59,7 +59,7 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
 
     await this.settingsService.setCurrencySettings(this.currencyId, this.settings);
 
-    await this.notificationService.show('The settings are saved.');
+    await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
 
     this.saved.next();
   }

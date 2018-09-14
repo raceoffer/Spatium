@@ -213,6 +213,10 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync(device: Device) {
+    if (this.synchronizing.getValue()) {
+      await this.syncService.cancel();
+    }
+
     try {
       this.synchronizing.next(true);
 
