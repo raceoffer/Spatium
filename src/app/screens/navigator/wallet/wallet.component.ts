@@ -18,6 +18,7 @@ import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.c
 import { SettingsComponent } from '../settings/settings.component';
 import { requestDialog } from '../../../utils/dialog';
 import { NotificationService } from '../../../services/notification.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-wallet',
@@ -89,6 +90,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     })
   ), []);
 
+  public synchronizing = new BehaviorSubject<boolean>(false);
+
   private subscriptions = [];
 
   constructor(
@@ -155,6 +158,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
 
     await this.syncService.cancel();
+    await this.connectionService.disconnect();
   }
 
   public toggleNavigation() {
@@ -210,6 +214,8 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public async sync(device: Device) {
     try {
+      this.synchronizing.next(true);
+
       await this.connectionService.connectPlain(device.ip, device.port);
 
       const capabilities = await this.connectionService.rpcClient.api.capabilities({});
@@ -277,6 +283,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     } catch (e) {
       console.error(e);
       this.notificationService.show('Synchronization error');
+    } finally {
+      this.synchronizing.next(false);
     }
   }
 }

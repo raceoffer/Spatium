@@ -12,16 +12,8 @@
   </button>
 
   <button mat-icon-button (click)="openDiscoveryOverlay()">
-    <mat-icon>sync</mat-icon>
+    <mat-icon [class.sync]="(synchronizing | async)">sync</mat-icon>
   </button>
-
-  <!-- <button mat-icon-button (click)="openConnectOverlay()">
-    <mat-icon>sync_problem</mat-icon>
-  </button>
-
-  <button mat-icon-button (click)="openConnectOverlay()">
-    <mat-icon class="sync">sync</mat-icon>
-  </button> -->
 </mat-toolbar>
 
 <mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">

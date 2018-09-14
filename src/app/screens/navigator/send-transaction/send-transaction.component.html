@@ -35,7 +35,7 @@
             readonly
             matInput
             mat-autosize="true"
-            [value]="(wallet.state | async) !== stateType.None ? 'Synchronizing' : 'Not synched'"
+            [value]="(wallet.state | async) !== stateType.None ? 'Synchronizing' : 'Not synced'"
             *ngIf="(wallet.state | async) !== stateType.Finalized">
           </textarea>
 

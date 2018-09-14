@@ -11,4 +11,7 @@
   <div style="margin: 10px;" *ngFor="let session of (sessions | async)">
     {{ session.deviceInfo.deviceName }}: {{ session.syncPercent.toString().padStart(3) }}% synchronization
   </div>
+  <div style="margin: 10px;" *ngIf="(sessions | async).length === 0">
+    Ready to sync
+  </div>
 </div>
