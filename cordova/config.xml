@@ -158,9 +158,9 @@
     <plugin name="cordova-plugin-zeroconf" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-zeroconf.git#716660c7554028849c03d9a8050a7f84b8d9faa5" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
     <plugin name="cz.blocshop.socketsforcordova" spec="..\..\sockets-for-cordova" />
+    <plugin name="cordova-plugin-ssdp" spec="..\..\cordova-plugin-ssdp" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^6.3.0" />
     <engine name="ios" spec="^4.5.5" />
-    <plugin name="cordova-plugin-ssdp" spec="..\..\cordova-plugin-ssdp" />
 </widget>

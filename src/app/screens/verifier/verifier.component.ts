@@ -19,6 +19,7 @@ import { CurrencyModel } from '../../services/wallet/wallet';
 import BN from 'bn.js';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { VerifierService } from '../../services/verifier.service';
+import { SsdpService } from '../../services/ssdp.service';
 
 @Component({
   selector: 'app-verifier',
@@ -79,7 +80,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly notification: NotificationService,
     private readonly rpcService: RPCServerService,
     private readonly verifierService: VerifierService,
-    private readonly fs: FileService
+    private readonly fs: FileService,
+    private readonly ssdp: SsdpService,
   ) {}
 
   async ngOnInit() {
@@ -106,7 +108,9 @@ export class VerifierComponent implements OnInit, OnDestroy {
       async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
     );
 
-    await this.rpcService.start('0.0.0.0', 5666);
+    const rpcPort = 5666;
+    await this.rpcService.start('0.0.0.0', rpcPort);
+    await this.ssdp.startAdvertising(rpcPort);
   }
 
   public async ngOnDestroy() {
@@ -115,6 +119,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
     await this.keychain.reset();
     await this.rpcService.stop();
+    await this.ssdp.stop();
   }
 
   public toggleNavigation() {

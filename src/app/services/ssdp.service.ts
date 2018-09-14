@@ -5,7 +5,6 @@ import { State } from './primitives/state';
 import { ProviderType } from './interfaces/connection-provider';
 
 declare const cordova: any;
-declare const device: any;
 
 @Injectable()
 export class SsdpService {
@@ -17,28 +16,30 @@ export class SsdpService {
     private target = 'spatium';
 
     constructor() {
+        console.log('ssdp - set callbacks');
         cordova.plugins.ssdp.setDiscoveredCallback(data => {
-            console.log('discovered:', data);
+            console.log('ssdp - discovered:', data);
             const devices = this.devices.getValue();
-            devices.set(data.name, new Device(
+            devices.set(data.usn, new Device(
                 ProviderType.SSDP,
                 data.name,
                 data.usn,
                 data.ip,
-                data.port
+                parseInt(data.port)
             ));
             this.devices.next(devices);
         });
 
         cordova.plugins.ssdp.setGoneCallback(data => {
-            console.log('gone:', data);
+            console.log('ssdp - gone:', data);
             const devices = this.devices.getValue();
-            devices.delete(data.name);
+            devices.delete(data.usn);
             this.devices.next(devices);
         });
     }
 
     async startAdvertising(port: number) {
+        console.log('ssdp - startAdvertising');
         if (this.advertising.getValue() !== State.Stopped) {
             return;
         }
@@ -54,6 +55,7 @@ export class SsdpService {
     }
 
     async stop() {
+        console.log('ssdp - stop');
         if (this.advertising.getValue() === State.Started) {
             this.advertising.next(State.Stopping);
             try {
@@ -78,6 +80,7 @@ export class SsdpService {
     }
 
     async searchDevices() {
+        console.log('ssdp - searchDevices');
         if (this.discovering.getValue() !== State.Stopped) {
             return;
         }
@@ -90,5 +93,9 @@ export class SsdpService {
             this.discovering.next(State.Stopped);
             throw e;
         }
+    }
+
+    reset() {
+        this.devices.next(new Map<string, Device>());
     }
 }

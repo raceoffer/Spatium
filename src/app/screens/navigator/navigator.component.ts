@@ -8,7 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SyncService } from '../../services/sync.service';
-import { WaitingComponent } from './waiting/waiting.component';
+import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 
 import BN from 'bn.js';
 
@@ -127,7 +127,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }
 
   public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.connectedEvent.subscribe(() => {
       this.navigationService.acceptOverlay();
     });

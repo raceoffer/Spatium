@@ -19,6 +19,7 @@ import { Client } from '../../../utils/client-server/client-server';
 import { CurrencyModel } from '../../../services/wallet/wallet';
 import { KeyChainService } from '../../../services/keychain.service';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 
 @Component({
   selector: 'app-wallet',
@@ -205,18 +206,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync() {
-    await this.connectionService.connectPlain('127.0.0.1', 5666);
-
-    const capabilities = await this.connectionService.rpcClient.api.capabilities({});
-    console.log(capabilities);
-
-    await this.syncService.sync(
-      this.keyChainService.sessionId,
-      this.keyChainService.paillierPublicKey,
-      this.keyChainService.paillierSecretKey,
-      this.connectionService.rpcClient
-    );
-
-    console.log('Synchronized');
+    this.navigationService.pushOverlay(DeviceDiscoveryComponent);
   }
 }
