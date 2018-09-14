@@ -13,6 +13,7 @@ import { CurrencyModel } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
 import { WaitingComponent } from '../waiting/waiting.component';
 
@@ -203,34 +204,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync() {
-    await this.connectionService.connectPlain('127.0.0.1', 5666);
-
-    const capabilities = await this.connectionService.rpcClient.api.capabilities({});
-    console.log(capabilities);
-
-    const appInfo: any = await this.deviceService.appInfo();
-    const deviceInfo: any = await this.deviceService.deviceInfo();
-    const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
-
-    await this.connectionService.rpcClient.api.registerSession({
-      sessionId: this.keyChainService.sessionId,
-      deviceInfo: {
-        deviceName: deviceInfo.model,
-        appVersionMajor: version[1],
-        appVersionMinor: version[2],
-        appVersionPatch: version[3]
-      },
-    });
-
-    if (await this.syncService.sync(
-      this.keyChainService.sessionId,
-      this.keyChainService.paillierPublicKey,
-      this.keyChainService.paillierSecretKey,
-      this.connectionService.rpcClient
-    )) {
-      console.log('Synchronized');
-    } else {
-      console.log('Synchronization canceled');
-    }
+    this.navigationService.pushOverlay(DeviceDiscoveryComponent);
   }
 }

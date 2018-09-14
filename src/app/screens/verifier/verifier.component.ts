@@ -1,26 +1,26 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, BehaviorSubject } from 'rxjs';
-import { bufferWhen, filter, map, skipUntil, timeInterval, withLatestFrom, mergeMap } from 'rxjs/operators';
+import BN from 'bn.js';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval } from 'rxjs/operators';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
+import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
+import { RPCServerService } from '../../services/rpc/rpc-server.service';
+import { SsdpService } from '../../services/ssdp.service';
+import { VerifierService } from '../../services/verifier.service';
+import { CurrencyModel, SyncState } from '../../services/wallet/wallet';
 import { checkAvailable, checkExisting, deleteTouch } from '../../utils/fingerprint';
+import { toBehaviourSubject } from '../../utils/transformers';
 import { DeleteSecretComponent } from '../delete-secret/delete-secret.component';
 import { FeedbackComponent } from '../feedback/feedback.component';
 import { SecretExportComponent } from '../secret-export/secret-export.component';
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
-import { CurrencyModel, SyncState } from '../../services/wallet/wallet';
-
-import BN from 'bn.js';
-import { RPCServerService } from '../../services/rpc/rpc-server.service';
-import { VerifierService } from '../../services/verifier.service';
-import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
-import { toBehaviourSubject } from '../../utils/transformers';
 
 @Component({
   selector: 'app-verifier',
@@ -94,7 +94,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly rpcService: RPCServerService,
     private readonly verifierService: VerifierService,
     private readonly currencyInfoService: CurrencyInfoService,
-    private readonly fs: FileService
+    private readonly fs: FileService,
+    private readonly ssdp: SsdpService
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       mergeMap((deviceSession) => deviceSession.currencyEvent.pipe(
@@ -165,7 +166,9 @@ export class VerifierComponent implements OnInit, OnDestroy {
       async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
     );
 
-    await this.rpcService.start('0.0.0.0', 5666);
+    const rpcPort = 5666;
+    await this.rpcService.start('0.0.0.0', rpcPort);
+    await this.ssdp.startAdvertising(rpcPort);
   }
 
   public async ngOnDestroy() {
@@ -174,6 +177,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
     await this.keychain.reset();
     await this.rpcService.stop();
+    await this.ssdp.stop();
   }
 
   public toggleNavigation() {

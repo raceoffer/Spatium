@@ -97,6 +97,7 @@ import { BluetoothService } from './services/bluetooth.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
 import { DiscoveryService } from './services/discovery.service';
+import { SsdpService } from './services/ssdp.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
 import { ICOService } from './services/ico.service';
@@ -116,6 +117,7 @@ import { CurrencyInfoService } from './services/currencyinfo.service';
 import { SyncService } from './services/sync.service';
 import { BalanceService } from './services/balance.service';
 import { RPCConnectionService } from './services/rpc/rpc-connection.service';
+import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/device-discovery.component';
 
 @NgModule({
   declarations: [
@@ -184,7 +186,8 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     CarouselItemElement,
     PresentationComponent,
     NavbarComponent,
-    AddTokenComponent
+    AddTokenComponent,
+    DeviceDiscoveryComponent
   ],
   imports: [
     OverlayModule,
@@ -235,6 +238,7 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     ActivityService,
     ICOService,
     DiscoveryService,
+    SsdpService,
     IpfsService,
     SettingsService,
     RPCServerService,
@@ -286,6 +290,7 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
     NavbarComponent,
     BackupComponent,
     AddTokenComponent,
+    DeviceDiscoveryComponent,
   ]
 })
 

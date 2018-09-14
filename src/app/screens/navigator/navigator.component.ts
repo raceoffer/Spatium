@@ -14,7 +14,7 @@ import { VerifierService } from '../../services/verifier.service';
 import { CurrencyModel } from '../../services/wallet/wallet';
 import { uuidFrom } from '../../utils/uuid';
 import { VerifyTransactionComponent } from '../verifier/verify-transaction/verify-transaction.component';
-import { WaitingComponent } from './waiting/waiting.component';
+import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 
 @Component({
   selector: 'app-navigator',
@@ -123,7 +123,7 @@ export class NavigatorComponent implements OnInit, OnDestroy {
   }
 
   public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.connectedEvent.subscribe(() => {
       this.navigationService.acceptOverlay();
     });
