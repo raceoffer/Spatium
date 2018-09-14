@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import BN from 'bn.js';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -96,7 +96,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly verifierService: VerifierService,
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly fs: FileService,
-    private readonly ssdp: SsdpService
+    private readonly ssdp: SsdpService,
+    private readonly ngZone: NgZone
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       mergeMap((deviceSession) => deviceSession.currencyEvent.pipe(
@@ -198,7 +199,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
   }
 
   public async accept(sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN): Promise<boolean> {
-    return new Promise<boolean>((resolve, ignored) => {
+    return await new Promise<boolean>((resolve, ignored) => this.ngZone.run(() => {
       const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
       componentRef.instance.sessionId = sessionId;
       componentRef.instance.model = model;
@@ -218,7 +219,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
         this.navigationService.acceptOverlay();
         resolve(false);
       });
-    });
+    }));
   }
 
   public async onExport() {
