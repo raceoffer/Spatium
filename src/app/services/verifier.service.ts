@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { DistributedEcdsaKeyShard } from 'crypto-core-async';
 import { Cryptosystem, CurrencyId, CurrencyInfoService } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
@@ -41,7 +41,8 @@ export class EcdsaCurrency extends Currency {
     _id: CurrencyId,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
+    private readonly _workerService: WorkerService,
+    private readonly _ngZone: NgZone
   ) {
     super(_id);
   }
@@ -68,7 +69,7 @@ export class EcdsaCurrency extends Currency {
       model = CurrencyModel.fromCoin(currencyInfo);
     }
 
-    return await this._acceptHandler(model, address, value, fee);
+    return await this._ngZone.run(async () => await this._acceptHandler(model, address, value, fee));
   }
 
   public async startSync(initialCommitment: any): Promise<any> {
@@ -85,7 +86,7 @@ export class EcdsaCurrency extends Currency {
 
     const initialData = await this._syncSessionShard.processInitialCommitment(initialCommitment);
 
-    this.state.next(SyncState.Started);
+    this._ngZone.run(() => this.state.next(SyncState.Started));
 
     return initialData;
   }
@@ -97,7 +98,7 @@ export class EcdsaCurrency extends Currency {
 
     const challengeCommitment = await this._syncSessionShard.processInitialDecommitment(initialDecommitment);
 
-    this.state.next(SyncState.Revealed);
+    this._ngZone.run(() => this.state.next(SyncState.Revealed));
 
     return challengeCommitment;
   }
@@ -109,7 +110,7 @@ export class EcdsaCurrency extends Currency {
 
     const challengeDecommitment = await this._syncSessionShard.processResponseCommitment(responseCommitment);
 
-    this.state.next(SyncState.Responded);
+    this._ngZone.run(() => this.state.next(SyncState.Responded));
 
     return challengeDecommitment;
   }
@@ -123,7 +124,7 @@ export class EcdsaCurrency extends Currency {
 
     await this._distributedKeyShard.importSyncData(shardSyncData);
 
-    this.state.next(SyncState.Finalized);
+    this._ngZone.run(() => this.state.next(SyncState.Finalized));
 
     return;
   }
@@ -206,7 +207,8 @@ export class DeviceSession {
     private readonly _deviceInfo: any,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
+    private readonly _workerService: WorkerService,
+    private readonly _ngZone: NgZone
   ) {}
 
   private safeGetEcdsa(currencyId) {
@@ -247,7 +249,13 @@ export class DeviceSession {
       throw new Error('Invalid cryptosystem for this currency');
     }
 
-    const currency = new EcdsaCurrency(currencyId, this._currencyInfoService, this._keyChainService, this._workerService);
+    const currency = new EcdsaCurrency(
+      currencyId,
+      this._currencyInfoService,
+      this._keyChainService,
+      this._workerService,
+      this._ngZone
+    );
     currency.setAcceptHandler(async (model, address, value, fee) => {
       return await this._acceptHandler(this.id, model, address, value, fee);
     });
@@ -327,7 +335,8 @@ export class VerifierService {
   public constructor(
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
+    private readonly _workerService: WorkerService,
+    private readonly _ngZone: NgZone
   ) {}
 
   /**
@@ -339,7 +348,14 @@ export class VerifierService {
       return true;
     }
 
-    const deviceSession = new DeviceSession(sessionId, deviceInfo, this._currencyInfoService, this._keyChainService, this._workerService);
+    const deviceSession = new DeviceSession(
+      sessionId,
+      deviceInfo,
+      this._currencyInfoService,
+      this._keyChainService,
+      this._workerService,
+      this._ngZone
+    );
     deviceSession.setAcceptHandler(this._acceptHandler);
 
     this._sessions.set(sessionId, deviceSession);
