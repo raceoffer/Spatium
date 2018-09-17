@@ -205,11 +205,11 @@ export class DeviceSession {
     return this._currencies.get(currenyId);
   }
 
-  private activityUp() {
+  private activityStart() {
     this._ngZone.run(() => this._activities.next(this._activities.getValue() + 1));
   }
 
-  private activityDown() {
+  private activityEnd() {
     this._ngZone.run(() => this._activities.next(this._activities.getValue() - 1));
   }
 
@@ -237,93 +237,98 @@ export class DeviceSession {
   }
 
   public async syncState(currencyId: CurrencyId): Promise<SyncState> {
-    this.activityUp();
+    this.activityStart();
 
-    if (!this._currencies.has(currencyId)) {
-      return SyncState.None;
+    try {
+      if (!this._currencies.has(currencyId)) {
+        return SyncState.None;
+      }
+
+      return this._currencies.get(currencyId).state.getValue();
+    } finally {
+      this.activityEnd();
     }
-
-    const state = this._currencies.get(currencyId).state.getValue();
-
-    this.activityDown();
-    return state;
   }
 
   public async syncStatus(): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
-    this.activityUp();
+    this.activityStart();
 
-    const status = Array.from(this._currencies.values()).map((currency) => {
-      return {
-        currencyId: currency.id,
-        state: currency.state.getValue()
-      };
-    });
-
-    this.activityDown();
-    return status;
+    try {
+      return Array.from(this._currencies.values()).map((currency) => {
+        return {
+          currencyId: currency.id,
+          state: currency.state.getValue()
+        };
+      });
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async startEcdsaSync(currencyId: CurrencyId, initialCommitment: any): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currencyInfo = this._currencyInfoService.currencyInfo(currencyId);
+    try {
+      const currencyInfo = this._currencyInfoService.currencyInfo(currencyId);
 
-    if (currencyInfo.cryptosystem !== Cryptosystem.Ecdsa) {
-      throw new Error('Invalid cryptosystem for this currency');
+      if (currencyInfo.cryptosystem !== Cryptosystem.Ecdsa) {
+        throw new Error('Invalid cryptosystem for this currency');
+      }
+
+      const currency = new EcdsaCurrency(
+        currencyId,
+        this._currencyInfoService,
+        this._keyChainService,
+        this._workerService,
+        this._ngZone
+      );
+      currency.setAcceptHandler(async (model, address, value, fee) => {
+        return await this._acceptHandler(this.id, model, address, value, fee);
+      });
+
+      this._currencies.set(currencyId, currency);
+
+      this.currencyEvent.next(currency);
+
+      return await currency.startSync(initialCommitment);
+    } finally {
+      this.activityEnd();
     }
-
-    const currency = new EcdsaCurrency(
-      currencyId,
-      this._currencyInfoService,
-      this._keyChainService,
-      this._workerService,
-      this._ngZone
-    );
-    currency.setAcceptHandler(async (model, address, value, fee) => {
-      return await this._acceptHandler(this.id, model, address, value, fee);
-    });
-
-    this._currencies.set(currencyId, currency);
-
-    this.currencyEvent.next(currency);
-
-    const initialData = await currency.startSync(initialCommitment);
-
-    this.activityDown();
-    return initialData;
   }
 
   public async ecdsaSyncReveal(currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currency = this.safeGetEcdsa(currencyId);
+    try {
+      const currency = this.safeGetEcdsa(currencyId);
 
-    const challengeCommitment = await currency.syncReveal(initialDecommitment);
-
-    this.activityDown();
-    return challengeCommitment;
+      return await currency.syncReveal(initialDecommitment);
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async ecdsaSyncResponse(currencyId: CurrencyId, responseCommitment: any): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currency = this.safeGetEcdsa(currencyId);
+    try {
+      const currency = this.safeGetEcdsa(currencyId);
 
-    const challengeDecommitment = await currency.syncResponse(responseCommitment);
-
-    this.activityDown();
-    return challengeDecommitment;
+      return await currency.syncResponse(responseCommitment);
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async ecdsaSyncFinalize(currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currency = this.safeGetEcdsa(currencyId);
-
-    const finalize = await currency.syncFinalize(responseDecommitment);
-
-    this.activityDown();
-    return finalize;
+    try {
+      const currency = this.safeGetEcdsa(currencyId);
+      return await currency.syncFinalize(responseDecommitment);
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async startEcdsaSign(
@@ -333,25 +338,27 @@ export class DeviceSession {
     transactionBytes: Buffer,
     entropyCommitment: any
   ): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currency = this.safeGetEcdsa(currencyId);
+    try {
+      const currency = this.safeGetEcdsa(currencyId);
 
-    const entropyData = await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
-
-    this.activityDown();
-    return entropyData;
+      return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async ecdsaSignReveal(currencyId: CurrencyId, signSessionId: string, entropyDecommitment: any): Promise<any> {
-    this.activityUp();
+    this.activityStart();
 
-    const currency = this.safeGetEcdsa(currencyId);
+    try {
+      const currency = this.safeGetEcdsa(currencyId);
 
-    const partialSignature = await currency.signReveal(signSessionId, entropyDecommitment);
-
-    this.activityDown();
-    return partialSignature;
+      return await currency.signReveal(signSessionId, entropyDecommitment);
+    } finally {
+      this.activityEnd();
+    }
   }
 
   public async reset() {
