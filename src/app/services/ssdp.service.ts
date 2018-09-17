@@ -95,6 +95,7 @@ export class SsdpService {
   }
 
   reset() {
+    cordova.plugins.ssdp.reset();
     this.devices.next(new Map<string, Device>());
   }
 }
