@@ -10,6 +10,7 @@ import { NotificationService } from '../../services/notification.service';
 import { SyncService } from '../../services/sync.service';
 import { uuidFrom } from '../../utils/uuid';
 import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
+import { RPCConnectionService } from '../../services/rpc/rpc-connection.service';
 
 @Component({
   selector: 'app-navigator',
@@ -33,10 +34,11 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     private readonly keyChain: KeyChainService,
     private readonly router: Router,
     private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService,
     private readonly balanceService: BalanceService,
     private readonly syncService: SyncService,
-    private readonly keyChainService: KeyChainService
+    private readonly keyChainService: KeyChainService,
+    private readonly connectionService: RPCConnectionService,
+    private readonly notificationService: NotificationService
   ) {
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
@@ -46,13 +48,13 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       this.back.subscribe(async () => {
-        this.notification.show('Tap back again to exit');
+        this.notificationService.show('Tap back again to exit');
       })
     );
 
     this.subscriptions.push(
       this.doubleBack.subscribe(async () => {
-        this.notification.hide();
+        this.notificationService.hide();
         await this.router.navigate(['/start']);
       })
     );
@@ -70,6 +72,8 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     console.log(this.keyChainService.sessionId);
 
     await this.balanceService.start();
+
+    await this.openDiscoveryOverlay();
   }
 
   public async ngOnDestroy() {
@@ -84,10 +88,26 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     await this.syncService.reset();
   }
 
-  public async openConnectOverlay() {
+  public async openDiscoveryOverlay() {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
-    componentRef.instance.connectedEvent.subscribe(() => {
+    componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
+
+      try {
+        await this.connectionService.connectPlain(device.ip, device.port);
+
+        await this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient
+        );
+
+        console.log('Synchronized');
+      } catch (e) {
+        console.error(e);
+        this.notificationService.show('Synchronization error');
+      }
     });
   }
 }

@@ -15,15 +15,16 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   @Output() selected = new EventEmitter<Device>();
+  @Output() cancelled = new EventEmitter<any>();
 
   public devices: BehaviorSubject<Device[]> = toBehaviourSubject(this.ssdp.devices.pipe(
-      map(d => Array.from(d.values()))
+    map(d => Array.from(d.values()))
   ), []);
 
   constructor(
     private readonly ssdp: SsdpService,
     private readonly navigationService: NavigationService
-  ) { }
+  ) {}
 
   async ngOnInit() {
     await this.startDiscovery();
@@ -31,6 +32,10 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
 
   async ngOnDestroy() {
     await this.ssdp.stop();
+  }
+
+  public cancel() {
+    this.cancelled.next();
   }
 
   onBack() {
