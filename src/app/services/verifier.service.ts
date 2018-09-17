@@ -8,6 +8,7 @@ import { WorkerService } from './worker.service';
 import BN from 'bn.js';
 
 import { CurrencyModel, SyncState } from './wallet/wallet';
+import { map } from 'rxjs/operators';
 
 export abstract class Currency {
   public state = new BehaviorSubject<SyncState>(SyncState.None);
@@ -17,7 +18,7 @@ export abstract class Currency {
   }
 
   public constructor(
-    protected readonly _id: CurrencyId,
+    protected readonly _id: CurrencyId
   ) {}
 
   public abstract compoundPublic(): any;
@@ -175,8 +176,10 @@ export class EcdsaCurrency extends Currency {
 
 export class DeviceSession {
   private _currencies = new Map<CurrencyId, Currency>();
+  private _activities = new BehaviorSubject<number>(0);
 
   public currencyEvent = new Subject<Currency>();
+  public active = this._activities.pipe(map((activities) => activities > 0));
 
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
 
@@ -200,6 +203,14 @@ export class DeviceSession {
 
   public currency(currenyId: CurrencyId): Currency {
     return this._currencies.get(currenyId);
+  }
+
+  private activityUp() {
+    this._ngZone.run(() => this._activities.next(this._activities.getValue() + 1));
+  }
+
+  private activityDown() {
+    this._ngZone.run(() => this._activities.next(this._activities.getValue() - 1));
   }
 
   public constructor(
@@ -226,23 +237,35 @@ export class DeviceSession {
   }
 
   public async syncState(currencyId: CurrencyId): Promise<SyncState> {
+    this.activityUp();
+
     if (!this._currencies.has(currencyId)) {
       return SyncState.None;
     }
 
-    return this._currencies.get(currencyId).state.getValue();
+    const state = this._currencies.get(currencyId).state.getValue();
+
+    this.activityDown();
+    return state;
   }
 
   public async syncStatus(): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
-    return Array.from(this._currencies.values()).map((currency) => {
+    this.activityUp();
+
+    const status = Array.from(this._currencies.values()).map((currency) => {
       return {
         currencyId: currency.id,
         state: currency.state.getValue()
       };
     });
+
+    this.activityDown();
+    return status;
   }
 
   public async startEcdsaSync(currencyId: CurrencyId, initialCommitment: any): Promise<any> {
+    this.activityUp();
+
     const currencyInfo = this._currencyInfoService.currencyInfo(currencyId);
 
     if (currencyInfo.cryptosystem !== Cryptosystem.Ecdsa) {
@@ -264,25 +287,43 @@ export class DeviceSession {
 
     this.currencyEvent.next(currency);
 
-    return await currency.startSync(initialCommitment);
+    const initialData = await currency.startSync(initialCommitment);
+
+    this.activityDown();
+    return initialData;
   }
 
   public async ecdsaSyncReveal(currencyId: CurrencyId, initialDecommitment: any): Promise<any> {
+    this.activityUp();
+
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.syncReveal(initialDecommitment);
+    const challengeCommitment = await currency.syncReveal(initialDecommitment);
+
+    this.activityDown();
+    return challengeCommitment;
   }
 
   public async ecdsaSyncResponse(currencyId: CurrencyId, responseCommitment: any): Promise<any> {
+    this.activityUp();
+
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.syncResponse(responseCommitment);
+    const challengeDecommitment = await currency.syncResponse(responseCommitment);
+
+    this.activityDown();
+    return challengeDecommitment;
   }
 
   public async ecdsaSyncFinalize(currencyId: CurrencyId, responseDecommitment: any): Promise<any> {
+    this.activityUp();
+
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.syncFinalize(responseDecommitment);
+    const finalize = await currency.syncFinalize(responseDecommitment);
+
+    this.activityDown();
+    return finalize;
   }
 
   public async startEcdsaSign(
@@ -292,15 +333,25 @@ export class DeviceSession {
     transactionBytes: Buffer,
     entropyCommitment: any
   ): Promise<any> {
+    this.activityUp();
+
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
+    const entropyData = await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
+
+    this.activityDown();
+    return entropyData;
   }
 
   public async ecdsaSignReveal(currencyId: CurrencyId, signSessionId: string, entropyDecommitment: any): Promise<any> {
+    this.activityUp();
+
     const currency = this.safeGetEcdsa(currencyId);
 
-    return await currency.signReveal(signSessionId, entropyDecommitment);
+    const partialSignature = await currency.signReveal(signSessionId, entropyDecommitment);
+
+    this.activityDown();
+    return partialSignature;
   }
 
   public async reset() {

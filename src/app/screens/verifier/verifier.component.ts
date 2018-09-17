@@ -1,8 +1,8 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import BN from 'bn.js';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval } from 'rxjs/operators';
+import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
+import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval, debounceTime } from 'rxjs/operators';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
 import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
 import { FileService } from '../../services/file.service';
@@ -11,7 +11,7 @@ import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SsdpService } from '../../services/ssdp.service';
-import { VerifierService } from '../../services/verifier.service';
+import { VerifierService, Currency } from '../../services/verifier.service';
 import { CurrencyModel, SyncState } from '../../services/wallet/wallet';
 import { checkAvailable, checkExisting, deleteTouch } from '../../utils/fingerprint';
 import { toBehaviourSubject } from '../../utils/transformers';
@@ -74,6 +74,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
 
   public sessions: BehaviorSubject<Array<{
     sessionId: string,
+    active: boolean,
     deviceInfo: {
       name: string
     },
@@ -99,28 +100,33 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly ssdp: SsdpService
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
-      mergeMap((deviceSession) => deviceSession.currencyEvent.pipe(
-        map((currency) => ({
+      mergeMap((deviceSession) => combineLatest<Currency | boolean>([
+        deviceSession.currencyEvent,
+        deviceSession.active
+      ]).pipe(
+        map(([currency, active]: [Currency, boolean]) => ({
           sessionId: deviceSession.id,
+          active: active,
           deviceInfo: deviceSession.deviceInfo,
           currency: currency
         }))
       )),
-      mergeMap(({ sessionId, deviceInfo, currency }) => currency.state.pipe(
+      mergeMap(({ sessionId, active, deviceInfo, currency }) => currency.state.pipe(
         map((state) => ({
           sessionId,
+          active,
           deviceInfo,
           currencyId: currency.id,
           model: CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currency.id)),
           state
         }))
       )),
-      map(({ sessionId, deviceInfo, currencyId, model, state }) => {
+      map(({ sessionId, active, deviceInfo, currencyId, model, state }) => {
         const sessions = this.sessions.getValue();
 
         let session = sessions.find((s) => s.sessionId === sessionId);
         if (!session) {
-          session = { sessionId, deviceInfo, syncPercent: 0, currencies: [] };
+          session = { sessionId, active: false, deviceInfo, syncPercent: 0, currencies: [] };
           sessions.push(session);
         }
 
@@ -133,6 +139,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
         currency.state = state;
 
         session.syncPercent = Math.round(100 * session.currencies.reduce((sum, c) => sum + c.state, 0) / 40);
+        session.active = active;
 
         return sessions;
       })
