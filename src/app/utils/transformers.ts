@@ -27,7 +27,7 @@ export async function waitForSubject<T>(subject: BehaviorSubject<T>, state: T, u
   ).toPromise();
 }
 
-export async function waitFiorPromise<T>(promise: Promise<T>, until?: Subject<any>) {
+export async function waitFiorPromise<T>(promise: Promise<T>, until?: Observable<any>) {
   return await from(promise).pipe(
     take(1),
     takeUntil(until || NEVER)

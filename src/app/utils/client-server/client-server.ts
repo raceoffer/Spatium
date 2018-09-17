@@ -1,9 +1,11 @@
 import { Reader, Root } from 'protobufjs';
 import uuid from 'uuid/v4';
-import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
+import { distinctUntilChanged, skip, filter, takeUntil, debounceTime } from 'rxjs/operators';
 import { Socket, State } from '../sockets/socket';
 
 import { abi } from './protocol';
+import { interval, timer, Subject } from 'rxjs';
+import { waitFiorPromise } from '../transformers';
 
 export enum ErrorCode {
   None = 0,
@@ -24,6 +26,16 @@ export class Client {
 
   public state = this.socket.state;
 
+  private disconnected = this.state.pipe(
+    distinctUntilChanged(),
+    skip(1),
+    filter(state => [State.Closing, State.Closed].includes(state))
+  );
+
+  private probe = interval(5000).pipe(
+    takeUntil(this.disconnected)
+  );
+
   private static bufferUUID(): Buffer {
     const uuidArray = [];
     uuid(undefined, uuidArray);
@@ -41,16 +53,21 @@ export class Client {
       await this.handleData(data);
     });
 
-    this.state.pipe(
-      distinctUntilChanged(),
-      skip(1),
-      filter(state => [State.Closing, State.Closed].includes(state))
-    ).subscribe(() => {
+    this.disconnected.subscribe(() => {
       this.handleDisconnect();
+    });
+
+    this.probe.subscribe(async () => {
+      try {
+        await this.request(Buffer.alloc(0), 3000);
+      } catch (e) {
+        console.error('Probe timeout');
+        await this.close();
+      }
     });
   }
 
-  public async request(data: Buffer): Promise<Buffer> {
+  public async request(data: Buffer, timeout: number = 10000): Promise<Buffer> {
     if (this.socket.state.getValue() !== State.Opened) {
       throw new Error('Request failed: Not connected');
     }
@@ -64,9 +81,15 @@ export class Client {
 
     await this.socket.write(message);
 
-    return await new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
+    const response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
       this.requestQueue.push({ id, resolve, reject });
-    });
+    }), timer(timeout));
+
+    if (!response) {
+      throw new Error('Request failed: Timeout');
+    }
+
+    return response;
   }
 
   public async close(): Promise<void> {
@@ -145,6 +168,14 @@ export class Server {
 
   public state = this.socket.state;
 
+  private disconnected = this.state.pipe(
+    distinctUntilChanged(),
+    skip(1),
+    filter(state => [State.Closing, State.Closed].includes(state))
+  );
+
+  private probe = new Subject<any>();
+
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
 
@@ -156,12 +187,15 @@ export class Server {
       await this.handleData(data);
     });
 
-    this.state.pipe(
-      distinctUntilChanged(),
-      skip(1),
-      filter(state => [State.Closing, State.Closed].includes(state))
-    ).subscribe(() => {
+    this.disconnected.subscribe(() => {
       this.handleDisconnect();
+    });
+
+    this.probe.pipe(
+      debounceTime(15000)
+    ).subscribe(async () => {
+      console.error('Server probe timeout');
+      await this.close();
     });
   }
 
@@ -204,15 +238,22 @@ export class Server {
   private async handleRequest(request: any): Promise<void> {
     const id = new Buffer(request.id);
     const data = new Buffer(request.data);
-    if (this.requestHandler) {
-      try {
-        const response = await this.requestHandler(data);
-        await this.respond(id, ErrorCode.None, response);
-      } catch (e) {
-        await this.respond(id, ErrorCode.RuntimeError, this.encodeError(e.message ? e.message : e.toString()));
-      }
+
+    // zero-data requests are reserverd for heartbeat
+    if (data.length === 0) {
+      this.probe.next();
+      await this.respond(id, ErrorCode.None, Buffer.alloc(0));
     } else {
-      await this.respond(id, ErrorCode.NotListening, this.encodeError('The server is not ready for communication'));
+      if (this.requestHandler) {
+        try {
+          const response = await this.requestHandler(data);
+          await this.respond(id, ErrorCode.None, response);
+        } catch (e) {
+          await this.respond(id, ErrorCode.RuntimeError, this.encodeError(e.message ? e.message : e.toString()));
+        }
+      } else {
+        await this.respond(id, ErrorCode.NotListening, this.encodeError('The server is not ready for communication'));
+      }
     }
   }
 
