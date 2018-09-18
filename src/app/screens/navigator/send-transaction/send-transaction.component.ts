@@ -21,6 +21,8 @@ import { State } from '../../../utils/sockets/socket';
 
 import * as WalletAddressValidator from 'wallet-address-validator';
 import * as CashAddr from 'cashaddrjs';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
+import { Device } from '../../../services/primitives/device';
 
 declare const cordova: any;
 
@@ -549,7 +551,34 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   async startSigning() {
     try {
       if (this.connectionService.state.getValue() !== State.Opened) {
-        this.connectionService.reconnect();
+        try {
+          await this.connectionService.reconnect();
+        } catch (e) {
+          const device = await this.selectDevice();
+
+          await this.connectionService.connectPlain(device.ip, device.port);
+        }
+
+        const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
+          sessionId: this.keyChainService.sessionId,
+          currencyId: this.model.currencyInfo.id
+        });
+
+        // Do not await
+        this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient
+        );
+
+        if (syncStateResponse.state !== SyncState.Finalized) {
+          this.notification.show('The currency is not synchronized. Please wait.');
+          this.syncService.forceCurrency(this.model.currencyInfo.id);
+
+          // Let the user start sign again
+          return;
+        }
       }
 
       const receiver = this.receiver.getValue();
@@ -688,6 +717,21 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   copy() {
     cordova.plugins.clipboard.copy(this.wallet.address.getValue());
+  }
+
+  public async selectDevice() {
+    return new Promise<Device>((resolve, reject) => {
+      const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+      componentRef.instance.selected.subscribe(async (device) => {
+        this.navigationService.acceptOverlay();
+
+        resolve(device);
+      });
+
+      componentRef.instance.cancelled.subscribe(() => {
+        reject(new Error('Cancelled'));
+      });
+    });
   }
 
   // more boilerplate stuff for focus tracking

@@ -7,18 +7,15 @@ import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.
 import { DeviceService, Platform } from '../../../services/device.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
-import { Device } from '../../../services/primitives/device';
+import { NotificationService } from '../../../services/notification.service';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 import { SyncService } from '../../../services/sync.service';
-import { CurrencyModel, SyncState } from '../../../services/wallet/wallet';
+import { CurrencyModel } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
-import { requestDialog } from '../../../utils/dialog';
-import { NotificationService } from '../../../services/notification.service';
-import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-wallet',
@@ -90,7 +87,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     })
   ), []);
 
-  public synchronizing = new BehaviorSubject<boolean>(false);
+  private synchronizing = this.syncService.synchronizing;
 
   private subscriptions = [];
 
@@ -149,8 +146,6 @@ export class WalletComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    this.openDiscoveryOverlay();
   }
 
   public async ngOnDestroy() {
@@ -208,85 +203,21 @@ export class WalletComponent implements OnInit, OnDestroy {
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
 
-      await this.sync(device);
-    });
-  }
+      try {
+        await this.connectionService.connectPlain(device.ip, device.port);
 
-  public async sync(device: Device) {
-    if (this.synchronizing.getValue()) {
-      await this.syncService.cancel();
-    }
-
-    try {
-      this.synchronizing.next(true);
-
-      await this.connectionService.connectPlain(device.ip, device.port);
-
-      const capabilities = await this.connectionService.rpcClient.api.capabilities({});
-      console.log(capabilities);
-
-      const appInfo: any = await this.deviceService.appInfo();
-      const deviceInfo: any = await this.deviceService.deviceInfo();
-      const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
-
-      const handshakeResponse = await this.connectionService.rpcClient.api.handshake({
-        sessionId: this.keyChainService.sessionId,
-        deviceInfo: {
-          deviceName: deviceInfo.model,
-          appVersionMajor: version[1],
-          appVersionMinor: version[2],
-          appVersionPatch: version[3]
-        },
-      });
-
-      const peerId = handshakeResponse.peerId;
-
-      if (!!this.syncService.currentPeerId && this.syncService.currentPeerId !== peerId) {
-        if (!await requestDialog(
-          'The remote device\'s peer id does not match the last session. The wallet will be synced from scratch. Continue?'
-        )) {
-          return;
-        }
-      }
-
-      const syncStatusResponse = await this.connectionService.rpcClient.api.syncStatus({
-        sessionId: this.keyChainService.sessionId
-      });
-
-      const remoteSyncedCurrencies = syncStatusResponse.statuses
-        .filter(status => status.state === SyncState.Finalized)
-        .map(status => status.currencyId);
-
-      console.log('Remote synched currencies:', remoteSyncedCurrencies);
-
-      const localSynchedCurrencies = this.syncService.currencies
-        .filter(c => c.state.getValue() === SyncState.Finalized)
-        .map(c => c.id);
-
-      console.log('Local synched currencies:', localSynchedCurrencies);
-
-      const unsyncedCurrencies = localSynchedCurrencies.filter(x => !remoteSyncedCurrencies.includes(x));
-
-      if (unsyncedCurrencies.length > 0) {
-        this.notificationService.show(
-          'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced'
+        await this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient
         );
+
+        console.log('Synchronized');
+      } catch (e) {
+        console.error(e);
+        this.notificationService.show('Synchronization error');
       }
-
-      await this.syncService.sync(
-        peerId,
-        this.keyChainService.sessionId,
-        this.keyChainService.paillierPublicKey,
-        this.keyChainService.paillierSecretKey,
-        this.connectionService.rpcClient
-      );
-
-      console.log('Synchronized');
-    } catch (e) {
-      console.error(e);
-      this.notificationService.show('Synchronization error');
-    } finally {
-      this.synchronizing.next(false);
-    }
+    });
   }
 }
