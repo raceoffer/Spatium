@@ -10,12 +10,14 @@ import { NavigationService, Position } from '../../../services/navigation.servic
 import { NotificationService } from '../../../services/notification.service';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 import { SyncService } from '../../../services/sync.service';
-import { CurrencyModel } from '../../../services/wallet/wallet';
+import { CurrencyModel, SyncState } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
+import { State } from '../../../utils/sockets/socket';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-wallet',
@@ -87,7 +89,21 @@ export class WalletComponent implements OnInit, OnDestroy {
     })
   ), []);
 
-  private synchronizing = this.syncService.synchronizing;
+  public synchronizing = this.syncService.synchronizing;
+  public incomplete = combineLatest([
+    this.synchronizing,
+    this.syncService.currencyEvent
+  ]).pipe(
+    map(([synchronizing]) => {
+      const synchronizedCount = this.syncService.currencies
+        .filter(c => c.state.getValue() === SyncState.Finalized)
+        .length;
+
+      return !synchronizing &&
+        synchronizedCount > 0 &&
+        synchronizedCount < this.currencyInfoService.syncOrder.length;
+    })
+  );
 
   private subscriptions = [];
 
@@ -202,22 +218,44 @@ export class WalletComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
+        try {
+          await this.connectionService.connectPlain(device.ip, device.port);
+        } catch (e) {
+          console.error(e);
+          this.notificationService.show('Failed to conenct to remote device');
+          return;
+        }
 
-      try {
-        await this.connectionService.connectPlain(device.ip, device.port);
-
-        await this.syncService.sync(
-          this.keyChainService.sessionId,
-          this.keyChainService.paillierPublicKey,
-          this.keyChainService.paillierSecretKey,
-          this.connectionService.rpcClient
-        );
-
-        console.log('Synchronized');
-      } catch (e) {
-        console.error(e);
-        this.notificationService.show('Synchronization error');
-      }
+        await this.sync();
     });
+  }
+
+  public async reconnect() {
+    if (this.connectionService.state.getValue() !== State.Opened) {
+      try {
+        await this.connectionService.reconnect();
+      } catch (e) {
+        await this.openDiscoveryOverlay();
+        return;
+      }
+
+      await this.sync();
+    }
+  }
+
+  public async sync() {
+    try {
+      await this.syncService.sync(
+        this.keyChainService.sessionId,
+        this.keyChainService.paillierPublicKey,
+        this.keyChainService.paillierSecretKey,
+        this.connectionService.rpcClient
+      );
+
+      console.log('Synchronized');
+    } catch (e) {
+      console.error(e);
+      this.notificationService.show('Synchronization error');
+    }
   }
 }

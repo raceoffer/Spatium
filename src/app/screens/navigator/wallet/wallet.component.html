@@ -11,8 +11,12 @@
     <mat-icon>search</mat-icon>
   </button>
 
-  <button mat-icon-button (click)="openDiscoveryOverlay()">
+  <button mat-icon-button (click)="openDiscoveryOverlay()" *ngIf="!(incomplete | async)">
     <mat-icon [class.sync]="(synchronizing | async)">sync</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="reconnect()" *ngIf="(incomplete | async)">
+    <mat-icon>sync_problem</mat-icon>
   </button>
 </mat-toolbar>
 
