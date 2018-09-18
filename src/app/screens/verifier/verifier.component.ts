@@ -1,8 +1,8 @@
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import BN from 'bn.js';
-import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
-import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval, debounceTime } from 'rxjs/operators';
+import { BehaviorSubject, Subject, combineLatest, of } from 'rxjs';
+import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval, switchMap } from 'rxjs/operators';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
 import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
 import { FileService } from '../../services/file.service';
@@ -100,49 +100,27 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly ssdp: SsdpService
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
-      mergeMap((deviceSession) => combineLatest<Currency | boolean>([
+      map((sessionId) => this.verifierService.session(sessionId)),
+      mergeMap((deviceSession) => deviceSession ? combineLatest<Currency | boolean>([
         deviceSession.currencyEvent,
         deviceSession.active
       ]).pipe(
-        map(([currency, active]: [Currency, boolean]) => ({
-          sessionId: deviceSession.id,
-          active: active,
-          deviceInfo: deviceSession.deviceInfo,
-          currency: currency
-        }))
-      )),
-      mergeMap(({ sessionId, active, deviceInfo, currency }) => currency.state.pipe(
-        map((state) => ({
-          sessionId,
-          active,
-          deviceInfo,
+        map(([currency]: [Currency]) => currency)
+      ) : of(null)),
+      switchMap((currency) => currency ? currency.state : of(null)),
+      map(() => this.verifierService.sessions.map((session) => ({
+        sessionId: session.id,
+        active: session.active.getValue(),
+        deviceInfo: session.deviceInfo,
+        syncPercent: Math.round(
+          100 * session.currencies.reduce((sum, c) => sum + c.state.getValue(), 0) / (4 * this.currencyInfoService.syncOrder.length)
+        ),
+        currencies: session.currencies.map((currency) => ({
           currencyId: currency.id,
           model: CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currency.id)),
-          state
+          state: currency.state.getValue()
         }))
-      )),
-      map(({ sessionId, active, deviceInfo, currencyId, model, state }) => {
-        const sessions = this.sessions.getValue();
-
-        let session = sessions.find((s) => s.sessionId === sessionId);
-        if (!session) {
-          session = { sessionId, active: false, deviceInfo, syncPercent: 0, currencies: [] };
-          sessions.push(session);
-        }
-
-        let currency = session.currencies.find((c) => c.currencyId === currencyId);
-        if (!currency) {
-          currency = { currencyId, model, state: SyncState.None };
-          session.currencies.push(currency);
-        }
-
-        currency.state = state;
-
-        session.syncPercent = Math.round(100 * session.currencies.reduce((sum, c) => sum + c.state, 0) / 40);
-        session.active = active;
-
-        return sessions;
-      })
+      })))
     ), []);
   }
 

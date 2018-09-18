@@ -9,6 +9,7 @@ import BN from 'bn.js';
 
 import { CurrencyModel, SyncState } from './wallet/wallet';
 import { map } from 'rxjs/operators';
+import { toBehaviourSubject } from '../utils/transformers';
 
 export abstract class Currency {
   public state = new BehaviorSubject<SyncState>(SyncState.None);
@@ -179,7 +180,7 @@ export class DeviceSession {
   private _activities = new BehaviorSubject<number>(0);
 
   public currencyEvent = new Subject<Currency>();
-  public active = this._activities.pipe(map((activities) => activities > 0));
+  public active = toBehaviourSubject(this._activities.pipe(map((activities) => activities > 0)), false);
 
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
 
@@ -376,7 +377,7 @@ export class DeviceSession {
 export class VerifierService {
   private _sessions = new Map<string, DeviceSession>();
 
-  public sessionEvent = new Subject<DeviceSession>();
+  public sessionEvent = new Subject<string>();
 
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
 
@@ -388,6 +389,10 @@ export class VerifierService {
 
   public session(sessionId: string): DeviceSession {
     return this._sessions.get(sessionId);
+  }
+
+  public get sessions(): Array<DeviceSession> {
+    return Array.from(this._sessions.values());
   }
 
   public constructor(
@@ -406,6 +411,15 @@ export class VerifierService {
       return true;
     }
 
+    const oldSessions =
+      Array.from(this._sessions.values())
+        .filter(session => session.deviceInfo.id === deviceInfo.id)
+        .map(session => session.id);
+
+    for (const oldSession of oldSessions) {
+      await this.clearSession(oldSession);
+    }
+
     const deviceSession = new DeviceSession(
       sessionId,
       deviceInfo,
@@ -418,7 +432,7 @@ export class VerifierService {
 
     this._sessions.set(sessionId, deviceSession);
 
-    this.sessionEvent.next(deviceSession);
+    this.sessionEvent.next(sessionId);
 
     return false;
   }
@@ -435,6 +449,8 @@ export class VerifierService {
     this._sessions.get(sessionId).reset();
 
     this._sessions.delete(sessionId);
+
+    this.sessionEvent.next(sessionId);
 
     return true;
   }
@@ -518,10 +534,11 @@ export class VerifierService {
   public async reset() {
     const sessions = Array.from(this._sessions.values());
 
+    this._sessions.clear();
+
     for (const session of sessions) {
       await session.reset();
+      this.sessionEvent.next(session.id);
     }
-
-    this._sessions.clear();
   }
 }

@@ -36,7 +36,8 @@ export class RPCServerService {
       const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
       return {
         deviceInfo: {
-          deviceName: deviceInfo.model,
+          id: deviceInfo.uuid,
+          displayName: deviceInfo.model,
           appVersionMajor: version[1],
           appVersionMinor: version[2],
           appVersionPatch: version[3]

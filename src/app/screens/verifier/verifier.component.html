@@ -9,7 +9,7 @@
   </mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
   <div style="margin: 10px;" *ngFor="let session of (sessions | async)">
-    {{ session.deviceInfo.deviceName }}: {{ session.syncPercent.toString().padStart(3) }}% synchronization {{ session.active ? '...' : '' }}
+    {{ session.deviceInfo.displayName }}: {{ session.syncPercent.toString().padStart(3) }}% synchronization {{ session.active ? '...' : '' }}
   </div>
   <div style="margin: 10px;" *ngIf="(sessions | async).length === 0">
     Ready to sync

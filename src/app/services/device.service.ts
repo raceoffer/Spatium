@@ -45,6 +45,7 @@ export class DeviceService {
 
   public async deviceInfo() {
     return {
+      uuid: device.uuid,
       manufacturer: device.manufacturer,
       model: device.model,
       platform: device.platform,

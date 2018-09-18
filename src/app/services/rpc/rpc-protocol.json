@@ -62,21 +62,25 @@
     },
     "DeviceInfo": {
       "fields": {
-        "deviceName": {
+        "id": {
           "type": "string",
           "id": 1
         },
-        "appVersionMajor": {
-          "type": "int32",
+        "displayName": {
+          "type": "string",
           "id": 2
         },
-        "appVersionMinor": {
+        "appVersionMajor": {
           "type": "int32",
           "id": 3
         },
-        "appVersionPatch": {
+        "appVersionMinor": {
           "type": "int32",
           "id": 4
+        },
+        "appVersionPatch": {
+          "type": "int32",
+          "id": 5
         }
       }
     },
