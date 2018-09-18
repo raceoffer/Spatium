@@ -15,7 +15,7 @@
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None)">
+    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None) && (synchronizing | async)">
   </mat-progress-bar>
 
   <div class="scroll full-width" id="transactionList" #transactionList>
@@ -33,7 +33,7 @@
             </div>
 
             <div *ngIf="(wallet.state | async) !== stateType.Finalized">
-              {{ (wallet.state | async) !== stateType.None ? 'Syncing' : 'Not synced' }}
+              {{ ((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced' }}
             </div>
 
             <button

@@ -70,6 +70,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   @Input() public model: CurrencyModel = null;
 
   public wallet: Wallet;
+  public synchronizing = this.syncService.synchronizing;
 
   public balanceUnconfirmed: BehaviorSubject<number>;
   public balanceConfirmed: BehaviorSubject<number>;

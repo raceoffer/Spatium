@@ -27,6 +27,7 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   public balanceStatusType = BalanceStatus;
 
   public wallet: Wallet;
+  public synchronizing = this.syncService.synchronizing;
 
   public balance: BehaviorSubject<number>;
   public balanceUSD: BehaviorSubject<number>;

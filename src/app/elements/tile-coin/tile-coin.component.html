@@ -42,7 +42,7 @@
       fxLayoutAlign="center center">
 
       <span class="sync-in-progress">
-        {{ (wallet.state | async) === stateType.None ? 'Not synced' : 'Syncing' }}
+        {{ ((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced' }}
       </span>
     </div>
   </button>

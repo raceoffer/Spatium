@@ -10,7 +10,7 @@
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None)">
+    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None) && (synchronizing | async)">
   </mat-progress-bar>
 
   <table class="full-width two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px;">
@@ -35,7 +35,7 @@
             readonly
             matInput
             mat-autosize="true"
-            [value]="(wallet.state | async) !== stateType.None ? 'Synchronizing' : 'Not synced'"
+            [value]="((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced'"
             *ngIf="(wallet.state | async) !== stateType.Finalized">
           </textarea>
 

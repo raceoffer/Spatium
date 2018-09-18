@@ -84,6 +84,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public wallet: Wallet;
   public parentWallet: Wallet;
+  public synchronizing = this.syncService.synchronizing;
 
   public allowFeeConfiguration = false;
   public fixedaddress: string = null;
