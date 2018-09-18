@@ -52,6 +52,10 @@ export class RPCClient {
     return await this.rpcService[method](data);
   }
 
+  public async heartbeat(timeout: number): Promise<void> {
+    await this.client.request(Buffer.alloc(0), timeout);
+  }
+
   public async close(): Promise<void> {
     return await this.client.close();
   }

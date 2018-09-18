@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { BehaviorSubject, of, interval, NEVER } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { Client } from '../../utils/client-server/client-server';
 import { PlainSocket } from '../../utils/sockets/plainsocket';
 import { State } from '../../utils/sockets/socket';
@@ -27,11 +27,26 @@ export class RPCConnectionService {
   } = null;
 
   public state = toBehaviourSubject(this._rpcClient.pipe(
-    mergeMap((rpcClient) => rpcClient ? rpcClient.state : of(State.Closed))
+    switchMap((rpcClient) => rpcClient ? rpcClient.state : of(State.Closed))
   ), State.Closed);
+
+  private probe = this.state.pipe(
+    switchMap((state) => state === State.Opened ? interval(5000) : NEVER)
+  );
 
   public get rpcClient(): RPCClient {
     return this._rpcClient.getValue();
+  }
+
+  public constructor() {
+    this.probe.subscribe(async () => {
+      try {
+        await this.rpcClient.heartbeat(3000);
+      } catch (e) {
+        console.error('Probe timeout');
+        await this.rpcClient.close();
+      }
+    });
   }
 
   public async connectPlain(host: string, port: number): Promise<void> {

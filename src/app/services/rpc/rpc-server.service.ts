@@ -16,10 +16,11 @@ import { VerifierService } from '../verifier.service';
 import * as abi from './rpc-protocol.json';
 import { Server } from '../../utils/client-server/client-server';
 import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
-import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
+import { distinctUntilChanged, skip, filter, debounceTime } from 'rxjs/operators';
 import { State, Socket } from '../../utils/sockets/socket';
 import { KeyChainService } from '../keychain.service';
 import { uuidFrom } from '../../utils/uuid';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class RPCServerService {
@@ -189,7 +190,7 @@ export class RPCServerService {
   };
 
   private _plainServerSocket: PlainServerSocket = null;
-  private _servers = new Set<Server>();
+  private _servers = new Set<{ server: Server, probe: Subject<any> }>();
 
   constructor(
     private readonly _deviceService: DeviceService,
@@ -203,21 +204,33 @@ export class RPCServerService {
     this._deviceService.deviceReady().then(() => {
       this._plainServerSocket = new PlainServerSocket();
       this._plainServerSocket.opened.subscribe(async (socket: Socket) => {
-        const server = new Server(socket);
+        const entry = { server: new Server(socket), probe: new Subject<any>() };
 
         socket.state.pipe(
           distinctUntilChanged(),
           skip(1),
           filter(state => [State.Closing, State.Closed].includes(state))
         ).subscribe(() => {
-          this._servers.delete(server);
+          this._servers.delete(entry);
         });
 
-        server.setRequestHandler(async (data) => {
+        entry.probe.pipe(
+          debounceTime(30000)
+        ).subscribe(async () => {
+          console.error('Server probe timeout');
+          await entry.server.close();
+        });
+
+        entry.server.setRequestHandler(async (data) => {
+          if (data.length === 0) {
+            entry.probe.next();
+            return Buffer.alloc(0);
+          }
+
           return await this.handleRequest(data);
         });
 
-        this._servers.add(server);
+        this._servers.add(entry);
       });
     });
   }
@@ -249,8 +262,8 @@ export class RPCServerService {
   }
 
   public async stop(): Promise<void> {
-    for (const server of Array.from(this._servers.values())) {
-      await server.close();
+    for (const entry of Array.from(this._servers.values())) {
+      await entry.server.close();
     }
 
     this._servers.clear();

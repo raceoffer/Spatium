@@ -1,11 +1,10 @@
 import { Reader, Root } from 'protobufjs';
+import { timer } from 'rxjs';
+import { distinctUntilChanged, filter, skip } from 'rxjs/operators';
 import uuid from 'uuid/v4';
-import { distinctUntilChanged, skip, filter, takeUntil, debounceTime } from 'rxjs/operators';
 import { Socket, State } from '../sockets/socket';
-
-import { abi } from './protocol';
-import { interval, timer, Subject } from 'rxjs';
 import { waitFiorPromise } from '../transformers';
+import { abi } from './protocol';
 
 export enum ErrorCode {
   None = 0,
@@ -32,10 +31,6 @@ export class Client {
     filter(state => [State.Closing, State.Closed].includes(state))
   );
 
-  private probe = interval(5000).pipe(
-    takeUntil(this.disconnected)
-  );
-
   private static bufferUUID(): Buffer {
     const uuidArray = [];
     uuid(undefined, uuidArray);
@@ -55,15 +50,6 @@ export class Client {
 
     this.disconnected.subscribe(() => {
       this.handleDisconnect();
-    });
-
-    this.probe.subscribe(async () => {
-      try {
-        await this.request(Buffer.alloc(0), 3000);
-      } catch (e) {
-        console.error('Probe timeout');
-        await this.close();
-      }
     });
   }
 
@@ -164,7 +150,7 @@ export class Server {
 
   private responseAccumulator = Buffer.alloc(0);
 
-  private requestHandler: (data: Buffer) => any = null;
+  private requestHandler: (data: Buffer) => Promise<Buffer> = null;
 
   public state = this.socket.state;
 
@@ -173,8 +159,6 @@ export class Server {
     skip(1),
     filter(state => [State.Closing, State.Closed].includes(state))
   );
-
-  private probe = new Subject<any>();
 
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
@@ -190,16 +174,9 @@ export class Server {
     this.disconnected.subscribe(() => {
       this.handleDisconnect();
     });
-
-    this.probe.pipe(
-      debounceTime(15000)
-    ).subscribe(async () => {
-      console.error('Server probe timeout');
-      await this.close();
-    });
   }
 
-  public setRequestHandler(handler: (data: Buffer) => any): void {
+  public setRequestHandler(handler: (data: Buffer) => Promise<Buffer>): void {
     this.requestHandler = handler;
   }
 
@@ -239,21 +216,15 @@ export class Server {
     const id = new Buffer(request.id);
     const data = new Buffer(request.data);
 
-    // zero-data requests are reserverd for heartbeat
-    if (data.length === 0) {
-      this.probe.next();
-      await this.respond(id, ErrorCode.None, Buffer.alloc(0));
-    } else {
-      if (this.requestHandler) {
-        try {
-          const response = await this.requestHandler(data);
-          await this.respond(id, ErrorCode.None, response);
-        } catch (e) {
-          await this.respond(id, ErrorCode.RuntimeError, this.encodeError(e.message ? e.message : e.toString()));
-        }
-      } else {
-        await this.respond(id, ErrorCode.NotListening, this.encodeError('The server is not ready for communication'));
+    if (this.requestHandler) {
+      try {
+        const response = await this.requestHandler(data);
+        await this.respond(id, ErrorCode.None, response);
+      } catch (e) {
+        await this.respond(id, ErrorCode.RuntimeError, this.encodeError(e.message ? e.message : e.toString()));
       }
+    } else {
+      await this.respond(id, ErrorCode.NotListening, this.encodeError('The server is not ready for communication'));
     }
   }
 
