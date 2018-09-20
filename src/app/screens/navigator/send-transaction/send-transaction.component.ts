@@ -553,7 +553,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   async startSigning() {
     try {
-      if (this.connectionService.state.getValue() !== State.Opened) {
+      if (!await this.connectionService.probe()) {
         try {
           await this.connectionService.reconnect();
         } catch (e) {

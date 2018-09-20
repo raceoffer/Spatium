@@ -190,7 +190,7 @@ export class RPCServerService {
   };
 
   private _plainServerSocket: PlainServerSocket = null;
-  private _servers = new Set<{ server: Server, probe: Subject<any> }>();
+  private _servers = new Set<Server>();
 
   constructor(
     private readonly _deviceService: DeviceService,
@@ -204,33 +204,26 @@ export class RPCServerService {
     this._deviceService.deviceReady().then(() => {
       this._plainServerSocket = new PlainServerSocket();
       this._plainServerSocket.opened.subscribe(async (socket: Socket) => {
-        const entry = { server: new Server(socket), probe: new Subject<any>() };
+        const server = new Server(socket);
 
         socket.state.pipe(
           distinctUntilChanged(),
           skip(1),
           filter(state => [State.Closing, State.Closed].includes(state))
         ).subscribe(() => {
-          this._servers.delete(entry);
+          this._servers.delete(server);
         });
 
-        entry.probe.pipe(
-          debounceTime(120000)
-        ).subscribe(async () => {
-          console.error('Server probe timeout');
-          await entry.server.close();
-        });
-
-        entry.server.setRequestHandler(async (data) => {
+        server.setRequestHandler(async (data) => {
+          // empty probe requests
           if (data.length === 0) {
-            entry.probe.next();
             return Buffer.alloc(0);
           }
 
           return await this.handleRequest(data);
         });
 
-        this._servers.add(entry);
+        this._servers.add(server);
       });
     });
   }
@@ -262,8 +255,8 @@ export class RPCServerService {
   }
 
   public async stop(): Promise<void> {
-    for (const entry of Array.from(this._servers.values())) {
-      await entry.server.close();
+    for (const server of Array.from(this._servers.values())) {
+      await server.close();
     }
 
     this._servers.clear();
