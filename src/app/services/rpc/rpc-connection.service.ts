@@ -31,7 +31,7 @@ export class RPCConnectionService {
   ), State.Closed);
 
   private probe = this.state.pipe(
-    switchMap((state) => state === State.Opened ? interval(5000) : NEVER)
+    switchMap((state) => state === State.Opened ? interval(15000) : NEVER)
   );
 
   public get rpcClient(): RPCClient {
@@ -41,7 +41,7 @@ export class RPCConnectionService {
   public constructor() {
     this.probe.subscribe(async () => {
       try {
-        await this.rpcClient.heartbeat(3000);
+        await this.rpcClient.heartbeat(10000);
       } catch (e) {
         console.error('Probe timeout');
         await this.rpcClient.close();

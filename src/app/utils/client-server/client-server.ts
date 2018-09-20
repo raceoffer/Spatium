@@ -25,7 +25,7 @@ export class Client {
 
   public state = this.socket.state;
 
-  public defaultTimeout = 10000;
+  public defaultTimeout = 20000;
 
   private disconnected = this.state.pipe(
     distinctUntilChanged(),

@@ -215,7 +215,7 @@ export class RPCServerService {
         });
 
         entry.probe.pipe(
-          debounceTime(30000)
+          debounceTime(120000)
         ).subscribe(async () => {
           console.error('Server probe timeout');
           await entry.server.close();
