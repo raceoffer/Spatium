@@ -661,7 +661,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
-    }), this.cancelSubject);
+    }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
       return null;
@@ -735,7 +735,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
-    }), this.cancelSubject);
+    }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
       return null;

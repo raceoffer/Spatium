@@ -25,6 +25,8 @@ export class Client {
 
   public state = this.socket.state;
 
+  public defaultTimeout = 10000;
+
   private disconnected = this.state.pipe(
     distinctUntilChanged(),
     skip(1),
@@ -53,7 +55,7 @@ export class Client {
     });
   }
 
-  public async request(data: Buffer, timeout: number = 10000): Promise<Buffer> {
+  public async request(data: Buffer, timeout: number = this.defaultTimeout): Promise<Buffer> {
     if (this.socket.state.getValue() !== State.Opened) {
       throw new Error('Request failed: Not connected');
     }
@@ -69,7 +71,7 @@ export class Client {
 
     const response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
       this.requestQueue.push({ id, resolve, reject });
-    }), timer(timeout));
+    }), timeout > 0 ? timer(timeout) : undefined);
 
     if (!response) {
       throw new Error('Request failed: Timeout');
