@@ -5,11 +5,11 @@ import isNumber from 'lodash/isNumber';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { BalanceService, BalanceStatus } from '../../../services/balance.service';
-import { CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
+import { CurrencyInfoService, CurrencyInfo, CurrencyId, Cryptosystem } from '../../../services/currencyinfo.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { FeeLevel, PriceService } from '../../../services/price.service';
-import { SyncService, EcdsaCurrency } from '../../../services/sync.service';
+import { SyncService, EcdsaCurrency, EddsaCurrency } from '../../../services/sync.service';
 import { CurrecnyModelType, CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { WorkerService } from '../../../services/worker.service';
@@ -591,7 +591,18 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         if (this.connectionService.state.getValue() !== State.Opened) {
           await this.connectionService.reconnect();
         }
-        this.signed = await this.signEcdsa(receiver, value, fee);
+
+        const currency = this.wallet.currency.getValue();
+        const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
+
+        switch (currencyInfo.cryptosystem) {
+          case Cryptosystem.Ecdsa:
+            this.signed = await this.signEcdsa(receiver, value, fee);
+            break;
+          case Cryptosystem.Ecdsa:
+            this.signed = await this.signEddsa(receiver, value, fee);
+            break;
+        }
 
         if (!this.signed) {
           this.phase.next(Phase.Creation);
@@ -661,18 +672,92 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
     const entropyDecommitment = await distributedSignSession.processEntropyData(entropyData);
 
-    const signRevealResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.ecdsaSignReveal({
+    const signFinalizeResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.ecdsaSignFinalize({
       sessionId: this.keyChainService.sessionId,
       currencyId: currency.id,
       signSessionId,
       entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
     }), this.cancelSubject);
-    console.log(signRevealResponse);
-    if (!signRevealResponse) {
+    console.log(signFinalizeResponse);
+    if (!signFinalizeResponse) {
       return null;
     }
 
-    const partialSignature = Marshal.decode(signRevealResponse.partialSignatureBytes);
+    const partialSignature = Marshal.decode(signFinalizeResponse.partialSignatureBytes);
+
+    const signature = await distributedSignSession.finalizeSignature(partialSignature);
+
+    await tx.applySignature(signature);
+
+    return tx;
+  }
+
+  public async signEddsa(receiver: string, value: BN, fee?: BN) {
+    const currency = this.wallet.currency.getValue() as EddsaCurrency;
+    const wallet = this.wallet.wallet.getValue();
+
+    console.log(await currency.compoundPublic());
+
+    const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
+      sessionId: this.keyChainService.sessionId,
+      currencyId: currency.id
+    }), this.cancelSubject);
+    console.log(syncStateResponse);
+    if (!syncStateResponse) {
+      return null;
+    }
+
+    if (syncStateResponse.state !== SyncState.Finalized) {
+      throw new Error('Not synced');
+    }
+
+    console.log(wallet.address);
+
+    const tx = await wallet.prepareTransaction(
+      await this.model.currencyInfo.transactionType.create(this.workerService.worker),
+      receiver,
+      value,
+      fee
+    );
+
+    const distributedSignSession = await tx.startSignSession(currency.distributedKey);
+
+    const entropyCommitment = await distributedSignSession.createEntropyCommitment();
+
+    const transactionBytes = await tx.toBytes();
+
+    const txId = await Utils.randomBytes(32);
+
+    const signSessionId = uuidFrom(txId);
+
+    const startSignResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.startEddsaSign({
+      sessionId: this.keyChainService.sessionId,
+      currencyId: currency.id,
+      signSessionId,
+      transactionBytes,
+      entropyCommitmentBytes: Marshal.encode(entropyCommitment)
+    }), this.cancelSubject);
+    console.log(startSignResponse);
+    if (!startSignResponse) {
+      return null;
+    }
+
+    const entropyData = Marshal.decode(startSignResponse.entropyDataBytes);
+
+    const entropyDecommitment = await distributedSignSession.processEntropyData(entropyData);
+
+    const signFinalizeResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.eddsaSignFinalize({
+      sessionId: this.keyChainService.sessionId,
+      currencyId: currency.id,
+      signSessionId,
+      entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
+    }), this.cancelSubject);
+    console.log(signFinalizeResponse);
+    if (!signFinalizeResponse) {
+      return null;
+    }
+
+    const partialSignature = Marshal.decode(signFinalizeResponse.partialSignatureBytes);
 
     const signature = await distributedSignSession.finalizeSignature(partialSignature);
 

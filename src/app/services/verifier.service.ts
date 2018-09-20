@@ -232,7 +232,7 @@ export class EddsaCurrency extends Currency {
       secret: privateBytes
     }, this._workerService.worker);
 
-    this._syncSessionShard = await this._distributedKeyShard.startSyncSession();
+    this._syncSessionShard = await this._distributedKeyShard.startSyncSessionShard();
 
     const data = await this._syncSessionShard.processCommitment(commitment);
 

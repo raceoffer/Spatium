@@ -5,12 +5,14 @@ import {
   LitecoinTransaction,
   BitcoinCashTransaction,
   EthereumTransaction,
+  NemTransaction,
   NeoTransaction,
   BitcoinWallet,
   LitecoinWallet,
   BitcoinCashWallet,
   EthereumWallet,
   ERC20Wallet,
+  NemWallet,
   NeoWallet
 } from 'crypto-core-async';
 import { SettingsService } from './settings.service';
@@ -24,6 +26,8 @@ export enum CurrencyId {
   BitcoinCashTest,
   Ethereum,
   EthereumTest,
+  Nem,
+  NemTest,
   Neo,
   NeoTest
 }
@@ -39,6 +43,7 @@ export enum ApiServer {
   Litecore,
   Blockdozer,
   Infura,
+  NemNative,
   Neoscan,
   Custom
 }
@@ -323,6 +328,28 @@ export class CurrencyInfoService {
       EthereumTransaction,
       EthereumWallet
     )],
+    [CurrencyId.Nem, new CurrencyInfo(
+      CurrencyId.Nem,
+      43,
+      'Nem',
+      'XEM',
+      Cryptosystem.Eddsa,
+      Curve.ed25519,
+      NemWallet.Mainnet,
+      NemTransaction,
+      NemWallet
+    )],
+    [CurrencyId.NemTest, new CurrencyInfo(
+      CurrencyId.NemTest,
+      1,
+      'Nem Test',
+      'XEM',
+      Cryptosystem.Eddsa,
+      Curve.ed25519,
+      NemWallet.Testnet,
+      NemTransaction,
+      NemWallet
+    )],
     [CurrencyId.Neo, new CurrencyInfo(
       CurrencyId.Neo,
       888,
@@ -352,11 +379,13 @@ export class CurrencyInfoService {
     CurrencyId.Litecoin,
     CurrencyId.BitcoinCash,
     CurrencyId.Ethereum,
+    CurrencyId.Nem,
     CurrencyId.Neo,
     CurrencyId.BitcoinTest,
     CurrencyId.LitecoinTest,
     CurrencyId.BitcoinCashTest,
     CurrencyId.EthereumTest,
+    CurrencyId.NemTest,
     CurrencyId.NeoTest
   ];
 
@@ -389,6 +418,9 @@ export class CurrencyInfoService {
       [ApiServer.Spatium, `${this._apiBaseUrl}/api/etherium/mainnet/infura`],
       [ApiServer.Infura, 'https://mainnet.infura.io/dlYX0gLUjGGCk7IBFq2C']
     ])],
+    [CurrencyId.Nem, new Map<ApiServer, string>([
+      [ApiServer.NemNative, '']
+    ])],
     [CurrencyId.Neo, new Map<ApiServer, string>([
       [ApiServer.Neoscan, 'https://api.neoscan.io/api/main_net/v1']
     ])],
@@ -408,6 +440,9 @@ export class CurrencyInfoService {
     [CurrencyId.EthereumTest, new Map<ApiServer, string>([
       [ApiServer.Spatium, `${this._apiBaseUrl}/api/etherium/testnet/infura`],
       [ApiServer.Infura, 'https://rinkeby.infura.io/dlYX0gLUjGGCk7IBFq2C']
+    ])],
+    [CurrencyId.NemTest, new Map<ApiServer, string>([
+      [ApiServer.NemNative, '']
     ])],
     [CurrencyId.NeoTest, new Map<ApiServer, string>([
       [ApiServer.Neoscan, 'https://api.neoscan.io/api/test_net/v1']

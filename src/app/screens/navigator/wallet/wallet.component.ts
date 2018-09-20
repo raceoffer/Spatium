@@ -123,6 +123,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.Litecoin,
         CurrencyId.BitcoinCash,
         CurrencyId.Ethereum,
+        CurrencyId.Nem,
         CurrencyId.Neo
       ].map((currencyId) => {
         return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
@@ -143,6 +144,7 @@ export class WalletComponent implements OnInit, OnDestroy {
         CurrencyId.LitecoinTest,
         CurrencyId.BitcoinCashTest,
         CurrencyId.EthereumTest,
+        CurrencyId.NemTest,
         CurrencyId.NeoTest
       ].map((currencyId) => {
         return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
@@ -238,9 +240,9 @@ export class WalletComponent implements OnInit, OnDestroy {
         await this.openDiscoveryOverlay();
         return;
       }
-
-      await this.sync();
     }
+
+    await this.sync();
   }
 
   public async sync() {

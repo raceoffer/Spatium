@@ -140,6 +140,11 @@ export class PriceService {
       [FeeLevel.Normal, 5000000000],
       [FeeLevel.Low, 2000000000]
     ])],
+    [CurrencyId.Nem, new Map<FeeLevel, number>([
+      [FeeLevel.High, 0],
+      [FeeLevel.Normal, 0],
+      [FeeLevel.Low, 0]
+    ])],
     [CurrencyId.Neo, new Map<FeeLevel, number>([
       [FeeLevel.High, 0],
       [FeeLevel.Normal, 0],
@@ -164,6 +169,11 @@ export class PriceService {
       [FeeLevel.High, 10000000000],
       [FeeLevel.Normal, 5000000000],
       [FeeLevel.Low, 2000000000]
+    ])],
+    [CurrencyId.NemTest, new Map<FeeLevel, number>([
+      [FeeLevel.High, 0],
+      [FeeLevel.Normal, 0],
+      [FeeLevel.Low, 0]
     ])],
     [CurrencyId.NeoTest, new Map<FeeLevel, number>([
       [FeeLevel.High, 0],

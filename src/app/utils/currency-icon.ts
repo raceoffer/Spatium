@@ -120,6 +120,10 @@ const logos = {
       '0xd53370acf66044910bb49cbcfe8f3cd020337f60': 'assets/images/drawable/currency/consensus.svg'
     }
   },
+  [CurrencyId.Nem]: {
+    logo: 'assets/images/drawable/currency/nem.svg',
+    tokenLogos: {}
+  },
   [CurrencyId.Neo]: {
     logo: 'assets/images/drawable/currency/neo.svg',
     tokenLogos: {}
@@ -138,6 +142,10 @@ const logos = {
   },
   [CurrencyId.EthereumTest]: {
     logo: 'assets/images/drawable/currency/ethereum.svg',
+    tokenLogos: {}
+  },
+  [CurrencyId.NemTest]: {
+    logo: 'assets/images/drawable/currency/nem.svg',
     tokenLogos: {}
   },
   [CurrencyId.NeoTest]: {

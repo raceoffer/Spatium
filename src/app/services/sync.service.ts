@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { CurrencyInfoService, CurrencyId } from './currencyinfo.service';
+import { CurrencyInfoService, CurrencyId, Cryptosystem } from './currencyinfo.service';
 import { KeyChainService } from './keychain.service';
 import { Currency } from './verifier.service';
 
 import {
   DistributedEcdsaKey,
+  DistributedEddsaKey,
   EcdsaInitialData,
   EcdsaChallengeCommitment,
-  EcdsaChallengeDecommitment
+  EcdsaChallengeDecommitment,
+  EddsaData
 } from 'crypto-core-async';
 
 import { ReplaySubject, Subject, BehaviorSubject } from 'rxjs';
@@ -111,6 +113,87 @@ export class EcdsaCurrency extends Currency {
       sessionId: this._sessionId,
       currencyId: this.id,
       responseDecommitment: responseDecommitment.toJSON()
+    }), this._cancelSubject);
+    console.log(syncFinalizeResponse);
+    if (!syncFinalizeResponse) {
+      return false;
+    }
+
+    await this._distributedKey.importSyncData(syncData);
+
+    this.state.next(SyncState.Finalized);
+
+    return true;
+  }
+
+  public cancel() {
+    this._cancelSubject.next();
+  }
+
+  public async reset(): Promise<void> {
+    this.state.next(SyncState.None);
+    this._distributedKey = null;
+  }
+}
+
+export class EddsaCurrency extends Currency {
+  private _distributedKey: any = null;
+  private _cancelSubject = new ReplaySubject<any>(1);
+
+  public get distributedKey(): any {
+    return this._distributedKey;
+  }
+
+  public compoundPublic(): any {
+    return this._distributedKey ? this._distributedKey.compoundPublic() : null;
+  }
+
+  public constructor(
+    _id: CurrencyId,
+    private _sessionId: string,
+    private readonly _currencyInfoService: CurrencyInfoService,
+    private readonly _keyChainService: KeyChainService,
+    private readonly _workerService: WorkerService
+  ) {
+    super(_id);
+  }
+
+  public async sync(rpcClient: RPCClient): Promise<boolean> {
+    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
+
+    const privateBytes = this._keyChainService.privateBytes(currencyInfo.derivationNumber, 1);
+
+    this._distributedKey = await DistributedEddsaKey.fromOptions({
+      curve: currencyInfo.curve,
+      secret: privateBytes,
+    }, this._workerService.worker);
+
+    const syncSession = await this._distributedKey.startSyncSession();
+
+    const commitment = await syncSession.createCommitment();
+
+    this.state.next(SyncState.Started);
+
+    const startSyncResponse = await waitFiorPromise<any>(rpcClient.api.startEddsaSync({
+      sessionId: this._sessionId,
+      currencyId: this.id,
+      commitment: commitment.toJSON()
+    }), this._cancelSubject);
+    console.log(startSyncResponse);
+    if (!startSyncResponse) {
+      return false;
+    }
+
+    const data = EddsaData.fromJSON(startSyncResponse.data);
+
+    const { decommitment, syncData } = await syncSession.processData(data);
+
+    this.state.next(SyncState.Revealed);
+
+    const syncFinalizeResponse = await waitFiorPromise<any>(rpcClient.api.eddsaSyncFinalize({
+      sessionId: this._sessionId,
+      currencyId: this.id,
+      decommitment: decommitment.toJSON()
     }), this._cancelSubject);
     console.log(syncFinalizeResponse);
     if (!syncFinalizeResponse) {
@@ -254,16 +337,31 @@ export class SyncService {
       while (this._syncQueue.length > 0 && !this._cancelled) {
         console.log('Sync queue', this._syncQueue);
         const currencyId = this._syncQueue[0];
+        const currencyInfo = this._currencyInfoService.currencyInfo(currencyId);
 
-        const currency = new EcdsaCurrency(
-          currencyId,
-          sessionId,
-          paillierPublicKey,
-          paillierSecretKey,
-          this._currencyInfoService,
-          this._keyChainService,
-          this._workerService,
-        );
+        let currency = null;
+        switch (currencyInfo.cryptosystem) {
+          case Cryptosystem.Ecdsa:
+            currency = new EcdsaCurrency(
+              currencyId,
+              sessionId,
+              paillierPublicKey,
+              paillierSecretKey,
+              this._currencyInfoService,
+              this._keyChainService,
+              this._workerService,
+            );
+            break;
+          case Cryptosystem.Eddsa:
+            currency = new EddsaCurrency(
+              currencyId,
+              sessionId,
+              this._currencyInfoService,
+              this._keyChainService,
+              this._workerService,
+            );
+            break;
+        }
 
         this._currencies.set(currencyId, currency);
 
