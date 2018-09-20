@@ -246,7 +246,9 @@ export class EddsaCurrency extends Currency {
       throw new Error('Invalid session state');
     }
 
-    await this._syncSessionShard.processDecommitment(decommitment);
+    const shardSyncData = await this._syncSessionShard.processDecommitment(decommitment);
+
+    await this._distributedKeyShard.importSyncData(shardSyncData);
 
     this._ngZone.run(() => this.state.next(SyncState.Finalized));
 

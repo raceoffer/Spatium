@@ -120,13 +120,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         network === 'main' ? 'prod' : 'testnet'
       );
     };
-    if (currencyInfo.id === CurrencyId.BitcoinCash) {
+    if ([CurrencyId.BitcoinCash, CurrencyId.BitcoinCashTest].includes(currencyInfo.id)) {
       try {
         CashAddr.decode(address);
         return true;
       } catch (ignored) {
         return verify();
       }
+    } else if ([CurrencyId.Nem, CurrencyId.NemTest].includes(currencyInfo.id)) {
+      return true;
     } else {
       return verify();
     }
@@ -164,7 +166,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       this.currencyInfoService
     );
 
-    this.allowFeeConfiguration = true;
+    this.allowFeeConfiguration = ![CurrencyId.Nem, CurrencyId.NemTest].includes(this.model.currencyInfo.id);
 
     this.estimatedSize = toBehaviourSubject(
       combineLatest([
@@ -588,9 +590,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
       try {
         this.phase.next(Phase.Confirmation);
-        if (this.connectionService.state.getValue() !== State.Opened) {
-          await this.connectionService.reconnect();
-        }
 
         const currency = this.wallet.currency.getValue();
         const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
@@ -599,7 +598,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           case Cryptosystem.Ecdsa:
             this.signed = await this.signEcdsa(receiver, value, fee);
             break;
-          case Cryptosystem.Ecdsa:
+          case Cryptosystem.Eddsa:
             this.signed = await this.signEddsa(receiver, value, fee);
             break;
         }
