@@ -16,7 +16,7 @@ export class SsdpService {
 
   constructor() {
     console.log('ssdp - set callbacks');
-    cordova.plugins.ssdp.setDiscoveredCallback(data => {
+    cordova.plugins.ssdp.setDeviceDiscoveredCallback(data => {
       console.log('ssdp - discovered:', data);
       const devices = this.devices.getValue();
       devices.set(data.usn, new Device(
@@ -29,7 +29,7 @@ export class SsdpService {
       this.devices.next(devices);
     });
 
-    cordova.plugins.ssdp.setGoneCallback(data => {
+    cordova.plugins.ssdp.setDeviceGoneCallback(data => {
       console.log('ssdp - gone:', data);
       const devices = this.devices.getValue();
       devices.delete(data.usn);
