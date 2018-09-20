@@ -54,9 +54,25 @@
           "requestType": "StartEcdsaSignRequest",
           "responseType": "StartEcdsaSignResponse"
         },
-        "EcdsaSignReveal": {
-          "requestType": "EcdsaSignRevealRequest",
-          "responseType": "EcdsaSignRevealResponse"
+        "EcdsaSignFinalize": {
+          "requestType": "EcdsaSignFinalizeRequest",
+          "responseType": "EcdsaSignFinalizeResponse"
+        },
+        "StartEddsaSync": {
+          "requestType": "StartEddsaSyncRequest",
+          "responseType": "StartEddsaSyncResponse"
+        },
+        "EddsaSyncFinalize": {
+          "requestType": "EddsaSyncFinalizeRequest",
+          "responseType": "EddsaSyncFinalizeResponse"
+        },
+        "StartEddsaSign": {
+          "requestType": "StartEddsaSignRequest",
+          "responseType": "StartEddsaSignResponse"
+        },
+        "EddsaSignFinalize": {
+          "requestType": "EddsaSignFinalizeRequest",
+          "responseType": "EddsaSignFinalizeResponse"
         }
       }
     },
@@ -323,11 +339,11 @@
       "fields": {
         "entropyDataBytes": {
           "type": "bytes",
-          "id": 2
+          "id": 1
         }
       }
     },
-    "EcdsaSignRevealRequest": {
+    "EcdsaSignFinalizeRequest": {
       "fields": {
         "sessionId": {
           "type": "string",
@@ -347,7 +363,114 @@
         }
       }
     },
-    "EcdsaSignRevealResponse": {
+    "EcdsaSignFinalizeResponse": {
+      "fields": {
+        "partialSignatureBytes": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "StartEddsaSyncRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "commitment": {
+          "type": "EddsaCommitment",
+          "id": 3
+        }
+      }
+    },
+    "StartEddsaSyncResponse": {
+      "fields": {
+        "data": {
+          "type": "EddsaData",
+          "id": 1
+        }
+      }
+    },
+    "EddsaSyncFinalizeRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "decommitment": {
+          "type": "EddsaDecommitment",
+          "id": 3
+        }
+      }
+    },
+    "EddsaSyncFinalizeResponse": {
+      "fields": {}
+    },
+    "StartEddsaSignRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "tokenId": {
+          "type": "string",
+          "id": 3
+        },
+        "signSessionId": {
+          "type": "string",
+          "id": 4
+        },
+        "transactionBytes": {
+          "type": "bytes",
+          "id": 5
+        },
+        "entropyCommitmentBytes": {
+          "type": "bytes",
+          "id": 6
+        }
+      }
+    },
+    "StartEddsaSignResponse": {
+      "fields": {
+        "entropyDataBytes": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "EddsaSignFinalizeRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "signSessionId": {
+          "type": "string",
+          "id": 3
+        },
+        "entropyDecommitmentBytes": {
+          "type": "bytes",
+          "id": 4
+        }
+      }
+    },
+    "EddsaSignFinalizeResponse": {
       "fields": {
         "partialSignatureBytes": {
           "type": "bytes",
@@ -904,6 +1027,58 @@
         "remotePaillierPublicKey": {
           "type": "PaillierPublicKey",
           "id": 10
+        }
+      }
+    },
+    "EddsaCommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "pedersenParameters": {
+          "type": "bytes",
+          "id": 2
+        },
+        "commitment": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    },
+    "EddsaDecommitment": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 3
+        },
+        "decommitment": {
+          "type": "bytes",
+          "id": 4
+        }
+      }
+    },
+    "EddsaData": {
+      "fields": {
+        "curve": {
+          "type": "int32",
+          "id": 1
+        },
+        "publicPoint": {
+          "type": "bytes",
+          "id": 2
+        },
+        "schnorrProof": {
+          "type": "SchnorrProof",
+          "id": 3
         }
       }
     }

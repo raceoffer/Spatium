@@ -4,6 +4,8 @@ import {
   EcdsaInitialDecommitment,
   EcdsaResponseCommitment,
   EcdsaResponseDecommitment,
+  EddsaCommitment,
+  EddsaDecommitment,
   Marshal,
   Utils
 } from 'crypto-core-async';
@@ -66,6 +68,7 @@ export class RPCServerService {
         state: await this.verifierService.syncState(request.sessionId, request.currencyId)
       };
     },
+
     async StartEcdsaSync(request) {
       const initialData = await this.verifierService.startEcdsaSync(
         request.sessionId,
@@ -108,6 +111,7 @@ export class RPCServerService {
 
       return {};
     },
+
     async StartEcdsaSign(request) {
       const entropyData = await this.verifierService.startEcdsaSign(
         request.sessionId,
@@ -122,8 +126,56 @@ export class RPCServerService {
         entropyDataBytes: Marshal.encode(entropyData)
       };
     },
-    async EcdsaSignReveal(request) {
-      const partialSignature = await this.verifierService.ecdsaSignReveal(
+    async EcdsaSignFinalize(request) {
+      const partialSignature = await this.verifierService.ecdsaSignFinalize(
+        request.sessionId,
+        request.currencyId,
+        request.signSessionId,
+        Marshal.decode(request.entropyDecommitmentBytes)
+      );
+
+      return {
+        partialSignatureBytes: Marshal.encode(partialSignature)
+      };
+    },
+
+    async StartEddsaSync(request) {
+      const data = await this.verifierService.startEddsaSync(
+        request.sessionId,
+        request.currencyId,
+        EddsaCommitment.fromJSON(request.commitment)
+      );
+
+      return {
+        data: data.toJSON()
+      };
+    },
+    async EddsaSyncFinalize(request) {
+      await this.verifierService.eddsaSyncFinalize(
+        request.sessionId,
+        request.currencyId,
+        EddsaDecommitment.fromJSON(request.decommitment)
+      );
+
+      return {};
+    },
+
+    async StartEddsaSign(request) {
+      const entropyData = await this.verifierService.startEddsaSign(
+        request.sessionId,
+        request.currencyId,
+        request.tokenId,
+        request.signSessionId,
+        new Buffer(request.transactionBytes),
+        Marshal.decode(request.entropyCommitmentBytes)
+      );
+
+      return {
+        entropyDataBytes: Marshal.encode(entropyData)
+      };
+    },
+    async EddsaSignFinalize(request) {
+      const partialSignature = await this.verifierService.eddsaSignFinalize(
         request.sessionId,
         request.currencyId,
         request.signSessionId,
