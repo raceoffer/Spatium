@@ -10,9 +10,15 @@ import {
   Utils
 } from 'crypto-core-async';
 import { Root } from 'protobufjs';
+import { distinctUntilChanged, filter, skip } from 'rxjs/operators';
+import { Server } from '../../utils/client-server/client-server';
+import { BluetoothServerSocket } from '../../utils/sockets/bluetoothserversocket';
+import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
+import { Socket, State } from '../../utils/sockets/socket';
+import { uuidFrom } from '../../utils/uuid';
 import { DeviceService } from '../device.service';
+import { KeyChainService } from '../keychain.service';
 import { VerifierService } from '../verifier.service';
-
 import * as abi from './rpc-protocol.json';
 import { Server } from '../../utils/client-server/client-server';
 import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
@@ -20,6 +26,7 @@ import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
 import { State, Socket } from '../../utils/sockets/socket';
 import { KeyChainService } from '../keychain.service';
 import { uuidFrom } from '../../utils/uuid';
+
 
 @Injectable()
 export class RPCServerService {
@@ -189,6 +196,7 @@ export class RPCServerService {
   };
 
   private _plainServerSocket: PlainServerSocket = null;
+  private _bluetoothServerSocket: BluetoothServerSocket = null;
   private _servers = new Set<Server>();
 
   constructor(
@@ -201,8 +209,7 @@ export class RPCServerService {
     this.RpcService = this.root.lookup('RpcService');
 
     this._deviceService.deviceReady().then(() => {
-      this._plainServerSocket = new PlainServerSocket();
-      this._plainServerSocket.opened.subscribe(async (socket: Socket) => {
+      const connectionHandler = async (socket: Socket) => {
         const server = new Server(socket);
 
         socket.state.pipe(
@@ -218,7 +225,13 @@ export class RPCServerService {
         });
 
         this._servers.add(server);
-      });
+      };
+
+      this._plainServerSocket = new PlainServerSocket();
+      this._plainServerSocket.opened.subscribe(connectionHandler);
+
+      this._bluetoothServerSocket = new BluetoothServerSocket();
+      this._bluetoothServerSocket.opened.subscribe(connectionHandler);
     });
   }
 
@@ -255,6 +268,9 @@ export class RPCServerService {
 
     this._servers.clear();
 
-    return await this._plainServerSocket.stop();
+    await this._plainServerSocket.stop();
+    await this._bluetoothServerSocket.stop();
+
+    return;
   }
 }

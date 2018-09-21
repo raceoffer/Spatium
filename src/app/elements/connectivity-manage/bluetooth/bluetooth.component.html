@@ -14,7 +14,7 @@
 
 <div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(toggled | async)">
   <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <span class="list-status" *ngIf="(connectedDevice | async) !== null && (connectionState | async) === connectionStateType.Connected">
+    <!-- <span class="list-status" *ngIf="(connectedDevice | async) !== null && (connectionState | async) === connectionStateType.Connected">
       Connected to {{ (connectedDevice | async).name }}
     </span>
     <span fxLayout="row" fxLayoutAlign="start center" style="width: 100%" *ngIf="(connectableState | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
@@ -43,6 +43,6 @@
       <button mat-button color="accent" class="button-style" *ngIf="(discoveryState | async) === stateType.Stopped" (click)="enableDiscovery()">Enable device discovery</button>
       <span class="list-status" style="padding-left: 16px;" *ngIf="(discoveryState | async) === stateType.Started">Discoverable</span>
       <mat-spinner mode="indeterminate" diameter="13" color="accent" *ngIf="(discoveryState | async) !== stateType.Started && (discoveryState | async) !== stateType.Stopped"></mat-spinner>
-    </span>
+    </span> -->
   </div>
 </div>

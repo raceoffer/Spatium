@@ -6,6 +6,7 @@ import { PlainSocket } from '../../utils/sockets/plainsocket';
 import { State } from '../../utils/sockets/socket';
 import { toBehaviourSubject } from '../../utils/transformers';
 import { RPCClient } from './rpc-client';
+import { BluetoothSocket } from '../../utils/sockets/bluetoothsocket';
 
 @Injectable()
 export class RPCConnectionService {
