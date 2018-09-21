@@ -1,8 +1,9 @@
 import { Reader, Root } from 'protobufjs';
+import { timer } from 'rxjs';
+import { distinctUntilChanged, filter, skip } from 'rxjs/operators';
 import uuid from 'uuid/v4';
-import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
 import { Socket, State } from '../sockets/socket';
-
+import { waitFiorPromise } from '../transformers';
 import { abi } from './protocol';
 
 export enum ErrorCode {
@@ -24,6 +25,14 @@ export class Client {
 
   public state = this.socket.state;
 
+  public defaultTimeout = 15000;
+
+  private disconnected = this.state.pipe(
+    distinctUntilChanged(),
+    skip(1),
+    filter(state => [State.Closing, State.Closed].includes(state))
+  );
+
   private static bufferUUID(): Buffer {
     const uuidArray = [];
     uuid(undefined, uuidArray);
@@ -41,16 +50,12 @@ export class Client {
       await this.handleData(data);
     });
 
-    this.state.pipe(
-      distinctUntilChanged(),
-      skip(1),
-      filter(state => [State.Closing, State.Closed].includes(state))
-    ).subscribe(() => {
+    this.disconnected.subscribe(() => {
       this.handleDisconnect();
     });
   }
 
-  public async request(data: Buffer): Promise<Buffer> {
+  public async request(data: Buffer, timeout: number = this.defaultTimeout): Promise<Buffer> {
     if (this.socket.state.getValue() !== State.Opened) {
       throw new Error('Request failed: Not connected');
     }
@@ -64,9 +69,15 @@ export class Client {
 
     await this.socket.write(message);
 
-    return await new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
+    const response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
       this.requestQueue.push({ id, resolve, reject });
-    });
+    }), timeout > 0 ? timer(timeout) : undefined);
+
+    if (!response) {
+      throw new Error('Request failed: Timeout');
+    }
+
+    return response;
   }
 
   public async close(): Promise<void> {
@@ -141,9 +152,15 @@ export class Server {
 
   private responseAccumulator = Buffer.alloc(0);
 
-  private requestHandler: (data: Buffer) => any = null;
+  private requestHandler: (data: Buffer) => Promise<Buffer> = null;
 
   public state = this.socket.state;
+
+  private disconnected = this.state.pipe(
+    distinctUntilChanged(),
+    skip(1),
+    filter(state => [State.Closing, State.Closed].includes(state))
+  );
 
   public constructor (private socket: Socket) {
     this.root = Root.fromJSON(abi);
@@ -156,16 +173,12 @@ export class Server {
       await this.handleData(data);
     });
 
-    this.state.pipe(
-      distinctUntilChanged(),
-      skip(1),
-      filter(state => [State.Closing, State.Closed].includes(state))
-    ).subscribe(() => {
+    this.disconnected.subscribe(() => {
       this.handleDisconnect();
     });
   }
 
-  public setRequestHandler(handler: (data: Buffer) => any): void {
+  public setRequestHandler(handler: (data: Buffer) => Promise<Buffer>): void {
     this.requestHandler = handler;
   }
 
@@ -204,6 +217,7 @@ export class Server {
   private async handleRequest(request: any): Promise<void> {
     const id = new Buffer(request.id);
     const data = new Buffer(request.data);
+
     if (this.requestHandler) {
       try {
         const response = await this.requestHandler(data);

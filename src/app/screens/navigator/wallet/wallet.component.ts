@@ -233,7 +233,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async reconnect() {
-    if (this.connectionService.state.getValue() !== State.Opened) {
+    if (!await this.connectionService.probe()) {
       try {
         await this.connectionService.reconnect();
       } catch (e) {

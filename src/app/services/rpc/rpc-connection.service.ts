@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { Client } from '../../utils/client-server/client-server';
 import { PlainSocket } from '../../utils/sockets/plainsocket';
 import { State } from '../../utils/sockets/socket';
@@ -27,7 +27,7 @@ export class RPCConnectionService {
   } = null;
 
   public state = toBehaviourSubject(this._rpcClient.pipe(
-    mergeMap((rpcClient) => rpcClient ? rpcClient.state : of(State.Closed))
+    switchMap((rpcClient) => rpcClient ? rpcClient.state : of(State.Closed))
   ), State.Closed);
 
   public get rpcClient(): RPCClient {
@@ -47,6 +47,15 @@ export class RPCConnectionService {
       method: Method.PlainSocket,
       data: { host, port }
     };
+  }
+
+  public async probe(): Promise<boolean> {
+    try {
+      await this.rpcClient.probe(10000);
+      return true;
+    } catch (ignored) {
+      return false;
+    }
   }
 
   public async reconnect(): Promise<void> {

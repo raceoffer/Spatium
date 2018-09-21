@@ -553,7 +553,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   async startSigning() {
     try {
-      if (this.connectionService.state.getValue() !== State.Opened) {
+      if (!await this.connectionService.probe()) {
         try {
           await this.connectionService.reconnect();
         } catch (e) {
@@ -661,7 +661,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
-    }), this.cancelSubject);
+    }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
       return null;
@@ -735,7 +735,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
-    }), this.cancelSubject);
+    }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
       return null;

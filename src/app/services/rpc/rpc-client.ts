@@ -19,12 +19,10 @@ export class RPCClient {
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
 
-    this.rpcService = this.RpcService.create((m, d, c) => this.rpcProxy(m, d, c));
-
     this._api = Object.keys(this.RpcService.methods).reduce((api, method) => {
       const methodName = method.charAt(0).toLowerCase() + method.slice(1);
-      api[methodName] = (data: any) => {
-        return this.rpcService[methodName](data);
+      api[methodName] = async (data: any, timeout?: number) => {
+        return await this.prcProxy(method, data, timeout);
       };
       return api;
     }, {});
@@ -34,22 +32,31 @@ export class RPCClient {
     return this._api;
   }
 
-  private async rpcProxy(method, data, callback) {
+  private async prcProxy(method: string, data: any, timeout?: number) {
+    const requestTypeName = this.RpcService.methods[method].requestType;
+    const responseTypeName = this.RpcService.methods[method].responseType;
+
+    const RequestType = this.root.lookupType(requestTypeName);
+    const ResponseType = this.root.lookupType(responseTypeName);
+
+    const requestBytes = RequestType.encode(data).finish();
+
     const rpcCall = new Buffer(this.RpcCall.encode({
-      method: method.name,
-      data: data
+      method: method,
+      data: requestBytes
     }).finish());
 
-    try {
-      const result = await this.client.request(rpcCall);
-      callback(null, result);
-    } catch (e) {
-      callback(e);
-    }
+    const resultBytes = await this.client.request(rpcCall, timeout);
+
+    return ResponseType.decode(resultBytes);
   }
 
   public async request(method: string, data: any): Promise<any> {
     return await this.rpcService[method](data);
+  }
+
+  public async probe(timeout: number): Promise<void> {
+    await this.client.request(Buffer.alloc(0), timeout);
   }
 
   public async close(): Promise<void> {
