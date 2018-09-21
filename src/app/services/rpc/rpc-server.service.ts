@@ -258,7 +258,8 @@ export class RPCServerService {
   }
 
   public async start(iface: string, port: number): Promise<void> {
-    return await this._plainServerSocket.start(iface, port);
+    await this._plainServerSocket.start(iface, port);
+    await this._bluetoothServerSocket.start();
   }
 
   public async stop(): Promise<void> {

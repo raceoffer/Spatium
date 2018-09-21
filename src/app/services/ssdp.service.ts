@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Device, ProviderType } from './primitives/device';
+import { Device, Provider } from './primitives/device';
 import { State } from './primitives/state';
 
 declare const cordova: any;
@@ -20,11 +20,12 @@ export class SsdpService {
       console.log('ssdp - discovered:', data);
       const devices = this.devices.getValue();
       devices.set(data.usn, new Device(
-        ProviderType.WIFI,
+        Provider.Wifi,
         data.name,
-        data.usn,
-        data.ip,
-        parseInt(data.port, 10)
+        data.usn, {
+          host: data.ip,
+          port: parseInt(data.port, 10)
+        }
       ));
       this.devices.next(devices);
     });
