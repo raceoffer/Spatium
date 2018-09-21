@@ -67,7 +67,7 @@ export class Client {
       data: data
     }).finish());
 
-    await this.socket.write(message);
+    this.socket.write(message);
 
     const response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
       this.requestQueue.push({ id, resolve, reject });
