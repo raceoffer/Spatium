@@ -21,8 +21,8 @@ export class RPCClient {
 
     this._api = Object.keys(this.RpcService.methods).reduce((api, method) => {
       const methodName = method.charAt(0).toLowerCase() + method.slice(1);
-      api[methodName] = async (data: any, timeout?: number) => {
-        return await this.prcProxy(method, data, timeout);
+      api[methodName] = async (data: any, timeout?: number, retries?: number) => {
+        return await this.prcProxy(method, data, timeout, retries);
       };
       return api;
     }, {});
@@ -32,7 +32,7 @@ export class RPCClient {
     return this._api;
   }
 
-  private async prcProxy(method: string, data: any, timeout?: number) {
+  private async prcProxy(method: string, data: any, timeout?: number, retries?: number) {
     const requestTypeName = this.RpcService.methods[method].requestType;
     const responseTypeName = this.RpcService.methods[method].responseType;
 
@@ -46,7 +46,7 @@ export class RPCClient {
       data: requestBytes
     }).finish());
 
-    const resultBytes = await this.client.request(rpcCall, timeout);
+    const resultBytes = await this.client.request(rpcCall, timeout, retries);
 
     return ResponseType.decode(resultBytes);
   }
@@ -55,8 +55,8 @@ export class RPCClient {
     return await this.rpcService[method](data);
   }
 
-  public async probe(timeout: number): Promise<void> {
-    await this.client.request(Buffer.alloc(0), timeout);
+  public async open(): Promise<void> {
+    return await this.client.open();
   }
 
   public async close(): Promise<void> {

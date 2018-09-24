@@ -23,6 +23,7 @@ import * as WalletAddressValidator from 'wallet-address-validator';
 import * as CashAddr from 'cashaddrjs';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { Device } from '../../../services/primitives/device';
+import { NetworkError } from '../../../utils/client-server/client-server';
 
 declare const cordova: any;
 
@@ -551,69 +552,83 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.navigationService.back();
   }
 
-  async startSigning() {
-    try {
-      if (!await this.connectionService.probe()) {
+  public async openDiscoveryOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+    componentRef.instance.selected.subscribe(async (device) => {
+      this.navigationService.acceptOverlay();
         try {
-          await this.connectionService.reconnect();
-        } catch (e) {
-          const device = await this.selectDevice();
-
           await this.connectionService.connectPlain(device.ip, device.port);
-        }
-
-        const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
-          sessionId: this.keyChainService.sessionId,
-          currencyId: this.model.currencyInfo.id
-        });
-
-        // Do not await
-        this.syncService.sync(
-          this.keyChainService.sessionId,
-          this.keyChainService.paillierPublicKey,
-          this.keyChainService.paillierSecretKey,
-          this.connectionService.rpcClient
-        );
-
-        if (syncStateResponse.state !== SyncState.Finalized) {
-          this.notification.show('The currency is not synchronized. Please wait.');
-          this.syncService.forceCurrency(this.model.currencyInfo.id);
-
-          // Let the user start sign again
+        } catch (e) {
+          console.error(e);
+          this.notification.show('Failed to conenct to remote device');
           return;
         }
-      }
 
+        await this.resign();
+    });
+  }
+
+  public async resign() {
+    const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
+      sessionId: this.keyChainService.sessionId,
+      currencyId: this.model.currencyInfo.id
+    });
+
+    // Do not await
+    this.syncService.sync(
+      this.keyChainService.sessionId,
+      this.keyChainService.paillierPublicKey,
+      this.keyChainService.paillierSecretKey,
+      this.connectionService.rpcClient
+    );
+
+    if (syncStateResponse.state !== SyncState.Finalized) {
+      this.notification.show('The currency is not synchronized. Please wait.');
+      this.syncService.forceCurrency(this.model.currencyInfo.id);
+
+      // Let the user start sign again
+      return;
+    }
+
+    await this.startSigning();
+  }
+
+  async startSigning() {
+    this.phase.next(Phase.Confirmation);
+
+    this.signed = null;
+
+    try {
       const receiver = this.receiver.getValue();
       const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
       // temporarily allow NEM to choose fee itself
       const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
-      try {
-        this.phase.next(Phase.Confirmation);
 
-        const currency = this.wallet.currency.getValue();
-        const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
+      const currency = this.wallet.currency.getValue();
+      const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
 
-        switch (currencyInfo.cryptosystem) {
-          case Cryptosystem.Ecdsa:
-            this.signed = await this.signEcdsa(receiver, value, fee);
-            break;
-          case Cryptosystem.Eddsa:
-            this.signed = await this.signEddsa(receiver, value, fee);
-            break;
-        }
-
-        if (!this.signed) {
-          this.phase.next(Phase.Creation);
-        } else {
-          this.phase.next(Phase.Sending);
-        }
-      } catch (e) {
-        this.phase.next(Phase.Creation);
+      switch (currencyInfo.cryptosystem) {
+        case Cryptosystem.Ecdsa:
+          this.signed = await this.signEcdsa(receiver, value, fee);
+          break;
+        case Cryptosystem.Eddsa:
+          this.signed = await this.signEddsa(receiver, value, fee);
+          break;
       }
-    } catch (e) {
-      console.error(e);
-      this.notification.show('Failed to sign a transaction');
+    } catch (error) {
+      if (error instanceof NetworkError) {
+        await this.openDiscoveryOverlay();
+        this.notification.show('Failed to restore connection automatically. Please secect a device');
+      } else {
+        console.error(error);
+        this.notification.show('Failed to sign a transaction');
+      }
+    } finally {
+      if (!this.signed) {
+        this.phase.next(Phase.Creation);
+      } else {
+        this.phase.next(Phase.Sending);
+      }
     }
   }
 
@@ -802,21 +817,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   copy() {
     cordova.plugins.clipboard.copy(this.wallet.address.getValue());
-  }
-
-  public async selectDevice() {
-    return new Promise<Device>((resolve, reject) => {
-      const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
-      componentRef.instance.selected.subscribe(async (device) => {
-        this.navigationService.acceptOverlay();
-
-        resolve(device);
-      });
-
-      componentRef.instance.cancelled.subscribe(() => {
-        reject(new Error('Cancelled'));
-      });
-    });
   }
 
   // more boilerplate stuff for focus tracking

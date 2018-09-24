@@ -12,7 +12,9 @@ export class PlainServerSocket extends ServerSocket {
 
     this.serverSocket = new cordova.plugins.sockets.ServerSocket();
     this.serverSocket.onOpened = (socket: any) => {
-      const plainSocket = new PlainSocket(socket);
+      const plainSocket = new PlainSocket({
+        socket
+      });
       plainSocket.state.next(SocketState.Opened);
       this.opened.next(plainSocket);
     };
@@ -38,8 +40,8 @@ export class PlainServerSocket extends ServerSocket {
   }
 
   public async stop(): Promise<void> {
-    if (this.state.getValue() !== State.Started) {
-      throw new Error('Failed to stop a busy server socket');
+    if (this.state.getValue() !== State.Stopped) {
+      return;
     }
 
     this.state.next(State.Stopping);

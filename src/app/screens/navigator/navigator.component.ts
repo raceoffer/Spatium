@@ -92,22 +92,27 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
+        try {
+          await this.connectionService.connectPlain(device.ip, device.port);
+        } catch (e) {
+          console.error(e);
+          this.notificationService.show('Failed to conenct to remote device');
+          return;
+        }
 
-      try {
-        await this.connectionService.connectPlain(device.ip, device.port);
+        try {
+          await this.syncService.sync(
+            this.keyChainService.sessionId,
+            this.keyChainService.paillierPublicKey,
+            this.keyChainService.paillierSecretKey,
+            this.connectionService.rpcClient
+          );
 
-        await this.syncService.sync(
-          this.keyChainService.sessionId,
-          this.keyChainService.paillierPublicKey,
-          this.keyChainService.paillierSecretKey,
-          this.connectionService.rpcClient
-        );
-
-        console.log('Synchronized');
-      } catch (e) {
-        console.error(e);
-        this.notificationService.show('Synchronization error');
-      }
+          console.log('Synchronized');
+        } catch (e) {
+          console.error(e);
+          this.notificationService.show('Synchronization error');
+        }
     });
   }
 }

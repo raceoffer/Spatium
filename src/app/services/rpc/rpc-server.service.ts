@@ -16,11 +16,10 @@ import { VerifierService } from '../verifier.service';
 import * as abi from './rpc-protocol.json';
 import { Server } from '../../utils/client-server/client-server';
 import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
-import { distinctUntilChanged, skip, filter, debounceTime } from 'rxjs/operators';
+import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
 import { State, Socket } from '../../utils/sockets/socket';
 import { KeyChainService } from '../keychain.service';
 import { uuidFrom } from '../../utils/uuid';
-import { Subject } from 'rxjs';
 
 @Injectable()
 export class RPCServerService {
@@ -215,11 +214,6 @@ export class RPCServerService {
         });
 
         server.setRequestHandler(async (data) => {
-          // empty probe requests
-          if (data.length === 0) {
-            return Buffer.alloc(0);
-          }
-
           return await this.handleRequest(data);
         });
 

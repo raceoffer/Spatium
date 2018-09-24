@@ -13,6 +13,8 @@ export enum ErrorCode {
   RuntimeError = 3
 }
 
+export class NetworkError extends Error {}
+
 export class Client {
   private root: Root;
 
@@ -25,7 +27,8 @@ export class Client {
 
   public state = this.socket.state;
 
-  public defaultTimeout = 15000;
+  public defaultTimeout = 10000;
+  public defaultRetries = 1;
 
   private disconnected = this.state.pipe(
     distinctUntilChanged(),
@@ -55,11 +58,11 @@ export class Client {
     });
   }
 
-  public async request(data: Buffer, timeout: number = this.defaultTimeout): Promise<Buffer> {
-    if (this.socket.state.getValue() !== State.Opened) {
-      throw new Error('Request failed: Not connected');
-    }
-
+  public async request(
+    data: Buffer,
+    timeout: number = this.defaultTimeout,
+    retries: number = this.defaultRetries
+  ): Promise<Buffer> {
     const id = Client.bufferUUID();
 
     const message = new Buffer(this.Request.encodeDelimited({
@@ -67,17 +70,48 @@ export class Client {
       data: data
     }).finish());
 
-    this.socket.write(message);
+    let response = null;
+    let tries = 0;
+    let needsReconnect = false;
+    do {
+      tries++;
 
-    const response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
-      this.requestQueue.push({ id, resolve, reject });
-    }), timeout > 0 ? timer(timeout) : undefined);
+      // try reconnect first
+      if (this.socket.state.getValue() !== State.Opened || needsReconnect) {
+        try {
+          await this.socket.open();
+        } catch (ignored) {
+          throw new NetworkError('Request failed: Failed to restore connection');
+        }
+      }
+
+      // case one: write failes immediately
+      try {
+        this.socket.write(message);
+      } catch (e) {
+        needsReconnect = true;
+        continue;
+      }
+
+      response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
+        this.requestQueue.push({ id, resolve, reject });
+      }), timeout > 0 ? timer(timeout) : undefined);
+
+      // case two: request failes by timeout
+      if (!response) {
+        needsReconnect = true;
+      }
+    } while (!response && tries < retries + 1);
 
     if (!response) {
-      throw new Error('Request failed: Timeout');
+      throw new NetworkError('Request failed: Maximum retries reached');
     }
 
     return response;
+  }
+
+  public async open(): Promise<void> {
+    return await this.socket.open();
   }
 
   public async close(): Promise<void> {

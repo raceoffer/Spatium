@@ -232,19 +232,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     });
   }
 
-  public async reconnect() {
-    if (!await this.connectionService.probe()) {
-      try {
-        await this.connectionService.reconnect();
-      } catch (e) {
-        await this.openDiscoveryOverlay();
-        return;
-      }
-    }
-
-    await this.sync();
-  }
-
   public async sync() {
     try {
       await this.syncService.sync(
