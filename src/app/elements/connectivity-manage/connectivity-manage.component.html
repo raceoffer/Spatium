@@ -1,1 +1,2 @@
-<div #container></div>
+<app-bluetooth-manage *ngIf="(isBtSupported | async)"></app-bluetooth-manage>
+<app-wifi-manage></app-wifi-manage>

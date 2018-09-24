@@ -36,7 +36,7 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/bluetooth.component';
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
-import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
+import { WiFiComponent } from './elements/connectivity-manage/wifi/wifi.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
@@ -172,7 +172,7 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     NewIcoComponent,
     InvestmentsComponent,
     BluetoothComponent,
-    ZeroconfComponent,
+    WiFiComponent,
     CreateComponent,
     DecryptComponent,
     VerifierSettingsComponent,
@@ -279,7 +279,7 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     CreateComponent,
     DecryptComponent,
     VerifierSettingsComponent,
-    ZeroconfComponent,
+    WiFiComponent,
     BluetoothComponent,
     PresentationComponent,
     NavbarComponent,

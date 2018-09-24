@@ -1,23 +1,24 @@
 <div class="connection-container">
   <div class="connection-div" fxLayout="row" fxLayoutAlign=" center">
-    <mat-icon class="list-icon">bluetooth</mat-icon>
-    <span>Bluetooth</span>
+    <mat-icon class="list-icon">wifi</mat-icon>
+
+    <span>WiFi/LAN</span>
 
     <span class="spacer"></span>
 
-    <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started"
-            (click)="enableBluetooth()">Enable Bluetooth
+    <!--<button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started"
+            (click)="enableWifi()">Enable WiFi\LAN
     </button>
     <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) == stateType.Started"
-            (click)="enableDiscovery()">Enable device discovery
-    </button>
+            (click)="networkSettings()">Connect to a network
+    </button>-->
   </div>
 
   <div fxLayout="column" fxLayoutAlign="start stretch">
     <div fxLayout="row" fxLayoutAlign="start center" class="status">
 
-      <span class="list-status" *ngIf="(deviceState | async) == stateType.Stopped">
-          Bluetooth disabled
+      <!--<span class="list-status" *ngIf="(deviceState | async) == stateType.Stopped">
+          WiFi/LAN disabled
       </span>
 
       <span fxLayout="row" fxLayoutAlign="start center" *ngIf="(deviceState | async) == stateType.Starting">
@@ -32,7 +33,7 @@
 
       <span class="list-status" *ngIf="(deviceState | async) == stateType.Started">
           Ready
-      </span>
+      </span>-->
 
     </div>
   </div>
