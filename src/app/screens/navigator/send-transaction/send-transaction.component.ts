@@ -1,29 +1,28 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import BN from 'bn.js';
+import * as CashAddr from 'cashaddrjs';
+import { Marshal, Utils } from 'crypto-core-async';
 import isNumber from 'lodash/isNumber';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs/operators';
+import * as WalletAddressValidator from 'wallet-address-validator';
 import { BalanceService, BalanceStatus } from '../../../services/balance.service';
-import { CurrencyInfoService, CurrencyInfo, CurrencyId, Cryptosystem } from '../../../services/currencyinfo.service';
+import { Cryptosystem, CurrencyId, CurrencyInfo, CurrencyInfoService } from '../../../services/currencyinfo.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { FeeLevel, PriceService } from '../../../services/price.service';
-import { SyncService, EcdsaCurrency, EddsaCurrency } from '../../../services/sync.service';
-import { CurrecnyModelType, CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
-import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
-import { WorkerService } from '../../../services/worker.service';
-import { Utils, Marshal } from 'crypto-core-async';
-import { uuidFrom } from '../../../utils/uuid';
-import { KeyChainService } from '../../../services/keychain.service';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
-import { State } from '../../../utils/sockets/socket';
-
-import * as WalletAddressValidator from 'wallet-address-validator';
-import * as CashAddr from 'cashaddrjs';
-import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
-import { Device, Provider } from '../../../services/primitives/device';
+import { EcdsaCurrency, EddsaCurrency, SyncService } from '../../../services/sync.service';
+import { CurrecnyModelType, CurrencyModel, SyncState, Wallet } from '../../../services/wallet/wallet';
+import { WorkerService } from '../../../services/worker.service';
 import { NetworkError } from '../../../utils/client-server/client-server';
+import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
+import { uuidFrom } from '../../../utils/uuid';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
+import { Provider } from '../../../services/primitives/device';
+
 
 declare const cordova: any;
 
@@ -556,43 +555,49 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
-    try {
-          await this.connectionService.connectPlain(device.ip, device.port);
-        } catch (e) {
-          console.error(e);
-          this.notification.show('Failed to conenct to remote device');
-          return;
+      try {
+        switch (device.provider) {
+          case Provider.Bluetooth:
+            await this.connectionService.connectBluetooth(device.data);
+            break;
+          case Provider.Wifi:
+            await this.connectionService.connectPlain(device.data);
+            break;
         }
+      } catch (e) {
+        console.error(e);
+        this.notification.show('Failed to conenct to remote device');
+        return;
+      }
 
-        await this.resign();
+      await this.resign();
     });
   }
-        }
 
   public async resign() {
-        const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
-          sessionId: this.keyChainService.sessionId,
-          currencyId: this.model.currencyInfo.id
-        });
+    const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
+      sessionId: this.keyChainService.sessionId,
+      currencyId: this.model.currencyInfo.id
+    });
 
-        // Do not await
-        this.syncService.sync(
-          this.keyChainService.sessionId,
-          this.keyChainService.paillierPublicKey,
-          this.keyChainService.paillierSecretKey,
-          this.connectionService.rpcClient
-        );
+    // Do not await
+    this.syncService.sync(
+      this.keyChainService.sessionId,
+      this.keyChainService.paillierPublicKey,
+      this.keyChainService.paillierSecretKey,
+      this.connectionService.rpcClient
+    );
 
-        if (syncStateResponse.state !== SyncState.Finalized) {
-          this.notification.show('The currency is not synchronized. Please wait.');
-          this.syncService.forceCurrency(this.model.currencyInfo.id);
+    if (syncStateResponse.state !== SyncState.Finalized) {
+      this.notification.show('The currency is not synchronized. Please wait.');
+      this.syncService.forceCurrency(this.model.currencyInfo.id);
 
-          // Let the user start sign again
-          return;
-        }
+      // Let the user start sign again
+      return;
+    }
 
     await this.startSigning();
-      }
+  }
 
   async startSigning() {
     this.phase.next(Phase.Confirmation);
@@ -605,17 +610,17 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       // temporarily allow NEM to choose fee itself
       const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
 
-        const currency = this.wallet.currency.getValue();
-        const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
+      const currency = this.wallet.currency.getValue();
+      const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
 
-        switch (currencyInfo.cryptosystem) {
-          case Cryptosystem.Ecdsa:
-            this.signed = await this.signEcdsa(receiver, value, fee);
-            break;
-          case Cryptosystem.Eddsa:
-            this.signed = await this.signEddsa(receiver, value, fee);
-            break;
-        }
+      switch (currencyInfo.cryptosystem) {
+        case Cryptosystem.Ecdsa:
+          this.signed = await this.signEcdsa(receiver, value, fee);
+          break;
+        case Cryptosystem.Eddsa:
+          this.signed = await this.signEddsa(receiver, value, fee);
+          break;
+      }
     } catch (error) {
       if (error instanceof NetworkError) {
         await this.openDiscoveryOverlay();
@@ -625,13 +630,13 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.notification.show('Failed to sign a transaction');
       }
     } finally {
-        if (!this.signed) {
-          this.phase.next(Phase.Creation);
-        } else {
-          this.phase.next(Phase.Sending);
-        }
+      if (!this.signed) {
+        this.phase.next(Phase.Creation);
+      } else {
+        this.phase.next(Phase.Sending);
       }
     }
+  }
 
   public async signEcdsa(receiver: string, value: BN, fee?: BN) {
     const currency = this.wallet.currency.getValue() as EcdsaCurrency;

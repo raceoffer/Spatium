@@ -20,13 +20,6 @@ import { DeviceService } from '../device.service';
 import { KeyChainService } from '../keychain.service';
 import { VerifierService } from '../verifier.service';
 import * as abi from './rpc-protocol.json';
-import { Server } from '../../utils/client-server/client-server';
-import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
-import { distinctUntilChanged, skip, filter } from 'rxjs/operators';
-import { State, Socket } from '../../utils/sockets/socket';
-import { KeyChainService } from '../keychain.service';
-import { uuidFrom } from '../../utils/uuid';
-
 
 @Injectable()
 export class RPCServerService {

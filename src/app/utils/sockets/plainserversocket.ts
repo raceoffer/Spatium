@@ -40,7 +40,7 @@ export class PlainServerSocket extends ServerSocket {
   }
 
   public async stop(): Promise<void> {
-    if (this.state.getValue() !== State.Stopped) {
+    if (this.state.getValue() === State.Stopped) {
       return;
     }
 

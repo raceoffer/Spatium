@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Client } from '../../utils/client-server/client-server';
-import { PlainSocket } from '../../utils/sockets/plainsocket';
+import { PlainSocket, Address as PlainSocketAddress } from '../../utils/sockets/plainsocket';
 import { State } from '../../utils/sockets/socket';
 import { toBehaviourSubject } from '../../utils/transformers';
 import { RPCClient } from './rpc-client';
-import { BluetoothSocket } from '../../utils/sockets/bluetoothsocket';
+import { BluetoothSocket, Address as BluetoothSocketAddress } from '../../utils/sockets/bluetoothsocket';
 
 @Injectable()
 export class RPCConnectionService {
@@ -20,10 +20,20 @@ export class RPCConnectionService {
     return this._rpcClient.getValue();
   }
 
-  public async connectPlain(host: string, port: number): Promise<void> {
+  public async connectPlain(connectionData: PlainSocketAddress): Promise<void> {
     await this.disconnect();
 
-    const rpcClient = new RPCClient(new Client(new PlainSocket({ host, port })));
+    const rpcClient = new RPCClient(new Client(new PlainSocket(connectionData)));
+
+    this._rpcClient.next(rpcClient);
+
+    await rpcClient.open();
+  }
+
+  public async connectBluetooth(connectionData: BluetoothSocketAddress): Promise<void> {
+    await this.disconnect();
+
+    const rpcClient = new RPCClient(new Client(new BluetoothSocket(connectionData)));
 
     this._rpcClient.next(rpcClient);
 

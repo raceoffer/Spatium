@@ -3,18 +3,34 @@ export enum Provider {
   Wifi
 }
 
+export interface WifiConnectionData {
+  host: string;
+  port: number;
+}
+
+export interface BluetoothConnectionData {
+  address: string;
+  paired: boolean;
+}
+
+export function isWifiConnectionData(
+  connectionData: WifiConnectionData| BluetoothConnectionData
+): connectionData is WifiConnectionData {
+  return (connectionData as WifiConnectionData).host !== undefined;
+}
+
+export function isBluetoothConnectionData(
+  connectionData: WifiConnectionData| BluetoothConnectionData
+): connectionData is BluetoothConnectionData {
+  return (connectionData as BluetoothConnectionData).address !== undefined;
+}
+
 export class Device {
   constructor(
     public provider: Provider,
     public name: string,
     public id: string,
-    public data: {
-      host: string,
-      port: number
-    } | {
-      address: string,
-      paired: boolean
-    }
+    public data: WifiConnectionData | BluetoothConnectionData
   ) {}
 
   public static equals(x: Device, y: Device): boolean {
@@ -25,12 +41,12 @@ export class Device {
     let yData;
     switch (x.provider) {
       case Provider.Bluetooth:
-        xData = x.data as { host: string, port: number };
-        yData = y.data as { host: string, port: number };
+        xData = x.data as BluetoothConnectionData;
+        yData = y.data as BluetoothConnectionData;
         return xData.host === yData.host && xData.port === yData.port;
       case Provider.Wifi:
-        xData = x.data as { address: string, paired: boolean };
-        yData = y.data as { address: string, paired: boolean };
+        xData = x.data as WifiConnectionData;
+        yData = y.data as WifiConnectionData;
         return xData.address === yData.address && xData.paired === yData.paired;
     }
   }

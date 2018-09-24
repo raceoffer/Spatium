@@ -94,17 +94,14 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
       try {
-        let data;
         switch (device.provider) {
           case Provider.Bluetooth:
-            data = device.data as { address: string, paired: boolean };
-            await this.connectionService.connectBluetooth(data.address);
+            await this.connectionService.connectBluetooth(device.data);
             break;
           case Provider.Wifi:
-            data = device.data as { host: string, port: number };
-            await this.connectionService.connectPlain(data.host, data.port);
+            await this.connectionService.connectPlain(device.data);
             break;
-        }
+          }
         } catch (e) {
           console.error(e);
           this.notificationService.show('Failed to conenct to remote device');

@@ -12,9 +12,11 @@ export class BluetoothServerSocket extends ServerSocket {
 
     this.serverSocket = new cordova.plugins.bluetooth.BluetoothServerSocket();
     this.serverSocket.onOpened = (socket: any) => {
-      const plainSocket = new BluetoothSocket(socket);
-      plainSocket.state.next(SocketState.Opened);
-      this.opened.next(plainSocket);
+      const bluetoothSocket = new BluetoothSocket({
+        socket
+      });
+      bluetoothSocket.state.next(SocketState.Opened);
+      this.opened.next(bluetoothSocket);
     };
     this.serverSocket.onStopped = () => {
       this.state.next(State.Stopped);
@@ -38,8 +40,8 @@ export class BluetoothServerSocket extends ServerSocket {
   }
 
   public async stop(): Promise<void> {
-    if (this.state.getValue() !== State.Started) {
-      throw new Error('Failed to stop a busy server socket');
+    if (this.state.getValue() === State.Stopped) {
+      return;
     }
 
     this.state.next(State.Stopping);

@@ -2,21 +2,21 @@ import { Socket, State } from './socket';
 
 declare const cordova: any;
 
-interface Address {
+export interface Address {
   host: string;
   port: number;
 }
 
-interface ConnectedSocket {
+export interface ConnectedSocket {
   socket: any;
 }
 
-function isAddress(options: Address | ConnectedSocket): options is Address {
-  return (<Address>options).host !== undefined;
+export function isAddress(options: Address | ConnectedSocket): options is Address {
+  return (options as Address).host !== undefined;
 }
 
-function isConnectedSocket(options: Address | ConnectedSocket): options is ConnectedSocket {
-  return (<ConnectedSocket>options).socket !== undefined;
+export function isConnectedSocket(options: Address | ConnectedSocket): options is ConnectedSocket {
+  return (options as ConnectedSocket).socket !== undefined;
 }
 
 export class PlainSocket extends Socket {
