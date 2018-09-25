@@ -2,7 +2,7 @@ import {
   Component, ComponentFactoryResolver, ComponentRef, Input, OnDestroy, OnInit, Type, ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { ProviderType } from '../../services/primitives/device';
+import { Provider } from '../../services/primitives/device';
 import { BluetoothComponent } from './bluetooth/bluetooth.component';
 import { ZeroconfComponent } from './zeroconf/zeroconf.component';
 import { IConnectivityManage } from './interface/connectivity-manage';
@@ -16,15 +16,15 @@ export class ConnectivityManageComponent implements OnInit, OnDestroy {
   private componentRef: ComponentRef<{}>;
 
   @Input() context: any;
-  @Input() type: ProviderType;
+  @Input() type: Provider;
 
   @ViewChild('container', { read: ViewContainerRef }) container: ViewContainerRef;
 
-  static getComponent(provderType: ProviderType): Type<any> {
+  static getComponent(provderType: Provider): Type<any> {
     switch (provderType) {
-      case ProviderType.BLUETOOTH:
+      case Provider.Bluetooth:
         return BluetoothComponent;
-      case ProviderType.WIFI:
+      case Provider.Wifi:
         return ZeroconfComponent;
     }
   }

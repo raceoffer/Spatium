@@ -16,18 +16,18 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
   public stateType = State;
   public connectionStateType = ConnectionState;
 
-  public connectedDevice = this.bt.connectedDevice;
+  // public connectedDevice = this.bt.connectedDevice;
 
-  public deviceState = this.bt.deviceState;
-  public connectionState = this.bt.connectionState;
+  // public deviceState = this.bt.deviceState;
+  // public connectionState = this.bt.connectionState;
 
   // public globalConnectionState = this.connectionProvider.connectionState;
 
-  public listeningState = this.bt.listeningState;
-  public serverState = this.bt.serverState;
-  public connectableState = this.bt.connectableState;
+  // public listeningState = this.bt.listeningState;
+  // public serverState = this.bt.serverState;
+  // public connectableState = this.bt.connectableState;
 
-  public discoveryState = this.bt.discoveryState;
+  // public discoveryState = this.bt.discoveryState;
 
   public toggled = new BehaviorSubject<boolean>(false);
   public waiting = new BehaviorSubject<boolean>(false);
@@ -57,35 +57,35 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
     //   })
     // );
 
-    this.subscriptions.push(this.bt.listeningState.pipe(
-      map(state => state === State.Stopped),
-      distinctUntilChanged(),
-      skip(1),
-      filter(s => s)
-    ).subscribe(async () => {
-      if (
-        this.toggled.getValue() &&
-        this.bt.deviceState.getValue() === State.Started // &&
-        // this.connectionProvider.connectionState.getValue() === ConnectionState.None
-      ) {
-        await this.bt.startListening();
-      }
-    }));
+    // this.subscriptions.push(this.bt.listeningState.pipe(
+    //   map(state => state === State.Stopped),
+    //   distinctUntilChanged(),
+    //   skip(1),
+    //   filter(s => s)
+    // ).subscribe(async () => {
+    //   if (
+    //     this.toggled.getValue() &&
+    //     this.bt.deviceState.getValue() === State.Started // &&
+    //     // this.connectionProvider.connectionState.getValue() === ConnectionState.None
+    //   ) {
+    //     await this.bt.startListening();
+    //   }
+    // }));
 
-    this.subscriptions.push(
-      this.bt.deviceState.pipe(
-        map(state => state !== State.Started),
-        distinctUntilChanged(),
-        skip(1),
-        filter(stopped => stopped)
-      ).subscribe(async () => {
-        await this.toggle({ checked: false });
-      })
-    );
+    // this.subscriptions.push(
+    //   this.bt.deviceState.pipe(
+    //     map(state => state !== State.Started),
+    //     distinctUntilChanged(),
+    //     skip(1),
+    //     filter(stopped => stopped)
+    //   ).subscribe(async () => {
+    //     await this.toggle({ checked: false });
+    //   })
+    // );
   }
 
   async ngOnInit() {
-    await this.bt.startServer();
+    // await this.bt.startServer();
   }
 
   async ngOnDestroy() {
@@ -94,7 +94,7 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
     this.cancel();
 
-    await this.bt.reset();
+    // await this.bt.reset();
   }
 
   async toggle(event) {
@@ -109,11 +109,11 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
       // - Telling us that we should abort the process
       // - If so, the awaited promise resolves with 'false', which is otherwise impossible due to 'filter'
       // - So, here's the story, thank you for your attention
-      if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
-        this.waiting.next(false);
-        this.toggled.next(false);
-        return;
-      }
+      // if (!await waitForSubject(this.deviceState, State.Started, this.cancelSubject)) {
+      //   this.waiting.next(false);
+      //   this.toggled.next(false);
+      //   return;
+      // }
 
       this.waiting.next(false);
 
@@ -125,15 +125,15 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
 
       this.cancel();
 
-      await this.bt.stopListening();
-      await this.bt.disconnect();
+      // await this.bt.stopListening();
+      // await this.bt.disconnect();
     }
   }
 
   async enableBluetooth() {
-    if (await requestDialog('The application wants to enable Bluetooth')) {
-      await this.bt.enable();
-    }
+    // if (await requestDialog('The application wants to enable Bluetooth')) {
+    //   await this.bt.enable();
+    // }
   }
 
   public cancel() {
@@ -141,6 +141,6 @@ export class BluetoothComponent extends IConnectivityManage implements OnInit, O
   }
 
   async enableDiscovery() {
-    await this.bt.enableDiscovery();
+    // await this.bt.enableDiscovery();
   }
 }

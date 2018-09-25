@@ -14,4 +14,7 @@
   <div style="margin: 10px;" *ngIf="(sessions | async).length === 0">
     Ready to sync
   </div>
+  <button mat-icon-button (click)="enableDiscovery()">
+    <mat-icon>menu</mat-icon>
+  </button>
 </div>

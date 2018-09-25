@@ -1,29 +1,29 @@
 import { ServerSocket, State } from './serversocket';
-import { PlainSocket } from './plainsocket';
 import { State as SocketState } from './socket';
+import { BluetoothSocket } from './bluetoothsocket';
 
 declare const cordova: any;
 
-export class PlainServerSocket extends ServerSocket {
+export class BluetoothServerSocket extends ServerSocket {
   private serverSocket: any;
 
   public constructor() {
     super();
 
-    this.serverSocket = new cordova.plugins.sockets.ServerSocket();
+    this.serverSocket = new cordova.plugins.bluetooth.BluetoothServerSocket();
     this.serverSocket.onOpened = (socket: any) => {
-      const plainSocket = new PlainSocket({
+      const bluetoothSocket = new BluetoothSocket({
         socket
       });
-      plainSocket.state.next(SocketState.Opened);
-      this.opened.next(plainSocket);
+      bluetoothSocket.state.next(SocketState.Opened);
+      this.opened.next(bluetoothSocket);
     };
     this.serverSocket.onStopped = () => {
       this.state.next(State.Stopped);
     };
   }
 
-  public async start(iface: string, port: number): Promise<void> {
+  public async start(): Promise<void> {
     if (this.state.getValue() !== State.Stopped) {
       throw new Error('Failed to start a busy server socket');
     }
@@ -31,7 +31,7 @@ export class PlainServerSocket extends ServerSocket {
     this.state.next(State.Starting);
 
     try {
-      await this.serverSocket.startAsync(iface, port);
+      await this.serverSocket.startAsync();
       this.state.next(State.Started);
     } catch (e) {
       this.state.next(State.Stopped);

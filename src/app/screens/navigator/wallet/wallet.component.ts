@@ -18,6 +18,7 @@ import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.c
 import { SettingsComponent } from '../settings/settings.component';
 import { State } from '../../../utils/sockets/socket';
 import { combineLatest } from 'rxjs';
+import { Provider } from '../../../services/primitives/device';
 
 @Component({
   selector: 'app-wallet',
@@ -221,7 +222,14 @@ export class WalletComponent implements OnInit, OnDestroy {
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
         try {
-          await this.connectionService.connectPlain(device.ip, device.port);
+          switch (device.provider) {
+            case Provider.Bluetooth:
+              await this.connectionService.connectBluetooth(device.data);
+              break;
+            case Provider.Wifi:
+              await this.connectionService.connectPlain(device.data);
+              break;
+          }
         } catch (e) {
           console.error(e);
           this.notificationService.show('Failed to conenct to remote device');

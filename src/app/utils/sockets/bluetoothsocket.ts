@@ -3,8 +3,7 @@ import { Socket, State } from './socket';
 declare const cordova: any;
 
 export interface Address {
-  host: string;
-  port: number;
+  address: string;
 }
 
 export interface ConnectedSocket {
@@ -12,29 +11,26 @@ export interface ConnectedSocket {
 }
 
 export function isAddress(options: Address | ConnectedSocket): options is Address {
-  return (options as Address).host !== undefined;
+  return (options as Address).address !== undefined;
 }
 
 export function isConnectedSocket(options: Address | ConnectedSocket): options is ConnectedSocket {
   return (options as ConnectedSocket).socket !== undefined;
 }
 
-export class PlainSocket extends Socket {
+export class BluetoothSocket extends Socket {
   private socket: any;
-  private host: string;
-  private port: number;
+  private address: string;
 
   public constructor(options: Address | ConnectedSocket) {
     super();
 
     if (isAddress(options)) {
-      this.socket = new cordova.plugins.sockets.Socket();
-      this.host = options.host;
-      this.port = options.port;
+      this.socket = new cordova.plugins.bluetooth.BluetoothSocket();
+      this.address = options.address;
     } else {
       this.socket = options.socket;
-      this.host = null;
-      this.port = null;
+      this.address = null;
     }
 
     this.socket.onData = (data) => {
@@ -54,18 +50,18 @@ export class PlainSocket extends Socket {
   }
 
   public async open(): Promise<void> {
-    if (!this.host || !this.port) {
+    if (!this.address) {
       throw new Error('The socket does not support connecting');
     }
 
     if (this.state.getValue() !== State.Closed) {
-      await this.close();
+      throw new Error('Failed to open a busy socket');
     }
 
     this.state.next(State.Opening);
 
     try {
-      await this.socket.openAsync(this.host, this.port);
+      await this.socket.openAsync(this.address);
       this.state.next(State.Opened);
     } catch (e) {
       this.state.next(State.Closed);

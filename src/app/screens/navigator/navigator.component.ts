@@ -11,6 +11,7 @@ import { SyncService } from '../../services/sync.service';
 import { uuidFrom } from '../../utils/uuid';
 import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 import { RPCConnectionService } from '../../services/rpc/rpc-connection.service';
+import { Provider } from '../../services/primitives/device';
 
 @Component({
   selector: 'app-navigator',
@@ -92,8 +93,15 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.selected.subscribe(async (device) => {
       this.navigationService.acceptOverlay();
-        try {
-          await this.connectionService.connectPlain(device.ip, device.port);
+      try {
+        switch (device.provider) {
+          case Provider.Bluetooth:
+            await this.connectionService.connectBluetooth(device.data);
+            break;
+          case Provider.Wifi:
+            await this.connectionService.connectPlain(device.data);
+            break;
+          }
         } catch (e) {
           console.error(e);
           this.notificationService.show('Failed to conenct to remote device');
@@ -101,18 +109,18 @@ export class NavigatorComponent implements OnInit, OnDestroy {
         }
 
         try {
-          await this.syncService.sync(
-            this.keyChainService.sessionId,
-            this.keyChainService.paillierPublicKey,
-            this.keyChainService.paillierSecretKey,
-            this.connectionService.rpcClient
-          );
+        await this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient
+        );
 
-          console.log('Synchronized');
-        } catch (e) {
-          console.error(e);
-          this.notificationService.show('Synchronization error');
-        }
+        console.log('Synchronized');
+      } catch (e) {
+        console.error(e);
+        this.notificationService.show('Synchronization error');
+      }
     });
   }
 }
