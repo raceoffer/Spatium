@@ -17,12 +17,18 @@
   font-family: 'Roboto-Light';
 }
 
-.active {
-  color: rgb(34, 119, 186);
+.rectangle-active {
+  margin: 0 4px;
+  height: 10px;
+  width: 6px;
+  background-color: rgb(34, 119, 186);
 }
 
-.inactive {
-  color: rgb(155, 160, 160);
+.rectangle-inactive {
+  margin: 0 4px;
+  height: 10px;
+  width: 6px;
+  background-color: rgb(155, 160, 160);
 }
 
 .icon-sync {
