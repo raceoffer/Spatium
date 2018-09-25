@@ -116,6 +116,7 @@ import { SyncService } from './services/sync.service';
 import { BalanceService } from './services/balance.service';
 import { RPCConnectionService } from './services/rpc/rpc-connection.service';
 import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/device-discovery.component';
+import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 
 @NgModule({
   declarations: [
@@ -184,7 +185,8 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     PresentationComponent,
     NavbarComponent,
     AddTokenComponent,
-    DeviceDiscoveryComponent
+    DeviceDiscoveryComponent,
+    ConnectedDeviceComponent
   ],
   imports: [
     OverlayModule,

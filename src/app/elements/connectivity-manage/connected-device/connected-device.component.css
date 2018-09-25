@@ -1,0 +1,34 @@
+:host {
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  place-content: center flex-start;
+  align-items: center;
+  width: 100%;
+}
+
+.connected-device {
+  width: 100%;
+  padding: 0 16px;
+  height: 36px;
+}
+
+.font-span {
+  font-family: 'Roboto-Light';
+}
+
+.active {
+  color: rgb(34, 119, 186);
+}
+
+.inactive {
+  color: rgb(155, 160, 160);
+}
+
+.icon-sync {
+  padding: 0px 9px 0px 4px;
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  align-content: center;
+}

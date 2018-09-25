@@ -1,0 +1,11 @@
+<div fxLayout="row" fxLayoutAlign="start center" class="connected-device font-span" *ngFor="let session of (sessions | async)">
+
+  <mat-icon class="list-icon icon-sync active" *ngIf="session.active">adjust</mat-icon>
+  <mat-icon class="list-icon icon-sync inactive" *ngIf="!session.active">adjust</mat-icon>
+
+  <span class="font-span">{{ session.deviceInfo.displayName }}</span>
+
+  <span class="spacer"></span>
+
+  <span class="font-span">{{ session.syncPercent.toString().padStart(3) }}% synced</span>
+</div>
