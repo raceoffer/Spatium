@@ -266,14 +266,17 @@ export class SyncService {
     try {
       this._cancelled = false;
 
-      const capabilities = await rpcClient.api.capabilities({});
+      const capabilities = await waitFiorPromise<any>(rpcClient.api.capabilities({}), this._cancelSubject);
       console.log(capabilities);
+      if (!capabilities) {
+        return false;
+      }
 
       const appInfo: any = await this._deviceService.appInfo();
       const deviceInfo: any = await this._deviceService.deviceInfo();
       const version = appInfo.version.match(/^(\d+)\.(\d+)\.(\d+)(\.\d+)?$/);
 
-      const handshakeResponse = await rpcClient.api.handshake({
+      const handshakeResponse = await waitFiorPromise<any>(rpcClient.api.handshake({
         sessionId: sessionId,
         deviceInfo: {
           id: deviceInfo.uuid,
@@ -282,7 +285,11 @@ export class SyncService {
           appVersionMinor: version[2],
           appVersionPatch: version[3]
         },
-      });
+      }), this._cancelSubject);
+      console.log(handshakeResponse);
+      if (!handshakeResponse) {
+        return false;
+      }
 
       const peerId = handshakeResponse.peerId;
 
@@ -295,11 +302,16 @@ export class SyncService {
           return;
         }
         cleanSync = true;
+        this.clearCurrencies();
       }
 
-      const syncStatusResponse = await rpcClient.api.syncStatus({
+      const syncStatusResponse = await waitFiorPromise<any>(rpcClient.api.syncStatus({
         sessionId: sessionId
-      });
+      }), this._cancelSubject);
+      console.log(syncStatusResponse);
+      if (!syncStatusResponse) {
+        return false;
+      }
 
       const remoteSyncedCurrencies = syncStatusResponse.statuses
         .filter(status => status.state === SyncState.Finalized)
@@ -320,10 +332,6 @@ export class SyncService {
         this._notificationService.show(
           'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced'
         );
-      }
-
-      if (!!this.currentPeerId && this.currentPeerId !== peerId) {
-        await this.reset();
       }
 
       this._currentPeerId = peerId;
@@ -367,13 +375,8 @@ export class SyncService {
 
         this.currencyEvent.next(currencyId);
 
-        const cancelSubscription = this._cancelSubject.subscribe(() => currency.cancel());
-
         console.log('Starting syncing', this._currencyInfoService.currencyInfo(currencyId).name);
-        const success = await currency.sync(rpcClient);
-
-        cancelSubscription.unsubscribe();
-
+        const success = await waitFiorPromise<any>(currency.sync(rpcClient), this._cancelSubject);
         if (success) {
           console.log('Finished syncing', this._currencyInfoService.currencyInfo(currencyId).name);
           const position = this._syncQueue.indexOf(currencyId);
@@ -381,6 +384,7 @@ export class SyncService {
             this._syncQueue.splice(position, 1);
           }
         } else {
+          currency.cancel();
           console.log('Cancelled syncing', this._currencyInfoService.currencyInfo(currencyId).name);
         }
       }
@@ -421,6 +425,10 @@ export class SyncService {
 
     this._currentPeerId = null;
 
+    this.clearCurrencies();
+  }
+
+  private clearCurrencies(): void {
     const currencies = Array.from(this._currencies.keys());
 
     this._currencies.clear();

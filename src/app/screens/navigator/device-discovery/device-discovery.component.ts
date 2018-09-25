@@ -2,10 +2,12 @@ import { Component, EventEmitter, HostBinding, OnDestroy, OnInit, Output } from 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NavigationService } from '../../../services/navigation.service';
-import { Device, Provider } from '../../../services/primitives/device';
+import { Device, Provider, WifiConnectionData, BluetoothConnectionData } from '../../../services/primitives/device';
 import { SsdpService } from '../../../services/ssdp.service';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { BluetoothService } from '../../../services/bluetooth.service';
+import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-device-discovery',
@@ -15,12 +17,12 @@ import { BluetoothService } from '../../../services/bluetooth.service';
 export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  @Output() selected = new EventEmitter<Device>();
+  @Output() connected = new EventEmitter<Device>();
   @Output() cancelled = new EventEmitter<any>();
 
   public providerType = Provider;
 
-  public devices: BehaviorSubject<Device[]> = toBehaviourSubject(combineLatest([
+  public devices = toBehaviourSubject(combineLatest([
     this.ssdp.devices.pipe(
       map(d => Array.from(d.values()))
     ),
@@ -31,10 +33,14 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
     map(([wifiDevices, bluetoothDevices]) => wifiDevices.concat(bluetoothDevices))
   ), []);
 
+  public connecting = new BehaviorSubject<boolean>(false);
+
   constructor(
     private readonly ssdp: SsdpService,
     private readonly bluetooth: BluetoothService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly notificationService: NotificationService,
+    private readonly connectionService: RPCConnectionService
   ) {}
 
   async ngOnInit() {
@@ -60,7 +66,29 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
     await this.bluetooth.searchDevices();
   }
 
-  connectTo(device: Device) {
-    this.selected.next(device);
+  async connectTo(device: Device) {
+    if (this.connecting.getValue()) {
+      return;
+    }
+
+    try {
+      this.connecting.next(true);
+
+      switch (device.provider) {
+        case Provider.Bluetooth:
+          await this.connectionService.connectBluetooth(device.data as BluetoothConnectionData);
+          break;
+        case Provider.Wifi:
+          await this.connectionService.connectPlain(device.data as WifiConnectionData);
+          break;
+      }
+
+      this.connected.next(device);
+    } catch (e) {
+      console.error(e);
+      this.notificationService.show('Failed to conenct to remote device');
+    } finally {
+      this.connecting.next(false);
+    }
   }
 }

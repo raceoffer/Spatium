@@ -81,8 +81,8 @@
       "cordova-plugin-appinfo": {},
       "cordova-plugin-nativestorage": {},
       "cz.blocshop.socketsforcordova": {},
-      "cordova-plugin-ssdp": {},
-      "cordova-plugin-bluetooth": {}
+      "cordova-plugin-bluetooth": {},
+      "cordova-plugin-ssdp": {}
     },
     "platforms": [
       "browser",

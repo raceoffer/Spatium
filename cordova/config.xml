@@ -155,8 +155,8 @@
     <plugin name="cordova-open-native-settings" spec="^1.5.1" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
     <plugin name="cz.blocshop.socketsforcordova" spec="..\..\sockets-for-cordova" />
-    <plugin name="cordova-plugin-ssdp" spec="..\..\cordova-plugin-ssdp" />
     <plugin name="cordova-plugin-bluetooth" spec="../../cordova-plugin-bluetooth" />
+    <plugin name="cordova-plugin-ssdp" spec="../../cordova-plugin-ssdp" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="ios" spec="^4.5.5" />

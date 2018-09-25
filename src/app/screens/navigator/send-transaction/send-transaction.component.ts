@@ -553,23 +553,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public async openDiscoveryOverlay() {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
-    componentRef.instance.selected.subscribe(async (device) => {
+    componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
-      try {
-        switch (device.provider) {
-          case Provider.Bluetooth:
-            await this.connectionService.connectBluetooth(device.data);
-            break;
-          case Provider.Wifi:
-            await this.connectionService.connectPlain(device.data);
-            break;
-        }
-      } catch (e) {
-        console.error(e);
-        this.notification.show('Failed to conenct to remote device');
-        return;
-      }
-
       await this.resign();
     });
   }

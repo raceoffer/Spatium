@@ -3,12 +3,18 @@
     <button mat-icon-button class="back-button" (click)="onBack()">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span style="overflow: hidden; text-overflow: ellipsis;">Connect to a device</span>
+    <span style="overflow: hidden; text-overflow: ellipsis;">Sync with device</span>
     <span class="spacer"></span>
   </mat-toolbar-row>
 </mat-toolbar>
 
 <div fxLayout="column" fxLayoutAlign="start center" style="z-index: 1;" class="box">
+  <mat-progress-bar
+    mode="indeterminate"
+    color="accent"
+    style="width: 100%; position: fixed; z-index: 2;"
+    *ngIf="(connecting | async)">
+  </mat-progress-bar>
   <div class="width-button-container" fxLayout="column" fxLayoutAlign="start center">
     <mat-nav-list style="width: 100%;">
       <mat-list-item *ngFor="let device of (devices | async)" (click)="connectTo(device)">
