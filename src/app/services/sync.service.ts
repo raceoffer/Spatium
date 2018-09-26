@@ -293,7 +293,6 @@ export class SyncService {
 
       const peerId = handshakeResponse.peerId;
 
-      let cleanSync = false;
       // Shall we move it out?
       if (!!this.currentPeerId && this.currentPeerId !== peerId) {
         if (!await requestDialog(
@@ -301,7 +300,6 @@ export class SyncService {
         )) {
           return;
         }
-        cleanSync = true;
         this.clearCurrencies();
       }
 
@@ -328,7 +326,7 @@ export class SyncService {
       const unsyncedCurrencies = localSynchedCurrencies.filter(x => !remoteSyncedCurrencies.includes(x));
 
       // Shall we move it out?
-      if (!cleanSync && unsyncedCurrencies.length > 0) {
+      if (unsyncedCurrencies.length > 0) {
         this._notificationService.show(
           'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced'
         );
