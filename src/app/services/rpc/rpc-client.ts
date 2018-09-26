@@ -15,7 +15,7 @@ export class RPCClient {
   private _api: any;
 
   constructor(private client: Client) {
-    this.root = Root.fromJSON(abi as any);
+    this.root = Root.fromJSON(abi.default as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
 
