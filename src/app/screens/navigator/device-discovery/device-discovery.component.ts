@@ -86,7 +86,7 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
       this.connected.next(device);
     } catch (e) {
       console.error(e);
-      this.notificationService.show('Failed to conenct to remote device');
+      this.notificationService.show('Failed to connect to remote device');
     } finally {
       this.connecting.next(false);
     }
