@@ -91,4 +91,13 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
       this.connecting.next(false);
     }
   }
+
+  getConnectedIcon(device) {
+    switch (device.provider) {
+      case Provider.Bluetooth:
+        return 'bluetooth';
+      case Provider.Wifi:
+        return 'wifi';
+    }
+  }
 }

@@ -1,48 +1,26 @@
-<div class="connection-div" fxLayout="row" fxLayoutAlign=" center">
-  <mat-icon class="list-icon">bluetooth</mat-icon>
-  <span>Bluetooth synchronization</span>
+<div class="connection-container">
+  <div class="connection-div" fxLayout="row" fxLayoutAlign=" center">
+    <mat-icon class="list-icon">bluetooth</mat-icon>
+    <span>Bluetooth</span>
 
-  <span class="spacer"></span>
+    <span class="spacer"></span>
 
-  <mat-slide-toggle
-    mat-list-item
-    class="custom-slide-toggle"
-    [checked]="(toggled | async)"
-    (change)="toggle($event)">
-  </mat-slide-toggle>
-</div>
-
-<div fxLayout="column" fxLayoutAlign="start stretch" *ngIf="(toggled | async)">
-  <div fxLayout="row" fxLayoutAlign="start center" class="status">
-    <!-- <span class="list-status" *ngIf="(connectedDevice | async) !== null && (connectionState | async) === connectionStateType.Connected">
-      Connected to {{ (connectedDevice | async).name }}
+    <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started"
+            (click)="enableBluetooth()">Enable Bluetooth
+    </button>
+    <button mat-button color="accent" class="button-style"
+            *ngIf="((deviceState | async) == stateType.Started) && !isVerifyMode && !(hasPermission | async)"
+            (click)="grantPermission()">Grant permission
+    </button>
+    <button mat-button color="accent" class="button-style"
+            *ngIf="((deviceState | async) == stateType.Started) && isVerifyMode && ((discoverable | async) !== stateType.Started)"
+            (click)="enableDiscovery()">Enable device discovery
+    </button>
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discovering | async) == stateType.Started)">
+      Discovering
     </span>
-    <span fxLayout="row" fxLayoutAlign="start center" style="width: 100%" *ngIf="(connectableState | async) !== stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
-      <span fxLayout="row" fxLayoutAlign="start center" style="width: 100%" *ngIf="(waiting | async)">
-        <span class="list-status">
-          Bluetooth disabled
-        </span>
-        <span class="spacer"></span>
-        <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started" (click)="enableBluetooth()">Enable Bluetooth</button>
-      </span>
-      <span fxLayout="row" fxLayoutAlign="start center" *ngIf="!(waiting | async)">
-        <span class="list-status" *ngIf="!(waiting | async) && (connectableState | async) === stateType.Starting">
-          Initialization
-        </span>
-        <span class="list-status" *ngIf="!(waiting | async) && (connectableState | async) === stateType.Stopping">
-          Stopping
-        </span>
-        <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
-      </span>
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discoverable | async) == stateType.Started)">
+      Discoverable
     </span>
-    <span fxLayout="row" fxLayoutAlign="start center" style="width: 100%" *ngIf="(connectableState | async) === stateType.Started && (globalConnectionState | async) !== connectionStateType.Connected">
-      <span class="list-status">
-        Awaiting connection
-      </span>
-      <span class="spacer"></span>
-      <button mat-button color="accent" class="button-style" *ngIf="(discoveryState | async) === stateType.Stopped" (click)="enableDiscovery()">Enable device discovery</button>
-      <span class="list-status" style="padding-left: 16px;" *ngIf="(discoveryState | async) === stateType.Started">Discoverable</span>
-      <mat-spinner mode="indeterminate" diameter="13" color="accent" *ngIf="(discoveryState | async) !== stateType.Started && (discoveryState | async) !== stateType.Stopped"></mat-spinner>
-    </span> -->
   </div>
 </div>

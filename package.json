@@ -18,7 +18,7 @@
     "@angular/common": "^6.0.2",
     "@angular/compiler": "^6.0.2",
     "@angular/core": "^6.0.2",
-    "@angular/flex-layout": "^6.0.0-beta.15",
+    "@angular/flex-layout": "^6.0.0-beta.18",
     "@angular/forms": "^6.0.2",
     "@angular/material": "^6.0.2",
     "@angular/platform-browser": "^6.0.2",
@@ -36,7 +36,7 @@
     "jquery": "^3.2.1",
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",
     "protobufjs": "^6.8.8",
-    "rxjs": "^6.1.0",
+    "rxjs": "^6.3.2",
     "rxjs-compat": "^6.2.0",
     "text-encoding": "^0.6.4",
     "tslint-angular": "^1.1.2",
@@ -67,6 +67,6 @@
     "ts-node": "^3.2.0",
     "tslint": "^5.7.0",
     "types-bn": "^0.0.1",
-    "typescript": "~2.7.2"
+    "typescript": "~2.9.2"
   }
 }

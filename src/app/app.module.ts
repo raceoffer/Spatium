@@ -36,7 +36,7 @@ import { EqualToDirective } from './directives/equal-to.directive';
 import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
 import { BluetoothComponent } from './elements/connectivity-manage/bluetooth/bluetooth.component';
 import { ConnectivityManageComponent } from './elements/connectivity-manage/connectivity-manage.component';
-import { ZeroconfComponent } from './elements/connectivity-manage/zeroconf/zeroconf.component';
+import { WiFiComponent } from './elements/connectivity-manage/wifi/wifi.component';
 import { LogoBlockComponent } from './elements/logo-block/logo-block.component';
 import { NumericSpinnerComponent } from './elements/numeric-spinner/numeric-spinner.component';
 import { TileCoinComponent } from './elements/tile-coin/tile-coin.component';
@@ -116,6 +116,7 @@ import { SyncService } from './services/sync.service';
 import { BalanceService } from './services/balance.service';
 import { RPCConnectionService } from './services/rpc/rpc-connection.service';
 import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/device-discovery.component';
+import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 
 @NgModule({
   declarations: [
@@ -172,7 +173,7 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     NewIcoComponent,
     InvestmentsComponent,
     BluetoothComponent,
-    ZeroconfComponent,
+    WiFiComponent,
     CreateComponent,
     DecryptComponent,
     VerifierSettingsComponent,
@@ -184,7 +185,8 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     PresentationComponent,
     NavbarComponent,
     AddTokenComponent,
-    DeviceDiscoveryComponent
+    DeviceDiscoveryComponent,
+    ConnectedDeviceComponent
   ],
   imports: [
     OverlayModule,
@@ -279,7 +281,7 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
     CreateComponent,
     DecryptComponent,
     VerifierSettingsComponent,
-    ZeroconfComponent,
+    WiFiComponent,
     BluetoothComponent,
     PresentationComponent,
     NavbarComponent,
