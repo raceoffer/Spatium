@@ -426,6 +426,19 @@ export class SyncService {
     this.clearCurrencies();
   }
 
+  public async resetRemote(
+    sessionId: string,
+    rpcClient: RPCClient
+  ): Promise<void> {
+    try {
+      await rpcClient.api.clearSession({
+        sessionId
+      }, 2000, 0);
+    } catch (e) {
+      console.error('Failed to reset remote session', e);
+    }
+  }
+
   private clearCurrencies(): void {
     const currencies = Array.from(this._currencies.keys());
 

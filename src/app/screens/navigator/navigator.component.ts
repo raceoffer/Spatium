@@ -83,7 +83,15 @@ export class NavigatorComponent implements OnInit, OnDestroy {
 
     this.navigationService.clearOverlayStack();
 
+    await this.syncService.cancel();
+
+    await this.syncService.resetRemote(
+      this.keyChainService.sessionId,
+      this.connectionService.rpcClient
+    );
+
     await this.keyChain.reset();
+    await this.connectionService.disconnect();
 
     await this.balanceService.reset();
     await this.syncService.reset();
@@ -94,14 +102,17 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
       try {
-        await this.syncService.sync(
+        const finished = await this.syncService.sync(
           this.keyChainService.sessionId,
           this.keyChainService.paillierPublicKey,
           this.keyChainService.paillierSecretKey,
           this.connectionService.rpcClient
         );
 
-        console.log('Synchronized');
+        if (finished) {
+          console.log('Synchronized');
+          this.notificationService.show('Synchronization finished');
+        }
       } catch (e) {
         console.error(e);
         this.notificationService.show('Synchronization error');

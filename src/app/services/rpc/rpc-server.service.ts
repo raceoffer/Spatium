@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import {
   EcdsaInitialCommitment,
   EcdsaInitialDecommitment,
@@ -195,7 +195,8 @@ export class RPCServerService {
   constructor(
     private readonly _deviceService: DeviceService,
     private readonly _verifierService: VerifierService,
-    private readonly _keyChainService: KeyChainService
+    private readonly _keyChainService: KeyChainService,
+    private readonly _ngZone: NgZone,
   ) {
     this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');
@@ -242,7 +243,7 @@ export class RPCServerService {
     console.log(request);
 
     if (Object.keys(this.api).includes(rpcCall.method)) {
-      const response = await this.api[rpcCall.method](request);
+      const response = await this._ngZone.run(() => this.api[rpcCall.method](request));
 
       return new Buffer(ResponseType.encode(response).finish());
     } else {

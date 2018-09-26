@@ -43,8 +43,7 @@ export class EcdsaCurrency extends Currency {
     _id: CurrencyId,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService,
-    private readonly _ngZone: NgZone
+    private readonly _workerService: WorkerService
   ) {
     super(_id);
   }
@@ -71,7 +70,7 @@ export class EcdsaCurrency extends Currency {
       model = CurrencyModel.fromCoin(currencyInfo);
     }
 
-    return await this._ngZone.run(async () => await this._acceptHandler(model, address, value, fee));
+    return await this._acceptHandler(model, address, value, fee);
   }
 
   public async startSync(initialCommitment: any): Promise<any> {
@@ -88,7 +87,7 @@ export class EcdsaCurrency extends Currency {
 
     const initialData = await this._syncSessionShard.processInitialCommitment(initialCommitment);
 
-    this._ngZone.run(() => this.state.next(SyncState.Started));
+    this.state.next(SyncState.Started);
 
     return initialData;
   }
@@ -100,7 +99,7 @@ export class EcdsaCurrency extends Currency {
 
     const challengeCommitment = await this._syncSessionShard.processInitialDecommitment(initialDecommitment);
 
-    this._ngZone.run(() => this.state.next(SyncState.Revealed));
+     this.state.next(SyncState.Revealed);
 
     return challengeCommitment;
   }
@@ -112,7 +111,7 @@ export class EcdsaCurrency extends Currency {
 
     const challengeDecommitment = await this._syncSessionShard.processResponseCommitment(responseCommitment);
 
-    this._ngZone.run(() => this.state.next(SyncState.Responded));
+    this.state.next(SyncState.Responded);
 
     return challengeDecommitment;
   }
@@ -126,7 +125,7 @@ export class EcdsaCurrency extends Currency {
 
     await this._distributedKeyShard.importSyncData(shardSyncData);
 
-    this._ngZone.run(() => this.state.next(SyncState.Finalized));
+    this.state.next(SyncState.Finalized);
 
     return;
   }
@@ -191,8 +190,7 @@ export class EddsaCurrency extends Currency {
     _id: CurrencyId,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService,
-    private readonly _ngZone: NgZone
+    private readonly _workerService: WorkerService
   ) {
     super(_id);
   }
@@ -219,7 +217,7 @@ export class EddsaCurrency extends Currency {
       model = CurrencyModel.fromCoin(currencyInfo);
     }
 
-    return await this._ngZone.run(async () => await this._acceptHandler(model, address, value, fee));
+    return await this._acceptHandler(model, address, value, fee);
   }
 
   public async startSync(commitment: any): Promise<any> {
@@ -236,7 +234,7 @@ export class EddsaCurrency extends Currency {
 
     const data = await this._syncSessionShard.processCommitment(commitment);
 
-    this._ngZone.run(() => this.state.next(SyncState.Started));
+    this.state.next(SyncState.Started);
 
     return data;
   }
@@ -250,7 +248,7 @@ export class EddsaCurrency extends Currency {
 
     await this._distributedKeyShard.importSyncData(shardSyncData);
 
-    this._ngZone.run(() => this.state.next(SyncState.Finalized));
+    this.state.next(SyncState.Finalized);
 
     return;
   }
@@ -331,11 +329,11 @@ export class DeviceSession {
   }
 
   private activityStart() {
-    this._ngZone.run(() => this._activities.next(this._activities.getValue() + 1));
+    this._activities.next(this._activities.getValue() + 1);
   }
 
   private activityEnd() {
-    this._ngZone.run(() => this._activities.next(this._activities.getValue() - 1));
+    this._activities.next(this._activities.getValue() - 1);
   }
 
   public constructor(
@@ -343,8 +341,7 @@ export class DeviceSession {
     private readonly _deviceInfo: any,
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService,
-    private readonly _ngZone: NgZone
+    private readonly _workerService: WorkerService
   ) {}
 
   private safeGetAs<T>(currencyId: CurrencyId, C: { new(... args: any[]): T }) {
@@ -404,8 +401,7 @@ export class DeviceSession {
         currencyId,
         this._currencyInfoService,
         this._keyChainService,
-        this._workerService,
-        this._ngZone
+        this._workerService
       );
       currency.setAcceptHandler(async (model, address, value, fee) => {
         return await this._acceptHandler(this.id, model, address, value, fee);
@@ -500,8 +496,7 @@ export class DeviceSession {
         currencyId,
         this._currencyInfoService,
         this._keyChainService,
-        this._workerService,
-        this._ngZone
+        this._workerService
       );
       currency.setAcceptHandler(async (model, address, value, fee) => {
         return await this._acceptHandler(this.id, model, address, value, fee);
@@ -595,8 +590,7 @@ export class VerifierService {
   public constructor(
     private readonly _currencyInfoService: CurrencyInfoService,
     private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService,
-    private readonly _ngZone: NgZone
+    private readonly _workerService: WorkerService
   ) {}
 
   /**
@@ -622,8 +616,7 @@ export class VerifierService {
       deviceInfo,
       this._currencyInfoService,
       this._keyChainService,
-      this._workerService,
-      this._ngZone
+      this._workerService
     );
     deviceSession.setAcceptHandler(this._acceptHandler);
 

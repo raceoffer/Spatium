@@ -168,9 +168,6 @@ export class WalletComponent implements OnInit, OnDestroy {
   public async ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
-
-    await this.syncService.cancel();
-    await this.connectionService.disconnect();
   }
 
   public toggleNavigation() {
@@ -226,14 +223,17 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public async sync() {
     try {
-      await this.syncService.sync(
+      const finished = await this.syncService.sync(
         this.keyChainService.sessionId,
         this.keyChainService.paillierPublicKey,
         this.keyChainService.paillierSecretKey,
         this.connectionService.rpcClient
       );
 
-      console.log('Synchronized');
+      if (finished) {
+        console.log('Synchronized');
+        this.notificationService.show('Synchronization finished');
+      }
     } catch (e) {
       console.error(e);
       this.notificationService.show('Synchronization error');
