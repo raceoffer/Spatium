@@ -13,7 +13,20 @@ export enum ErrorCode {
   RuntimeError = 3
 }
 
-export class NetworkError extends Error {}
+export enum NetworkErrorCode {
+  Unreachable = 0,
+  Timeout = 1
+}
+
+export class NetworkError extends Error {
+  public constructor(public networkErrorCode: NetworkErrorCode, ... args) {
+    super(...args);
+  }
+}
+
+export function isNetworkError(error: Error): error is NetworkError {
+  return (error as NetworkError).networkErrorCode !== undefined;
+}
 
 export class Client {
   private root: Root;
@@ -81,7 +94,7 @@ export class Client {
         try {
           await this.socket.open();
         } catch (ignored) {
-          throw new NetworkError('Request failed: Failed to restore connection');
+          throw new NetworkError(NetworkErrorCode.Unreachable, 'Request failed: Failed to restore connection');
         }
       }
 
@@ -104,7 +117,7 @@ export class Client {
     } while (!response && tries < retries + 1);
 
     if (!response) {
-      throw new NetworkError('Request failed: Maximum retries reached');
+      throw new NetworkError(NetworkErrorCode.Timeout, 'Request failed: Maximum retries reached');
     }
 
     return response;

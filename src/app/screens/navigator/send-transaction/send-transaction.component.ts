@@ -17,7 +17,7 @@ import { RPCConnectionService } from '../../../services/rpc/rpc-connection.servi
 import { EcdsaCurrency, EddsaCurrency, SyncService } from '../../../services/sync.service';
 import { CurrecnyModelType, CurrencyModel, SyncState, Wallet } from '../../../services/wallet/wallet';
 import { WorkerService } from '../../../services/worker.service';
-import { NetworkError } from '../../../utils/client-server/client-server';
+import { NetworkError, isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
@@ -607,8 +607,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
           break;
       }
     } catch (error) {
-      if (error instanceof NetworkError) {
+      if (isNetworkError(error)) {
         await this.openDiscoveryOverlay();
+        console.error(error);
         this.notification.show('Failed to restore connection automatically. Please secect a device');
       } else {
         console.error(error);
