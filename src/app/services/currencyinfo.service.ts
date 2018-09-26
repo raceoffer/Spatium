@@ -397,7 +397,8 @@ export class CurrencyInfoService {
     [ApiServer.Litecore, 'litecore.io'],
     [ApiServer.Blockdozer, 'blockdozer.com'],
     [ApiServer.Infura, 'infura.io'],
-    [ApiServer.Neoscan, 'neoscan.io']
+    [ApiServer.Neoscan, 'neoscan.io'],
+    [ApiServer.NemNative, 'Nem native']
   ]);
 
   private readonly _apiServers = new Map<CurrencyId, Map<ApiServer, string>>([
@@ -481,13 +482,20 @@ export class CurrencyInfoService {
     return this._apiServers.get(id);
   }
 
-  public async currentApiServer(id: CurrencyId): Promise<string> {
-    const settings = await this.settingsService.currencySettings(id, {
-      apiServer: ApiServer.Spatium
+  public async currentApiSettings(id: CurrencyId): Promise<{
+    apiServer: ApiServer,
+    customApiServer: string
+  }> {
+    return await this.settingsService.currencySettings(id, {
+      apiServer: Array.from(this._apiServers.get(id).keys())[0]
     }) as {
       apiServer: ApiServer,
       customApiServer: string
     };
+  }
+
+  public async currentApiServer(id: CurrencyId): Promise<string> {
+    const settings = await this.currentApiSettings(id);
 
     return settings.apiServer === ApiServer.Custom
             ? settings.customApiServer

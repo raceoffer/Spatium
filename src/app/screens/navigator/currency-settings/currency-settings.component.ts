@@ -38,12 +38,7 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
       Array.from(await this.currencyInfoService.apiServers(this.currencyId).keys())
         .map((apiServer) => ({ key: apiServer, value: this.currencyInfoService.apiName(apiServer) }));
     this.currencyInfo = await this.currencyInfoService.currencyInfo(this.currencyId);
-    this.settings = await this.settingsService.currencySettings(this.currencyId, {
-      apiServer: ApiServer.Spatium
-    }) as {
-      apiServer: ApiServer,
-      customApiServer: string
-    };
+    this.settings = await this.currencyInfoService.currentApiSettings(this.currencyId);
   }
 
   ngOnDestroy() {
