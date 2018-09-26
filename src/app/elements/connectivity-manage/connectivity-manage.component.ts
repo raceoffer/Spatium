@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BluetoothService } from '../../services/bluetooth.service';
-import { BehaviorSubject } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-connectivity-manage',
@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs/Rx';
 })
 export class ConnectivityManageComponent implements OnInit, OnDestroy {
 
+  @Input() isVerifyMode: boolean;
   public isBtSupported: BehaviorSubject<boolean> = this.bt.supported;
 
   constructor(private readonly bt: BluetoothService) {

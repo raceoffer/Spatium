@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BluetoothService } from '../../../services/bluetooth.service';
 import { State } from '../../../services/primitives/state';
 import { toBehaviourSubject } from '../../../utils/transformers';
@@ -12,24 +12,29 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class BluetoothComponent implements OnInit, OnDestroy {
 
+  @Input() isVerifyMode: boolean;
+
   stateType = State;
   deviceState = this.bt.deviceState;
-
-  enabled: BehaviorSubject<boolean> = toBehaviourSubject(this.bt.deviceState.pipe(map(state => state === State.Started)), false);
+  hasPermission = this.bt.hasPermission;
+  discovering = this.bt.discovering;
+  discoverable = this.bt.discoverable;
 
   constructor(
     private readonly bt: BluetoothService
   ) { }
 
-  async ngOnInit() {
-    await this.bt.startServer();
-  }
+  async ngOnInit() { }
 
   async ngOnDestroy() {
   }
 
   async enableBluetooth() {
     await this.bt.enable();
+  }
+
+  async grantPermission() {
+    await this.bt.grantPermission();
   }
 
   async enableDiscovery() {

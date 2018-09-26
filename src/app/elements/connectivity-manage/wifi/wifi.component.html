@@ -6,35 +6,8 @@
 
     <span class="spacer"></span>
 
-    <!--<button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started"
-            (click)="enableWifi()">Enable WiFi\LAN
+    <button mat-button color="accent" class="button-style" (click)="networkSettings()">
+      Connect to network
     </button>
-    <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) == stateType.Started"
-            (click)="networkSettings()">Connect to a network
-    </button>-->
-  </div>
-
-  <div fxLayout="column" fxLayoutAlign="start stretch">
-    <div fxLayout="row" fxLayoutAlign="start center" class="status">
-
-      <!--<span class="list-status" *ngIf="(deviceState | async) == stateType.Stopped">
-          WiFi/LAN disabled
-      </span>
-
-      <span fxLayout="row" fxLayoutAlign="start center" *ngIf="(deviceState | async) == stateType.Starting">
-        <span class="list-status">Initialization</span>
-        <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
-      </span>
-
-      <span fxLayout="row" fxLayoutAlign="start center" *ngIf="(deviceState | async) == stateType.Stopping">
-        <span class="list-status">Stopping</span>
-        <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
-      </span>
-
-      <span class="list-status" *ngIf="(deviceState | async) == stateType.Started">
-          Ready
-      </span>-->
-
-    </div>
   </div>
 </div>

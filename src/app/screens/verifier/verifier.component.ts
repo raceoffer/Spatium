@@ -98,8 +98,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly verifierService: VerifierService,
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly fs: FileService,
-    private readonly ssdp: SsdpService,
-    private readonly bluetooth: BluetoothService
+    private readonly ssdp: SsdpService
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       map((sessionId) => this.verifierService.session(sessionId)),
@@ -163,10 +162,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
     await this.rpcService.stop();
     await this.verifierService.reset();
     await this.ssdp.stop();
-  }
-
-  public async enableDiscovery() {
-    await this.bluetooth.enableDiscovery();
   }
 
   public toggleNavigation() {

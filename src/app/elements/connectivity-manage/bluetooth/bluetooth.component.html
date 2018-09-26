@@ -8,32 +8,19 @@
     <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) !== stateType.Started"
             (click)="enableBluetooth()">Enable Bluetooth
     </button>
-    <button mat-button color="accent" class="button-style" *ngIf="(deviceState | async) == stateType.Started"
+    <button mat-button color="accent" class="button-style"
+            *ngIf="((deviceState | async) == stateType.Started) && !isVerifyMode && !(hasPermission | async)"
+            (click)="grantPermission()">Grant permission
+    </button>
+    <button mat-button color="accent" class="button-style"
+            *ngIf="((deviceState | async) == stateType.Started) && isVerifyMode && ((discoverable | async) !== stateType.Started)"
             (click)="enableDiscovery()">Enable device discovery
     </button>
-  </div>
-
-  <div fxLayout="column" fxLayoutAlign="start stretch">
-    <div fxLayout="row" fxLayoutAlign="start center" class="status">
-
-      <span class="list-status" *ngIf="(deviceState | async) == stateType.Stopped">
-          Bluetooth disabled
-      </span>
-
-      <span fxLayout="row" fxLayoutAlign="start center" *ngIf="(deviceState | async) == stateType.Starting">
-        <span class="list-status">Initialization</span>
-        <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
-      </span>
-
-      <span fxLayout="row" fxLayoutAlign="start center" *ngIf="(deviceState | async) == stateType.Stopping">
-        <span class="list-status">Stopping</span>
-        <mat-spinner mode="indeterminate" diameter="13" color="accent"></mat-spinner>
-      </span>
-
-      <span class="list-status" *ngIf="(deviceState | async) == stateType.Started">
-          Ready
-      </span>
-
-    </div>
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discovering | async) == stateType.Started)">
+      Discovering
+    </span>
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discoverable | async) == stateType.Started)">
+      Discoverable
+    </span>
   </div>
 </div>

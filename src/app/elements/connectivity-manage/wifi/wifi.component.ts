@@ -16,18 +16,6 @@ export class WiFiComponent implements OnInit, OnDestroy {
 
   async ngOnDestroy() { }
 
-  async enableWifi() {
-    if (this.deviceService.platform === Platform.IOS) {
-      this.networkSettings();
-    } else {
-      cordova.plugins.diagnostic.setWifiState(function () {
-        console.log('Wifi was enabled');
-      }, function (error) {
-        console.error('The following error occurred: ' + error);
-      }, true);
-    }
-  }
-
   networkSettings() {
     if (this.deviceService.platform === Platform.IOS) {
       cordova.plugins.settings.open('wifi', function () {
