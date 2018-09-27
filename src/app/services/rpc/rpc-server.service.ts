@@ -198,7 +198,7 @@ export class RPCServerService {
     private readonly _keyChainService: KeyChainService,
     private readonly _ngZone: NgZone,
   ) {
-    this.root = Root.fromJSON(abi as any);
+    this.root = Root.fromJSON(abi.default as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
 
