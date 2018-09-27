@@ -1,7 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, ElementRef, HostBinding, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostBinding, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-import * as $ from 'jquery';
 import { BehaviorSubject, timer, combineLatest } from 'rxjs';
 import { map, filter, mergeMap } from 'rxjs/operators';
 import { DeviceService, Platform } from '../../../services/device.service';
@@ -65,8 +64,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public stateType = SyncState;
   public balanceStatusType = BalanceStatus;
 
-  @ViewChild('transactionList') transactionList: ElementRef;
-
   @Input() public model: CurrencyModel = null;
 
   public wallet: Wallet;
@@ -76,6 +73,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public balanceConfirmed: BehaviorSubject<number>;
   public balanceUSDUnconfirmed: BehaviorSubject<number>;
   public balanceUSDConfirmed: BehaviorSubject<number>;
+
+  public transactions: Array<HistoryEntry> = [];
+  public isLoadingTransactions = false;
+  private step = 10;
 
   // public transactionArray = [];
   // public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
@@ -126,12 +127,6 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.model.ticker) : null)
     ), null);
 
-    // $('#transactionList').scroll(() => {
-    //   if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
-    //       this.loadMore();
-    //     }
-    // });
-
     this.subscriptions.push(
       timer(0, 3000).pipe(
         mergeMap(() => this.wallet.balanceWatcher),
@@ -142,6 +137,19 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     );
 
     this.syncService.forceCurrency(this.model.currencyInfo.id);
+
+    // get transaction history
+    this.wallet.wallet.subscribe(async wallet => {
+      if (wallet) {
+        this.isLoadingTransactions = true;
+        try {
+          const transactions = await wallet.getTransactions(this.step, 0);
+          this.transactions = transactions.map(tx => HistoryEntry.fromJSON(tx));
+        } finally {
+          this.isLoadingTransactions = false;
+        }
+      }
+    });
 
     /** @todo Refactor the stuff below */
 
@@ -186,6 +194,12 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onBack() {
     this.navigationService.back();
+  }
+
+  public async onScroll(percent: number) {
+    if (percent >= 90) {
+      await this.loadMore();
+    }
   }
 
   /** @todo Refactor the stuff below */
@@ -253,7 +267,22 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   //   }
   // }
 
-  // async loadMore() {
+  async loadMore() {
+    if (this.isLoadingTransactions) {
+      return;
+    }
+
+    // get transaction history
+    const wallet = this.wallet.wallet.getValue();
+    this.isLoadingTransactions = true;
+    try {
+      const oldTransactions = (await wallet.getTransactions(this.transactions.length + this.step, this.transactions.length))
+        .map(tx => HistoryEntry.fromJSON(tx));
+      oldTransactions.forEach((oldTransaction: HistoryEntry) => this.transactions.push(oldTransaction));
+    } finally {
+      this.isLoadingTransactions = false;
+    }
+
   //   if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
   //     this.isLoadingTransactions = true;
 
@@ -277,7 +306,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   //     this.isLoadingTransactions = false;
   //   }
-  // }
+  }
 
   // async updateTransactions(listTo = this.step, listFrom = 0) {
   //   const wallet = this.balanceWatcher.getValue() ? this.balanceWatcher.getValue().wallet : null;
