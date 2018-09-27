@@ -11,6 +11,10 @@
     <mat-icon>search</mat-icon>
   </button>
 
+  <button mat-icon-button (click)="addToken()">
+    <mat-icon>add</mat-icon>
+  </button>
+
   <button mat-icon-button (click)="openDiscoveryOverlay()">
     <mat-icon [class.sync]="(synchronizing | async)">{{ (incomplete | async) ? 'sync_problem' : 'sync' }}</mat-icon>
   </button>

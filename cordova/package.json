@@ -20,7 +20,7 @@
     "cocoon-cordova-labs-local-webserver": "^2.4.1",
     "cocoon-cordova-labs-wkwebview-engine-localhost": "^0.5.1",
     "cocoon-cordova-plugin-wkwebview-engine": "^1.1.1",
-    "cordova-android": "^7.0.0",
+    "cordova-android": "^7.1.1",
     "cordova-browser": "^5.0.2",
     "cordova-custom-config": "^5.0.2",
     "cordova-ios": "^4.5.5",
