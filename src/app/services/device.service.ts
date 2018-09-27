@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, filter } from 'rxjs/operators';
 
+declare const cordova: any;
 declare const device: any;
 declare const navigator: any;
 
@@ -44,10 +45,20 @@ export class DeviceService {
   }
 
   public async deviceInfo() {
+
+    let deviceName = '';
+    await cordova.plugins.deviceName.get(function success(name) {
+      console.log(name);
+      deviceName = name;
+    }, function failure(error) {
+      console.log(error);
+      deviceName = device.model;
+    });
+
     return {
       uuid: device.uuid,
       manufacturer: device.manufacturer,
-      model: device.model,
+      model: deviceName,
       platform: device.platform,
       version: device.version,
       cordova: device.cordova

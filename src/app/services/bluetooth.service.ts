@@ -21,10 +21,6 @@ export class BluetoothService {
   constructor(private readonly ngZone: NgZone,
               private readonly deviceService: DeviceService) {
 
-    checkPermission(Permission.CoarseLocation).then(val => this.ngZone.run( () => {
-      this.hasPermission.next(val);
-    }));
-
     cordova.plugins.bluetooth.getSupported().then(supported => this.ngZone.run(async () => {
       this.supported.next(supported);
     }));
