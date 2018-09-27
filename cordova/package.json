@@ -5,17 +5,16 @@
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
-    "webpack-dev": "npm explore crypto-core-async -- npm run webpack-dev",
-    "webpack-prod": "npm explore crypto-core-async -- npm run webpack-prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
+  "repository": "https://github.com/CaspianTechnologies/Spatium.git",
   "dependencies": {
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git#b3384e0e302e60d7c46056f8c73d167b7f68db2f",
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
-    "SocketsForCordova": "file:../../sockets-for-cordova",
+    "SocketsForCordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#8050440ab8dc9094a89e13e0cdb849b8fb13c933",
     "ajv": "^6.0.0",
     "android-versions": "^1.3.0",
     "cocoon-cordova-labs-local-webserver": "^2.4.1",
@@ -30,26 +29,27 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-appinfo": "^2.1.2",
     "cordova-plugin-badge": "^0.8.7",
-    "cordova-plugin-bluetooth": "file:../../cordova-plugin-bluetooth",
+    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7ec3be624e3f9ffe9a6e7b2d3aa540c4282f1e3e",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
-    "cordova-plugin-device-name": "^1.3.3",
+    "cordova-plugin-device-name": "^1.3.4",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
-    "cordova-plugin-local-notification": "^0.9.0-beta.3",
+    "cordova-plugin-local-notification": "^0.9.0-beta.2",
+    "cordova-plugin-nativestorage": "^2.3.2",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
-    "cordova-plugin-ssdp": "file:../../cordova-plugin-ssdp",
+    "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#a6bf89be626102b78b76e3e450f0d5a72c6533f2",
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-windows": "^6.0.0",
-    "cordova.plugins.diagnostic": "^4.0.8",
-    "cz.blocshop.socketsforcordova": "file:../../sockets-for-cordova",
+    "cordova.plugins.diagnostic": "^4.0.10",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
+    "sockets-for-cordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18",
     "xml2js": "^0.4.19"
   },
   "cordova": {
@@ -80,20 +80,15 @@
       "cordova-open-native-settings": {},
       "cordova-plugin-appinfo": {},
       "cordova-plugin-nativestorage": {},
-      "cz.blocshop.socketsforcordova": {},
+      "sockets-for-cordova": {},
       "cordova-plugin-ssdp": {},
       "cordova-plugin-bluetooth": {}
     },
     "platforms": [
       "browser",
-      "ios",
       "windows",
+      "ios",
       "android"
     ]
-  },
-  "devDependencies": {
-    "crypto-core-async": "file:../../crypto-core-async",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^2.1.5"
   }
 }

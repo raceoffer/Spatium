@@ -17,11 +17,10 @@ import { RPCConnectionService } from '../../../services/rpc/rpc-connection.servi
 import { EcdsaCurrency, EddsaCurrency, SyncService } from '../../../services/sync.service';
 import { CurrecnyModelType, CurrencyModel, SyncState, Wallet } from '../../../services/wallet/wallet';
 import { WorkerService } from '../../../services/worker.service';
-import { NetworkError, isNetworkError } from '../../../utils/client-server/client-server';
+import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
-import { Provider } from '../../../services/primitives/device';
 
 
 declare const cordova: any;

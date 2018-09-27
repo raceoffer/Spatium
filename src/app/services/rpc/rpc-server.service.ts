@@ -19,7 +19,7 @@ import { uuidFrom } from '../../utils/uuid';
 import { DeviceService } from '../device.service';
 import { KeyChainService } from '../keychain.service';
 import { VerifierService } from '../verifier.service';
-import * as abi from './rpc-protocol.json';
+import abi from './rpc-protocol.json';
 
 @Injectable()
 export class RPCServerService {
@@ -198,7 +198,7 @@ export class RPCServerService {
     private readonly _keyChainService: KeyChainService,
     private readonly _ngZone: NgZone,
   ) {
-    this.root = Root.fromJSON(abi.default as any);
+    this.root = Root.fromJSON(abi as any);
     this.RpcCall = this.root.lookupType('RpcCall');
     this.RpcService = this.root.lookup('RpcService');
 
