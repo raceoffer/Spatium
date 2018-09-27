@@ -5,6 +5,9 @@ import { State } from './primitives/state';
 import { LoggerService } from './logger.service';
 import { DeviceService, Platform } from './device.service';
 import { checkPermission, Permission, requestPermission } from '../utils/permissions';
+import { toBehaviourSubject } from '../utils/transformers';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 
 declare const cordova: any;
 
@@ -13,66 +16,85 @@ export class BluetoothService {
   public supported = new BehaviorSubject<boolean>(false);
   public deviceState = new BehaviorSubject<State>(State.Stopped);
   public hasPermission = new BehaviorSubject<boolean>(false);
-  public discoverable: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
-  public discovering: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
+  public discoverableInner: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
+  public discoverable = toBehaviourSubject(this.discoverableInner.pipe(
+    debounceTime(500),
+    distinctUntilChanged()
+  ), this.discoverableInner.getValue());
+  public discoveringInner: BehaviorSubject<State> = new BehaviorSubject<State>(State.Stopped);
+  public discovering = toBehaviourSubject(this.discoveringInner.pipe(
+    debounceTime(500),
+    distinctUntilChanged()
+  ), this.discoveringInner.getValue());
+
+  private _ready = new BehaviorSubject<boolean>(false);
 
   public devices: BehaviorSubject<Map<string, Device>> = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
 
   constructor(private readonly ngZone: NgZone,
               private readonly deviceService: DeviceService) {
 
-    cordova.plugins.bluetooth.getSupported().then(supported => this.ngZone.run(async () => {
-      this.supported.next(supported);
-    }));
+    this.deviceService.deviceReady().then(async () => {
 
-    cordova.plugins.bluetooth.setStateCallback(state => this.ngZone.run(async () => {
-      this.deviceState.next(state);
-    }));
+      this.deviceState.next(await cordova.plugins.bluetooth.getState());
 
-    cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(async () => {
-      console.log('DiscoveryCallback ' + discovering);
-      this.discovering.next(discovering ? State.Started : State.Stopped);
-    }));
+      cordova.plugins.bluetooth.getSupported().then(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
+      }));
 
-    cordova.plugins.bluetooth.setDiscoverableCallback(discovery => this.ngZone.run(async () => {
-      console.log('DiscoverableCallback ' + discovery);
-      this.discoverable.next(discovery ? State.Started : State.Stopped);
-    }));
+      cordova.plugins.bluetooth.setStateCallback(state => this.ngZone.run(() => {
+        this.deviceState.next(state);
+      }));
 
-    cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
-      console.log('Discoverable ' + discoverable);
-      this.discoverable.next(discoverable ? State.Started : State.Stopped);
-    }));
+      cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(() => {
+        this.discoveringInner.next(discovering ? State.Started : State.Stopped);
+      }));
 
-    cordova.plugins.bluetooth.getState().then(state => this.ngZone.run(async () => {
-      this.deviceState.next(state);
-    }));
+      cordova.plugins.bluetooth.setDiscoverableCallback(discovery => this.ngZone.run(() => {
+        this.discoverableInner.next(discovery ? State.Started : State.Stopped);
+      }));
 
-    cordova.plugins.bluetooth.setDeviceDiscoveredCallback(data => this.ngZone.run(async () => {
-      const devices = this.devices.getValue();
-      devices.set(data.address, new Device(
-        Provider.Bluetooth,
-        data.name,
-        data.address, {
-          address: data.address,
-          paired: data.paired
-        }
-      ));
-      this.devices.next(devices);
-    }));
+      cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
+        this.discoverableInner.next(discoverable ? State.Started : State.Stopped);
+      }));
 
-    cordova.plugins.bluetooth.setDeviceGoneCallback(data => this.ngZone.run(async () => {
-      const devices = this.devices.getValue();
-      devices.delete(data.address);
-      this.devices.next(devices);
-    }));
+      cordova.plugins.bluetooth.setDeviceDiscoveredCallback(data => this.ngZone.run(() => {
+        const devices = this.devices.getValue();
+        devices.set(data.address, new Device(
+          Provider.Bluetooth,
+          data.name,
+          data.address, {
+            address: data.address,
+            paired: data.paired
+          }
+        ));
+        this.devices.next(devices);
+      }));
+
+      cordova.plugins.bluetooth.setDeviceGoneCallback(data => this.ngZone.run(() => {
+        const devices = this.devices.getValue();
+        devices.delete(data.address);
+        this.devices.next(devices);
+      }));
+
+      this._ready.next(true);
+    });
+  }
+
+  async ready() {
+    return await this._ready.pipe(
+      filter(ready => !!ready),
+      first(),
+    ).toPromise();
   }
 
   async enableDiscovery() {
+    await this.ready();
     await cordova.plugins.bluetooth.enableDiscovery();
   }
 
   async stop() {
+    await this.ready();
     if (this.discovering.getValue() !== State.Started) {
       console.log('Trying to start search while not finished');
       return;
@@ -87,6 +109,7 @@ export class BluetoothService {
   }
 
   async searchDevices() {
+    await this.ready();
     await this.checkPlatformPermission();
 
     if (!this.hasPermission.getValue()) {
@@ -112,6 +135,7 @@ export class BluetoothService {
   }
 
   async enable() {
+    await this.ready();
     if (this.deviceState.getValue() !== State.Stopped) {
       console.log('Trying to enable enabled BT');
       return;
@@ -142,6 +166,7 @@ export class BluetoothService {
   }
 
   async grantPermission() {
+    await this.ready();
     await this.checkPlatformPermission();
 
     if (!this.hasPermission.getValue()) {
@@ -155,11 +180,11 @@ export class BluetoothService {
   }
 
   async checkPlatformPermission() {
+    await this.ready();
     if (this.deviceService.platform !== Platform.Windows) {
       this.hasPermission.next(await checkPermission(Permission.CoarseLocation));
     } else {
       this.hasPermission.next(true);
     }
   }
-
 }
