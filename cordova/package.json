@@ -38,7 +38,7 @@
     "cordova-plugin-file": "^5.0.0",
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
-    "cordova-plugin-local-notification": "^0.9.0-beta.2",
+    "cordova-plugin-local-notification": "^0.9.0-beta.3",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
     "cordova-plugin-ssdp": "file:../../cordova-plugin-ssdp",
@@ -46,7 +46,7 @@
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-windows": "^6.0.0",
     "cordova.plugins.diagnostic": "^4.0.8",
-    "cz.blocshop.socketsforcordova": "..\\..\\sockets-for-cordova",
+    "cz.blocshop.socketsforcordova": "file:../../sockets-for-cordova",
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
@@ -86,8 +86,8 @@
     },
     "platforms": [
       "browser",
-      "windows",
       "ios",
+      "windows",
       "android"
     ]
   },

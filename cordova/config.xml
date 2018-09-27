@@ -158,7 +158,7 @@
     <plugin name="cordova-plugin-bluetooth" spec="..\..\cordova-plugin-bluetooth" />
     <plugin name="cordova-plugin-ssdp" spec="../../cordova-plugin-ssdp" />
     <engine name="browser" spec="^5.0.2" />
-    <engine name="windows" spec="^6.0.0" />
     <engine name="ios" spec="^4.5.5" />
+    <engine name="windows" spec="^6.0.0" />
     <engine name="android" spec="^7.0.0" />
 </widget>
