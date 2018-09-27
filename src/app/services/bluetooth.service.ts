@@ -30,14 +30,17 @@ export class BluetoothService {
     }));
 
     cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(async () => {
+      console.log('DiscoveryCallback ' + discovering);
       this.discovering.next(discovering ? State.Started : State.Stopped);
     }));
 
     cordova.plugins.bluetooth.setDiscoverableCallback(discovery => this.ngZone.run(async () => {
+      console.log('DiscoverableCallback ' + discovery);
       this.discoverable.next(discovery ? State.Started : State.Stopped);
     }));
 
     cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
+      console.log('Discoverable ' + discoverable);
       this.discoverable.next(discoverable ? State.Started : State.Stopped);
     }));
 
@@ -75,38 +78,36 @@ export class BluetoothService {
       return;
     }
 
-      this.discovering.next(State.Stopping);
-      try {
-        await cordova.plugins.bluetooth.cancelDiscovery();
-      } catch (e) {
-        this.discovering.next(State.Started);
-        throw e;
-      }
+    try {
+      await cordova.plugins.bluetooth.cancelDiscovery();
+    } catch (e) {
+      this.discovering.next(State.Started);
+      throw e;
+    }
   }
 
   async searchDevices() {
-    if (this.deviceService.platform !== Platform.Windows && await checkPermission(Permission.CoarseLocation)) {
-      if (!this.hasPermission.getValue()) {
-        return;
-      }
+    await this.checkPlatformPermission();
 
-      if (this.discovering.getValue() !== State.Stopped) {
-        return;
-      }
+    if (!this.hasPermission.getValue()) {
+      return;
+    }
 
-      if (this.deviceState.getValue() !== State.Started) {
-        console.log('Trying to search devices with disabled BT');
-        return;
-      }
+    if (this.discovering.getValue() !== State.Stopped) {
+      return;
+    }
 
-      console.log('Trying to search devices with BT');
-      this.discovering.next(State.Starting);
-      try {
-        cordova.plugins.bluetooth.startDiscovery();
-      } catch (e) {
-        this.discovering.next(State.Stopped);
-        throw e;
-      }
+    if (this.deviceState.getValue() !== State.Started) {
+      console.log('Trying to search devices with disabled BT');
+      return;
+    }
+
+    console.log('Trying to search devices with BT');
+    try {
+      cordova.plugins.bluetooth.startDiscovery();
+    } catch (e) {
+      this.discovering.next(State.Stopped);
+      throw e;
     }
   }
 
@@ -140,15 +141,24 @@ export class BluetoothService {
     this.devices.next(new Map<string, Device>());
   }
 
-
   async grantPermission() {
-    if (this.deviceService.platform !== Platform.Windows && !await checkPermission(Permission.CoarseLocation)) {
-      await requestPermission(Permission.CoarseLocation).then(value => this.ngZone.run( () => {
+    await this.checkPlatformPermission();
+
+    if (!this.hasPermission.getValue()) {
+      await requestPermission(Permission.CoarseLocation).then(value => this.ngZone.run(() => {
         this.hasPermission.next(value);
         this.searchDevices();
       }));
     } else {
       this.searchDevices();
+    }
+  }
+
+  async checkPlatformPermission() {
+    if (this.deviceService.platform !== Platform.Windows) {
+      this.hasPermission.next(await checkPermission(Permission.CoarseLocation));
+    } else {
+      this.hasPermission.next(true);
     }
   }
 
