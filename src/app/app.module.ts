@@ -31,6 +31,7 @@ import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AutofocusDirective } from './directives/autofocus.directive';
+import { ScrollDirective } from './directives/scroll.directive';
 import { CarouselItemDirective } from './directives/carousel-item.directive';
 import { EqualToDirective } from './directives/equal-to.directive';
 import { CarouselComponent, CarouselItemElement } from './elements/carousel/carousel.component';
@@ -140,6 +141,7 @@ import { ConnectedDeviceComponent } from './elements/connectivity-manage/connect
     RegistrationComponent,
     RegistrationSuccessComponent,
     AutofocusDirective,
+    ScrollDirective,
     FactorNodeComponent,
     CurrencyComponent,
     CurrencySettingsComponent,

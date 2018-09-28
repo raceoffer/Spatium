@@ -18,7 +18,7 @@
     *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None) && (synchronizing | async)">
   </mat-progress-bar>
 
-  <div class="scroll full-width" id="transactionList" #transactionList>
+  <div class="scroll full-width" scroll-directive (onScroll)="onScroll($event)">
     <table class="two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px; width: 100%">
       <tr>
         <td colspan="2">
@@ -102,7 +102,33 @@
         <div style="height: 150px" *ngIf="(wallet.address | async) === null"></div>
       </div>
 
-      <!-- <mat-list class="text-center transaction-list">        
+      <mat-list class="text-center transaction-list">
+        <mat-list-item *ngFor="let transaction of transactions"
+                       class="list-item"
+                       [@fadeIn]="''"
+                       [class.unconfirmed]="!transaction.confirmed">
+          <span matLine class="transaction-amount"
+                [class.input]="transaction.type==txType.In"
+                [class.output]="transaction.type==txType.Out">
+            {{ (wallet.wallet | async).fromInternal(transaction.amount) }} {{ model.ticker }}
+          </span>
+          <span matLine class="transaction-time"
+                *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
+          <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
+          <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
+          <mat-divider></mat-divider>
+        </mat-list-item>
+      </mat-list>
+
+      <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" *ngIf="isLoadingTransactions">
+        <mat-spinner
+          color="accent"
+          [diameter]="50"
+          [strokeWidth] = "5">
+        </mat-spinner>
+      </div>
+
+      <!-- <mat-list class="text-center transaction-list">
         <mat-list-item class="list-item" [@fadeIn]="''"
                       *ngFor="let transaction of ((transactions | async) || [])"
                       [class.unconfirmed]="!transaction.confirmed">
