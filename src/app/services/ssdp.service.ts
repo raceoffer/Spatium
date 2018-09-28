@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Device, Provider } from './primitives/device';
 import { State } from './primitives/state';
+import { DeviceService } from './device.service';
 
 declare const cordova: any;
 
@@ -14,7 +15,9 @@ export class SsdpService {
 
   private target = 'spatium';
 
-  constructor() {
+  constructor(
+    private readonly deviceService: DeviceService
+  ) {
     console.log('ssdp - set callbacks');
     cordova.plugins.ssdp.setDeviceDiscoveredCallback(data => {
       console.log('ssdp - discovered:', data);
@@ -44,9 +47,11 @@ export class SsdpService {
       return;
     }
 
+    const deviceInfo = await this.deviceService.deviceInfo();
+
     this.advertising.next(State.Starting);
     try {
-      await cordova.plugins.ssdp.startAdvertising(this.target, port);
+      await cordova.plugins.ssdp.startAdvertising(this.target, deviceInfo.name, deviceInfo.uuid, port);
       this.advertising.next(State.Started);
     } catch (e) {
       this.advertising.next(State.Stopped);

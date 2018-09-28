@@ -280,7 +280,7 @@ export class SyncService {
         sessionId: sessionId,
         deviceInfo: {
           id: deviceInfo.uuid,
-          displayName: deviceInfo.model,
+          displayName: deviceInfo.name,
           appVersionMajor: version[1],
           appVersionMinor: version[2],
           appVersionPatch: version[3]

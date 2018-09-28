@@ -45,20 +45,20 @@ export class DeviceService {
   }
 
   public async deviceInfo() {
-
-    let deviceName = '';
-    await cordova.plugins.deviceName.get(function success(name) {
-      console.log(name);
-      deviceName = name;
-    }, function failure(error) {
-      console.log(error);
-      deviceName = device.model;
-    });
+    let deviceName = null;
+    try {
+      deviceName = await new Promise<string>((resolve, reject) => {
+        cordova.plugins.deviceName.get(resolve, reject);
+      });
+    } catch (e) {
+      console.log(e);
+    }
 
     return {
       uuid: device.uuid,
       manufacturer: device.manufacturer,
-      model: deviceName,
+      model: device.model,
+      name: !!deviceName ? deviceName : device.manufacturer + ' ' + device.model,
       platform: device.platform,
       version: device.version,
       cordova: device.cordova
