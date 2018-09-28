@@ -35,7 +35,8 @@ export class BluetoothServerSocket extends ServerSocket {
       this.state.next(State.Started);
     } catch (e) {
       this.state.next(State.Stopped);
-      throw new Error('Failed to start server socket: ' + e);
+      console.error('Failed to start server socket: ' + e);
+      // throw new Error('Failed to start server socket: ' + e);
     }
   }
 
