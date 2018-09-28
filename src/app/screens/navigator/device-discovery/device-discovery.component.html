@@ -21,10 +21,11 @@
     </app-connectivity-manage>
     <mat-nav-list style="width: 100%;">
       <mat-list-item class="device-list" *ngFor="let device of (devices | async)" (click)="connectTo(device)">
+        <mat-icon class="list-icon" mat-list-icon>{{ getConnectedIcon(device) }}</mat-icon>
         <p class="list-name" mat-line>{{ device.name }}</p>
         <p *ngIf="device.provider === providerType.Wifi" class="list-info" mat-line>{{ device.data.host }}:{{ device.data.port }}</p>
-        <p *ngIf="device.provider === providerType.Bluetooth" class="list-info" mat-line>{{ device.data.address }} {{ device.data.paired ? 'paired' : '' }}</p>
-        <mat-icon class="list-icon">{{ getConnectedIcon(device) }}</mat-icon>
+        <p *ngIf="device.provider === providerType.Bluetooth" class="list-info" mat-line>{{ device.data.address }}</p>
+        <mat-icon class="list-icon" *ngIf="device.data.paired">link</mat-icon>
       </mat-list-item>
     </mat-nav-list>
   </div>

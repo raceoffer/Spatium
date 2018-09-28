@@ -153,7 +153,7 @@
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
     <plugin name="sockets-for-cordova" spec="https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18" />
     <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#a6bf89be626102b78b76e3e450f0d5a72c6533f2" />
-    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7ec3be624e3f9ffe9a6e7b2d3aa540c4282f1e3e" />
+    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#9c856e4c954344ca199f56f75aad6598178746e0" />
     <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
