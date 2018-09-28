@@ -11,7 +11,6 @@ import { SyncService } from '../../services/sync.service';
 import { uuidFrom } from '../../utils/uuid';
 import { DeviceDiscoveryComponent } from './device-discovery/device-discovery.component';
 import { RPCConnectionService } from '../../services/rpc/rpc-connection.service';
-import { Provider } from '../../services/primitives/device';
 
 @Component({
   selector: 'app-navigator',

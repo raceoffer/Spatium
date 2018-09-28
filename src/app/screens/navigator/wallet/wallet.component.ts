@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, map, distinctUntilChanged, withLatestFrom } from 'rxjs/operators';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
 import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { DeviceService, Platform } from '../../../services/device.service';
@@ -16,7 +16,8 @@ import { FeedbackComponent } from '../../feedback/feedback.component';
 import { CurrencyComponent } from '../currency/currency.component';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
-import { combineLatest } from 'rxjs';
+import { Subject, merge, combineLatest } from 'rxjs';
+import { AddTokenComponent } from '../add-token/add-token.component';
 
 @Component({
   selector: 'app-wallet',
@@ -70,12 +71,20 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public filterControl = new FormControl();
   public filter = toBehaviourSubject(this.filterControl.valueChanges.pipe(
-    debounceTime(300)
+    debounceTime(300),
+    distinctUntilChanged()
   ), '');
+  public manualRefresh = new Subject<any>();
 
   public tiles = new Array<CurrencyModel>();
 
-  public filteredTiles = toBehaviourSubject(this.filter.pipe(
+  public filteredTiles = toBehaviourSubject(merge(
+    this.filter,
+    this.manualRefresh.pipe(
+      withLatestFrom(this.filter),
+      map(([ignored, filterValue]) => filterValue)
+    )
+  ).pipe(
     map((filterValue) => {
       if (filterValue.length > 0) {
         return this.tiles.filter(t => {
@@ -218,6 +227,18 @@ export class WalletComponent implements OnInit, OnDestroy {
       this.navigationService.acceptOverlay();
 
       await this.sync();
+    });
+  }
+
+  public async addToken() {
+    const componentRef = this.navigationService.pushOverlay(AddTokenComponent);
+    componentRef.instance.created.subscribe(async (tokenInfo) => {
+      this.navigationService.acceptOverlay();
+
+      const ethereumInfo = this.currencyInfoService.currencyInfo(CurrencyId.Ethereum);
+
+      this.tiles.unshift(CurrencyModel.fromToken(ethereumInfo, tokenInfo));
+      this.manualRefresh.next(true);
     });
   }
 

@@ -281,6 +281,10 @@ mat-icon.size-40{
   display: block;
 }
 
+.mat-nav-list .device-list.mat-list-item-with-avatar .mat-list-item-content .mat-list-text {
+  padding-left: 0px !important;
+}
+
 //toggler
 .mat-slide-toggle-label {
   justify-content: space-around;
