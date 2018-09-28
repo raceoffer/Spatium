@@ -104,7 +104,7 @@ import { KeyChainService } from './services/keychain.service';
 import { LoggerService } from './services/logger.service';
 import { NavigationService } from './services/navigation.service';
 import { NotificationService } from './services/notification.service';
-import { CurrencyPriceService, PriceService } from './services/price.service';
+import { PriceService } from './services/price.service';
 import { SettingsService } from './services/settings.service';
 import { WorkerService } from './services/worker.service';
 import { NavbarComponent } from './modals/navbar/navbar.component';
@@ -224,7 +224,6 @@ import { ConnectedDeviceComponent } from './elements/connectivity-manage/connect
   providers: [
     DeviceService,
     WorkerService,
-    CurrencyPriceService,
     BluetoothService,
     LoggerService,
     AuthService,
