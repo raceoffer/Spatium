@@ -26,10 +26,8 @@ export class BluetoothService {
     debounceTime(500),
     distinctUntilChanged()
   ), this.discoveringInner.getValue());
-
-  private _ready = new BehaviorSubject<boolean>(false);
-
   public devices: BehaviorSubject<Map<string, Device>> = new BehaviorSubject<Map<string, Device>>(new Map<string, Device>());
+  private _ready = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly ngZone: NgZone,
               private readonly deviceService: DeviceService) {
@@ -47,14 +45,17 @@ export class BluetoothService {
       }));
 
       cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(() => {
+        console.log('setDiscoveryCallback ' + discovering);
         this.discoveringInner.next(discovering ? State.Started : State.Stopped);
       }));
 
       cordova.plugins.bluetooth.setDiscoverableCallback(discovery => this.ngZone.run(() => {
+        console.log('setDiscoverableCallback ' + discovery);
         this.discoverableInner.next(discovery ? State.Started : State.Stopped);
       }));
 
       cordova.plugins.bluetooth.getDiscoverable().then(discoverable => this.ngZone.run(() => {
+        console.log('getDiscoverable ' + discoverable);
         this.discoverableInner.next(discoverable ? State.Started : State.Stopped);
       }));
 
