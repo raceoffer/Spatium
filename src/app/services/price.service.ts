@@ -11,6 +11,10 @@ export enum FeeLevel {
   Low
 }
 
+function median(values: Array<number>): number {
+  return values.sort()[Math.trunc(values.length / 2)];
+}
+
 @Injectable()
 export class PriceService {
   private _cryptowatUrl = 'https://api.cryptowat.ch/markets/prices';
@@ -18,7 +22,7 @@ export class PriceService {
 
   private _requestTimer = timer(0, 5 * 60 * 1000);
 
-  private _prices = new Map<string, number>();
+  private _prices = new Map<string, Map<string, number>>();
   private _defaultfeePrice = new Map<CurrencyId, Map<FeeLevel, number>>([
     [CurrencyId.Bitcoin, new Map<FeeLevel, number>([
       [FeeLevel.High, 200],
@@ -83,7 +87,7 @@ export class PriceService {
   ]);
 
   public price(ticker: string): number {
-    return this._prices.get(ticker.toUpperCase());
+    return median(Array.from(this._prices.get(ticker.toUpperCase()).values()));
   }
 
   public feePrice(currencyId: CurrencyId, feeLevel: FeeLevel): number {
@@ -109,11 +113,16 @@ export class PriceService {
 
       for (const entry in data.result) {
         if (data.result.hasOwnProperty(entry) && entry.endsWith('usd')) {
+          const provider = entry.split(':')[0];
           const name = entry.split(':')[1].replace('usd', '').toUpperCase();
           const price = +data.result[entry];
 
           if (price !== null) {
-            this._prices.set(name, price);
+            if (!this._prices.has(name)) {
+              this._prices.set(name, new Map<string, number>());
+            }
+
+            this._prices.get(name).set(provider, price);
           }
         }
       }
@@ -133,7 +142,11 @@ export class PriceService {
         const price = +entry.price_usd;
 
         if (price !== null) {
-          this._prices.set(name, price);
+          if (!this._prices.has(name)) {
+            this._prices.set(name, new Map<string, number>());
+          }
+
+          this._prices.get(name).set('Coinmarketcap', price);
         }
       }
     }
