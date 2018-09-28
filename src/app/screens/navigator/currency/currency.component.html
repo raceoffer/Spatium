@@ -110,8 +110,7 @@
           <span matLine class="transaction-amount"
                 [class.input]="transaction.type==txType.In"
                 [class.output]="transaction.type==txType.Out">
-            <!--{{ wallet.wallet.fromInternal(transaction.amount) }}-->
-            {{ model.ticker }}
+            {{ (wallet.wallet | async).fromInternal(transaction.amount) }} {{ model.ticker }}
           </span>
           <span matLine class="transaction-time"
                 *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
