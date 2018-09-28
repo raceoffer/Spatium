@@ -1128,3 +1128,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   padding-bottom: 0;
   width: 100%;
 }
+
+.caret-center:focus {
+  padding-left: 50%;
+}

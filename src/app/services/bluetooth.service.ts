@@ -42,6 +42,9 @@ export class BluetoothService {
 
       cordova.plugins.bluetooth.setStateCallback(state => this.ngZone.run(() => {
         this.deviceState.next(state);
+        if (state !== State.Started) {
+          this.reset();
+        }
       }));
 
       cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(() => {
