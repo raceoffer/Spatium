@@ -88,8 +88,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     map((filterValue) => {
       if (filterValue.length > 0) {
         return this.tiles.filter(t => {
-          return t.currencyInfo.name.toUpperCase().includes(filterValue.toUpperCase()) ||
-                 t.currencyInfo.ticker.toUpperCase().includes(filterValue.toUpperCase());
+          return t.name.toUpperCase().includes(filterValue.toUpperCase()) ||
+                 t.ticker.toUpperCase().includes(filterValue.toUpperCase());
         });
       } else {
         return this.tiles;
