@@ -36,7 +36,8 @@
             matInput
             mat-autosize="true"
             [value]="((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced'"
-            *ngIf="(wallet.state | async) !== stateType.Finalized">
+            *ngIf="(wallet.state | async) !== stateType.Finalized"
+            id="synchronizing">
           </textarea>
 
           <button
