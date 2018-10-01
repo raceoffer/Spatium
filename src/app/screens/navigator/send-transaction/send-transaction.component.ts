@@ -126,7 +126,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       } catch (ignored) {
         return verify();
       }
-    } else if ([CurrencyId.Nem, CurrencyId.NemTest].includes(currencyInfo.id)) {
+    } else if ([CurrencyId.Nem, CurrencyId.NemTest, CurrencyId.NeoTest].includes(currencyInfo.id)) {
       return true;
     } else {
       return verify();

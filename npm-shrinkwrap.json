@@ -3824,7 +3824,7 @@
       }
     },
     "crypto-core": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#3f982e2a9128021abd44f838efb514b918565a26",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#58d3ab6c63fada1b228eea83b88ab391d64415cf",
       "requires": {
         "@cityofzion/neon-js": "3.11.0",
         "aes-js": "3.1.1",
@@ -3836,7 +3836,7 @@
         "elliptic": "6.3.0",
         "eth-lib": "0.2.8",
         "ethereum-input-data-decoder": "0.0.4",
-        "etherscan-api": "8.1.4",
+        "etherscan-api": "8.1.5",
         "ethjs-unit": "0.1.6",
         "hash.js": "1.1.5",
         "hmac-drbg": "1.0.1",
@@ -3857,9 +3857,9 @@
       }
     },
     "crypto-core-async": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#55c83d18367fa2d51da1c3354c25139c9197f7c6",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#4404a2ebbb1cd1ddf43ea3a1d480918a7f06229d",
       "requires": {
-        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#3f982e2a9128021abd44f838efb514b918565a26",
+        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#58d3ab6c63fada1b228eea83b88ab391d64415cf",
         "promise-worker": "1.1.1"
       }
     },
@@ -4976,15 +4976,15 @@
         },
         "uuid": {
           "version": "2.0.1",
-          "resolved": "https://registry.npmjs.org/uuid/-/uuid-2.0.1.tgz",
+          "resolved": "http://registry.npmjs.org/uuid/-/uuid-2.0.1.tgz",
           "integrity": "sha1-wqMN7bPlNdcsz4LjQ5QaULqFM6w="
         }
       }
     },
     "etherscan-api": {
-      "version": "8.1.4",
-      "resolved": "https://registry.npmjs.org/etherscan-api/-/etherscan-api-8.1.4.tgz",
-      "integrity": "sha512-MsoryIcCbWG/2k/UfDbx0B8FLwfxEs5dgbNsGXktVjJumEu/VFpJhrxC0C8hQzQJh7UDvjB7Qbez/UmGG9azvQ==",
+      "version": "8.1.5",
+      "resolved": "https://registry.npmjs.org/etherscan-api/-/etherscan-api-8.1.5.tgz",
+      "integrity": "sha512-P5pgGlv2mMwx8U48MnuytxNRZmKsVOtAGrvH0xof7ufRnZCh7KgE/nwgNlx96zq5qhfGl17qjUpxiktZVFepiQ==",
       "requires": {
         "axios": "0.18.0",
         "gh-pages": "2.0.0",
