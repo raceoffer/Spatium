@@ -49,3 +49,6 @@ mat-form-field .by-content {
   cursor: default;
 }
 
+.invalid {
+  outline: 1px solid #ff5722 !important;
+}
