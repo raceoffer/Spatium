@@ -328,7 +328,7 @@ export class SyncService {
       // Shall we move it out?
       if (unsyncedCurrencies.length > 0) {
         this._notificationService.show(
-          'The remote device doesn\'t prvide enough synchronized currencies. Some currencies will be re-synced'
+          'The remote device doesn\'t provide enough synchronized currencies. Some currencies will be re-synced'
         );
       }
 
