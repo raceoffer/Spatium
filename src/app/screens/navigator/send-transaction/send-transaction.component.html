@@ -89,13 +89,12 @@
     </tr>
     <tr>
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': !amountField.valid}">
           <span>
             <input
               matInput
               [formControl]="amountField"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setAmountFocused(false)"
               (focus)="setAmountFocused(true)">
@@ -103,13 +102,12 @@
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;">
+        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': !amountUsdField.valid}">
           <span>
             <input
               matInput
               [formControl]="amountUsdField"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setAmountUsdFocused(false)"
               (focus)="setAmountUsdFocused(true)">
@@ -305,7 +303,7 @@
       color="accent"
       class="width-button-full color"
       (click)="startSigning()"
-      [disabled]="!(valid | async)">
+      [disabled]="!amountField.valid || !amountUsdField.valid || !(valid | async)">
       Sign transaction
     </button>
     <button

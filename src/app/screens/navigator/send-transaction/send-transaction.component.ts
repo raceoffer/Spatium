@@ -21,6 +21,7 @@ import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
+import {validateNumber} from '../../../validators/validators';
 
 
 declare const cordova: any;
@@ -51,8 +52,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiverField = new FormControl();
 
-  public amountField = new FormControl();
-  public amountUsdField = new FormControl();
+  public amountField = new FormControl('', validateNumber);
+  public amountUsdField = new FormControl('', validateNumber);
 
   public feeType: any = Fee;
 
