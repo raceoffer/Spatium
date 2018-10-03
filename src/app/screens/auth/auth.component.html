@@ -65,7 +65,7 @@
       mat-raised-button
       color="accent"
       class="width-button color"
-      *ngIf="state === stateType.Ready"
+      *ngIf="state === stateType.Ready && !busy"
       (click)="signIn()">
       Sign in
     </button>
