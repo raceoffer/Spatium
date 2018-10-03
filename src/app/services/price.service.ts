@@ -21,6 +21,7 @@ export class PriceService {
   private _coinmarketcapUrl = 'https://api.coinmarketcap.com/v1/ticker/?limit=10000';
 
   private _requestTimer = timer(0, 5 * 60 * 1000);
+  private _requestSubscription = null;
 
   private _prices = new Map<string, Map<string, number>>();
   private _defaultfeePrice = new Map<CurrencyId, Map<FeeLevel, number>>([
@@ -94,13 +95,17 @@ export class PriceService {
     return this._defaultfeePrice.get(currencyId).get(feeLevel);
   }
 
-  constructor(private http: HttpClient) {
-    this._requestTimer.subscribe(async () => {
-      await Promise.all([
-        this.getCryptowat(),
-        this.getCoinmarketcap()
-      ]);
-    });
+  constructor(private http: HttpClient) {}
+
+  startFetching() {
+    if (!this._requestSubscription) {
+      this._requestSubscription = this._requestTimer.subscribe(async () => {
+        await Promise.all([
+          this.getCryptowat(),
+          this.getCoinmarketcap()
+        ]);
+      });
+    }
   }
 
   async getCryptowat() {

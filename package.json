@@ -11,6 +11,8 @@
     "e2e": "ng e2e",
     "postinstall": "node postinstall.js"
   },
+  "author": "Caspian Technologies PTE. LTD.",
+  "repository": "https://github.com/CaspianTechnologies/Spatium.git",
   "private": true,
   "dependencies": {
     "@angular/animations": "^6.1.8",
@@ -31,7 +33,7 @@
     "cashaddrjs": "^0.2.8",
     "codelyzer": "^4.4.4",
     "core-js": "^2.4.1",
-    "crypto-core-async": "https://github.com/CaspianTechnologies/crypto-core-async.git#55c83d18367fa2d51da1c3354c25139c9197f7c6",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#916c1ba6b97ab816e00b4e8b5e5102f3075cebd5",
     "flatted": "^0.2.2",
     "hammerjs": "^2.0.8",
     "jquery": "^3.2.1",

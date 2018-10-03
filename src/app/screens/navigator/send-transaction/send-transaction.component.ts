@@ -21,6 +21,7 @@ import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
+import {validateNumber} from '../../../validators/validators';
 
 
 declare const cordova: any;
@@ -51,8 +52,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiverField = new FormControl();
 
-  public amountField = new FormControl();
-  public amountUsdField = new FormControl();
+  public amountField = new FormControl('', validateNumber);
+  public amountUsdField = new FormControl('', validateNumber);
 
   public feeType: any = Fee;
 
@@ -126,7 +127,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       } catch (ignored) {
         return verify();
       }
-    } else if ([CurrencyId.Nem, CurrencyId.NemTest].includes(currencyInfo.id)) {
+    } else if ([CurrencyId.Nem, CurrencyId.NemTest, CurrencyId.NeoTest].includes(currencyInfo.id)) {
       return true;
     } else {
       return verify();
@@ -400,14 +401,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      let fee = null;
-      if (this.model.type === CurrecnyModelType.Token) {
-        fee = parentWalet.toInternal(value);
-      } else {
-        fee = wallet.toInternal(value);
+      if (this.feeFocused) {
+        let fee = null;
+        if (this.model.type === CurrecnyModelType.Token) {
+          fee = parentWalet.toInternal(value);
+        } else {
+          fee = wallet.toInternal(value);
+        }
+        this.fee.next(fee);
+        this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
       }
-      this.fee.next(fee);
-      this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -421,14 +424,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      let fee = null;
-      if (this.model.type === CurrecnyModelType.Token) {
-        fee = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
-      } else {
-        fee = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+      if (this.feeUsdFocused) {
+        let fee = null;
+        if (this.model.type === CurrecnyModelType.Token) {
+          fee = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
+        } else {
+          fee = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+        }
+        this.fee.next(fee);
+        this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
       }
-      this.fee.next(fee);
-      this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -442,14 +447,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      let feePrice = null;
-      if (this.model.type === CurrecnyModelType.Token) {
-        feePrice = parentWalet.toInternal(value);
-      } else {
-        feePrice = wallet.toInternal(value);
+      if (this.feePriceFocused) {
+        let feePrice = null;
+        if (this.model.type === CurrecnyModelType.Token) {
+          feePrice = parentWalet.toInternal(value);
+        } else {
+          feePrice = wallet.toInternal(value);
+        }
+        this.feePrice.next(feePrice);
+        this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
       }
-      this.feePrice.next(feePrice);
-      this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -463,14 +470,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      let feePrice = null;
-      if (this.model.type === CurrecnyModelType.Token) {
-        feePrice = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
-      } else {
-        feePrice = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+      if (this.feePriceUsdFocused) {
+        let feePrice = null;
+        if (this.model.type === CurrecnyModelType.Token) {
+          feePrice = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
+        } else {
+          feePrice = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+        }
+        this.feePrice.next(feePrice);
+        this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
       }
-      this.feePrice.next(feePrice);
-      this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
     }));
 
     this.subscriptions.push(

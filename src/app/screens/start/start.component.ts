@@ -5,6 +5,7 @@ import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
+import { PriceService } from '../../services/price.service';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -25,8 +26,11 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
-    private readonly keyChainService: KeyChainService
-  ) {}
+    private readonly keyChainService: KeyChainService,
+    private readonly priceService: PriceService
+  ) {
+    this.priceService.startFetching();
+  }
 
   public async ngOnInit() {
     await this.deviceService.deviceReady();
