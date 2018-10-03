@@ -786,27 +786,6 @@
         "secure-random": "1.1.1",
         "semver": "5.5.1",
         "wif": "2.0.6"
-      },
-      "dependencies": {
-        "bignumber.js": {
-          "version": "5.0.0",
-          "resolved": "https://registry.npmjs.org/bignumber.js/-/bignumber.js-5.0.0.tgz",
-          "integrity": "sha512-KWTu6ZMVk9sxlDJQh2YH1UOnfDP8O8TpxUxgQG/vKASoSnEjK9aVuOueFaPcQEYQ5fyNXNTOYwYw3099RYebWg=="
-        },
-        "elliptic": {
-          "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
-          "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
-          "requires": {
-            "bn.js": "4.11.8",
-            "brorand": "1.1.0",
-            "hash.js": "1.1.5",
-            "hmac-drbg": "1.0.1",
-            "inherits": "2.0.3",
-            "minimalistic-assert": "1.0.1",
-            "minimalistic-crypto-utils": "1.0.1"
-          }
-        }
       }
     },
     "@mrmlnc/readdir-enhanced": {
@@ -1556,7 +1535,7 @@
       "dev": true,
       "requires": {
         "browserslist": "3.2.8",
-        "caniuse-lite": "1.0.30000888",
+        "caniuse-lite": "1.0.30000889",
         "normalize-range": "0.1.2",
         "num2fraction": "1.2.2",
         "postcss": "6.0.23",
@@ -2551,9 +2530,9 @@
       "dev": true
     },
     "bignumber.js": {
-      "version": "7.2.1",
-      "resolved": "https://registry.npmjs.org/bignumber.js/-/bignumber.js-7.2.1.tgz",
-      "integrity": "sha512-S4XzBk5sMB+Rcb/LNcpzXr57VRTxgAvaAEDAl1AwRx27j00hT84O6OkteE7u8UB3NuaaygCRrEpqox4uDOrbdQ=="
+      "version": "5.0.0",
+      "resolved": "https://registry.npmjs.org/bignumber.js/-/bignumber.js-5.0.0.tgz",
+      "integrity": "sha512-KWTu6ZMVk9sxlDJQh2YH1UOnfDP8O8TpxUxgQG/vKASoSnEjK9aVuOueFaPcQEYQ5fyNXNTOYwYw3099RYebWg=="
     },
     "binary-extensions": {
       "version": "1.12.0",
@@ -2876,7 +2855,7 @@
         "browserify-rsa": "4.0.1",
         "create-hash": "1.2.0",
         "create-hmac": "1.1.7",
-        "elliptic": "6.3.0",
+        "elliptic": "6.4.1",
         "inherits": "2.0.3",
         "parse-asn1": "5.1.1"
       }
@@ -2896,7 +2875,7 @@
       "integrity": "sha512-WHVocJYavUwVgVViC0ORikPHQquXwVh939TaelZ4WDqpWgTX/FsGhl/+P4qBUAGcRvtOgDgC+xftNWWp2RUTAQ==",
       "dev": true,
       "requires": {
-        "caniuse-lite": "1.0.30000888",
+        "caniuse-lite": "1.0.30000889",
         "electron-to-chromium": "1.3.73"
       }
     },
@@ -3141,9 +3120,9 @@
       }
     },
     "caniuse-lite": {
-      "version": "1.0.30000888",
-      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30000888.tgz",
-      "integrity": "sha512-vftg+5p/lPsQGpnhSo/yBuYL36ai/cyjLvU3dOPJY1kkKrekLWIy8SLm+wzjX0hpCUdFTasC4/ZT7uqw4rKOnQ==",
+      "version": "1.0.30000889",
+      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30000889.tgz",
+      "integrity": "sha512-MFxcQ6x/LEEoaIhO7Zdb7Eg8YyNONN+WBnS5ERJ0li2yRw51+i4xXUNxnLaveTb/4ZoJqsWKEmlomhG2pYzlQA==",
       "dev": true
     },
     "caseless": {
@@ -3759,7 +3738,7 @@
       "integrity": "sha512-GbEHQPMOswGpKXM9kCWVrremUcBmjteUaQ01T9rkKCPDXfUHX0IoP9LpHYo2NPFampa4e+/pFDc3jQdxrxQLaw==",
       "requires": {
         "bn.js": "4.11.8",
-        "elliptic": "6.3.0"
+        "elliptic": "6.4.1"
       }
     },
     "create-hash": {
@@ -3769,7 +3748,7 @@
       "requires": {
         "cipher-base": "1.0.4",
         "inherits": "2.0.3",
-        "md5.js": "1.3.4",
+        "md5.js": "1.3.5",
         "ripemd160": "2.0.2",
         "sha.js": "2.4.11"
       }
@@ -3854,6 +3833,24 @@
         "web3": "1.0.0-beta.36",
         "web3-core-helpers": "1.0.0-beta.36",
         "web3-utils": "1.0.0-beta.36"
+      },
+      "dependencies": {
+        "bignumber.js": {
+          "version": "7.2.1",
+          "resolved": "https://registry.npmjs.org/bignumber.js/-/bignumber.js-7.2.1.tgz",
+          "integrity": "sha512-S4XzBk5sMB+Rcb/LNcpzXr57VRTxgAvaAEDAl1AwRx27j00hT84O6OkteE7u8UB3NuaaygCRrEpqox4uDOrbdQ=="
+        },
+        "elliptic": {
+          "version": "6.3.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.3.0.tgz",
+          "integrity": "sha1-G16euplA8SpHRlHHEhkNNzvIsho=",
+          "requires": {
+            "bn.js": "4.11.8",
+            "brorand": "1.1.0",
+            "hash.js": "1.1.5",
+            "inherits": "2.0.3"
+          }
+        }
       }
     },
     "crypto-core-async": {
@@ -4460,14 +4457,17 @@
       "dev": true
     },
     "elliptic": {
-      "version": "6.3.0",
-      "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.3.0.tgz",
-      "integrity": "sha1-G16euplA8SpHRlHHEhkNNzvIsho=",
+      "version": "6.4.1",
+      "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
+      "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
       "requires": {
         "bn.js": "4.11.8",
         "brorand": "1.1.0",
         "hash.js": "1.1.5",
-        "inherits": "2.0.3"
+        "hmac-drbg": "1.0.1",
+        "inherits": "2.0.3",
+        "minimalistic-assert": "1.0.1",
+        "minimalistic-crypto-utils": "1.0.1"
       }
     },
     "email-addresses": {
@@ -4835,22 +4835,6 @@
         "bn.js": "4.11.8",
         "elliptic": "6.4.1",
         "xhr-request-promise": "0.1.2"
-      },
-      "dependencies": {
-        "elliptic": {
-          "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
-          "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
-          "requires": {
-            "bn.js": "4.11.8",
-            "brorand": "1.1.0",
-            "hash.js": "1.1.5",
-            "hmac-drbg": "1.0.1",
-            "inherits": "2.0.3",
-            "minimalistic-assert": "1.0.1",
-            "minimalistic-crypto-utils": "1.0.1"
-          }
-        }
       }
     },
     "ethereum-input-data-decoder": {
@@ -5023,7 +5007,7 @@
       "resolved": "https://registry.npmjs.org/evp_bytestokey/-/evp_bytestokey-1.0.3.tgz",
       "integrity": "sha512-/f2Go4TognH/KvCISP7OUsHn85hT9nUkxxA9BEWxFn+Oj9o8ZNLm/40hdlgSLyuOimsrTKLUMEorQexp/aPQeA==",
       "requires": {
-        "md5.js": "1.3.4",
+        "md5.js": "1.3.5",
         "safe-buffer": "5.1.2"
       }
     },
@@ -9090,12 +9074,13 @@
       "integrity": "sha1-izqsWIuKZuSXXjzepn97sylgH6w="
     },
     "md5.js": {
-      "version": "1.3.4",
-      "resolved": "https://registry.npmjs.org/md5.js/-/md5.js-1.3.4.tgz",
-      "integrity": "sha1-6b296UogpawYsENA/Fdk1bCdkB0=",
+      "version": "1.3.5",
+      "resolved": "https://registry.npmjs.org/md5.js/-/md5.js-1.3.5.tgz",
+      "integrity": "sha512-xitP+WxNPcTTOgnTJcrhM0xvdPepipPSf3I8EIpGKeFLjt3PlJLIDG3u8EX53ZIubkb+5U2+3rELYpEhHhzdkg==",
       "requires": {
         "hash-base": "3.0.4",
-        "inherits": "2.0.3"
+        "inherits": "2.0.3",
+        "safe-buffer": "5.1.2"
       }
     },
     "media-typer": {
@@ -12247,7 +12232,7 @@
         "bn.js": "4.11.8",
         "create-hash": "1.2.0",
         "drbg.js": "1.0.1",
-        "elliptic": "6.3.0",
+        "elliptic": "6.4.1",
         "nan": "2.11.1",
         "safe-buffer": "5.1.2"
       }
@@ -13339,20 +13324,6 @@
         "xhr-request-promise": "0.1.2"
       },
       "dependencies": {
-        "elliptic": {
-          "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
-          "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
-          "requires": {
-            "bn.js": "4.11.8",
-            "brorand": "1.1.0",
-            "hash.js": "1.1.5",
-            "hmac-drbg": "1.0.1",
-            "inherits": "2.0.3",
-            "minimalistic-assert": "1.0.1",
-            "minimalistic-crypto-utils": "1.0.1"
-          }
-        },
         "eth-lib": {
           "version": "0.1.27",
           "resolved": "https://registry.npmjs.org/eth-lib/-/eth-lib-0.1.27.tgz",
@@ -14987,20 +14958,6 @@
         "web3-utils": "1.0.0-beta.36"
       },
       "dependencies": {
-        "elliptic": {
-          "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
-          "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
-          "requires": {
-            "bn.js": "4.11.8",
-            "brorand": "1.1.0",
-            "hash.js": "1.1.5",
-            "hmac-drbg": "1.0.1",
-            "inherits": "2.0.3",
-            "minimalistic-assert": "1.0.1",
-            "minimalistic-crypto-utils": "1.0.1"
-          }
-        },
         "eth-lib": {
           "version": "0.2.7",
           "resolved": "https://registry.npmjs.org/eth-lib/-/eth-lib-0.2.7.tgz",
@@ -15144,20 +15101,6 @@
           "version": "4.11.6",
           "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-4.11.6.tgz",
           "integrity": "sha1-UzRK2xRhehP26N0s4okF0cC6MhU="
-        },
-        "elliptic": {
-          "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.1.tgz",
-          "integrity": "sha512-BsXLz5sqX8OHcsh7CqBMztyXARmGQ3LWPtGjJi6DiJHq5C/qvi9P3OqgswKSDftbu8+IoI/QDTAm2fFnQ9SZSQ==",
-          "requires": {
-            "bn.js": "4.11.6",
-            "brorand": "1.1.0",
-            "hash.js": "1.1.5",
-            "hmac-drbg": "1.0.1",
-            "inherits": "2.0.3",
-            "minimalistic-assert": "1.0.1",
-            "minimalistic-crypto-utils": "1.0.1"
-          }
         },
         "eth-lib": {
           "version": "0.1.27",

@@ -1,10 +1,11 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { wallet as NeoWallet } from '@cityofzion/neon-js';
 import BN from 'bn.js';
-import NEM from 'nem-sdk';
 import * as CashAddr from 'cashaddrjs';
 import { Marshal, Utils } from 'crypto-core-async';
 import isNumber from 'lodash/isNumber';
+import NEM from 'nem-sdk';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs/operators';
 import * as WalletAddressValidator from 'wallet-address-validator';
@@ -136,6 +137,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         return false;
       }
 
+      if ([CurrencyId.NeoTest, CurrencyId.Neo].includes(currencyInfo.id)) {
+        return NeoWallet.isAddress(address);
+      }
+
       return WalletAddressValidator.validate(
         address,
         currencyInfo.ticker,
@@ -149,8 +154,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       } catch (ignored) {
         return verify();
       }
-    } else if ([CurrencyId.NeoTest].includes(currencyInfo.id)) {
-      return true;
     } else {
       return verify();
     }
