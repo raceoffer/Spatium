@@ -38,6 +38,7 @@
     "hammerjs": "^2.0.8",
     "jquery": "^3.2.1",
     "lodash": "^4.17.11",
+    "nem-sdk": "^1.6.7",
     "patternlock": "git+https://github.com/CaspianTechnologies/patternLock.git",
     "protobufjs": "^6.8.8",
     "rxjs": "^6.3.3",
