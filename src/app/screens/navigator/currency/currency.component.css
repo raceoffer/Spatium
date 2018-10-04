@@ -57,6 +57,10 @@ input.mat-input-element{
   color: #F44336;
 }
 
+.self {
+  color: #005494;
+}
+
 .unconfirmed {
   opacity: 0.6;
 }

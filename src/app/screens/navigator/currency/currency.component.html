@@ -109,13 +109,15 @@
                        [class.unconfirmed]="!transaction.confirmed">
           <span matLine class="transaction-amount"
                 [class.input]="transaction.type==txType.In"
-                [class.output]="transaction.type==txType.Out">
+                [class.output]="transaction.type==txType.Out"
+                [class.self]="transaction.type==txType.Self">
             {{ (wallet.wallet | async).fromInternal(transaction.amount) }} {{ model.ticker }}
           </span>
           <span matLine class="transaction-time"
                 *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
           <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
           <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
+          <span matLine class="transaction-address" *ngIf="transaction.type==txType.Self"> {{ transaction.to }} </span>
           <mat-divider></mat-divider>
         </mat-list-item>
       </mat-list>
@@ -127,35 +129,6 @@
           [strokeWidth] = "5">
         </mat-spinner>
       </div>
-
-      <!-- <mat-list class="text-center transaction-list">
-        <mat-list-item class="list-item" [@fadeIn]="''"
-                      *ngFor="let transaction of ((transactions | async) || [])"
-                      [class.unconfirmed]="!transaction.confirmed">
-          <span matLine class="transaction-amount"
-                [class.input]="transaction.type==txType.In"
-                [class.output]="transaction.type==txType.Out">
-            {{ (balanceWatcher | async).wallet.fromInternal(transaction.amount) }} {{ model.ticker }}
-          </span>
-          <span matLine class="transaction-time"
-                *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
-          <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
-          <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
-          <mat-divider></mat-divider>
-        </mat-list-item>
-      </mat-list>
-      <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
-          *ngIf="((transactions | async) === null) &&
-                  ((address | async) !== null) &&
-                  ((balanceUnconfirmed | async) !== null) &&
-                  ((balanceUSDUnconfirmed | async) !== null) ||
-                  (isLoadingTransactions === true)">
-        <mat-spinner
-          color="accent"
-          [diameter]="50"
-          [strokeWidth] = "5">
-        </mat-spinner>
-      </div> -->
     </div>
   </div>
   <div class="footer text-center">

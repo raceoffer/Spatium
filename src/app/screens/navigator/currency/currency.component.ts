@@ -16,28 +16,43 @@ import { CurrencyModel, Wallet, SyncState } from '../../../services/wallet/walle
 
 export enum TransactionType {
   In,
-  Out
+  Out,
+  Self
 }
 
 export class HistoryEntry {
-  constructor(public type: TransactionType,
-              // tslint:disable-next-line:no-shadowed-variable
-              public from: string,
-              public to: string,
-              public amount: number,
-              public confirmed: boolean,
-              public time: number,
-              public blockhash: string) {}
+  constructor(
+    public type: TransactionType,
+    public from: string,
+    public to: string,
+    public amount: any,
+    public fee: any,
+    public confirmed: boolean,
+    public time: number,
+    public hash: string
+  ) {}
 
   static fromJSON(json) {
+    const type = ((t) => {
+      switch (t) {
+        case 'In':
+          return TransactionType.In;
+        case 'Out':
+          return TransactionType.Out;
+        case 'Self':
+          return TransactionType.Self;
+      }
+    })(json.type);
+
     return new HistoryEntry(
-      json.type === 'Out' ? TransactionType.Out : TransactionType.In,
+      type,
       json.from,
       json.to,
       json.amount,
+      json.fee,
       json.confirmed,
       json.time,
-      json.blockhash
+      json.hash
     );
   }
 }
@@ -76,7 +91,8 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public transactions: Array<HistoryEntry> = [];
   public isLoadingTransactions = false;
-  private step = 10;
+
+  private page = 1;
 
   private subscriptions = [];
 
@@ -86,8 +102,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly syncService: SyncService,
     private readonly balanceService: BalanceService,
-    private readonly priceService: PriceService,
-    @Inject(DOCUMENT) private document: Document
+    private readonly priceService: PriceService
   ) {}
 
   async ngOnInit() {
@@ -133,7 +148,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       ).subscribe(async wallet => {
         this.isLoadingTransactions = true;
         try {
-          const transactions = await wallet.getTransactions(this.step, 0);
+          const transactions = await wallet.getTransactions(this.page++);
           this.transactions = transactions.map(tx => HistoryEntry.fromJSON(tx));
         } finally {
           this.isLoadingTransactions = false;
@@ -186,12 +201,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     const wallet = this.wallet.wallet.getValue();
     this.isLoadingTransactions = true;
     try {
-      const oldTransactions = (await wallet.getTransactions(this.transactions.length + this.step, this.transactions.length))
-        .map(tx => HistoryEntry.fromJSON(tx));
+      const oldTransactions = (await wallet.getTransactions(this.page++)).map(tx => HistoryEntry.fromJSON(tx));
       oldTransactions.forEach((oldTransaction: HistoryEntry) => this.transactions.push(oldTransaction));
     } finally {
       this.isLoadingTransactions = false;
     }
-
   }
 }
