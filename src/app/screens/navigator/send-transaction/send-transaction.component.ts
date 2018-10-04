@@ -105,7 +105,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public requiredFilled: BehaviorSubject<boolean> = null;
   public valid: BehaviorSubject<boolean> = null;
 
-  public ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public sizeEstimated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
   private signed: any = null;
@@ -189,12 +189,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             return 1;
           }
 
-          return await wallet.estimateTransaction(
+          const size = await wallet.estimateTransaction(
             wallet.address,
             balance.div(new BN(2))
           );
-        }),
-        tap(size => this.ready.next(size as boolean))
+
+          this.sizeEstimated.next(true);
+
+          return size;
+        })
       ), 1);
 
     this.receiver = new BehaviorSubject<string>('');

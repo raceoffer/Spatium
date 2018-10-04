@@ -157,7 +157,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (wallet.address | async) !== null"
+              *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feeField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -166,9 +166,6 @@
               step="0.01"
               (blur)="setFeeFocused(false)"
               (focus)="setFeeFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
-              Estimating...
-            </span>
           </span>
         </div>
       </td>
@@ -176,7 +173,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (wallet.address | async) !== null"
+              *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feeUsdField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -185,9 +182,6 @@
               step="0.01"
               (blur)="setFeeUsdFocused(false)"
               (focus)="setFeeUsdFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
-              Estimating...
-            </span>
           </span>
         </div>
       </td>
@@ -205,7 +199,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (wallet.address | async) !== null"
+              *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feePriceField"
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -214,9 +208,6 @@
               step="0.01"
               (blur)="setFeePriceFocused(false)"
               (focus)="setFeePriceFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
-              Estimating...
-            </span>
           </span>
         </div>
       </td>
@@ -224,7 +215,7 @@
         <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
           <span>
             <input
-              *ngIf="(ready | async) && (wallet.address | async) !== null"
+              *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
               matInput
               [formControl]="feePriceUsdField"hfjfjjf
               [readonly]="feeTypeField.value !== feeType.Manual"
@@ -233,9 +224,6 @@
               step="0.01"
               (blur)="setFeePriceUsdFocused(false)"
               (focus)="setFeePriceUsdFocused(true)">
-            <span class="estimating" *ngIf="!(ready | async) || (wallet.address | async) === null">
-              Estimating...
-            </span>
           </span>
         </div>
       </td>
