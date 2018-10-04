@@ -148,11 +148,16 @@ export class RegistrationComponent implements OnDestroy {
     }
   }
 
-  public openBackupOverlay(id, data) {
+  public openManualBackupOverlay(login, factors) {
     const componentRef = this.navigationService.pushOverlay(BackupComponent);
 
-    componentRef.instance.id = id;
-    componentRef.instance.data = data;
+    componentRef.instance.isManual = true;
+    componentRef.instance.login = login;
+    componentRef.instance.factors = factors;
+
+    componentRef.instance.setSeed.subscribe(async (seed) => {
+      this.seed = seed;
+    });
 
     componentRef.instance.success.subscribe(async () => {
       this.navigationService.acceptOverlay();
@@ -207,6 +212,13 @@ export class RegistrationComponent implements OnDestroy {
     this.advanced = true;
   }
 
+  async openManual() {
+    await this.openManualBackupOverlay(this.login, [{
+      type: AuthFactor.Password,
+      value: Buffer.from(this.password, 'utf-8')
+    }].concat(this.factors.getValue()));
+  }
+
   async onBackClicked() {
     this.cancel.next(true);
     await this.router.navigate(['/login']);
@@ -254,8 +266,7 @@ export class RegistrationComponent implements OnDestroy {
         // that means cancelled
         return;
       } else if (result.success === false) {
-        await this.openBackupOverlay(id, data);
-        this.notification.show('Failed to save registration data to the storage. You can perform registration manually');
+        this.notification.show('Retry. Check for update');
       } else if (result.success === true) {
         await this.openSuccessOverlay();
         this.notification.show('Successfully uploaded the secret');

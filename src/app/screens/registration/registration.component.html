@@ -101,12 +101,24 @@
         type="submit"
         mat-raised-button
         color="accent"
-        [disabled]="passwordInput.invalid || confirmPasswordInput.invalid" class="width-button color" *ngIf="!uploading">
-        Sign up
+        [disabled]="passwordInput.invalid || confirmPasswordInput.invalid || uploading"
+        class="width-button color"
+        style="margin-bottom: 5px !important;">
+        <mat-spinner diameter="20" style="margin: auto;" *ngIf="uploading"></mat-spinner>
+        <span *ngIf="!uploading">Sign up</span>
       </button>
-      <button type="button" mat-raised-button color="accent" class="width-button color" disabled *ngIf="uploading">
-        <mat-spinner diameter="25" style="margin: auto;"></mat-spinner>
-      </button>
+
+      <div
+        class="content text-center"
+        fxLayout="column"
+        fxLayoutAlign="center center"
+        style="overflow: auto; max-height: 100%; min-height: fit-content;">
+        <div class="width-button-width" style="display: inline-block">
+          <button type="button" mat-button style="opacity: 0.5; text-decoration: underline; color: #1a0dab; margin-bottom: 23px !important;"
+                  [disabled]="passwordInput.invalid || confirmPasswordInput.invalid"
+                  (click)="openManual()">Sign up manually</button>
+        </div>
+      </div>
     </div>
   </form>
 </div>

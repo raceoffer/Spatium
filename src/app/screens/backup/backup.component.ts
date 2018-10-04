@@ -1,9 +1,12 @@
 import { Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { packTree, randomBytes } from 'crypto-core-async/lib/utils';
 import { from, of } from 'rxjs';
 import { catchError, mapTo } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
 import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
+import { WorkerService } from '../../services/worker.service';
 
 declare const cordova: any;
 
@@ -28,20 +31,34 @@ export class BackupComponent implements OnInit, OnDestroy {
   public syncStateType = SyncState;
   public syncState: SyncState = SyncState.Ready;
   public saving = false;
+  @Input() public isManual = false;
   @Input() public id: any = null;
   @Input() public data: any = null;
+  @Input() public login: any = null;
+  @Input() public factors: any = null;
+  @Output() setSeed: EventEmitter<any> = new EventEmitter<any>();
   @Output() success: EventEmitter<any> = new EventEmitter<any>();
   private subscriptions = [];
   private account: DDSAccount = null;
 
   constructor(private readonly dds: DDSService,
+              private readonly authService: AuthService,
               private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService) {}
+              private readonly navigationService: NavigationService,
+              private readonly workerService: WorkerService) {}
 
   async ngOnInit() {
-    this.account = await this.dds.getStoreAccount(this.id);
+    if (!this.isManual) {
+      await this.getView(this.id, this.data);
+    } else {
+      await this.packData();
+    }
+  }
+
+  async getView(id, data) {
+    this.account = await this.dds.getStoreAccount(id);
     this.address = this.account.address;
-    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(this.id, this.data)).toString(), 'ether'));
+    this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(id, data)).toString(), 'ether'));
     await this.updateBalance();
   }
 
@@ -90,5 +107,32 @@ export class BackupComponent implements OnInit, OnDestroy {
 
       this.success.emit();
     });
+  }
+
+  async packData() {
+    const seed = await randomBytes(64, this.workerService.worker);
+    this.setSeed.emit(seed);
+
+    const packed = [];
+    for (const factor of this.factors) {
+      packed.push(await this.authService.pack(factor.type, factor.value));
+    }
+
+    const reversed = packed.reverse();
+
+    const tree = reversed.reduce((rest, factor) => {
+      const node = {
+        factor: factor
+      };
+      if (rest) {
+        node['children'] = [rest];
+      }
+      return node;
+    }, null);
+
+    const id = await this.authService.toId(this.login.toLowerCase());
+    const data = await packTree(tree, seed, this.workerService.worker);
+
+    await this.getView(id, data);
   }
 }
