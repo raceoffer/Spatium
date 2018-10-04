@@ -89,7 +89,7 @@
     </tr>
     <tr>
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': !amountField.valid}">
+        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': amountField.enabled && amountField.invalid}">
           <span>
             <input
               matInput
@@ -102,7 +102,7 @@
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': !amountUsdField.valid}">
+        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': amountUsdField.enabled && amountUsdField.invalid}">
           <span>
             <input
               matInput
