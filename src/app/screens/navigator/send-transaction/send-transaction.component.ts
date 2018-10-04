@@ -1,9 +1,11 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { wallet as NeoWallet } from '@cityofzion/neon-js';
 import BN from 'bn.js';
 import * as CashAddr from 'cashaddrjs';
 import { Marshal, Utils } from 'crypto-core-async';
 import isNumber from 'lodash/isNumber';
+import NEM from 'nem-sdk';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs/operators';
 import * as WalletAddressValidator from 'wallet-address-validator';
@@ -103,7 +105,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public requiredFilled: BehaviorSubject<boolean> = null;
   public valid: BehaviorSubject<boolean> = null;
 
-  public ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public sizeEstimated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
   private signed: any = null;
@@ -112,8 +114,34 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   private subscriptions = [];
 
+  constructor(private readonly ngZone: NgZone,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService,
+              private readonly syncService: SyncService,
+              private readonly balanceService: BalanceService,
+              private readonly currencyInfoService: CurrencyInfoService,
+              private readonly priceService: PriceService,
+              private readonly workerService: WorkerService,
+              private readonly keyChainService: KeyChainService,
+              private readonly connectionService: RPCConnectionService) {
+    this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
+  }
+
   public static verifyAddress(address: string, currencyInfo: CurrencyInfo, network: string): boolean {
     const verify = () => {
+      if ([CurrencyId.NemTest, CurrencyId.Nem].includes(currencyInfo.id)) {
+        if (NEM.model.address.isValid(address)) {
+          const networkId = currencyInfo.walletType.networkId(network);
+          const isFromNetwork = NEM.model.address.isFromNetwork(address, networkId);
+          return isFromNetwork;
+        }
+        return false;
+      }
+
+      if ([CurrencyId.NeoTest, CurrencyId.Neo].includes(currencyInfo.id)) {
+        return NeoWallet.isAddress(address);
+      }
+
       return WalletAddressValidator.validate(
         address,
         currencyInfo.ticker,
@@ -127,26 +155,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       } catch (ignored) {
         return verify();
       }
-    } else if ([CurrencyId.Nem, CurrencyId.NemTest, CurrencyId.NeoTest].includes(currencyInfo.id)) {
-      return true;
     } else {
       return verify();
     }
-  }
-
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService,
-    private readonly syncService: SyncService,
-    private readonly balanceService: BalanceService,
-    private readonly currencyInfoService: CurrencyInfoService,
-    private readonly priceService: PriceService,
-    private readonly workerService: WorkerService,
-    private readonly keyChainService: KeyChainService,
-    private readonly connectionService: RPCConnectionService
-  ) {
-    this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
   }
 
   async ngOnInit() {
@@ -178,12 +189,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
             return 1;
           }
 
-          return await wallet.estimateTransaction(
+          const size = await wallet.estimateTransaction(
             wallet.address,
             balance.div(new BN(2))
           );
-        }),
-        tap(size => this.ready.next(size as boolean))
+
+          this.sizeEstimated.next(true);
+
+          return size;
+        })
       ), 1);
 
     this.receiver = new BehaviorSubject<string>('');
@@ -257,10 +271,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     ), false);
 
     this.valid = toBehaviourSubject(combineLatest([
-        this.sufficientBalance,
-        this.sufficientValue,
-        this.validReceiver,
-        this.requiredFilled
+      this.sufficientBalance,
+      this.sufficientValue,
+      this.validReceiver,
+      this.requiredFilled
     ]).pipe(
       map(([sufficientBalance, sufficientValue, validReceiver, requiredFilled]) => {
         return sufficientBalance && sufficientValue && validReceiver && requiredFilled;
