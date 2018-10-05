@@ -16,10 +16,10 @@
             *ngIf="((deviceState | async) == stateType.Started) && isVerifyMode && ((discoverable | async) !== stateType.Started)"
             (click)="enableDiscovery()">Enable device discovery
     </button>
-    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discovering | async) == stateType.Started)">
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && !isVerifyMode && ((discovering | async) == stateType.Started)">
       Discovering
     </span>
-    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && ((discoverable | async) == stateType.Started)">
+    <span class="list-status" *ngIf="((deviceState | async) == stateType.Started) && isVerifyMode && ((discoverable | async) == stateType.Started)">
       Discoverable
     </span>
   </div>
