@@ -3824,7 +3824,7 @@
       }
     },
     "crypto-core": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#d8b5537df1c09e055b9eb15e4b7d56b440784ebe",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#f5e6dca676fe839059c3497ed1c8c4674bc294ff",
       "requires": {
         "@cityofzion/neon-js": "3.11.0",
         "aes-js": "3.1.1",
@@ -3857,9 +3857,9 @@
       }
     },
     "crypto-core-async": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#4913960dcd450e7d364ed17c61a5f93e07e5f52d",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#f3e9559c6ba8d825e33973af017159a019ee2553",
       "requires": {
-        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#d8b5537df1c09e055b9eb15e4b7d56b440784ebe",
+        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#f5e6dca676fe839059c3497ed1c8c4674bc294ff",
         "promise-worker": "1.1.1"
       }
     },

@@ -34,7 +34,7 @@
     "cashaddrjs": "^0.2.8",
     "codelyzer": "^4.4.4",
     "core-js": "^2.4.1",
-    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#4913960dcd450e7d364ed17c61a5f93e07e5f52d",
+    "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#f3e9559c6ba8d825e33973af017159a019ee2553",
     "flatted": "^0.2.2",
     "hammerjs": "^2.0.8",
     "jquery": "^3.2.1",
