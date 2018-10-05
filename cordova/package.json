@@ -41,6 +41,7 @@
     "cordova-plugin-nativestorage": "^2.3.2",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
+    "cordova-plugin-splashscreen": "^5.0.2",
     "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#62ee99ee73275b034c14e46b939bf16c7cd13e98",
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-whitelist": "^1.3.3",
@@ -82,7 +83,8 @@
       "cordova-plugin-nativestorage": {},
       "sockets-for-cordova": {},
       "cordova-plugin-bluetooth": {},
-      "cordova-plugin-ssdp": {}
+      "cordova-plugin-ssdp": {},
+      "cordova-plugin-splashscreen": {}
     },
     "platforms": [
       "browser",
