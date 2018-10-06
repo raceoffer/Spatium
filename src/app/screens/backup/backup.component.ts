@@ -7,6 +7,7 @@ import { DDSAccount, DDSService } from '../../services/dds.service';
 import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
+import { NetworkService } from '../../services/network.service';
 
 declare const cordova: any;
 
@@ -26,12 +27,12 @@ export class BackupComponent implements OnInit, OnDestroy {
   public address = '';
   public balance = 0.0;
   public comission = null;
+  public comissionLoading = true;
   public enough = false;
   public gasPrice: number = this.dds.toWei('5', 'gwei');
   public syncStateType = SyncState;
   public syncState: SyncState = SyncState.Ready;
   public saving = false;
-  public ready = false;
   @Input() public isManual = false;
   @Input() public id: any = null;
   @Input() public data: any = null;
@@ -46,17 +47,30 @@ export class BackupComponent implements OnInit, OnDestroy {
               private readonly authService: AuthService,
               private readonly notification: NotificationService,
               private readonly navigationService: NavigationService,
-              private readonly workerService: WorkerService) {}
+              private readonly workerService: WorkerService,
+              private readonly network: NetworkService) {}
 
   async ngOnInit() {
+    this.subscriptions.push(
+      this.network.online.subscribe(async (online: boolean) => {
+        if (online) {
+          await this.packData();
+        }
+      })
+    );
+
     try {
       if (!this.isManual) {
         await this.getView(this.id, this.data);
       } else {
         await this.packData();
       }
+    } catch (e) {
+      console.warn(e);
+      this.syncState = this.syncStateType.Error;
     } finally {
-      this.ready = true;
+      this.comissionLoading = false;
+	  this.ready = true;
     }
   }
 
@@ -64,6 +78,7 @@ export class BackupComponent implements OnInit, OnDestroy {
     this.account = await this.dds.getStoreAccount(id);
     this.address = this.account.address;
     this.comission = parseFloat(this.dds.fromWei((this.gasPrice * await this.account.estimateGas(id, data)).toString(), 'ether'));
+    this.comissionLoading = false;
     await this.updateBalance();
   }
 
