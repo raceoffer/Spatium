@@ -23,6 +23,11 @@
     margin-top: 16px;
 }
 
-::ng-deep .mat-progress-spinner.mat-progress-spinner-indeterminate-animation[mode=indeterminate] circle {
+.comission-spinner.mat-progress-spinner-indeterminate-fallback-animation {
+    margin-top: 34px;
+}
+
+::ng-deep .mat-progress-spinner.mat-progress-spinner-indeterminate-animation[mode=indeterminate] circle,
+::ng-deep .mat-progress-spinner.mat-progress-spinner-indeterminate-fallback-animation[mode=indeterminate] circle {
     stroke: #735e5e;
 }
