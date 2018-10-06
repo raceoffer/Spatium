@@ -33,6 +33,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   public syncStateType = SyncState;
   public syncState: SyncState = SyncState.Ready;
   public saving = false;
+  public ready = false;
   @Input() public isManual = false;
   @Input() public id: any = null;
   @Input() public data: any = null;
