@@ -28,9 +28,11 @@
 
     <mat-list-item>
       <p class="list-info" mat-line>Balance, ETH</p>
-      <p class="list-name" mat-line>{{ balance }}</p>
+      <p class="list-name" mat-line>
+        <span *ngIf="syncState==syncStateType.Ready || syncState==syncStateType.Syncing">{{ balance }}</span>
+      </p>
 
-      <button matSuffix mat-icon-button (click)="updateBalance()">
+      <button matSuffix mat-icon-button (click)="packData()">
         <mat-icon *ngIf="syncState==syncStateType.Ready">sync</mat-icon>
         <mat-icon class="sync" *ngIf="syncState==syncStateType.Syncing">sync</mat-icon>
         <mat-icon *ngIf="syncState==syncStateType.Error">sync_problem</mat-icon>
@@ -39,7 +41,7 @@
 
     <mat-list-item>
       <p class="list-info" mat-line>Estimated fee, ETH</p>
-      <mat-spinner diameter="18" class="comission-spinner" *ngIf="comission === null"></mat-spinner>
+      <mat-spinner diameter="18" class="comission-spinner" *ngIf="comissionLoading"></mat-spinner>
       <p class="list-name" mat-line *ngIf="comission !== null">{{ comission }}</p>
     </mat-list-item>
 
