@@ -1,7 +1,9 @@
+@import "../../../assets/themes/variables";
+
 .welcome-title{
   font-family: Roboto-Bold;
   font-size: 40px;
-  color: rgb(34, 119, 186);
+  color: $accent;
   border-bottom: 1px solid rgb(155, 160, 160);
   width: 100%;
 }
@@ -15,7 +17,7 @@
   height: 200px;
   width: 200px;
   font-size: 200px;
-  color: rgb(34, 119, 186);
+  color: $accent;
 }
 
 .final-text{

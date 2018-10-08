@@ -5,7 +5,7 @@ import { NavigationService } from '../../services/navigation.service';
 @Component({
   selector: 'app-presentation',
   templateUrl: './presentation.component.html',
-  styleUrls: ['./presentation.component.css']
+  styleUrls: ['./presentation.component.scss']
 })
 export class PresentationComponent {
   public path = 'assets/images/assistent-slides/' + ((this.deviceService.platform === Platform.IOS) ? 'ios/' : 'android/');

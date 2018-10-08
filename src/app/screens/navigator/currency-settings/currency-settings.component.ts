@@ -8,7 +8,7 @@ import { SettingsService } from '../../../services/settings.service';
 @Component({
   selector: 'app-currency-settings',
   templateUrl: './currency-settings.component.html',
-  styleUrls: ['./currency-settings.component.css']
+  styleUrls: ['./currency-settings.component.scss']
 })
 export class CurrencySettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';

@@ -12,7 +12,7 @@ import { BigNumber } from 'bignumber.js';
 @Component({
   selector: 'app-tile-coin',
   templateUrl: './tile-coin.component.html',
-  styleUrls: ['./tile-coin.component.css']
+  styleUrls: ['./tile-coin.component.scss']
 })
 export class TileCoinComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'tile-coin';

@@ -1,3 +1,5 @@
+@import "../../../../assets/themes/variables";
+
 :host {
   flex-direction: column;
   box-sizing: border-box;
@@ -21,7 +23,7 @@
   margin: 0 4px;
   height: 10px;
   width: 6px;
-  background-color: rgb(34, 119, 186);
+  background-color: $accent;
 }
 
 .rectangle-inactive {
