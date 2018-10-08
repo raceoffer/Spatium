@@ -154,8 +154,8 @@
     <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
-    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#62ee99ee73275b034c14e46b939bf16c7cd13e98" />
     <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
+    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#68b1539789037294cfc3f305203e97b3161d81a5" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="ios" spec="^4.5.5" />
