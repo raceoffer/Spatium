@@ -47,6 +47,10 @@ export class BluetoothService {
         }
       }));
 
+      cordova.plugins.bluetooth.setSupportedCallback(supported => this.ngZone.run(() => {
+        this.supported.next(supported);
+      }));
+
       cordova.plugins.bluetooth.setDiscoveryCallback(discovering => this.ngZone.run(() => {
         console.log('setDiscoveryCallback ' + discovering);
         this.discoveringInner.next(discovering ? State.Started : State.Stopped);
@@ -121,11 +125,6 @@ export class BluetoothService {
     }
 
     if (this.discovering.getValue() !== State.Stopped) {
-      return;
-    }
-
-    if (this.deviceState.getValue() !== State.Started) {
-      console.log('Trying to search devices with disabled BT');
       return;
     }
 
