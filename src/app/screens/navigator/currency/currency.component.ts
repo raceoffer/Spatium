@@ -62,7 +62,7 @@ declare const cordova: any;
 @Component({
   selector: 'app-currency',
   templateUrl: './currency.component.html',
-  styleUrls: ['./currency.component.css'],
+  styleUrls: ['./currency.component.scss'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [

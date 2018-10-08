@@ -1,3 +1,5 @@
+@import "../../../assets/themes/variables";
+
 .grid-item {
   height: 100%;
   width: 100%;
@@ -43,7 +45,7 @@
 
 .balance {
   font-family: 'Roboto-Medium';
-  color: #2277ba;
+  color: $accent;
 }
 
 .title {

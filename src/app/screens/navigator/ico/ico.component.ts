@@ -16,7 +16,7 @@ declare const window: any;
 @Component({
   selector: 'app-ico',
   templateUrl: './ico.component.html',
-  styleUrls: ['./ico.component.css']
+  styleUrls: ['./ico.component.scss']
 })
 
 export class IcoComponent implements OnInit {

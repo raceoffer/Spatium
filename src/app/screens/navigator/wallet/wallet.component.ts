@@ -22,7 +22,7 @@ import { AddTokenComponent } from '../add-token/add-token.component';
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
-  styleUrls: ['./wallet.component.css'],
+  styleUrls: ['./wallet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WalletComponent implements OnInit, OnDestroy {

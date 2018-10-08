@@ -1,8 +1,8 @@
+import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 import { ComponentRef, Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DeviceService } from './device.service';
-import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
 
 export enum Position {
   Fullscreen,
@@ -13,17 +13,15 @@ export enum Position {
 @Injectable()
 export class NavigationService {
   private backSubject: Subject<any> = new Subject<any>();
-  private overlayStack: Array<[ OverlayRef, any ]> = [];
+  private overlayStack: Array<[OverlayRef, any]> = [];
 
   private backEventSubject: Subject<any> = new Subject<any>();
 
   public backEvent = this.backEventSubject.asObservable();
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly device: DeviceService,
-    private readonly overlay: Overlay
-  ) {
+  constructor(private readonly ngZone: NgZone,
+              private readonly device: DeviceService,
+              private readonly overlay: Overlay) {
     this.device.deviceReady().then(() => {
       document.addEventListener('backbutton', e => this.ngZone.run(() => {
         this.backSubject.next();
@@ -39,12 +37,12 @@ export class NavigationService {
     });
   }
 
-  public back() {
-    this.backSubject.next();
-  }
-
   public get overlayCount() {
     return this.overlayStack.length;
+  }
+
+  public back() {
+    this.backSubject.next();
   }
 
   public clearOverlayStack() {
@@ -57,19 +55,19 @@ export class NavigationService {
     const config = new OverlayConfig();
 
     switch (position) {
-    case Position.Fullscreen:
-      config.height = '100%';
-      config.width = '100%';
-      break;
-    case Position.Center:
-      config.hasBackdrop = true;
-      config.positionStrategy = this.overlay.position().global().centerHorizontally().centerVertically();
-      break;
-    case Position.Left:
-      config.hasBackdrop = true;
-      config.height = '100%';
-      config.positionStrategy = this.overlay.position().global().left();
-      break;
+      case Position.Fullscreen:
+        config.height = '100%';
+        config.width = '100%';
+        break;
+      case Position.Center:
+        config.hasBackdrop = true;
+        config.positionStrategy = this.overlay.position().global().centerHorizontally().centerVertically();
+        break;
+      case Position.Left:
+        config.hasBackdrop = true;
+        config.height = '100%';
+        config.positionStrategy = this.overlay.position().global().left();
+        break;
     }
 
     const overlayRef = this.overlay.create(config);
@@ -84,7 +82,7 @@ export class NavigationService {
     elements[0].style.cssText += ';-webkit-transform: rotateZ(0deg) !important';
     elements[0].style.cssText += ';-webkit-transform: none !important';
 
-    this.overlayStack.push([ overlayRef, componentRef ]);
+    this.overlayStack.push([overlayRef, componentRef]);
 
     return componentRef;
   }
@@ -99,11 +97,12 @@ export class NavigationService {
 
   public popOverlay(cancel: boolean = false): void {
     if (this.overlayStack.length > 0) {
-      const [ overlayRef, componentRef ] = this.overlayStack.pop();
+      const [overlayRef, componentRef] = this.overlayStack.pop();
       if (cancel) {
         try {
           componentRef.instance.cancel();
-        } catch (ignored) {}
+        } catch (ignored) {
+        }
       }
       overlayRef.dispose();
     }

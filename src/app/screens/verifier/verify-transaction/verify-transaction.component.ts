@@ -18,7 +18,7 @@ enum State {
 @Component({
   selector: 'app-verify-transaction',
   templateUrl: './verify-transaction.component.html',
-  styleUrls: ['./verify-transaction.component.css']
+  styleUrls: ['./verify-transaction.component.scss']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
