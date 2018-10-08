@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { BigNumber } from 'bignumber.js';
 import { BehaviorSubject, timer, combineLatest } from 'rxjs';
 import { map, filter, mergeMap } from 'rxjs/operators';
 import { DeviceService, Platform } from '../../../services/device.service';
@@ -84,10 +84,10 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public wallet: Wallet;
   public synchronizing = this.syncService.synchronizing;
 
-  public balanceUnconfirmed: BehaviorSubject<number>;
-  public balanceConfirmed: BehaviorSubject<number>;
-  public balanceUSDUnconfirmed: BehaviorSubject<number>;
-  public balanceUSDConfirmed: BehaviorSubject<number>;
+  public balanceUnconfirmed: BehaviorSubject<BigNumber>;
+  public balanceConfirmed: BehaviorSubject<BigNumber>;
+  public balanceUSDUnconfirmed: BehaviorSubject<BigNumber>;
+  public balanceUSDConfirmed: BehaviorSubject<BigNumber>;
 
   public transactions: Array<HistoryEntry> = [];
   public isLoadingTransactions = false;
@@ -123,11 +123,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
     ), null);
 
     this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
-      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed * this.priceService.price(this.model.ticker) : null)
+      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed.times(this.priceService.price(this.model.ticker)) : null)
     ), null);
 
     this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
-      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed * this.priceService.price(this.model.ticker) : null)
+      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed.times(this.priceService.price(this.model.ticker)) : null)
     ), null);
 
     this.subscriptions.push(

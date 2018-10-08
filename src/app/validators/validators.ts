@@ -1,8 +1,8 @@
 import { FormControl } from '@angular/forms';
-import isNumber from 'lodash/isNumber';
+import { BigNumber } from 'bignumber.js';
 
 export function validateNumber(c: FormControl) {
-  return isNumber(c.value) ? null : {
+  return new BigNumber(c.value).toString() !== c.toString() ? null : {
     validateNumber: {
       valid: false
     }

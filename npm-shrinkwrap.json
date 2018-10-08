@@ -3824,7 +3824,7 @@
       }
     },
     "crypto-core": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#881d38f97eb1ade7c105c4e037216f3ef2451ede",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core.git#2788f643cd7a6bec033ccf34c87b2823c8b5118b",
       "requires": {
         "@cityofzion/neon-js": "3.11.0",
         "aes-js": "3.1.1",
@@ -3857,9 +3857,9 @@
       }
     },
     "crypto-core-async": {
-      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#a95e7ee810617b15c6452a4692e4f379ab93352b",
+      "version": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#85c81c0673a011b06db6e22412464a8b7508f224",
       "requires": {
-        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#881d38f97eb1ade7c105c4e037216f3ef2451ede",
+        "crypto-core": "git+https://github.com/CaspianTechnologies/crypto-core.git#2788f643cd7a6bec033ccf34c87b2823c8b5118b",
         "promise-worker": "1.1.1"
       }
     },
@@ -4987,7 +4987,7 @@
       "integrity": "sha512-P5pgGlv2mMwx8U48MnuytxNRZmKsVOtAGrvH0xof7ufRnZCh7KgE/nwgNlx96zq5qhfGl17qjUpxiktZVFepiQ==",
       "requires": {
         "axios": "0.18.0",
-        "gh-pages": "2.0.0",
+        "gh-pages": "2.0.1",
         "querystring": "0.2.0"
       }
     },
@@ -6097,9 +6097,9 @@
       }
     },
     "gh-pages": {
-      "version": "2.0.0",
-      "resolved": "https://registry.npmjs.org/gh-pages/-/gh-pages-2.0.0.tgz",
-      "integrity": "sha512-zGs6QDPXOpzZRa53s4/ezazHnRLY11RPo6CfbhOyVIl/wdWMZOIuuOhxrUhmVAO8Xdiu2OeGmBPy/+zsUCD/0Q==",
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/gh-pages/-/gh-pages-2.0.1.tgz",
+      "integrity": "sha512-uFlk3bukljeiWKQ2XvPfjcSi/ou7IfoDf2p+Fj672saLAr8bnOdFVqI/JSgrSgInKpCg5BksxEwGUl++dbg8Dg==",
       "requires": {
         "async": "2.6.1",
         "commander": "2.18.0",

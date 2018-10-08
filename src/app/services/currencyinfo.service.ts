@@ -487,7 +487,7 @@ export class CurrencyInfoService {
     customApiServer: string
   }> {
     return await this.settingsService.currencySettings(id, {
-      apiServer: Array.from(this._apiServers.get(id).keys()).filter(serverId => serverId != ApiServer.Spatium)[0]
+      apiServer: Array.from(this._apiServers.get(id).keys()).filter(serverId => serverId !== ApiServer.Spatium)[0]
     }) as {
       apiServer: ApiServer,
       customApiServer: string
