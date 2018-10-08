@@ -15,7 +15,8 @@ export enum ErrorCode {
 
 export enum NetworkErrorCode {
   Unreachable = 0,
-  Timeout = 1
+  Timeout = 1,
+  Disconnected = 2
 }
 
 export class NetworkError extends Error {
@@ -106,11 +107,21 @@ export class Client {
         continue;
       }
 
-      response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
-        this.requestQueue.push({ id, resolve, reject });
-      }), timeout > 0 ? timer(timeout) : undefined);
+      try {
+        response = await waitFiorPromise(new Promise((resolve: (buffer: Buffer) => void, reject: (error: Error) => void) => {
+          this.requestQueue.push({ id, resolve, reject });
+        }), timeout > 0 ? timer(timeout) : undefined);
+      } catch (e) {
+        // case two: network finds out that peer disconnected
+        if (isNetworkError(e)) {
+          needsReconnect = true;
+          continue;
+        } else {
+          throw e;
+        }
+      }
 
-      // case two: request failes by timeout
+      // case three: request failes by timeout
       if (!response) {
         needsReconnect = true;
       }
@@ -183,7 +194,7 @@ export class Client {
 
   private handleDisconnect(): void {
     this.requestQueue.forEach(entry => {
-      entry.reject(new Error('Request failed: Peer disconnected'));
+      entry.reject(new NetworkError(NetworkErrorCode.Disconnected, 'Request failed: Peer disconnected'));
     });
     this.requestQueue = [];
     this.responseAccumulator = Buffer.alloc(0);
