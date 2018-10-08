@@ -243,6 +243,12 @@ export class WalletComponent implements OnInit, OnDestroy {
   }
 
   public async sync() {
+    const resyncSubscription = this.syncService.resyncEvent.subscribe(() => {
+      this.notificationService.show(
+        'The remote device doesn\'t provide enough synchronized currencies. Some currencies will be re-synced'
+      );
+    });
+
     try {
       const finished = await this.syncService.sync(
         this.keyChainService.sessionId,
@@ -258,6 +264,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     } catch (e) {
       console.error(e);
       this.notificationService.show('Synchronization error');
+    } finally {
+      resyncSubscription.unsubscribe();
     }
   }
 }

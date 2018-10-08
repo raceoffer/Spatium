@@ -577,33 +577,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
-      await this.resign();
+      await this.startSigning();
     });
-  }
-
-  public async resign() {
-    const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: this.model.currencyInfo.id
-    });
-
-    // Do not await
-    this.syncService.sync(
-      this.keyChainService.sessionId,
-      this.keyChainService.paillierPublicKey,
-      this.keyChainService.paillierSecretKey,
-      this.connectionService.rpcClient
-    );
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      this.notification.show('The currency is not synchronized. Please wait.');
-      this.syncService.forceCurrency(this.model.currencyInfo.id);
-
-      // Let the user start sign again
-      return;
-    }
-
-    await this.startSigning();
   }
 
   async startSigning() {
@@ -612,6 +587,30 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.signed = null;
 
     try {
+      const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
+        sessionId: this.keyChainService.sessionId,
+        currencyId: this.model.currencyInfo.id
+      }), this.cancelSubject);
+      console.log(syncStateResponse);
+      if (!syncStateResponse) {
+        return;
+      }
+
+      if (syncStateResponse.state !== SyncState.Finalized) {
+        this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient,
+          this.model.currencyInfo.id
+        );
+
+        this.notification.show(
+          'The requested currency is not synchronized. Please wait for it to be resynced'
+        );
+        return;
+      }
+
       const receiver = this.receiver.getValue();
       const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
       // temporarily allow NEM to choose fee itself
@@ -651,19 +650,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const wallet = this.wallet.wallet.getValue();
 
     console.log(await currency.compoundPublic());
-
-    const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: currency.id
-    }), this.cancelSubject);
-    console.log(syncStateResponse);
-    if (!syncStateResponse) {
-      return null;
-    }
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      throw new Error('Not synced');
-    }
 
     console.log(wallet.address);
 
@@ -725,19 +711,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const wallet = this.wallet.wallet.getValue();
 
     console.log(await currency.compoundPublic());
-
-    const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: currency.id
-    }), this.cancelSubject);
-    console.log(syncStateResponse);
-    if (!syncStateResponse) {
-      return null;
-    }
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      throw new Error('Not synced');
-    }
 
     console.log(wallet.address);
 
