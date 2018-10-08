@@ -68,7 +68,7 @@
       class="width-button color"
       (click)="signIn()"
       [disabled]="buttonState === stateType.Empty"
-      *ngIf="buttonState === stateType.Exists || buttonState === stateType.Empty && !(delayed | async)">
+      *ngIf="(buttonState === stateType.Exists || buttonState === stateType.Empty) && !(delayed | async)">
       Sign in
     </button>
     <button
