@@ -631,7 +631,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (isNetworkError(error)) {
         await this.openDiscoveryOverlay();
         console.error(error);
-        this.notification.show('Failed to restore connection automatically. Please secect a device');
+        this.notification.show('Failed to restore connection automatically. Please select a device');
       } else {
         console.error(error);
         this.notification.show('Failed to sign a transaction');
