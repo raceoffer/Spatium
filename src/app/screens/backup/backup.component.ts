@@ -151,9 +151,9 @@ export class BackupComponent implements OnInit, OnDestroy {
       return node;
     }, null);
 
-    const id = await this.authService.toId(this.login.toLowerCase());
-    const data = await packTree(tree, seed, this.workerService.worker);
+    this.id = await this.authService.toId(this.login.toLowerCase());
+    this.data = await packTree(tree, seed, this.workerService.worker);
 
-    await this.getView(id, data);
+    await this.getView(this.id, this.data);
   }
 }
