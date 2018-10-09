@@ -61,10 +61,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public feeTypeField = new FormControl();
 
-  public feeField = new FormControl();
-  public feeUsdField = new FormControl();
-  public feePriceField = new FormControl();
-  public feePriceUsdField = new FormControl();
+  public feeField = new FormControl('', validateNumber);
+  public feeUsdField = new FormControl('', validateNumber);
+  public feePriceField = new FormControl('', validateNumber);
+  public feePriceUsdField = new FormControl('', validateNumber);
 
   public subtractFeeField = new FormControl();
 

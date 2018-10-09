@@ -154,7 +154,11 @@
 
     <tr *ngIf="allowFeeConfiguration">
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
+        <div
+          class="field"
+          style="margin-bottom: 13px;"
+          [class.disable]="feeTypeField.value !== feeType.Manual"
+          [ngClass]="{'invalid': feeField.enabled && feeField.invalid}">
           <span>
             <input
               *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
@@ -162,7 +166,6 @@
               [formControl]="feeField"
               [readonly]="feeTypeField.value !== feeType.Manual"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setFeeFocused(false)"
               (focus)="setFeeFocused(true)">
@@ -170,7 +173,11 @@
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
+        <div
+          class="field"
+          style="margin-bottom: 13px;"
+          [class.disable]="feeTypeField.value !== feeType.Manual"
+          [ngClass]="{'invalid': feeUsdField.enabled && feeUsdField.invalid}">
           <span>
             <input
               *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
@@ -178,7 +185,6 @@
               [formControl]="feeUsdField"
               [readonly]="feeTypeField.value !== feeType.Manual"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setFeeUsdFocused(false)"
               (focus)="setFeeUsdFocused(true)">
@@ -196,7 +202,11 @@
     </tr>
     <tr *ngIf="feeTypeField.value === feeType.Manual && allowFeeConfiguration">
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
+        <div
+          class="field"
+          style="margin-bottom: 13px;"
+          [class.disable]="feeTypeField.value !== feeType.Manual"
+          [ngClass]="{'invalid': feePriceField.enabled && feePriceField.invalid}">
           <span>
             <input
               *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
@@ -204,7 +214,6 @@
               [formControl]="feePriceField"
               [readonly]="feeTypeField.value !== feeType.Manual"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setFeePriceFocused(false)"
               (focus)="setFeePriceFocused(true)">
@@ -212,15 +221,18 @@
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [class.disable]="feeTypeField.value !== feeType.Manual">
+        <div
+          class="field" 
+          tyle="margin-bottom: 13px;"
+          [class.disable]="feeTypeField.value !== feeType.Manual"
+          [ngClass]="{'invalid': feePriceUsdField.enabled && feePriceUsdField.invalid}">
           <span>
             <input
               *ngIf="(sizeEstimated | async) && (wallet.address | async) !== null"
               matInput
-              [formControl]="feePriceUsdField"hfjfjjf
+              [formControl]="feePriceUsdField"
               [readonly]="feeTypeField.value !== feeType.Manual"
               type="number"
-              ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/"
               step="0.01"
               (blur)="setFeePriceUsdFocused(false)"
               (focus)="setFeePriceUsdFocused(true)">
