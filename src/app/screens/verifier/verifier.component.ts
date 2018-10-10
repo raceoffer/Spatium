@@ -149,8 +149,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     );
 
     const rpcPort = 5666;
-    await this.ssdp.startAdvertising(rpcPort);
     await this.rpcService.start('0.0.0.0', rpcPort);
+    await this.ssdp.startAdvertising(rpcPort);
   }
 
   public async ngOnDestroy() {
