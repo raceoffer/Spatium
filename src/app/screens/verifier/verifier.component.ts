@@ -163,8 +163,12 @@ export class VerifierComponent implements OnInit, OnDestroy {
     await this.ssdp.stop();
   }
 
-  public toggleNavigation() {
+  public async toggleNavigation() {
     const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
+
+    if (!await checkAvailable()) {
+      this.navLinks = this.navLinks.filter((link) => link.name != 'Settings');
+    }
     componentRef.instance.navLinks = this.navLinks;
 
     componentRef.instance.clicked.subscribe(async navLink => {
