@@ -22,8 +22,6 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     await this.deviceService.deviceReady();
 
-    navigator.splashscreen.hide();
-
     hockeyapp.start(null, null, this.hockeyService.appId, true, null, false, true);
 
     const lastLogData = await this.logger.getLastLogData();

@@ -6,6 +6,7 @@ import { NavigationService, Position } from '../../services/navigation.service';
 import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { PriceService } from '../../services/price.service';
+import { delay } from 'rxjs/operators';
 
 declare const navigator: any;
 declare const Windows: any;
@@ -38,7 +39,9 @@ export class StartComponent implements OnInit, OnDestroy {
 
     const viewed = await this.settings.presentationViewed();
 
-    if (!viewed) {
+    if (viewed) {
+      navigator.splashscreen.hide();
+    } else {
       this.openPresentation();
     }
 
@@ -82,6 +85,9 @@ export class StartComponent implements OnInit, OnDestroy {
 
   public openPresentation() {
     const componentRef = this.navigationService.pushOverlay(PresentationComponent, Position.Fullscreen);
+    componentRef.instance.initialized
+      .pipe(delay(100))
+      .subscribe(() => navigator.splashscreen.hide());
     componentRef.instance.finished.subscribe(async () => {
       this.navigationService.acceptOverlay();
       await this.settings.setPresentationViewed(true);

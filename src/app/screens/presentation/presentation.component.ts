@@ -1,4 +1,4 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, AfterViewInit } from '@angular/core';
 import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService } from '../../services/navigation.service';
 
@@ -7,7 +7,7 @@ import { NavigationService } from '../../services/navigation.service';
   templateUrl: './presentation.component.html',
   styleUrls: ['./presentation.component.scss']
 })
-export class PresentationComponent {
+export class PresentationComponent implements AfterViewInit {
   public path = 'assets/images/assistent-slides/' + ((this.deviceService.platform === Platform.IOS) ? 'ios/' : 'android/');
 
   public items = [
@@ -61,11 +61,16 @@ export class PresentationComponent {
   public finished = new EventEmitter<any>();
   public skipped = new EventEmitter<any>();
   public cancelled = new EventEmitter<any>();
+  public initialized = new EventEmitter<any>();
 
   constructor(
     private readonly navigationService: NavigationService,
     private readonly deviceService: DeviceService
   ) { }
+  
+  ngAfterViewInit() {
+    this.initialized.next();
+  }
 
   public cancel() {
     this.cancelled.next();
