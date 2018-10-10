@@ -21,7 +21,6 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
-import { BluetoothService } from '../../services/bluetooth.service';
 
 @Component({
   selector: 'app-verifier',

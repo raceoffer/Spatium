@@ -21,11 +21,11 @@
         style="position: relative;">
 
         <span class="balance" *ngIf="(balance | async) !== null">
-          {{ (balance | async)?.toFixed(6) * 1 }} {{ model.ticker }}
+          {{ (balance | async)?.sd() > 8 ? (balance | async)?.toFixed(6) : (balance | async)?.toFixed() }} {{ model.ticker }}
         </span>
 
         <span class="balanceUSD" *ngIf="(balanceUSD | async) !== null">
-          {{ (balanceUSD | async)?.toFixed(6) * 1 }} USD
+          {{ (balanceUSD | async)?.sd() > 8 ? (balanceUSD | async)?.toFixed(6) : (balanceUSD | async)?.toFixed() }} USD
         </span>
 
         <span class="sync-in-progress" *ngIf="(balance | async) === null">

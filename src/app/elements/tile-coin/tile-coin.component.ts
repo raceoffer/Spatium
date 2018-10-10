@@ -7,11 +7,12 @@ import { PriceService } from '../../services/price.service';
 import { SyncService } from '../../services/sync.service';
 import { CurrencyModel, CurrecnyModelType, Wallet, SyncState } from '../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../utils/transformers';
+import { BigNumber } from 'bignumber.js';
 
 @Component({
   selector: 'app-tile-coin',
   templateUrl: './tile-coin.component.html',
-  styleUrls: ['./tile-coin.component.css']
+  styleUrls: ['./tile-coin.component.scss']
 })
 export class TileCoinComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'tile-coin';
@@ -29,8 +30,8 @@ export class TileCoinComponent implements OnInit, OnDestroy {
   public wallet: Wallet;
   public synchronizing = this.syncService.synchronizing;
 
-  public balance: BehaviorSubject<number>;
-  public balanceUSD: BehaviorSubject<number>;
+  public balance: BehaviorSubject<BigNumber>;
+  public balanceUSD: BehaviorSubject<BigNumber>;
 
   public _toggled = false;
 
@@ -54,7 +55,7 @@ export class TileCoinComponent implements OnInit, OnDestroy {
     ), null);
 
     this.balanceUSD = toBehaviourSubject(this.balance.pipe(
-      map((balance) => balance !== null ? balance * this.priceService.price(this.model.ticker) : null)
+      map((balance) => balance !== null ? balance.times(this.priceService.price(this.model.ticker)) : null)
     ), null);
   }
 

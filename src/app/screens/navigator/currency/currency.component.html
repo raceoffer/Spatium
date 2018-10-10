@@ -60,7 +60,7 @@
         <td class="right">
           <div class="field disable">
             <span *ngIf="(balanceUnconfirmed | async) !== null">
-              {{ balanceUnconfirmed | async }}
+              {{ (balanceUnconfirmed | async).toFixed() }}
             </span>
             <span *ngIf="(balanceUnconfirmed | async) === null">
               {{ (wallet.state | async) === stateType.Finalized ? 'Loading' : '' }}
@@ -70,7 +70,7 @@
         <td class="left">
           <div class="field disable">
             <span *ngIf="(balanceUSDUnconfirmed | async) !== null">
-              {{ balanceUSDUnconfirmed | async }}
+              {{ (balanceUSDUnconfirmed | async).toFixed() }}
             </span>
             <span *ngIf="(balanceUSDUnconfirmed | async) === null">
             {{ (wallet.state | async) === stateType.Finalized ? 'Loading' : '' }}
@@ -79,7 +79,7 @@
         </td>
       </tr>
       <tr *ngIf="(balanceUnconfirmed | async) !== null &&
-                (balanceUnconfirmed | async) !== (balanceConfirmed | async) &&
+                !(balanceUnconfirmed | async).eq(balanceConfirmed | async) &&
                 (wallet.balanceStatus | async) !== balanceStatusType.Error">
         <td colspan="2" fxLayout="row" style="width: 100%">
           <mat-icon class="info">info</mat-icon>
@@ -111,7 +111,7 @@
                 [class.input]="transaction.type==txType.In"
                 [class.output]="transaction.type==txType.Out"
                 [class.self]="transaction.type==txType.Self">
-            {{ (wallet.wallet | async).fromInternal(transaction.amount) }} {{ model.ticker }}
+            {{ (wallet.wallet | async).fromInternal(transaction.amount).toFixed() }} {{ model.ticker }}
           </span>
           <span matLine class="transaction-time"
                 *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>

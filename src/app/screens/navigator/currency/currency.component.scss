@@ -1,0 +1,132 @@
+@import "../../../../assets/themes/variables";
+
+.mat-form-field-infix {
+  width: 100%!important;
+}
+
+table .full-width td {
+  width: 100px;
+}
+
+.subtitle {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+input.mat-input-element{
+  height: inherit;
+  margin-top: 0em;
+}
+
+.top-panel {
+  padding-bottom: 10px;
+  background-color: $background-color;
+}
+
+.qrcode {
+  margin: 32px 0 32px 0;
+}
+
+.transaction-list {
+  text-align: left;
+  width: 100%;
+}
+
+.transaction-amount {
+  font-family: 'Roboto-Medium';
+}
+
+.transaction-address {
+  font-family: 'Roboto-Light';
+  margin: 5px 0 2px 0 !important;
+}
+
+.transaction-time {
+  font-family: 'Roboto-Light';
+  position: absolute;
+  right: 16px;
+}
+
+.list-item {
+  position: relative;
+}
+
+.input {
+  color: #009688;
+}
+
+.output {
+  color: #F44336;
+}
+
+.self {
+  color: #005494;
+}
+
+.unconfirmed {
+  opacity: 0.6;
+}
+
+.send-button-background {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding: 10px 0 30px 0;
+  background-color: $background-color;
+}
+
+textarea.mat-input-element {
+  resize: none;
+}
+
+.field.auto-height {
+  height: auto;
+  min-height: 40px;
+  padding: 10px 15px;
+  padding-right: 50px;
+  word-break: break-all;
+  box-sizing: border-box;
+  position: relative;
+  font-family: 'Roboto-Light';
+}
+
+button.wallet-address-button {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(0, -50%);
+}
+
+.info {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: $accent;
+}
+
+.warning {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 16px;
+  color: rgb(255, 204, 0);
+}
+
+.windows.box .content {
+  max-height: none;
+}
+
+.windows.box.with-transactions .content {
+  margin-top: 130px;
+}
+
+.scroll {
+  overflow-y: scroll;
+  height: 100%;
+}
+
+html, body
+{
+    height: 100%;
+}

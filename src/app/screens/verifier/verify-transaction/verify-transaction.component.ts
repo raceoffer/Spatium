@@ -18,7 +18,7 @@ enum State {
 @Component({
   selector: 'app-verify-transaction',
   templateUrl: './verify-transaction.component.html',
-  styleUrls: ['./verify-transaction.component.css']
+  styleUrls: ['./verify-transaction.component.scss']
 })
 export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
@@ -88,9 +88,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     }
 
     this.value = wallet.fromInternal(this.valueInternal);
-    this.valueUsd = this.value * this.priceService.price(this.model.ticker);
+    this.valueUsd = this.value.times(this.priceService.price(this.model.ticker));
     this.fee = parentWallet.fromInternal(this.feeInternal);
-    this.feeUsd = this.fee * this.priceService.price(this.parentModel.ticker);
+    this.feeUsd = this.fee.times(this.priceService.price(this.parentModel.ticker));
 
     this.state = State.Verifying;
 

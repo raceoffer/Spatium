@@ -647,7 +647,7 @@ export class VerifierService {
 
   public async syncState(sessionId: string, currencyId: CurrencyId): Promise<SyncState> {
     if (!this._sessions.has(sessionId)) {
-      throw new Error('Unknown session id');
+      return SyncState.None;
     }
 
     return await this._sessions.get(sessionId).syncState(currencyId);
@@ -655,7 +655,7 @@ export class VerifierService {
 
   public async syncStatus(sessionId: string): Promise<Array<{ currencyId: CurrencyId, state: SyncState }>> {
     if (!this._sessions.has(sessionId)) {
-      throw new Error('Unknown session id');
+      return [];
     }
 
     return await this._sessions.get(sessionId).syncStatus();

@@ -100,6 +100,13 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
+
+      const resyncSubscription = this.syncService.resyncEvent.subscribe(() => {
+        this.notificationService.show(
+          'The remote device doesn\'t provide enough synchronized currencies. Some currencies will be re-synced'
+        );
+      });
+
       try {
         const finished = await this.syncService.sync(
           this.keyChainService.sessionId,
@@ -115,6 +122,8 @@ export class NavigatorComponent implements OnInit, OnDestroy {
       } catch (e) {
         console.error(e);
         this.notificationService.show('Synchronization error');
+      } finally {
+        resyncSubscription.unsubscribe();
       }
     });
   }

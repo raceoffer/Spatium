@@ -231,6 +231,8 @@ export class SyncService {
 
   public currencyEvent = new Subject<CurrencyId>();
 
+  public resyncEvent = new Subject<void>();
+
   public currency(currencyId: CurrencyId): Currency {
     return this._currencies.has(currencyId) ? this._currencies.get(currencyId) : null;
   }
@@ -255,7 +257,8 @@ export class SyncService {
     sessionId: string,
     paillierPublicKey: any,
     paillierSecretKey: any,
-    rpcClient: RPCClient
+    rpcClient: RPCClient,
+    startWith: CurrencyId = null
   ): Promise<boolean> {
     if (this.synchronizing.getValue()) {
       await this.cancel();
@@ -325,11 +328,10 @@ export class SyncService {
 
       const unsyncedCurrencies = localSynchedCurrencies.filter(x => !remoteSyncedCurrencies.includes(x));
 
-      // Shall we move it out?
-      if (unsyncedCurrencies.length > 0) {
-        this._notificationService.show(
-          'The remote device doesn\'t provide enough synchronized currencies. Some currencies will be re-synced'
-        );
+      if (startWith === null &&  unsyncedCurrencies.length > 0) {
+        this.resyncEvent.next();
+      } else if (startWith !== null && unsyncedCurrencies.includes(startWith)) {
+        this.resyncEvent.next();
       }
 
       this._currentPeerId = peerId;
@@ -338,7 +340,13 @@ export class SyncService {
 
       console.log('Common synched currencies:', commonSynchedCurrencies);
 
-      this._syncQueue = this._currencyInfoService.syncOrder.filter(x => !commonSynchedCurrencies.includes(x));
+      if (startWith !== null) {
+        this._syncQueue = [startWith].concat(
+          this._currencyInfoService.syncOrder.filter(x => !commonSynchedCurrencies.includes(x) && x !== startWith)
+        );
+      } else {
+        this._syncQueue = this._currencyInfoService.syncOrder.filter(x => !commonSynchedCurrencies.includes(x));
+      }
 
       while (this._syncQueue.length > 0 && !this._cancelled) {
         console.log('Sync queue', this._syncQueue);

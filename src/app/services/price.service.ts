@@ -88,7 +88,11 @@ export class PriceService {
   ]);
 
   public price(ticker: string): number {
-    return median(Array.from(this._prices.get(ticker.toUpperCase()).values()));
+    if (this._prices.has(ticker.toUpperCase())) {
+      return median(Array.from(this._prices.get(ticker.toUpperCase()).values()));
+    } else {
+      return undefined;
+    }
   }
 
   public feePrice(currencyId: CurrencyId, feeLevel: FeeLevel): number {

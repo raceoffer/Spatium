@@ -23,8 +23,8 @@ import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
-import {validateNumber} from '../../../validators/validators';
-
+import { validateNumber } from '../../../validators/validators';
+import { BigNumber } from 'bignumber.js';
 
 declare const cordova: any;
 
@@ -61,10 +61,10 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public feeTypeField = new FormControl();
 
-  public feeField = new FormControl();
-  public feeUsdField = new FormControl();
-  public feePriceField = new FormControl();
-  public feePriceUsdField = new FormControl();
+  public feeField = new FormControl('', validateNumber);
+  public feeUsdField = new FormControl('', validateNumber);
+  public feePriceField = new FormControl('', validateNumber);
+  public feePriceUsdField = new FormControl('', validateNumber);
 
   public subtractFeeField = new FormControl();
 
@@ -110,20 +110,22 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   private signed: any = null;
 
-  private cancelSubject = new Subject<any>();
+  private cancelSubject = new Subject<void>();
 
   private subscriptions = [];
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly notification: NotificationService,
-              private readonly navigationService: NavigationService,
-              private readonly syncService: SyncService,
-              private readonly balanceService: BalanceService,
-              private readonly currencyInfoService: CurrencyInfoService,
-              private readonly priceService: PriceService,
-              private readonly workerService: WorkerService,
-              private readonly keyChainService: KeyChainService,
-              private readonly connectionService: RPCConnectionService) {
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly notification: NotificationService,
+    private readonly navigationService: NavigationService,
+    private readonly syncService: SyncService,
+    private readonly balanceService: BalanceService,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly priceService: PriceService,
+    private readonly workerService: WorkerService,
+    private readonly keyChainService: KeyChainService,
+    private readonly connectionService: RPCConnectionService
+  ) {
     this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
   }
 
@@ -290,13 +292,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }
       if (!this.amountFocused) {
         this.amountField.setValue(
-          wallet.fromInternal(value),
-          {emitEvent: false});
+          wallet.fromInternal(value).toFixed(),
+          {emitEvent: false}
+        );
       }
       if (!this.amountUsdFocused) {
         this.amountUsdField.setValue(
-          wallet.fromInternal(value) * (this.priceService.price(this.model.ticker) || 1),
-          {emitEvent: false});
+          wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
+          {emitEvent: false}
+        );
       }
     }));
 
@@ -325,22 +329,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!this.feeFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
           this.feeField.setValue(
-            parentWallet.fromInternal(value),
-            {emitEvent: false});
+            parentWallet.fromInternal(value).toFixed(),
+            {emitEvent: false}
+          );
         } else {
           this.feeField.setValue(
-            wallet.fromInternal(value),
-            {emitEvent: false});
+            wallet.fromInternal(value).toFixed(),
+            {emitEvent: false}
+          );
         }
       }
       if (!this.feeUsdFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
           this.feeUsdField.setValue(
-            parentWallet.fromInternal(value) * (this.priceService.price(this.parentModel.ticker) || 1),
-            {emitEvent: false});
+            parentWallet.fromInternal(value).times(this.priceService.price(this.parentModel.ticker) || 1).toFixed(),
+            {emitEvent: false}
+          );
         } else {
           this.feeUsdField.setValue(
-            wallet.fromInternal(value) * (this.priceService.price(this.model.ticker) || 1),
+            wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
             {emitEvent: false});
         }
       }
@@ -357,23 +364,25 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!this.feePriceFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
           this.feePriceField.setValue(
-            parentWallet.fromInternal(value),
+            parentWallet.fromInternal(value).toFixed(),
             {emitEvent: false});
         } else {
           this.feePriceField.setValue(
-            wallet.fromInternal(value),
+            wallet.fromInternal(value).toFixed(),
             {emitEvent: false});
         }
       }
       if (!this.feePriceUsdFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
           this.feePriceUsdField.setValue(
-            parentWallet.fromInternal(value) * (this.priceService.price(this.parentModel.ticker) || 1),
-            {emitEvent: false});
+            parentWallet.fromInternal(value).times(this.priceService.price(this.parentModel.ticker) || 1).toFixed(),
+            {emitEvent: false}
+          );
         } else {
           this.feePriceUsdField.setValue(
-            wallet.fromInternal(value) * (this.priceService.price(this.model.ticker) || 1),
-            {emitEvent: false});
+            wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
+            {emitEvent: false}
+          );
         }
       }
     }));
@@ -388,7 +397,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      this.amount.next(wallet.toInternal(value));
+      this.amount.next(wallet.toInternal(new BigNumber(value)));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -401,7 +410,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      this.amount.next(wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1)));
+      this.amount.next(wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1)));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -418,9 +427,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feeFocused) {
         let fee = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          fee = parentWalet.toInternal(value);
+          fee = parentWalet.toInternal(new BigNumber(value));
         } else {
-          fee = wallet.toInternal(value);
+          fee = wallet.toInternal(new BigNumber(value));
         }
         this.fee.next(fee);
         this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
@@ -441,9 +450,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feeUsdFocused) {
         let fee = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          fee = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
+          fee = parentWalet.toInternal(new BigNumber(value).div(this.priceService.price(this.parentModel.ticker) || 1));
         } else {
-          fee = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+          fee = wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1));
         }
         this.fee.next(fee);
         this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
@@ -464,9 +473,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feePriceFocused) {
         let feePrice = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          feePrice = parentWalet.toInternal(value);
+          feePrice = parentWalet.toInternal(new BigNumber(value));
         } else {
-          feePrice = wallet.toInternal(value);
+          feePrice = wallet.toInternal(new BigNumber(value));
         }
         this.feePrice.next(feePrice);
         this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
@@ -487,9 +496,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feePriceUsdFocused) {
         let feePrice = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          feePrice = parentWalet.toInternal(value / (this.priceService.price(this.parentModel.ticker) || 1));
+          feePrice = parentWalet.toInternal(new BigNumber(value).div(this.priceService.price(this.parentModel.ticker) || 1));
         } else {
-          feePrice = wallet.toInternal(value / (this.priceService.price(this.model.ticker) || 1));
+          feePrice = wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1));
         }
         this.feePrice.next(feePrice);
         this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
@@ -577,33 +586,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
     componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
-      await this.resign();
+      await this.startSigning();
     });
-  }
-
-  public async resign() {
-    const syncStateResponse = await this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: this.model.currencyInfo.id
-    });
-
-    // Do not await
-    this.syncService.sync(
-      this.keyChainService.sessionId,
-      this.keyChainService.paillierPublicKey,
-      this.keyChainService.paillierSecretKey,
-      this.connectionService.rpcClient
-    );
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      this.notification.show('The currency is not synchronized. Please wait.');
-      this.syncService.forceCurrency(this.model.currencyInfo.id);
-
-      // Let the user start sign again
-      return;
-    }
-
-    await this.startSigning();
   }
 
   async startSigning() {
@@ -612,6 +596,30 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.signed = null;
 
     try {
+      const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
+        sessionId: this.keyChainService.sessionId,
+        currencyId: this.model.currencyInfo.id
+      }), this.cancelSubject);
+      console.log(syncStateResponse);
+      if (!syncStateResponse) {
+        return;
+      }
+
+      if (syncStateResponse.state !== SyncState.Finalized) {
+        this.syncService.sync(
+          this.keyChainService.sessionId,
+          this.keyChainService.paillierPublicKey,
+          this.keyChainService.paillierSecretKey,
+          this.connectionService.rpcClient,
+          this.model.currencyInfo.id
+        );
+
+        this.notification.show(
+          'The requested currency is not synchronized. Please wait for it to be resynced'
+        );
+        return;
+      }
+
       const receiver = this.receiver.getValue();
       const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
       // temporarily allow NEM to choose fee itself
@@ -632,7 +640,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (isNetworkError(error)) {
         await this.openDiscoveryOverlay();
         console.error(error);
-        this.notification.show('Failed to restore connection automatically. Please secect a device');
+        this.notification.show('Failed to restore connection automatically. Please select a device');
       } else {
         console.error(error);
         this.notification.show('Failed to sign a transaction');
@@ -651,19 +659,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const wallet = this.wallet.wallet.getValue();
 
     console.log(await currency.compoundPublic());
-
-    const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: currency.id
-    }), this.cancelSubject);
-    console.log(syncStateResponse);
-    if (!syncStateResponse) {
-      return null;
-    }
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      throw new Error('Not synced');
-    }
 
     console.log(wallet.address);
 
@@ -725,19 +720,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const wallet = this.wallet.wallet.getValue();
 
     console.log(await currency.compoundPublic());
-
-    const syncStateResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.syncState({
-      sessionId: this.keyChainService.sessionId,
-      currencyId: currency.id
-    }), this.cancelSubject);
-    console.log(syncStateResponse);
-    if (!syncStateResponse) {
-      return null;
-    }
-
-    if (syncStateResponse.state !== SyncState.Finalized) {
-      throw new Error('Not synced');
-    }
 
     console.log(wallet.address);
 
