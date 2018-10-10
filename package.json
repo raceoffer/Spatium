@@ -49,7 +49,7 @@
     "tslint-angular": "^1.1.2",
     "uuid": "^3.3.2",
     "wallet-address-validator": "^0.1.7",
-    "web3": "^1.0.0-beta.35",
+    "web3": "1.0.0-beta.34",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
