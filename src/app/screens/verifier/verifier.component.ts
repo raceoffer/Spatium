@@ -149,8 +149,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     );
 
     const rpcPort = 5666;
-    await this.rpcService.start('0.0.0.0', rpcPort);
     await this.ssdp.startAdvertising(rpcPort);
+    await this.rpcService.start('0.0.0.0', rpcPort);
   }
 
   public async ngOnDestroy() {
@@ -163,8 +163,12 @@ export class VerifierComponent implements OnInit, OnDestroy {
     await this.ssdp.stop();
   }
 
-  public toggleNavigation() {
+  public async toggleNavigation() {
     const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
+
+    if (!await checkAvailable()) {
+      this.navLinks = this.navLinks.filter((link) => link.name != 'Settings');
+    }
     componentRef.instance.navLinks = this.navLinks;
 
     componentRef.instance.clicked.subscribe(async navLink => {
