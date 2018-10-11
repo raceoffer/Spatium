@@ -163,7 +163,6 @@ export class NewIcoComponent implements OnInit {
     campaign.ipfsFolder = hash;
     try {
       const result = await this.icoService.addCampaign(campaign);
-      console.log(result);
     } catch (e) {
       console.error(e);
       this.errors.push(e);
