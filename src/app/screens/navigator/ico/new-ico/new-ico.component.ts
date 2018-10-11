@@ -117,7 +117,6 @@ export class NewIcoComponent implements OnInit {
 
   public async checkErrors() {
     this.errors = [];
-    console.log(this.password.value);
 
     if (!this.password.valid ||
       (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() !==
