@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch" (swiperight)="toggleNavigation()">
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="!isSearch">
   <button mat-icon-button (click)="toggleNavigation()">
     <mat-icon>menu</mat-icon>
   </button>
@@ -20,7 +20,7 @@
   </button>
 </mat-toolbar>
 
-<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch" (swiperight)="toggleNavigation()">
+<mat-toolbar color="primary" class="header-toolbar shadow" *ngIf="isSearch">
   <button mat-icon-button class="back-button" (click)="toggleSearch(false)">
     <mat-icon>arrow_back</mat-icon>
   </button>
@@ -34,7 +34,7 @@
   </button>
 </mat-toolbar>
 
-<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" [class.scroll]="isWindows" (swiperight)="toggleNavigation()">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" [class.scroll]="isWindows">
   <div class='content' (window:resize)="onResize()">
     <mat-grid-list cols="{{cols}}" rowHeight="4:3" [class.windows]="isWindows">
       <mat-grid-tile
