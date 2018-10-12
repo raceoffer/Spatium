@@ -33,7 +33,7 @@
       </tr>
       <tr>
         <td class="right">
-          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+          <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
         </td>
         <td class="left">
           <span class="label" style="margin-left: 5px;">USD</span>
@@ -43,14 +43,14 @@
         <td class="right">
           <div class="field disable">
             <span>
-              {{ btc }}
+              {{ value.toFixed() }}
             </span>
           </div>
         </td>
         <td class="left">
           <div class="field right disable">
             <span>
-              {{ usd }}
+              {{ valueUsd.toFixed() }}
             </span>
           </div>
         </td>
@@ -62,7 +62,7 @@
       </tr>
       <tr>
         <td class="right">
-          <span class="label" style="margin-left: 5px;">{{ currentInfo?.symbol }}</span>
+          <span class="label" style="margin-left: 5px;">{{ parentModel.ticker }}</span>
         </td>
         <td class="left">
           <span class="label" style="margin-left: 5px;">USD</span>
@@ -72,14 +72,14 @@
         <td class="right">
           <div class="field disable">
             <span>
-              {{ fee }}
+              {{ fee.toFixed() }}
             </span>
           </div>
         </td>
         <td class="left">
           <div class="field right disable">
             <span>
-              {{ feeUsd }}
+              {{ feeUsd.toFixed() }}
             </span>
           </div>
         </td>

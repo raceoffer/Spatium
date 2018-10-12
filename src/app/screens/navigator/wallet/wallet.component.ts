@@ -1,30 +1,28 @@
-import { ChangeDetectionStrategy, Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { debounceTime, map, distinctUntilChanged, withLatestFrom } from 'rxjs/operators';
 import { NavbarComponent } from '../../../modals/navbar/navbar.component';
-import { ConnectionProviderService } from '../../../services/connection-provider';
-import { CurrencyService } from '../../../services/currency.service';
+import { CurrencyId, CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { DeviceService, Platform } from '../../../services/device.service';
-import { Coin, KeyChainService, Token } from '../../../services/keychain.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
-import { ConnectionState } from '../../../services/primitives/state';
-import { SyncStatus, WalletService } from '../../../services/wallet.service';
-import { requestDialog } from '../../../utils/dialog';
+import { NotificationService } from '../../../services/notification.service';
+import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
+import { SyncService } from '../../../services/sync.service';
+import { CurrencyModel, SyncState } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { FeedbackComponent } from '../../feedback/feedback.component';
-import { AddTokenComponent } from '../add-token/add-token.component';
 import { CurrencyComponent } from '../currency/currency.component';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { SettingsComponent } from '../settings/settings.component';
-import { WaitingComponent } from '../waiting/waiting.component';
-import { Router } from '@angular/router';
-
-declare const navigator: any;
+import { Subject, merge, combineLatest } from 'rxjs';
+import { AddTokenComponent } from '../add-token/add-token.component';
 
 @Component({
   selector: 'app-wallet',
   templateUrl: './wallet.component.html',
-  styleUrls: ['./wallet.component.css'],
+  styleUrls: ['./wallet.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WalletComponent implements OnInit, OnDestroy {
@@ -64,14 +62,6 @@ export class WalletComponent implements OnInit, OnDestroy {
     }
   }];
 
-  public statusType = SyncStatus;
-
-  public status = this.wallet.synchronizatonStatus;
-  public synchronizing = this.wallet.synchronizing;
-  public partiallySync = this.wallet.partiallySync;
-
-  public connectionState = this.connectionProvider.connectionState;
-
   public isWindows;
 
   public cols: any = Math.ceil(window.innerWidth / 350);
@@ -79,75 +69,101 @@ export class WalletComponent implements OnInit, OnDestroy {
   public title = 'Wallet';
   public isSearch = false;
 
-  public staticCoins: Array<Coin | Token> = [
-    Coin.BTC,
-    Coin.BCH,
-    Coin.ETH,
-    Coin.LTC,
-    Coin.NEM,
-    Coin.NEO,
-    Coin.ADA,
-    Coin.XRP,
-    Coin.XLM
-  ];
-
-  public tileModel = new Map<Coin | Token, any>();
-
   public filterControl = new FormControl();
-
-  public tiles = new BehaviorSubject<Array<Coin | Token>>([]);
   public filter = toBehaviourSubject(this.filterControl.valueChanges.pipe(
-    debounceTime(300)
+    debounceTime(300),
+    distinctUntilChanged()
   ), '');
-  public filteredTiles = toBehaviourSubject(combineLatest([
-    this.tiles,
-    this.filter
-  ]).pipe(
-    map(([tiles, filterValue]) => {
+  public manualRefresh = new Subject<any>();
+
+  public tiles = new Array<CurrencyModel>();
+
+  public filteredTiles = toBehaviourSubject(merge(
+    this.filter,
+    this.manualRefresh.pipe(
+      withLatestFrom(this.filter),
+      map(([ignored, filterValue]) => filterValue)
+    )
+  ).pipe(
+    map((filterValue) => {
       if (filterValue.length > 0) {
-        return tiles.filter(
-          t => {
-            const model = this.tileModel.get(t);
-            return model.title.toUpperCase().includes(filterValue.toUpperCase()) ||
-                   model.symbols.includes(filterValue.toUpperCase());
-          }
-        );
+        return this.tiles.filter(t => {
+          return t.name.toUpperCase().includes(filterValue.toUpperCase()) ||
+                 t.ticker.toUpperCase().includes(filterValue.toUpperCase());
+        });
       } else {
-        return tiles;
+        return this.tiles;
       }
     })
   ), []);
 
+  public synchronizing = this.syncService.synchronizing;
+  public incomplete = combineLatest([
+    this.synchronizing,
+    this.syncService.currencyEvent
+  ]).pipe(
+    map(([synchronizing]) => {
+      const synchronizedCount = this.syncService.currencies
+        .filter(c => c.state.getValue() === SyncState.Finalized)
+        .length;
+
+      return !synchronizing &&
+        synchronizedCount > 0 &&
+        synchronizedCount < this.currencyInfoService.syncOrder.length;
+    })
+  );
+
   private subscriptions = [];
 
-  constructor(private readonly keychain: KeyChainService,
-              private readonly navigationService: NavigationService,
-              private readonly currency: CurrencyService,
-              private readonly connectionProvider: ConnectionProviderService,
-              private readonly wallet: WalletService,
-              private readonly device: DeviceService,
-    private readonly router: Router
-  ) {}
+  constructor(
+    private readonly router: Router,
+    private readonly deviceService: DeviceService,
+    private readonly navigationService: NavigationService,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly syncService: SyncService,
+    private readonly keyChainService: KeyChainService,
+    private readonly connectionService: RPCConnectionService,
+    private readonly notificationService: NotificationService
+  ) {
+    this.tiles.push(
+      ... [
+        CurrencyId.Bitcoin,
+        CurrencyId.Litecoin,
+        CurrencyId.BitcoinCash,
+        CurrencyId.Ethereum,
+        CurrencyId.Nem,
+        CurrencyId.Neo
+      ].map((currencyId) => {
+        return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
+      })
+    );
+
+    for (const tile of this.tiles.slice(0)) {
+      this.tiles.push(
+        ... tile.currencyInfo.tokens.map((tokenInfo) => {
+          return CurrencyModel.fromToken(tile.currencyInfo, tokenInfo);
+        })
+      );
+    }
+
+    this.tiles.push(
+      ... [
+        CurrencyId.BitcoinTest,
+        CurrencyId.LitecoinTest,
+        CurrencyId.BitcoinCashTest,
+        CurrencyId.EthereumTest,
+        CurrencyId.NemTest,
+        CurrencyId.NeoTest
+      ].map((currencyId) => {
+        return CurrencyModel.fromCoin(this.currencyInfoService.currencyInfo(currencyId));
+      })
+    );
+  }
 
   public async ngOnInit() {
-    await this.wallet.walletReady();
+    await this.deviceService.deviceReady();
 
-    let tiles = [];
-
-    this.staticCoins.forEach(coin => tiles.push(coin));
-
-    this.keychain.topTokens.getValue().forEach(tokenInfo => tiles.push(tokenInfo.token));
-
-    tiles.push(Coin.BTC_test);
-    tiles.push(Coin.NEO_test);
-
-    tiles.forEach(tile => {
-      this.tileModel.set(tile, this.getTileModel(tile));
-    });
-
-    this.tiles.next(tiles);
-
-    this.isWindows = (this.device.platform === Platform.Windows);
+    this.isWindows = (this.deviceService.platform === Platform.Windows);
 
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(() => {
@@ -158,12 +174,9 @@ export class WalletComponent implements OnInit, OnDestroy {
     );
   }
 
-  public openSettings() {
-    this.navigationService.pushOverlay(SettingsComponent);
-  }
-
-  public openFeedback() {
-    this.navigationService.pushOverlay(FeedbackComponent);
+  public async ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   public toggleNavigation() {
@@ -182,7 +195,7 @@ export class WalletComponent implements OnInit, OnDestroy {
     });
   }
 
-  onResize(): void {
+  public onResize() {
     this.cols = Math.ceil(window.innerWidth / 350);
   }
 
@@ -190,77 +203,69 @@ export class WalletComponent implements OnInit, OnDestroy {
     this.filterControl.setValue('');
   }
 
-  public ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  public async onTileClicked(coin: Coin | Token) {
-    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
-    componentRef.instance.currency = coin;
-  }
-
   public toggleSearch(value) {
     this.isSearch = value;
     this.clearFilterValue();
   }
 
-  public async openConnectOverlay() {
-    const componentRef = this.navigationService.pushOverlay(WaitingComponent);
-    componentRef.instance.connectedEvent.subscribe(ignored => {
+  public openCurrencyOverlay(model) {
+    const componentRef = this.navigationService.pushOverlay(CurrencyComponent);
+    componentRef.instance.model = model;
+  }
+
+  public openSettings() {
+    this.navigationService.pushOverlay(SettingsComponent);
+  }
+
+  public openFeedback() {
+    this.navigationService.pushOverlay(FeedbackComponent);
+  }
+
+  public async openDiscoveryOverlay() {
+    const componentRef = this.navigationService.pushOverlay(DeviceDiscoveryComponent);
+    componentRef.instance.connected.subscribe(async () => {
       this.navigationService.acceptOverlay();
+
+      await this.sync();
     });
   }
 
-  public async onConnect() {
-    if (this.connectionState.getValue() !== ConnectionState.None) {
-      if (await requestDialog('Syncronize with another device')) {
-        await this.openConnectOverlay();
-      }
-    } else {
-      await this.openConnectOverlay();
-    }
+  public async addToken() {
+    const componentRef = this.navigationService.pushOverlay(AddTokenComponent);
+    componentRef.instance.created.subscribe(async (tokenInfo) => {
+      this.navigationService.acceptOverlay();
+
+      const ethereumInfo = this.currencyInfoService.currencyInfo(CurrencyId.Ethereum);
+
+      this.tiles.unshift(CurrencyModel.fromToken(ethereumInfo, tokenInfo));
+      this.manualRefresh.next(true);
+    });
   }
 
-  public getTileModel(currency: Coin | Token | number) {
-    if (currency === undefined || currency === null) {
-      return undefined;
+  public async sync() {
+    const resyncSubscription = this.syncService.resyncEvent.subscribe(() => {
+      this.notificationService.show(
+        'The remote device doesn\'t provide enough synchronized currencies. Some currencies will be re-synced'
+      );
+    });
+
+    try {
+      const finished = await this.syncService.sync(
+        this.keyChainService.sessionId,
+        this.keyChainService.paillierPublicKey,
+        this.keyChainService.paillierSecretKey,
+        this.connectionService.rpcClient
+      );
+
+      if (finished) {
+        console.log('Synchronized');
+        this.notificationService.show('Synchronization finished');
+      }
+    } catch (e) {
+      console.error(e);
+      this.notificationService.show('Synchronization error');
+    } finally {
+      resyncSubscription.unsubscribe();
     }
-
-    const currencyInfo = this.currency.getInfo(currency);
-
-    const tileModel: any = {
-      title: currencyInfo.name,
-      symbols: currencyInfo.symbol,
-      logo: currencyInfo.icon,
-      coin: currency,
-      erc20: this.wallet.tokenWallets.get(currency)
-    };
-
-    if (this.wallet.currencyWallets.has(currency)) {
-      const currencyWallet = this.wallet.currencyWallets.get(currency);
-
-      const balanceUnconfirmed = toBehaviourSubject(
-        currencyWallet.balance.pipe(map(balance => balance ? currencyWallet.fromInternal(balance.unconfirmed) : null)),
-        null);
-
-      tileModel.implemented = true;
-      tileModel.status = currencyWallet.status;
-      tileModel.balanceStatus = currencyWallet.balanceStatus;
-      tileModel.balance = balanceUnconfirmed;
-      tileModel.balanceUSD = toBehaviourSubject(combineLatest([
-        balanceUnconfirmed,
-        currencyInfo.rate
-      ]).pipe(map(
-        ([balance, rate]) => {
-          if (rate === null || balance === null) {
-            return null;
-          }
-          return balance * rate;
-        }
-      )), null);
-    }
-
-    return tileModel;
   }
 }

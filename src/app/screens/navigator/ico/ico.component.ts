@@ -1,23 +1,22 @@
-import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
-import { IcoDetailsComponent } from './ico-details/ico-details.component';
-import { NavigationService, Position } from '../../../services/navigation.service';
-import { IpfsService } from '../../../services/ipfs.service';
-import { ICOService, IcoCampaign } from '../../../services/ico.service';
-import { NewIcoComponent } from './new-ico/new-ico.component';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { SettingsComponent } from '../settings/settings.component';
-import { FeedbackComponent } from '../../feedback/feedback.component';
-import { DeviceService, Platform } from '../../../services/device.service';
-import { NavbarComponent } from '../../../modals/navbar/navbar.component';
-
 import { BehaviorSubject } from 'rxjs';
+import { NavbarComponent } from '../../../modals/navbar/navbar.component';
+import { ICOService } from '../../../services/ico.service';
+import { IpfsService } from '../../../services/ipfs.service';
+import { NavigationService, Position } from '../../../services/navigation.service';
+import { FeedbackComponent } from '../../feedback/feedback.component';
+import { SettingsComponent } from '../settings/settings.component';
+import { IcoDetailsComponent } from './ico-details/ico-details.component';
+import { NewIcoComponent } from './new-ico/new-ico.component';
+
 
 declare const window: any;
 
 @Component({
   selector: 'app-ico',
   templateUrl: './ico.component.html',
-  styleUrls: ['./ico.component.css']
+  styleUrls: ['./ico.component.scss']
 })
 
 export class IcoComponent implements OnInit {

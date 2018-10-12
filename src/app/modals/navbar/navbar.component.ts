@@ -1,4 +1,5 @@
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
+import { DeviceService } from '../../services/device.service';
 
 @Component({
   selector: 'app-navbar',
@@ -6,6 +7,12 @@ import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
+  public version: any;
+  constructor(private readonly ds: DeviceService) { 
+    this.ds.appInfo().then((info: any) => {
+      this.version = info.version;
+    })
+  }
   @Input() navLinks: Array<any> = [];
   @Input() current: string = null;
 

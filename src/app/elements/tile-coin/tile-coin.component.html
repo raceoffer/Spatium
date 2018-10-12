@@ -1,17 +1,17 @@
 <div class="grid-item">
-  <button mat-button class="block" style="padding: 0px;" [class.colored]="tileModel.chosen" [disabled]="!tileModel.implemented" (click)='onClick()'>
-    <div class="erc20" *ngIf="tileModel.erc20">
-      <img class="ethereum" src="{{ ethereum }}">
+  <button mat-button class="block" style="padding: 0px;" [class.colored]="_toggled" (click)='onClick()'>
+    <div class="erc20" *ngIf="model.type == modelType.Token">
+      <img class="ethereum" src="{{ model.currencyLogo }}">
     </div>
     <div class="div-height" fxLayout="row" fxLayoutAlign="center center" >
-      <img class="logo" src="{{logo}}">
+      <img class="logo" src="{{ model.logo }}">
       <div class="wallet-description">
-        <span class="sym">{{ tileModel.symbols }}</span>
-        <span class="title">{{ tileModel.title }}</span>
+        <span class="sym">{{ model.ticker }}</span>
+        <span class="title">{{ model.name }}</span>
       </div>
     </div>
     <div
-      *ngIf="(tileModel.status | async) === stateType.Ready"
+      *ngIf="(wallet.state | async) === stateType.Finalized"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
@@ -20,29 +20,29 @@
         fxLayoutAlign="center center"
         style="position: relative;">
 
-        <span class="balance" *ngIf="(tileModel.balance | async) !== null">
-          {{ (tileModel.balance | async)?.toFixed(6) * 1 }} {{ tileModel.symbols }}
+        <span class="balance" *ngIf="(balance | async) !== null">
+          {{ (balance | async)?.sd() > 8 ? (balance | async)?.toFixed(6) : (balance | async)?.toFixed() }} {{ model.ticker }}
         </span>
 
-        <span class="balanceUSD" *ngIf="(tileModel.balanceUSD | async) !== null">
-          {{ (tileModel.balanceUSD | async)?.toFixed(6) * 1 }} USD
+        <span class="balanceUSD" *ngIf="(balanceUSD | async) !== null">
+          {{ (balanceUSD | async)?.sd() > 8 ? (balanceUSD | async)?.toFixed(6) : (balanceUSD | async)?.toFixed() }} USD
         </span>
 
-        <span class="sync-in-progress" *ngIf="(tileModel.balance | async) === null">
+        <span class="sync-in-progress" *ngIf="(balance | async) === null">
           Loading
         </span>
 
-        <mat-icon *ngIf="(tileModel.balanceStatus | async) === balanceStateType.Error" class="warning">warning</mat-icon>
+        <mat-icon *ngIf="(wallet.balanceStatus | async) === balanceStatusType.Error" class="warning">warning</mat-icon>
       </div>
     </div>
     <div
-      *ngIf="(tileModel.status | async) !== stateType.Ready"
+      *ngIf="(wallet.state | async) !== stateType.Finalized"
       class="half-height"
       fxLayout="column"
       fxLayoutAlign="center center">
 
       <span class="sync-in-progress">
-        {{ (tileModel.status | async) === stateType.Synchronizing ? 'Syncing' : 'Not synced' }}
+        {{ ((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced' }}
       </span>
     </div>
   </button>

@@ -1,19 +1,17 @@
 <mat-toolbar color="primary" class="header-toolbar shadow">
-    <button mat-icon-button (click)="toggleNavigation()">
-      <mat-icon>menu</mat-icon>
-    </button>
+  <button mat-icon-button (click)="toggleNavigation()">
+    <mat-icon>menu</mat-icon>
+  </button>
 
-    <span>Confirmation mode</span>
+  <span>Confirmation mode</span>
 
-    <span class="spacer"></span>
-
-    <mat-icon *ngIf="(fullySync | async)">sync</mat-icon>
-    <mat-icon *ngIf="(partiallySync | async)">sync_problem</mat-icon>
-  </mat-toolbar>
+  <span class="spacer"></span>
+</mat-toolbar>
 <div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
-  <mat-nav-list class="width-button-width" fxLayout="column" fxLayoutAlign=" stretch">
-    <div *ngFor="let provider of (providersArray | async)">
-      <app-connectivity-manage [type]="provider.provider"></app-connectivity-manage>
-    </div>
-  </mat-nav-list>
+  <app-connectivity-manage
+    [isVerifyMode]="true">
+  </app-connectivity-manage>
+  <app-connected-device
+    [sessions]="sessions">
+  </app-connected-device>
 </div>

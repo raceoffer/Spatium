@@ -1,15 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="capital.spatium.wallet" version="0.18.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="capital.spatium.wallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Spatium</name>
     <preference name="WindowsStorePublisherName" value="Caspian Technologies Pte. Ltd." />
     <preference name="windows-target-version" value="10.0" />
     <preference name="WindowsDefaultUriPrefix" value="ms-appx://" />
+    <preference name="AlternateContentSrc" value="http://localhost:0" />
+    <preference name="AutoHideSplashScreen" value="false" />
+    <preference name="SplashShowOnlyFirstTime" value="false" />
+    <preference name="ShowSplashScreenSpinner" value="false" />
     <hook src="hooks/copySmallIcons.js" type="before_prepare" />
     <hook src="hooks/prepareAngularApp.js" type="before_prepare" />
     <hook src="hooks/copyWorker.js" type="before_prepare" />
-    <platform name="windows">
-        <hook src="hooks/copyWindows10Manifest.js" type="after_prepare" />
-    </platform>
     <content src="http://localhost:0" />
     <access allows-arbitrary-loads-for-media="true" allows-arbitrary-loads-in-web-content="true" allows-local-networking="true" origin="*" />
     <allow-intent href="http://*/*" />
@@ -18,17 +19,6 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
-    <platform name="windows">
-        <content src="index.html" />
-    </platform>
-    <platform name="android">
-        <preference name="android-minSdkVersion" value="21" />
-        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:resizeableActivity="false" />
-        </edit-config>
-        <allow-intent href="market:*" />
-        <content src="index.html" />
-    </platform>
     <platform name="ios">
         <custom-config-file mode="replace" parent="UISupportedInterfaceOrientations" target="*-Info.plist">
             <array>
@@ -51,42 +41,48 @@
         </custom-config-file>
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
-    </platform>
-    <platform name="ios">
         <icon height="20" src="res/icon/ios/Icon-App-20x20@1x.png" width="20" />
-        <icon height="180" src="res/icon/ios/Icon-App-60x60@3x.png" width="180" />
-        <icon height="60" src="res/icon/ios/Icon-App-20x20@3x.png" width="60" />
-        <icon height="120" src="res/icon/ios/Icon-App-60x60@2x.png" width="120" />
-        <icon height="76" src="res/icon/ios/Icon-App-76x76@1x.png" width="76" />
-        <icon height="152" src="res/icon/ios/Icon-App-76x76@2x.png" width="152" />
-        <icon height="40" src="res/icon/ios/Icon-App-40x40@1x.png" width="40" />
-        <icon height="80" src="res/icon/ios/Icon-App-40x40@2x.png" width="80" />
-        <icon height="57" src="res/icon/ios/Icon-App-57x57@1x.png" width="57" />
-        <icon height="114" src="res/icon/ios/Icon-App-57x57@2x.png" width="114" />
-        <icon height="72" src="res/icon/ios/Icon-App-72x72@1x.png" width="72" />
-        <icon height="144" src="res/icon/ios/Icon-App-72x72@2x.png" width="144" />
         <icon height="29" src="res/icon/ios/Icon-App-29x29@1x.png" width="29" />
-        <icon height="58" src="res/icon/ios/Icon-App-29x29@2x.png" width="58" />
-        <icon height="87" src="res/icon/ios/Icon-App-29x29@3x.png" width="87" />
+        <icon height="40" src="res/icon/ios/Icon-App-40x40@1x.png" width="40" />
         <icon height="50" src="res/icon/ios/Icon-App-50x50@1x.png" width="50" />
+        <icon height="57" src="res/icon/ios/Icon-App-57x57@1x.png" width="57" />
+        <icon height="58" src="res/icon/ios/Icon-App-29x29@2x.png" width="58" />
+        <icon height="60" src="res/icon/ios/Icon-App-20x20@3x.png" width="60" />
+        <icon height="72" src="res/icon/ios/Icon-App-72x72@1x.png" width="72" />
+        <icon height="76" src="res/icon/ios/Icon-App-76x76@1x.png" width="76" />
+        <icon height="80" src="res/icon/ios/Icon-App-40x40@2x.png" width="80" />
+        <icon height="87" src="res/icon/ios/Icon-App-29x29@3x.png" width="87" />
         <icon height="100" src="res/icon/ios/Icon-App-50x50@2x.png" width="100" />
+        <icon height="114" src="res/icon/ios/Icon-App-57x57@2x.png" width="114" />
+        <icon height="120" src="res/icon/ios/Icon-App-60x60@2x.png" width="120" />
+        <icon height="144" src="res/icon/ios/Icon-App-72x72@2x.png" width="144" />
+        <icon height="152" src="res/icon/ios/Icon-App-76x76@2x.png" width="152" />
         <icon height="167" src="res/icon/ios/Icon-App-83.5x83.5@2x.png" width="167" />
+        <icon height="180" src="res/icon/ios/Icon-App-60x60@3x.png" width="180" />
         <icon height="1024" src="res/icon/ios/Icon-App-1024.png" width="1024" />
-    </platform>
-    <platform name="ios">
         <splash height="480" src="res/screen/ios/Default320x480.png" width="320" />
         <splash height="960" src="res/screen/ios/Default640x960.png" width="640" />
-        <splash height="1024" src="res/screen/ios/Default768x1024.png" width="768" />
-        <splash height="2048" src="res/screen/ios/Default1536x2048.png" width="1536" />
-        <splash height="768" src="res/screen/ios/Default1024x768.png" width="1024" />
-        <splash height="1536" src="res/screen/ios/Default2048x1536.png" width="2048" />
         <splash height="1136" src="res/screen/ios/Default640x1136.png" width="640" />
         <splash height="1334" src="res/screen/ios/Default750x1334.png" width="750" />
-        <splash height="2208" src="res/screen/ios/Default1242x2208.png" width="1242" />
+        <splash height="1024" src="res/screen/ios/Default768x1024.png" width="768" />
+        <splash height="768" src="res/screen/ios/Default1024x768.png" width="1024" />
         <splash height="2436" src="res/screen/ios/Default1125x2436.png" width="1125" />
+        <splash height="2208" src="res/screen/ios/Default1242x2208.png" width="1242" />
+        <splash height="2048" src="res/screen/ios/Default1536x2048.png" width="1536" />
         <splash height="1080" src="res/screen/ios/Default1920x1080.png" width="1920" />
+        <splash height="1536" src="res/screen/ios/Default2048x1536.png" width="2048" />
+        <splash height="1242" src="res/screen/ios/Default2208x1242.png" width="2208" />
+        <splash height="1125" src="res/screen/ios/Default2436x1125.png" width="2436" />
+        <splash height="2160" src="res/screen/ios/Default3840x2160.png" width="3840" />
+        <preference name="SplashScreenBackgroundColor" value="black" />
     </platform>
     <platform name="android">
+        <preference name="android-minSdkVersion" value="21" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:resizeableActivity="false" />
+        </edit-config>
+        <allow-intent href="market:*" />
+        <content src="index.html" />
         <icon density="ldpi" src="res/icon/android/icon-36-ldpi.png" />
         <icon density="mdpi" src="res/icon/android/icon-48-mdpi.png" />
         <icon density="hdpi" src="res/icon/android/icon-72-hdpi.png" />
@@ -108,6 +104,7 @@
         <preference name="android-manifest/application/activity/@android:windowSoftInputMode" value="adjustResize" />
         <preference name="Orientation" value="portrait" />
         <preference name="loadUrlTimeoutValue" value="700000" />
+        <preference name="SplashScreenBackgroundColor" value="black" />
         <custom-config-file parent="/*" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.CAMERA" />
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -115,8 +112,9 @@
         </custom-config-file>
     </platform>
     <platform name="windows">
-        <preference name="BackgroundColor" value="transparent" />
-        <preference name="SplashScreenBackgroundColor" value="#F5F5F5" />
+        <content src="index.html" />
+        <hook src="hooks/copyWindows10Manifest.js" type="after_prepare" />
+        <icon src="res/icon/windows/StoreLogo.png" target="StoreLogo" />
         <icon src="res/icon/windows/Square30x30Logo.png" target="Square30x30Logo" />
         <icon src="res/icon/windows/Square44x44Logo.png" target="Square44x44Logo" />
         <icon src="res/icon/windows/Square70x70Logo.png" target="Square70x70Logo" />
@@ -124,18 +122,16 @@
         <icon src="res/icon/windows/Square150x150Logo.png" target="Square150x150Logo" />
         <icon src="res/icon/windows/Square310x310Logo.png" target="Square310x310Logo" />
         <icon src="res/icon/windows/Wide310x150Logo.png" target="Wide310x150Logo" />
-        <icon src="res/icon/windows/StoreLogo.png" target="StoreLogo" />
-        <splash src="res/screen/windows/splashscreen.png" target="splashscreen" />
-        <splash src="res/screen/windows/SplashScreenPhone.png" target="SplashScreenPhone" />
+        <splash src="res/screen/windows/splashscreen.png" target="SplashScreen" />
+        <splash src="res/screen/windows/splashscreenphone.png" target="SplashScreenPhone" />
+        <preference name="BackgroundColor" value="transparent" />
+        <preference name="SplashScreenBackgroundColor" value="black" />
     </platform>
-    <preference name="AlternateContentSrc" value="http://localhost:0" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-file" spec="^5.0.0" />
     <plugin name="cordova-plugin-vibration" spec="^3.1.0" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.0.0" />
     <plugin name="cordova-plugin-keychain-touch-id" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git" />
-    <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
-    <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="cordova-plugin-dialogs" spec="^2.0.1" />
     <plugin name="phonegap-plugin-barcodescanner" spec="^7.1.2">
         <variable name="ANDROID_SUPPORT_V4_VERSION" value="27.+" />
@@ -145,20 +141,23 @@
     <plugin name="Canvas2ImagePlugin" spec="git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git" />
     <plugin name="cordova-plugin-camera-info" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git" />
     <plugin name="cordova-plugin-hockeyapp" spec="git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git" />
-    <plugin name="cordova-custom-config" spec="^5.0.2" />
-    <plugin name="cordova-plugin-websocket-server" spec="^1.4.10" />
     <plugin name="cordova-plugin-networkinterface" spec="^2.0.0" />
     <plugin name="cordova-plugin-advanced-http" spec="^1.11.1" />
-    <plugin name="cordova-plugin-device-name" spec="^1.3.3" />
+    <plugin name="cordova-plugin-device-name" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea" />
     <plugin name="cordova.plugins.diagnostic" spec="^4.0.8" />
     <plugin name="cocoon-cordova-labs-wkwebview-engine-localhost" spec="^0.5.1" />
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-open-native-settings" spec="^1.5.1" />
-    <plugin name="cordova-plugin-bluetooth" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7d86cfd40a0bbe6923351a6cc9da267b9f6fe707" />
-    <plugin name="cordova-plugin-zeroconf" spec="git+https://github.com/CaspianTechnologies/cordova-plugin-zeroconf.git#716660c7554028849c03d9a8050a7f84b8d9faa5" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
+    <plugin name="sockets-for-cordova" spec="https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18" />
+    <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de" />
+    <plugin name="cordova-custom-config" spec="^5.0.2" />
+    <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
+    <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
+    <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
+    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#6e651c8cf46406fb89545941346fc89caa2e2781" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
-    <engine name="android" spec="^6.3.0" />
     <engine name="ios" spec="^4.5.5" />
+    <engine name="android" spec="^7.1.1" />
 </widget>

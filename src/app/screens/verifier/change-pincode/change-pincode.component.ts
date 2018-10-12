@@ -23,7 +23,6 @@ import {
 import { SettingsService } from '../../../services/settings.service';
 
 declare const Buffer: any;
-declare const window: any;
 
 export enum State {
   Decryption,

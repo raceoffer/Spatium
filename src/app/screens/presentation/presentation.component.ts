@@ -1,13 +1,13 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, AfterViewInit } from '@angular/core';
 import { DeviceService, Platform } from '../../services/device.service';
 import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-presentation',
   templateUrl: './presentation.component.html',
-  styleUrls: ['./presentation.component.css']
+  styleUrls: ['./presentation.component.scss']
 })
-export class PresentationComponent {
+export class PresentationComponent implements AfterViewInit {
   public path = 'assets/images/assistent-slides/' + ((this.deviceService.platform === Platform.IOS) ? 'ios/' : 'android/');
 
   public items = [
@@ -32,6 +32,7 @@ export class PresentationComponent {
       image: this.path + '6.png'
     },
     {
+      // tslint:disable-next-line:max-line-length
       description: 'By clicking on <b>Advanced security</b> you can protect your wallet with several authorization factors you choose instead of a simple password.',
       image: this.path + '7.png'
     },
@@ -60,11 +61,16 @@ export class PresentationComponent {
   public finished = new EventEmitter<any>();
   public skipped = new EventEmitter<any>();
   public cancelled = new EventEmitter<any>();
+  public initialized = new EventEmitter<any>();
 
   constructor(
     private readonly navigationService: NavigationService,
     private readonly deviceService: DeviceService
   ) { }
+  
+  ngAfterViewInit() {
+    this.initialized.next();
+  }
 
   public cancel() {
     this.cancelled.next();

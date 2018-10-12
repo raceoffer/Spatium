@@ -1,21 +1,24 @@
 <app-toolbar
-  [label] = "currencyInfo?.name"
+  [label] = "model.name"
   [isColored] = "true"
   [isShadowed] = "true"
   [hasSettings] = "true"
   (backClicked) = "onBack()"
   (settingsClicked) = "onSettingsClicked()"></app-toolbar>
 
-<div class="currency-component box" [ngClass]="{'windows' : isWindows(), 'with-transactions': ((transactions | async) !== null)}" fxLayout="column" fxLayoutAlign="start center">
+<div
+  class="currency-component box"
+  [ngClass]="{'windows' : isWindows(), 'with-transactions': 'false'}"
+  fxLayout="column"
+  fxLayoutAlign="start center">
   <mat-progress-bar
     mode="indeterminate"
     color="accent"
     style="width: 100%; position: fixed; z-index: 2;"
-    *ngIf="(currencyWallet?.status | async) === statusType.Synchronizing ||
-           (currencyWallet?.balanceStatus | async) === balanceStatusType.Loading ||
-           (isUpdatingTransactions === true)">
+    *ngIf="((wallet.state | async) !== stateType.Finalized && (wallet.state | async) !== stateType.None) && (synchronizing | async)">
   </mat-progress-bar>
-  <div class="scroll full-width" id="transactionList" #transactionList>
+
+  <div class="scroll full-width" scroll-directive (onScroll)="onScroll($event)">
     <table class="two-columns" style="text-align: left; table-layout: fixed; margin-top: 5px; width: 100%">
       <tr>
         <td colspan="2">
@@ -25,16 +28,16 @@
       <tr>
         <td colspan="2" style="margin-bottom: 13px;">
           <div class="field auto-height">
-            <div *ngIf="(currencyWallet?.status | async) === statusType.Ready">
-              {{ walletAddress | async }}
+            <div *ngIf="(wallet.state | async) === stateType.Finalized">
+              {{ wallet.address | async }}
             </div>
 
-            <div *ngIf="(currencyWallet?.status | async) !== statusType.Ready">
-              {{ (currencyWallet?.status | async) === statusType.Synchronizing ? 'Syncing' : 'Not synced' }}
+            <div *ngIf="(wallet.state | async) !== stateType.Finalized">
+              {{ ((wallet.state | async) !== stateType.None && (synchronizing | async)) ? 'Syncing' : 'Not synced' }}
             </div>
 
             <button
-              *ngIf="(currencyWallet?.status | async) === statusType.Ready"
+              *ngIf="(wallet.state | async) === stateType.Finalized"
               id="copy"
               class="wallet-address-button"
               mat-icon-button
@@ -47,7 +50,7 @@
       </tr>
       <tr>
         <td class="right">
-          <span class="label" style="margin-left: 5px;">{{ currencyInfo?.symbol }}</span>
+          <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
         </td>
         <td class="left">
           <span class="label" style="margin-left: 5px;">USD</span>
@@ -56,69 +59,70 @@
       <tr>
         <td class="right">
           <div class="field disable">
-            <span *ngIf="(balanceCurrencyUnconfirmed | async) !== null">
-              {{ balanceCurrencyUnconfirmed | async }}
+            <span *ngIf="(balanceUnconfirmed | async) !== null">
+              {{ (balanceUnconfirmed | async).toFixed() }}
             </span>
-            <span *ngIf="(balanceCurrencyUnconfirmed | async) === null">
-              {{ (currencyWallet?.status | async) === statusType.Ready ? 'Loading' : '' }}
+            <span *ngIf="(balanceUnconfirmed | async) === null">
+              {{ (wallet.state | async) === stateType.Finalized ? 'Loading' : '' }}
             </span>
           </div>
         </td>
         <td class="left">
           <div class="field disable">
-            <span *ngIf="(balanceUsdUnconfirmed | async) !== null">
-              {{ balanceUsdUnconfirmed | async }}
+            <span *ngIf="(balanceUSDUnconfirmed | async) !== null">
+              {{ (balanceUSDUnconfirmed | async).toFixed() }}
             </span>
-            <span *ngIf="(balanceUsdUnconfirmed | async) === null">
-            {{ (currencyWallet?.status | async) === statusType.Ready ? 'Loading' : '' }}
+            <span *ngIf="(balanceUSDUnconfirmed | async) === null">
+            {{ (wallet.state | async) === stateType.Finalized ? 'Loading' : '' }}
             </span>
           </div>
         </td>
       </tr>
-      <tr *ngIf="(balanceCurrencyUnconfirmed | async) !== null &&
-                (balanceCurrencyUnconfirmed | async) !== (balanceCurrencyConfirmed | async) &&
-                (currencyWallet?.balanceStatus | async) !== balanceStatusType.Error">
+      <tr *ngIf="(balanceUnconfirmed | async) !== null &&
+                !(balanceUnconfirmed | async).eq(balanceConfirmed | async) &&
+                (wallet.balanceStatus | async) !== balanceStatusType.Error">
         <td colspan="2" fxLayout="row" style="width: 100%">
           <mat-icon class="info">info</mat-icon>
           <span class="label" style="margin-left: 5px; line-height: 20px">Unconfirmed balance</span>
         </td>
       </tr>
-      <tr *ngIf="(currencyWallet?.balanceStatus | async) === balanceStatusType.Error">
+      <tr *ngIf="(wallet.balanceStatus | async) === balanceStatusType.Error">
         <td colspan="2" fxLayout="row" style="width: 100%">
           <mat-icon class="warning">warning</mat-icon>
-          <span class="label" style="margin-left: 5px; line-height: 20px">{{ (balanceCurrencyUnconfirmed | async) !== null ? 'Outdated balance' : 'Failed to fetch balance' }}</span>
+          <span class="label" style="margin-left: 5px; line-height: 20px">
+            {{ (balanceUnconfirmed | async) !== null ? 'Outdated balance' : 'Failed to fetch balance' }}
+          </span>
         </td>
       </tr>
     </table>
 
     <div class="content text-center" fxLayout="column" fxLayoutAlign="start center">
       <div class="qrcode">
-        <qr-code [value]="walletAddress | async" [size]="150" [background]="'#f5f5f5'" *ngIf="(walletAddress | async) !== null" ></qr-code>
-        <div style="height: 150px" *ngIf="(walletAddress | async) === null"></div>
+        <qr-code [value]="wallet.address | async" [size]="150" [background]="'#f5f5f5'" *ngIf="(wallet.address | async) !== null" ></qr-code>
+        <div style="height: 150px" *ngIf="(wallet.address | async) === null"></div>
       </div>
 
-      <mat-list class="text-center transaction-list">        
-        <mat-list-item class="list-item" [@fadeIn]="''"
-                      *ngFor="let transaction of ((transactions | async) || [])"
-                      [class.unconfirmed]="!transaction.confirmed">
+      <mat-list class="text-center transaction-list">
+        <mat-list-item *ngFor="let transaction of transactions"
+                       class="list-item"
+                       [@fadeIn]="''"
+                       [class.unconfirmed]="!transaction.confirmed">
           <span matLine class="transaction-amount"
                 [class.input]="transaction.type==txType.In"
-                [class.output]="transaction.type==txType.Out">
-            {{ currencyWallet.fromInternal(transaction.amount) }} {{ currencyInfo?.symbol }}
+                [class.output]="transaction.type==txType.Out"
+                [class.self]="transaction.type==txType.Self">
+            {{ (wallet.wallet | async).fromInternal(transaction.amount).toFixed() }} {{ model.ticker }}
           </span>
           <span matLine class="transaction-time"
                 *ngIf="transaction.confirmed"> {{ transaction.time*1000 | date: 'medium' }}</span>
           <span matLine class="transaction-address" *ngIf="transaction.type==txType.In"> {{ transaction.from }} </span>
           <span matLine class="transaction-address" *ngIf="transaction.type==txType.Out"> {{ transaction.to }} </span>
+          <span matLine class="transaction-address" *ngIf="transaction.type==txType.Self"> {{ transaction.to }} </span>
           <mat-divider></mat-divider>
         </mat-list-item>
       </mat-list>
-      <div class="content text-center" fxLayout="column" fxLayoutAlign="center center"
-          *ngIf="((transactions | async) === null) &&
-                  ((walletAddress | async) !== null) &&
-                  ((balanceCurrencyUnconfirmed | async) !== null) &&
-                  ((balanceUsdUnconfirmed | async) !== null) 
-                  || (isLoadingTransactions === true)">
+
+      <div class="content text-center" fxLayout="column" fxLayoutAlign="center center" *ngIf="isLoadingTransactions">
         <mat-spinner
           color="accent"
           [diameter]="50"

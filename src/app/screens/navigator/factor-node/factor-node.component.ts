@@ -1,41 +1,28 @@
-import {
-  Component,
-  ElementRef,
-  HostBinding,
-  OnDestroy,
-  ViewChild
-} from '@angular/core';
-import {
-  animate,
-  sequence,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, sequence, style, transition, trigger } from '@angular/animations';
+import { Component, ElementRef, HostBinding, OnDestroy, ViewChild } from '@angular/core';
+import { packTree } from 'crypto-core-async/lib/utils';
 import * as $ from 'jquery';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { take, takeUntil, map } from 'rxjs/operators';
+import { catchError, mapTo } from 'rxjs/internal/operators';
+import { map, take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../../modals/dialog-factors/dialog-factors.component';
-import { AuthService, AuthFactor, IdFactor } from '../../../services/auth.service';
+import { AuthFactor, AuthService, IdFactor } from '../../../services/auth.service';
 import { DDSService } from '../../../services/dds.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService, Position } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { WorkerService } from '../../../services/worker.service';
-
-import { packLogin, tryUnpackLogin, packTree, randomBytes } from 'crypto-core-async/lib/utils';
 import { toBehaviourSubject } from '../../../utils/transformers';
-import { LoginFactorComponent } from '../../identification-factors/login-factor/login-factor.component';
-import { QrFactorComponent } from '../../identification-factors/qr-factor/qr-factor.component';
-import { NfcFactorComponent } from '../../identification-factors/nfc-factor/nfc-factor.component';
+import { FileAuthFactorComponent } from '../../authorization-factors/file-auth-factor/file-auth-factor.component';
+import { GraphicKeyAuthFactorComponent } from '../../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
+import { NfcAuthFactorComponent } from '../../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
 import { PasswordAuthFactorComponent } from '../../authorization-factors/password-auth-factor/password-auth-factor.component';
 import { PincodeAuthFactorComponent } from '../../authorization-factors/pincode-auth-factor/pincode-auth-factor.component';
-import { GraphicKeyAuthFactorComponent } from '../../authorization-factors/graphic-key-auth-factor/graphic-key-auth-factor.component';
-import { FileAuthFactorComponent } from '../../authorization-factors/file-auth-factor/file-auth-factor.component';
 import { QrAuthFactorComponent } from '../../authorization-factors/qr-auth-factor/qr-auth-factor.component';
-import { NfcAuthFactorComponent } from '../../authorization-factors/nfc-auth-factor/nfc-auth-factor.component';
-import { catchError, mapTo } from 'rxjs/internal/operators';
 import { BackupComponent } from '../../backup/backup.component';
+import { LoginFactorComponent } from '../../identification-factors/login-factor/login-factor.component';
+import { NfcFactorComponent } from '../../identification-factors/nfc-factor/nfc-factor.component';
+import { QrFactorComponent } from '../../identification-factors/qr-factor/qr-factor.component';
 
 @Component({
   selector: 'app-factor-node',
@@ -227,7 +214,7 @@ export class FactorNodeComponent implements OnDestroy {
     try {
       this.uploading = true;
 
-      const seed = this.keychain.getSeed();
+      const seed = this.keychain.seed;
 
       const factors = this.factors.getValue();
 

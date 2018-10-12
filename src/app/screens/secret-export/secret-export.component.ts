@@ -5,7 +5,7 @@ import { WorkerService } from '../../services/worker.service';
 
 declare const nfc: any;
 
-import { checkNfc } from "../../utils/nfc";
+import { checkNfc } from '../../utils/nfc';
 
 import { packSeed } from 'crypto-core-async/lib/utils';
 

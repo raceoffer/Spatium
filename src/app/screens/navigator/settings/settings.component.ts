@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
-import { NavigationService } from "../../../services/navigation.service";
-import { FactorNodeComponent } from "../factor-node/factor-node.component";
+import { NavigationService } from '../../../services/navigation.service';
+import { FactorNodeComponent } from '../factor-node/factor-node.component';
 
 @Component({
   selector: 'app-settings',

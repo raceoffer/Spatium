@@ -1,39 +1,58 @@
-import { ProviderType } from '../interfaces/connection-provider';
+export enum Provider {
+  Bluetooth,
+  Wifi
+}
+
+export interface WifiConnectionData {
+  host: string;
+  port: number;
+}
+
+export interface BluetoothConnectionData {
+  address: string;
+  paired: boolean;
+}
+
+export function isWifiConnectionData(
+  connectionData: WifiConnectionData| BluetoothConnectionData
+): connectionData is WifiConnectionData {
+  return (connectionData as WifiConnectionData).host !== undefined;
+}
+
+export function isBluetoothConnectionData(
+  connectionData: WifiConnectionData| BluetoothConnectionData
+): connectionData is BluetoothConnectionData {
+  return (connectionData as BluetoothConnectionData).address !== undefined;
+}
 
 export class Device {
-  constructor(public provider: ProviderType,
-              public name: string,
-              public macAddress: string = null,
-              public ip: string = null,
-              public port: number = null,
-              public paired: boolean = false) { }
+  constructor(
+    public provider: Provider,
+    public name: string,
+    public id: string,
+    public data: WifiConnectionData | BluetoothConnectionData
+  ) {}
 
   public static equals(x: Device, y: Device): boolean {
-    return x.provider === y.provider &&
-           x.name === y.name &&
-           x.macAddress === y.macAddress &&
-           x.ip === y.ip &&
-           x.port === y.port &&
-           x.paired === y.paired;
-  }
-
-  public static merge(x: Device, y: Device): Device {
-    return new Device(
-      y.provider || x.provider,
-      y.name || x.name,
-      y.macAddress || x.macAddress,
-      y.ip || x.ip,
-      y.port || x.port,
-      y.paired
-    );
+    if (x.provider !== y.provider || x.name !== y.name || x.id !== y.id) {
+      return false;
+    }
+    let xData;
+    let yData;
+    switch (x.provider) {
+      case Provider.Bluetooth:
+        xData = x.data as BluetoothConnectionData;
+        yData = y.data as BluetoothConnectionData;
+        return xData.host === yData.host && xData.port === yData.port;
+      case Provider.Wifi:
+        xData = x.data as WifiConnectionData;
+        yData = y.data as WifiConnectionData;
+        return xData.address === yData.address && xData.paired === yData.paired;
+    }
   }
 
   public equals(y: Device): boolean {
     return Device.equals(this, y);
-  }
-
-  public merge(y: Device): Device {
-    return Device.merge(this, y);
   }
 }
 

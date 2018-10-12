@@ -6,8 +6,8 @@ declare const cordova: any;
 
 import { sha256, matchPassphrase } from 'crypto-core-async/lib/utils';
 
-import { WorkerService } from "./worker.service";
-import { checkNfc } from "../utils/nfc";
+import { WorkerService } from './worker.service';
+import { checkNfc } from '../utils/nfc';
 
 export enum IdFactor {
   Login,
@@ -129,8 +129,8 @@ export class AuthService {
     const withQr = checkCameraSupport ? this.qrSupported : true;
     const withNfc = checkNfcSupport ? this.nfcSupported : true;
     const keysToRemove = [];
-    if (!withQr) keysToRemove.push(IdFactor.QR);
-    if (!withNfc) keysToRemove.push(IdFactor.NFC);
+    if (!withQr) { keysToRemove.push(IdFactor.QR); }
+    if (!withNfc) { keysToRemove.push(IdFactor.NFC); }
     return this.filterMap(this.idFactors, keysToRemove);
   }
 
@@ -138,8 +138,8 @@ export class AuthService {
     const withQr = checkCameraSupport ? this.qrSupported : true;
     const withNfc = checkNfcSupport ? this.nfcSupported : true;
     const keysToRemove = [];
-    if (!withQr) keysToRemove.push(AuthFactor.QR);
-    if (!withNfc) keysToRemove.push(AuthFactor.NFC);
+    if (!withQr) { keysToRemove.push(AuthFactor.QR); }
+    if (!withNfc) { keysToRemove.push(AuthFactor.NFC); }
     return this.filterMap(this.authFactors, keysToRemove);
   }
 

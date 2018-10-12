@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Subject } from "rxjs";
-import { debounceTime, tap } from "rxjs/operators";
+import { Subject } from 'rxjs';
+import { debounceTime, tap } from 'rxjs/operators';
 
 @Injectable()
 export class ActivityService {
@@ -13,6 +13,6 @@ export class ActivityService {
   constructor() { }
 
   onActivity() {
-    this.activity.next()
+    this.activity.next();
   }
 }

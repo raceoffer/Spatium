@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { FormControl, Validators } from "@angular/forms";
-import { AuthService } from "../../services/auth.service";
-
-import { BehaviorSubject } from "rxjs";
+import { FormControl, Validators } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
+import { DeviceService, Platform } from '../../services/device.service';
 
 export enum State {
   Updating,
@@ -16,7 +16,8 @@ export enum State {
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnDestroy{
+export class LoginComponent implements OnDestroy {
+  public caretClass = this.isWindows() ? 'caret-center' : '';
   public stateType = State;
   public state = new BehaviorSubject<State>(State.Ready);
 
@@ -40,15 +41,24 @@ export class LoginComponent implements OnDestroy{
   private manualLoginInputStream = this.loginControl.valueChanges.pipe(
     distinctUntilChanged(),
     filter(() => !this.loginGenerated),
-    map(value => value ? value : ''),
+    map((value) => {
+      if (!value) {
+        if (this.isWindows()) {
+          this.caretClass = 'caret-center';
+        }
+        return '';
+      } else {
+        this.caretClass = '';
+        return value;
+      }
+    }),
     tap(() => this.delayed.next(true)),
     debounceTime(1000),
     tap(() => this.delayed.next(false)),
   );
 
-  constructor(
-    private readonly authService: AuthService,
-  ) {
+  constructor(private readonly authService: AuthService,
+              private readonly deviceService: DeviceService) {
 
     this.subscriptions.push(
       this.manualLoginInputStream.subscribe(value => {
@@ -88,14 +98,18 @@ export class LoginComponent implements OnDestroy{
   generateNewLogin() {
     try {
       this.state.next(State.Updating);
-      let login = this.authService.makeNewLogin(10);
+      const login = this.authService.makeNewLogin(10);
 
       this.loginGenerated = true;
       this.loginControl.setValue(login);
 
       this.state.next(State.Ready);
-    } catch(e) {
+    } catch (e) {
       this.state.next(State.Error);
     }
+  }
+
+  isWindows(): boolean {
+    return this.deviceService.platform === Platform.Windows;
   }
 }

@@ -1,23 +1,9 @@
 @import '~@angular/material/theming';
 @import "android_theme";
-
-// You can add global styles to this file that will cascade like normal CSS
-$bluish : rgb(34, 119, 186); //#2277ba
-$charcoal_grey : rgb(55, 55, 65); //#373741
-$silver : rgb(226, 227, 227); //#e2e3e3
-$black_20 : rgba(0, 0, 0, 0.2);//
-$white_36 : rgba(255, 255, 255, 0.36);//
-$white_two : rgb(238, 238,	238);//eeeeee;
-$charcoal_grey_36 : rgba(55, 55, 65, 0.36);//
-$dark : rgb(29, 29, 38);//#1d1d26
-$selected : rgba(29, 29, 38, 0.03);//
-$cool_grey : rgb(155, 160, 160);//#9ba0a0
-$white : rgb(245, 245, 245);//#f5f5f5,
-$dark_grey_21:rgba(44, 46, 49, 0.21);
-$green: rgb(24, 154, 57);//#189a39
+@import "variables";
 
 .blue-color {
-  color: $bluish;
+  color: $accent;
 }
 
 .mat-toolbar-row, .mat-toolbar-single-row {
@@ -88,7 +74,7 @@ $green: rgb(24, 154, 57);//#189a39
 }
 
 .shadow{
-  box-shadow: 0 3px 5px $dark_grey_21;
+  box-shadow: 0 3px 5px $shadow;
 }
 
 .mat-drawer-backdrop mat-drawer-shown{
@@ -210,7 +196,7 @@ $green: rgb(24, 154, 57);//#189a39
 .mat-mini-fab.mat-warn.color[disabled],
 .mat-mini-fab.color[disabled][disabled] {
   opacity: 0.5;
-  background-color: $bluish;
+  background-color: $accent;
   color: $white!important;
 }
 
@@ -239,7 +225,7 @@ mat-icon.color-cool_grey{
 }
 
 mat-icon.bluish{
-  color: $bluish;
+  color: $accent;
 }
 
 mat-icon.size-30{
@@ -281,6 +267,10 @@ mat-icon.size-40{
   display: block;
 }
 
+.mat-nav-list .device-list.mat-list-item-with-avatar .mat-list-item-content .mat-list-text {
+  padding-left: 0px !important;
+}
+
 //toggler
 .mat-slide-toggle-label {
   justify-content: space-around;
@@ -315,9 +305,9 @@ mat-icon.size-40{
 
 .spatium-textfield.error-field {
   input {
-    color: #ff5722;
-    caret-color: #ff5722;
-    border-color: #ff5722;
+    color: $error-field;
+    caret-color: $error-field;
+    border-color: $error-field;
   }
 }
 
@@ -344,8 +334,8 @@ mat-icon.size-40{
 .search-wallet > input {
   border-bottom: 0px;
   text-align: left;
-  caret-color: $bluish;
-  color: $bluish;
+  caret-color: $accent;
+  color: $accent;
 }
 
 
@@ -478,13 +468,6 @@ body, buttons, html, input, textarea {
   line-height: 30px!important;
 }
 
-.button-imitator-large{
-  font-size: 40px;
-  width: 40px !important;
-  height: 40px !important;
-  line-height: 40px!important;
-}
-
 @-webkit-keyframes sync {
   from { transform: rotate(359deg); }
   to { transform: rotate(0deg); }
@@ -511,7 +494,7 @@ body, buttons, html, input, textarea {
 }
 
 .sync {
-  color: $bluish;
+  color: $accent;
   -webkit-animation: sync 1s infinite linear;
   -moz-animation: sync 1s infinite linear;
   -ms-animation: sync 1s infinite linear;
@@ -621,7 +604,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   width: 33px;
   height: 33px;
   border-radius: 50px;
-  background-color: $bluish;
+  background-color: $accent;
   color: #FFFFFF;
   display: inline-block;
   margin-right: 15px;
@@ -678,7 +661,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .icon-custom-graphic_key-mask:before {
   content: "\e900";
-  color: $bluish;
+  color: $accent;
   font-size: 40px !important;
 }
 
@@ -690,7 +673,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .icon-custom-qr_code_blue:before {
   content: "\e901";
-  color: $bluish;
+  color: $accent;
   font-size: 30px !important;
 }
 
@@ -713,7 +696,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .icon-custom-qr_code-mask:before {
   content: "\e901";
-  color: $bluish;
+  color: $accent;
   font-size: 40px !important;
 }
 
@@ -725,7 +708,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 
 .icon-custom-bonjour_blue:before {
   content: "\e902";
-  color: $bluish;
+  color: $accent;
   font-size: 22px !important;
 }
 
@@ -774,11 +757,11 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 }
 
 .patt-inner-circ.hovered{
-  border:1px solid $bluish;
+  border:1px solid $accent;
 }
 
 .patt-dots{
-  background: $bluish;
+  background: $accent;
   width: 12px;
   height: 12px;
   border-radius: 6px;
@@ -792,7 +775,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .patt-lines{
   border-radius:1px;
   height:2px;
-  background:$bluish;
+  background: $accent;
   position:absolute;
   transform-origin:1px 1px;
   -ms-transform-origin:1px 1px; /* IE 9 */
@@ -1031,7 +1014,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .currency-component input {
   font-family: 'Roboto-Light';
   line-height: 40px;
-  caret-color: #2277ba;
+  caret-color: $accent;
   color: #373741 !important;
   text-overflow: ellipsis;
 }
@@ -1072,7 +1055,7 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 }
 
 .mat-radio-checked {
-  color: $bluish;
+  color: $accent;
 }
 
 //для компонентов с тулбарами
@@ -1130,4 +1113,8 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .by-content .mat-form-field-wrapper{
   padding-bottom: 0;
   width: 100%;
+}
+
+.caret-center:focus {
+  padding-left: 50%;
 }

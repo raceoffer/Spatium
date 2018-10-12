@@ -1,0 +1,205 @@
+syntax = "proto3";
+
+import "distributedecdsasyncsession.proto";
+import "distributedecdsasignsession.proto";
+import "distributededdsasyncsession.proto";
+import "distributededdsasignsession.proto";
+
+// Internal message representing an rpc call
+message RpcCall {
+  string method = 1;
+  bytes data = 2;
+}
+
+service RpcService {
+  rpc Capabilities (CapabilitiesRequest) returns (CapabilitiesResponse);
+  rpc Handshake (HandshakeRequest) returns (HandshakeResponse);
+  rpc ClearSession (ClearSessionRequest) returns (ClearSessionResponse);
+
+  rpc SyncStatus (SyncStatusRequest) returns (SyncStatusResponse);
+  rpc SyncState (SyncStateRequest) returns (SyncStateResponse);
+
+  rpc StartEcdsaSync (StartEcdsaSyncRequest) returns (StartEcdsaSyncResponse);
+  rpc EcdsaSyncReveal (EcdsaSyncRevealRequest) returns (EcdsaSyncRevealResponse);
+  rpc EcdsaSyncResponse (EcdsaSyncResponseRequest) returns (EcdsaSyncResponseResponse);
+  rpc EcdsaSyncFinalize (EcdsaSyncFinalizeRequest) returns (EcdsaSyncFinalizeResponse);
+
+  rpc StartEcdsaSign (StartEcdsaSignRequest) returns (StartEcdsaSignResponse);
+  rpc EcdsaSignFinalize (EcdsaSignFinalizeRequest) returns (EcdsaSignFinalizeResponse);
+
+  rpc StartEddsaSync (StartEddsaSyncRequest) returns (StartEddsaSyncResponse);
+  rpc EddsaSyncFinalize (EddsaSyncFinalizeRequest) returns (EddsaSyncFinalizeResponse);
+
+  rpc StartEddsaSign (StartEddsaSignRequest) returns (StartEddsaSignResponse);
+  rpc EddsaSignFinalize (EddsaSignFinalizeRequest) returns (EddsaSignFinalizeResponse);
+}
+
+message DeviceInfo {
+  string id = 1;
+  string display_name = 2;
+  int32 app_version_major = 3;
+  int32 app_version_minor = 4;
+  int32 app_version_patch = 5;
+}
+
+message CapabilitiesRequest {
+}
+
+message CapabilitiesResponse {
+  repeated int32 supported_protocol_versions = 1;
+  DeviceInfo device_info = 2;
+}
+
+message HandshakeRequest {
+  string session_id = 1;
+  DeviceInfo device_info = 2;
+}
+
+message HandshakeResponse {
+  bool existing = 1;
+  string peer_id = 2;
+}
+
+message ClearSessionRequest {
+  string session_id = 1;
+}
+
+message ClearSessionResponse {
+  bool existing = 1;
+}
+
+enum SyncState {
+  NONE = 0;
+  STARTED = 1;
+  REVEALED = 2;
+  RESPONDED = 3;
+  FINALIZED = 4;
+}
+
+message SyncStatusRequest {
+  string session_id = 1;
+}
+
+message SyncStatusResponse {
+  message SyncStatus {
+    int32 currency_id = 1;
+    SyncState state = 2;
+  }
+  repeated SyncStatus statuses = 1;
+}
+
+message SyncStateRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+}
+
+message SyncStateResponse {
+  SyncState state = 1;
+}
+
+message StartEcdsaSyncRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EcdsaInitialCommitment initial_commitment = 3;
+}
+
+message StartEcdsaSyncResponse {
+  EcdsaInitialData initial_data = 1;
+}
+
+message EcdsaSyncRevealRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EcdsaInitialDecommitment initial_decommitment = 3;
+}
+
+message EcdsaSyncRevealResponse {
+  EcdsaChallengeCommitment challenge_commitment = 1;
+}
+
+message EcdsaSyncResponseRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EcdsaResponseCommitment response_commitment = 3;
+}
+
+message EcdsaSyncResponseResponse {
+  EcdsaChallengeDecommitment challenge_decommitment = 1;
+}
+
+message EcdsaSyncFinalizeRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EcdsaResponseDecommitment response_decommitment = 3;
+}
+
+message EcdsaSyncFinalizeResponse {
+}
+
+message StartEcdsaSignRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string token_id = 3;
+  string sign_session_id = 4;
+  bytes transaction_bytes = 5;
+  bytes entropy_commitment_bytes = 6;
+}
+
+message StartEcdsaSignResponse {
+  bytes entropy_data_bytes = 1;
+}
+
+message EcdsaSignFinalizeRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string sign_session_id = 3;
+  bytes entropy_decommitment_bytes = 4;
+}
+
+message EcdsaSignFinalizeResponse {
+  bytes partial_signature_bytes = 1;
+}
+
+message StartEddsaSyncRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EddsaCommitment commitment = 3;
+}
+
+message StartEddsaSyncResponse {
+  EddsaData data = 1;
+}
+
+message EddsaSyncFinalizeRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  EddsaDecommitment decommitment = 3;
+}
+
+message EddsaSyncFinalizeResponse {
+
+}
+
+message StartEddsaSignRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string token_id = 3;
+  string sign_session_id = 4;
+  bytes transaction_bytes = 5;
+  bytes entropy_commitment_bytes = 6;
+}
+
+message StartEddsaSignResponse {
+  bytes entropy_data_bytes = 1;
+}
+
+message EddsaSignFinalizeRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string sign_session_id = 3;
+  bytes entropy_decommitment_bytes = 4;
+}
+
+message EddsaSignFinalizeResponse {
+  bytes partial_signature_bytes = 1;
+}

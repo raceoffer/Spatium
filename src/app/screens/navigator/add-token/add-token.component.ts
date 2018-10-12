@@ -2,8 +2,9 @@ import { Component, EventEmitter, HostBinding, NgZone, OnInit, Output } from '@a
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DeviceService, Platform } from '../../../services/device.service';
-import { KeyChainService, TokenEntry } from '../../../services/keychain.service';
+import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { TokenInfo } from '../../../services/currencyinfo.service';
 
 declare const cordova: any;
 
@@ -15,9 +16,7 @@ declare const cordova: any;
 export class AddTokenComponent implements OnInit {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  @Output() public createdEvent = new EventEmitter<any>();
-
-  title = 'Add a new token';
+  @Output() public created = new EventEmitter<TokenInfo>();
 
   public nameField = new FormControl('', Validators.required);
   public addressField = new FormControl('', Validators.compose([Validators.required, Validators.pattern('^(0x){1}[0-9a-fA-F]{40}$')]));
@@ -29,17 +28,18 @@ export class AddTokenComponent implements OnInit {
     address: this.addressField,
     decimals: this.decimalsField
   });
-  
+
   public receiverFocused = false;
   public disable = false;
   public validReceiver: BehaviorSubject<boolean> = null;
 
-  isSaving: boolean = false;
+  isSaving = false;
 
-  constructor(private readonly ngZone: NgZone,
-              private readonly deviceService: DeviceService,
-              private readonly navigationService: NavigationService,
-              private readonly keyChainService: KeyChainService) { }
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly deviceService: DeviceService,
+    private readonly navigationService: NavigationService
+  ) { }
 
   ngOnInit() {}
 
@@ -64,16 +64,14 @@ export class AddTokenComponent implements OnInit {
   }
 
   async saveNewToken() {
-    const token = new TokenEntry(
-      null,
+    const tokenInfo = new TokenInfo(
       this.nameField.value,
       this.tickerField.value,
       this.addressField.value,
-      null,
-      this.decimalsField.value);
+      this.decimalsField.value
+    );
 
-    //await this.keyChainService.addCustomToken(token);
-    //this.createdEvent.emit(token);
+    this.created.emit(tokenInfo);
   }
 
 }

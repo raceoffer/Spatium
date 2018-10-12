@@ -6,22 +6,7 @@ module.exports = function(context) {
   const baseWWW = basePath + '/www';
 
   const prod = context.opts.options && context.opts.options['production'];
-  const noCore = context.opts.options && context.opts.options['nocore'];
-
-  if (!noCore) {
-    console.log('Building core bundle.');
-
-    const webpackCommand = 'npm run webpack' + (prod ? '-prod' : '-dev');
-    console.log('Command:', webpackCommand);
-
-    console.log(execSync(
-      webpackCommand,
-      {
-        maxBuffer: 1024 * 1024
-      }).toString('utf8')
-    );
-  }
-
+  
   console.log('Building Angular application into "./www" directory.');
 
   let baseHref = "/android_asset/www/";

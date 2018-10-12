@@ -42,3 +42,13 @@ mat-form-field .by-content {
   height: inherit;
 }
 
+#synchronizing {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+.invalid {
+  outline: 1px solid #ff5722 !important;
+}

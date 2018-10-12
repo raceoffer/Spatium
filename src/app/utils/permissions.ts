@@ -2,7 +2,8 @@ declare const cordova: any;
 
 export enum Permission {
   Camera,
-  Storage
+  Storage,
+  CoarseLocation
 }
 
 function mapPermission(permission: Permission) {
@@ -11,6 +12,8 @@ function mapPermission(permission: Permission) {
       return cordova.plugins.permissions.CAMERA;
     case Permission.Storage:
       return cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE;
+    case Permission.CoarseLocation:
+      return cordova.plugins.permissions.ACCESS_COARSE_LOCATION;
   }
 }
 
@@ -24,10 +27,10 @@ export async function checkPermission(permission: Permission) {
 }
 
 export async function requestPermission(permission: Permission) {
-  return await new Promise((resolve, reject) => {
+  return await new Promise<boolean>((resolve, reject) => {
     cordova.plugins.permissions.requestPermission(
       mapPermission(permission),
-      status => status.hasPermission ? resolve() : reject(),
+      status => resolve(status.hasPermission),
       reject);
   });
 }

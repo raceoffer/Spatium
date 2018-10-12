@@ -1,38 +1,44 @@
-import {Component, OnInit, OnDestroy, HostBinding, Input} from '@angular/core';
+import {Component, OnInit, OnDestroy, HostBinding, Input, Output, EventEmitter} from '@angular/core';
 
-import { Coin, Token } from '../../../services/keychain.service';
-import { CurrencyService, Info, CurrencySettings, CurrencyServerName } from '../../../services/currency.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ApiServer, CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
+import { SettingsService } from '../../../services/settings.service';
 
 @Component({
   selector: 'app-currency-settings',
   templateUrl: './currency-settings.component.html',
-  styleUrls: ['./currency-settings.component.css']
+  styleUrls: ['./currency-settings.component.scss']
 })
 export class CurrencySettingsComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
-  @Input() public currency: Coin | Token = null;
+  @Input() public currencyId: CurrencyId = null;
+  @Output() public saved = new EventEmitter<any>();
 
-  public currencyInfo: Info = null;
-  public currencySettings: CurrencySettings = new CurrencySettings();
-  public apiServers: Map<string, string> = null;
+  public apiServerType = ApiServer;
+
+  public currencyInfo: CurrencyInfo = null;
+  public apiServers: Array<{ key: ApiServer, value: string }> = null;
+  public settings: { apiServer: ApiServer, customApiServer: string } = null;
 
   public customApiServerInvalid = false;
 
   private subscriptions = [];
 
   constructor(
-    private readonly currencyService: CurrencyService,
+    private readonly currencyInfoService: CurrencyInfoService,
     private readonly navigationService: NavigationService,
-    private readonly notificationService: NotificationService
-    ) { }
+    private readonly notificationService: NotificationService,
+    private readonly settingsService: SettingsService
+  ) {}
 
   async ngOnInit() {
-    this.apiServers = await this.currencyService.getAvailableApiServers(this.currency);
-    this.currencyInfo = await this.currencyService.getInfo(this.currency);
-    this.currencySettings = await this.currencyService.getSettings(this.currency);
+    this.apiServers =
+      Array.from(await this.currencyInfoService.apiServers(this.currencyId).keys())
+        .map((apiServer) => ({ key: apiServer, value: this.currencyInfoService.apiName(apiServer) }));
+    this.currencyInfo = await this.currencyInfoService.currencyInfo(this.currencyId);
+    this.settings = await this.currencyInfoService.currentApiSettings(this.currencyId);
   }
 
   ngOnDestroy() {
@@ -40,22 +46,17 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
     this.subscriptions = [];
   }
 
-  getApiServerKeys() {
-    if (this.apiServers == null) {
-      return [];
-    }
-    return Array.from(this.apiServers.keys());
-  }
-
   async onSaveClicked() {
-    if (this.currencySettings.serverName === CurrencyServerName.Custom && !this.isValidServerUrl(this.currencySettings.serverUrl)) {
+    if (this.settings.apiServer === ApiServer.Custom && !this.isValidServerUrl(this.settings.customApiServer)) {
       this.customApiServerInvalid = true;
       return;
     }
 
-    await this.currencyService.saveSettings(this.currency, this.currencySettings);
+    await this.settingsService.setCurrencySettings(this.currencyId, this.settings);
+
     await this.notificationService.show('The settings are saved. Restart the application to apply settings.');
-    await this.onBack();
+
+    this.saved.next();
   }
 
   isValidServerUrl(url: string): boolean {

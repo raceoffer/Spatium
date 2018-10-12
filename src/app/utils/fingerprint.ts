@@ -3,7 +3,12 @@ declare const device: any;
 
 export async function checkAvailable() {
   return new Promise<boolean>((resolve, ignored) => {
-    window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
+    const iosDevicesToDisable = ['iPhone10,3', 'iPhone10,6', 'iPhone11,8', 'iPhone11,2', 'iPhone11,6'];
+    if (iosDevicesToDisable.includes(device.model)) {
+      resolve(false)
+    } else {
+      window.plugins.touchid.isAvailable(() => resolve(true), () => resolve(false));
+    }
   });
 }
 

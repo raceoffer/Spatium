@@ -66,9 +66,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isNfcAvailable = await checkNfc();
     this.isCameraAvailable = await cordova.plugins.cameraInfo.isAvailable();
 
-    this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(isCameraAvailable => this.ngZone.run(() => {
-      this.isCameraAvailable = isCameraAvailable;
-    }));
+    this.cameraChangesCallbackId = await cordova.plugins.cameraInfo.subscribeToAvailabilityChanges(
+      isCameraAvailable => this.ngZone.run(() => {
+        this.isCameraAvailable = isCameraAvailable;
+      })
+    );
   }
 
   ngAfterViewInit() {

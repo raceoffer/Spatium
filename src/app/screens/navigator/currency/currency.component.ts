@@ -1,28 +1,68 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, Input, OnDestroy, OnInit, HostListener, ViewChild, Inject, AfterViewInit, ChangeDetectorRef, ElementRef, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, from, interval } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CurrencyService, Info } from '../../../services/currency.service';
-import { Coin, Token } from '../../../services/keychain.service';
+import { Component, HostBinding, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { BigNumber } from 'bignumber.js';
+import { BehaviorSubject, timer, combineLatest } from 'rxjs';
+import { map, filter, mergeMap } from 'rxjs/operators';
+import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
-import { WalletService } from '../../../services/wallet.service';
-import {
-  BalanceStatus, CurrencyWallet, HistoryEntry, Status,
-  TransactionType
-} from '../../../services/wallet/currencywallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { DeviceService, Platform } from '../../../services/device.service';
-import { DOCUMENT } from '@angular/platform-browser';
-import * as $ from 'jquery';
+import { BalanceStatus, BalanceService } from '../../../services/balance.service';
+import { CurrencyInfoService } from '../../../services/currencyinfo.service';
+import { SyncService } from '../../../services/sync.service';
+import { PriceService } from '../../../services/price.service';
+import { CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
+
+export enum TransactionType {
+  In,
+  Out,
+  Self
+}
+
+export class HistoryEntry {
+  constructor(
+    public type: TransactionType,
+    public from: string,
+    public to: string,
+    public amount: any,
+    public fee: any,
+    public confirmed: boolean,
+    public time: number,
+    public hash: string
+  ) {}
+
+  static fromJSON(json) {
+    const type = ((t) => {
+      switch (t) {
+        case 'In':
+          return TransactionType.In;
+        case 'Out':
+          return TransactionType.Out;
+        case 'Self':
+          return TransactionType.Self;
+      }
+    })(json.type);
+
+    return new HistoryEntry(
+      type,
+      json.from,
+      json.to,
+      json.amount,
+      json.fee,
+      json.confirmed,
+      json.time,
+      json.hash
+    );
+  }
+}
 
 declare const cordova: any;
 
 @Component({
   selector: 'app-currency',
   templateUrl: './currency.component.html',
-  styleUrls: ['./currency.component.css'],
+  styleUrls: ['./currency.component.scss'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
@@ -32,136 +72,88 @@ declare const cordova: any;
     ])
   ]
 })
-
 export class CurrencyComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
 
   public txType = TransactionType;
-  public statusType = Status;
+  public stateType = SyncState;
   public balanceStatusType = BalanceStatus;
-  
-  @ViewChild('transactionList') transactionList: ElementRef;
 
-  @Input() public currency: Coin | Token = null;
-  public currencyInfo: Info = null;
+  @Input() public model: CurrencyModel = null;
 
-  public currencyWallet: CurrencyWallet = null;
+  public wallet: Wallet;
+  public synchronizing = this.syncService.synchronizing;
 
-  public walletAddress: BehaviorSubject<string> = null;
-  public balanceCurrencyConfirmed: BehaviorSubject<number> = null;
-  public balanceCurrencyUnconfirmed: BehaviorSubject<number> = null;
-  public balanceUsdConfirmed: BehaviorSubject<number> = null;
-  public balanceUsdUnconfirmed: BehaviorSubject<number> = null;
+  public balanceUnconfirmed: BehaviorSubject<BigNumber>;
+  public balanceConfirmed: BehaviorSubject<BigNumber>;
+  public balanceUSDUnconfirmed: BehaviorSubject<BigNumber>;
+  public balanceUSDConfirmed: BehaviorSubject<BigNumber>;
 
-  public transactions: BehaviorSubject<Array<HistoryEntry>> = null;
-  public isLoadingTransactions: boolean = false;
-  public isUpdatingTransactions: boolean = false;
+  public transactions: Array<HistoryEntry> = [];
+  public isLoadingTransactions = false;
+
+  private page = 1;
 
   private subscriptions = [];
 
-  private transactionsCount = 0;
-  private isHistoryLoaded: boolean = false;
-  private step = 10;
-  private unconfirmedList: Array<HistoryEntry> = [];
-  private isFirstUpdate: boolean = true;
-  
   constructor(
-    private readonly wallet: WalletService,
-    private readonly currencyService: CurrencyService,
     private readonly navigationService: NavigationService,
     private readonly deviceService: DeviceService,
-    @Inject(DOCUMENT) private document: Document,
-    private ngZone: NgZone,
+    private readonly currencyInfoService: CurrencyInfoService,
+    private readonly syncService: SyncService,
+    private readonly balanceService: BalanceService,
+    private readonly priceService: PriceService
   ) {}
 
   async ngOnInit() {
-    $('#transactionList').scroll(() => {    
-      if ($('#transactionList').scrollTop() >=  ($('#transactionList')[0].scrollHeight - $('#transactionList').height()) * 0.9 ) {
-          this.loadMore();
-        }
-    });
+    this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
 
-    this.currencyInfo = await this.currencyService.getInfo(this.currency);
-
-    this.currencyWallet = this.wallet.currencyWallets.get(this.currency);
-
-    this.walletAddress = this.currencyWallet.address;
-
-    this.balanceCurrencyUnconfirmed = toBehaviourSubject(
-      this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.unconfirmed) : null)),
-      null);
-    this.balanceCurrencyConfirmed = toBehaviourSubject(
-      this.currencyWallet.balance.pipe(map(balance => balance ? this.currencyWallet.fromInternal(balance.confirmed) : null)),
-      null);
-
-    this.balanceUsdUnconfirmed = toBehaviourSubject(combineLatest([
-      this.balanceCurrencyUnconfirmed,
-      this.currencyInfo.rate
+    this.balanceUnconfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceUnconfirmed,
+      this.wallet.wallet
     ]).pipe(
-      map(([balance, rate]) => {
-        if (rate === null || balance === null) {
-          return null;
-        }
-        return balance * rate;
-      })
+      map(([balanceUnconfirmed, wallet]) => balanceUnconfirmed ? wallet.fromInternal(balanceUnconfirmed) : null)
     ), null);
 
-    this.balanceUsdConfirmed = toBehaviourSubject(combineLatest([
-      this.balanceCurrencyConfirmed,
-      this.currencyInfo.rate
+    this.balanceConfirmed = toBehaviourSubject(combineLatest([
+      this.wallet.balanceConfirmed,
+      this.wallet.wallet
     ]).pipe(
-      map(([balance, rate]) => {
-        if (rate === null || balance === null) {
-          return null;
-        }
-        return balance * rate;
-      })
+      map(([balanceConfirmed, wallet]) => balanceConfirmed ? wallet.fromInternal(balanceConfirmed) : null)
     ), null);
 
-    this.transactions = toBehaviourSubject(
-      from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-      null);
+    this.balanceUSDUnconfirmed = toBehaviourSubject(this.balanceUnconfirmed.pipe(
+      map((balanceUnconfirmed) => balanceUnconfirmed !== null ? balanceUnconfirmed.times(this.priceService.price(this.model.ticker)) : null)
+    ), null);
+
+    this.balanceUSDConfirmed = toBehaviourSubject(this.balanceConfirmed.pipe(
+      map((balanceConfirmed) => balanceConfirmed !== null ? balanceConfirmed.times(this.priceService.price(this.model.ticker)) : null)
+    ), null);
 
     this.subscriptions.push(
-      this.currencyWallet.readyEvent.subscribe(() => {
-        this.transactions = toBehaviourSubject(
-          from(this.currencyWallet.listTransactionHistory(this.step, 0)),
-          null);
+      timer(0, 3000).pipe(
+        mergeMap(() => this.wallet.balanceWatcher),
+        filter(watcher => !!watcher)
+      ).subscribe((watcher) => {
+        this.balanceService.forceCurrency(watcher.id);
       })
     );
 
-    this.transactionsCount += this.step;
+    this.syncService.forceCurrency(this.model.currencyInfo.id);
 
-    interval(10000).subscribe(async () => {
-      await this.updateTransactions();
-    });
-  }
-
-  async loadMore() {
-    if (!this.isHistoryLoaded && !this.isLoadingTransactions) {
-      this.isLoadingTransactions = true;
-
-      let newList = await this.currencyWallet.listTransactionHistory(this.transactionsCount + this.step, this.transactionsCount);
-      let oldList = this.transactions.getValue();
-
-      if (newList.length > 0) {
-        oldList.push.apply(oldList, newList);
-
-        let unconfirmed = newList.filter(item => item.confirmed === false);
-        this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
-      }
-      if (newList.length < this.step) {
-        this.currencyWallet.isHistoryLoaded = true;
-        this.isHistoryLoaded = true;
-        console.log("History loaded!");
-      }
-
-      this.transactions.next(oldList);
-
-      this.transactionsCount += this.step;
-
-      this.isLoadingTransactions = false;
-    }
+    // get transaction history
+    this.subscriptions.push(
+      this.wallet.wallet.pipe(
+        filter(wallet => !!wallet)
+      ).subscribe(async wallet => {
+        this.isLoadingTransactions = true;
+        try {
+          const transactions = await wallet.getTransactions(this.page++);
+          this.transactions = transactions.map(tx => HistoryEntry.fromJSON(tx));
+        } finally {
+          this.isLoadingTransactions = false;
+        }
+    }));
   }
 
   ngOnDestroy() {
@@ -171,11 +163,11 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   send() {
     const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
-    overalyRef.instance.currency = this.currency;
+    overalyRef.instance.model = this.model;
   }
 
   copy() {
-    cordova.plugins.clipboard.copy(this.walletAddress.value);
+    cordova.plugins.clipboard.copy(this.wallet.address.getValue());
   }
 
   isWindows(): boolean {
@@ -184,79 +176,35 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   async onSettingsClicked() {
     const componentRef = this.navigationService.pushOverlay(CurrencySettingsComponent);
-    componentRef.instance.currency = this.currency;
+    componentRef.instance.currencyId = this.model.currencyInfo.id;
+    componentRef.instance.saved.subscribe(() => {
+      this.navigationService.acceptOverlay();
+    });
   }
 
   async onBack() {
     this.navigationService.back();
   }
 
-  async updateTransactions(to=this.step, from=0) {
-    if (this.currencyWallet !== null && this.transactions.getValue() !== null && !this.isUpdatingTransactions && !this.isLoadingTransactions) {
-      this.isUpdatingTransactions = true;
-
-      if (this.isFirstUpdate) {
-        let unconfirmed = this.transactions.getValue().filter(item => item.confirmed === false);
-        this.unconfirmedList.push.apply(this.unconfirmedList, unconfirmed);
-        this.isFirstUpdate = false;
-      }
-
-      let newList = await this.currencyWallet.listTransactionHistory(to, from);   
-
-      if (newList !== null && newList.length > 0) {
-        this.checkUnconfirmed(newList);
-
-        let oldList = this.transactions.getValue();
-
-        if (newList.slice(-1)[0].time <= oldList[0].time) {
-          let timeEnd = oldList[0].time;
-          let filtered = newList.filter(item => (item.confirmed && item.time > timeEnd || !item.confirmed && this.transactionHashNotInList(item.blockhash)));
-
-          oldList.unshift.apply(oldList, filtered);
-          this.transactions.next(oldList);
-
-          let unconfirmed = filtered.filter(item => item.confirmed === false);
-          this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
-        } else {
-          oldList.unshift.apply(oldList, newList);
-          this.transactions.next(oldList);
-
-          let unconfirmed = newList.filter(item => item.confirmed === false);
-          this.unconfirmedList.unshift.apply(this.unconfirmedList, unconfirmed);
-
-          this.updateTransactions(to + this.step, from + this.step);
-        }
-      }
-      
-      this.isUpdatingTransactions = false;
+  public async onScroll(percent: number) {
+    if (percent >= 90) {
+      await this.loadMore();
     }
   }
 
-  public transactionHashNotInList(blockhash: string) : boolean {
-    let transactionsList = this.transactions.getValue();
-    for (var i = 0; i < transactionsList.length; i++)
-      if (transactionsList[i].blockhash === blockhash)
-        return false;
+  async loadMore() {
+    if (this.isLoadingTransactions) {
+      return;
+    }
 
-    return true;
-  }
-
-  public checkUnconfirmed(newList: Array<HistoryEntry>): void {
-    if (this.unconfirmedList.length > 0) {
-      let oldList = this.transactions.getValue();
-      let confirmedList = newList.filter(item => item.confirmed === true);
-      for (let confirmed of confirmedList) {
-        let unconfirmed = this.unconfirmedList.filter(item => item.blockhash === confirmed.blockhash);
-        if (unconfirmed.length > 0) {
-          let unconfirmedEntity = unconfirmed[0];
-          this.unconfirmedList.splice(this.unconfirmedList.indexOf(unconfirmedEntity), 1);
-
-          let confirmedEntity = oldList.filter(item => item.blockhash === confirmed.blockhash)[0];
-          confirmedEntity.confirmed = true;
-          confirmedEntity.time = confirmed.time;
-        }
-      }
-      this.transactions.next(oldList);
+    // get transaction history
+    const wallet = this.wallet.wallet.getValue();
+    this.isLoadingTransactions = true;
+    try {
+      const oldTransactions = (await wallet.getTransactions(this.page++)).map(tx => HistoryEntry.fromJSON(tx));
+      oldTransactions.forEach((oldTransaction: HistoryEntry) => this.transactions.push(oldTransaction));
+    } finally {
+      this.isLoadingTransactions = false;
     }
   }
 }
