@@ -79,10 +79,8 @@ export class FeedbackComponent implements OnInit {
 
       reader.onload = (e) => {
         console.log(e.target);
-        console.log('file:', );
         const fileInfo: FileInfo = new FileInfo(file, (<FileReader>e.target).result as string);
         this.screenshotsPreview.push(fileInfo);
-        console.log(this.screenshotsPreview);
       };
 
       reader.readAsDataURL(event.srcElement.files[0]);
