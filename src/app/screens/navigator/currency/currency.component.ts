@@ -164,6 +164,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   send() {
     const overalyRef = this.navigationService.pushOverlay(SendTransactionComponent);
     overalyRef.instance.model = this.model;
+    overalyRef.instance.balanceUnconfirmed = this.balanceUnconfirmed;
   }
 
   copy() {
