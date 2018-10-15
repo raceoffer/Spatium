@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DeviceService } from '../../services/device.service';
 
 @Component({
@@ -8,16 +8,16 @@ import { DeviceService } from '../../services/device.service';
 })
 export class NavbarComponent {
   public version: any;
-  constructor(private readonly ds: DeviceService) { 
-    this.ds.appInfo().then((info: any) => {
-      this.version = info.version;
-    })
-  }
   @Input() navLinks: Array<any> = [];
   @Input() current: string = null;
-
   @Output() clicked = new EventEmitter<any>();
   @Output() closed = new EventEmitter<any>();
+
+  constructor(private readonly ds: DeviceService) {
+    this.ds.appInfo().then((info: any) => {
+      this.version = info.version;
+    });
+  }
 
   public onClicked(navLink) {
     this.clicked.next(navLink);

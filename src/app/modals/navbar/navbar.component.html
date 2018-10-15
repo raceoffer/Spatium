@@ -1,20 +1,24 @@
-<mat-toolbar color="primary" class="custom">
-  <button mat-icon-button class="hide-sidenav-button">
-    <mat-icon class="size-30 color-custom" (click)="onClose()">clear</mat-icon>
-  </button>
-  <div class="nav-logo-text"></div>
-</mat-toolbar>
-<mat-nav-list>
-  <mat-list-item *ngFor="let navLink of navLinks"
-                 class="main-nav-list-custom"
-                 [class.disabled]="!navLink.clicked"
-                 [class.selected]="navLink.name === current"
-                 (click)="onClicked(navLink)"
-                 [ngClass]="navLink.class">
-    <a [innerHtml]="navLink.name"></a>
-  </mat-list-item>
-  <div class="version-info disabled">
-    <span style="font-family: 'Roboto-Bold'">SPATIUM</span>
-    <span style="font-family: 'Roboto-Light'">Version {{version}}</span>
+<div class="wrapper" (swipeleft)="onClose()" (click)="onClose()">
+  <div class="navbar">
+    <mat-toolbar color="primary" class="custom">
+      <button mat-icon-button class="hide-sidenav-button">
+        <mat-icon class="size-30 color-custom" (click)="onClose()">clear</mat-icon>
+      </button>
+      <div class="nav-logo-text"></div>
+    </mat-toolbar>
+    <mat-nav-list>
+      <mat-list-item *ngFor="let navLink of navLinks"
+                    class="main-nav-list-custom"
+                    [class.disabled]="!navLink.clicked"
+                    [class.selected]="navLink.name === current"
+                    (click)="onClicked(navLink)"
+                    [ngClass]="navLink.class">
+        <a [innerHtml]="navLink.name"></a>
+      </mat-list-item>
+      <div class="version-info disabled">
+        <span style="font-family: 'Roboto-Bold'">SPATIUM</span>
+        <span style="font-family: 'Roboto-Light'">Version {{version}}</span>
+      </div>
+    </mat-nav-list>
   </div>
-</mat-nav-list>
+</div>
