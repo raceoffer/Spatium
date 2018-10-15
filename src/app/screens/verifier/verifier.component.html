@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="header-toolbar shadow">
+<mat-toolbar color="primary" class="header-toolbar shadow" (swiperight)="toggleNavigation()">
   <button mat-icon-button (click)="toggleNavigation()">
     <mat-icon>menu</mat-icon>
   </button>
@@ -7,7 +7,7 @@
 
   <span class="spacer"></span>
 </mat-toolbar>
-<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" (swiperight)="toggleNavigation()">
   <app-connectivity-manage
     [isVerifyMode]="true">
   </app-connectivity-manage>
