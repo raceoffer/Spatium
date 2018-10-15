@@ -43,7 +43,7 @@ enum Fee {
 @Component({
   selector: 'app-send-transaction',
   templateUrl: './send-transaction.component.html',
-  styleUrls: ['./send-transaction.component.css']
+  styleUrls: ['./send-transaction.component.scss']
 })
 export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
