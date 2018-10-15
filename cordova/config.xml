@@ -79,7 +79,7 @@
     <platform name="android">
         <preference name="android-minSdkVersion" value="21" />
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:resizeableActivity="false" />
+            <application android:allowBackup="false" android:resizeableActivity="false" />
         </edit-config>
         <allow-intent href="market:*" />
         <content src="index.html" />
