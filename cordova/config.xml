@@ -77,7 +77,7 @@
         <preference name="SplashScreenBackgroundColor" value="black" />
     </platform>
     <platform name="android">
-        <preference name="android-minSdkVersion" value="21" />
+        <preference name="android-minSdkVersion" value="23" />
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
             <application android:allowBackup="false" android:resizeableActivity="false" />
             <application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" />
