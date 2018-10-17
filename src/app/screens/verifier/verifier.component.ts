@@ -21,6 +21,7 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
+import { DeviceService, Platform } from "../../services/device.service";
 
 @Component({
   selector: 'app-verifier',
@@ -61,6 +62,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     }
   }];
 
+  public isIOS: boolean;
+
   private back = new Subject<any>();
   public doubleBack = this.back.pipe(
     bufferWhen(() => this.back.pipe(
@@ -97,7 +100,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     private readonly verifierService: VerifierService,
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly fs: FileService,
-    private readonly ssdp: SsdpService
+    private readonly ssdp: SsdpService,
+    private readonly deviceService: DeviceService,
   ) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       map((sessionId) => this.verifierService.session(sessionId)),
@@ -125,6 +129,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.isIOS = this.deviceService.platform === Platform.IOS;
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.back.next();
