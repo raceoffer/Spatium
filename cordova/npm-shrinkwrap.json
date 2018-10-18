@@ -1511,7 +1511,7 @@
       "integrity": "sha1-dH509W4gHNWFvGLRS8oZ9oZ/8e0="
     },
     "cordova-plugin-ssdp": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#6e651c8cf46406fb89545941346fc89caa2e2781"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc"
     },
     "cordova-plugin-vibration": {
       "version": "3.1.0",
@@ -1999,7 +1999,7 @@
       }
     },
     "sockets-for-cordova": {
-      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18"
+      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c"
     },
     "stream-buffers": {
       "version": "2.2.0",

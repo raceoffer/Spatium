@@ -42,7 +42,7 @@
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
     "cordova-plugin-splashscreen": "^5.0.2",
-    "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#6e651c8cf46406fb89545941346fc89caa2e2781",
+    "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc",
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-windows": "^6.0.0",
@@ -50,7 +50,7 @@
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
-    "sockets-for-cordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18",
+    "sockets-for-cordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c",
     "xml2js": "^0.4.19"
   },
   "cordova": {
