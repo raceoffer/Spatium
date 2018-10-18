@@ -2,13 +2,13 @@
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "Unhackable wallet for over 100 cryptocurrencies",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Apache Cordova Team",
-  "license": "Apache-2.0",
+  "author": "Caspian Technologies Pte. Ltd.",
+  "license": "gpl-3.0",
   "repository": "https://github.com/CaspianTechnologies/Spatium.git",
   "dependencies": {
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",

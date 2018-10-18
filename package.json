@@ -1,7 +1,7 @@
 {
   "name": "wallet",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "gpl-3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -12,6 +12,7 @@
     "postinstall": "node postinstall.js"
   },
   "author": "Caspian Technologies PTE. LTD.",
+  "description": "Unhackable wallet for over 100 cryptocurrencies",
   "repository": "https://github.com/CaspianTechnologies/Spatium.git",
   "private": true,
   "dependencies": {
