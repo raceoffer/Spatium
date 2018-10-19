@@ -119,6 +119,7 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
 import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/device-discovery.component';
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
+import { TransactionService } from "./services/transaction.service";
 
 @NgModule({
   declarations: [
@@ -248,7 +249,8 @@ import { NetworkService } from './services/network.service';
     BalanceService,
     PriceService,
     RPCConnectionService,
-    NetworkService
+    NetworkService,
+    TransactionService
   ],
   bootstrap: [
     AppComponent
