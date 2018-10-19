@@ -96,6 +96,7 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   private transactionWatcherId = '';
   private transactionWatcher: any = null;
   private subscriptions = [];
+  private isFirstInView = true;
 
 
   constructor(private readonly navigationService: NavigationService,
@@ -175,8 +176,9 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(
       interval(10000).subscribe(async () => {
-        // todo: only if first transaction seen
-        await this.transactionWatcher.updateTransactions();
+        if (this.isFirstInView) {
+          await this.transactionWatcher.updateTransactions();
+        }
       })
     );
   }
@@ -214,6 +216,12 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public async onScroll(percent: number) {
     if (percent >= 90) {
       await this.transactionWatcher.loadMoreTransactions();
+    }
+  }
+
+  onInViewportChange(inViewport: boolean, index) {
+    if (index === 0) {
+      this.isFirstInView = inViewport;
     }
   }
 }

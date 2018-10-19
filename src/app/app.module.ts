@@ -120,6 +120,7 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
 import { TransactionService } from "./services/transaction.service";
+import { InViewportModule } from '@thisissoon/angular-inviewport';
 
 @NgModule({
   declarations: [
@@ -223,7 +224,8 @@ import { TransactionService } from "./services/transaction.service";
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule
+    QRCodeModule,
+    InViewportModule
   ],
   providers: [
     DeviceService,

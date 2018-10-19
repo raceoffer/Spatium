@@ -103,9 +103,11 @@
       </div>
 
       <mat-list class="text-center transaction-list">
-        <mat-list-item *ngFor="let transaction of (transactions | async).entries"
+        <mat-list-item *ngFor="let transaction of (transactions | async).entries let i = index"
                        class="list-item"
                        [@fadeIn]="''"
+                       snInViewport
+                       (inViewportChange)="onInViewportChange($event, i)"
                        [class.unconfirmed]="!transaction.confirmed">
           <span matLine class="transaction-amount"
                 [class.input]="transaction.type==txType.In"
