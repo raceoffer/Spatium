@@ -1,6 +1,6 @@
 {
   "name": "capital.spatium.wallet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "lockfileVersion": 1,
   "requires": true,
   "dependencies": {
@@ -143,7 +143,7 @@
         "abbrev": {
           "version": "1.1.1",
           "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz",
-          "integrity": "sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q=="
+          "integrity": "sha1-+PLIh60Qv2f2NPAFtph/7TF5qsg="
         },
         "android-versions": {
           "version": "1.3.0",
@@ -255,7 +255,7 @@
         "minimatch": {
           "version": "3.0.4",
           "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
-          "integrity": "sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==",
+          "integrity": "sha1-UWbihkV/AzBgZL5Ul+jbsMPTIIM=",
           "requires": {
             "brace-expansion": "1.1.11"
           }
@@ -1466,10 +1466,10 @@
       "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de"
     },
     "cordova-plugin-camera-info": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git#5567a0de109974aca73f434ee011e6d79e3800ef"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git#c1fc93a44b50f6397d9a0301e2fe11f9c2b882eb"
     },
     "cordova-plugin-device": {
-      "version": "git+https://github.com/apache/cordova-plugin-device.git#f870c9b0ae1ef162d4294302b3a03255c14039fd"
+      "version": "git+https://github.com/apache/cordova-plugin-device.git#2d12d550ad978ebde1f84d50ed2dc8d4bd58d0df"
     },
     "cordova-plugin-device-name": {
       "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea"
@@ -1498,7 +1498,7 @@
       "integrity": "sha512-olg/BzYRk0NGbKQ5f7rf21RYQEyJI19CCZn6RpVMO9/kbRRFqae/6ixjDNy81dXSu2TQ42brjBddGe1Qpn5ViA=="
     },
     "cordova-plugin-network-information": {
-      "version": "git+https://github.com/apache/cordova-plugin-network-information.git#2cde33a4145995f01de2702b620469395ccec771"
+      "version": "git+https://github.com/apache/cordova-plugin-network-information.git#0796cf953358e900659eca8d347fd5386cc80183"
     },
     "cordova-plugin-networkinterface": {
       "version": "2.0.0",

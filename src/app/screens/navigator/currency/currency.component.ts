@@ -1,18 +1,20 @@
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
 import { BigNumber } from 'bignumber.js';
-import { BehaviorSubject, timer, combineLatest } from 'rxjs';
-import { map, filter, mergeMap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, interval, timer } from 'rxjs';
+import { filter, map, mergeMap } from 'rxjs/operators';
+import { BalanceService, BalanceStatus } from '../../../services/balance.service';
+import { CurrencyInfoService } from '../../../services/currencyinfo.service';
 import { DeviceService, Platform } from '../../../services/device.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { PriceService } from '../../../services/price.service';
+import { SyncService } from '../../../services/sync.service';
+import { HistoryBlock, TransactionService } from '../../../services/transaction.service';
+import { CurrecnyModelType, CurrencyModel, SyncState, Wallet } from '../../../services/wallet/wallet';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { uuidFrom } from '../../../utils/uuid';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
-import { BalanceStatus, BalanceService } from '../../../services/balance.service';
-import { CurrencyInfoService } from '../../../services/currencyinfo.service';
-import { SyncService } from '../../../services/sync.service';
-import { PriceService } from '../../../services/price.service';
-import { CurrencyModel, Wallet, SyncState } from '../../../services/wallet/wallet';
 
 export enum TransactionType {
   In,
@@ -21,16 +23,14 @@ export enum TransactionType {
 }
 
 export class HistoryEntry {
-  constructor(
-    public type: TransactionType,
-    public from: string,
-    public to: string,
-    public amount: any,
-    public fee: any,
-    public confirmed: boolean,
-    public time: number,
-    public hash: string
-  ) {}
+  constructor(public type: TransactionType,
+              public from: string,
+              public to: string,
+              public amount: any,
+              public fee: any,
+              public confirmed: boolean,
+              public time: number,
+              public hash: string) {}
 
   static fromJSON(json) {
     const type = ((t) => {
@@ -89,24 +89,46 @@ export class CurrencyComponent implements OnInit, OnDestroy {
   public balanceUSDUnconfirmed: BehaviorSubject<BigNumber>;
   public balanceUSDConfirmed: BehaviorSubject<BigNumber>;
 
-  public transactions: Array<HistoryEntry> = [];
-  public isLoadingTransactions = false;
+  public transactions: BehaviorSubject<HistoryBlock> = new BehaviorSubject<HistoryBlock>(new HistoryBlock([]));
+  public isLoadingTransactions: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isLoadingMoreTransactions: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-  private page = 1;
-
+  private transactionWatcherId = '';
+  private transactionWatcher: any = null;
   private subscriptions = [];
+  private isFirstInView = true;
 
-  constructor(
-    private readonly navigationService: NavigationService,
-    private readonly deviceService: DeviceService,
-    private readonly currencyInfoService: CurrencyInfoService,
-    private readonly syncService: SyncService,
-    private readonly balanceService: BalanceService,
-    private readonly priceService: PriceService
-  ) {}
+
+  constructor(private readonly navigationService: NavigationService,
+              private readonly deviceService: DeviceService,
+              private readonly currencyInfoService: CurrencyInfoService,
+              private readonly syncService: SyncService,
+              private readonly balanceService: BalanceService,
+              private readonly transactionService: TransactionService,
+              private readonly priceService: PriceService) {}
 
   async ngOnInit() {
     this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
+
+    switch (this.model.type) {
+      case CurrecnyModelType.Coin: {
+        this.transactionWatcherId = uuidFrom(this.model.currencyInfo.id.toString());
+        break;
+      }
+      case CurrecnyModelType.Token: {
+        this.transactionWatcherId = uuidFrom(this.model.currencyInfo.id.toString() + this.model.tokenInfo.id.toString());
+        break;
+      }
+    }
+
+    if (!this.transactionService.hasWatcher(this.transactionWatcherId)) {
+      this.transactionWatcher = this.transactionService.registerWatcher(this.transactionWatcherId, this.wallet);
+    } else {
+      this.transactionWatcher = this.transactionService.watcher(this.transactionWatcherId);
+    }
+    this.transactions = this.transactionWatcher.cachedTransactions;
+    this.isLoadingTransactions = this.transactionWatcher.isLoadingLastTransactions;
+    this.isLoadingMoreTransactions = this.transactionWatcher.isLoadingMoreTransactions;
 
     this.balanceUnconfirmed = toBehaviourSubject(combineLatest([
       this.wallet.balanceUnconfirmed,
@@ -146,14 +168,19 @@ export class CurrencyComponent implements OnInit, OnDestroy {
       this.wallet.wallet.pipe(
         filter(wallet => !!wallet)
       ).subscribe(async wallet => {
-        this.isLoadingTransactions = true;
-        try {
-          const transactions = await wallet.getTransactions(this.page++);
-          this.transactions = transactions.map(tx => HistoryEntry.fromJSON(tx));
-        } finally {
-          this.isLoadingTransactions = false;
+        if (!this.transactionWatcher.hasTransactions()) {
+          await this.transactionWatcher.loadLastPageTransactions();
         }
-    }));
+      })
+    );
+
+    this.subscriptions.push(
+      interval(10000).subscribe(async () => {
+        if (this.isFirstInView) {
+          await this.transactionWatcher.updateTransactions();
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -189,23 +216,13 @@ export class CurrencyComponent implements OnInit, OnDestroy {
 
   public async onScroll(percent: number) {
     if (percent >= 90) {
-      await this.loadMore();
+      await this.transactionWatcher.loadMoreTransactions();
     }
   }
 
-  async loadMore() {
-    if (this.isLoadingTransactions) {
-      return;
-    }
-
-    // get transaction history
-    const wallet = this.wallet.wallet.getValue();
-    this.isLoadingTransactions = true;
-    try {
-      const oldTransactions = (await wallet.getTransactions(this.page++)).map(tx => HistoryEntry.fromJSON(tx));
-      oldTransactions.forEach((oldTransaction: HistoryEntry) => this.transactions.push(oldTransaction));
-    } finally {
-      this.isLoadingTransactions = false;
+  onInViewportChange(inViewport: boolean, index) {
+    if (index === 0) {
+      this.isFirstInView = inViewport;
     }
   }
 }

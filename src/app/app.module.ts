@@ -120,6 +120,8 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
 import { HammerConfig } from './configs/hammer-config';
+import { TransactionService } from "./services/transaction.service";
+import { InViewportModule } from '@thisissoon/angular-inviewport';
 
 @NgModule({
   declarations: [
@@ -223,7 +225,8 @@ import { HammerConfig } from './configs/hammer-config';
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule
+    QRCodeModule,
+    InViewportModule
   ],
   providers: [
     DeviceService,
@@ -250,7 +253,9 @@ import { HammerConfig } from './configs/hammer-config';
     PriceService,
     RPCConnectionService,
     NetworkService,
-    {provide: HAMMER_GESTURE_CONFIG, useClass: HammerConfig}
+    {provide: HAMMER_GESTURE_CONFIG, useClass: HammerConfig},
+    NetworkService,
+    TransactionService
   ],
   bootstrap: [
     AppComponent
