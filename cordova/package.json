@@ -14,7 +14,7 @@
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git#b3384e0e302e60d7c46056f8c73d167b7f68db2f",
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
-    "SocketsForCordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#8050440ab8dc9094a89e13e0cdb849b8fb13c933",
+    "SocketsForCordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c",
     "ajv": "^6.0.0",
     "android-versions": "^1.3.0",
     "cocoon-cordova-labs-local-webserver": "^2.4.1",

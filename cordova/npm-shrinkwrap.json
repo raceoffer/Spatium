@@ -14,7 +14,7 @@
       "version": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git#6db2d67e9ac099cafaf04004ad6d99801d404ac4"
     },
     "SocketsForCordova": {
-      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#8050440ab8dc9094a89e13e0cdb849b8fb13c933"
+      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c"
     },
     "ajv": {
       "version": "6.5.4",
