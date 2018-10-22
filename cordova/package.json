@@ -29,7 +29,7 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-appinfo": "^2.1.2",
     "cordova-plugin-badge": "^0.8.7",
-    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de",
+    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#feccebe13f70ba8f4ecda88c5d44a1ae5eab9bde",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
     "cordova-plugin-device-name": "git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea",
