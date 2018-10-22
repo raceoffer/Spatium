@@ -1463,7 +1463,7 @@
       "integrity": "sha512-s+s4yusKdeJ4sMPhQs4zR3lR2UuROzSy14GFAp00pTHPiBfCtxeINSUYAZYnpuO3RGx6PPlVCwSJpVG0IdM58g=="
     },
     "cordova-plugin-bluetooth": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#feccebe13f70ba8f4ecda88c5d44a1ae5eab9bde"
     },
     "cordova-plugin-camera-info": {
       "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git#c1fc93a44b50f6397d9a0301e2fe11f9c2b882eb"
