@@ -1,7 +1,7 @@
 {
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Unhackable wallet for over 100 cryptocurrencies",
   "main": "index.js",
   "scripts": {
