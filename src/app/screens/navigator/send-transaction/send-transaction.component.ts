@@ -43,7 +43,7 @@ enum Fee {
 @Component({
   selector: 'app-send-transaction',
   templateUrl: './send-transaction.component.html',
-  styleUrls: ['./send-transaction.component.css']
+  styleUrls: ['./send-transaction.component.scss']
 })
 export class SendTransactionComponent implements OnInit, OnDestroy {
   @HostBinding('class') classes = 'toolbars-component overlay-background';
@@ -82,6 +82,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public disable = false;
 
   @Input() public model: CurrencyModel = null;
+  @Input() public balanceUnconfirmed: BehaviorSubject<BigNumber>;
   public parentModel: CurrencyModel;
 
   public wallet: Wallet;
@@ -111,7 +112,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   private signed: any = null;
 
   private cancelSubject = new Subject<void>();
-
+  private isSendAll = false;
   private subscriptions = [];
 
   constructor(
@@ -389,7 +390,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(combineLatest([
       this.amountField.valueChanges.pipe(
-        filter(isNumber),
+        filter((value) => {
+          return this.isSendAll ? (new BigNumber(value) != null) : isNumber(value) ;
+        }),
         distinctUntilChanged()
       ),
       this.wallet.wallet
@@ -813,6 +816,14 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   copy() {
     cordova.plugins.clipboard.copy(this.wallet.address.getValue());
+  }
+
+  sendAll() {
+    this.isSendAll = true;
+    this.amountField.setValue(
+      this.balanceUnconfirmed.getValue().toFixed(),
+      {emitEvent: true});
+    this.isSendAll = false;
   }
 
   // more boilerplate stuff for focus tracking

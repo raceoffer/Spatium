@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="header-toolbar shadow">
+<mat-toolbar color="primary" class="header-toolbar shadow" (swiperight)="toggleNavigation()">
   <button mat-icon-button (click)="toggleNavigation()">
     <mat-icon>menu</mat-icon>
   </button>
@@ -7,11 +7,17 @@
 
   <span class="spacer"></span>
 </mat-toolbar>
-<div fxLayout="column" fxLayoutAlign="start center" class="box wallet">
+<div fxLayout="column" fxLayoutAlign="start center" class="box wallet" (swiperight)="toggleNavigation()">
   <app-connectivity-manage
     [isVerifyMode]="true">
   </app-connectivity-manage>
   <app-connected-device
     [sessions]="sessions">
   </app-connected-device>
+  <div *ngIf="isIOS" class="message message-container">
+    <div class="message-content">
+      <div>To confirm transactions on this device, please keep the screen on.</div>
+    </div>
+  </div>
+  
 </div>

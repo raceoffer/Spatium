@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="capital.spatium.wallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="capital.spatium.wallet" version="1.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Spatium</name>
     <preference name="WindowsStorePublisherName" value="Caspian Technologies Pte. Ltd." />
     <preference name="windows-target-version" value="10.0" />
@@ -77,18 +77,31 @@
         <preference name="SplashScreenBackgroundColor" value="black" />
     </platform>
     <platform name="android">
-        <preference name="android-minSdkVersion" value="21" />
+        <preference name="android-minSdkVersion" value="23" />
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:resizeableActivity="false" />
+            <application android:allowBackup="false" android:resizeableActivity="false" />
+            <application android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" />
         </edit-config>
         <allow-intent href="market:*" />
         <content src="index.html" />
-        <icon density="ldpi" src="res/icon/android/icon-36-ldpi.png" />
-        <icon density="mdpi" src="res/icon/android/icon-48-mdpi.png" />
-        <icon density="hdpi" src="res/icon/android/icon-72-hdpi.png" />
-        <icon density="xhdpi" src="res/icon/android/icon-96-xhdpi.png" />
-        <icon density="xxhdpi" src="res/icon/android/icon-144-xxhdpi.png" />
-        <icon density="xxxhdpi" src="res/icon/android/icon-192-xxxhdpi.png" />
+        <resource-file src="res/icon/android/values/ic_launcher_background.xml" target="app/src/main/res/values/ic_launcher_background.xml" />
+        <resource-file src="res/icon/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" />
+        <resource-file src="res/icon/android/mipmap-anydpi-v26/ic_launcher_round.xml" target="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" />
+        <resource-file src="res/icon/android/mipmap-hdpi/ic_launcher.png" target="app/src/main/res/mipmap-hdpi/ic_launcher.png" />
+        <resource-file src="res/icon/android/mipmap-hdpi/ic_launcher_round.png" target="app/src/main/res/mipmap-hdpi/ic_launcher_round.png" />
+        <resource-file src="res/icon/android/mipmap-hdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png" />
+        <resource-file src="res/icon/android/mipmap-mdpi/ic_launcher.png" target="app/src/main/res/mipmap-mdpi/ic_launcher.png" />
+        <resource-file src="res/icon/android/mipmap-mdpi/ic_launcher_round.png" target="app/src/main/res/mipmap-mdpi/ic_launcher_round.png" />
+        <resource-file src="res/icon/android/mipmap-mdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png" />
+        <resource-file src="res/icon/android/mipmap-xhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xhdpi/ic_launcher.png" />
+        <resource-file src="res/icon/android/mipmap-xhdpi/ic_launcher_round.png" target="app/src/main/res/mipmap-xhdpi/ic_launcher_round.png" />
+        <resource-file src="res/icon/android/mipmap-xhdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png" />
+        <resource-file src="res/icon/android/mipmap-xxhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xxhdpi/ic_launcher.png" />
+        <resource-file src="res/icon/android/mipmap-xxhdpi/ic_launcher_round.png" target="app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png" />
+        <resource-file src="res/icon/android/mipmap-xxhdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png" />
+        <resource-file src="res/icon/android/mipmap-xxxhdpi/ic_launcher.png" target="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" />
+        <resource-file src="res/icon/android/mipmap-xxxhdpi/ic_launcher_round.png" target="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" />
+        <resource-file src="res/icon/android/mipmap-xxxhdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png" />
         <splash density="land-hdpi" src="res/screen/android/splash-land-hdpi.png" />
         <splash density="land-ldpi" src="res/screen/android/splash-land-ldpi.png" />
         <splash density="land-mdpi" src="res/screen/android/splash-land-mdpi.png" />
@@ -149,13 +162,13 @@
     <plugin name="CordovaClipboard" spec="git+https://github.com/CaspianTechnologies/CordovaClipboard.git" />
     <plugin name="cordova-open-native-settings" spec="^1.5.1" />
     <plugin name="cordova-plugin-appinfo" spec="^2.1.2" />
-    <plugin name="sockets-for-cordova" spec="https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18" />
+    <plugin name="sockets-for-cordova" spec="https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c" />
     <plugin name="cordova-plugin-bluetooth" spec="https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de" />
     <plugin name="cordova-custom-config" spec="^5.0.2" />
     <plugin name="cordova-plugin-local-notification" spec="^0.9.0-beta.2" />
     <plugin name="phonegap-plugin-mobile-accessibility" spec="^1.0.5" />
     <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
-    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#6e651c8cf46406fb89545941346fc89caa2e2781" />
+    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc" />
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
     <engine name="ios" spec="^4.5.5" />
