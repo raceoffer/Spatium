@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import BN from 'bn.js';
 import { BehaviorSubject, Subject, combineLatest, of } from 'rxjs';
@@ -89,6 +89,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
     }>
   }>>;
 
+  private signCancelled: EventEmitter<any> = new EventEmitter<any>();
+
   private subscriptions = [];
 
   constructor(
@@ -153,6 +155,12 @@ export class VerifierComponent implements OnInit, OnDestroy {
       async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
     );
 
+    this.verifierService.setCancelHandler(
+      async (sessionId) => await new Promise<any>((resolve, ignored) => {
+        this.signCancelled.next(sessionId);
+        resolve();
+    }));
+
     const rpcPort = 5666;
     await this.rpcService.start('0.0.0.0', rpcPort);
     await this.ssdp.startAdvertising(rpcPort);
@@ -212,6 +220,14 @@ export class VerifierComponent implements OnInit, OnDestroy {
         this.navigationService.acceptOverlay();
         resolve(false);
       });
+
+      this.subscriptions.push(
+        this.signCancelled.subscribe(cancelledSessionId => {
+          if (cancelledSessionId === sessionId) {
+            this.navigationService.acceptOverlay();
+            resolve(false);
+          }
+      }));
     });
   }
 
