@@ -129,12 +129,8 @@ textarea.mat-input-element {
   max-height: none;
 }
 
-.windows.box.with-transactions .content {
-  margin-top: 130px;
-}
-
 .scroll {
-  overflow-y: scroll;
+  overflow-y: auto;
   height: 100%;
 }
 
