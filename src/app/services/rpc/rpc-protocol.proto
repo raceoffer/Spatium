@@ -32,6 +32,8 @@ service RpcService {
 
   rpc StartEddsaSign (StartEddsaSignRequest) returns (StartEddsaSignResponse);
   rpc EddsaSignFinalize (EddsaSignFinalizeRequest) returns (EddsaSignFinalizeResponse);
+
+  rpc CancelSign (CancelSignRequest) returns (CancelSignResponse);
 }
 
 message DeviceInfo {
@@ -202,4 +204,13 @@ message EddsaSignFinalizeRequest {
 
 message EddsaSignFinalizeResponse {
   bytes partial_signature_bytes = 1;
+}
+
+message CancelSignRequest {
+  string session_id = 1;
+  int32 currency_id = 2;
+  string sign_session_id = 3;
+}
+
+message CancelSignResponse {
 }

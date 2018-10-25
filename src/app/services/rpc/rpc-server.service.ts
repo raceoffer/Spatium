@@ -185,6 +185,15 @@ export class RPCServerService {
       return {
         partialSignatureBytes: Marshal.encode(partialSignature)
       };
+    },
+
+    async CancelSign(request) {
+      return {
+        existing: await this.verifierService.cancelSign(
+          request.sessionId,
+          request.currencyId,
+          request.signSessionId
+      )};
     }
   };
 
