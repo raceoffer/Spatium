@@ -90,10 +90,10 @@ export class NavigatorComponent implements OnInit, OnDestroy {
     );
 
     await this.keyChain.reset();
-    await this.connectionService.disconnect();
-
     await this.balanceService.reset();
     await this.syncService.reset();
+    
+    await this.connectionService.disconnect();
   }
 
   public async openDiscoveryOverlay() {

@@ -14,4 +14,10 @@
   <app-connected-device
     [sessions]="sessions">
   </app-connected-device>
+  <div *ngIf="isIOS" class="message message-container">
+    <div class="message-content">
+      <div>To confirm transactions on this device, please keep the screen on.</div>
+    </div>
+  </div>
+  
 </div>

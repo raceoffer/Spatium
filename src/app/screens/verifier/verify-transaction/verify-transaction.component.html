@@ -43,14 +43,20 @@
         <td class="right">
           <div class="field disable">
             <span>
-              {{ value.toFixed() }}
+              <input
+                matInput
+                readonly
+                value="{{ value.toFixed() }}">
             </span>
           </div>
         </td>
         <td class="left">
           <div class="field right disable">
             <span>
-              {{ valueUsd.toFixed() }}
+              <input
+                matInput
+                readonly
+                value="{{ valueUsd.toFixed() }}">
             </span>
           </div>
         </td>
@@ -72,14 +78,20 @@
         <td class="right">
           <div class="field disable">
             <span>
-              {{ fee.toFixed() }}
+              <input
+                matInput
+                readonly
+                value="{{ fee.toFixed() }}">
             </span>
           </div>
         </td>
         <td class="left">
           <div class="field right disable">
             <span>
-              {{ feeUsd.toFixed() }}
+              <input
+                matInput
+                readonly
+                value="{{ feeUsd.toFixed() }}">
             </span>
           </div>
         </td>

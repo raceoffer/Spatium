@@ -16,7 +16,7 @@ import { BluetoothServerSocket } from '../../utils/sockets/bluetoothserversocket
 import { PlainServerSocket } from '../../utils/sockets/plainserversocket';
 import { Socket, State } from '../../utils/sockets/socket';
 import { uuidFrom } from '../../utils/uuid';
-import { DeviceService } from '../device.service';
+import { DeviceService, Platform } from '../device.service';
 import { KeyChainService } from '../keychain.service';
 import { VerifierService } from '../verifier.service';
 import abi from './rpc-protocol.json';
@@ -253,7 +253,9 @@ export class RPCServerService {
 
   public async start(iface: string, port: number): Promise<void> {
     await this._plainServerSocket.start(iface, port);
-    await this._bluetoothServerSocket.start();
+    if (this._deviceService.platform !== Platform.IOS) {
+      await this._bluetoothServerSocket.start();
+    }
   }
 
   public async stop(): Promise<void> {

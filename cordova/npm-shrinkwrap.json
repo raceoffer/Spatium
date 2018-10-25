@@ -1,6 +1,6 @@
 {
   "name": "capital.spatium.wallet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "lockfileVersion": 1,
   "requires": true,
   "dependencies": {
@@ -14,7 +14,7 @@
       "version": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git#6db2d67e9ac099cafaf04004ad6d99801d404ac4"
     },
     "SocketsForCordova": {
-      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#8050440ab8dc9094a89e13e0cdb849b8fb13c933"
+      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#1d9df9f5d4855ebc6e54cb8218388c30162d4c53"
     },
     "ajv": {
       "version": "6.5.4",
@@ -143,7 +143,7 @@
         "abbrev": {
           "version": "1.1.1",
           "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz",
-          "integrity": "sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q=="
+          "integrity": "sha1-+PLIh60Qv2f2NPAFtph/7TF5qsg="
         },
         "android-versions": {
           "version": "1.3.0",
@@ -255,7 +255,7 @@
         "minimatch": {
           "version": "3.0.4",
           "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
-          "integrity": "sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==",
+          "integrity": "sha1-UWbihkV/AzBgZL5Ul+jbsMPTIIM=",
           "requires": {
             "brace-expansion": "1.1.11"
           }
@@ -1463,13 +1463,13 @@
       "integrity": "sha512-s+s4yusKdeJ4sMPhQs4zR3lR2UuROzSy14GFAp00pTHPiBfCtxeINSUYAZYnpuO3RGx6PPlVCwSJpVG0IdM58g=="
     },
     "cordova-plugin-bluetooth": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#feccebe13f70ba8f4ecda88c5d44a1ae5eab9bde"
     },
     "cordova-plugin-camera-info": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git#5567a0de109974aca73f434ee011e6d79e3800ef"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git#c1fc93a44b50f6397d9a0301e2fe11f9c2b882eb"
     },
     "cordova-plugin-device": {
-      "version": "git+https://github.com/apache/cordova-plugin-device.git#f870c9b0ae1ef162d4294302b3a03255c14039fd"
+      "version": "git+https://github.com/apache/cordova-plugin-device.git#2d12d550ad978ebde1f84d50ed2dc8d4bd58d0df"
     },
     "cordova-plugin-device-name": {
       "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea"
@@ -1498,7 +1498,7 @@
       "integrity": "sha512-olg/BzYRk0NGbKQ5f7rf21RYQEyJI19CCZn6RpVMO9/kbRRFqae/6ixjDNy81dXSu2TQ42brjBddGe1Qpn5ViA=="
     },
     "cordova-plugin-network-information": {
-      "version": "git+https://github.com/apache/cordova-plugin-network-information.git#2cde33a4145995f01de2702b620469395ccec771"
+      "version": "git+https://github.com/apache/cordova-plugin-network-information.git#0796cf953358e900659eca8d347fd5386cc80183"
     },
     "cordova-plugin-networkinterface": {
       "version": "2.0.0",
@@ -1511,7 +1511,7 @@
       "integrity": "sha1-dH509W4gHNWFvGLRS8oZ9oZ/8e0="
     },
     "cordova-plugin-ssdp": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#68b1539789037294cfc3f305203e97b3161d81a5"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc"
     },
     "cordova-plugin-vibration": {
       "version": "3.1.0",
@@ -1999,7 +1999,7 @@
       }
     },
     "sockets-for-cordova": {
-      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#38cf4efb8a2c7d47ba57a801c82dbf7f2d6d6a18"
+      "version": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#1d9df9f5d4855ebc6e54cb8218388c30162d4c53"
     },
     "stream-buffers": {
       "version": "2.2.0",
