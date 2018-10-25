@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
-import { NavigationService } from '../../services/navigation.service';
+import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { SettingsService } from '../../services/settings.service';
+import { DialogCustomComponent } from '../../modals/dialog-custom/dialog-custom.component';
 
 @Component({
   selector: 'app-verifier-auth',
@@ -59,6 +60,12 @@ export class VerifierAuthComponent implements OnInit, OnDestroy {
     this.keychain.seed = seed;
 
     this.notification.show('The secret successfully saved');
+
+    const componentRef = this.navigationService.pushOverlay(DialogCustomComponent, Position.Center);
+    componentRef.instance.content = 'When you delete the application, the secret will be irrevocably deleted.<br />Export your secret before uninstalling the application.';
+    componentRef.instance.okClicked.subscribe(async () => {
+      this.navigationService.cancelOverlay();
+    })
 
     await this.router.navigate(['/verifier']);
   }
