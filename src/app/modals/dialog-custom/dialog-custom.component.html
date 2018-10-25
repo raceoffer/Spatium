@@ -1,0 +1,10 @@
+<div class="dialog-label" fxLayout="row" fxLayoutAlign="start center" >
+  <span class="spacer"></span>
+  <mat-icon style="padding-right: 8px;">info</mat-icon>
+</div>
+
+<div mat-dialog-content  [innerHTML]= "content"></div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onOkClicked()" style="font-family: inherit;">OK</button>
+</div>

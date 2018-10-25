@@ -120,8 +120,9 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
 import { HammerConfig } from './configs/hammer-config';
-import { TransactionService } from "./services/transaction.service";
+import { TransactionService } from './services/transaction.service';
 import { InViewportModule } from '@thisissoon/angular-inviewport';
+import { DialogCustomComponent } from './modals/dialog-custom/dialog-custom.component';
 
 @NgModule({
   declarations: [
@@ -192,7 +193,8 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
     NavbarComponent,
     AddTokenComponent,
     DeviceDiscoveryComponent,
-    ConnectedDeviceComponent
+    ConnectedDeviceComponent,
+    DialogCustomComponent
   ],
   imports: [
     OverlayModule,
@@ -262,6 +264,7 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
   ],
   entryComponents: [
     DialogFactorsComponent,
+    DialogCustomComponent,
     DefaultAuthFactorComponent,
     PasswordAuthFactorComponent,
     PincodeAuthFactorComponent,
