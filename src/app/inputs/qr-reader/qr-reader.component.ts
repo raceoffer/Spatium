@@ -1,9 +1,11 @@
 import { AfterViewInit, Component, EventEmitter, Output } from '@angular/core';
 import { DeviceService, Platform } from '../../services/device.service';
-import { checkPermission, Permission, requestPermission } from "../../utils/permissions";
+import { SettingsService } from '../../services/settings.service';
+import { checkPermission, Permission, requestPermission } from '../../utils/permissions';
 
 declare const cordova: any;
 declare const window: any;
+declare const Windows: any;
 
 @Component({
   selector: 'app-qr-reader',
@@ -15,7 +17,8 @@ export class QrReaderComponent implements AfterViewInit {
   @Output() cancelled: EventEmitter<any> = new EventEmitter<any>();
   @Output() error: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private readonly deviceService: DeviceService) {}
+  constructor(private readonly deviceService: DeviceService,
+              private readonly settings: SettingsService) {}
 
   async ngAfterViewInit() {
     if (this.deviceService.platform !== Platform.Windows && !await checkPermission(Permission.Camera)) {
@@ -28,14 +31,14 @@ export class QrReaderComponent implements AfterViewInit {
       resolve,
       reject,
       {
-        preferFrontCamera : false, // iOS and Android
-        showFlipCameraButton : true, // iOS and Android
-        showTorchButton : true, // iOS and Android
+        preferFrontCamera: false, // iOS and Android
+        showFlipCameraButton: true, // iOS and Android
+        showTorchButton: true, // iOS and Android
         torchOn: false, // Android, launch with the torch switched on (if available)
         saveHistory: false, // Android, save scan history (default false)
-        prompt : 'Place a barcode inside the scan area', // Android
+        prompt: 'Place a barcode inside the scan area', // Android
         resultDisplayDuration: 0, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
-        disableAnimations : true, // iOS
+        disableAnimations: true, // iOS
         disableSuccessBeep: false // iOS and Android
       }
     ));
@@ -52,9 +55,23 @@ export class QrReaderComponent implements AfterViewInit {
         } else {
           this.cancelled.next();
         }
-      } catch(e) {
+      } catch (e) {
         this.error.next(e);
+        if (this.deviceService.platform === Platform.Windows) {
+          const stored = await this.settings.accessWinWebcam();
+          if (stored) {
+            this.goToAppSettings();
+          } else {
+            await this.settings.setAccessWinWebcam(true);
+          }
+        }
       }
     }
+  }
+
+  goToAppSettings() {
+    const uriToLaunch = 'ms-settings:appsfeatures-app';
+    const uri = new Windows.Foundation.Uri(uriToLaunch);
+    Windows.System.Launcher.launchUriAsync(uri);
   }
 }

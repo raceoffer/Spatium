@@ -15,6 +15,7 @@ export class SettingsService {
     startPath: null,
     fingerprintEnabled: false,
     currencySettings: {},
+    accessWinWebcam: false
   };
 
   private settings = {};
@@ -68,6 +69,14 @@ export class SettingsService {
 
   async setCurrencySettings(id: CurrencyId, value: object) {
     return await this.setValue(`currencySettings.${ id }`, value);
+  }
+
+  async accessWinWebcam(): Promise<boolean> {
+    return this.getValue('accessWinWebcam', null);
+  }
+
+  async setAccessWinWebcam(value: boolean) {
+    return this.setValue('accessWinWebcam', value);
   }
 
   private async getValue(path: string, defaultValue: any): Promise<any> {
