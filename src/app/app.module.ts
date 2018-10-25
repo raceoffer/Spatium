@@ -25,7 +25,7 @@ import {
   MatSnackBarModule,
   MatToolbarModule,
 } from '@angular/material';
-import { BrowserModule } from '@angular/platform-browser';
+import { HAMMER_GESTURE_CONFIG, BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { QRCodeModule } from 'angular2-qrcode';
 import { AppRoutingModule } from './app-routing.module';
@@ -119,6 +119,9 @@ import { RPCConnectionService } from './services/rpc/rpc-connection.service';
 import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/device-discovery.component';
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
+import { HammerConfig } from './configs/hammer-config';
+import { TransactionService } from "./services/transaction.service";
+import { InViewportModule } from '@thisissoon/angular-inviewport';
 
 @NgModule({
   declarations: [
@@ -222,7 +225,8 @@ import { NetworkService } from './services/network.service';
     MatFormFieldModule,
     MatGridListModule,
     MatSnackBarModule,
-    QRCodeModule
+    QRCodeModule,
+    InViewportModule
   ],
   providers: [
     DeviceService,
@@ -248,7 +252,10 @@ import { NetworkService } from './services/network.service';
     BalanceService,
     PriceService,
     RPCConnectionService,
-    NetworkService
+    NetworkService,
+    {provide: HAMMER_GESTURE_CONFIG, useClass: HammerConfig},
+    NetworkService,
+    TransactionService
   ],
   bootstrap: [
     AppComponent

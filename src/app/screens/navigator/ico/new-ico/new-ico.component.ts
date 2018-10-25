@@ -117,7 +117,6 @@ export class NewIcoComponent implements OnInit {
 
   public async checkErrors() {
     this.errors = [];
-    console.log(this.password.value);
 
     if (!this.password.valid ||
       (await sha256(Buffer.from(this.password.value))).toString('hex').toLowerCase() !==
@@ -164,7 +163,6 @@ export class NewIcoComponent implements OnInit {
     campaign.ipfsFolder = hash;
     try {
       const result = await this.icoService.addCampaign(campaign);
-      console.log(result);
     } catch (e) {
       console.error(e);
       this.errors.push(e);

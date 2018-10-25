@@ -18,6 +18,24 @@ input.mat-input-element{
   margin-top: 0em;
 }
 
+textarea.mat-input-element:disabled {
+  color: #373741;
+}
+
+/*.mat-input-element {
+  font: inherit;
+  background: 0 0;
+  color: currentColor;
+  border: none;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  vertical-align: bottom;
+  text-align: inherit;
+}*/
+
 .top-panel {
   padding-bottom: 10px;
   background-color: $background-color;
@@ -78,6 +96,7 @@ input.mat-input-element{
 
 textarea.mat-input-element {
   resize: none;
+  font-family: 'Roboto-Light';
 }
 
 .field.auto-height {
@@ -89,13 +108,6 @@ textarea.mat-input-element {
   box-sizing: border-box;
   position: relative;
   font-family: 'Roboto-Light';
-}
-
-button.wallet-address-button {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate(0, -50%);
 }
 
 .info {

@@ -1,8 +1,8 @@
 <app-toolbar
-  [label] = "'Transfer ' + model.name"
-  [isColored] = "true"
-  [isShadowed] = "true"
-  (backClicked) = "onBack()">
+  [label]="'Transfer ' + model.name"
+  [isColored]="true"
+  [isShadowed]="true"
+  (backClicked)="onBack()">
 </app-toolbar>
 
 <div class="currency-component box" fxLayout="column" fxLayoutAlign="start center">
@@ -22,7 +22,8 @@
 
     <tr>
       <td colspan="2" style="margin-bottom: 13px;">
-        <mat-form-field class="wallet-address-field field by-content" color="accent" fxLayout="column" fxLayoutAlign="center center">
+        <mat-form-field class="wallet-address-field field by-content" color="accent" fxLayout="column"
+                        fxLayoutAlign="center center">
           <textarea
             readonly
             matInput
@@ -80,6 +81,18 @@
     </tr>
     <tr>
       <td class="right">
+        <div class="label" style="margin-left: 5px; word-break: break-word;">Available: {{ (balanceUnconfirmed | async) !== null ? (balanceUnconfirmed|async).toFixed() : 'Loading'}}</div>
+      </td>
+
+      <td class="left" style="text-align: right;">
+        <button mat-button color="accent" class="small-button"
+                *ngIf="(balanceUnconfirmed | async) !== null"
+                (click)="sendAll()">Use all funds
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td class="right">
         <span class="label" style="margin-left: 5px;">{{ model.ticker }}</span>
       </td>
 
@@ -89,7 +102,8 @@
     </tr>
     <tr>
       <td class="right">
-        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': amountField.enabled && amountField.invalid}">
+        <div class="field" style="margin-bottom: 13px;"
+             [ngClass]="{'invalid': amountField.enabled && amountField.invalid}">
           <span>
             <input
               matInput
@@ -102,7 +116,8 @@
         </div>
       </td>
       <td class="left">
-        <div class="field" style="margin-bottom: 13px;" [ngClass]="{'invalid': amountUsdField.enabled && amountUsdField.invalid}">
+        <div class="field" style="margin-bottom: 13px;"
+             [ngClass]="{'invalid': amountUsdField.enabled && amountUsdField.invalid}">
           <span>
             <input
               matInput
@@ -222,7 +237,7 @@
       </td>
       <td class="left">
         <div
-          class="field" 
+          class="field"
           tyle="margin-bottom: 13px;"
           [class.disable]="feeTypeField.value !== feeType.Manual"
           [ngClass]="{'invalid': feePriceUsdField.enabled && feePriceUsdField.invalid}">
@@ -243,7 +258,8 @@
     <tr *ngIf="allowFeeConfiguration">
       <td colspan="2">
         <div style="padding-bottom: 13px;">
-          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFeeField">Subtract fee</mat-checkbox>
+          <mat-checkbox style="font-family: 'Roboto-Light';" [formControl]="subtractFeeField">Subtract fee
+          </mat-checkbox>
         </div>
       </td>
     </tr>
