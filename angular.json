@@ -26,7 +26,8 @@
               "src/assets/themes/styles.scss"
             ],
             "scripts": [
-              "node_modules/hammerjs/hammer.js"
+              "node_modules/hammerjs/hammer.js",
+              "node_modules/inobounce/inobounce.js"
             ]
           },
           "configurations": {
