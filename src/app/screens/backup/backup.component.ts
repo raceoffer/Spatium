@@ -131,28 +131,30 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   async packData() {
-    const seed = await randomBytes(64, this.workerService.worker);
-    this.setSeed.emit(seed);
-
-    const packed = [];
-    for (const factor of this.factors) {
-      packed.push(await this.authService.pack(factor.type, factor.value));
-    }
-
-    const reversed = packed.reverse();
-
-    const tree = reversed.reduce((rest, factor) => {
-      const node = {
-        factor: factor
-      };
-      if (rest) {
-        node['children'] = [rest];
+    if (!this.data) {
+      const seed = await randomBytes(64, this.workerService.worker);
+      this.setSeed.emit(seed);
+      
+      const packed = [];
+      for (const factor of this.factors) {
+        packed.push(await this.authService.pack(factor.type, factor.value));
       }
-      return node;
-    }, null);
 
-    this.id = await this.authService.toId(this.login.toLowerCase());
-    this.data = await packTree(tree, seed, this.workerService.worker);
+      const reversed = packed.reverse();
+
+      const tree = reversed.reduce((rest, factor) => {
+        const node = {
+          factor: factor
+        };
+        if (rest) {
+          node['children'] = [rest];
+        }
+        return node;
+      }, null);
+
+      this.id = await this.authService.toId(this.login.toLowerCase());
+      this.data = await packTree(tree, seed, this.workerService.worker);
+    }
 
     await this.getView(this.id, this.data);
   }
