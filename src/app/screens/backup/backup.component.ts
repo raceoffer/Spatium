@@ -104,7 +104,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   getQrCodeText() {
-    return `etherium:${this.address}?value=${this.comission}`;
+    return `ethereum:${this.address}?value=${this.comission}`;
   }
 
   copy() {
