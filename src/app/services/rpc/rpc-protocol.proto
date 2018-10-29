@@ -145,6 +145,7 @@ message StartEcdsaSignRequest {
   string sign_session_id = 4;
   bytes transaction_bytes = 5;
   bytes entropy_commitment_bytes = 6;
+  string price = 7;
 }
 
 message StartEcdsaSignResponse {
@@ -189,6 +190,7 @@ message StartEddsaSignRequest {
   string sign_session_id = 4;
   bytes transaction_bytes = 5;
   bytes entropy_commitment_bytes = 6;
+  string price = 7;
 }
 
 message StartEddsaSignResponse {

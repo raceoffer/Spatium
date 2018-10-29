@@ -1,13 +1,14 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { wallet as NeoWallet } from '@cityofzion/neon-js';
+import { BigNumber } from 'bignumber.js';
 import BN from 'bn.js';
 import * as CashAddr from 'cashaddrjs';
 import { Marshal, Utils } from 'crypto-core-async';
 import isNumber from 'lodash/isNumber';
 import NEM from 'nem-sdk';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mergeMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
 import * as WalletAddressValidator from 'wallet-address-validator';
 import { BalanceService, BalanceStatus } from '../../../services/balance.service';
 import { Cryptosystem, CurrencyId, CurrencyInfo, CurrencyInfoService } from '../../../services/currencyinfo.service';
@@ -22,9 +23,8 @@ import { WorkerService } from '../../../services/worker.service';
 import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
-import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { validateNumber } from '../../../validators/validators';
-import { BigNumber } from 'bignumber.js';
+import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 
 declare const cordova: any;
 
@@ -97,6 +97,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public fee: BehaviorSubject<BN> = null;
   public feePrice: BehaviorSubject<BN> = null;
   public estimatedSize: BehaviorSubject<number> = null;
+  public currencyPrice: BehaviorSubject<number> = null;
 
   public subtractFee: BehaviorSubject<boolean> = null;
 
@@ -116,18 +117,16 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   private isSendAll = false;
   private subscriptions = [];
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly notification: NotificationService,
-    private readonly navigationService: NavigationService,
-    private readonly syncService: SyncService,
-    private readonly balanceService: BalanceService,
-    private readonly currencyInfoService: CurrencyInfoService,
-    private readonly priceService: PriceService,
-    private readonly workerService: WorkerService,
-    private readonly keyChainService: KeyChainService,
-    private readonly connectionService: RPCConnectionService
-  ) {
+  constructor(private readonly ngZone: NgZone,
+              private readonly notification: NotificationService,
+              private readonly navigationService: NavigationService,
+              private readonly syncService: SyncService,
+              private readonly balanceService: BalanceService,
+              private readonly currencyInfoService: CurrencyInfoService,
+              private readonly priceService: PriceService,
+              private readonly workerService: WorkerService,
+              private readonly keyChainService: KeyChainService,
+              private readonly connectionService: RPCConnectionService) {
     this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
   }
 
@@ -204,6 +203,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         })
       ), 1);
 
+    this.currencyPrice = new BehaviorSubject<number>(this.priceService.price(this.model.ticker));
     this.receiver = new BehaviorSubject<string>('');
     this.amount = new BehaviorSubject<BN>(new BN());
     this.feePrice = new BehaviorSubject<BN>(new BN(this.priceService.feePrice(this.model.currencyInfo.id, FeeLevel.Normal)));
@@ -299,8 +299,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         );
       }
       if (!this.amountUsdFocused) {
+        this.currencyPrice.next(this.priceService.price(this.model.ticker));
         this.amountUsdField.setValue(
-          wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
+          wallet.fromInternal(value).times(this.currencyPrice.getValue() || 1).toFixed(),
           {emitEvent: false}
         );
       }
@@ -343,13 +344,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }
       if (!this.feeUsdFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
+          this.currencyPrice.next(this.priceService.price(this.parentModel.ticker));
           this.feeUsdField.setValue(
-            parentWallet.fromInternal(value).times(this.priceService.price(this.parentModel.ticker) || 1).toFixed(),
+            parentWallet.fromInternal(value).times(this.currencyPrice.getValue() || 1).toFixed(),
             {emitEvent: false}
           );
         } else {
+          this.currencyPrice.next(this.priceService.price(this.model.ticker));
           this.feeUsdField.setValue(
-            wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
+            wallet.fromInternal(value).times(this.currencyPrice.getValue() || 1).toFixed(),
             {emitEvent: false});
         }
       }
@@ -376,13 +379,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       }
       if (!this.feePriceUsdFocused) {
         if (this.model.type === CurrecnyModelType.Token) {
+          this.currencyPrice.next(this.priceService.price(this.parentModel.ticker));
           this.feePriceUsdField.setValue(
-            parentWallet.fromInternal(value).times(this.priceService.price(this.parentModel.ticker) || 1).toFixed(),
+            parentWallet.fromInternal(value).times(this.currencyPrice.getValue() || 1).toFixed(),
             {emitEvent: false}
           );
         } else {
+          this.currencyPrice.next(this.priceService.price(this.model.ticker));
           this.feePriceUsdField.setValue(
-            wallet.fromInternal(value).times(this.priceService.price(this.model.ticker) || 1).toFixed(),
+            wallet.fromInternal(value).times(this.currencyPrice.getValue() || 1).toFixed(),
             {emitEvent: false}
           );
         }
@@ -392,7 +397,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.subscriptions.push(combineLatest([
       this.amountField.valueChanges.pipe(
         filter((value) => {
-          return this.isSendAll ? (new BigNumber(value) != null) : isNumber(value) ;
+          return this.isSendAll ? (new BigNumber(value) != null) : isNumber(value);
         }),
         distinctUntilChanged()
       ),
@@ -414,7 +419,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (!wallet) {
         return;
       }
-      this.amount.next(wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1)));
+      this.currencyPrice.next(this.priceService.price(this.model.ticker));
+      this.amount.next(wallet.toInternal(new BigNumber(value).div(this.currencyPrice.getValue() || 1)));
     }));
 
     this.subscriptions.push(combineLatest([
@@ -454,9 +460,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feeUsdFocused) {
         let fee = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          fee = parentWalet.toInternal(new BigNumber(value).div(this.priceService.price(this.parentModel.ticker) || 1));
+          this.currencyPrice.next(this.priceService.price(this.parentModel.ticker));
+          fee = parentWalet.toInternal(new BigNumber(value).div(this.currencyPrice.getValue() || 1));
         } else {
-          fee = wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1));
+          this.currencyPrice.next(this.priceService.price(this.model.ticker));
+          fee = wallet.toInternal(new BigNumber(value).div(this.currencyPrice.getValue() || 1));
         }
         this.fee.next(fee);
         this.feePrice.next(fee.div(new BN(this.estimatedSize.getValue())));
@@ -500,9 +508,11 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       if (this.feePriceUsdFocused) {
         let feePrice = null;
         if (this.model.type === CurrecnyModelType.Token) {
-          feePrice = parentWalet.toInternal(new BigNumber(value).div(this.priceService.price(this.parentModel.ticker) || 1));
+          this.currencyPrice.next(this.priceService.price(this.parentModel.ticker));
+          feePrice = parentWalet.toInternal(new BigNumber(value).div(this.currencyPrice.getValue() || 1));
         } else {
-          feePrice = wallet.toInternal(new BigNumber(value).div(this.priceService.price(this.model.ticker) || 1));
+          this.currencyPrice.next(this.priceService.price(this.model.ticker));
+          feePrice = wallet.toInternal(new BigNumber(value).div(this.currencyPrice.getValue() || 1));
         }
         this.feePrice.next(feePrice);
         this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
@@ -627,18 +637,20 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
       const receiver = this.receiver.getValue();
       const value = this.subtractFee.getValue() ? this.amount.getValue().sub(this.fee.getValue()) : this.amount.getValue();
+
       // temporarily allow NEM to choose fee itself
       const fee = this.allowFeeConfiguration ? this.fee.getValue() : undefined;
+      const price = this.currencyPrice.getValue() || 1;
 
       const currency = this.wallet.currency.getValue();
       const currencyInfo = this.currencyInfoService.currencyInfo(currency.id);
 
       switch (currencyInfo.cryptosystem) {
         case Cryptosystem.Ecdsa:
-          this.signed = await this.signEcdsa(receiver, value, fee);
+          this.signed = await this.signEcdsa(receiver, value, fee, price);
           break;
         case Cryptosystem.Eddsa:
-          this.signed = await this.signEddsa(receiver, value, fee);
+          this.signed = await this.signEddsa(receiver, value, fee, price);
           break;
       }
     } catch (error) {
@@ -659,7 +671,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     }
   }
 
-  public async signEcdsa(receiver: string, value: BN, fee?: BN) {
+  public async signEcdsa(receiver: string, value: BN, fee?: BN, price?: BN) {
     const currency = this.wallet.currency.getValue() as EcdsaCurrency;
     const wallet = this.wallet.wallet.getValue();
 
@@ -689,7 +701,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       currencyId: currency.id,
       signSessionId: this.signSessionId,
       transactionBytes,
-      entropyCommitmentBytes: Marshal.encode(entropyCommitment)
+      entropyCommitmentBytes: Marshal.encode(entropyCommitment),
+      price: price.toString(),
     }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
@@ -722,7 +735,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     return tx;
   }
 
-  public async signEddsa(receiver: string, value: BN, fee?: BN) {
+  public async signEddsa(receiver: string, value: BN, fee?: BN, price?: BN) {
     const currency = this.wallet.currency.getValue() as EddsaCurrency;
     const wallet = this.wallet.wallet.getValue();
 
@@ -752,7 +765,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
       currencyId: currency.id,
       signSessionId: this.signSessionId,
       transactionBytes,
-      entropyCommitmentBytes: Marshal.encode(entropyCommitment)
+      entropyCommitmentBytes: Marshal.encode(entropyCommitment),
+      price: price.toString(),
     }, -1), this.cancelSubject);
     console.log(startSignResponse);
     if (!startSignResponse) {
@@ -795,7 +809,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         currencyId: currency.id,
         signSessionId: this.signSessionId
       });
-    }  
+    }
   }
 
   async sendTransaction() {

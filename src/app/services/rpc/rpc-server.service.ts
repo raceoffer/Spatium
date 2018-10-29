@@ -119,7 +119,8 @@ export class RPCServerService {
         request.tokenId,
         request.signSessionId,
         new Buffer(request.transactionBytes),
-        Marshal.decode(request.entropyCommitmentBytes)
+        Marshal.decode(request.entropyCommitmentBytes),
+        request.price
       );
 
       return {
@@ -167,7 +168,8 @@ export class RPCServerService {
         request.tokenId,
         request.signSessionId,
         new Buffer(request.transactionBytes),
-        Marshal.decode(request.entropyCommitmentBytes)
+        Marshal.decode(request.entropyCommitmentBytes),
+        request.price
       );
 
       return {

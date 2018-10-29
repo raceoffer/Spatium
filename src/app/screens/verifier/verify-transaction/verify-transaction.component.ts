@@ -28,6 +28,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @Input() public address: string = null;
   @Input() public valueInternal: BN = null;
   @Input() public feeInternal: BN = null;
+  @Input() public price: number = null;
 
   public parentModel: CurrencyModel = null;
 
@@ -51,8 +52,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly currencyInfoService: CurrencyInfoService,
-    private readonly verifierService: VerifierService,
-    private readonly priceService: PriceService
+    private readonly verifierService: VerifierService
   ) {}
 
   async ngOnInit() {
@@ -88,9 +88,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     }
 
     this.value = wallet.fromInternal(this.valueInternal);
-    this.valueUsd = this.value.times(this.priceService.price(this.model.ticker));
+    this.valueUsd = this.value.times(this.price);
     this.fee = parentWallet.fromInternal(this.feeInternal);
-    this.feeUsd = this.fee.times(this.priceService.price(this.parentModel.ticker));
+    this.feeUsd = this.fee.times(this.price);
 
     this.state = State.Verifying;
 

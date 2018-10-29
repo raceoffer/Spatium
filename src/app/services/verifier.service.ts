@@ -1,26 +1,22 @@
-import { Injectable, NgZone } from '@angular/core';
-import { DistributedEcdsaKeyShard, DistributedEddsaKey } from 'crypto-core-async';
-import { Cryptosystem, CurrencyId, CurrencyInfoService } from './currencyinfo.service';
-import { KeyChainService } from './keychain.service';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { WorkerService } from './worker.service';
-
+import { Injectable } from '@angular/core';
 import BN from 'bn.js';
-
-import { CurrencyModel, SyncState } from './wallet/wallet';
+import { DistributedEcdsaKeyShard, DistributedEddsaKey, Marshal } from 'crypto-core-async';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../utils/transformers';
+import { Cryptosystem, CurrencyId, CurrencyInfoService } from './currencyinfo.service';
+import { KeyChainService } from './keychain.service';
+import { CurrencyModel, SyncState } from './wallet/wallet';
+import { WorkerService } from './worker.service';
 
 export abstract class Currency {
   public state = new BehaviorSubject<SyncState>(SyncState.None);
 
+  public constructor(protected readonly _id: CurrencyId) {}
+
   public get id(): CurrencyId {
     return this._id;
   }
-
-  public constructor(
-    protected readonly _id: CurrencyId
-  ) {}
 
   public abstract compoundPublic(): any;
 
@@ -35,49 +31,27 @@ export class EcdsaCurrency extends Currency {
 
   private _signSessions = new Map<string, any>();
 
-  private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN, price: string) => Promise<boolean> = null;
   private _cancelHandler: (sessionId: string) => Promise<any> = null;
+
+  public constructor(_id: CurrencyId,
+                     private readonly _currencyInfoService: CurrencyInfoService,
+                     private readonly _keyChainService: KeyChainService,
+                     private readonly _workerService: WorkerService) {
+    super(_id);
+  }
 
   public compoundPublic(): any {
     return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
   }
 
-  public constructor(
-    _id: CurrencyId,
-    private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
-  ) {
-    super(_id);
-  }
-
-  public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>): void {
+  public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN,
+                                          price: string) => Promise<boolean>): void {
     this._acceptHandler = acceptHandler;
   }
 
   public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
     this._cancelHandler = cancelHandler;
-  }
-
-  private async requestAccept(tokenId: string, transaction: any): Promise<boolean> {
-    const outputs = await transaction.totalOutputs();
-
-    const fee = await transaction.estimateFee();
-
-    const address = outputs.outputs[0].address;
-    const value = outputs.outputs[0].value;
-
-    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
-
-    let model;
-    if (tokenId) {
-      const tokenInfo = currencyInfo.tokens.find((info) => info.id === tokenId);
-      model = CurrencyModel.fromToken(currencyInfo, tokenInfo);
-    } else {
-      model = CurrencyModel.fromCoin(currencyInfo);
-    }
-
-    return await this._acceptHandler(model, address, value, fee);
   }
 
   public async startSync(initialCommitment: any): Promise<any> {
@@ -106,7 +80,7 @@ export class EcdsaCurrency extends Currency {
 
     const challengeCommitment = await this._syncSessionShard.processInitialDecommitment(initialDecommitment);
 
-     this.state.next(SyncState.Revealed);
+    this.state.next(SyncState.Revealed);
 
     return challengeCommitment;
   }
@@ -137,7 +111,8 @@ export class EcdsaCurrency extends Currency {
     return;
   }
 
-  public async startSign(signSessionId: string, tokenId: string, transactionBytes: Buffer, entropyCommitment: any): Promise<any> {
+  public async startSign(signSessionId: string, tokenId: string, transactionBytes: Buffer, entropyCommitment: any,
+                         price: string): Promise<any> {
     if (this.state.getValue() !== SyncState.Finalized) {
       throw new Error('Invalid session state');
     }
@@ -146,7 +121,7 @@ export class EcdsaCurrency extends Currency {
 
     const transaction = await currencyInfo.transactionType.fromBytes(transactionBytes, this._workerService.worker);
 
-    if (!await this.requestAccept(tokenId, transaction)) {
+    if (!await this.requestAccept(tokenId, transaction, price)) {
       throw new Error('Rejected');
     }
 
@@ -186,39 +161,8 @@ export class EcdsaCurrency extends Currency {
     this._syncSessionShard = null;
     this._signSessions.clear();
   }
-}
 
-export class EddsaCurrency extends Currency {
-  private _distributedKeyShard: any = null;
-  private _syncSessionShard: any = null;
-
-  private _signSessions = new Map<string, any>();
-
-  private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
-  private _cancelHandler: (sessionId: string) => Promise<any> = null;
-
-  public compoundPublic(): any {
-    return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
-  }
-
-  public constructor(
-    _id: CurrencyId,
-    private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
-  ) {
-    super(_id);
-  }
-
-  public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>): void {
-    this._acceptHandler = acceptHandler;
-  }
-
-  public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
-    this._cancelHandler = cancelHandler;
-  }
-
-  private async requestAccept(tokenId: string, transaction: any): Promise<boolean> {
+  private async requestAccept(tokenId: string, transaction: any, price: string): Promise<boolean> {
     const outputs = await transaction.totalOutputs();
 
     const fee = await transaction.estimateFee();
@@ -236,7 +180,37 @@ export class EddsaCurrency extends Currency {
       model = CurrencyModel.fromCoin(currencyInfo);
     }
 
-    return await this._acceptHandler(model, address, value, fee);
+    return await this._acceptHandler(model, address, value, fee, price);
+  }
+}
+
+export class EddsaCurrency extends Currency {
+  private _distributedKeyShard: any = null;
+  private _syncSessionShard: any = null;
+
+  private _signSessions = new Map<string, any>();
+
+  private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN, price: string) => Promise<boolean> = null;
+  private _cancelHandler: (sessionId: string) => Promise<any> = null;
+
+  public constructor(_id: CurrencyId,
+                     private readonly _currencyInfoService: CurrencyInfoService,
+                     private readonly _keyChainService: KeyChainService,
+                     private readonly _workerService: WorkerService) {
+    super(_id);
+  }
+
+  public compoundPublic(): any {
+    return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
+  }
+
+  public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN,
+                                          price: string) => Promise<boolean>): void {
+    this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
+    this._cancelHandler = cancelHandler;
   }
 
   public async startSync(commitment: any): Promise<any> {
@@ -272,7 +246,8 @@ export class EddsaCurrency extends Currency {
     return;
   }
 
-  public async startSign(signSessionId: string, tokenId: string, transactionBytes: Buffer, entropyCommitment: any): Promise<any> {
+  public async startSign(signSessionId: string, tokenId: string, transactionBytes: Buffer, entropyCommitment: any,
+                         price: string): Promise<any> {
     if (this.state.getValue() !== SyncState.Finalized) {
       throw new Error('Invalid session state');
     }
@@ -281,7 +256,7 @@ export class EddsaCurrency extends Currency {
 
     const transaction = await currencyInfo.transactionType.fromBytes(transactionBytes, this._workerService.worker);
 
-    if (!await this.requestAccept(tokenId, transaction)) {
+    if (!await this.requestAccept(tokenId, transaction, price)) {
       throw new Error('Rejected');
     }
 
@@ -321,26 +296,47 @@ export class EddsaCurrency extends Currency {
     this._syncSessionShard = null;
     this._signSessions.clear();
   }
+
+  private async requestAccept(tokenId: string, transaction: any, price: string): Promise<boolean> {
+    const outputs = await transaction.totalOutputs();
+
+    const fee = await transaction.estimateFee();
+
+    const address = outputs.outputs[0].address;
+    const value = outputs.outputs[0].value;
+
+    const currencyInfo = this._currencyInfoService.currencyInfo(this.id);
+
+    let model;
+    if (tokenId) {
+      const tokenInfo = currencyInfo.tokens.find((info) => info.id === tokenId);
+      model = CurrencyModel.fromToken(currencyInfo, tokenInfo);
+    } else {
+      model = CurrencyModel.fromCoin(currencyInfo);
+    }
+
+    return await this._acceptHandler(model, address, value, fee, price);
+  }
 }
 
 export class DeviceSession {
-  private _currencies = new Map<CurrencyId, Currency>();
-  private _activities = new BehaviorSubject<number>(0);
-
   public currencyEvent = new Subject<Currency>();
+  private _activities = new BehaviorSubject<number>(0);
   public active = toBehaviourSubject(this._activities.pipe(map((activities) => activities > 0)), false);
-
-  private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN,
+                           price: string) => Promise<boolean> = null;
   private _cancelHandler: (signSessionId: string) => Promise<any> = null;
 
-  public setAcceptHandler(
-    acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>
-  ): void {
-    this._acceptHandler = acceptHandler;
-  }
+  public constructor(private readonly _id: string,
+                     private readonly _deviceInfo: any,
+                     private readonly _currencyInfoService: CurrencyInfoService,
+                     private readonly _keyChainService: KeyChainService,
+                     private readonly _workerService: WorkerService) {}
 
-  public setCancelHandler(cancelHandler: (signSessionId: string) => Promise<any>): void {
-    this._cancelHandler = cancelHandler;
+  private _currencies = new Map<CurrencyId, Currency>();
+
+  public get currencies(): Array<Currency> {
+    return Array.from(this._currencies.values());
   }
 
   public get id(): string {
@@ -351,42 +347,17 @@ export class DeviceSession {
     return this._deviceInfo;
   }
 
-  public get currencies(): Array<Currency> {
-    return Array.from(this._currencies.values());
+  public setAcceptHandler(acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN,
+                                          price: string) => Promise<boolean>): void {
+    this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(cancelHandler: (signSessionId: string) => Promise<any>): void {
+    this._cancelHandler = cancelHandler;
   }
 
   public currency(currenyId: CurrencyId): Currency {
     return this._currencies.get(currenyId);
-  }
-
-  private activityStart() {
-    this._activities.next(this._activities.getValue() + 1);
-  }
-
-  private activityEnd() {
-    this._activities.next(this._activities.getValue() - 1);
-  }
-
-  public constructor(
-    private readonly _id: string,
-    private readonly _deviceInfo: any,
-    private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
-  ) {}
-
-  private safeGetAs<T>(currencyId: CurrencyId, C: { new(... args: any[]): T }) {
-    if (!this._currencies.has(currencyId)) {
-      throw new Error('Sync session not started');
-    }
-
-    const currency = this._currencies.get(currencyId);
-
-    if (!(currency instanceof C)) {
-      throw new Error('Invalid cryptosystem for this currency');
-    }
-
-    return currency as T;
   }
 
   public async syncState(currencyId: CurrencyId): Promise<SyncState> {
@@ -435,11 +406,11 @@ export class DeviceSession {
         this._workerService
       );
 
-      currency.setAcceptHandler(async (model, address, value, fee) => {
-        return await this._acceptHandler(this.id, model, address, value, fee);
+      currency.setAcceptHandler(async (model, address, value, fee, price) => {
+        return await this._acceptHandler(this.id, model, address, value, fee, price);
       });
 
-      currency.setCancelHandler(async(signSessionId) => {
+      currency.setCancelHandler(async (signSessionId) => {
         return await this._cancelHandler(signSessionId);
       });
 
@@ -488,19 +459,19 @@ export class DeviceSession {
     }
   }
 
-  public async startEcdsaSign(
-    currencyId: CurrencyId,
-    tokenId: string,
-    signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitment: any
-  ): Promise<any> {
+  public async startEcdsaSign(currencyId: CurrencyId,
+                              tokenId: string,
+                              signSessionId: string,
+                              transactionBytes: Buffer,
+                              entropyCommitment: any,
+                              price: string): Promise<any> {
     this.activityStart();
 
     try {
       const currency = this.safeGetAs(currencyId, EcdsaCurrency);
 
-      return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
+      return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment,
+        price);
     } finally {
       this.activityEnd();
     }
@@ -535,11 +506,11 @@ export class DeviceSession {
         this._workerService
       );
 
-      currency.setAcceptHandler(async (model, address, value, fee) => {
-        return await this._acceptHandler(this.id, model, address, value, fee);
+      currency.setAcceptHandler(async (model, address, value, fee, price) => {
+        return await this._acceptHandler(this.id, model, address, value, fee, price);
       });
-      
-      currency.setCancelHandler(async(signSessionId) => {
+
+      currency.setCancelHandler(async (signSessionId) => {
         return await this._cancelHandler(signSessionId);
       });
 
@@ -565,19 +536,19 @@ export class DeviceSession {
     }
   }
 
-  public async startEddsaSign(
-    currencyId: CurrencyId,
-    tokenId: string,
-    signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitment: any
-  ): Promise<any> {
+  public async startEddsaSign(currencyId: CurrencyId,
+                              tokenId: string,
+                              signSessionId: string,
+                              transactionBytes: Buffer,
+                              entropyCommitment: any,
+                              price: string): Promise<any> {
     this.activityStart();
 
     try {
       const currency = this.safeGetAs(currencyId, EddsaCurrency);
 
-      return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment);
+      return await currency.startSign(signSessionId, tokenId, transactionBytes, entropyCommitment,
+        price);
     } finally {
       this.activityEnd();
     }
@@ -615,42 +586,59 @@ export class DeviceSession {
 
     this._currencies.clear();
   }
+
+  private activityStart() {
+    this._activities.next(this._activities.getValue() + 1);
+  }
+
+  private activityEnd() {
+    this._activities.next(this._activities.getValue() - 1);
+  }
+
+  private safeGetAs<T>(currencyId: CurrencyId, C: { new(...args: any[]): T }) {
+    if (!this._currencies.has(currencyId)) {
+      throw new Error('Sync session not started');
+    }
+
+    const currency = this._currencies.get(currencyId);
+
+    if (!(currency instanceof C)) {
+      throw new Error('Invalid cryptosystem for this currency');
+    }
+
+    return currency as T;
+  }
 }
 
 @Injectable()
 export class VerifierService {
-  private _sessions = new Map<string, DeviceSession>();
-
   public sessionEvent = new Subject<string>();
-
-  private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN,
+                           price: string) => Promise<boolean> = null;
   private _cancelHandler: (sessionId: string) => Promise<any> = null;
 
-  public setAcceptHandler(
-    acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>
-  ): void {
+  public constructor(private readonly _currencyInfoService: CurrencyInfoService,
+                     private readonly _keyChainService: KeyChainService,
+                     private readonly _workerService: WorkerService) {}
+
+  private _sessions = new Map<string, DeviceSession>();
+
+  public get sessions(): Array<DeviceSession> {
+    return Array.from(this._sessions.values());
+  }
+
+  public setAcceptHandler(acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN,
+                                          price: string) => Promise<boolean>): void {
     this._acceptHandler = acceptHandler;
   }
 
-  public setCancelHandler(
-    cancelHandler: (sessionId: string) => Promise<any>
-  ): void {
+  public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
     this._cancelHandler = cancelHandler;
   }
 
   public session(sessionId: string): DeviceSession {
     return this._sessions.get(sessionId);
   }
-
-  public get sessions(): Array<DeviceSession> {
-    return Array.from(this._sessions.values());
-  }
-
-  public constructor(
-    private readonly _currencyInfoService: CurrencyInfoService,
-    private readonly _keyChainService: KeyChainService,
-    private readonly _workerService: WorkerService
-  ) {}
 
   /**
    * Checks if this session Id is registered and registers it otherwise
@@ -753,27 +741,25 @@ export class VerifierService {
     return await this._sessions.get(sessionId).ecdsaSyncFinalize(currencyId, responseDecommitment);
   }
 
-  public async startEcdsaSign(
-    sessionId: string,
-    currencyId: CurrencyId,
-    tokenId: string,
-    signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitment: any
-  ): Promise<any> {
+  public async startEcdsaSign(sessionId: string,
+                              currencyId: CurrencyId,
+                              tokenId: string,
+                              signSessionId: string,
+                              transactionBytes: Buffer,
+                              entropyCommitment: any,
+                              price: string): Promise<any> {
     if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this._sessions.get(sessionId).startEcdsaSign(currencyId, tokenId, signSessionId, transactionBytes, entropyCommitment);
+    return await this._sessions.get(sessionId).startEcdsaSign(currencyId, tokenId, signSessionId, transactionBytes,
+      entropyCommitment, price);
   }
 
-  public async ecdsaSignFinalize(
-    sessionId: string,
-    currencyId: CurrencyId,
-    signSessionId: string,
-    entropyDecommitment: any
-  ): Promise<any> {
+  public async ecdsaSignFinalize(sessionId: string,
+                                 currencyId: CurrencyId,
+                                 signSessionId: string,
+                                 entropyDecommitment: any): Promise<any> {
     if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
@@ -797,27 +783,25 @@ export class VerifierService {
     return await this._sessions.get(sessionId).eddsaSyncFinalize(currencyId, initialDecommitment);
   }
 
-  public async startEddsaSign(
-    sessionId: string,
-    currencyId: CurrencyId,
-    tokenId: string,
-    signSessionId: string,
-    transactionBytes: Buffer,
-    entropyCommitment: any
-  ): Promise<any> {
+  public async startEddsaSign(sessionId: string,
+                              currencyId: CurrencyId,
+                              tokenId: string,
+                              signSessionId: string,
+                              transactionBytes: Buffer,
+                              entropyCommitment: any,
+                              price: string): Promise<any> {
     if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
 
-    return await this._sessions.get(sessionId).startEddsaSign(currencyId, tokenId, signSessionId, transactionBytes, entropyCommitment);
+    return await this._sessions.get(sessionId).startEddsaSign(currencyId, tokenId, signSessionId, transactionBytes,
+      entropyCommitment, price);
   }
 
-  public async eddsaSignFinalize(
-    sessionId: string,
-    currencyId: CurrencyId,
-    signSessionId: string,
-    entropyDecommitment: any
-  ): Promise<any> {
+  public async eddsaSignFinalize(sessionId: string,
+                                 currencyId: CurrencyId,
+                                 signSessionId: string,
+                                 entropyDecommitment: any): Promise<any> {
     if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }
@@ -825,11 +809,9 @@ export class VerifierService {
     return await this._sessions.get(sessionId).eddsaSignFinalize(currencyId, signSessionId, entropyDecommitment);
   }
 
-  public async cancelSign(
-    sessionId: string,
-    currencyId: CurrencyId,
-    signSessionId: string
-  ): Promise<any> {
+  public async cancelSign(sessionId: string,
+                          currencyId: CurrencyId,
+                          signSessionId: string): Promise<any> {
     if (!this._sessions.has(sessionId)) {
       throw new Error('Unknown session id');
     }

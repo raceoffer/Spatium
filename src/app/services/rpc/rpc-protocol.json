@@ -336,6 +336,10 @@
         "entropyCommitmentBytes": {
           "type": "bytes",
           "id": 6
+        },
+        "price": {
+          "type": "string",
+          "id": 7
         }
       }
     },
@@ -443,6 +447,10 @@
         "entropyCommitmentBytes": {
           "type": "bytes",
           "id": 6
+        },
+        "price": {
+          "type": "string",
+          "id": 7
         }
       }
     },

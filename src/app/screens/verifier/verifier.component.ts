@@ -1,17 +1,18 @@
 import { Component, EventEmitter, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import BN from 'bn.js';
-import { BehaviorSubject, Subject, combineLatest, of } from 'rxjs';
-import { bufferWhen, filter, map, mergeMap, skipUntil, timeInterval, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, of, Subject } from 'rxjs';
+import { bufferWhen, filter, map, mergeMap, skipUntil, switchMap, timeInterval } from 'rxjs/operators';
 import { NavbarComponent } from '../../modals/navbar/navbar.component';
 import { CurrencyId, CurrencyInfoService } from '../../services/currencyinfo.service';
+import { DeviceService, Platform } from '../../services/device.service';
 import { FileService } from '../../services/file.service';
 import { KeyChainService } from '../../services/keychain.service';
 import { NavigationService, Position } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { RPCServerService } from '../../services/rpc/rpc-server.service';
 import { SsdpService } from '../../services/ssdp.service';
-import { VerifierService, Currency } from '../../services/verifier.service';
+import { Currency, VerifierService } from '../../services/verifier.service';
 import { CurrencyModel, SyncState } from '../../services/wallet/wallet';
 import { checkAvailable, checkExisting, deleteTouch } from '../../utils/fingerprint';
 import { toBehaviourSubject } from '../../utils/transformers';
@@ -21,7 +22,6 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
-import { DeviceService, Platform } from "../../services/device.service";
 
 @Component({
   selector: 'app-verifier',
@@ -63,18 +63,6 @@ export class VerifierComponent implements OnInit, OnDestroy {
   }];
 
   public isIOS: boolean;
-
-  private back = new Subject<any>();
-  public doubleBack = this.back.pipe(
-    bufferWhen(() => this.back.pipe(
-      skipUntil(this.back),
-      timeInterval(),
-      filter(time => time.interval < 3000)
-    )),
-    map(emits => emits.length),
-    filter(emits => emits > 0)
-  );
-
   public sessions: BehaviorSubject<Array<{
     sessionId: string,
     active: boolean,
@@ -88,23 +76,30 @@ export class VerifierComponent implements OnInit, OnDestroy {
       state: SyncState
     }>
   }>>;
-
+  private back = new Subject<any>();
+  public doubleBack = this.back.pipe(
+    bufferWhen(() => this.back.pipe(
+      skipUntil(this.back),
+      timeInterval(),
+      filter(time => time.interval < 3000)
+    )),
+    map(emits => emits.length),
+    filter(emits => emits > 0)
+  );
   private signCancelled: EventEmitter<any> = new EventEmitter<any>();
 
   private subscriptions = [];
 
-  constructor(
-    private readonly router: Router,
-    private readonly keychain: KeyChainService,
-    private readonly navigationService: NavigationService,
-    private readonly notification: NotificationService,
-    private readonly rpcService: RPCServerService,
-    private readonly verifierService: VerifierService,
-    private readonly currencyInfoService: CurrencyInfoService,
-    private readonly fs: FileService,
-    private readonly ssdp: SsdpService,
-    private readonly deviceService: DeviceService,
-  ) {
+  constructor(private readonly router: Router,
+              private readonly keychain: KeyChainService,
+              private readonly navigationService: NavigationService,
+              private readonly notification: NotificationService,
+              private readonly rpcService: RPCServerService,
+              private readonly verifierService: VerifierService,
+              private readonly currencyInfoService: CurrencyInfoService,
+              private readonly fs: FileService,
+              private readonly ssdp: SsdpService,
+              private readonly deviceService: DeviceService) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       map((sessionId) => this.verifierService.session(sessionId)),
       mergeMap((deviceSession) => deviceSession ? combineLatest<Currency | boolean>([
@@ -152,14 +147,15 @@ export class VerifierComponent implements OnInit, OnDestroy {
     );
 
     this.verifierService.setAcceptHandler(
-      async (sessionId, model, address, value, fee) => await this.accept(sessionId, model, address, value, fee)
+      async (sessionId, model, address, value, fee, price) =>
+        await this.accept(sessionId, model, address, value, fee, price)
     );
 
     this.verifierService.setCancelHandler(
       async (sessionId) => await new Promise<any>((resolve, ignored) => {
         this.signCancelled.next(sessionId);
         resolve();
-    }));
+      }));
 
     const rpcPort = 5666;
     await this.rpcService.start('0.0.0.0', rpcPort);
@@ -180,7 +176,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
     const componentRef = this.navigationService.pushOverlay(NavbarComponent, Position.Left);
 
     if (!await checkAvailable()) {
-      this.navLinks = this.navLinks.filter((link) => link.name != 'Settings');
+      this.navLinks = this.navLinks.filter((link) => link.name !== 'Settings');
     }
     componentRef.instance.navLinks = this.navLinks;
 
@@ -199,7 +195,12 @@ export class VerifierComponent implements OnInit, OnDestroy {
     this.navigationService.pushOverlay(FeedbackComponent);
   }
 
-  public async accept(sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN): Promise<boolean> {
+  public async accept(sessionId: string,
+                      model: CurrencyModel,
+                      address: string,
+                      value: BN,
+                      fee: BN,
+                      price: string): Promise<boolean> {
     return await new Promise<boolean>((resolve, ignored) => {
       const componentRef = this.navigationService.pushOverlay(VerifyTransactionComponent);
       componentRef.instance.sessionId = sessionId;
@@ -207,6 +208,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
       componentRef.instance.address = address;
       componentRef.instance.valueInternal = value;
       componentRef.instance.feeInternal = fee;
+      componentRef.instance.price = Number(price);
 
       componentRef.instance.confirm.subscribe(async () => {
         this.navigationService.acceptOverlay();
@@ -227,7 +229,7 @@ export class VerifierComponent implements OnInit, OnDestroy {
             this.navigationService.acceptOverlay();
             resolve(false);
           }
-      }));
+        }));
     });
   }
 
