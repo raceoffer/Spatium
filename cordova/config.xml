@@ -172,5 +172,5 @@
     <engine name="windows" spec="^6.0.0" />
     <engine name="ios" spec="^4.5.5" />
     <engine name="android" spec="^7.1.1" />
-    <plugin name="cordova-plugin-ssdp" spec="../../cordova-plugin-ssdp" />
+    <plugin name="cordova-plugin-ssdp" spec="https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#ee5afc80382f5ee45b4dfe996600087d9edcdf05" />
 </widget>
