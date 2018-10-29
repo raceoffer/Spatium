@@ -6,11 +6,12 @@
 
     <span class="spacer"></span>
 
-    <span *ngIf="!(wifiService.available | async)">Wi-Fi is unavailable</span>
-    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="(wifiService.available | async) && !(wifiService.enabled | async)">
-      Enabled Wi-Fi
+    <span *ngIf="!available">Wi-Fi is unavailable</span>
+    <span *ngIf="connected">Connected to Wi-Fi</span>
+    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="available && !enabled">
+      Enable Wi-Fi
     </button>
-    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="(wifiService.enabled | async) && !(wifiService.connected | async)">
+    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="enabled && !connected">
       Connect to network
     </button>
   </div>
