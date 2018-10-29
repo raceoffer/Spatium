@@ -24,6 +24,8 @@ export abstract class Currency {
 
   public abstract compoundPublic(): any;
 
+  public async cancelSign(sessionsId: string, signSessionId: string): Promise<any> {}
+
   public abstract async reset(): Promise<void>;
 }
 
@@ -34,6 +36,7 @@ export class EcdsaCurrency extends Currency {
   private _signSessions = new Map<string, any>();
 
   private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _cancelHandler: (sessionId: string) => Promise<any> = null;
 
   public compoundPublic(): any {
     return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
@@ -50,6 +53,10 @@ export class EcdsaCurrency extends Currency {
 
   public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>): void {
     this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
+    this._cancelHandler = cancelHandler;
   }
 
   private async requestAccept(tokenId: string, transaction: any): Promise<boolean> {
@@ -166,6 +173,13 @@ export class EcdsaCurrency extends Currency {
     return partialSignature;
   }
 
+  public async cancelSign(sessionsId: string, signSessionId: string): Promise<any> {
+    if (this._signSessions.has(signSessionId)) {
+      this._signSessions.delete(signSessionId);
+    }
+    return await this._cancelHandler(sessionsId);
+  }
+
   public async reset(): Promise<void> {
     this.state.next(SyncState.None);
     this._distributedKeyShard = null;
@@ -181,6 +195,7 @@ export class EddsaCurrency extends Currency {
   private _signSessions = new Map<string, any>();
 
   private _acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _cancelHandler: (sessionId: string) => Promise<any> = null;
 
   public compoundPublic(): any {
     return this._distributedKeyShard ? this._distributedKeyShard.compoundPublic() : null;
@@ -197,6 +212,10 @@ export class EddsaCurrency extends Currency {
 
   public setAcceptHandler(acceptHandler: (model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>): void {
     this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(cancelHandler: (sessionId: string) => Promise<any>): void {
+    this._cancelHandler = cancelHandler;
   }
 
   private async requestAccept(tokenId: string, transaction: any): Promise<boolean> {
@@ -289,6 +308,13 @@ export class EddsaCurrency extends Currency {
     return partialSignature;
   }
 
+  public async cancelSign(sessionId: string, signSessionId: string): Promise<any> {
+    if (this._signSessions.has(signSessionId)) {
+      this._signSessions.delete(signSessionId);
+    }
+    return await this._cancelHandler(sessionId);
+  }
+
   public async reset(): Promise<void> {
     this.state.next(SyncState.None);
     this._distributedKeyShard = null;
@@ -305,11 +331,16 @@ export class DeviceSession {
   public active = toBehaviourSubject(this._activities.pipe(map((activities) => activities > 0)), false);
 
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _cancelHandler: (signSessionId: string) => Promise<any> = null;
 
   public setAcceptHandler(
     acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>
   ): void {
     this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(cancelHandler: (signSessionId: string) => Promise<any>): void {
+    this._cancelHandler = cancelHandler;
   }
 
   public get id(): string {
@@ -403,8 +434,13 @@ export class DeviceSession {
         this._keyChainService,
         this._workerService
       );
+
       currency.setAcceptHandler(async (model, address, value, fee) => {
         return await this._acceptHandler(this.id, model, address, value, fee);
+      });
+
+      currency.setCancelHandler(async(signSessionId) => {
+        return await this._cancelHandler(signSessionId);
       });
 
       this._currencies.set(currencyId, currency);
@@ -498,8 +534,13 @@ export class DeviceSession {
         this._keyChainService,
         this._workerService
       );
+
       currency.setAcceptHandler(async (model, address, value, fee) => {
         return await this._acceptHandler(this.id, model, address, value, fee);
+      });
+      
+      currency.setCancelHandler(async(signSessionId) => {
+        return await this._cancelHandler(signSessionId);
       });
 
       this._currencies.set(currencyId, currency);
@@ -554,6 +595,17 @@ export class DeviceSession {
     }
   }
 
+  public async cancelSign(sessionId: string, currencyId: CurrencyId, signSessionId: string): Promise<any> {
+    this.activityStart();
+
+    try {
+      const currency = this._currencies.get(currencyId);
+      return await currency.cancelSign(sessionId, signSessionId);
+    } finally {
+      this.activityEnd();
+    }
+  }
+
   public async reset() {
     const currencies = Array.from(this.currencies.values());
 
@@ -572,11 +624,18 @@ export class VerifierService {
   public sessionEvent = new Subject<string>();
 
   private _acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean> = null;
+  private _cancelHandler: (sessionId: string) => Promise<any> = null;
 
   public setAcceptHandler(
     acceptHandler: (sessionId: string, model: CurrencyModel, address: string, value: BN, fee: BN) => Promise<boolean>
   ): void {
     this._acceptHandler = acceptHandler;
+  }
+
+  public setCancelHandler(
+    cancelHandler: (sessionId: string) => Promise<any>
+  ): void {
+    this._cancelHandler = cancelHandler;
   }
 
   public session(sessionId: string): DeviceSession {
@@ -619,6 +678,7 @@ export class VerifierService {
       this._workerService
     );
     deviceSession.setAcceptHandler(this._acceptHandler);
+    deviceSession.setCancelHandler(this._cancelHandler);
 
     this._sessions.set(sessionId, deviceSession);
 
@@ -763,6 +823,18 @@ export class VerifierService {
     }
 
     return await this._sessions.get(sessionId).eddsaSignFinalize(currencyId, signSessionId, entropyDecommitment);
+  }
+
+  public async cancelSign(
+    sessionId: string,
+    currencyId: CurrencyId,
+    signSessionId: string
+  ): Promise<any> {
+    if (!this._sessions.has(sessionId)) {
+      throw new Error('Unknown session id');
+    }
+
+    return await this._sessions.get(sessionId).cancelSign(sessionId, currencyId, signSessionId);
   }
 
   public async reset() {

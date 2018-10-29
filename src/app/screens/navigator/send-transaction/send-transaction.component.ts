@@ -109,6 +109,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public sizeEstimated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   public phase: BehaviorSubject<Phase> = new BehaviorSubject<Phase>(Phase.Creation);
 
+  private signSessionId: string = null;
   private signed: any = null;
 
   private cancelSubject = new Subject<void>();
@@ -579,6 +580,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
+    this.cancelTransaction();
   }
 
   async onBack() {
@@ -680,12 +682,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
     const txId = await Utils.randomBytes(32);
 
-    const signSessionId = uuidFrom(txId);
+    this.signSessionId = uuidFrom(txId);
 
     const startSignResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.startEcdsaSign({
       sessionId: this.keyChainService.sessionId,
       currencyId: currency.id,
-      signSessionId,
+      signSessionId: this.signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
     }, -1), this.cancelSubject);
@@ -701,13 +703,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const signFinalizeResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.ecdsaSignFinalize({
       sessionId: this.keyChainService.sessionId,
       currencyId: currency.id,
-      signSessionId,
+      signSessionId: this.signSessionId,
       entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
     }), this.cancelSubject);
     console.log(signFinalizeResponse);
     if (!signFinalizeResponse) {
       return null;
     }
+
+    this.signSessionId = null;
 
     const partialSignature = Marshal.decode(signFinalizeResponse.partialSignatureBytes);
 
@@ -741,12 +745,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
     const txId = await Utils.randomBytes(32);
 
-    const signSessionId = uuidFrom(txId);
+    this.signSessionId = uuidFrom(txId);
 
     const startSignResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.startEddsaSign({
       sessionId: this.keyChainService.sessionId,
       currencyId: currency.id,
-      signSessionId,
+      signSessionId: this.signSessionId,
       transactionBytes,
       entropyCommitmentBytes: Marshal.encode(entropyCommitment)
     }, -1), this.cancelSubject);
@@ -762,13 +766,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     const signFinalizeResponse = await waitFiorPromise<any>(this.connectionService.rpcClient.api.eddsaSignFinalize({
       sessionId: this.keyChainService.sessionId,
       currencyId: currency.id,
-      signSessionId,
+      signSessionId: this.signSessionId,
       entropyDecommitmentBytes: Marshal.encode(entropyDecommitment)
     }), this.cancelSubject);
     console.log(signFinalizeResponse);
     if (!signFinalizeResponse) {
       return null;
     }
+
+    this.signSessionId = null;
 
     const partialSignature = Marshal.decode(signFinalizeResponse.partialSignatureBytes);
 
@@ -781,6 +787,15 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   async cancelTransaction() {
     this.cancelSubject.next();
+
+    if (this.signSessionId) {
+      const currency = this.wallet.currency.getValue();
+      this.connectionService.rpcClient.api.cancelSign({
+        sessionId: this.keyChainService.sessionId,
+        currencyId: currency.id,
+        signSessionId: this.signSessionId
+      });
+    }  
   }
 
   async sendTransaction() {

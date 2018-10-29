@@ -36,21 +36,15 @@ export class LoginComponent implements OnDestroy {
   private generateLoginStream = this.loginControl.valueChanges.pipe(
     distinctUntilChanged(),
     filter(() => this.loginGenerated),
-    map(value => value ? value : ''),
+    map((value) => {
+      return this.loginValueChange(value);
+    }),
   );
   private manualLoginInputStream = this.loginControl.valueChanges.pipe(
     distinctUntilChanged(),
     filter(() => !this.loginGenerated),
     map((value) => {
-      if (!value) {
-        if (this.isWindows()) {
-          this.caretClass = 'caret-center';
-        }
-        return '';
-      } else {
-        this.caretClass = '';
-        return value;
-      }
+      return this.loginValueChange(value);
     }),
     tap(() => this.delayed.next(true)),
     debounceTime(1000),
@@ -111,5 +105,17 @@ export class LoginComponent implements OnDestroy {
 
   isWindows(): boolean {
     return this.deviceService.platform === Platform.Windows;
+  }
+
+  loginValueChange(value) {
+    if (!value) {
+      if (this.isWindows()) {
+        this.caretClass = 'caret-center';
+      }
+      return '';
+    } else {
+      this.caretClass = '';
+      return value;
+    }
   }
 }
