@@ -1,5 +1,5 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { wallet as NeoWallet } from '@cityofzion/neon-js';
 import BN from 'bn.js';
 import * as CashAddr from 'cashaddrjs';
@@ -23,7 +23,7 @@ import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
-import { validateNumber } from '../../../validators/validators';
+import { AmountValidator, validateNumber } from '../../../validators/validators';
 import { BigNumber } from 'bignumber.js';
 
 declare const cordova: any;
@@ -54,7 +54,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiverField = new FormControl();
 
-  public amountField = new FormControl('', validateNumber);
+  public amountField = new FormControl('');
   public amountUsdField = new FormControl('', validateNumber);
 
   public feeType: any = Fee;
@@ -165,6 +165,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.amountField = new FormControl('', [Validators.required, AmountValidator.getValidator(this.model)]);
+
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
 
     this.wallet = new Wallet(
