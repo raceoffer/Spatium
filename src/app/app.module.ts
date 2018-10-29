@@ -97,6 +97,7 @@ import { BluetoothService } from './services/bluetooth.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
 import { SsdpService } from './services/ssdp.service';
+import { WiFiService } from './services/wifi.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
 import { ICOService } from './services/ico.service';
@@ -243,6 +244,7 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
     ActivityService,
     ICOService,
     SsdpService,
+    WiFiService,
     IpfsService,
     SettingsService,
     RPCServerService,

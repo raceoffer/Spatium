@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DeviceService, Platform } from '../../../services/device.service';
+import { WiFiService } from '../../../services/wifi.service';
 
 declare const cordova: any;
 
@@ -10,7 +11,9 @@ declare const cordova: any;
 })
 export class WiFiComponent implements OnInit, OnDestroy {
 
-  constructor(private readonly deviceService: DeviceService) { }
+  constructor(
+    private readonly deviceService: DeviceService,
+    public readonly wifiService: WiFiService) { }
 
   async ngOnInit() { }
 
