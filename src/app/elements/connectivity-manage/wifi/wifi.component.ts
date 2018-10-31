@@ -13,6 +13,7 @@ export class WiFiComponent implements OnInit, OnDestroy {
   public available: boolean;
   public enabled: boolean;
   public connected: boolean;
+  public isIOS: boolean;
 
   constructor(
     private readonly ngZone: NgZone,
@@ -23,21 +24,13 @@ export class WiFiComponent implements OnInit, OnDestroy {
     wifiService.connected.subscribe(connected => this.ngZone.run(() => this.connected = connected));
   }
 
-  async ngOnInit() { }
+  async ngOnInit() { 
+    this.isIOS = this.deviceService.platform === Platform.IOS;
+  }
 
   async ngOnDestroy() { }
 
   networkSettings() {
-    if (this.deviceService.platform === Platform.IOS) {
-      cordova.plugins.settings.open('wifi', function () {
-          console.log('opened wifi settings');
-        },
-        function () {
-          console.log('failed to open wifi settings');
-        }
-      );
-    } else {
-      cordova.plugins.diagnostic.switchToWifiSettings();
-    }
+    cordova.plugins.diagnostic.switchToWifiSettings();
   }
 }
