@@ -1,5 +1,5 @@
 import { Component, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { wallet as NeoWallet } from '@cityofzion/neon-js';
 import { BigNumber } from 'bignumber.js';
 import BN from 'bn.js';
@@ -25,6 +25,9 @@ import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers
 import { uuidFrom } from '../../../utils/uuid';
 import { validateNumber } from '../../../validators/validators';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
+import { AmountValidator, validateNumber } from '../../../validators/validators';
+import { BigNumber } from 'bignumber.js';
+import { NetworkService } from '../../../services/network.service';
 
 declare const cordova: any;
 
@@ -54,7 +57,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   public receiverField = new FormControl();
 
-  public amountField = new FormControl('', validateNumber);
+  public amountField = new FormControl('');
   public amountUsdField = new FormControl('', validateNumber);
 
   public feeType: any = Fee;
@@ -96,7 +99,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   public amount: BehaviorSubject<BN> = null;
   public fee: BehaviorSubject<BN> = null;
   public feePrice: BehaviorSubject<BN> = null;
-  public estimatedSize: BehaviorSubject<number> = null;
+  public estimatedSize = new BehaviorSubject<number>(1);
+  public estimatedSizeBeh: BehaviorSubject<number> = null;
   public currencyPrice: BehaviorSubject<number> = null;
 
   public subtractFee: BehaviorSubject<boolean> = null;
@@ -126,7 +130,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               private readonly priceService: PriceService,
               private readonly workerService: WorkerService,
               private readonly keyChainService: KeyChainService,
-              private readonly connectionService: RPCConnectionService) {
+    private readonly connectionService: RPCConnectionService,
+    private readonly networkService: NetworkService
+  ) {
     this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
   }
 
@@ -164,6 +170,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.amountField = new FormControl('', [Validators.required, AmountValidator.getValidator(this.model)]);
+
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
 
     this.wallet = new Wallet(
@@ -182,26 +190,20 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
     this.allowFeeConfiguration = ![CurrencyId.Nem, CurrencyId.NemTest].includes(this.model.currencyInfo.id);
 
-    this.estimatedSize = toBehaviourSubject(
+    this.estimatedSizeBeh = toBehaviourSubject(
       combineLatest([
         this.wallet.balanceUnconfirmed.pipe(distinctUntilChanged()),
         this.wallet.wallet
       ]).pipe(
         mergeMap(async ([balance, wallet]) => {
-          if (balance === null || balance.eq(new BN())) {
+          await this.updateEstimatedSize();
             return 1;
+        })), 1);
+    this.networkService.online.subscribe(async (online) => {
+      if (online) {
+        await this.updateEstimatedSize();
           }
-
-          const size = await wallet.estimateTransaction(
-            wallet.address,
-            balance.div(new BN(2))
-          );
-
-          this.sizeEstimated.next(true);
-
-          return size;
-        })
-      ), 1);
+    });
 
     this.currencyPrice = new BehaviorSubject<number>(this.priceService.price(this.model.ticker));
     this.receiver = new BehaviorSubject<string>('');
@@ -209,6 +211,12 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
     this.feePrice = new BehaviorSubject<BN>(new BN(this.priceService.feePrice(this.model.currencyInfo.id, FeeLevel.Normal)));
     this.fee = new BehaviorSubject<BN>(this.feePrice.getValue().mul(new BN(this.estimatedSize.getValue())));
     this.subtractFee = new BehaviorSubject<boolean>(false);
+
+    this.subscriptions.push(
+      this.estimatedSize.pipe(distinctUntilChanged()).subscribe(value => {
+        this.fee.next(new BN(value).mul(this.feePrice.getValue()));
+      })
+    );
 
     this.sufficientBalance = toBehaviourSubject(combineLatest([
       this.wallet.balanceUnconfirmed,
@@ -518,12 +526,6 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
         this.fee.next(feePrice.mul(new BN(this.estimatedSize.getValue())));
       }
     }));
-
-    this.subscriptions.push(
-      this.estimatedSize.pipe(distinctUntilChanged()).subscribe(value => {
-        this.fee.next(new BN(value).mul(this.feePrice.getValue()));
-      })
-    );
 
     this.subscriptions.push(
       this.subtractFeeField.valueChanges.pipe(distinctUntilChanged()).subscribe((value: boolean) => {
@@ -883,5 +885,23 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
 
   setFeePriceUsdFocused(focused: boolean): void {
     this.feePriceUsdFocused = focused;
+  }
+
+  private async updateEstimatedSize() {
+    const balance = this.wallet.balanceUnconfirmed.getValue();
+    const wallet = this.wallet.wallet.getValue();
+
+    if (balance === null || balance.eq(new BN())) {
+      this.estimatedSize.next(1);
+      return;
+    }
+
+    const size = await wallet.estimateTransaction(
+      wallet.address,
+      balance.div(new BN(2))
+    );
+
+    this.sizeEstimated.next(true);
+    this.estimatedSize.next(size);
   }
 }

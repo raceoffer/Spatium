@@ -2,12 +2,19 @@
   <div class="connection-div" fxLayout="row" fxLayoutAlign=" center">
     <mat-icon class="list-icon">wifi</mat-icon>
 
-    <span>WiFi/LAN</span>
+    <span style="flex-shrink: 0">Wi-Fi/LAN</span>
 
     <span class="spacer"></span>
 
-    <button mat-button color="accent" class="button-style" (click)="networkSettings()">
+    <span *ngIf="!available">Wi-Fi is unavailable</span>
+    <span *ngIf="connected">Connected to Wi-Fi</span>
+    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="available && !enabled && !isIOS">
+      Enable Wi-Fi
+    </button>
+    <span style="text-align: right" *ngIf="available && !enabled && isIOS">Turn on Wi-Fi via System Settings</span>
+    <button mat-button color="accent" class="button-style" (click)="networkSettings()" *ngIf="enabled && !connected && !isIOS">
       Connect to network
     </button>
+    <span style="text-align: right" *ngIf="enabled && !connected && isIOS">Connect to network via System Settings</span>
   </div>
 </div>

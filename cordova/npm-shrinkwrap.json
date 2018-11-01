@@ -1511,7 +1511,7 @@
       "integrity": "sha1-dH509W4gHNWFvGLRS8oZ9oZ/8e0="
     },
     "cordova-plugin-ssdp": {
-      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc"
+      "version": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#ee5afc80382f5ee45b4dfe996600087d9edcdf05"
     },
     "cordova-plugin-vibration": {
       "version": "3.1.0",

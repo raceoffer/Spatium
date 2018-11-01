@@ -57,7 +57,7 @@ export class NotificationService {
   }
 
   public show(message: string) {
-    this.snackBarRef = this.snackBar.open(message, 'Dismiss', {duration: 3000});
+    this.snackBarRef = this.snackBar.open(message, 'Dismiss', {duration: 10000});
 
     this.snackBarRef.onAction().subscribe(() => {
       this.snackBarRef.dismiss();

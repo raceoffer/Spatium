@@ -578,10 +578,10 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
 .mat-icon-button.gigantic-button{
   padding: 0;
   min-width: 0;
-  width: 150px;
-  height: 150px;
+  width: 200px;
+  height: 200px;
   flex-shrink: 0;
-  line-height: 150px;
+  line-height: 200px;
   border-radius: 50%;
   position: absolute;
   z-index: 3;
@@ -657,59 +657,69 @@ input[type=text]::-ms-clear, input[type=password]::-ms-reveal {
   content: "\e900";
   color: white;
   font-size: 20px !important;
+  vertical-align: top;
 }
 
 .icon-custom-graphic_key-mask:before {
   content: "\e900";
   color: $accent;
   font-size: 40px !important;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code:before {
   content: "\e901";
   color: white;
   font-size: 20px !important;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code_blue:before {
   content: "\e901";
   color: $accent;
   font-size: 30px !important;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code_black:before {
   content: "\e901";
   color: $dark;
   font-size: 30px !important;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code_large:before {
   content: "\e901";
   color: $dark;
   font-size: 180px !important;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code_sizeless:before {
   content: "\e901";
   color: $dark;
+  vertical-align: top;
 }
 
 .icon-custom-qr_code-mask:before {
   content: "\e901";
   color: $accent;
   font-size: 40px !important;
+  vertical-align: top;
 }
 
 .icon-custom-bonjour_black:before {
   content: "\e902";
   color: $dark;
   font-size: 22px !important;
+  vertical-align: top;
 }
 
 .icon-custom-bonjour_blue:before {
   content: "\e902";
   color: $accent;
   font-size: 22px !important;
+  vertical-align: top;
 }
 
 .glass{
