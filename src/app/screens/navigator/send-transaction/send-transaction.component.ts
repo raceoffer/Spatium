@@ -170,7 +170,7 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.amountField = new FormControl('', [Validators.required, AmountValidator.getValidator(this.model)]);
+    this.amountField = new FormControl('', AmountValidator.getValidator(this.model));
 
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
 
