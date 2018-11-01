@@ -23,10 +23,8 @@ import { WorkerService } from '../../../services/worker.service';
 import { isNetworkError } from '../../../utils/client-server/client-server';
 import { toBehaviourSubject, waitFiorPromise } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
-import { validateNumber } from '../../../validators/validators';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { AmountValidator, validateNumber } from '../../../validators/validators';
-import { BigNumber } from 'bignumber.js';
 import { NetworkService } from '../../../services/network.service';
 
 declare const cordova: any;
