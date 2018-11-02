@@ -98,6 +98,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   ), []);
 
   public synchronizing = this.syncService.synchronizing;
+  public resynchronizing = this.syncService.resynchronizing;
   public incomplete = combineLatest([
     this.synchronizing,
     this.syncService.currencyEvent

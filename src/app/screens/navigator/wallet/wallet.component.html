@@ -16,7 +16,7 @@
   </button>
 
   <button mat-icon-button (click)="openDiscoveryOverlay()">
-    <mat-icon [class.sync]="(synchronizing | async)">{{ (incomplete | async) ? 'sync_problem' : 'sync' }}</mat-icon>
+    <mat-icon [class.sync]="((synchronizing | async) || (resynchronizing | async))">{{ (incomplete | async) ? 'sync_problem' : 'sync' }}</mat-icon>
   </button>
 </mat-toolbar>
 
