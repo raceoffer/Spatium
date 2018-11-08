@@ -10,10 +10,32 @@ declare const window: any;
 export enum View {
   WelcomeScreen                 = 'Welcome screen',
   WelcomeSeries                 = 'Welcome series',
+
   RegistrationWalletMode        = 'Registration — wallet mode',
   RegistrationConfirmationMode  = 'Registration — confirmation mode',
+  RegistrationBackup            = 'Registration — backup',
+
   AuthWalletMode                = 'Auth — wallet mode',
   AuthConfirmationMode          = 'Auth — confirmation mode',
+
+  Wallet                        = 'Wallet',
+  DeviceDiscovery               = 'Device discovery',
+  SettingsWalletMode            = 'Settings - wallet mode',
+  AddAuthPath                   = 'Add authorization path',
+  AddToken                      = 'Add token',
+  Currency                      = 'Currency',
+  CurrencySettings              = 'Currency settings',
+  SendTransaction               = 'SendTransaction',
+
+  Verifier                      = 'Advertise confirmation device',
+  ChangePincode                 = 'Change pincode',
+  SettingsConfirmationMode      = 'Settings — confirmation mode',
+  VerifyTransaction             = 'Verify transaction',
+  SecretImport                  = 'Secret — import',
+  SecretExport                  = 'Secret — export',
+  DeleteSecret                  = 'Secret — delete',
+
+  Feedback                      = 'Feedback'
 }
 
 export enum Event {
@@ -77,7 +99,6 @@ export class AnalyticsService {
 
     console.log('Google analytics is ready now');
 
-    this.googleAnalytics.debugMode();
     this.googleAnalytics.setAllowIDFACollection(true);
 
     this.googleAnalytics.getVar(
@@ -98,8 +119,10 @@ export class AnalyticsService {
     this.googleAnalytics.setUserId(userId.toString('hex'));
   }
 
-  public trackView(view: View) {
-    this.googleAnalytics.trackView(view, undefined, undefined, () => {},
+  public trackView(view: View, postfix: string = null) {
+    const viewTitle = postfix ? view + " " + postfix : view;
+    console.log('View', viewTitle);
+    this.googleAnalytics.trackView(viewTitle, undefined, undefined, () => {},
       e => console.log("Trackview error", e)
     );
   }

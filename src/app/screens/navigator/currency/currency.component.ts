@@ -15,6 +15,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { uuidFrom } from '../../../utils/uuid';
 import { CurrencySettingsComponent } from '../currency-settings/currency-settings.component';
 import { SendTransactionComponent } from '../send-transaction/send-transaction.component';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 export enum TransactionType {
   In,
@@ -105,9 +106,12 @@ export class CurrencyComponent implements OnInit, OnDestroy {
               private readonly syncService: SyncService,
               private readonly balanceService: BalanceService,
               private readonly transactionService: TransactionService,
-              private readonly priceService: PriceService) {}
+              private readonly priceService: PriceService,
+              private readonly analyticsService: AnalyticsService,) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.Currency, this.model ? this.model.name : undefined);
+
     this.wallet = new Wallet(this.model, this.syncService, this.balanceService, this.currencyInfoService);
 
     switch (this.model.type) {

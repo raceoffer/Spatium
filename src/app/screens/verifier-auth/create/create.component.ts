@@ -15,6 +15,7 @@ import { SecretImportComponent } from '../../secret-import/secret-import.compone
 import { PincodeComponent } from '../../../inputs/pincode/pincode.component';
 import { NotificationService } from '../../../services/notification.service';
 import { SettingsService } from '../../../services/settings.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-create',
@@ -41,6 +42,7 @@ export class CreateComponent implements OnInit {
     private readonly workerService: WorkerService,
     private readonly notification: NotificationService,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {
@@ -52,6 +54,8 @@ export class CreateComponent implements OnInit {
     } else {
       this.touchEnabled.next(true);
     }
+
+    this.analyticsService.trackView(View.RegistrationConfirmationMode);
   }
 
   public onImport() {

@@ -9,6 +9,7 @@ import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 import { checkNfc, Type } from '../../utils/nfc';
 import { SettingsService } from '../../services/settings.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 declare const cordova: any;
 
@@ -54,9 +55,12 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly workerService: WorkerService,
     private readonly ngZone: NgZone,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.AuthWalletMode);
+
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {
         await this.onBack();

@@ -7,6 +7,7 @@ import { FeedbackData, FeedbackDataFile } from '../../data/feedback-data';
 import { FileInfo } from '../../data/file-info';
 import { NotificationService } from '../../services/notification.service';
 import { FormControl, Validators } from '@angular/forms';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 declare const cordova: any;
 declare const window: any;
@@ -39,10 +40,12 @@ export class FeedbackComponent implements OnInit {
               private readonly dds: DDSService,
               private readonly navigationService: NavigationService,
               private readonly loggerService: LoggerService,
-              private readonly notificationService: NotificationService) { }
+              private readonly notificationService: NotificationService,
+              private readonly analyticsService: AnalyticsService,) { }
 
 
   ngOnInit() {
+    this.analyticsService.trackView(View.Feedback);
     this.onResize();
   }
 

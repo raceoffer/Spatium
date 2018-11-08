@@ -4,6 +4,7 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { VerifierService } from '../../../services/verifier.service';
 import { CurrecnyModelType, CurrencyModel } from '../../../services/wallet/wallet';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 import BN from 'bn.js';
 import { PriceService } from '../../../services/price.service';
@@ -52,10 +53,13 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly currencyInfoService: CurrencyInfoService,
-    private readonly verifierService: VerifierService
+    private readonly verifierService: VerifierService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.VerifyTransaction);
+
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
 
     this.state = State.Preparing;

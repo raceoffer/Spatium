@@ -4,6 +4,7 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ApiServer, CurrencyInfoService, CurrencyInfo, CurrencyId } from '../../../services/currencyinfo.service';
 import { SettingsService } from '../../../services/settings.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-currency-settings',
@@ -30,10 +31,13 @@ export class CurrencySettingsComponent implements OnInit, OnDestroy {
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly navigationService: NavigationService,
     private readonly notificationService: NotificationService,
-    private readonly settingsService: SettingsService
+    private readonly settingsService: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.CurrencySettings);
+
     this.apiServers =
       Array.from(await this.currencyInfoService.apiServers(this.currencyId).keys())
         .map((apiServer) => ({ key: apiServer, value: this.currencyInfoService.apiName(apiServer) }));

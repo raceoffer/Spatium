@@ -23,6 +23,7 @@ import { BackupComponent } from '../../backup/backup.component';
 import { LoginFactorComponent } from '../../identification-factors/login-factor/login-factor.component';
 import { NfcFactorComponent } from '../../identification-factors/nfc-factor/nfc-factor.component';
 import { QrFactorComponent } from '../../identification-factors/qr-factor/qr-factor.component';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-factor-node',
@@ -71,10 +72,13 @@ export class FactorNodeComponent implements OnDestroy {
     private readonly keychain: KeyChainService,
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   ngOnDestroy() {
+    this.analyticsService.trackView(View.AddAuthPath);
+
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   }

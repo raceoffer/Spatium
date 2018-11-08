@@ -4,6 +4,7 @@ import { IdFactor } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 import { SettingsService } from '../../services/settings.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 import { tryUnpackEncryptedSeed } from 'crypto-core-async/lib/utils';
 import { checkNfc, Type } from '../../utils/nfc';
@@ -69,6 +70,7 @@ export class SecretImportComponent implements OnInit, OnDestroy {
     private readonly ngZone: NgZone,
     private readonly workerService: WorkerService,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {
@@ -88,6 +90,8 @@ export class SecretImportComponent implements OnInit, OnDestroy {
       cameraAvailable => this.ngZone.run(() => {
         this.cameraAvailable = cameraAvailable;
       }));
+
+    this.analyticsService.trackView(View.SecretImport);
   }
 
   ngOnDestroy() {

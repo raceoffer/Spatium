@@ -22,6 +22,7 @@ import { SecretExportComponent } from '../secret-export/secret-export.component'
 import { ChangePincodeComponent } from './change-pincode/change-pincode.component';
 import { SettingsComponent } from './settings/verifier-settings.component';
 import { VerifyTransactionComponent } from './verify-transaction/verify-transaction.component';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 @Component({
   selector: 'app-verifier',
@@ -99,7 +100,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
               private readonly currencyInfoService: CurrencyInfoService,
               private readonly fs: FileService,
               private readonly ssdp: SsdpService,
-              private readonly deviceService: DeviceService) {
+              private readonly deviceService: DeviceService,
+              private readonly analyticsService: AnalyticsService,) {
     this.sessions = toBehaviourSubject(this.verifierService.sessionEvent.pipe(
       map((sessionId) => this.verifierService.session(sessionId)),
       mergeMap((deviceSession) => deviceSession ? combineLatest<Currency | boolean>([
@@ -126,6 +128,8 @@ export class VerifierComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.Verifier);
+
     this.isIOS = this.deviceService.platform === Platform.IOS;
     this.subscriptions.push(
       this.navigationService.backEvent.subscribe(async () => {

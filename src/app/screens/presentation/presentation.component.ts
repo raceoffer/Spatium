@@ -1,6 +1,6 @@
 import { Component, EventEmitter, AfterViewInit } from '@angular/core';
 import { DeviceService, Platform } from '../../services/device.service';
-import { AnalyticsService, Event } from '../../services/analytics.service';
+import { AnalyticsService, Event, View } from '../../services/analytics.service';
 import { NavigationService } from '../../services/navigation.service';
 
 @Component({
@@ -85,5 +85,9 @@ export class PresentationComponent implements AfterViewInit {
 
   public skip() {
     this.skipped.next();
+  }
+
+  public slideChanged(currentSlide) {
+    this.analyticsService.trackView(View.WelcomeSeries, currentSlide);
   }
 }

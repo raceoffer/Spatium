@@ -8,7 +8,7 @@ import { catchError, mapTo } from 'rxjs/internal/operators';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthFactor, AuthService } from '../../services/auth.service';
-import { AnalyticsService, Event } from '../../services/analytics.service';
+import { AnalyticsService, Event, View } from '../../services/analytics.service';
 import { DDSService } from '../../services/dds.service';
 import { DeviceService, Platform } from '../../services/device.service';
 import { KeyChainService } from '../../services/keychain.service';
@@ -85,6 +85,8 @@ export class RegistrationComponent implements OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.analyticsService.trackView(View.RegistrationWalletMode);
   }
 
   ngOnDestroy() {
