@@ -1,5 +1,5 @@
 <div>
-  <carousel (skipped)="skip()" (finished)="finish()">
+  <carousel (skipped)="skip()" (finished)="finish()" (slideChanged)="slideChanged($event)">
     <ng-container>
       <ng-container *carouselItem>
         <div class="item" fxLayout="column" fxLayoutAlign="center start">

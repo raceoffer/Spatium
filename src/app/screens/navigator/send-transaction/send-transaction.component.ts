@@ -26,6 +26,7 @@ import { uuidFrom } from '../../../utils/uuid';
 import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.component';
 import { AmountValidator, validateNumber } from '../../../validators/validators';
 import { NetworkService } from '../../../services/network.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 declare const cordova: any;
 
@@ -128,8 +129,9 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
               private readonly priceService: PriceService,
               private readonly workerService: WorkerService,
               private readonly keyChainService: KeyChainService,
-    private readonly connectionService: RPCConnectionService,
-    private readonly networkService: NetworkService
+              private readonly connectionService: RPCConnectionService,
+              private readonly networkService: NetworkService,
+              private readonly analyticsService: AnalyticsService,
   ) {
     this.navigationService.backEvent.subscribe(() => this.cancelTransaction());
   }
@@ -168,6 +170,8 @@ export class SendTransactionComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.SendTransaction, this.model ? this.model.name : undefined);
+    
     this.amountField = new FormControl('', AmountValidator.getValidator(this.model));
 
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);

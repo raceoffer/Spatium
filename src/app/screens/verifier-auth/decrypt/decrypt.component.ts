@@ -15,6 +15,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { checkAvailable, checkExisting, deleteTouch, getTouchPassword } from '../../../utils/fingerprint';
 import { DeleteSecretComponent } from '../../delete-secret/delete-secret.component';
 import { SettingsService } from '../../../services/settings.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-decrypt',
@@ -43,9 +44,11 @@ export class DecryptComponent implements OnInit {
     private readonly workerService: WorkerService,
     private readonly notification: NotificationService,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.AuthConfirmationMode);
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());
     const stored = await this.settings.fingerprintEnabled();

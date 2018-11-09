@@ -3,6 +3,7 @@ import { DeviceService } from './services/device.service';
 import { FileService } from './services/file.service';
 import { LoggerService } from './services/logger.service';
 import { HockeyService } from './services/hockey.service';
+import { AnalyticsService } from './services/analytics.service';
 
 declare const hockeyapp: any;
 declare const navigator: any;
@@ -16,7 +17,8 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly logger: LoggerService,
     private readonly deviceService: DeviceService,
-    private readonly hockeyService: HockeyService
+    private readonly hockeyService: HockeyService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {

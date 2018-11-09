@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostBinding, Output } from '@angular/core';
 import { NavigationService } from '../../services/navigation.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 declare const window: any;
 
@@ -20,8 +21,10 @@ export class DeleteSecretComponent {
   public hasTouch = false;
 
   constructor(
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly analyticsService: AnalyticsService,
   ) {
+    this.analyticsService.trackView(View.AuthConfirmationMode);
     this.checkPhrase = this.capitalizeRandomChars(this.checkPhrase);
   }
 

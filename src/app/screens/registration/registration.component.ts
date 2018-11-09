@@ -8,6 +8,7 @@ import { catchError, mapTo } from 'rxjs/internal/operators';
 import { take, takeUntil } from 'rxjs/operators';
 import { DialogFactorsComponent } from '../../modals/dialog-factors/dialog-factors.component';
 import { AuthFactor, AuthService } from '../../services/auth.service';
+import { AnalyticsService, Event, View } from '../../services/analytics.service';
 import { DDSService } from '../../services/dds.service';
 import { DeviceService, Platform } from '../../services/device.service';
 import { KeyChainService } from '../../services/keychain.service';
@@ -71,7 +72,8 @@ export class RegistrationComponent implements OnDestroy {
               private readonly authService: AuthService,
               private readonly navigationService: NavigationService,
               private readonly workerService: WorkerService,
-              private readonly deviceService: DeviceService) {
+              private readonly deviceService: DeviceService,
+              private readonly analyticsService: AnalyticsService,) {
     this.subscriptions.push(
       activatedRoute.paramMap.subscribe(async params => {
         this.login = params.get('login');
@@ -83,6 +85,8 @@ export class RegistrationComponent implements OnDestroy {
         await this.onBackClicked();
       })
     );
+
+    this.analyticsService.trackView(View.RegistrationWalletMode);
   }
 
   ngOnDestroy() {
@@ -270,6 +274,7 @@ export class RegistrationComponent implements OnDestroy {
       } else if (result.success === true) {
         await this.openSuccessOverlay();
         this.notification.show('Successfully uploaded the secret');
+        this.analyticsService.trackEvent(Event.CompleteRegistration);
       }
     } catch (ignored) {
       this.notification.show('Registration error');

@@ -35,6 +35,7 @@
     "cordova-plugin-device-name": "git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
+    "cordova-plugin-google-analytics": "^1.8.6",
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
@@ -84,7 +85,10 @@
       "sockets-for-cordova": {},
       "cordova-plugin-bluetooth": {},
       "cordova-plugin-splashscreen": {},
-      "cordova-plugin-ssdp": {}
+      "cordova-plugin-ssdp": {},
+      "cordova-plugin-google-analytics": {
+        "GMS_VERSION": "11.0.1"
+      }
     },
     "platforms": [
       "browser",
