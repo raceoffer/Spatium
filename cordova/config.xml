@@ -177,7 +177,7 @@
         <branch-key value="key_live_dgNnkweiHrSteyld7SNrlkcnCrbzwL3y" />
         <uri-scheme value="branchcordova" />
         <link-domain value="cordova.app.link" />
-        <ios-team-release value="PW4Q8885U7" />
+        <ios-team-release value="9K54662B88" />
     </branch-config>
     <engine name="browser" spec="^5.0.2" />
     <engine name="windows" spec="^6.0.0" />
