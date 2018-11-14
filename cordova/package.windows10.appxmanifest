@@ -39,6 +39,7 @@
     <Capability Name="privateNetworkClientServer" />
     <uap:Capability Name="picturesLibrary" />
     <DeviceCapability Name="webcam" />
+    <DeviceCapability Name="wiFiControl"/>
     <DeviceCapability Name="bluetooth.rfcomm">
       <Device Id="any">
         <Function Type="serviceId:995f40e0-ce68-4d24-8f68-f49d2b9d661f" />

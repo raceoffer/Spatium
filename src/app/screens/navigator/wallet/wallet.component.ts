@@ -18,6 +18,7 @@ import { DeviceDiscoveryComponent } from '../device-discovery/device-discovery.c
 import { SettingsComponent } from '../settings/settings.component';
 import { Subject, merge, combineLatest } from 'rxjs';
 import { AddTokenComponent } from '../add-token/add-token.component';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-wallet',
@@ -98,6 +99,7 @@ export class WalletComponent implements OnInit, OnDestroy {
   ), []);
 
   public synchronizing = this.syncService.synchronizing;
+  public resynchronizing = this.syncService.resynchronizing;
   public incomplete = combineLatest([
     this.synchronizing,
     this.syncService.currencyEvent
@@ -123,7 +125,8 @@ export class WalletComponent implements OnInit, OnDestroy {
     private readonly syncService: SyncService,
     private readonly keyChainService: KeyChainService,
     private readonly connectionService: RPCConnectionService,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly analyticsService: AnalyticsService,
   ) {
     this.tiles.push(
       ... [
@@ -162,6 +165,8 @@ export class WalletComponent implements OnInit, OnDestroy {
 
   public async ngOnInit() {
     await this.deviceService.deviceReady();
+
+    this.analyticsService.trackView(View.Wallet);
 
     this.isWindows = (this.deviceService.platform === Platform.Windows);
 

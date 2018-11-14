@@ -6,6 +6,7 @@ import { WorkerService } from '../../../services/worker.service';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { toBehaviourSubject } from '../../../utils/transformers';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 import {
   deriveAesKey,
@@ -84,9 +85,12 @@ export class ChangePincodeComponent implements OnInit {
     private readonly navigationService: NavigationService,
     private readonly notification: NotificationService,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.ChangePincode);
+
     this.fileData.next(Buffer.from(await this.fs.readFile(this.fs.safeFileName('seed')), 'hex'));
     this.touchAvailable.next(await checkAvailable());
     this.touchExisting.next(await checkExisting());

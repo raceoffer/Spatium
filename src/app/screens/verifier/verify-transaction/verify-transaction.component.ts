@@ -4,6 +4,7 @@ import { NavigationService } from '../../../services/navigation.service';
 import { NotificationService } from '../../../services/notification.service';
 import { VerifierService } from '../../../services/verifier.service';
 import { CurrecnyModelType, CurrencyModel } from '../../../services/wallet/wallet';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 import BN from 'bn.js';
 import { PriceService } from '../../../services/price.service';
@@ -28,6 +29,7 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
   @Input() public address: string = null;
   @Input() public valueInternal: BN = null;
   @Input() public feeInternal: BN = null;
+  @Input() public price: number = null;
 
   public parentModel: CurrencyModel = null;
 
@@ -52,10 +54,12 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     private readonly notification: NotificationService,
     private readonly currencyInfoService: CurrencyInfoService,
     private readonly verifierService: VerifierService,
-    private readonly priceService: PriceService
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.VerifyTransaction);
+
     this.parentModel = CurrencyModel.fromCoin(this.model.currencyInfo);
 
     this.state = State.Preparing;
@@ -88,9 +92,9 @@ export class VerifyTransactionComponent implements OnInit, OnDestroy {
     }
 
     this.value = wallet.fromInternal(this.valueInternal);
-    this.valueUsd = this.value.times(this.priceService.price(this.model.ticker));
+    this.valueUsd = this.value.times(this.price);
     this.fee = parentWallet.fromInternal(this.feeInternal);
-    this.feeUsd = this.fee.times(this.priceService.price(this.parentModel.ticker));
+    this.feeUsd = this.fee.times(this.price);
 
     this.state = State.Verifying;
 

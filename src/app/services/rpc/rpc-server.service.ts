@@ -119,7 +119,8 @@ export class RPCServerService {
         request.tokenId,
         request.signSessionId,
         new Buffer(request.transactionBytes),
-        Marshal.decode(request.entropyCommitmentBytes)
+        Marshal.decode(request.entropyCommitmentBytes),
+        request.price
       );
 
       return {
@@ -167,7 +168,8 @@ export class RPCServerService {
         request.tokenId,
         request.signSessionId,
         new Buffer(request.transactionBytes),
-        Marshal.decode(request.entropyCommitmentBytes)
+        Marshal.decode(request.entropyCommitmentBytes),
+        request.price
       );
 
       return {
@@ -185,6 +187,15 @@ export class RPCServerService {
       return {
         partialSignatureBytes: Marshal.encode(partialSignature)
       };
+    },
+
+    async CancelSign(request) {
+      return {
+        existing: await this.verifierService.cancelSign(
+          request.sessionId,
+          request.currencyId,
+          request.signSessionId
+      )};
     }
   };
 

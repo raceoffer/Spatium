@@ -18,18 +18,10 @@
         <button
           mat-icon-button
           class="fab"
-          fxLayout="row"
-          fxLayoutAlign="center center"
           [disabled]="buttonState === stateType.Updating || (delayed | async)"
           (click)="toggleContent(contentType.QR)">
-          <div fxLayoutAlign="center center">
-              <span
-                [class.icon-custom-qr_code_blue]="content === contentType.QR"
-                [class.icon-custom-qr_code_black]="content !== contentType.QR"
-                [class.optical-4]="content !== contentType.QR && !(buttonState === stateType.Updating || (delayed | async))"
-                [class.optical-2]="content !== contentType.QR && (buttonState === stateType.Updating || (delayed | async))">
-              </span>
-          </div>
+              <mat-icon class="size-40" color="accent" fontIcon="icon-custom-qr_code_blue" *ngIf="content === contentType.QR"></mat-icon>
+              <mat-icon class="size-40 optical-4" fontIcon="icon-custom-qr_code_black" *ngIf="content !== contentType.QR"></mat-icon>
         </button>
       </div>
       <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 33.3%;" *ngIf="isNfcAvailable">

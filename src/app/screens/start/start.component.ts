@@ -6,6 +6,7 @@ import { NavigationService, Position } from '../../services/navigation.service';
 import { SettingsService } from '../../services/settings.service';
 import { PresentationComponent } from '../presentation/presentation.component';
 import { PriceService } from '../../services/price.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 import { delay } from 'rxjs/operators';
 
 declare const navigator: any;
@@ -28,15 +29,19 @@ export class StartComponent implements OnInit, OnDestroy {
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
     private readonly keyChainService: KeyChainService,
-    private readonly priceService: PriceService
+    private readonly priceService: PriceService,
+    private readonly analyticsService: AnalyticsService
   ) {
     this.priceService.startFetching();
   }
 
   public async ngOnInit() {
+    
     await this.deviceService.deviceReady();
     await this.settings.ready();
 
+    this.analyticsService.trackView(View.WelcomeScreen);
+    
     const viewed = await this.settings.presentationViewed();
 
     if (viewed) {

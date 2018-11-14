@@ -7218,6 +7218,11 @@
       "integrity": "sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==",
       "dev": true
     },
+    "inobounce": {
+      "version": "0.1.6",
+      "resolved": "https://registry.npmjs.org/inobounce/-/inobounce-0.1.6.tgz",
+      "integrity": "sha512-526BdpKOby/5Ft9AvihHC948w5VBzIkI76yBWclkj9zVEK9JRNcuybm4HztB7O9VkM4sp6E4WqnhtRRhgGNt+A=="
+    },
     "inquirer": {
       "version": "5.2.0",
       "resolved": "http://registry.npmjs.org/inquirer/-/inquirer-5.2.0.tgz",

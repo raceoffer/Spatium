@@ -1,7 +1,7 @@
 {
   "name": "capital.spatium.wallet",
   "displayName": "Wallet",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Unhackable wallet for over 100 cryptocurrencies",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "Canvas2ImagePlugin": "git+https://github.com/CaspianTechnologies/Canvas2ImagePlugin.git",
     "CordovaClipboard": "git+https://github.com/CaspianTechnologies/CordovaClipboard.git#b3384e0e302e60d7c46056f8c73d167b7f68db2f",
     "HockeySDK-Cordova": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
-    "SocketsForCordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c",
+    "SocketsForCordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#1d9df9f5d4855ebc6e54cb8218388c30162d4c53",
     "ajv": "^6.0.0",
     "android-versions": "^1.3.0",
     "cocoon-cordova-labs-local-webserver": "^2.4.1",
@@ -29,12 +29,13 @@
     "cordova-plugin-android-permissions": "^1.0.0",
     "cordova-plugin-appinfo": "^2.1.2",
     "cordova-plugin-badge": "^0.8.7",
-    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#7605a8d77739a4400c8de77e53e70ea2a119e6de",
+    "cordova-plugin-bluetooth": "git+https://github.com/CaspianTechnologies/cordova-plugin-bluetooth.git#6cf7d58cf381f464966b23b402fb96dd05290a9b",
     "cordova-plugin-camera-info": "git+https://github.com/CaspianTechnologies/cordova-plugin-camera-info.git",
     "cordova-plugin-device": "git+https://github.com/apache/cordova-plugin-device.git",
     "cordova-plugin-device-name": "git+https://github.com/CaspianTechnologies/cordova-plugin-device-name.git#43bc15b60d5a25c2cdb653347ac083dbcdad6eea",
     "cordova-plugin-dialogs": "^2.0.1",
     "cordova-plugin-file": "^5.0.0",
+    "cordova-plugin-google-analytics": "^1.8.6",
     "cordova-plugin-hockeyapp": "git+https://github.com/CaspianTechnologies/HockeySDK-Cordova.git",
     "cordova-plugin-keychain-touch-id": "git+https://github.com/CaspianTechnologies/cordova-plugin-keychain-touch-id.git",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
@@ -42,7 +43,7 @@
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
     "cordova-plugin-networkinterface": "^2.0.0",
     "cordova-plugin-splashscreen": "^5.0.2",
-    "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#b5fe8278dc4fea7ecce20cc18ac052c0ce9eb7cc",
+    "cordova-plugin-ssdp": "git+https://github.com/CaspianTechnologies/cordova-plugin-ssdp.git#ee5afc80382f5ee45b4dfe996600087d9edcdf05",
     "cordova-plugin-vibration": "^3.1.0",
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-windows": "^6.0.0",
@@ -50,7 +51,7 @@
     "phonegap-nfc": "^0.7.3",
     "phonegap-plugin-barcodescanner": "^7.1.2",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
-    "sockets-for-cordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#46018f683f34abdd7c57dc0b2e92304be968411c",
+    "sockets-for-cordova": "git+https://github.com/CaspianTechnologies/sockets-for-cordova.git#1d9df9f5d4855ebc6e54cb8218388c30162d4c53",
     "xml2js": "^0.4.19"
   },
   "cordova": {
@@ -83,8 +84,11 @@
       "cordova-plugin-nativestorage": {},
       "sockets-for-cordova": {},
       "cordova-plugin-bluetooth": {},
+      "cordova-plugin-splashscreen": {},
       "cordova-plugin-ssdp": {},
-      "cordova-plugin-splashscreen": {}
+      "cordova-plugin-google-analytics": {
+        "GMS_VERSION": "11.0.1"
+      }
     },
     "platforms": [
       "browser",

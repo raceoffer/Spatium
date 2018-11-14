@@ -2,6 +2,7 @@ import { Component, OnInit, HostBinding } from '@angular/core';
 import { NavigationService } from '../../../services/navigation.service';
 import { SettingsService } from '../../../services/settings.service';
 import { checkAvailable } from '../../../utils/fingerprint';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-verifier-settings',
@@ -17,9 +18,12 @@ export class SettingsComponent implements OnInit {
   constructor(
     private readonly navigationService: NavigationService,
     private readonly settings: SettingsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.SettingsConfirmationMode);
+
     this.fingerprintAvailable = await checkAvailable();
     if (this.fingerprintAvailable) {
       const stored = await this.settings.fingerprintEnabled();

@@ -5,6 +5,7 @@ import { DeviceService, Platform } from '../../../services/device.service';
 import { KeyChainService } from '../../../services/keychain.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { TokenInfo } from '../../../services/currencyinfo.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 declare const cordova: any;
 
@@ -38,10 +39,13 @@ export class AddTokenComponent implements OnInit {
   constructor(
     private readonly ngZone: NgZone,
     private readonly deviceService: DeviceService,
-    private readonly navigationService: NavigationService
+    private readonly navigationService: NavigationService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.analyticsService.trackView(View.AddToken);
+  }
 
   onBack() {
     this.navigationService.back();

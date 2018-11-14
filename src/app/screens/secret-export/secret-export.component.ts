@@ -2,6 +2,7 @@ import { Component, EventEmitter, HostBinding, Input, OnInit, Output } from '@an
 import { IdFactor } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 import { WorkerService } from '../../services/worker.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 declare const nfc: any;
 
@@ -31,7 +32,8 @@ export class SecretExportComponent implements OnInit {
 
   constructor(
     private readonly navigationService: NavigationService,
-    private readonly workerService: WorkerService
+    private readonly workerService: WorkerService,
+    private readonly analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {
@@ -41,6 +43,8 @@ export class SecretExportComponent implements OnInit {
 
     this.qrData = packed.toString('hex');
     this.nfcData = packed;
+
+    this.analyticsService.trackView(View.SecretExport);
   }
 
   onBack() {

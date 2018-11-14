@@ -61,8 +61,9 @@ textarea.mat-input-element:disabled {
 
 .transaction-time {
   font-family: 'Roboto-Light';
-  position: absolute;
+  font-size: 12px !important;
   right: 16px;
+  margin: 2px 0 5px 0 !important;
 }
 
 .list-item {
@@ -129,12 +130,8 @@ textarea.mat-input-element {
   max-height: none;
 }
 
-.windows.box.with-transactions .content {
-  margin-top: 130px;
-}
-
 .scroll {
-  overflow-y: scroll;
+  overflow-y: auto;
   height: 100%;
 }
 

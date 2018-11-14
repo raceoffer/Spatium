@@ -1,6 +1,6 @@
 {
   "name": "wallet",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "gpl-3.0",
   "scripts": {
     "ng": "ng",
@@ -40,6 +40,7 @@
     "crypto-core-async": "git+https://github.com/CaspianTechnologies/crypto-core-async.git#85c81c0673a011b06db6e22412464a8b7508f224",
     "flatted": "^0.2.2",
     "hammerjs": "^2.0.8",
+    "inobounce": "^0.1.6",
     "intersection-observer": "^0.5.0",
     "jquery": "^3.2.1",
     "lodash": "^4.17.11",

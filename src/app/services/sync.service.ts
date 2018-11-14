@@ -228,10 +228,13 @@ export class SyncService {
   private _currentPeerId = null;
 
   public synchronizing = new BehaviorSubject<boolean>(false);
+  public resynchronizing = new BehaviorSubject<boolean>(false);
 
   public currencyEvent = new Subject<CurrencyId>();
 
   public resyncEvent = new Subject<void>();
+
+  public resetEvent = new Subject<void>();
 
   public currency(currencyId: CurrencyId): Currency {
     return this._currencies.has(currencyId) ? this._currencies.get(currencyId) : null;
@@ -258,7 +261,8 @@ export class SyncService {
     paillierPublicKey: any,
     paillierSecretKey: any,
     rpcClient: RPCClient,
-    startWith: CurrencyId = null
+    startWith: CurrencyId = null,
+    isReseted: boolean = false
   ): Promise<boolean> {
     if (this.synchronizing.getValue()) {
       await this.cancel();
@@ -297,13 +301,15 @@ export class SyncService {
       const peerId = handshakeResponse.peerId;
 
       // Shall we move it out?
-      if (!!this.currentPeerId && this.currentPeerId !== peerId) {
+      if (!!this.currentPeerId && this.currentPeerId !== peerId && !isReseted) {
         if (!await requestDialog(
           'The remote device\'s peer id does not match the last session. The wallet will be synced from scratch. Continue?'
         )) {
           return;
         }
         this.clearCurrencies();
+        this.resetEvent.next();
+        return;
       }
 
       const syncStatusResponse = await waitFiorPromise<any>(rpcClient.api.syncStatus({

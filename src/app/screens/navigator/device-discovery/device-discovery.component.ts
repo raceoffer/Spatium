@@ -8,6 +8,7 @@ import { toBehaviourSubject } from '../../../utils/transformers';
 import { BluetoothService } from '../../../services/bluetooth.service';
 import { RPCConnectionService } from '../../../services/rpc/rpc-connection.service';
 import { NotificationService } from '../../../services/notification.service';
+import { AnalyticsService, View } from '../../../services/analytics.service';
 
 @Component({
   selector: 'app-device-discovery',
@@ -40,10 +41,12 @@ export class DeviceDiscoveryComponent implements OnInit, OnDestroy {
     private readonly bluetooth: BluetoothService,
     private readonly navigationService: NavigationService,
     private readonly notificationService: NotificationService,
-    private readonly connectionService: RPCConnectionService
+    private readonly connectionService: RPCConnectionService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.DeviceDiscovery);
     await this.startDiscovery();
   }
 

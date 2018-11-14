@@ -73,6 +73,10 @@
         "EddsaSignFinalize": {
           "requestType": "EddsaSignFinalizeRequest",
           "responseType": "EddsaSignFinalizeResponse"
+        },
+        "CancelSign": {
+          "requestType": "CancelSignRequest",
+          "responseType": "CancelSignResponse"
         }
       }
     },
@@ -332,6 +336,10 @@
         "entropyCommitmentBytes": {
           "type": "bytes",
           "id": 6
+        },
+        "price": {
+          "type": "string",
+          "id": 7
         }
       }
     },
@@ -439,6 +447,10 @@
         "entropyCommitmentBytes": {
           "type": "bytes",
           "id": 6
+        },
+        "price": {
+          "type": "string",
+          "id": 7
         }
       }
     },
@@ -477,6 +489,25 @@
           "id": 1
         }
       }
+    },
+    "CancelSignRequest": {
+      "fields": {
+        "sessionId": {
+          "type": "string",
+          "id": 1
+        },
+        "currencyId": {
+          "type": "int32",
+          "id": 2
+        },
+        "signSessionId": {
+          "type": "string",
+          "id": 3
+        }
+      }
+    },
+    "CancelSignResponse": {
+      "fields": {}
     },
     "EcdsaInitialCommitment": {
       "fields": {

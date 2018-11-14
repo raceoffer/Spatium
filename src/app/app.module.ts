@@ -97,6 +97,7 @@ import { BluetoothService } from './services/bluetooth.service';
 import { DDSService } from './services/dds.service';
 import { DeviceService } from './services/device.service';
 import { SsdpService } from './services/ssdp.service';
+import { WiFiService } from './services/wifi.service';
 import { FileService } from './services/file.service';
 import { HockeyService } from './services/hockey.service';
 import { ICOService } from './services/ico.service';
@@ -120,8 +121,9 @@ import { DeviceDiscoveryComponent } from './screens/navigator/device-discovery/d
 import { ConnectedDeviceComponent } from './elements/connectivity-manage/connected-device/connected-device.component';
 import { NetworkService } from './services/network.service';
 import { HammerConfig } from './configs/hammer-config';
-import { TransactionService } from "./services/transaction.service";
+import { TransactionService } from './services/transaction.service';
 import { InViewportModule } from '@thisissoon/angular-inviewport';
+import { DialogCustomComponent } from './modals/dialog-custom/dialog-custom.component';
 
 @NgModule({
   declarations: [
@@ -192,7 +194,8 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
     NavbarComponent,
     AddTokenComponent,
     DeviceDiscoveryComponent,
-    ConnectedDeviceComponent
+    ConnectedDeviceComponent,
+    DialogCustomComponent
   ],
   imports: [
     OverlayModule,
@@ -243,6 +246,7 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
     ActivityService,
     ICOService,
     SsdpService,
+    WiFiService,
     IpfsService,
     SettingsService,
     RPCServerService,
@@ -262,6 +266,7 @@ import { InViewportModule } from '@thisissoon/angular-inviewport';
   ],
   entryComponents: [
     DialogFactorsComponent,
+    DialogCustomComponent,
     DefaultAuthFactorComponent,
     PasswordAuthFactorComponent,
     PincodeAuthFactorComponent,

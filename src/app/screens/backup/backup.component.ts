@@ -8,6 +8,7 @@ import { NavigationService } from '../../services/navigation.service';
 import { NotificationService } from '../../services/notification.service';
 import { WorkerService } from '../../services/worker.service';
 import { NetworkService } from '../../services/network.service';
+import { AnalyticsService, View } from '../../services/analytics.service';
 
 declare const cordova: any;
 
@@ -49,9 +50,12 @@ export class BackupComponent implements OnInit, OnDestroy {
               private readonly notification: NotificationService,
               private readonly navigationService: NavigationService,
               private readonly workerService: WorkerService,
-              private readonly network: NetworkService) {}
+              private readonly network: NetworkService,
+              private readonly analyticsService: AnalyticsService,) {}
 
   async ngOnInit() {
+    this.analyticsService.trackView(View.RegistrationBackup);
+
     this.subscriptions.push(
       this.network.online.subscribe(async (online: boolean) => {
         if (online) {
@@ -104,7 +108,7 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   getQrCodeText() {
-    return `etherium:${this.address}?value=${this.comission}`;
+    return `ethereum:${this.address}?value=${this.comission}`;
   }
 
   copy() {
@@ -131,28 +135,30 @@ export class BackupComponent implements OnInit, OnDestroy {
   }
 
   async packData() {
-    const seed = await randomBytes(64, this.workerService.worker);
-    this.setSeed.emit(seed);
-
-    const packed = [];
-    for (const factor of this.factors) {
-      packed.push(await this.authService.pack(factor.type, factor.value));
-    }
-
-    const reversed = packed.reverse();
-
-    const tree = reversed.reduce((rest, factor) => {
-      const node = {
-        factor: factor
-      };
-      if (rest) {
-        node['children'] = [rest];
+    if (!this.data) {
+      const seed = await randomBytes(64, this.workerService.worker);
+      this.setSeed.emit(seed);
+      
+      const packed = [];
+      for (const factor of this.factors) {
+        packed.push(await this.authService.pack(factor.type, factor.value));
       }
-      return node;
-    }, null);
 
-    this.id = await this.authService.toId(this.login.toLowerCase());
-    this.data = await packTree(tree, seed, this.workerService.worker);
+      const reversed = packed.reverse();
+
+      const tree = reversed.reduce((rest, factor) => {
+        const node = {
+          factor: factor
+        };
+        if (rest) {
+          node['children'] = [rest];
+        }
+        return node;
+      }, null);
+
+      this.id = await this.authService.toId(this.login.toLowerCase());
+      this.data = await packTree(tree, seed, this.workerService.worker);
+    }
 
     await this.getView(this.id, this.data);
   }
